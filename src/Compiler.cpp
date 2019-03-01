@@ -1,4 +1,5 @@
 #include "Compiler.h"
+#include "Error.h"
 #include "LexicalAnalyzer.h"
 #include <iostream>
 
@@ -9,6 +10,17 @@ Compiler::Compiler()
 }
 
 void Compiler::Compile()
+{
+    try
+    {
+        Process();
+    }
+    catch (const Error&)
+    {
+    }
+}
+
+void Compiler::Process()
 {
     LexicalAnalyzer lexicalAnalyzer;
     vector<Token> tokens = lexicalAnalyzer.Process(std::cin);

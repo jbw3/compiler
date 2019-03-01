@@ -13,6 +13,8 @@ public:
     void Compile();
 
 private:
+    void Process();
+
     void PrintTokens(const std::vector<Token>& tokens);
 };
 

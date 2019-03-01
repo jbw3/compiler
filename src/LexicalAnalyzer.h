@@ -8,14 +8,23 @@
 class LexicalAnalyzer
 {
 public:
+    LexicalAnalyzer();
+
     std::vector<Token> Process(std::istream& is);
 
 private:
     std::string tokenStr;
+    bool isValid;
     unsigned long line;
     unsigned long column;
 
     Token CreateToken();
+
+    void ParseChar(char ch, std::vector<Token>& tokens);
+
+    bool IsValidToken(const std::string& str) const;
+
+    void ThrowError();
 };
 
 #endif // LEXICAL_ANALYZER_H_
