@@ -122,7 +122,7 @@ bool isNumber(const string& tokenStr)
     return false;
 }
 
-const unordered_set<string> LexicalAnalyzer::SYMBOLS = {"+", "="};
+const unordered_set<string> LexicalAnalyzer::SYMBOLS = {"+", "=", ";"};
 
 LexicalAnalyzer::LexicalAnalyzer() : isValid(false)
 {
