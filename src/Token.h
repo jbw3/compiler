@@ -6,8 +6,6 @@
 class Token
 {
 public:
-    Token(const std::string& value);
-
     Token(const std::string& value, unsigned long line, unsigned long column);
 
     const std::string& GetValue() const;

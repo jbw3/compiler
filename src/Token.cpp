@@ -2,10 +2,6 @@
 
 using namespace std;
 
-Token::Token(const string& value) : Token(value, 0, 0)
-{
-}
-
 Token::Token(const string& value, unsigned long line, unsigned long column) :
     value(value),
     line(line),

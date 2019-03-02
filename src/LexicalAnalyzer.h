@@ -3,6 +3,7 @@
 
 #include "Token.h"
 #include <istream>
+#include <unordered_set>
 #include <vector>
 
 class LexicalAnalyzer
@@ -13,6 +14,8 @@ public:
     std::vector<Token> Process(std::istream& is);
 
 private:
+    static const std::unordered_set<std::string> SYMBOLS;
+
     std::string tokenStr;
     bool isValid;
     unsigned long line;

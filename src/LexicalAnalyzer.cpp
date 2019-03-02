@@ -122,6 +122,8 @@ bool isNumber(const string& tokenStr)
     return false;
 }
 
+const unordered_set<string> LexicalAnalyzer::SYMBOLS = {"+", "="};
+
 LexicalAnalyzer::LexicalAnalyzer() : isValid(false)
 {
 }
@@ -242,7 +244,7 @@ void LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 
 bool LexicalAnalyzer::IsValidToken(const string& str) const
 {
-    return isIdentifier(str) || isNumber(str);
+    return SYMBOLS.find(str) != SYMBOLS.end() || isIdentifier(str) || isNumber(str);
 }
 
 void LexicalAnalyzer::ThrowError()
