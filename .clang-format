@@ -26,6 +26,7 @@ BreakBeforeBraces: Custom
 BreakConstructorInitializers: AfterColon
 ColumnLimit: 100
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+FixNamespaceComments: true
 IncludeBlocks: Merge
 IncludeCategories:
   - Regex: '^<.*>$'
