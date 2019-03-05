@@ -13,6 +13,15 @@ class Expression : public SyntaxTreeNode
 {
 };
 
+class NumericExpression : public Expression
+{
+public:
+    NumericExpression(std::string number);
+
+private:
+    std::string number;
+};
+
 class BinaryExpression : public Expression
 {
 public:

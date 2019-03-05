@@ -4,10 +4,15 @@
 #include "Token.h"
 #include <vector>
 
+namespace SyntaxTree
+{
+class SyntaxTreeNode;
+}
+
 class SyntaxAnalyzer
 {
 public:
-    void Process(const std::vector<Token>& tokens);
+    SyntaxTree::SyntaxTreeNode* Process(const std::vector<Token>& tokens);
 };
 
 #endif // SYNTAX_ANALYZER_H_

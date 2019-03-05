@@ -2,9 +2,11 @@
 #include "Error.h"
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
+#include "SyntaxTree.h"
 #include <iostream>
 
 using namespace std;
+using namespace SyntaxTree;
 
 Compiler::Compiler()
 {
@@ -27,5 +29,7 @@ void Compiler::Process()
     vector<Token> tokens = lexicalAnalyzer.Process(std::cin);
 
     SyntaxAnalyzer syntaxAnalyzer;
-    syntaxAnalyzer.Process(tokens);
+    SyntaxTreeNode* syntaxTree = syntaxAnalyzer.Process(tokens);
+
+    delete syntaxTree;
 }

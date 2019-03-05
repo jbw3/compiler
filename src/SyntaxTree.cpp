@@ -4,6 +4,10 @@ using namespace std;
 
 namespace SyntaxTree
 {
+NumericExpression::NumericExpression(string number) : number(number)
+{
+}
+
 BinaryExpression::BinaryExpression(Expression* left, Expression* right) : left(left), right(right)
 {
 }
