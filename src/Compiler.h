@@ -14,8 +14,6 @@ public:
 
 private:
     void Process();
-
-    void PrintTokens(const std::vector<Token>& tokens);
 };
 
 #endif // COMPILER_H_
