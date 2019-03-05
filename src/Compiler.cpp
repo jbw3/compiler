@@ -3,6 +3,7 @@
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
+#include "SyntaxTreePrinter.h"
 #include <iostream>
 
 using namespace std;
@@ -30,6 +31,9 @@ void Compiler::Process()
 
     SyntaxAnalyzer syntaxAnalyzer;
     SyntaxTreeNode* syntaxTree = syntaxAnalyzer.Process(tokens);
+
+    SyntaxTreePrinter printer;
+    syntaxTree->Accept(&printer);
 
     delete syntaxTree;
 }
