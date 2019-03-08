@@ -11,20 +11,6 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
 
 SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
 {
-    // print tokens
-    if (tokens.size() > 0)
-    {
-        cout << '|';
-    }
-
-    for (Token token : tokens)
-    {
-        string value = token.GetValue();
-        cout << (value == "\n" ? "\\n" : value) << '|';
-    }
-
-    cout << '\n';
-
     // build syntax tree
     if (tokens.size() < 4)
     {

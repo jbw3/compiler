@@ -4,50 +4,93 @@
 using namespace std;
 using namespace SyntaxTree;
 
+SyntaxTreePrinter::BracePrinter::BracePrinter(SyntaxTreePrinter& printer) : printer(printer)
+{
+    ++printer.level;
+    printer.Print("{\n");
+}
+
+SyntaxTreePrinter::BracePrinter::~BracePrinter()
+{
+    --printer.level;
+    printer.Print("\n}");
+}
+
 SyntaxTreePrinter::SyntaxTreePrinter() : level(0)
 {
 }
 
 void SyntaxTreePrinter::Visit(const Assignment* assignment)
 {
-    ++level;
+    BracePrinter printer(*this);
 
-    cout << level << ": =\n";
+    Print("\"type\": \"Assignment\",\n\"variable\":\n");
 
     assignment->GetVariable()->Accept(this);
-    assignment->GetExpression()->Accept(this);
 
-    --level;
+    Print(",\n\"expression\":\n");
+
+    assignment->GetExpression()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpression)
 {
-    ++level;
+    BracePrinter printer(*this);
 
-    cout << level << ": ";
+    Print("\"type\": \"BinaryExpression\",\n\"operator\": \"");
+
     switch (binaryExpression->GetOperator())
     {
         case BinaryExpression::eAdd:
-            cout << "+";
+            Print("+");
             break;
         case BinaryExpression::eSubtract:
-            cout << "-";
+            Print("-");
             break;
     }
-    cout << "\n";
+
+    Print("\",\n\"left\":\n");
 
     binaryExpression->GetLeftExpression()->Accept(this);
-    binaryExpression->GetRightExpression()->Accept(this);
 
-    --level;
+    Print(",\n\"right\":\n");
+
+    binaryExpression->GetRightExpression()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
 {
-    cout << (level + 1) << ": " << numericExpression->GetNumber() << "\n";
+    BracePrinter printer(*this);
+
+    Print("\"type\": \"NumericExpression\",\n\"value\": \"");
+    Print(numericExpression->GetNumber());
+    Print("\"");
 }
 
 void SyntaxTreePrinter::Visit(const Variable* variable)
 {
-    cout << (level + 1) << ": " << variable->GetName() << "\n";
+    BracePrinter printer(*this);
+
+    Print("\"type\": \"Variable\",\n\"name\": \"");
+    Print(variable->GetName());
+    Print("\"");
+}
+
+void SyntaxTreePrinter::Print(const string& str) const
+{
+    string padding(level * 4, ' ');
+
+    for (char ch : str)
+    {
+        cout.put(ch);
+
+        if (ch == '\n')
+        {
+            cout << padding;
+        }
+        else if (ch == '}' && level == 0)
+        {
+            cout << '\n';
+        }
+    }
 }

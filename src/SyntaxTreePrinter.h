@@ -17,7 +17,20 @@ public:
     void Visit(const SyntaxTree::Variable* variable) override;
 
 private:
+    class BracePrinter
+    {
+    public:
+        BracePrinter(SyntaxTreePrinter& printer);
+
+        ~BracePrinter();
+
+    private:
+        SyntaxTreePrinter& printer;
+    };
+
     unsigned int level;
+
+    void Print(const std::string& str) const;
 };
 
 #endif // SYNTAX_TREE_PRINTER_H_
