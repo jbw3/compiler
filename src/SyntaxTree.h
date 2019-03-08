@@ -41,7 +41,8 @@ class BinaryExpression : public Expression
 public:
     enum EOperator
     {
-        eAddition,
+        eAdd,
+        eSubtract,
     };
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);

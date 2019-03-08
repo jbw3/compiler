@@ -1,13 +1,13 @@
 #include "SyntaxAnalyzer.h"
 #include "Error.h"
-#include "SyntaxTree.h"
 #include "utils.h"
 #include <iostream>
 
 using namespace std;
 using namespace SyntaxTree;
 
-const unordered_set<string> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS = {"+"};
+const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS = {
+    {"+", BinaryExpression::eAdd}, {"-", BinaryExpression::eSubtract}};
 
 SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
 {
@@ -50,7 +50,7 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
 
     Expression* rightHandExpr = nullptr;
     bool expectNumber = true;
-    BinaryExpression::EOperator binOp = BinaryExpression::eAddition;
+    BinaryExpression::EOperator binOp = BinaryExpression::eAdd;
     while (iter != tokens.cend())
     {
         string value = iter->GetValue();
@@ -84,14 +84,15 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
         }
         else
         {
-            // TODO: Don't hard-code addition operator
-            if (value != "+")
+            auto opIter = BINARY_EXPRESSION_OPERATORS.find(value);
+            if (opIter == BINARY_EXPRESSION_OPERATORS.cend())
             {
-                cerr << "Expected \"+\", but got \"" << value << "\" instead\n";
+                cerr << "Expected an operator, but got \"" << value << "\" instead\n";
                 delete rightHandExpr;
                 throw Error();
             }
-            binOp = BinaryExpression::eAddition;
+
+            binOp = opIter->second;
         }
 
         expectNumber = !expectNumber;

@@ -27,11 +27,11 @@ void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpressi
     cout << level << ": ";
     switch (binaryExpression->GetOperator())
     {
-        case BinaryExpression::eAddition:
+        case BinaryExpression::eAdd:
             cout << "+";
             break;
-        default:
-            cout << "<UNKNOWN OPERATOR>";
+        case BinaryExpression::eSubtract:
+            cout << "-";
             break;
     }
     cout << "\n";
