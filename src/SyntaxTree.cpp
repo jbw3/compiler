@@ -19,7 +19,10 @@ string NumericExpression::GetNumber() const
     return number;
 }
 
-BinaryExpression::BinaryExpression(Expression* left, Expression* right) : left(left), right(right)
+BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right) :
+    op(op),
+    left(left),
+    right(right)
 {
 }
 
@@ -32,6 +35,11 @@ BinaryExpression::~BinaryExpression()
 void BinaryExpression::Accept(SyntaxTreeVisitor* visitor) const
 {
     visitor->Visit(this);
+}
+
+BinaryExpression::EOperator BinaryExpression::GetOperator() const
+{
+    return op;
 }
 
 const Expression* BinaryExpression::GetLeftExpression() const

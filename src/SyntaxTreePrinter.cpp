@@ -24,8 +24,17 @@ void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpressi
 {
     ++level;
 
-    // TODO: print operator
-    cout << level << ": TODO: print operator\n";
+    cout << level << ": ";
+    switch (binaryExpression->GetOperator())
+    {
+        case BinaryExpression::eAddition:
+            cout << "+";
+            break;
+        default:
+            cout << "<UNKNOWN OPERATOR>";
+            break;
+    }
+    cout << "\n";
 
     binaryExpression->GetLeftExpression()->Accept(this);
     binaryExpression->GetRightExpression()->Accept(this);

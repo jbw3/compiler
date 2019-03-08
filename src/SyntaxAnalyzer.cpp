@@ -7,6 +7,8 @@
 using namespace std;
 using namespace SyntaxTree;
 
+const unordered_set<string> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS = {"+"};
+
 SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
 {
     // print tokens
@@ -30,32 +32,81 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
         throw Error();
     }
 
-    string varName = tokens[0].GetValue();
-    string op = tokens[1].GetValue();
-    string number = tokens[2].GetValue();
-    string end = tokens[3].GetValue();
+    vector<Token>::const_iterator iter = tokens.cbegin();
+
+    string varName = (iter++)->GetValue();
+    string assignmentOp = (iter++)->GetValue();
 
     if (!isIdentifier(varName))
     {
         cerr << "First token is not an identifier\n";
         throw Error();
     }
-    if (op != "=")
+    if (assignmentOp != "=")
     {
         cerr << "Expected assignment operator (=)\n";
+        throw Error();
     }
-    if (!isNumber(number))
+
+    Expression* rightHandExpr = nullptr;
+    bool expectNumber = true;
+    BinaryExpression::EOperator binOp = BinaryExpression::eAddition;
+    while (iter != tokens.cend())
     {
-        cerr << "\"" << number << "\" is not a number\n";
+        string value = iter->GetValue();
+
+        if (value == "\n" || value == ";")
+        {
+            break;
+        }
+
+        if (expectNumber)
+        {
+            if (isNumber(value))
+            {
+                NumericExpression* numExpr = new NumericExpression(value);
+                if (rightHandExpr == nullptr)
+                {
+                    rightHandExpr = numExpr;
+                }
+                else
+                {
+                    BinaryExpression* binExpr = new BinaryExpression(binOp, rightHandExpr, numExpr);
+                    rightHandExpr = binExpr;
+                }
+            }
+            else
+            {
+                cerr << "\"" << value << "\" is not a number\n";
+                delete rightHandExpr;
+                throw Error();
+            }
+        }
+        else
+        {
+            // TODO: Don't hard-code addition operator
+            if (value != "+")
+            {
+                cerr << "Expected \"+\", but got \"" << value << "\" instead\n";
+                delete rightHandExpr;
+                throw Error();
+            }
+            binOp = BinaryExpression::eAddition;
+        }
+
+        expectNumber = !expectNumber;
+        ++iter;
     }
-    if (end != "\n" && end != ";")
+
+    if (expectNumber)
     {
-        cerr << "Expected end of statement\n";
+        cerr << "Expected another number\n";
+        delete rightHandExpr;
+        throw Error();
     }
 
     Variable* variable = new Variable(varName);
-    NumericExpression* numericExpression = new NumericExpression(number);
-    Assignment* assignment = new Assignment(variable, numericExpression);
+    Assignment* assignment = new Assignment(variable, rightHandExpr);
 
     return assignment;
 }

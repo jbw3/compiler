@@ -39,17 +39,25 @@ private:
 class BinaryExpression : public Expression
 {
 public:
-    BinaryExpression(Expression* left, Expression* right);
+    enum EOperator
+    {
+        eAddition,
+    };
+
+    BinaryExpression(EOperator op, Expression* left, Expression* right);
 
     virtual ~BinaryExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
+
+    EOperator GetOperator() const;
 
     const Expression* GetLeftExpression() const;
 
     const Expression* GetRightExpression() const;
 
 private:
+    EOperator op;
     Expression* left;
     Expression* right;
 };
