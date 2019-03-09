@@ -1,5 +1,4 @@
 #include "LexicalAnalyzer.h"
-#include "Error.h"
 #include "utils.h"
 #include <iostream>
 
@@ -11,9 +10,9 @@ LexicalAnalyzer::LexicalAnalyzer() : isValid(false)
 {
 }
 
-vector<Token> LexicalAnalyzer::Process(istream& is)
+bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 {
-    vector<Token> tokens;
+    tokens.clear();
     tokens.reserve(256);
 
     tokenStr = "";
@@ -24,7 +23,11 @@ vector<Token> LexicalAnalyzer::Process(istream& is)
     is.read(&ch, 1);
     while (!is.eof())
     {
-        ParseChar(ch, tokens);
+        bool ok = ParseChar(ch, tokens);
+        if (!ok)
+        {
+            return false;
+        }
 
         if (ch == '\n')
         {
@@ -46,7 +49,7 @@ vector<Token> LexicalAnalyzer::Process(istream& is)
         tokenStr = "";
     }
 
-    return tokens;
+    return true;
 }
 
 Token LexicalAnalyzer::CreateToken()
@@ -54,7 +57,7 @@ Token LexicalAnalyzer::CreateToken()
     return Token(tokenStr, line, column - tokenStr.size());
 }
 
-void LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
+bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 {
     if (isblank(ch))
     {
@@ -68,7 +71,8 @@ void LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
             }
             else
             {
-                ThrowError();
+                PrintError();
+                return false;
             }
         }
     }
@@ -95,7 +99,8 @@ void LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
                 // not valid, report an error
                 if (!tokenStr.empty())
                 {
-                    ThrowError();
+                    PrintError();
+                    return false;
                 }
                 else
                 {
@@ -123,6 +128,8 @@ void LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
             isValid = false;
         }
     }
+
+    return true;
 }
 
 bool LexicalAnalyzer::IsValidToken(const string& str) const
@@ -130,8 +137,7 @@ bool LexicalAnalyzer::IsValidToken(const string& str) const
     return SYMBOLS.find(str) != SYMBOLS.end() || isIdentifier(str) || isNumber(str);
 }
 
-void LexicalAnalyzer::ThrowError()
+void LexicalAnalyzer::PrintError()
 {
-    cout << "Invalid syntax: \"" + tokenStr + "\"\n";
-    throw Error();
+    cerr << "Invalid syntax: \"" + tokenStr + "\"\n";
 }

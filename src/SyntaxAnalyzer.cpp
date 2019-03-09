@@ -1,5 +1,4 @@
 #include "SyntaxAnalyzer.h"
-#include "Error.h"
 #include "utils.h"
 #include <iostream>
 
@@ -9,13 +8,15 @@ using namespace SyntaxTree;
 const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS = {
     {"+", BinaryExpression::eAdd}, {"-", BinaryExpression::eSubtract}};
 
-SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
+bool SyntaxAnalyzer::Process(const vector<Token>& tokens, SyntaxTreeNode*& syntaxTree)
 {
+    syntaxTree = nullptr;
+
     // build syntax tree
     if (tokens.size() < 4)
     {
         cerr << "Not enough tokens\n";
-        throw Error();
+        return false;
     }
 
     vector<Token>::const_iterator iter = tokens.cbegin();
@@ -26,12 +27,12 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
     if (!isIdentifier(varName))
     {
         cerr << "First token is not an identifier\n";
-        throw Error();
+        return false;
     }
     if (assignmentOp != "=")
     {
         cerr << "Expected assignment operator (=)\n";
-        throw Error();
+        return false;
     }
 
     Expression* rightHandExpr = nullptr;
@@ -65,7 +66,7 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
             {
                 cerr << "\"" << value << "\" is not a number\n";
                 delete rightHandExpr;
-                throw Error();
+                return false;
             }
         }
         else
@@ -75,7 +76,7 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
             {
                 cerr << "Expected an operator, but got \"" << value << "\" instead\n";
                 delete rightHandExpr;
-                throw Error();
+                return false;
             }
 
             binOp = opIter->second;
@@ -89,11 +90,12 @@ SyntaxTreeNode* SyntaxAnalyzer::Process(const vector<Token>& tokens)
     {
         cerr << "Expected another number\n";
         delete rightHandExpr;
-        throw Error();
+        return false;
     }
 
     Variable* variable = new Variable(varName);
     Assignment* assignment = new Assignment(variable, rightHandExpr);
 
-    return assignment;
+    syntaxTree = assignment;
+    return true;
 }

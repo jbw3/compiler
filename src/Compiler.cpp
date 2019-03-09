@@ -1,5 +1,4 @@
 #include "Compiler.h"
-#include "Error.h"
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
@@ -13,27 +12,30 @@ Compiler::Compiler()
 {
 }
 
-void Compiler::Compile()
+bool Compiler::Compile()
 {
-    try
+    bool ok = true;
+
+    vector<Token> tokens;
+    if (ok)
     {
-        Process();
+        LexicalAnalyzer lexicalAnalyzer;
+        ok = lexicalAnalyzer.Process(std::cin, tokens);
     }
-    catch (const Error&)
+
+    SyntaxTreeNode* syntaxTree = nullptr;
+    if (ok)
     {
+        SyntaxAnalyzer syntaxAnalyzer;
+        ok = syntaxAnalyzer.Process(tokens, syntaxTree);
     }
-}
 
-void Compiler::Process()
-{
-    LexicalAnalyzer lexicalAnalyzer;
-    vector<Token> tokens = lexicalAnalyzer.Process(std::cin);
-
-    SyntaxAnalyzer syntaxAnalyzer;
-    SyntaxTreeNode* syntaxTree = syntaxAnalyzer.Process(tokens);
-
-    SyntaxTreePrinter printer;
-    syntaxTree->Accept(&printer);
+    if (ok)
+    {
+        SyntaxTreePrinter printer;
+        syntaxTree->Accept(&printer);
+    }
 
     delete syntaxTree;
+    return ok;
 }

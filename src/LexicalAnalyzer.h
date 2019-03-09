@@ -11,7 +11,7 @@ class LexicalAnalyzer
 public:
     LexicalAnalyzer();
 
-    std::vector<Token> Process(std::istream& is);
+    bool Process(std::istream& is, std::vector<Token>& tokens);
 
 private:
     static const std::unordered_set<std::string> SYMBOLS;
@@ -23,11 +23,11 @@ private:
 
     Token CreateToken();
 
-    void ParseChar(char ch, std::vector<Token>& tokens);
+    bool ParseChar(char ch, std::vector<Token>& tokens);
 
     bool IsValidToken(const std::string& str) const;
 
-    void ThrowError();
+    void PrintError();
 };
 
 #endif // LEXICAL_ANALYZER_H_

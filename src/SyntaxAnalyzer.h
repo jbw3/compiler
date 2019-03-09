@@ -12,7 +12,7 @@ public:
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator>
         BINARY_EXPRESSION_OPERATORS;
 
-    SyntaxTree::SyntaxTreeNode* Process(const std::vector<Token>& tokens);
+    bool Process(const std::vector<Token>& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
 };
 
 #endif // SYNTAX_ANALYZER_H_

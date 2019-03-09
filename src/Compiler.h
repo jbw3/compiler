@@ -10,10 +10,7 @@ class Compiler
 public:
     Compiler();
 
-    void Compile();
-
-private:
-    void Process();
+    bool Compile();
 };
 
 #endif // COMPILER_H_
