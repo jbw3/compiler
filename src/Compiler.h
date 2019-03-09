@@ -8,9 +8,24 @@
 class Compiler
 {
 public:
+    struct Config
+    {
+        bool printSyntaxTree;
+
+        Config()
+        {
+            printSyntaxTree = false;
+        }
+    };
+
     Compiler();
 
+    Compiler(const Config& config);
+
     bool Compile();
+
+private:
+    Config config;
 };
 
 #endif // COMPILER_H_

@@ -21,6 +21,8 @@ public:
 
     void Visit(const SyntaxTree::Variable* variable) override;
 
+    bool GenerateCode(const SyntaxTree::SyntaxTreeNode* syntaxTree);
+
 private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;

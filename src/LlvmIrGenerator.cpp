@@ -1,7 +1,14 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 #include "LlvmIrGenerator.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/Support/raw_ostream.h"
 #include "utils.h"
+#include <iostream>
+#pragma clang diagnostic pop
 
 using namespace llvm;
+using namespace std;
 using namespace SyntaxTree;
 
 LlvmIrGenerator::LlvmIrGenerator() : builder(context), resultValue(nullptr)
@@ -10,6 +17,9 @@ LlvmIrGenerator::LlvmIrGenerator() : builder(context), resultValue(nullptr)
 
 void LlvmIrGenerator::Visit(const Assignment* assignment)
 {
+    assignment->GetExpression()->Accept(this);
+
+    // TODO: set the variable
 }
 
 void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
@@ -56,4 +66,35 @@ void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(const Variable* variable)
 {
+    // TODO: implement this
+    resultValue = nullptr;
+}
+
+bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
+{
+    syntaxTree->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return false;
+    }
+
+    Module module("module", context);
+
+    FunctionType* mainFuncType = FunctionType::get(Type::getInt32Ty(context), false);
+    Function* mainFunc = Function::Create(mainFuncType, Function::ExternalLinkage, "main", &module);
+
+    BasicBlock* basicBlock = BasicBlock::Create(context, "entry", mainFunc);
+    builder.SetInsertPoint(basicBlock);
+    builder.CreateRet(resultValue);
+
+    bool error = verifyFunction(*mainFunc);
+    if (error)
+    {
+        cerr << "Internal error verifying function\n";
+        return false;
+    }
+
+    module.print(outs(), nullptr);
+
+    return true;
 }

@@ -1,5 +1,6 @@
 #include "Compiler.h"
 #include "LexicalAnalyzer.h"
+#include "LlvmIrGenerator.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreePrinter.h"
@@ -9,6 +10,10 @@ using namespace std;
 using namespace SyntaxTree;
 
 Compiler::Compiler()
+{
+}
+
+Compiler::Compiler(const Compiler::Config& config) : config(config)
 {
 }
 
@@ -32,8 +37,14 @@ bool Compiler::Compile()
 
     if (ok)
     {
-        SyntaxTreePrinter printer;
-        syntaxTree->Accept(&printer);
+        if (config.printSyntaxTree)
+        {
+            SyntaxTreePrinter printer;
+            syntaxTree->Accept(&printer);
+        }
+
+        LlvmIrGenerator generator;
+        ok = generator.GenerateCode(syntaxTree);
     }
 
     delete syntaxTree;
