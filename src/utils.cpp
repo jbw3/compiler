@@ -108,3 +108,80 @@ bool isNumber(const string& tokenStr)
     // should not get here
     return false;
 }
+
+bool decStringToInteger(const string& str, int64_t& num)
+{
+    num = 0;
+
+    for (char ch : str)
+    {
+        if (isdigit(ch))
+        {
+            num *= 10;
+            num += ch - '0';
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool stringToInteger(const string& str, int64_t& num)
+{
+    bool ok = false;
+
+    // determine base
+    int base = 10;
+    if (str.size() >= 2 && str[0] == '0')
+    {
+        switch (str[1])
+        {
+            case 'b':
+            case 'B':
+                base = 2;
+                break;
+
+            case 'o':
+            case 'O':
+                base = 8;
+                break;
+
+            case 'x':
+            case 'X':
+                base = 16;
+                break;
+
+            default:
+                base = 10;
+                break;
+        }
+    }
+
+    switch (base)
+    {
+        case 2:
+            // TODO: support this base
+            ok = false;
+            break;
+        case 8:
+            // TODO: support this base
+            ok = false;
+            break;
+        case 10:
+            ok = decStringToInteger(str, num);
+            break;
+        case 16:
+            // TODO: support this base
+            ok = false;
+            break;
+        default:
+            // we should not get here
+            ok = false;
+            break;
+    }
+
+    return ok;
+}

@@ -20,4 +20,6 @@ bool isIdentifier(const std::string& str);
 
 bool isNumber(const std::string& tokenStr);
 
+bool stringToInteger(const std::string& str, int64_t& num);
+
 #endif // UTILS_H_
