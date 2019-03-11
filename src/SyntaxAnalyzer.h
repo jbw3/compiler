@@ -9,10 +9,20 @@
 class SyntaxAnalyzer
 {
 public:
+    typedef std::vector<Token> TokenSequence;
+    typedef TokenSequence::const_iterator TokenIterator;
+
+    static const std::string FUNCTION_KEYWORD;
+
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator>
         BINARY_EXPRESSION_OPERATORS;
 
-    bool Process(const std::vector<Token>& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
+    bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
+
+private:
+    SyntaxTree::Function* ProcessFunction(TokenIterator iter, TokenIterator endIter);
+
+    SyntaxTree::Expression* ProcessExpression(TokenIterator iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

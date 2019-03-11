@@ -5,40 +5,73 @@
 using namespace std;
 using namespace SyntaxTree;
 
+const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
+
 const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS = {
     {"+", BinaryExpression::eAdd}, {"-", BinaryExpression::eSubtract}};
 
-bool SyntaxAnalyzer::Process(const vector<Token>& tokens, SyntaxTreeNode*& syntaxTree)
+bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& syntaxTree)
 {
-    syntaxTree = nullptr;
+    TokenIterator iter = tokens.cbegin();
+    TokenIterator endIter = tokens.cend();
 
-    // build syntax tree
-    if (tokens.size() < 4)
+    // TODO: loop and look for multiple function definitions
+    Function* function = ProcessFunction(iter, endIter);
+
+    syntaxTree = function;
+    return syntaxTree != nullptr;
+}
+
+Function* SyntaxAnalyzer::ProcessFunction(TokenIterator iter, TokenIterator endIter)
+{
+    if (iter == endIter || iter->GetValue() != FUNCTION_KEYWORD)
     {
-        cerr << "Not enough tokens\n";
-        return false;
+        cerr << "Expected function keyword\n";
+        return nullptr;
     }
 
-    vector<Token>::const_iterator iter = tokens.cbegin();
-
-    string varName = (iter++)->GetValue();
-    string assignmentOp = (iter++)->GetValue();
-
-    if (!isIdentifier(varName))
+    ++iter;
+    if (iter == endIter || !isIdentifier(iter->GetValue()))
     {
-        cerr << "First token is not an identifier\n";
-        return false;
-    }
-    if (assignmentOp != "=")
-    {
-        cerr << "Expected assignment operator (=)\n";
-        return false;
+        cerr << "\"" << iter->GetValue() << "\" is not a valid function name\n";
+        return nullptr;
     }
 
-    Expression* rightHandExpr = nullptr;
+    string functionName = iter->GetValue();
+
+    ++iter;
+    if (iter == endIter || iter->GetValue() != "(")
+    {
+        cerr << "Expected \"(\"\n";
+        return nullptr;
+    }
+
+    // TODO: put in support for parameters here
+
+    ++iter;
+    if (iter == endIter || iter->GetValue() != ")")
+    {
+        cerr << "Expected \")\"\n";
+        return nullptr;
+    }
+
+    ++iter;
+    SyntaxTreeNode* code = ProcessExpression(iter, endIter);
+    if (code == nullptr)
+    {
+        return nullptr;
+    }
+
+    Function* function = new Function(functionName, code);
+    return function;
+}
+
+Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator iter, TokenIterator endIter)
+{
+    Expression* expression = nullptr;
     bool expectNumber = true;
     BinaryExpression::EOperator binOp = BinaryExpression::eAdd;
-    while (iter != tokens.cend())
+    while (iter != endIter)
     {
         string value = iter->GetValue();
 
@@ -52,21 +85,21 @@ bool SyntaxAnalyzer::Process(const vector<Token>& tokens, SyntaxTreeNode*& synta
             if (isNumber(value))
             {
                 NumericExpression* numExpr = new NumericExpression(value);
-                if (rightHandExpr == nullptr)
+                if (expression == nullptr)
                 {
-                    rightHandExpr = numExpr;
+                    expression = numExpr;
                 }
                 else
                 {
-                    BinaryExpression* binExpr = new BinaryExpression(binOp, rightHandExpr, numExpr);
-                    rightHandExpr = binExpr;
+                    BinaryExpression* binExpr = new BinaryExpression(binOp, expression, numExpr);
+                    expression = binExpr;
                 }
             }
             else
             {
                 cerr << "\"" << value << "\" is not a number\n";
-                delete rightHandExpr;
-                return false;
+                delete expression;
+                return nullptr;
             }
         }
         else
@@ -75,8 +108,8 @@ bool SyntaxAnalyzer::Process(const vector<Token>& tokens, SyntaxTreeNode*& synta
             if (opIter == BINARY_EXPRESSION_OPERATORS.cend())
             {
                 cerr << "Expected an operator, but got \"" << value << "\" instead\n";
-                delete rightHandExpr;
-                return false;
+                delete expression;
+                return nullptr;
             }
 
             binOp = opIter->second;
@@ -89,13 +122,9 @@ bool SyntaxAnalyzer::Process(const vector<Token>& tokens, SyntaxTreeNode*& synta
     if (expectNumber)
     {
         cerr << "Expected another number\n";
-        delete rightHandExpr;
-        return false;
+        delete expression;
+        return nullptr;
     }
 
-    Variable* variable = new Variable(varName);
-    Assignment* assignment = new Assignment(variable, rightHandExpr);
-
-    syntaxTree = assignment;
-    return true;
+    return expression;
 }

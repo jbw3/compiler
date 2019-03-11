@@ -10,11 +10,18 @@ class Compiler
 public:
     struct Config
     {
-        bool printSyntaxTree;
+        enum EOutput
+        {
+            eTokens,
+            eSyntaxTree,
+            eIr,
+        };
+
+        EOutput output;
 
         Config()
         {
-            printSyntaxTree = false;
+            output = eSyntaxTree;
         }
     };
 
@@ -26,6 +33,8 @@ public:
 
 private:
     Config config;
+
+    void PrintTokens(const std::vector<Token>& tokens) const;
 };
 
 #endif // COMPILER_H_

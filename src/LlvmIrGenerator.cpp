@@ -7,9 +7,17 @@
 #include <iostream>
 #pragma clang diagnostic pop
 
-using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
+using llvm::APInt;
+using llvm::BasicBlock;
+using llvm::ConstantInt;
+using llvm::FunctionType;
+using llvm::IRBuilder;
+using llvm::Module;
+using llvm::outs;
+using llvm::Type;
+using llvm::Value;
 
 LlvmIrGenerator::LlvmIrGenerator() : builder(context), resultValue(nullptr)
 {
@@ -52,6 +60,12 @@ void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(const Function* function)
+{
+    // TODO: implement this
+    resultValue = nullptr;
+}
+
 void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
 {
     resultValue = nullptr;
@@ -81,7 +95,8 @@ bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
     Module module("module", context);
 
     FunctionType* mainFuncType = FunctionType::get(Type::getInt32Ty(context), false);
-    Function* mainFunc = Function::Create(mainFuncType, Function::ExternalLinkage, "main", &module);
+    llvm::Function* mainFunc =
+        llvm::Function::Create(mainFuncType, llvm::Function::ExternalLinkage, "main", &module);
 
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", mainFunc);
     builder.SetInsertPoint(basicBlock);

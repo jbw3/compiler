@@ -8,7 +8,9 @@ class SyntaxTreeVisitor
 public:
     virtual void Visit(const SyntaxTree::Assignment* assignment) = 0;
 
-    virtual void Visit(const SyntaxTree::BinaryExpression* assignment) = 0;
+    virtual void Visit(const SyntaxTree::BinaryExpression* binaryExpression) = 0;
+
+    virtual void Visit(const SyntaxTree::Function* function) = 0;
 
     virtual void Visit(const SyntaxTree::NumericExpression* numericExpression) = 0;
 

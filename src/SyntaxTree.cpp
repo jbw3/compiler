@@ -14,7 +14,7 @@ void NumericExpression::Accept(SyntaxTreeVisitor* visitor) const
     visitor->Visit(this);
 }
 
-string NumericExpression::GetNumber() const
+const string& NumericExpression::GetNumber() const
 {
     return number;
 }
@@ -52,7 +52,7 @@ const Expression* BinaryExpression::GetRightExpression() const
     return right;
 }
 
-Variable::Variable(string name) : name(name)
+Variable::Variable(const string& name) : name(name)
 {
 }
 
@@ -61,7 +61,7 @@ void Variable::Accept(SyntaxTreeVisitor* visitor) const
     visitor->Visit(this);
 }
 
-string Variable::GetName() const
+const string& Variable::GetName() const
 {
     return name;
 }
@@ -91,5 +91,33 @@ const Variable* Assignment::GetVariable() const
 const Expression* Assignment::GetExpression() const
 {
     return expression;
+}
+
+Function::Function(const string& name, SyntaxTreeNode* code) : name(name), code(code)
+{
+}
+
+Function::~Function()
+{
+    for (Variable* param : parameters)
+    {
+        delete param;
+    }
+    delete code;
+}
+
+void Function::Accept(SyntaxTreeVisitor* visitor) const
+{
+    visitor->Visit(this);
+}
+
+const string& Function::GetName() const
+{
+    return name;
+}
+
+const SyntaxTreeNode* Function::GetCode() const
+{
+    return code;
 }
 } // namespace SyntaxTree

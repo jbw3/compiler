@@ -2,6 +2,7 @@
 #define SYNTAX_TREE_H_
 
 #include <string>
+#include <vector>
 
 class SyntaxTreeVisitor;
 
@@ -30,7 +31,7 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
 
-    std::string GetNumber() const;
+    const std::string& GetNumber() const;
 
 private:
     std::string number;
@@ -66,13 +67,13 @@ private:
 class Variable : public SyntaxTreeNode
 {
 public:
-    Variable(std::string name);
+    Variable(const std::string& name);
 
     virtual ~Variable() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
 
-    std::string GetName() const;
+    const std::string& GetName() const;
 
 private:
     std::string name;
@@ -94,6 +95,25 @@ public:
 private:
     Variable* variable;
     Expression* expression;
+};
+
+class Function : public SyntaxTreeNode
+{
+public:
+    Function(const std::string& name, SyntaxTreeNode* code);
+
+    virtual ~Function();
+
+    void Accept(SyntaxTreeVisitor* visitor) const override;
+
+    const std::string& GetName() const;
+
+    const SyntaxTreeNode* GetCode() const;
+
+private:
+    std::string name;
+    std::vector<Variable*> parameters;
+    SyntaxTreeNode* code;
 };
 } // namespace SyntaxTree
 

@@ -58,6 +58,22 @@ void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpressi
     binaryExpression->GetRightExpression()->Accept(this);
 }
 
+void SyntaxTreePrinter::Visit(const Function* function)
+{
+    BracePrinter printer(*this);
+
+    Print("\"type\": \"Function\",\n\"name\": \"");
+    Print(function->GetName());
+    Print("\",\n");
+
+    // TODO: print parameters
+    Print("\"parameters\": [],\n");
+
+    // print code
+    Print("\"code\":\n");
+    function->GetCode()->Accept(this);
+}
+
 void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
 {
     BracePrinter printer(*this);

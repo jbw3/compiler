@@ -12,6 +12,8 @@ public:
 
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
+    void Visit(const SyntaxTree::Function* function) override;
+
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 
     void Visit(const SyntaxTree::Variable* variable) override;
