@@ -19,7 +19,10 @@ using llvm::outs;
 using llvm::Type;
 using llvm::Value;
 
-LlvmIrGenerator::LlvmIrGenerator() : builder(context), resultValue(nullptr)
+LlvmIrGenerator::LlvmIrGenerator() :
+    builder(context),
+    module("module", context),
+    resultValue(nullptr)
 {
 }
 
@@ -62,8 +65,27 @@ void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
 
 void LlvmIrGenerator::Visit(const Function* function)
 {
-    // TODO: implement this
-    resultValue = nullptr;
+    function->GetCode()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), false);
+    llvm::Function* func = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
+                                                  function->GetName(), &module);
+
+    BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
+    builder.SetInsertPoint(basicBlock);
+    builder.CreateRet(resultValue);
+
+    bool error = verifyFunction(*func);
+    if (error)
+    {
+        resultValue = nullptr;
+        cerr << "Internal error verifying function\n";
+        return;
+    }
 }
 
 void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
@@ -89,23 +111,6 @@ bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
     syntaxTree->Accept(this);
     if (resultValue == nullptr)
     {
-        return false;
-    }
-
-    Module module("module", context);
-
-    FunctionType* mainFuncType = FunctionType::get(Type::getInt32Ty(context), false);
-    llvm::Function* mainFunc =
-        llvm::Function::Create(mainFuncType, llvm::Function::ExternalLinkage, "main", &module);
-
-    BasicBlock* basicBlock = BasicBlock::Create(context, "entry", mainFunc);
-    builder.SetInsertPoint(basicBlock);
-    builder.CreateRet(resultValue);
-
-    bool error = verifyFunction(*mainFunc);
-    if (error)
-    {
-        cerr << "Internal error verifying function\n";
         return false;
     }
 

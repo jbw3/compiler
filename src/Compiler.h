@@ -21,7 +21,7 @@ public:
 
         Config()
         {
-            output = eSyntaxTree;
+            output = eIr;
         }
     };
 

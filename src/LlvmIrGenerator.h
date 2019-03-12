@@ -28,6 +28,7 @@ public:
 private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
+    llvm::Module module;
     llvm::Value* resultValue;
 };
 
