@@ -8,20 +8,25 @@
 #include "llvm/IR/LLVMContext.h"
 #pragma clang diagnostic pop
 
+namespace SyntaxTree
+{
+class SyntaxTreeNode;
+} // namespace SyntaxTree
+
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
     LlvmIrGenerator();
 
-    void Visit(const SyntaxTree::Assignment* assignment) override;
-
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
-    void Visit(const SyntaxTree::Function* function) override;
+    void Visit(const SyntaxTree::FunctionDefinition* functionDefinition) override;
 
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 
-    void Visit(const SyntaxTree::Variable* variable) override;
+    void Visit(const SyntaxTree::VariableDefinition* variableDefinition) override;
+
+    void Visit(const SyntaxTree::VariableExpression* variableExpression) override;
 
     bool GenerateCode(const SyntaxTree::SyntaxTreeNode* syntaxTree);
 

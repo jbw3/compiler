@@ -52,71 +52,60 @@ const Expression* BinaryExpression::GetRightExpression() const
     return right;
 }
 
-Variable::Variable(const string& name) : name(name)
+VariableExpression::VariableExpression(const string& name) : name(name)
 {
 }
 
-void Variable::Accept(SyntaxTreeVisitor* visitor) const
+void VariableExpression::Accept(SyntaxTreeVisitor* visitor) const
 {
     visitor->Visit(this);
 }
 
-const string& Variable::GetName() const
+const string& VariableExpression::GetName() const
 {
     return name;
 }
 
-Assignment::Assignment(Variable* variable, Expression* expression) :
-    variable(variable),
-    expression(expression)
+VariableDefinition::VariableDefinition(const string& name) : name(name)
 {
 }
 
-Assignment::~Assignment()
-{
-    delete variable;
-    delete expression;
-}
-
-void Assignment::Accept(SyntaxTreeVisitor* visitor) const
+void VariableDefinition::Accept(SyntaxTreeVisitor* visitor) const
 {
     visitor->Visit(this);
 }
 
-const Variable* Assignment::GetVariable() const
+const string& VariableDefinition::GetName() const
 {
-    return variable;
+    return name;
 }
 
-const Expression* Assignment::GetExpression() const
-{
-    return expression;
-}
-
-Function::Function(const string& name, SyntaxTreeNode* code) : name(name), code(code)
+FunctionDefinition::FunctionDefinition(const string& name, SyntaxTreeNode* code) :
+    name(name),
+    code(code)
 {
 }
 
-Function::~Function()
+FunctionDefinition::~FunctionDefinition()
 {
-    for (Variable* param : parameters)
+    for (VariableDefinition* param : parameters)
     {
         delete param;
     }
     delete code;
 }
 
-void Function::Accept(SyntaxTreeVisitor* visitor) const
+void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor) const
 {
     visitor->Visit(this);
 }
 
-const string& Function::GetName() const
+const string& FunctionDefinition::GetName() const
 {
     return name;
 }
 
-const SyntaxTreeNode* Function::GetCode() const
+const SyntaxTreeNode* FunctionDefinition::GetCode() const
 {
     return code;
 }

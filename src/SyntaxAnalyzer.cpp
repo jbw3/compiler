@@ -16,13 +16,14 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& synta
     TokenIterator endIter = tokens.cend();
 
     // TODO: loop and look for multiple function definitions
-    Function* function = ProcessFunction(iter, endIter);
+    FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
 
-    syntaxTree = function;
+    syntaxTree = functionDefinition;
     return syntaxTree != nullptr;
 }
 
-Function* SyntaxAnalyzer::ProcessFunction(TokenIterator iter, TokenIterator endIter)
+FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator iter,
+                                                              TokenIterator endIter)
 {
     if (iter == endIter || iter->GetValue() != FUNCTION_KEYWORD)
     {
@@ -62,8 +63,8 @@ Function* SyntaxAnalyzer::ProcessFunction(TokenIterator iter, TokenIterator endI
         return nullptr;
     }
 
-    Function* function = new Function(functionName, code);
-    return function;
+    FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, code);
+    return functionDefinition;
 }
 
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator iter, TokenIterator endIter)

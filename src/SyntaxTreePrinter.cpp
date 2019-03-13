@@ -1,4 +1,5 @@
 #include "SyntaxTreePrinter.h"
+#include "SyntaxTree.h"
 #include <iostream>
 
 using namespace std;
@@ -18,19 +19,6 @@ SyntaxTreePrinter::BracePrinter::~BracePrinter()
 
 SyntaxTreePrinter::SyntaxTreePrinter() : level(0)
 {
-}
-
-void SyntaxTreePrinter::Visit(const Assignment* assignment)
-{
-    BracePrinter printer(*this);
-
-    Print("\"type\": \"Assignment\",\n\"variable\":\n");
-
-    assignment->GetVariable()->Accept(this);
-
-    Print(",\n\"expression\":\n");
-
-    assignment->GetExpression()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpression)
@@ -58,12 +46,12 @@ void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpressi
     binaryExpression->GetRightExpression()->Accept(this);
 }
 
-void SyntaxTreePrinter::Visit(const Function* function)
+void SyntaxTreePrinter::Visit(const FunctionDefinition* functionDefinition)
 {
     BracePrinter printer(*this);
 
-    Print("\"type\": \"Function\",\n\"name\": \"");
-    Print(function->GetName());
+    Print("\"type\": \"FunctionDefinition\",\n\"name\": \"");
+    Print(functionDefinition->GetName());
     Print("\",\n");
 
     // TODO: print parameters
@@ -71,7 +59,7 @@ void SyntaxTreePrinter::Visit(const Function* function)
 
     // print code
     Print("\"code\":\n");
-    function->GetCode()->Accept(this);
+    functionDefinition->GetCode()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
@@ -83,12 +71,21 @@ void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
     Print("\"");
 }
 
-void SyntaxTreePrinter::Visit(const Variable* variable)
+void SyntaxTreePrinter::Visit(const VariableDefinition* variableDefinition)
 {
     BracePrinter printer(*this);
 
-    Print("\"type\": \"Variable\",\n\"name\": \"");
-    Print(variable->GetName());
+    Print("\"type\": \"VariableDefinition\",\n\"name\": \"");
+    Print(variableDefinition->GetName());
+    Print("\"");
+}
+
+void SyntaxTreePrinter::Visit(const VariableExpression* variableExpression)
+{
+    BracePrinter printer(*this);
+
+    Print("\"type\": \"VariableExpression\",\n\"name\": \"");
+    Print(variableExpression->GetName());
     Print("\"");
 }
 

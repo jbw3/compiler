@@ -64,12 +64,12 @@ private:
     Expression* right;
 };
 
-class Variable : public SyntaxTreeNode
+class VariableExpression : public Expression
 {
 public:
-    Variable(const std::string& name);
+    VariableExpression(const std::string& name);
 
-    virtual ~Variable() = default;
+    virtual ~VariableExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
 
@@ -79,30 +79,27 @@ private:
     std::string name;
 };
 
-class Assignment : public SyntaxTreeNode
+class VariableDefinition : public SyntaxTreeNode
 {
 public:
-    Assignment(Variable* variable, Expression* expression);
+    VariableDefinition(const std::string& name);
 
-    virtual ~Assignment();
+    virtual ~VariableDefinition() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
 
-    const Variable* GetVariable() const;
-
-    const Expression* GetExpression() const;
+    const std::string& GetName() const;
 
 private:
-    Variable* variable;
-    Expression* expression;
+    std::string name;
 };
 
-class Function : public SyntaxTreeNode
+class FunctionDefinition : public SyntaxTreeNode
 {
 public:
-    Function(const std::string& name, SyntaxTreeNode* code);
+    FunctionDefinition(const std::string& name, SyntaxTreeNode* code);
 
-    virtual ~Function();
+    virtual ~FunctionDefinition();
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
 
@@ -112,7 +109,7 @@ public:
 
 private:
     std::string name;
-    std::vector<Variable*> parameters;
+    std::vector<VariableDefinition*> parameters;
     SyntaxTreeNode* code;
 };
 } // namespace SyntaxTree

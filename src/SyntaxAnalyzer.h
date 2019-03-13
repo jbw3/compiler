@@ -20,7 +20,8 @@ public:
     bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
 
 private:
-    SyntaxTree::Function* ProcessFunction(TokenIterator iter, TokenIterator endIter);
+    SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator iter,
+                                                              TokenIterator endIter);
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator iter, TokenIterator endIter);
 };

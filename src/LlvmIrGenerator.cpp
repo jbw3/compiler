@@ -1,6 +1,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "LlvmIrGenerator.h"
+#include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
 #include "utils.h"
@@ -9,28 +10,13 @@
 
 using namespace std;
 using namespace SyntaxTree;
-using llvm::APInt;
-using llvm::BasicBlock;
-using llvm::ConstantInt;
-using llvm::FunctionType;
-using llvm::IRBuilder;
-using llvm::Module;
-using llvm::outs;
-using llvm::Type;
-using llvm::Value;
+using namespace llvm;
 
 LlvmIrGenerator::LlvmIrGenerator() :
     builder(context),
     module("module", context),
     resultValue(nullptr)
 {
-}
-
-void LlvmIrGenerator::Visit(const Assignment* assignment)
-{
-    assignment->GetExpression()->Accept(this);
-
-    // TODO: set the variable
 }
 
 void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
@@ -63,9 +49,9 @@ void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(const Function* function)
+void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
 {
-    function->GetCode()->Accept(this);
+    functionDefinition->GetCode()->Accept(this);
     if (resultValue == nullptr)
     {
         return;
@@ -73,7 +59,7 @@ void LlvmIrGenerator::Visit(const Function* function)
 
     FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), false);
     llvm::Function* func = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
-                                                  function->GetName(), &module);
+                                                  functionDefinition->GetName(), &module);
 
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);
@@ -100,7 +86,13 @@ void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(const Variable* variable)
+void LlvmIrGenerator::Visit(const VariableDefinition* variableDefinition)
+{
+    // TODO: implement this
+    resultValue = nullptr;
+}
+
+void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
 {
     // TODO: implement this
     resultValue = nullptr;

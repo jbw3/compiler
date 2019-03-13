@@ -2,21 +2,22 @@
 #define SYNTAX_TREE_PRINTER_H_
 
 #include "SyntaxTreeVisitor.h"
+#include <string>
 
 class SyntaxTreePrinter : public SyntaxTreeVisitor
 {
 public:
     SyntaxTreePrinter();
 
-    void Visit(const SyntaxTree::Assignment* assignment) override;
-
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
-    void Visit(const SyntaxTree::Function* function) override;
+    void Visit(const SyntaxTree::FunctionDefinition* functionDefinition) override;
 
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 
-    void Visit(const SyntaxTree::Variable* variable) override;
+    void Visit(const SyntaxTree::VariableDefinition* variableDefinition) override;
+
+    void Visit(const SyntaxTree::VariableExpression* variableExpression) override;
 
 private:
     class BracePrinter
