@@ -23,7 +23,10 @@ private:
     SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator iter,
                                                               TokenIterator endIter);
 
-    SyntaxTree::Expression* ProcessExpression(TokenIterator iter, TokenIterator endIter);
+    bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
+                           std::vector<SyntaxTree::VariableDefinition*>& parameters);
+
+    SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

@@ -97,13 +97,16 @@ private:
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:
-    FunctionDefinition(const std::string& name, SyntaxTreeNode* code);
+    FunctionDefinition(const std::string& name, const std::vector<VariableDefinition*>& parameters,
+                       SyntaxTreeNode* code);
 
     virtual ~FunctionDefinition();
 
     void Accept(SyntaxTreeVisitor* visitor) const override;
 
     const std::string& GetName() const;
+
+    const std::vector<VariableDefinition*>& GetParameters() const;
 
     const SyntaxTreeNode* GetCode() const;
 

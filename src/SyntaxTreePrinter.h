@@ -23,12 +23,14 @@ private:
     class BracePrinter
     {
     public:
-        BracePrinter(SyntaxTreePrinter& printer);
+        BracePrinter(SyntaxTreePrinter& printer, std::string start, std::string end);
 
         ~BracePrinter();
 
     private:
         SyntaxTreePrinter& printer;
+        std::string startStr;
+        std::string endStr;
     };
 
     unsigned int level;

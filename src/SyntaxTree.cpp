@@ -80,8 +80,11 @@ const string& VariableDefinition::GetName() const
     return name;
 }
 
-FunctionDefinition::FunctionDefinition(const string& name, SyntaxTreeNode* code) :
+FunctionDefinition::FunctionDefinition(const string& name,
+                                       const vector<VariableDefinition*>& parameters,
+                                       SyntaxTreeNode* code) :
     name(name),
+    parameters(parameters),
     code(code)
 {
 }
@@ -103,6 +106,11 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor) const
 const string& FunctionDefinition::GetName() const
 {
     return name;
+}
+
+const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
+{
+    return parameters;
 }
 
 const SyntaxTreeNode* FunctionDefinition::GetCode() const

@@ -47,12 +47,15 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator iter
         return nullptr;
     }
 
-    // TODO: put in support for parameters here
-
     ++iter;
-    if (iter == endIter || iter->GetValue() != ")")
+    vector<VariableDefinition*> parameters;
+    bool ok = ProcessParameters(iter, endIter, parameters);
+    if (!ok)
     {
-        cerr << "Expected \")\"\n";
+        for (auto param : parameters)
+        {
+            delete param;
+        }
         return nullptr;
     }
 
@@ -60,14 +63,67 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator iter
     SyntaxTreeNode* code = ProcessExpression(iter, endIter);
     if (code == nullptr)
     {
+        for (auto param : parameters)
+        {
+            delete param;
+        }
         return nullptr;
     }
 
-    FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, code);
+    FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, parameters, code);
     return functionDefinition;
 }
 
-Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator iter, TokenIterator endIter)
+bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIter,
+                                       vector<VariableDefinition*>& parameters)
+{
+    bool expectParam = true;
+    parameters.clear();
+
+    while (iter != endIter && iter->GetValue() != ")")
+    {
+        const string& value = iter->GetValue();
+        if (expectParam)
+        {
+            if (isIdentifier(value))
+            {
+                VariableDefinition* param = new VariableDefinition(value);
+                parameters.push_back(param);
+            }
+            else
+            {
+                cerr << "Invalid parameter name: \"" << value << "\"\n";
+                return false;
+            }
+        }
+        else
+        {
+            if (value != ",")
+            {
+                cerr << "Expected \",\" not \"" << value << "\"\n";
+                return false;
+            }
+        }
+
+        ++iter;
+        expectParam = !expectParam;
+    }
+
+    if (iter == endIter)
+    {
+        cerr << "Expected \")\"\n";
+        return false;
+    }
+    else if (expectParam && parameters.size() > 0)
+    {
+        cerr << "Expected a parameter\n";
+        return false;
+    }
+
+    return true;
+}
+
+Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter)
 {
     Expression* expression = nullptr;
     bool expectNumber = true;
