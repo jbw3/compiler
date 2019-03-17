@@ -8,13 +8,13 @@
 using namespace llvm;
 using namespace std;
 
-bool Scope::AddVariable(const Value* variable)
+bool Scope::AddVariable(Value* variable)
 {
     auto rv = variables.insert({variable->getName(), variable});
     return rv.second;
 }
 
-const Value* Scope::GetVariable(const string& name) const
+Value* Scope::GetVariable(const string& name) const
 {
     auto iter = variables.find(name);
     if (iter == variables.cend())

@@ -11,14 +11,14 @@ class Value;
 class Scope
 {
 public:
-    bool AddVariable(const llvm::Value* variable);
+    bool AddVariable(llvm::Value* variable);
 
-    const llvm::Value* GetVariable(const std::string& name) const;
+    llvm::Value* GetVariable(const std::string& name) const;
 
     bool Contains(const std::string& name) const;
 
 private:
-    std::unordered_map<std::string, const llvm::Value*> variables;
+    std::unordered_map<std::string, llvm::Value*> variables;
 };
 
 #endif // SCOPE_H_

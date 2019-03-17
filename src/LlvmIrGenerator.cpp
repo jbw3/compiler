@@ -56,6 +56,9 @@ void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
     llvm::Function* func = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
                                                   functionDefinition->GetName(), &module);
 
+    BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
+    builder.SetInsertPoint(basicBlock);
+
     currentScope.reset(new Scope());
     size_t idx = 0;
     for (Argument& arg : func->args())
@@ -74,11 +77,9 @@ void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
         return;
     }
 
-    BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
-    builder.SetInsertPoint(basicBlock);
     builder.CreateRet(resultValue);
 
-    bool error = verifyFunction(*func);
+    bool error = verifyFunction(*func, &errs());
     if (error)
     {
         resultValue = nullptr;
@@ -107,8 +108,13 @@ void LlvmIrGenerator::Visit(const VariableDefinition* variableDefinition)
 
 void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
 {
-    // TODO: implement this
-    resultValue = nullptr;
+    const string& name = variableExpression->GetName();
+    resultValue = currentScope->GetVariable(name);
+    if (resultValue == nullptr)
+    {
+        cerr << "\"" << name << "\" has not been defined\n";
+        return;
+    }
 }
 
 bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)

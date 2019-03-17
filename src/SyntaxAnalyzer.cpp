@@ -126,7 +126,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter)
 {
     Expression* expression = nullptr;
-    bool expectNumber = true;
+    bool expectNumOrVar = true;
     BinaryExpression::EOperator binOp = BinaryExpression::eAdd;
     while (iter != endIter)
     {
@@ -137,7 +137,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             break;
         }
 
-        if (expectNumber)
+        if (expectNumOrVar)
         {
             if (isNumber(value))
             {
@@ -149,6 +149,19 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 else
                 {
                     BinaryExpression* binExpr = new BinaryExpression(binOp, expression, numExpr);
+                    expression = binExpr;
+                }
+            }
+            else if (isIdentifier(value))
+            {
+                VariableExpression* varExpr = new VariableExpression(value);
+                if (expression == nullptr)
+                {
+                    expression = varExpr;
+                }
+                else
+                {
+                    BinaryExpression* binExpr = new BinaryExpression(binOp, expression, varExpr);
                     expression = binExpr;
                 }
             }
@@ -172,11 +185,11 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             binOp = opIter->second;
         }
 
-        expectNumber = !expectNumber;
+        expectNumOrVar = !expectNumOrVar;
         ++iter;
     }
 
-    if (expectNumber)
+    if (expectNumOrVar)
     {
         cerr << "Expected another number\n";
         delete expression;
