@@ -51,15 +51,28 @@ void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
 
 void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
 {
+    vector<Type*> parameters(functionDefinition->GetParameters().size(), Type::getInt32Ty(context));
+    FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), parameters, false);
+    llvm::Function* func = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
+                                                  functionDefinition->GetName(), &module);
+
+    currentScope.reset(new Scope());
+    size_t idx = 0;
+    for (Argument& arg : func->args())
+    {
+        string paramName = functionDefinition->GetParameters()[idx]->GetName();
+        arg.setName(paramName);
+        currentScope->AddVariable(&arg);
+        ++idx;
+    }
+
     functionDefinition->GetCode()->Accept(this);
+    currentScope.reset(nullptr);
+
     if (resultValue == nullptr)
     {
         return;
     }
-
-    FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), false);
-    llvm::Function* func = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
-                                                  functionDefinition->GetName(), &module);
 
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);

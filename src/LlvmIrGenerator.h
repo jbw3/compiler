@@ -3,6 +3,7 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+#include "Scope.h"
 #include "SyntaxTreeVisitor.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
@@ -34,6 +35,7 @@ private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::Module module;
+    std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
 };
 
