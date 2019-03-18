@@ -88,6 +88,12 @@ void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
     }
 }
 
+void LlvmIrGenerator::Visit(const ModuleDefinition* moduleDefinition)
+{
+    // TODO: implement this
+    resultValue = nullptr;
+}
+
 void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
 {
     resultValue = nullptr;

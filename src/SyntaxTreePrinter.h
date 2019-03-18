@@ -4,6 +4,11 @@
 #include "SyntaxTreeVisitor.h"
 #include <string>
 
+namespace SyntaxTree
+{
+class VariableDefinition;
+}
+
 class SyntaxTreePrinter : public SyntaxTreeVisitor
 {
 public:
@@ -12,6 +17,8 @@ public:
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
     void Visit(const SyntaxTree::FunctionDefinition* functionDefinition) override;
+
+    void Visit(const SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 

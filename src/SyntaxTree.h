@@ -113,6 +113,21 @@ private:
     std::vector<VariableDefinition*> parameters;
     SyntaxTreeNode* code;
 };
+
+class ModuleDefinition : public SyntaxTreeNode
+{
+public:
+    ModuleDefinition(const std::vector<FunctionDefinition*>& functionDefinitions);
+
+    virtual ~ModuleDefinition();
+
+    void Accept(SyntaxTreeVisitor* visitor) const override;
+
+    const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
+
+private:
+    std::vector<FunctionDefinition*> functionDefinitions;
+};
 } // namespace SyntaxTree
 
 #endif // SYNTAX_TREE_H_

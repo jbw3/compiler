@@ -23,6 +23,8 @@ public:
 
     void Visit(const SyntaxTree::FunctionDefinition* functionDefinition) override;
 
+    void Visit(const SyntaxTree::ModuleDefinition* moduleDefinition) override;
+
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 
     void Visit(const SyntaxTree::VariableExpression* variableExpression) override;

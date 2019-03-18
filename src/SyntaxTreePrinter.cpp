@@ -85,6 +85,34 @@ void SyntaxTreePrinter::Visit(const FunctionDefinition* functionDefinition)
     functionDefinition->GetCode()->Accept(this);
 }
 
+void SyntaxTreePrinter::Visit(const ModuleDefinition* moduleDefinition)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"ModuleDefinition\",\n");
+
+    // print function definitions
+    const vector<FunctionDefinition*>& functions = moduleDefinition->GetFunctionDefinitions();
+    Print("\"functions\": ");
+    if (functions.size() == 0)
+    {
+        Print("[]");
+    }
+    else
+    {
+        BracePrinter printer2(*this, "[", "]");
+
+        for (size_t i = 0; i < functions.size(); ++i)
+        {
+            functions[i]->Accept(this);
+            if (i < functions.size() - 1)
+            {
+                Print(",\n");
+            }
+        }
+    }
+}
+
 void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
 {
     BracePrinter printer(*this, "{", "}");

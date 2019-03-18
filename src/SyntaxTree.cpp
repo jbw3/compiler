@@ -112,4 +112,27 @@ const SyntaxTreeNode* FunctionDefinition::GetCode() const
 {
     return code;
 }
+
+ModuleDefinition::ModuleDefinition(const vector<FunctionDefinition*>& functionDefinitions) :
+    functionDefinitions(functionDefinitions)
+{
+}
+
+ModuleDefinition::~ModuleDefinition()
+{
+    for (FunctionDefinition* funcDef : functionDefinitions)
+    {
+        delete funcDef;
+    }
+}
+
+void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor) const
+{
+    visitor->Visit(this);
+}
+
+const vector<FunctionDefinition*>& ModuleDefinition::GetFunctionDefinitions() const
+{
+    return functionDefinitions;
+}
 } // namespace SyntaxTree
