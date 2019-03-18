@@ -15,8 +15,6 @@ public:
 
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 
-    void Visit(const SyntaxTree::VariableDefinition* variableDefinition) override;
-
     void Visit(const SyntaxTree::VariableExpression* variableExpression) override;
 
 private:
@@ -34,6 +32,8 @@ private:
     };
 
     unsigned int level;
+
+    void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
     void Print(const std::string& str) const;
 };

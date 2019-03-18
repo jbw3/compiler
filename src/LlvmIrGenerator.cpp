@@ -100,12 +100,6 @@ void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(const VariableDefinition* variableDefinition)
-{
-    // TODO: implement this
-    resultValue = nullptr;
-}
-
 void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
 {
     const string& name = variableExpression->GetName();

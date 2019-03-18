@@ -25,8 +25,6 @@ public:
 
     void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
 
-    void Visit(const SyntaxTree::VariableDefinition* variableDefinition) override;
-
     void Visit(const SyntaxTree::VariableExpression* variableExpression) override;
 
     bool GenerateCode(const SyntaxTree::SyntaxTreeNode* syntaxTree);

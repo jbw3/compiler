@@ -70,11 +70,6 @@ VariableDefinition::VariableDefinition(const string& name) : name(name)
 {
 }
 
-void VariableDefinition::Accept(SyntaxTreeVisitor* visitor) const
-{
-    visitor->Visit(this);
-}
-
 const string& VariableDefinition::GetName() const
 {
     return name;

@@ -72,7 +72,7 @@ void SyntaxTreePrinter::Visit(const FunctionDefinition* functionDefinition)
 
         for (size_t i = 0; i < parameters.size(); ++i)
         {
-            parameters[i]->Accept(this);
+            PrintVariableDefinition(parameters[i]);
             if (i < parameters.size() - 1)
             {
                 Print(",\n");
@@ -94,21 +94,21 @@ void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
     Print("\"");
 }
 
-void SyntaxTreePrinter::Visit(const VariableDefinition* variableDefinition)
-{
-    BracePrinter printer(*this, "{", "}");
-
-    Print("\"type\": \"VariableDefinition\",\n\"name\": \"");
-    Print(variableDefinition->GetName());
-    Print("\"");
-}
-
 void SyntaxTreePrinter::Visit(const VariableExpression* variableExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
     Print("\"type\": \"VariableExpression\",\n\"name\": \"");
     Print(variableExpression->GetName());
+    Print("\"");
+}
+
+void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"VariableDefinition\",\n\"name\": \"");
+    Print(variableDefinition->GetName());
     Print("\"");
 }
 

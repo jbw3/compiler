@@ -79,14 +79,12 @@ private:
     std::string name;
 };
 
-class VariableDefinition : public SyntaxTreeNode
+class VariableDefinition
 {
 public:
     VariableDefinition(const std::string& name);
 
     virtual ~VariableDefinition() = default;
-
-    void Accept(SyntaxTreeVisitor* visitor) const override;
 
     const std::string& GetName() const;
 

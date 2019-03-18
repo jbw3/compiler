@@ -19,8 +19,6 @@ public:
 
     virtual void Visit(const SyntaxTree::NumericExpression* numericExpression) = 0;
 
-    virtual void Visit(const SyntaxTree::VariableDefinition* variableDefinition) = 0;
-
     virtual void Visit(const SyntaxTree::VariableExpression* variableExpression) = 0;
 };
 
