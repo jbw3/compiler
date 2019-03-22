@@ -90,8 +90,14 @@ void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(const ModuleDefinition* moduleDefinition)
 {
-    // TODO: implement this
-    resultValue = nullptr;
+    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    {
+        funcDef->Accept(this);
+        if (resultValue == nullptr)
+        {
+            break;
+        }
+    }
 }
 
 void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
