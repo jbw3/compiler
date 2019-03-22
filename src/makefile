@@ -11,7 +11,7 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$<.Td
 CXX = clang++
 CXXFLAGS = `$(LLVMDIR)/llvm-config --cxxflags` -std=c++1z -Wall -Wextra $(DEPFLAGS)
 
-LDFLAGS = `$(LLVMDIR)/llvm-config --ldflags --system-libs --libs core`
+LDFLAGS = `$(LLVMDIR)/llvm-config --ldflags --system-libs --libs all`
 
 POSTCOMPILE = @mv -f $(DEPDIR)/$<.Td $(DEPDIR)/$<.d && touch $@
 
