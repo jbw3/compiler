@@ -13,7 +13,7 @@ Compiler::Compiler()
 {
 }
 
-Compiler::Compiler(const Compiler::Config& config) : config(config)
+Compiler::Compiler(const Config& config) : config(config)
 {
 }
 
@@ -30,7 +30,7 @@ bool Compiler::Compile()
     }
 
     // check tokens are the output
-    if (ok && config.output == Config::eTokens)
+    if (ok && config.outputType == Config::eTokens)
     {
         PrintTokens(tokens);
         return ok;
@@ -45,7 +45,7 @@ bool Compiler::Compile()
     }
 
     // check if syntax tree is the output
-    if (ok && config.output == Config::eSyntaxTree)
+    if (ok && config.outputType == Config::eSyntaxTree)
     {
         SyntaxTreePrinter printer;
         syntaxTree->Accept(&printer);
@@ -53,7 +53,7 @@ bool Compiler::Compile()
         return ok;
     }
 
-    if (ok)
+    if (ok && config.outputType == Config::eAssembly)
     {
         LlvmIrGenerator generator;
         ok = generator.GenerateCode(syntaxTree);

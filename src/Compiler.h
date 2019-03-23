@@ -1,6 +1,7 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
+#include "Config.h"
 #include "Token.h"
 #include <istream>
 #include <vector>
@@ -8,23 +9,6 @@
 class Compiler
 {
 public:
-    struct Config
-    {
-        enum EOutput
-        {
-            eTokens,
-            eSyntaxTree,
-            eIr,
-        };
-
-        EOutput output;
-
-        Config()
-        {
-            output = eIr;
-        }
-    };
-
     Compiler();
 
     Compiler(const Config& config);

@@ -1,9 +1,16 @@
 #include "Compiler.h"
+#include "Config.h"
 
-int main()
+int main(int argc, const char* const argv[])
 {
-    Compiler compiler;
-    compiler.Compile();
+    Config config;
+    bool ok = config.ParseArgs(argc, argv);
 
-    return 0;
+    if (ok)
+    {
+        Compiler compiler(config);
+        compiler.Compile();
+    }
+
+    return ok ? 0 : 1;
 }
