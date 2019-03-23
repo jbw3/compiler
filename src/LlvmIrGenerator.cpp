@@ -18,9 +18,10 @@ using namespace std;
 using namespace SyntaxTree;
 using namespace llvm;
 
-LlvmIrGenerator::LlvmIrGenerator(const string& outFile) :
+LlvmIrGenerator::LlvmIrGenerator(const string& outFile, Config::EAssemblyType assemblyType) :
     builder(context),
     module("module", context),
+    assemblyType(assemblyType),
     resultValue(nullptr)
 {
     if (outFile.empty())
@@ -139,55 +140,76 @@ void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
 
 bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
 {
+    // generate LLVM IR from syntax tree
     syntaxTree->Accept(this);
     if (resultValue == nullptr)
     {
         return false;
     }
 
-    string targetTripple = sys::getDefaultTargetTriple();
-    InitializeAllTargetInfos();
-    InitializeAllTargets();
-    InitializeAllTargetMCs();
-    InitializeAllAsmParsers();
-    InitializeAllAsmPrinters();
-
-    string errorMsg;
-    const Target* target = TargetRegistry::lookupTarget(targetTripple, errorMsg);
-    if (target == nullptr)
+    if (assemblyType == Config::eLlvmIr)
     {
-        cerr << errorMsg;
+        error_code ec;
+        raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
+        if (ec)
+        {
+            cerr << ec.message();
+            return false;
+        }
+
+        // print LLVM IR
+        module.print(outFile, nullptr);
+    }
+    else if (assemblyType == Config::eMachineText || assemblyType == Config::eMachineBinary)
+    {
+        string targetTripple = sys::getDefaultTargetTriple();
+        InitializeAllTargetInfos();
+        InitializeAllTargets();
+        InitializeAllTargetMCs();
+        InitializeAllAsmParsers();
+        InitializeAllAsmPrinters();
+
+        string errorMsg;
+        const Target* target = TargetRegistry::lookupTarget(targetTripple, errorMsg);
+        if (target == nullptr)
+        {
+            cerr << errorMsg;
+            return false;
+        }
+
+        TargetOptions options;
+        auto relocModel = Optional<Reloc::Model>();
+        TargetMachine* targetMachine =
+            target->createTargetMachine(targetTripple, "generic", "", options, relocModel);
+
+        module.setDataLayout(targetMachine->createDataLayout());
+        module.setTargetTriple(targetTripple);
+
+        error_code ec;
+        raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
+        if (ec)
+        {
+            cerr << ec.message();
+            return false;
+        }
+
+        legacy::PassManager passManager;
+        TargetMachine::CodeGenFileType fileType = (assemblyType == Config::eMachineBinary)
+                                                      ? TargetMachine::CGFT_ObjectFile
+                                                      : TargetMachine::CGFT_AssemblyFile;
+        if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
+        {
+            cerr << "Target machine cannot emit a file of this type\n";
+            return false;
+        }
+
+        passManager.run(module);
+    }
+    else
+    {
+        cerr << "Internal error: Unknown assembly type\n";
         return false;
     }
-
-    TargetOptions options;
-    auto relocModel = Optional<Reloc::Model>();
-    TargetMachine* targetMachine =
-        target->createTargetMachine(targetTripple, "generic", "", options, relocModel);
-
-    module.setDataLayout(targetMachine->createDataLayout());
-    module.setTargetTriple(targetTripple);
-
-    error_code ec;
-    raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
-    if (ec)
-    {
-        cerr << ec.message();
-        return false;
-    }
-
-    legacy::PassManager passManager;
-    TargetMachine::CodeGenFileType fileType = TargetMachine::CGFT_ObjectFile;
-    if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
-    {
-        cerr << "Target machine cannot emit a file of this type\n";
-        return false;
-    }
-
-    passManager.run(module);
-
-    // print LLVM IR
-    module.print(outs(), nullptr);
 
     return true;
 }

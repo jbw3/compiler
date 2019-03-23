@@ -1,5 +1,6 @@
 #include "SyntaxTreePrinter.h"
 #include "SyntaxTree.h"
+#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -22,8 +23,17 @@ SyntaxTreePrinter::BracePrinter::~BracePrinter()
     printer.Print(endStr);
 }
 
-SyntaxTreePrinter::SyntaxTreePrinter() : level(0)
+SyntaxTreePrinter::SyntaxTreePrinter(const string& outFilename) : level(0)
 {
+    os = outFilename.empty() ? &cout : new fstream(outFilename, ios_base::out);
+}
+
+SyntaxTreePrinter::~SyntaxTreePrinter()
+{
+    if (os != &cout)
+    {
+        delete os;
+    }
 }
 
 void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpression)
@@ -146,15 +156,15 @@ void SyntaxTreePrinter::Print(const string& str) const
 
     for (char ch : str)
     {
-        cout.put(ch);
+        os->put(ch);
 
         if (ch == '\n')
         {
-            cout << padding;
+            *os << padding;
         }
         else if ((ch == '}' || ch == ']') && level == 0)
         {
-            cout << '\n';
+            *os << '\n';
         }
     }
 }

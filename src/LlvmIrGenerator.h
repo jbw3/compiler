@@ -3,6 +3,7 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+#include "Config.h"
 #include "Scope.h"
 #include "SyntaxTreeVisitor.h"
 #include "llvm/IR/IRBuilder.h"
@@ -17,7 +18,7 @@ class SyntaxTreeNode;
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator(const std::string& outFile);
+    LlvmIrGenerator(const std::string& outFile, Config::EAssemblyType assemblyType);
 
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
@@ -36,6 +37,7 @@ private:
     llvm::IRBuilder<> builder;
     llvm::Module module;
     std::string outFilename;
+    Config::EAssemblyType assemblyType;
     std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
 };

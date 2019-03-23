@@ -4,6 +4,7 @@
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreePrinter.h"
+#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -47,7 +48,7 @@ bool Compiler::Compile()
     // check if syntax tree is the output
     if (ok && config.outputType == Config::eSyntaxTree)
     {
-        SyntaxTreePrinter printer;
+        SyntaxTreePrinter printer(config.outFilename);
         syntaxTree->Accept(&printer);
         delete syntaxTree;
         return ok;
@@ -55,7 +56,7 @@ bool Compiler::Compile()
 
     if (ok && config.outputType == Config::eAssembly)
     {
-        LlvmIrGenerator generator(config.outFilename);
+        LlvmIrGenerator generator(config.outFilename, config.assemblyType);
         ok = generator.GenerateCode(syntaxTree);
     }
 
@@ -63,24 +64,39 @@ bool Compiler::Compile()
     return ok;
 }
 
-void Compiler::PrintTokens(const std::vector<Token>& tokens) const
+void Compiler::PrintTokens(const vector<Token>& tokens) const
 {
+    ostream* os = nullptr;
+    if (config.outFilename.empty())
+    {
+        os = &cout;
+    }
+    else
+    {
+        os = new fstream(config.outFilename, ios_base::out);
+    }
+
     if (tokens.size() > 0)
     {
-        cout << '|';
+        *os << '|';
         for (const Token& token : tokens)
         {
             const string& value = token.GetValue();
             if (value == "\n")
             {
-                cout << "\\n";
+                *os << "\\n";
             }
             else
             {
-                cout << value;
+                *os << value;
             }
-            cout << '|';
+            *os << '|';
         }
-        cout << '\n';
+        *os << '\n';
+    }
+
+    if (os != &cout)
+    {
+        delete os;
     }
 }

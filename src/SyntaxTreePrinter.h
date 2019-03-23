@@ -12,7 +12,9 @@ class VariableDefinition;
 class SyntaxTreePrinter : public SyntaxTreeVisitor
 {
 public:
-    SyntaxTreePrinter();
+    SyntaxTreePrinter(const std::string& outFilename);
+
+    ~SyntaxTreePrinter();
 
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
@@ -38,6 +40,7 @@ private:
         std::string endStr;
     };
 
+    std::ostream* os;
     unsigned int level;
 
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
