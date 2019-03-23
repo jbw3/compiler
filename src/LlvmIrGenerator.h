@@ -17,7 +17,7 @@ class SyntaxTreeNode;
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator();
+    LlvmIrGenerator(const std::string& outFile);
 
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 
@@ -35,6 +35,7 @@ private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::Module module;
+    std::string outFilename;
     std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
 };

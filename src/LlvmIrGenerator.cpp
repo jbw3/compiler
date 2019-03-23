@@ -18,11 +18,19 @@ using namespace std;
 using namespace SyntaxTree;
 using namespace llvm;
 
-LlvmIrGenerator::LlvmIrGenerator() :
+LlvmIrGenerator::LlvmIrGenerator(const string& outFile) :
     builder(context),
     module("module", context),
     resultValue(nullptr)
 {
+    if (outFile.empty())
+    {
+        outFilename = "output.o";
+    }
+    else
+    {
+        outFilename = outFile;
+    }
 }
 
 void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
@@ -160,9 +168,8 @@ bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
     module.setDataLayout(targetMachine->createDataLayout());
     module.setTargetTriple(targetTripple);
 
-    string filename = "output.o";
     error_code ec;
-    raw_fd_ostream outFile(filename, ec, sys::fs::F_None);
+    raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
     if (ec)
     {
         cerr << ec.message();
