@@ -1,5 +1,6 @@
 #include "LexicalAnalyzer.h"
 #include "utils.h"
+#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -10,8 +11,24 @@ LexicalAnalyzer::LexicalAnalyzer() : isValid(false)
 {
 }
 
-bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
+bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
 {
+    istream* is = nullptr;
+    if (inFile.empty() || inFile == "-")
+    {
+        is = &cin;
+    }
+    else
+    {
+        is = new fstream(inFile, ios_base::in);
+        if (is->fail())
+        {
+            delete is;
+            cerr << "Error: Could not open file \"" << inFile << "\"\n";
+            return false;
+        }
+    }
+
     tokens.clear();
     tokens.reserve(256);
 
@@ -19,14 +36,15 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     line = 1;
     column = 1;
 
+    bool ok = true;
     char ch = '\0';
-    is.read(&ch, 1);
-    while (!is.eof())
+    is->read(&ch, 1);
+    while (!is->eof())
     {
-        bool ok = ParseChar(ch, tokens);
+        ok = ParseChar(ch, tokens);
         if (!ok)
         {
-            return false;
+            break;
         }
 
         if (ch == '\n')
@@ -39,17 +57,22 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             ++column;
         }
 
-        is.read(&ch, 1);
+        is->read(&ch, 1);
     }
 
     // check for leftover token
-    if (!tokenStr.empty())
+    if (ok && !tokenStr.empty())
     {
         tokens.push_back(CreateToken());
         tokenStr = "";
     }
 
-    return true;
+    if (is != &cin)
+    {
+        delete is;
+    }
+
+    return ok;
 }
 
 Token LexicalAnalyzer::CreateToken()

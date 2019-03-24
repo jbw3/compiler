@@ -27,7 +27,7 @@ bool Compiler::Compile()
     if (ok)
     {
         LexicalAnalyzer lexicalAnalyzer;
-        ok = lexicalAnalyzer.Process(std::cin, tokens);
+        ok = lexicalAnalyzer.Process(config.inFilename, tokens);
     }
 
     // check tokens are the output

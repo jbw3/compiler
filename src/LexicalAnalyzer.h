@@ -2,7 +2,6 @@
 #define LEXICAL_ANALYZER_H_
 
 #include "Token.h"
-#include <istream>
 #include <unordered_set>
 #include <vector>
 
@@ -11,7 +10,7 @@ class LexicalAnalyzer
 public:
     LexicalAnalyzer();
 
-    bool Process(std::istream& is, std::vector<Token>& tokens);
+    bool Process(const std::string& inFile, std::vector<Token>& tokens);
 
 private:
     static const std::unordered_set<std::string> SYMBOLS;

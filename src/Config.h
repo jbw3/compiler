@@ -22,6 +22,7 @@ public:
 
     EOutputType outputType;
     EAssemblyType assemblyType;
+    std::string inFilename;
     std::string outFilename;
 
     Config();

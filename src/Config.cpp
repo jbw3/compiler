@@ -75,6 +75,18 @@ bool Config::ParseNextArgs(int& idx, int argc, const char* const argv[])
             }
         }
     }
+    else
+    {
+        if (inFilename.empty())
+        {
+            inFilename = arg;
+        }
+        else
+        {
+            cerr << "Error: More than one input file cannot be specified\n";
+            ok = false;
+        }
+    }
 
     return ok;
 }
