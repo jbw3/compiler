@@ -1,4 +1,4 @@
-NAME = comp
+NAME = wip
 
 SRCDIR = .
 DEPDIR = .dep
