@@ -27,10 +27,12 @@ public:
 
     Config();
 
-    bool ParseArgs(int argc, const char* const argv[]);
+    bool ParseArgs(int argc, const char* const argv[], bool& help);
 
 private:
-    bool ParseNextArgs(int& idx, int argc, const char* const argv[]);
+    bool ParseNextArgs(int argc, const char* const argv[], int& idx, bool& help);
+
+    void PrintHelp() const;
 };
 
 #endif // CONFIG_H_

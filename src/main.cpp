@@ -4,9 +4,10 @@
 int main(int argc, const char* const argv[])
 {
     Config config;
-    bool ok = config.ParseArgs(argc, argv);
+    bool help = false;
+    bool ok = config.ParseArgs(argc, argv, help);
 
-    if (ok)
+    if (ok && !help)
     {
         Compiler compiler(config);
         compiler.Compile();

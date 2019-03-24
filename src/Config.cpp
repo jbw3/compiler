@@ -11,13 +11,14 @@ Config::Config()
     outFilename = "";
 }
 
-bool Config::ParseArgs(int argc, const char* const argv[])
+bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
 {
+    help = false;
     bool ok = true;
     for (int idx = 1; idx < argc; ++idx)
     {
-        ok = ParseNextArgs(idx, argc, argv);
-        if (!ok)
+        ok = ParseNextArgs(argc, argv, idx, help);
+        if (!ok || help)
         {
             break;
         }
@@ -26,7 +27,7 @@ bool Config::ParseArgs(int argc, const char* const argv[])
     return ok;
 }
 
-bool Config::ParseNextArgs(int& idx, int argc, const char* const argv[])
+bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& help)
 {
     bool ok = true;
     const char* const arg = argv[idx];
@@ -83,6 +84,11 @@ bool Config::ParseNextArgs(int& idx, int argc, const char* const argv[])
     {
         assemblyType = eLlvmIr;
     }
+    else if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0)
+    {
+        help = true;
+        PrintHelp();
+    }
     else
     {
         if (inFilename.empty())
@@ -97,4 +103,15 @@ bool Config::ParseNextArgs(int& idx, int argc, const char* const argv[])
     }
 
     return ok;
+}
+
+void Config::PrintHelp() const
+{
+    cout << R"(Options:
+  -h, --help             Print help message
+  --llvm                 Output LLVM IR
+  --out-type <value>     Type of output: assembly, tokens, tree
+  -o, --output <file>    Specify name of output file
+  -S                     Output assembly
+)";
 }
