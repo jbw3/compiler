@@ -44,6 +44,37 @@ bool Config::ParseNextArgs(int& idx, int argc, const char* const argv[])
             ++idx;
         }
     }
+    else if (strcmp(arg, "--out-type") == 0)
+    {
+        if (idx + 1 >= argc)
+        {
+            cerr << "Error: Expected an argument after " << arg << "\n";
+            ok = false;
+        }
+        else
+        {
+            const char* const outType = argv[idx + 1];
+            ++idx;
+
+            if (strcmp(outType, "tokens") == 0)
+            {
+                outputType = eTokens;
+            }
+            else if (strcmp(outType, "tree") == 0)
+            {
+                outputType = eSyntaxTree;
+            }
+            else if (strcmp(outType, "assembly") == 0)
+            {
+                outputType = eAssembly;
+            }
+            else
+            {
+                cerr << "Error: Unknown argument :" << outType << "\n";
+                ok = false;
+            }
+        }
+    }
 
     return ok;
 }
