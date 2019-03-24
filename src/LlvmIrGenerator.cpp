@@ -18,19 +18,33 @@ using namespace std;
 using namespace SyntaxTree;
 using namespace llvm;
 
-LlvmIrGenerator::LlvmIrGenerator(const string& outFile, Config::EAssemblyType assemblyType) :
+LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     builder(context),
     module("module", context),
-    assemblyType(assemblyType),
+    assemblyType(config.assemblyType),
     resultValue(nullptr)
 {
-    if (outFile.empty())
+    if (config.outFilename.empty())
     {
-        outFilename = "output.o";
+        size_t idx = config.inFilename.rfind('.');
+        string baseName = config.inFilename.substr(0, idx);
+
+        switch (config.assemblyType)
+        {
+            case Config::eLlvmIr:
+                outFilename = baseName + ".ll";
+                break;
+            case Config::eMachineText:
+                outFilename = baseName + ".s";
+                break;
+            case Config::eMachineBinary:
+                outFilename = baseName + ".o";
+                break;
+        }
     }
     else
     {
-        outFilename = outFile;
+        outFilename = config.outFilename;
     }
 }
 

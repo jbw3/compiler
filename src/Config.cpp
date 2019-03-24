@@ -75,6 +75,14 @@ bool Config::ParseNextArgs(int& idx, int argc, const char* const argv[])
             }
         }
     }
+    else if (strcmp(arg, "-S") == 0)
+    {
+        assemblyType = eMachineText;
+    }
+    else if (strcmp(arg, "--llvm") == 0)
+    {
+        assemblyType = eLlvmIr;
+    }
     else
     {
         if (inFilename.empty())

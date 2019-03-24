@@ -18,7 +18,7 @@ class SyntaxTreeNode;
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator(const std::string& outFile, Config::EAssemblyType assemblyType);
+    LlvmIrGenerator(const Config& config);
 
     void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
 

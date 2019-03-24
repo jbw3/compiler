@@ -56,7 +56,7 @@ bool Compiler::Compile()
 
     if (ok && config.outputType == Config::eAssembly)
     {
-        LlvmIrGenerator generator(config.outFilename, config.assemblyType);
+        LlvmIrGenerator generator(config);
         ok = generator.GenerateCode(syntaxTree);
     }
 
