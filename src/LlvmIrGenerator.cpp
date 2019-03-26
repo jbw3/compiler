@@ -82,8 +82,8 @@ void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
 {
     vector<Type*> parameters(functionDefinition->GetParameters().size(), Type::getInt32Ty(context));
     FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), parameters, false);
-    llvm::Function* func = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
-                                                  functionDefinition->GetName(), &module);
+    Function* func = llvm::Function::Create(funcType, Function::ExternalLinkage,
+                                            functionDefinition->GetName(), &module);
 
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);
@@ -154,8 +154,25 @@ void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
 
 void LlvmIrGenerator::Visit(const FunctionExpression* functionExpression)
 {
-    // TODO: implement this
-    resultValue = nullptr;
+    const string& funcName = functionExpression->GetName();
+    Function* func = module.getFunction(funcName);
+    if (func == nullptr)
+    {
+        resultValue = nullptr;
+        cerr << "Use of undeclared function \"" << funcName << "\"\n";
+        return;
+    }
+
+    // TODO: support functions with arguments
+    if (func->arg_size() > 0)
+    {
+        resultValue = nullptr;
+        cerr << "Cannot call function with arguments\n";
+        return;
+    }
+
+    vector<Value*> args;
+    resultValue = builder.CreateCall(func, args, "call");
 }
 
 bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
