@@ -60,6 +60,21 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& synta
     return ok;
 }
 
+bool SyntaxAnalyzer::SkipNewlines(TokenIterator& iter, TokenIterator endIter)
+{
+    do
+    {
+        ++iter;
+        if (iter == endIter)
+        {
+            cerr << "Did not expect end of file\n";
+            return false;
+        }
+    } while (iter->GetValue() == "\n");
+
+    return true;
+}
+
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
@@ -97,7 +112,17 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    ++iter;
+    // skip newlines
+    ok = SkipNewlines(iter, endIter);
+    if (!ok)
+    {
+        for (auto param : parameters)
+        {
+            delete param;
+        }
+        return nullptr;
+    }
+
     SyntaxTreeNode* code = ProcessExpression(iter, endIter);
     if (code == nullptr)
     {

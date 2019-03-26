@@ -20,6 +20,8 @@ public:
     bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
 
 private:
+    bool SkipNewlines(TokenIterator& iter, TokenIterator endIter);
+
     SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter);
 
