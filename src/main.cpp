@@ -10,7 +10,7 @@ int main(int argc, const char* const argv[])
     if (ok && !help)
     {
         Compiler compiler(config);
-        compiler.Compile();
+        ok = compiler.Compile();
     }
 
     return ok ? 0 : 1;
