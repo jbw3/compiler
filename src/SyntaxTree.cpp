@@ -66,6 +66,24 @@ const string& VariableExpression::GetName() const
     return name;
 }
 
+FunctionExpression::FunctionExpression(const string& name) : name(name)
+{
+}
+
+FunctionExpression::~FunctionExpression()
+{
+}
+
+void FunctionExpression::Accept(SyntaxTreeVisitor* visitor) const
+{
+    visitor->Visit(this);
+}
+
+const string& FunctionExpression::GetName() const
+{
+    return name;
+}
+
 VariableDefinition::VariableDefinition(const string& name) : name(name)
 {
 }

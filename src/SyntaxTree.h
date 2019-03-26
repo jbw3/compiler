@@ -79,6 +79,21 @@ private:
     std::string name;
 };
 
+class FunctionExpression : public Expression
+{
+public:
+    FunctionExpression(const std::string& name);
+
+    virtual ~FunctionExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) const override;
+
+    const std::string& GetName() const;
+
+private:
+    std::string name;
+};
+
 class VariableDefinition
 {
 public:

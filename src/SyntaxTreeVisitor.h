@@ -5,6 +5,7 @@ namespace SyntaxTree
 {
 class BinaryExpression;
 class FunctionDefinition;
+class FunctionExpression;
 class ModuleDefinition;
 class NumericExpression;
 class VariableExpression;
@@ -22,6 +23,8 @@ public:
     virtual void Visit(const SyntaxTree::NumericExpression* numericExpression) = 0;
 
     virtual void Visit(const SyntaxTree::VariableExpression* variableExpression) = 0;
+
+    virtual void Visit(const SyntaxTree::FunctionExpression* functionExpression) = 0;
 };
 
 #endif // SYNTAX_TREE_VISITOR_H_

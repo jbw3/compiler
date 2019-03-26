@@ -30,6 +30,8 @@ public:
 
     void Visit(const SyntaxTree::VariableExpression* variableExpression) override;
 
+    void Visit(const SyntaxTree::FunctionExpression* functionExpression) override;
+
     bool GenerateCode(const SyntaxTree::SyntaxTreeNode* syntaxTree);
 
 private:

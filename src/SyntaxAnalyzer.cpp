@@ -217,15 +217,44 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             }
             else if (isIdentifier(value))
             {
-                VariableExpression* varExpr = new VariableExpression(value);
-                if (expression == nullptr)
+                // check if it's a function call
+                TokenIterator next = iter + 1;
+                if (next != endIter && next->GetValue() == "(")
                 {
-                    expression = varExpr;
+                    // TODO: support function arguments
+                    iter += 2;
+                    if (iter == endIter || iter->GetValue() != ")")
+                    {
+                        cerr << "Expected \")\"\n";
+                        delete expression;
+                        return nullptr;
+                    }
+
+                    FunctionExpression* funcExpr = new FunctionExpression(value);
+                    if (expression == nullptr)
+                    {
+                        expression = funcExpr;
+                    }
+                    else
+                    {
+                        BinaryExpression* binExpr =
+                            new BinaryExpression(binOp, expression, funcExpr);
+                        expression = binExpr;
+                    }
                 }
-                else
+                else // it's a variable
                 {
-                    BinaryExpression* binExpr = new BinaryExpression(binOp, expression, varExpr);
-                    expression = binExpr;
+                    VariableExpression* varExpr = new VariableExpression(value);
+                    if (expression == nullptr)
+                    {
+                        expression = varExpr;
+                    }
+                    else
+                    {
+                        BinaryExpression* binExpr =
+                            new BinaryExpression(binOp, expression, varExpr);
+                        expression = binExpr;
+                    }
                 }
             }
             else

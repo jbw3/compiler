@@ -141,6 +141,15 @@ void SyntaxTreePrinter::Visit(const VariableExpression* variableExpression)
     Print("\"");
 }
 
+void SyntaxTreePrinter::Visit(const FunctionExpression* functionExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"FunctionExpression\",\n\"name\": \"");
+    Print(functionExpression->GetName());
+    Print("\"");
+}
+
 void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)
 {
     BracePrinter printer(*this, "{", "}");

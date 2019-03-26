@@ -152,6 +152,12 @@ void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(const FunctionExpression* functionExpression)
+{
+    // TODO: implement this
+    resultValue = nullptr;
+}
+
 bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
 {
     // generate LLVM IR from syntax tree
