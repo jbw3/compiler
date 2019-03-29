@@ -163,15 +163,25 @@ void LlvmIrGenerator::Visit(const FunctionExpression* functionExpression)
         return;
     }
 
-    // TODO: support functions with arguments
-    if (func->arg_size() > 0)
+    if (functionExpression->GetArguments().size() != func->arg_size())
     {
         resultValue = nullptr;
-        cerr << "Cannot call function with arguments\n";
+        cerr << "Unexpected number of function arguments\n";
         return;
     }
 
     vector<Value*> args;
+    for (Expression* expr : functionExpression->GetArguments())
+    {
+        expr->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+
+        args.push_back(resultValue);
+    }
+
     resultValue = builder.CreateCall(func, args, "call");
 }
 
