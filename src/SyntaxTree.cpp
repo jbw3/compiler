@@ -66,12 +66,18 @@ const string& VariableExpression::GetName() const
     return name;
 }
 
-FunctionExpression::FunctionExpression(const string& name) : name(name)
+FunctionExpression::FunctionExpression(const string& name, const vector<Expression*>& arguments) :
+    name(name),
+    arguments(arguments)
 {
 }
 
 FunctionExpression::~FunctionExpression()
 {
+    for (Expression* arg : arguments)
+    {
+        delete arg;
+    }
 }
 
 void FunctionExpression::Accept(SyntaxTreeVisitor* visitor) const
@@ -82,6 +88,11 @@ void FunctionExpression::Accept(SyntaxTreeVisitor* visitor) const
 const string& FunctionExpression::GetName() const
 {
     return name;
+}
+
+const vector<Expression*>& FunctionExpression::GetArguments() const
+{
+    return arguments;
 }
 
 VariableDefinition::VariableDefinition(const string& name) : name(name)

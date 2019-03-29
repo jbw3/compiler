@@ -82,7 +82,7 @@ private:
 class FunctionExpression : public Expression
 {
 public:
-    FunctionExpression(const std::string& name);
+    FunctionExpression(const std::string& name, const std::vector<Expression*>& arguments);
 
     virtual ~FunctionExpression();
 
@@ -90,8 +90,11 @@ public:
 
     const std::string& GetName() const;
 
+    const std::vector<Expression*>& GetArguments() const;
+
 private:
     std::string name;
+    std::vector<Expression*> arguments;
 };
 
 class VariableDefinition

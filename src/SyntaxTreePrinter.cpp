@@ -147,7 +147,28 @@ void SyntaxTreePrinter::Visit(const FunctionExpression* functionExpression)
 
     Print("\"type\": \"FunctionExpression\",\n\"name\": \"");
     Print(functionExpression->GetName());
-    Print("\"");
+    Print("\",\n");
+
+    // print arguments
+    const vector<Expression*>& arguments = functionExpression->GetArguments();
+    Print("\"arguments\": ");
+    if (arguments.size() == 0)
+    {
+        Print("[]");
+    }
+    else
+    {
+        BracePrinter printer2(*this, "[", "]");
+
+        for (size_t i = 0; i < arguments.size(); ++i)
+        {
+            arguments[i]->Accept(this);
+            if (i < arguments.size() - 1)
+            {
+                Print(",\n");
+            }
+        }
+    }
 }
 
 void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)

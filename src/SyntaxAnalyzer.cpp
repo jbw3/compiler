@@ -123,7 +123,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    SyntaxTreeNode* code = ProcessExpression(iter, endIter);
+    SyntaxTreeNode* code = ProcessExpression(iter, endIter, {"\n"});
     if (code == nullptr)
     {
         for (auto param : parameters)
@@ -186,7 +186,8 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     return true;
 }
 
-Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter)
+Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
+                                              const unordered_set<string>& endTokens)
 {
     Expression* expression = nullptr;
     bool expectNumOrVar = true;
@@ -195,7 +196,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     {
         string value = iter->GetValue();
 
-        if (value == "\n" || value == ";")
+        if (endTokens.find(value) != endTokens.cend())
         {
             break;
         }
@@ -221,16 +222,37 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 TokenIterator next = iter + 1;
                 if (next != endIter && next->GetValue() == "(")
                 {
-                    // TODO: support function arguments
                     iter += 2;
-                    if (iter == endIter || iter->GetValue() != ")")
+                    if (iter == endIter)
                     {
-                        cerr << "Expected \")\"\n";
+                        cerr << "Unexpected end of file\n";
                         delete expression;
                         return nullptr;
                     }
 
-                    FunctionExpression* funcExpr = new FunctionExpression(value);
+                    // process arguments
+                    vector<Expression*> arguments;
+                    while (iter->GetValue() != ")")
+                    {
+                        Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
+                        if (argExpr == nullptr)
+                        {
+                            delete expression;
+                            for (Expression* arg : arguments)
+                            {
+                                delete arg;
+                            }
+                            return nullptr;
+                        }
+                        arguments.push_back(argExpr);
+
+                        if (iter->GetValue() == ",")
+                        {
+                            ++iter;
+                        }
+                    }
+
+                    FunctionExpression* funcExpr = new FunctionExpression(value, arguments);
                     if (expression == nullptr)
                     {
                         expression = funcExpr;

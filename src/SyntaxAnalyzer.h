@@ -4,6 +4,7 @@
 #include "SyntaxTree.h"
 #include "Token.h"
 #include <map>
+#include <unordered_set>
 #include <vector>
 
 class SyntaxAnalyzer
@@ -28,7 +29,8 @@ private:
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            std::vector<SyntaxTree::VariableDefinition*>& parameters);
 
-    SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter);
+    SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
+                                              const std::unordered_set<std::string>& endTokens);
 };
 
 #endif // SYNTAX_ANALYZER_H_
