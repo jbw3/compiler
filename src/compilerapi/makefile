@@ -1,9 +1,9 @@
-NAME = wip
+NAME = libcompilerapi
 
 SRCDIR = .
 DEPDIR = .dep
-OBJDIR = ../obj/$(NAME)
-BINDIR = ../bin
+OBJDIR = ../../obj/$(NAME)
+LIBDIR = ../../lib
 LLVMDIR = ~/opt/llvm/bin
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$<.Td
@@ -11,7 +11,8 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$<.Td
 CXX = clang++
 CXXFLAGS = `$(LLVMDIR)/llvm-config --cxxflags` -std=c++1z -Wall -Wextra $(DEPFLAGS)
 
-LDFLAGS = `$(LLVMDIR)/llvm-config --ldflags --system-libs --libs all`
+LD = ar
+LDFLAGS = -rcs
 
 POSTCOMPILE = @mv -f $(DEPDIR)/$<.Td $(DEPDIR)/$<.d && touch $@
 
@@ -21,7 +22,7 @@ debug: CXXFLAGS += -O0 -g
 SRC = $(notdir $(wildcard $(SRCDIR)/*.cpp))
 OBJ = $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRC))
 
-TARGET = $(BINDIR)/$(NAME)
+TARGET = $(LIBDIR)/$(NAME).a
 
 .PHONY: release
 release: init $(TARGET)
@@ -33,10 +34,10 @@ debug: init $(TARGET)
 init:
 	@mkdir -p $(DEPDIR)
 	@mkdir -p $(OBJDIR)
-	@mkdir -p $(BINDIR)
+	@mkdir -p $(LIBDIR)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(OBJ) -o $(TARGET) $(LDFLAGS)
+	$(LD) $(LDFLAGS) $(TARGET) $(OBJ)
 
 $(OBJDIR)/%.o: %.cpp $(DEPDIR)/%.cpp.d
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -50,7 +51,7 @@ $(DEPDIR)/%.d: ;
 
 .PHONY: clean
 clean:
-	rm -f $(OBJDIR)/*.o $(OBJDIR)/*.gcno $(OBJDIR)/*.gcda $(TARGET) *.gcov $(DEPDIR)/*.d
+	rm -f $(OBJDIR)/*.o $(TARGET) $(DEPDIR)/*.d
 
 # include dependency makefiles
 include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(SRC)))
