@@ -15,20 +15,56 @@ bool LexicalAnalyzerTests::Run()
 
 bool LexicalAnalyzerTests::TestValidInputs()
 {
-    stringstream ss;
-    vector<Token> expectedTokens;
-    vector<Token> actualTokens;
+    vector<pair<string, vector<Token>>> tests =
+    {
+        {
+            "fun test() 1 + 2\n",
+            {
+                {"fun", 1, 1},
+                {"test", 1, 5},
+                {"(", 1, 9},
+                {")", 1, 10},
+                {"1", 1, 12},
+                {"+", 1, 14},
+                {"2", 1, 16},
+                {"\n", 1, 17}
+            }
+        },
+        {
+            "fun a_function(param1, param2) param1 - param2\n",
+            {
+                {"fun", 1, 1},
+                {"a_function", 1, 5},
+                {"(", 1, 15},
+                {"param1", 1, 16},
+                {",", 1, 22},
+                {"param2", 1, 24},
+                {")", 1, 30},
+                {"param1", 1, 32},
+                {"-", 1, 39},
+                {"param2", 1, 41},
+                {"\n", 1, 47}
+            }
+        }
+    };
+
 
     LexicalAnalyzer analyzer;
 
-    ss.str("fun test() 1 + 2\n");
-    expectedTokens = {Token("fun", 1, 1), Token("test", 1, 5), Token("(", 1, 9),
-                      Token(")", 1, 10),  Token("1", 1, 12),   Token("+", 1, 14),
-                      Token("2", 1, 16),  Token("\n", 1, 17)};
-    bool ok = analyzer.Process(ss, actualTokens);
-    if (ok)
+    stringstream ss;
+    vector<Token> actualTokens;
+    bool ok = false;
+    for (pair<string, vector<Token>> test : tests)
     {
-        ok = TokenSequencesAreEqual(expectedTokens, actualTokens);
+        ss.clear();
+        ss.str(test.first);
+        const vector<Token>& expectedTokens = test.second;
+
+        ok = analyzer.Process(ss, actualTokens);
+        if (ok)
+        {
+            ok = TokenSequencesAreEqual(expectedTokens, actualTokens);
+        }
     }
 
     return ok;
