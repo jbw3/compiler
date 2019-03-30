@@ -4,12 +4,13 @@ SRCDIR = .
 DEPDIR = .dep
 OBJDIR = ../../obj/$(NAME)
 LIBDIR = ../../lib
-LLVMDIR = ~/opt/llvm/bin
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$<.Td
 
-CXX = clang++
-CXXFLAGS = `$(LLVMDIR)/llvm-config --cxxflags` -std=c++1z -Wall -Wextra $(DEPFLAGS)
+LLVM_CONFIG=llvm-config-8
+
+CXX = clang++-8
+CXXFLAGS = `$(LLVM_CONFIG) --cxxflags` -std=c++14 -Wall -Wextra $(DEPFLAGS)
 
 LD = ar
 LDFLAGS = -rcs

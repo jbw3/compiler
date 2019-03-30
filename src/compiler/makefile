@@ -6,15 +6,16 @@ DEPDIR = .dep
 OBJDIR = ../../obj/$(NAME)
 LIBDIR = ../../lib
 BINDIR = ../../bin
-LLVMDIR = ~/opt/llvm/bin
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$<.Td
 
-CXX = clang++
-CXXFLAGS = `$(LLVMDIR)/llvm-config --cxxflags` $(INCLUDES) -std=c++1z -Wall -Wextra $(DEPFLAGS)
+LLVM_CONFIG=llvm-config-8
+
+CXX = clang++-8
+CXXFLAGS = `$(LLVM_CONFIG) --cxxflags` $(INCLUDES) -std=c++14 -Wall -Wextra $(DEPFLAGS)
 
 LDLIBS = -L$(LIBDIR) -lcompilerapi
-LDFLAGS = $(LDLIBS) `$(LLVMDIR)/llvm-config --ldflags --system-libs --libs all`
+LDFLAGS = $(LDLIBS) `$(LLVM_CONFIG) --ldflags --system-libs --libs all`
 
 POSTCOMPILE = @mv -f $(DEPDIR)/$<.Td $(DEPDIR)/$<.d && touch $@
 
