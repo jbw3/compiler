@@ -36,7 +36,8 @@ bool LexicalAnalyzerTests::TestValidInputs()
 
 bool LexicalAnalyzerTests::TokensAreEqual(const Token& token1, const Token& token2)
 {
-    return token1.GetValue() == token2.GetValue();
+    return token1.GetValue() == token2.GetValue() && token1.GetLine() == token2.GetLine() &&
+           token1.GetColumn() == token2.GetColumn();
 }
 
 bool LexicalAnalyzerTests::TokenSequencesAreEqual(const std::vector<Token>& sequence1,
