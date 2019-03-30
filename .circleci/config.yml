@@ -1,0 +1,11 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/compiler
+
+    docker:
+      - image: jbw3/compiler:0.1.1
+
+    steps:
+      - checkout
+      - run: make
