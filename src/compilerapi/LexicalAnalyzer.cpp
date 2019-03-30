@@ -29,6 +29,18 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
         }
     }
 
+    bool ok = Process(*is, tokens);
+
+    if (is != &cin)
+    {
+        delete is;
+    }
+
+    return ok;
+}
+
+bool LexicalAnalyzer::Process(std::istream& is, std::vector<Token>& tokens)
+{
     tokens.clear();
     tokens.reserve(256);
 
@@ -38,8 +50,8 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
 
     bool ok = true;
     char ch = '\0';
-    is->read(&ch, 1);
-    while (!is->eof())
+    is.read(&ch, 1);
+    while (!is.eof())
     {
         ok = ParseChar(ch, tokens);
         if (!ok)
@@ -57,7 +69,7 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
             ++column;
         }
 
-        is->read(&ch, 1);
+        is.read(&ch, 1);
     }
 
     // check for leftover token
@@ -65,11 +77,6 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
     {
         tokens.push_back(CreateToken());
         tokenStr = "";
-    }
-
-    if (is != &cin)
-    {
-        delete is;
     }
 
     return ok;

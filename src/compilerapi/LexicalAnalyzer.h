@@ -12,6 +12,8 @@ public:
 
     bool Process(const std::string& inFile, std::vector<Token>& tokens);
 
+    bool Process(std::istream& is, std::vector<Token>& tokens);
+
 private:
     static const std::unordered_set<std::string> SYMBOLS;
 
