@@ -1,21 +1,22 @@
 #ifndef LEXICAL_ANALYZER_TESTS_H_
 #define LEXICAL_ANALYZER_TESTS_H_
 
+#include "TestClass.h"
 #include "Token.h"
 #include <vector>
 
-class LexicalAnalyzerTests
+class LexicalAnalyzerTests : public TestClass
 {
 public:
-    bool Run();
+    LexicalAnalyzerTests();
 
 private:
-    bool TestValidInputs();
+    static bool TestValidInputs();
 
-    bool TokensAreEqual(const Token& token1, const Token& token2);
+    static bool TokensAreEqual(const Token& token1, const Token& token2);
 
-    bool TokenSequencesAreEqual(const std::vector<Token>& sequence1,
-                                const std::vector<Token>& sequence2);
+    static bool TokenSequencesAreEqual(const std::vector<Token>& sequence1,
+                                       const std::vector<Token>& sequence2);
 };
 
 #endif // LEXICAL_ANALYZER_TESTS_H_

@@ -4,13 +4,9 @@
 
 using namespace std;
 
-bool LexicalAnalyzerTests::Run()
+LexicalAnalyzerTests::LexicalAnalyzerTests()
 {
-    bool passed = true;
-
-    passed &= TestValidInputs();
-
-    return passed;
+    AddTest(TestValidInputs);
 }
 
 bool LexicalAnalyzerTests::TestValidInputs()
@@ -47,7 +43,6 @@ bool LexicalAnalyzerTests::TestValidInputs()
             }
         }
     };
-
 
     LexicalAnalyzer analyzer;
 
