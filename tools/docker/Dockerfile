@@ -3,6 +3,7 @@ FROM ubuntu:16.04
 # install dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    git \
     software-properties-common \
     wget
 
