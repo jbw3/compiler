@@ -10,5 +10,3 @@ RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key 2>/dev/null | apt-key a
 # install clang/LLVM
 RUN apt-get update && apt-get install -y \
     clang-8
-
-CMD clang++-8 --version
