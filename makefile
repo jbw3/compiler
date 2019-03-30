@@ -8,6 +8,10 @@ debug:
 	cd src/compiler; make debug
 	cd src/unittests; make debug
 
+.PHONY: test
+test:
+	bin/unittests
+
 .PHONY: clean
 clean:
 	cd src/compiler; make clean
