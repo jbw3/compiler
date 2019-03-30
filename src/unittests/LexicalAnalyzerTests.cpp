@@ -22,7 +22,7 @@ bool LexicalAnalyzerTests::TestValidInputs()
     LexicalAnalyzer analyzer;
 
     ss.str("fun test() 1 + 2\n");
-    expectedTokens = {Token("fun", 2, 1), Token("test", 1, 5), Token("(", 1, 9),
+    expectedTokens = {Token("fun", 1, 1), Token("test", 1, 5), Token("(", 1, 9),
                       Token(")", 1, 10),  Token("1", 1, 12),   Token("+", 1, 14),
                       Token("2", 1, 16),  Token("\n", 1, 17)};
     bool ok = analyzer.Process(ss, actualTokens);
