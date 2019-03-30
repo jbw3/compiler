@@ -36,7 +36,7 @@ SyntaxTreePrinter::~SyntaxTreePrinter()
     }
 }
 
-void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpression)
+void SyntaxTreePrinter::Visit(SyntaxTree::BinaryExpression* binaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
@@ -61,7 +61,7 @@ void SyntaxTreePrinter::Visit(const SyntaxTree::BinaryExpression* binaryExpressi
     binaryExpression->GetRightExpression()->Accept(this);
 }
 
-void SyntaxTreePrinter::Visit(const FunctionDefinition* functionDefinition)
+void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
@@ -95,7 +95,7 @@ void SyntaxTreePrinter::Visit(const FunctionDefinition* functionDefinition)
     functionDefinition->GetCode()->Accept(this);
 }
 
-void SyntaxTreePrinter::Visit(const ModuleDefinition* moduleDefinition)
+void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
@@ -123,7 +123,7 @@ void SyntaxTreePrinter::Visit(const ModuleDefinition* moduleDefinition)
     }
 }
 
-void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
+void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
@@ -132,7 +132,7 @@ void SyntaxTreePrinter::Visit(const NumericExpression* numericExpression)
     Print("\"");
 }
 
-void SyntaxTreePrinter::Visit(const VariableExpression* variableExpression)
+void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
@@ -141,7 +141,7 @@ void SyntaxTreePrinter::Visit(const VariableExpression* variableExpression)
     Print("\"");
 }
 
-void SyntaxTreePrinter::Visit(const FunctionExpression* functionExpression)
+void SyntaxTreePrinter::Visit(FunctionExpression* functionExpression)
 {
     BracePrinter printer(*this, "{", "}");
 

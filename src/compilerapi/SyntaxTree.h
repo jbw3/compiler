@@ -13,7 +13,7 @@ class SyntaxTreeNode
 public:
     virtual ~SyntaxTreeNode() = default;
 
-    virtual void Accept(SyntaxTreeVisitor* visitor) const = 0;
+    virtual void Accept(SyntaxTreeVisitor* visitor) = 0;
 };
 
 class Expression : public SyntaxTreeNode
@@ -29,7 +29,7 @@ public:
 
     virtual ~NumericExpression() = default;
 
-    void Accept(SyntaxTreeVisitor* visitor) const override;
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetNumber() const;
 
@@ -50,13 +50,13 @@ public:
 
     virtual ~BinaryExpression();
 
-    void Accept(SyntaxTreeVisitor* visitor) const override;
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     EOperator GetOperator() const;
 
-    const Expression* GetLeftExpression() const;
+    Expression* GetLeftExpression() const;
 
-    const Expression* GetRightExpression() const;
+    Expression* GetRightExpression() const;
 
 private:
     EOperator op;
@@ -71,7 +71,7 @@ public:
 
     virtual ~VariableExpression() = default;
 
-    void Accept(SyntaxTreeVisitor* visitor) const override;
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetName() const;
 
@@ -86,7 +86,7 @@ public:
 
     virtual ~FunctionExpression();
 
-    void Accept(SyntaxTreeVisitor* visitor) const override;
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetName() const;
 
@@ -118,13 +118,13 @@ public:
 
     virtual ~FunctionDefinition();
 
-    void Accept(SyntaxTreeVisitor* visitor) const override;
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetName() const;
 
     const std::vector<VariableDefinition*>& GetParameters() const;
 
-    const SyntaxTreeNode* GetCode() const;
+    SyntaxTreeNode* GetCode() const;
 
 private:
     std::string name;
@@ -139,7 +139,7 @@ public:
 
     virtual ~ModuleDefinition();
 
-    void Accept(SyntaxTreeVisitor* visitor) const override;
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
 

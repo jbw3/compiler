@@ -14,17 +14,17 @@ class VariableExpression;
 class SyntaxTreeVisitor
 {
 public:
-    virtual void Visit(const SyntaxTree::BinaryExpression* binaryExpression) = 0;
+    virtual void Visit(SyntaxTree::BinaryExpression* binaryExpression) = 0;
 
-    virtual void Visit(const SyntaxTree::FunctionDefinition* functionDefinition) = 0;
+    virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
 
-    virtual void Visit(const SyntaxTree::ModuleDefinition* moduleDefinition) = 0;
+    virtual void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) = 0;
 
-    virtual void Visit(const SyntaxTree::NumericExpression* numericExpression) = 0;
+    virtual void Visit(SyntaxTree::NumericExpression* numericExpression) = 0;
 
-    virtual void Visit(const SyntaxTree::VariableExpression* variableExpression) = 0;
+    virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
 
-    virtual void Visit(const SyntaxTree::FunctionExpression* functionExpression) = 0;
+    virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
 };
 
 #endif // SYNTAX_TREE_VISITOR_H_

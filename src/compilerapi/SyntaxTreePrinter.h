@@ -16,17 +16,17 @@ public:
 
     ~SyntaxTreePrinter();
 
-    void Visit(const SyntaxTree::BinaryExpression* binaryExpression) override;
+    void Visit(SyntaxTree::BinaryExpression* binaryExpression) override;
 
-    void Visit(const SyntaxTree::FunctionDefinition* functionDefinition) override;
+    void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
-    void Visit(const SyntaxTree::ModuleDefinition* moduleDefinition) override;
+    void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
-    void Visit(const SyntaxTree::NumericExpression* numericExpression) override;
+    void Visit(SyntaxTree::NumericExpression* numericExpression) override;
 
-    void Visit(const SyntaxTree::VariableExpression* variableExpression) override;
+    void Visit(SyntaxTree::VariableExpression* variableExpression) override;
 
-    void Visit(const SyntaxTree::FunctionExpression* functionExpression) override;
+    void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
 private:
     class BracePrinter

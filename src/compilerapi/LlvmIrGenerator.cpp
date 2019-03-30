@@ -48,7 +48,7 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     }
 }
 
-void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
+void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 {
     binaryExpression->GetLeftExpression()->Accept(this);
     if (resultValue == nullptr)
@@ -78,7 +78,7 @@ void LlvmIrGenerator::Visit(const BinaryExpression* binaryExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
+void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
     vector<Type*> parameters(functionDefinition->GetParameters().size(), Type::getInt32Ty(context));
     FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), parameters, false);
@@ -117,7 +117,7 @@ void LlvmIrGenerator::Visit(const FunctionDefinition* functionDefinition)
     }
 }
 
-void LlvmIrGenerator::Visit(const ModuleDefinition* moduleDefinition)
+void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
@@ -129,7 +129,7 @@ void LlvmIrGenerator::Visit(const ModuleDefinition* moduleDefinition)
     }
 }
 
-void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
+void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 {
     resultValue = nullptr;
 
@@ -141,7 +141,7 @@ void LlvmIrGenerator::Visit(const NumericExpression* numericExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
+void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 {
     const string& name = variableExpression->GetName();
     resultValue = currentScope->GetVariable(name);
@@ -152,7 +152,7 @@ void LlvmIrGenerator::Visit(const VariableExpression* variableExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(const FunctionExpression* functionExpression)
+void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();
     Function* func = module.getFunction(funcName);
@@ -185,7 +185,7 @@ void LlvmIrGenerator::Visit(const FunctionExpression* functionExpression)
     resultValue = builder.CreateCall(func, args, "call");
 }
 
-bool LlvmIrGenerator::GenerateCode(const SyntaxTreeNode* syntaxTree)
+bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
 {
     // generate LLVM IR from syntax tree
     syntaxTree->Accept(this);

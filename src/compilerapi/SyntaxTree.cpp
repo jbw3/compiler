@@ -9,7 +9,7 @@ NumericExpression::NumericExpression(string number) : number(number)
 {
 }
 
-void NumericExpression::Accept(SyntaxTreeVisitor* visitor) const
+void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
@@ -32,7 +32,7 @@ BinaryExpression::~BinaryExpression()
     delete right;
 }
 
-void BinaryExpression::Accept(SyntaxTreeVisitor* visitor) const
+void BinaryExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
@@ -42,12 +42,12 @@ BinaryExpression::EOperator BinaryExpression::GetOperator() const
     return op;
 }
 
-const Expression* BinaryExpression::GetLeftExpression() const
+Expression* BinaryExpression::GetLeftExpression() const
 {
     return left;
 }
 
-const Expression* BinaryExpression::GetRightExpression() const
+Expression* BinaryExpression::GetRightExpression() const
 {
     return right;
 }
@@ -56,7 +56,7 @@ VariableExpression::VariableExpression(const string& name) : name(name)
 {
 }
 
-void VariableExpression::Accept(SyntaxTreeVisitor* visitor) const
+void VariableExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
@@ -80,7 +80,7 @@ FunctionExpression::~FunctionExpression()
     }
 }
 
-void FunctionExpression::Accept(SyntaxTreeVisitor* visitor) const
+void FunctionExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
@@ -122,7 +122,7 @@ FunctionDefinition::~FunctionDefinition()
     delete code;
 }
 
-void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor) const
+void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
@@ -137,7 +137,7 @@ const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
     return parameters;
 }
 
-const SyntaxTreeNode* FunctionDefinition::GetCode() const
+SyntaxTreeNode* FunctionDefinition::GetCode() const
 {
     return code;
 }
@@ -155,7 +155,7 @@ ModuleDefinition::~ModuleDefinition()
     }
 }
 
-void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor) const
+void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
