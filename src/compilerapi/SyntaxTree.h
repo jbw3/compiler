@@ -22,6 +22,7 @@ public:
     enum EType
     {
         eUnknown,
+        eBool,
         eInt32,
     };
 
@@ -50,6 +51,21 @@ public:
 
 private:
     std::string number;
+};
+
+class BoolLiteralExpression : public Expression
+{
+public:
+    BoolLiteralExpression(const std::string& value);
+
+    virtual ~BoolLiteralExpression() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const std::string& GetValue() const;
+
+private:
+    std::string value;
 };
 
 class BinaryExpression : public Expression

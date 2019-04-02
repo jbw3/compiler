@@ -24,6 +24,8 @@ public:
 
     void Visit(SyntaxTree::NumericExpression* numericExpression) override;
 
+    void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) override;
+
     void Visit(SyntaxTree::VariableExpression* variableExpression) override;
 
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;

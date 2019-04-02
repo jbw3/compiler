@@ -132,6 +132,15 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     Print("\"");
 }
 
+void SyntaxTreePrinter::Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"BoolLiteralExpression\",\n\"value\": \"");
+    Print(boolLiteralExpression->GetValue());
+    Print("\"");
+}
+
 void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
 {
     BracePrinter printer(*this, "{", "}");

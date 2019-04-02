@@ -109,6 +109,11 @@ bool isNumber(const string& tokenStr)
     return false;
 }
 
+bool isBool(const string& tokenStr)
+{
+    return tokenStr == "true" || tokenStr == "false";
+}
+
 bool decStringToInteger(const string& str, int64_t& num)
 {
     num = 0;
@@ -184,4 +189,22 @@ bool stringToInteger(const string& str, int64_t& num)
     }
 
     return ok;
+}
+
+bool stringToBool(const string& str, bool& value)
+{
+    if (str == "true")
+    {
+        value = true;
+        return true;
+    }
+    else if (str == "false")
+    {
+        value = false;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

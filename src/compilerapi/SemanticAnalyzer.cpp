@@ -92,6 +92,11 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     numericExpression->SetType(Expression::eInt32);
 }
 
+void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
+{
+    boolLiteralExpression->SetType(Expression::eBool);
+}
+
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     // TODO: look up type in scope

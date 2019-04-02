@@ -15,6 +15,7 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
 
 const map<string, Expression::EType> SyntaxAnalyzer::TYPES =
 {
+    {"bool", Expression::eBool},
     {"i32", Expression::eInt32},
 };
 
@@ -254,6 +255,19 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     expression = binExpr;
                 }
             }
+            else if (isBool(value))
+            {
+                BoolLiteralExpression* boolExpr = new BoolLiteralExpression(value);
+                if (expression == nullptr)
+                {
+                    expression = boolExpr;
+                }
+                else
+                {
+                    BinaryExpression* binExpr = new BinaryExpression(binOp, expression, boolExpr);
+                    expression = binExpr;
+                }
+            }
             else if (isIdentifier(value))
             {
                 // check if it's a function call
@@ -319,7 +333,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             }
             else
             {
-                cerr << "\"" << value << "\" is not a number\n";
+                cerr << "Unexpected term \"" << value << "\"\n";
                 delete expression;
                 return nullptr;
             }

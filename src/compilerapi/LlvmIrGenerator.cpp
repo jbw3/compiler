@@ -80,8 +80,28 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
+    Type* returnType = nullptr;
+    switch (functionDefinition->GetReturnType())
+    {
+        case Expression::eUnknown:
+            returnType = nullptr;
+            break;
+        case Expression::eBool:
+            returnType = Type::getInt1Ty(context);
+            break;
+        case Expression::eInt32:
+            returnType = Type::getInt32Ty(context);
+            break;
+    }
+
+    if (returnType == nullptr)
+    {
+        cerr << "Internal error: invalid function return type\n";
+        return;
+    }
+
     vector<Type*> parameters(functionDefinition->GetParameters().size(), Type::getInt32Ty(context));
-    FunctionType* funcType = FunctionType::get(Type::getInt32Ty(context), parameters, false);
+    FunctionType* funcType = FunctionType::get(returnType, parameters, false);
     Function* func = llvm::Function::Create(funcType, Function::ExternalLinkage,
                                             functionDefinition->GetName(), &module);
 
@@ -131,13 +151,31 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 {
-    resultValue = nullptr;
-
     int64_t number = 0;
     bool ok = stringToInteger(numericExpression->GetNumber(), number);
     if (ok)
     {
         resultValue = ConstantInt::get(context, APInt(32, number, true));
+    }
+    else
+    {
+        resultValue = nullptr;
+        cerr << "Invalid numeric literal \"" << numericExpression->GetNumber() << "\"\n";
+    }
+}
+
+void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
+{
+    bool value = false;
+    bool ok = stringToBool(boolLiteralExpression->GetValue(), value);
+    if (ok)
+    {
+        resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
+    }
+    else
+    {
+        resultValue = nullptr;
+        cerr << "Invalid boolean literal \"" << boolLiteralExpression->GetValue() << "\"\n";
     }
 }
 

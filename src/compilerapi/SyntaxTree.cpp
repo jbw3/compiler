@@ -34,6 +34,21 @@ const string& NumericExpression::GetNumber() const
     return number;
 }
 
+BoolLiteralExpression::BoolLiteralExpression(const string& value) :
+    value(value)
+{
+}
+
+void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const string& BoolLiteralExpression::GetValue() const
+{
+    return value;
+}
+
 BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right) :
     op(op),
     left(left),
