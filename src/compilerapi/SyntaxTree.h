@@ -19,7 +19,22 @@ public:
 class Expression : public SyntaxTreeNode
 {
 public:
+    enum EType
+    {
+        eUnknown,
+        eInt32,
+    };
+
+    Expression();
+
     virtual ~Expression() = default;
+
+    EType GetType() const;
+
+    void SetType(EType newType);
+
+private:
+    EType type;
 };
 
 class NumericExpression : public Expression

@@ -1,6 +1,7 @@
 #include "Compiler.h"
 #include "LexicalAnalyzer.h"
 #include "LlvmIrGenerator.h"
+#include "SemanticAnalyzer.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreePrinter.h"
@@ -43,6 +44,13 @@ bool Compiler::Compile()
     {
         SyntaxAnalyzer syntaxAnalyzer;
         ok = syntaxAnalyzer.Process(tokens, syntaxTree);
+    }
+
+    // semantic analysis
+    if (ok)
+    {
+        SemanticAnalyzer semanticAnalyzer;
+        ok = semanticAnalyzer.Process(syntaxTree);
     }
 
     // check if syntax tree is the output

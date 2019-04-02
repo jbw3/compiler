@@ -5,6 +5,21 @@ using namespace std;
 
 namespace SyntaxTree
 {
+Expression::Expression() :
+    type(eUnknown)
+{
+}
+
+Expression::EType Expression::GetType() const
+{
+    return type;
+}
+
+void Expression::SetType(EType newType)
+{
+    type = newType;
+}
+
 NumericExpression::NumericExpression(string number) : number(number)
 {
 }
