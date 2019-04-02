@@ -2,6 +2,7 @@
 #define SEMANTIC_ANALYZER_H_
 
 #include "SyntaxTreeVisitor.h"
+#include <map>
 
 namespace SyntaxTree
 {
@@ -29,6 +30,7 @@ public:
 
 private:
     bool isError;
+    std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
 };
 
 #endif // SEMANTIC_ANALYZER_H_

@@ -15,8 +15,9 @@ public:
 
     static const std::string FUNCTION_KEYWORD;
 
-    static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator>
-        BINARY_EXPRESSION_OPERATORS;
+    static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
+
+    static const std::map<std::string, SyntaxTree::Expression::EType> TYPES;
 
     bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
 

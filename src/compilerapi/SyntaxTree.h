@@ -129,7 +129,7 @@ class FunctionDefinition : public SyntaxTreeNode
 {
 public:
     FunctionDefinition(const std::string& name, const std::vector<VariableDefinition*>& parameters,
-                       SyntaxTreeNode* code);
+                       Expression::EType returnType, Expression* code);
 
     virtual ~FunctionDefinition();
 
@@ -139,12 +139,15 @@ public:
 
     const std::vector<VariableDefinition*>& GetParameters() const;
 
-    SyntaxTreeNode* GetCode() const;
+    Expression::EType GetReturnType() const;
+
+    Expression* GetCode() const;
 
 private:
     std::string name;
     std::vector<VariableDefinition*> parameters;
-    SyntaxTreeNode* code;
+    Expression::EType returnType;
+    Expression* code;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

@@ -46,11 +46,36 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
+    Expression* code = functionDefinition->GetCode();
     functionDefinition->GetCode()->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    if (functionDefinition->GetReturnType() != code->GetType())
+    {
+        isError = true;
+        cerr << "Function return expression does not equal return type\n";
+    }
 }
 
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
+    // build a look-up table for all functions
+    functions.clear();
+    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    {
+        auto rv = functions.insert({funcDef->GetName(), funcDef});
+        if (!rv.second)
+        {
+            isError = true;
+            cerr << "Function \"" << funcDef->GetName() << "\" has already been defined\n";
+            return;
+        }
+    }
+
+    // perform semantic analysis on all functions
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
         funcDef->Accept(this);
@@ -75,6 +100,15 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
-    // TODO: look up type in scope
-    functionExpression->SetType(Expression::eInt32);
+    const string& funcName = functionExpression->GetName();
+    auto iter = functions.find(funcName);
+    if (iter == functions.cend())
+    {
+        cerr << "Function \"" << funcName << "\" is not defined\n";
+        isError = true;
+    }
+    else
+    {
+        functionExpression->SetType(iter->second->GetReturnType());
+    }
 }

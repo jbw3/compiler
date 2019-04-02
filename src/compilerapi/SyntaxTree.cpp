@@ -121,9 +121,11 @@ const string& VariableDefinition::GetName() const
 
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
-                                       SyntaxTreeNode* code) :
+                                       Expression::EType returnType,
+                                       Expression* code) :
     name(name),
     parameters(parameters),
+    returnType(returnType),
     code(code)
 {
 }
@@ -152,7 +154,12 @@ const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
     return parameters;
 }
 
-SyntaxTreeNode* FunctionDefinition::GetCode() const
+Expression::EType FunctionDefinition::GetReturnType() const
+{
+    return returnType;
+}
+
+Expression* FunctionDefinition::GetCode() const
 {
     return code;
 }

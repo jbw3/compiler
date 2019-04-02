@@ -7,8 +7,16 @@ using namespace SyntaxTree;
 
 const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
 
-const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS = {
-    {"+", BinaryExpression::eAdd}, {"-", BinaryExpression::eSubtract}};
+const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS =
+{
+    {"+", BinaryExpression::eAdd},
+    {"-", BinaryExpression::eSubtract},
+};
+
+const map<string, Expression::EType> SyntaxAnalyzer::TYPES =
+{
+    {"i32", Expression::eInt32},
+};
 
 bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& syntaxTree)
 {
@@ -112,6 +120,36 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
+    // get return type
+    ++iter;
+    Expression::EType returnType = Expression::eUnknown;
+    if (iter == endIter)
+    {
+        ok = false;
+    }
+    else
+    {
+        auto typeIter = TYPES.find(iter->GetValue());
+        if (typeIter == TYPES.cend())
+        {
+            ok = false;
+        }
+        else
+        {
+            returnType = typeIter->second;
+        }
+    }
+
+    if (!ok)
+    {
+        cerr << "Expected return type\n";
+        for (auto param : parameters)
+        {
+            delete param;
+        }
+        return nullptr;
+    }
+
     // skip newlines
     ok = SkipNewlines(iter, endIter);
     if (!ok)
@@ -123,7 +161,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    SyntaxTreeNode* code = ProcessExpression(iter, endIter, {"\n"});
+    Expression* code = ProcessExpression(iter, endIter, {"\n"});
     if (code == nullptr)
     {
         for (auto param : parameters)
@@ -133,7 +171,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, parameters, code);
+    FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, parameters, returnType, code);
     return functionDefinition;
 }
 
