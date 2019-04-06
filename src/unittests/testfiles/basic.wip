@@ -1,0 +1,8 @@
+fun noArgs() i32
+    42
+
+fun oneArg(x) i32
+    x + 2
+
+fun twoArgs(arg1, arg2) i32
+    arg1 - arg2
