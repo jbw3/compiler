@@ -17,3 +17,18 @@ entry:
   %sub = sub i32 %arg1, %arg2
   ret i32 %sub
 }
+
+define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
+entry:
+  %call = call i32 @twoArgs(i32 0, i32 %x)
+  %add = add i32 %y, 42
+  %sub = sub i32 %z, 57
+  %call1 = call i32 @twoArgs(i32 %add, i32 %sub)
+  %add2 = add i32 %call, %call1
+  ret i32 %add2
+}
+
+define i1 @returnBool() {
+entry:
+  ret i1 true
+}
