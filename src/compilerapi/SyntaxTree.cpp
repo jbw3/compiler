@@ -6,11 +6,11 @@ using namespace std;
 namespace SyntaxTree
 {
 Expression::Expression() :
-    type(eUnknown)
+    type(EType::eUnknown)
 {
 }
 
-Expression::EType Expression::GetType() const
+EType Expression::GetType() const
 {
     return type;
 }
@@ -125,7 +125,9 @@ const vector<Expression*>& FunctionExpression::GetArguments() const
     return arguments;
 }
 
-VariableDefinition::VariableDefinition(const string& name) : name(name)
+VariableDefinition::VariableDefinition(const string& name, EType type) :
+    name(name),
+    type(type)
 {
 }
 
@@ -134,9 +136,14 @@ const string& VariableDefinition::GetName() const
     return name;
 }
 
+EType VariableDefinition::GetType() const
+{
+    return type;
+}
+
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
-                                       Expression::EType returnType,
+                                       EType returnType,
                                        Expression* code) :
     name(name),
     parameters(parameters),
@@ -169,7 +176,7 @@ const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
     return parameters;
 }
 
-Expression::EType FunctionDefinition::GetReturnType() const
+EType FunctionDefinition::GetReturnType() const
 {
     return returnType;
 }

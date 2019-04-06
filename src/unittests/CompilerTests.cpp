@@ -26,6 +26,7 @@ bool CompilerTests::RunTest(const string& baseFilename)
     bool ok = compiler.Compile();
     if (!ok)
     {
+        cerr << "Error: Failed to compile\n";
         return false;
     }
 

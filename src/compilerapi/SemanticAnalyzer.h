@@ -7,6 +7,7 @@
 namespace SyntaxTree
 {
 class SyntaxTreeNode;
+class VariableDefinition;
 }
 
 class SemanticAnalyzer : public SyntaxTreeVisitor
@@ -33,6 +34,7 @@ public:
 private:
     bool isError;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
+    std::map<std::string, SyntaxTree::VariableDefinition*> variables;
 };
 
 #endif // SEMANTIC_ANALYZER_H_

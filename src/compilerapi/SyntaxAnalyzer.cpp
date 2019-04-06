@@ -13,10 +13,10 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"-", BinaryExpression::eSubtract},
 };
 
-const map<string, Expression::EType> SyntaxAnalyzer::TYPES =
+const map<string, EType> SyntaxAnalyzer::TYPES =
 {
-    {"bool", Expression::eBool},
-    {"i32", Expression::eInt32},
+    {"bool", EType::eBool},
+    {"i32", EType::eInt32},
 };
 
 bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& syntaxTree)
@@ -84,6 +84,19 @@ bool SyntaxAnalyzer::SkipNewlines(TokenIterator& iter, TokenIterator endIter)
     return true;
 }
 
+EType SyntaxAnalyzer::GetType(const std::string& typeName)
+{
+    auto typeIter = TYPES.find(typeName);
+    if (typeIter == TYPES.cend())
+    {
+        return EType::eUnknown;
+    }
+    else
+    {
+        return typeIter->second;
+    }
+}
+
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
@@ -123,21 +136,17 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
 
     // get return type
     ++iter;
-    Expression::EType returnType = Expression::eUnknown;
+    EType returnType = EType::eUnknown;
     if (iter == endIter)
     {
         ok = false;
     }
     else
     {
-        auto typeIter = TYPES.find(iter->GetValue());
-        if (typeIter == TYPES.cend())
+        returnType = GetType(iter->GetValue());
+        if (returnType == EType::eUnknown)
         {
             ok = false;
-        }
-        else
-        {
-            returnType = typeIter->second;
         }
     }
 
@@ -179,36 +188,58 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
 bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                                        vector<VariableDefinition*>& parameters)
 {
-    bool expectParam = true;
+    EParameterState state = eName;
     parameters.clear();
 
+    string paramName;
     while (iter != endIter && iter->GetValue() != ")")
     {
         const string& value = iter->GetValue();
-        if (expectParam)
+        if (state == eName)
         {
             if (isIdentifier(value))
             {
-                VariableDefinition* param = new VariableDefinition(value);
-                parameters.push_back(param);
+                paramName = value;
             }
             else
             {
                 cerr << "Invalid parameter name: \"" << value << "\"\n";
                 return false;
             }
+
+            state = eType;
         }
-        else
+        else if (state == eType)
+        {
+            EType paramType = GetType(value);
+            if (paramType == EType::eUnknown)
+            {
+                cerr << "\"" << value << "\" is not a known type\n";
+                return false;
+            }
+
+            VariableDefinition* param = new VariableDefinition(paramName, paramType);
+            parameters.push_back(param);
+
+            state = eDelimiter;
+        }
+        else if (state == eDelimiter)
         {
             if (value != ",")
             {
                 cerr << "Expected \",\" not \"" << value << "\"\n";
                 return false;
             }
+
+            state = eName;
+        }
+        else
+        {
+            cerr << "Internal error: Unknown state: " << state << "\n";
+            return false;
         }
 
         ++iter;
-        expectParam = !expectParam;
     }
 
     if (iter == endIter)
@@ -216,9 +247,14 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         cerr << "Expected \")\"\n";
         return false;
     }
-    else if (expectParam && parameters.size() > 0)
+    else if (state == eName && parameters.size() > 0)
     {
         cerr << "Expected a parameter\n";
+        return false;
+    }
+    else if (state == eType)
+    {
+        cerr << "Expected a parameter type\n";
         return false;
     }
 

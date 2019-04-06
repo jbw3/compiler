@@ -8,6 +8,13 @@ class SyntaxTreeVisitor;
 
 namespace SyntaxTree
 {
+enum class EType
+{
+    eUnknown,
+    eBool,
+    eInt32,
+};
+
 class SyntaxTreeNode
 {
 public:
@@ -19,13 +26,6 @@ public:
 class Expression : public SyntaxTreeNode
 {
 public:
-    enum EType
-    {
-        eUnknown,
-        eBool,
-        eInt32,
-    };
-
     Expression();
 
     virtual ~Expression() = default;
@@ -131,21 +131,24 @@ private:
 class VariableDefinition
 {
 public:
-    VariableDefinition(const std::string& name);
+    VariableDefinition(const std::string& name, EType type);
 
     virtual ~VariableDefinition() = default;
 
     const std::string& GetName() const;
 
+    EType GetType() const;
+
 private:
     std::string name;
+    EType type;
 };
 
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:
     FunctionDefinition(const std::string& name, const std::vector<VariableDefinition*>& parameters,
-                       Expression::EType returnType, Expression* code);
+                       EType returnType, Expression* code);
 
     virtual ~FunctionDefinition();
 
@@ -155,14 +158,14 @@ public:
 
     const std::vector<VariableDefinition*>& GetParameters() const;
 
-    Expression::EType GetReturnType() const;
+    EType GetReturnType() const;
 
     Expression* GetCode() const;
 
 private:
     std::string name;
     std::vector<VariableDefinition*> parameters;
-    Expression::EType returnType;
+    EType returnType;
     Expression* code;
 };
 

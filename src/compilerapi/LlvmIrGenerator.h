@@ -5,15 +5,11 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "Config.h"
 #include "Scope.h"
+#include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #pragma clang diagnostic pop
-
-namespace SyntaxTree
-{
-class SyntaxTreeNode;
-} // namespace SyntaxTree
 
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
@@ -44,6 +40,8 @@ private:
     Config::EAssemblyType assemblyType;
     std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
+
+    llvm::Type* GetType(SyntaxTree::EType type);
 };
 
 #endif // LLVM_IR_GENERATOR_H_

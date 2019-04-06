@@ -78,6 +78,18 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     // perform semantic analysis on all functions
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
+        variables.clear();
+        for (VariableDefinition* varDef : funcDef->GetParameters())
+        {
+            auto rv = variables.insert({varDef->GetName(), varDef});
+            if (!rv.second)
+            {
+                isError = true;
+                cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
+                return;
+            }
+        }
+
         funcDef->Accept(this);
         if (isError)
         {
@@ -89,18 +101,27 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 {
     // TODO: check number's type
-    numericExpression->SetType(Expression::eInt32);
+    numericExpression->SetType(EType::eInt32);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    boolLiteralExpression->SetType(Expression::eBool);
+    boolLiteralExpression->SetType(EType::eBool);
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
-    // TODO: look up type in scope
-    variableExpression->SetType(Expression::eInt32);
+    const string& varName = variableExpression->GetName();
+    auto iter = variables.find(varName);
+    if (iter == variables.cend())
+    {
+        cerr << "Variable \"" << varName << "\" is not defined\n";
+        isError = true;
+    }
+    else
+    {
+        variableExpression->SetType(iter->second->GetType());
+    }
 }
 
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
@@ -111,9 +132,42 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     {
         cerr << "Function \"" << funcName << "\" is not defined\n";
         isError = true;
+        return;
     }
-    else
+
+    const FunctionDefinition* funcDef = iter->second;
+
+    // check argument count
+    const vector<Expression*>& args = functionExpression->GetArguments();
+    const vector<VariableDefinition*>& params = funcDef->GetParameters();
+    if (args.size() != params.size())
     {
-        functionExpression->SetType(iter->second->GetReturnType());
+        cerr << "Function '" << funcName << "' expected " << params.size() << " arguments but got " << args.size() << "\n";
+        isError = true;
+        return;
     }
+
+    // process arguments
+    for (size_t i = 0; i < args.size(); ++i)
+    {
+        // set argument type
+        Expression* arg = args[i];
+        arg->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        // check argument against the parameter type
+        const VariableDefinition* param = params[i];
+        if (arg->GetType() != param->GetType())
+        {
+            cerr << "Argument does not match parameter type\n";
+            isError = true;
+            return;
+        }
+    }
+
+    // set expression's type to the function's return type
+    functionExpression->SetType(funcDef->GetReturnType());
 }

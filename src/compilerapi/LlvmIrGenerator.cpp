@@ -80,27 +80,23 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
-    Type* returnType = nullptr;
-    switch (functionDefinition->GetReturnType())
-    {
-        case Expression::eUnknown:
-            returnType = nullptr;
-            break;
-        case Expression::eBool:
-            returnType = Type::getInt1Ty(context);
-            break;
-        case Expression::eInt32:
-            returnType = Type::getInt32Ty(context);
-            break;
-    }
-
+    // get the return type
+    Type* returnType = GetType(functionDefinition->GetReturnType());
     if (returnType == nullptr)
     {
         cerr << "Internal error: invalid function return type\n";
         return;
     }
 
-    vector<Type*> parameters(functionDefinition->GetParameters().size(), Type::getInt32Ty(context));
+    // get the parameter types
+    vector<Type*> parameters;
+    parameters.reserve(functionDefinition->GetParameters().size());
+    for (const VariableDefinition* varDef : functionDefinition->GetParameters())
+    {
+        Type* varType = GetType(varDef->GetType());
+        parameters.push_back(varType);
+    }
+
     FunctionType* funcType = FunctionType::get(returnType, parameters, false);
     Function* func = llvm::Function::Create(funcType, Function::ExternalLinkage,
                                             functionDefinition->GetName(), &module);
@@ -297,4 +293,23 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
     }
 
     return true;
+}
+
+Type* LlvmIrGenerator::GetType(EType type)
+{
+    Type* llvmType = nullptr;
+    switch (type)
+    {
+        case EType::eUnknown:
+            llvmType = nullptr;
+            break;
+        case EType::eBool:
+            llvmType = Type::getInt1Ty(context);
+            break;
+        case EType::eInt32:
+            llvmType = Type::getInt32Ty(context);
+            break;
+    }
+
+    return llvmType;
 }

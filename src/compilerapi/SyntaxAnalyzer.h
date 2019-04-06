@@ -17,12 +17,21 @@ public:
 
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
 
-    static const std::map<std::string, SyntaxTree::Expression::EType> TYPES;
+    static const std::map<std::string, SyntaxTree::EType> TYPES;
 
     bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
 
 private:
+    enum EParameterState
+    {
+        eName,
+        eType,
+        eDelimiter,
+    };
+
     bool SkipNewlines(TokenIterator& iter, TokenIterator endIter);
+
+    SyntaxTree::EType GetType(const std::string& typeName);
 
     SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter);
