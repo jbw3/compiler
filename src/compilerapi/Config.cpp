@@ -9,6 +9,7 @@ Config::Config()
     outputType = eAssembly;
     assemblyType = eMachineBinary;
     outFilename = "";
+    architecture = "";
 }
 
 bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
@@ -76,6 +77,19 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
+    else if (strcmp(arg, "--arch") == 0)
+    {
+        if (idx + 1 >= argc)
+        {
+            cerr << "Error: Expected an argument after " << arg << "\n";
+            ok = false;
+        }
+        else
+        {
+            ++idx;
+            architecture = argv[idx];
+        }
+    }
     else if (strcmp(arg, "-S") == 0)
     {
         assemblyType = eMachineText;
@@ -109,6 +123,7 @@ void Config::PrintHelp() const
 {
     cout << R"(Options:
   -h, --help             Print help message
+  --arch <value>         Assembly architecture
   --llvm                 Output LLVM IR
   --out-type <value>     Type of output: assembly, tokens, tree
   -o, --output <file>    Specify name of output file

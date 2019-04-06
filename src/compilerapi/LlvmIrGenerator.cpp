@@ -21,6 +21,7 @@ using namespace llvm;
 LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     builder(context),
     module("module", context),
+    architecture(config.architecture),
     assemblyType(config.assemblyType),
     resultValue(nullptr)
 {
@@ -250,7 +251,16 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
     }
     else if (assemblyType == Config::eMachineText || assemblyType == Config::eMachineBinary)
     {
-        string targetTripple = sys::getDefaultTargetTriple();
+        // default target triple to the current machine
+        Triple targetTripple(sys::getDefaultTargetTriple());
+
+        // override the architecture if configured
+        if (!architecture.empty())
+        {
+            Triple::ArchType archType = Triple::getArchTypeForLLVMName(architecture);
+            targetTripple.setArch(archType);
+        }
+
         InitializeAllTargetInfos();
         InitializeAllTargets();
         InitializeAllTargetMCs();
@@ -258,7 +268,7 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
         InitializeAllAsmPrinters();
 
         string errorMsg;
-        const Target* target = TargetRegistry::lookupTarget(targetTripple, errorMsg);
+        const Target* target = TargetRegistry::lookupTarget(targetTripple.str(), errorMsg);
         if (target == nullptr)
         {
             cerr << errorMsg;
@@ -268,10 +278,10 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
         TargetOptions options;
         auto relocModel = Optional<Reloc::Model>();
         TargetMachine* targetMachine =
-            target->createTargetMachine(targetTripple, "generic", "", options, relocModel);
+            target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel);
 
         module.setDataLayout(targetMachine->createDataLayout());
-        module.setTargetTriple(targetTripple);
+        module.setTargetTriple(targetTripple.str());
 
         error_code ec;
         raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);

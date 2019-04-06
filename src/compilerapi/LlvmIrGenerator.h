@@ -37,6 +37,7 @@ private:
     llvm::IRBuilder<> builder;
     llvm::Module module;
     std::string outFilename;
+    std::string architecture;
     Config::EAssemblyType assemblyType;
     std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
