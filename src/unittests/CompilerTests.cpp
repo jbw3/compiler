@@ -50,5 +50,11 @@ bool CompilerTests::RunTest(const string& baseFilename)
         ++lineNum;
     }
 
+    if (expectedFile.eof() != outFile.eof())
+    {
+        cerr << "Error: Unexpected number of lines\n";
+        return false;
+    }
+
     return true;
 }
