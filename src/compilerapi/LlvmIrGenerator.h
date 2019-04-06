@@ -42,6 +42,8 @@ private:
     llvm::Value* resultValue;
 
     llvm::Type* GetType(SyntaxTree::EType type);
+
+    bool CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef);
 };
 
 #endif // LLVM_IR_GENERATOR_H_

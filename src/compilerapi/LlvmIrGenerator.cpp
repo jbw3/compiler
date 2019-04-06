@@ -80,26 +80,21 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
-    // get the return type
-    Type* returnType = GetType(functionDefinition->GetReturnType());
-    if (returnType == nullptr)
+    const string& funcName = functionDefinition->GetName();
+    Function* func = module.getFunction(funcName);
+    if (func == nullptr)
     {
-        cerr << "Internal error: invalid function return type\n";
+        cerr << "Internal error: Function '" << funcName << "' was not declared\n";
+        resultValue = nullptr;
         return;
     }
 
-    // get the parameter types
-    vector<Type*> parameters;
-    parameters.reserve(functionDefinition->GetParameters().size());
-    for (const VariableDefinition* varDef : functionDefinition->GetParameters())
+    if (!func->empty())
     {
-        Type* varType = GetType(varDef->GetType());
-        parameters.push_back(varType);
+        cerr << "Cannot redefine function: '" << funcName << "'\n";
+        resultValue = nullptr;
+        return;
     }
-
-    FunctionType* funcType = FunctionType::get(returnType, parameters, false);
-    Function* func = llvm::Function::Create(funcType, Function::ExternalLinkage,
-                                            functionDefinition->GetName(), &module);
 
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);
@@ -135,12 +130,24 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
+    // create function declarations
+    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    {
+        bool ok = CreateFunctionDeclaration(funcDef);
+        if (!ok)
+        {
+            resultValue = nullptr;
+            return;
+        }
+    }
+
+    // generate code for functions
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
         funcDef->Accept(this);
         if (resultValue == nullptr)
         {
-            break;
+            return;
         }
     }
 }
@@ -312,4 +319,29 @@ Type* LlvmIrGenerator::GetType(EType type)
     }
 
     return llvmType;
+}
+
+bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef)
+{
+    // get the return type
+    Type* returnType = GetType(funcDef->GetReturnType());
+    if (returnType == nullptr)
+    {
+        cerr << "Internal error: invalid function return type\n";
+        return false;
+    }
+
+    // get the parameter types
+    vector<Type*> parameters;
+    parameters.reserve(funcDef->GetParameters().size());
+    for (const VariableDefinition* varDef : funcDef->GetParameters())
+    {
+        Type* varType = GetType(varDef->GetType());
+        parameters.push_back(varType);
+    }
+
+    FunctionType* funcType = FunctionType::get(returnType, parameters, false);
+    llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), &module);
+
+    return true;
 }

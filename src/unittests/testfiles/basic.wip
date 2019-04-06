@@ -10,5 +10,8 @@ fun twoArgs(arg1 i32, arg2 i32) i32
 fun nestedCall(x i32, y i32, z i32) i32
     twoArgs(0, x) + twoArgs(y + 42, z - 57)
 
+fun call_function_defined_later() bool
+    returnBool()
+
 fun returnBool() bool
     true

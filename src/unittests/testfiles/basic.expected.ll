@@ -28,6 +28,12 @@ entry:
   ret i32 %add2
 }
 
+define i1 @call_function_defined_later() {
+entry:
+  %call = call i1 @returnBool()
+  ret i1 %call
+}
+
 define i1 @returnBool() {
 entry:
   ret i1 true
