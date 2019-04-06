@@ -1,14 +1,9 @@
 #ifndef SEMANTIC_ANALYZER_H_
 #define SEMANTIC_ANALYZER_H_
 
+#include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include <map>
-
-namespace SyntaxTree
-{
-class SyntaxTreeNode;
-class VariableDefinition;
-}
 
 class SemanticAnalyzer : public SyntaxTreeVisitor
 {
@@ -35,6 +30,8 @@ private:
     bool isError;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
     std::map<std::string, SyntaxTree::VariableDefinition*> variables;
+
+    bool CheckBinaryOperatorType(SyntaxTree::BinaryExpression::EOperator op, SyntaxTree::EType type);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

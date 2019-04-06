@@ -37,10 +37,27 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     {
         cerr << "Left and right operands do not have the same type\n";
         isError = true;
+        return;
     }
-    else
+
+    if (!CheckBinaryOperatorType(binaryExpression->GetOperator(), left->GetType()))
     {
-        binaryExpression->SetType(left->GetType());
+        cerr << "Binary operator does not support type\n";
+        isError = true;
+        return;
+    }
+
+    binaryExpression->SetType(left->GetType());
+}
+
+bool SemanticAnalyzer::CheckBinaryOperatorType(BinaryExpression::EOperator op, EType type)
+{
+    switch (op)
+    {
+        case BinaryExpression::eAdd:
+            return type == EType::eInt32;
+        case BinaryExpression::eSubtract:
+            return type == EType::eInt32;
     }
 }
 
