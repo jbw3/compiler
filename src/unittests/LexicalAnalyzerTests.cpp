@@ -14,32 +14,36 @@ bool LexicalAnalyzerTests::TestValidInputs()
     vector<pair<string, vector<Token>>> tests =
     {
         {
-            "fun test() 1 + 2\n",
+            "fun test() i32 1 + 2\n",
             {
                 {"fun", 1, 1},
                 {"test", 1, 5},
                 {"(", 1, 9},
                 {")", 1, 10},
-                {"1", 1, 12},
-                {"+", 1, 14},
-                {"2", 1, 16},
-                {"\n", 1, 17}
+                {"i32", 1, 12},
+                {"1", 1, 16},
+                {"+", 1, 18},
+                {"2", 1, 20},
+                {"\n", 1, 21}
             }
         },
         {
-            "fun a_function(param1, param2) param1 - param2\n",
+            "fun a_function(param1 i32, param2 i32) i32 param1 - param2\n",
             {
                 {"fun", 1, 1},
                 {"a_function", 1, 5},
                 {"(", 1, 15},
                 {"param1", 1, 16},
-                {",", 1, 22},
-                {"param2", 1, 24},
-                {")", 1, 30},
-                {"param1", 1, 32},
-                {"-", 1, 39},
-                {"param2", 1, 41},
-                {"\n", 1, 47}
+                {"i32", 1, 23},
+                {",", 1, 26},
+                {"param2", 1, 28},
+                {"i32", 1, 35},
+                {")", 1, 38},
+                {"i32", 1, 40},
+                {"param1", 1, 44},
+                {"-", 1, 51},
+                {"param2", 1, 53},
+                {"\n", 1, 59}
             }
         }
     };
