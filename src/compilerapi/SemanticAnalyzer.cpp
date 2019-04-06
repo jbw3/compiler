@@ -58,6 +58,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorType(BinaryExpression::EOperator op, E
             return type == EType::eInt32;
         case BinaryExpression::eSubtract:
             return type == EType::eInt32;
+        case BinaryExpression::eMultiply:
+            return type == EType::eInt32;
     }
 }
 

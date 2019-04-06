@@ -11,6 +11,7 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
 {
     {"+", BinaryExpression::eAdd},
     {"-", BinaryExpression::eSubtract},
+    {"*", BinaryExpression::eMultiply},
 };
 
 const map<string, EType> SyntaxAnalyzer::TYPES =

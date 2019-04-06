@@ -73,8 +73,8 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eSubtract:
             resultValue = builder.CreateSub(leftValue, rightValue, "sub");
             break;
-        default:
-            resultValue = nullptr;
+        case BinaryExpression::eMultiply:
+            resultValue = builder.CreateMul(leftValue, rightValue, "mul");
             break;
     }
 }

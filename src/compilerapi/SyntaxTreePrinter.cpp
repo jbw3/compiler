@@ -50,6 +50,9 @@ void SyntaxTreePrinter::Visit(SyntaxTree::BinaryExpression* binaryExpression)
         case BinaryExpression::eSubtract:
             Print("-");
             break;
+        case BinaryExpression::eMultiply:
+            Print("*");
+            break;
     }
 
     Print("\",\n\"left\":\n");
