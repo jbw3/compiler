@@ -60,6 +60,10 @@ bool SemanticAnalyzer::CheckBinaryOperatorType(BinaryExpression::EOperator op, E
             return type == EType::eInt32;
         case BinaryExpression::eMultiply:
             return type == EType::eInt32;
+        case BinaryExpression::eDivide:
+            return type == EType::eInt32;
+        case BinaryExpression::eModulo:
+            return type == EType::eInt32;
     }
 }
 

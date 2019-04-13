@@ -53,6 +53,12 @@ void SyntaxTreePrinter::Visit(SyntaxTree::BinaryExpression* binaryExpression)
         case BinaryExpression::eMultiply:
             Print("*");
             break;
+        case BinaryExpression::eDivide:
+            Print("/");
+            break;
+        case BinaryExpression::eModulo:
+            Print("%");
+            break;
     }
 
     Print("\",\n\"left\":\n");

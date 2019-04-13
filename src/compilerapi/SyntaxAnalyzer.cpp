@@ -12,6 +12,8 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"+", BinaryExpression::eAdd},
     {"-", BinaryExpression::eSubtract},
     {"*", BinaryExpression::eMultiply},
+    {"/", BinaryExpression::eDivide},
+    {"%", BinaryExpression::eModulo},
 };
 
 const map<string, EType> SyntaxAnalyzer::TYPES =
@@ -363,7 +365,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    ProcessExpressionOperators(terms, operators, {BinaryExpression::eMultiply});
+    ProcessExpressionOperators(terms, operators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eModulo});
     ProcessExpressionOperators(terms, operators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
 
     return terms.front();

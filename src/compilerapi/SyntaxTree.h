@@ -77,6 +77,8 @@ public:
         eAdd,
         eSubtract,
         eMultiply,
+        eDivide,
+        eModulo,
     };
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);

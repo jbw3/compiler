@@ -18,12 +18,23 @@ entry:
   ret i32 %sub
 }
 
-define i32 @opOrder(i32 %a, i32 %b, i32 %c, i32 %d) {
+define i32 @opOrder1(i32 %a, i32 %b, i32 %c, i32 %d) {
 entry:
   %mul = mul i32 %b, %c
   %add = add i32 %a, %mul
   %sub = sub i32 %add, %d
   ret i32 %sub
+}
+
+define i32 @opOrder2(i32 %a, i32 %b, i32 %c, i32 %d) {
+entry:
+  %mul = mul i32 %b, %c
+  %add = add i32 %a, %mul
+  %div = sdiv i32 %d, %a
+  %sub = sub i32 %add, %div
+  %mod = srem i32 %b, 42
+  %add1 = add i32 %sub, %mod
+  ret i32 %add1
 }
 
 define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {

@@ -76,6 +76,12 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eMultiply:
             resultValue = builder.CreateMul(leftValue, rightValue, "mul");
             break;
+        case BinaryExpression::eDivide:
+            resultValue = builder.CreateSDiv(leftValue, rightValue, "div");
+            break;
+        case BinaryExpression::eModulo:
+            resultValue = builder.CreateSRem(leftValue, rightValue, "mod");
+            break;
     }
 }
 
