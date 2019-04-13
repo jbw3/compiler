@@ -33,37 +33,65 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         return;
     }
 
-    if (left->GetType() != right->GetType())
+    if (!CheckBinaryOperatorTypes(binaryExpression->GetOperator(), left->GetType(), right->GetType()))
     {
-        cerr << "Left and right operands do not have the same type\n";
         isError = true;
         return;
     }
 
-    if (!CheckBinaryOperatorType(binaryExpression->GetOperator(), left->GetType()))
-    {
-        cerr << "Binary operator does not support type\n";
-        isError = true;
-        return;
-    }
-
-    binaryExpression->SetType(left->GetType());
+    EType resultType = GetBinaryOperatorResultType(binaryExpression->GetOperator(), left->GetType(), right->GetType());
+    binaryExpression->SetType(resultType);
 }
 
-bool SemanticAnalyzer::CheckBinaryOperatorType(BinaryExpression::EOperator op, EType type)
+bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, EType leftType, EType rightType)
+{
+    bool ok = false;
+
+    if (leftType != rightType)
+    {
+        cerr << "Left and right operands do not have the same type\n";
+        ok = false;
+    }
+    else
+    {
+        switch (op)
+        {
+            case BinaryExpression::eAdd:
+                ok = leftType == EType::eInt32;
+                break;
+            case BinaryExpression::eSubtract:
+                ok = leftType == EType::eInt32;
+                break;
+            case BinaryExpression::eMultiply:
+                ok = leftType == EType::eInt32;
+                break;
+            case BinaryExpression::eDivide:
+                ok = leftType == EType::eInt32;
+                break;
+            case BinaryExpression::eModulo:
+                ok = leftType == EType::eInt32;
+                break;
+        }
+
+        if (!ok)
+        {
+            cerr << "Binary operator does not support type\n";
+        }
+    }
+
+    return ok;
+}
+
+EType SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator op, EType leftType, EType /*rightType*/)
 {
     switch (op)
     {
         case BinaryExpression::eAdd:
-            return type == EType::eInt32;
         case BinaryExpression::eSubtract:
-            return type == EType::eInt32;
         case BinaryExpression::eMultiply:
-            return type == EType::eInt32;
         case BinaryExpression::eDivide:
-            return type == EType::eInt32;
         case BinaryExpression::eModulo:
-            return type == EType::eInt32;
+            return leftType;
     }
 }
 
