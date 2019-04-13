@@ -44,6 +44,12 @@ void SyntaxTreePrinter::Visit(SyntaxTree::BinaryExpression* binaryExpression)
 
     switch (binaryExpression->GetOperator())
     {
+        case BinaryExpression::eEqual:
+            Print("==");
+            break;
+        case BinaryExpression::eNotEqual:
+            Print("!=");
+            break;
         case BinaryExpression::eAdd:
             Print("+");
             break;

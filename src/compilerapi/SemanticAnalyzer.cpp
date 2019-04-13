@@ -56,18 +56,14 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     {
         switch (op)
         {
+            case BinaryExpression::eEqual:
+            case BinaryExpression::eNotEqual:
+                ok = leftType == rightType;
+                break;
             case BinaryExpression::eAdd:
-                ok = leftType == EType::eInt32;
-                break;
             case BinaryExpression::eSubtract:
-                ok = leftType == EType::eInt32;
-                break;
             case BinaryExpression::eMultiply:
-                ok = leftType == EType::eInt32;
-                break;
             case BinaryExpression::eDivide:
-                ok = leftType == EType::eInt32;
-                break;
             case BinaryExpression::eModulo:
                 ok = leftType == EType::eInt32;
                 break;
@@ -86,6 +82,9 @@ EType SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator 
 {
     switch (op)
     {
+        case BinaryExpression::eEqual:
+        case BinaryExpression::eNotEqual:
+            return EType::eBool;
         case BinaryExpression::eAdd:
         case BinaryExpression::eSubtract:
         case BinaryExpression::eMultiply:

@@ -67,6 +67,12 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
     switch (binaryExpression->GetOperator())
     {
+        case BinaryExpression::eEqual:
+            resultValue = builder.CreateICmpEQ(leftValue, rightValue, "cmpeq");
+            break;
+        case BinaryExpression::eNotEqual:
+            resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
+            break;
         case BinaryExpression::eAdd:
             resultValue = builder.CreateAdd(leftValue, rightValue, "add");
             break;

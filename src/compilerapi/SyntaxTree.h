@@ -74,6 +74,8 @@ class BinaryExpression : public Expression
 public:
     enum EOperator
     {
+        eEqual,
+        eNotEqual,
         eAdd,
         eSubtract,
         eMultiply,

@@ -9,6 +9,8 @@ const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
 
 const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS =
 {
+    {"==", BinaryExpression::eEqual},
+    {"!=", BinaryExpression::eNotEqual},
     {"+", BinaryExpression::eAdd},
     {"-", BinaryExpression::eSubtract},
     {"*", BinaryExpression::eMultiply},
@@ -367,6 +369,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     ProcessExpressionOperators(terms, operators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eModulo});
     ProcessExpressionOperators(terms, operators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
+    ProcessExpressionOperators(terms, operators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual});
 
     return terms.front();
 }
