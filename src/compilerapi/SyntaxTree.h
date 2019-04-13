@@ -101,6 +101,29 @@ private:
     Expression* right;
 };
 
+class UnaryExpression : public Expression
+{
+public:
+    enum EOperator
+    {
+        eNegative,
+    };
+
+    UnaryExpression(EOperator op, Expression* subExpr);
+
+    virtual ~UnaryExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    EOperator GetOperator() const;
+
+    Expression* GetSubExpression() const;
+
+private:
+    EOperator op;
+    Expression* subExpression;
+};
+
 class VariableExpression : public Expression
 {
 public:

@@ -45,6 +45,19 @@ entry:
   ret i1 %cmpeq
 }
 
+define i32 @negatives(i32 %a, i32 %b, i32 %c) {
+entry:
+  %neg = sub i32 0, %a
+  %neg1 = sub i32 0, %b
+  %neg2 = sub i32 0, %c
+  %add = add i32 2, %neg2
+  %call = call i32 @oneArg(i32 %add)
+  %neg3 = sub i32 0, %call
+  %mul = mul i32 %neg1, %neg3
+  %sub = sub i32 %neg, %mul
+  ret i32 %sub
+}
+
 define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
 entry:
   %call = call i32 @twoArgs(i32 0, i32 %x)

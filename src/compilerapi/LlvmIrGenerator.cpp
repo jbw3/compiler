@@ -49,6 +49,23 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     }
 }
 
+void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
+{
+    unaryExpression->GetSubExpression()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* subExprValue = resultValue;
+
+    switch (unaryExpression->GetOperator())
+    {
+        case UnaryExpression::eNegative:
+            resultValue = builder.CreateNeg(subExprValue, "neg");
+            break;
+    }
+}
+
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 {
     binaryExpression->GetLeftExpression()->Accept(this);

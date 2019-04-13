@@ -7,6 +7,11 @@ using namespace SyntaxTree;
 
 const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
 
+const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_OPERATORS =
+{
+    {"-", UnaryExpression::eNegative},
+};
+
 const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS =
 {
     {"==", BinaryExpression::eEqual},
@@ -266,12 +271,25 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     return true;
 }
 
+Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<UnaryExpression::EOperator>& unaryOperators)
+{
+    Expression* result = baseExpr;
+    while (!unaryOperators.empty())
+    {
+        result = new UnaryExpression(unaryOperators.top(), result);
+        unaryOperators.pop();
+    }
+
+    return result;
+}
+
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const unordered_set<string>& endTokens)
 {
-    bool expectNumOrVar = true;
+    bool expectTerm = true;
     vector<Expression*> terms;
-    vector<BinaryExpression::EOperator> operators;
+    stack<UnaryExpression::EOperator> unaryOperators;
+    vector<BinaryExpression::EOperator> binOperators;
 
     while (iter != endIter)
     {
@@ -282,65 +300,76 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             break;
         }
 
-        if (expectNumOrVar)
+        if (expectTerm)
         {
-            if (isNumber(value))
+            auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
+            if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
             {
-                NumericExpression* numExpr = new NumericExpression(value);
-                terms.push_back(numExpr);
-            }
-            else if (isBool(value))
-            {
-                BoolLiteralExpression* boolExpr = new BoolLiteralExpression(value);
-                terms.push_back(boolExpr);
-            }
-            else if (isIdentifier(value))
-            {
-                // check if it's a function call
-                TokenIterator next = iter + 1;
-                if (next != endIter && next->GetValue() == "(")
-                {
-                    iter += 2;
-                    if (iter == endIter)
-                    {
-                        cerr << "Unexpected end of file\n";
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    // process arguments
-                    vector<Expression*> arguments;
-                    while (iter->GetValue() != ")")
-                    {
-                        Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
-                        if (argExpr == nullptr)
-                        {
-                            deletePointerContainer(terms);
-                            deletePointerContainer(arguments);
-                            return nullptr;
-                        }
-                        arguments.push_back(argExpr);
-
-                        if (iter->GetValue() == ",")
-                        {
-                            ++iter;
-                        }
-                    }
-
-                    FunctionExpression* funcExpr = new FunctionExpression(value, arguments);
-                    terms.push_back(funcExpr);
-                }
-                else // it's a variable
-                {
-                    VariableExpression* varExpr = new VariableExpression(value);
-                    terms.push_back(varExpr);
-                }
+                unaryOperators.push(unaryOpIter->second);
+                expectTerm = true;
             }
             else
             {
-                cerr << "Unexpected term \"" << value << "\"\n";
-                deletePointerContainer(terms);
-                return nullptr;
+                if (isNumber(value))
+                {
+                    Expression* expr = AddUnaryExpressions(new NumericExpression(value), unaryOperators);
+                    terms.push_back(expr);
+                }
+                else if (isBool(value))
+                {
+                    Expression* expr = AddUnaryExpressions(new BoolLiteralExpression(value), unaryOperators);
+                    terms.push_back(expr);
+                }
+                else if (isIdentifier(value))
+                {
+                    // check if it's a function call
+                    TokenIterator next = iter + 1;
+                    if (next != endIter && next->GetValue() == "(")
+                    {
+                        iter += 2;
+                        if (iter == endIter)
+                        {
+                            cerr << "Unexpected end of file\n";
+                            deletePointerContainer(terms);
+                            return nullptr;
+                        }
+
+                        // process arguments
+                        vector<Expression*> arguments;
+                        while (iter->GetValue() != ")")
+                        {
+                            Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
+                            if (argExpr == nullptr)
+                            {
+                                deletePointerContainer(terms);
+                                deletePointerContainer(arguments);
+                                return nullptr;
+                            }
+                            arguments.push_back(argExpr);
+
+                            if (iter->GetValue() == ",")
+                            {
+                                ++iter;
+                            }
+                        }
+
+                        Expression* expr = AddUnaryExpressions(new FunctionExpression(value, arguments), unaryOperators);
+                        terms.push_back(expr);
+                    }
+                    else // it's a variable
+                    {
+                        Expression* expr = AddUnaryExpressions(new VariableExpression(value), unaryOperators);
+                        terms.push_back(expr);
+                    }
+                }
+                else
+                {
+                    cerr << "Unexpected term \"" << value << "\"\n";
+                    deletePointerContainer(terms);
+                    return nullptr;
+                }
+
+                expectTerm = false;
             }
         }
         else
@@ -353,23 +382,23 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 return nullptr;
             }
 
-            operators.push_back(opIter->second);
+            binOperators.push_back(opIter->second);
+            expectTerm = true;
         }
 
-        expectNumOrVar = !expectNumOrVar;
         ++iter;
     }
 
-    if (expectNumOrVar)
+    if (expectTerm)
     {
         cerr << "Expected another number\n";
         deletePointerContainer(terms);
         return nullptr;
     }
 
-    ProcessExpressionOperators(terms, operators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eModulo});
-    ProcessExpressionOperators(terms, operators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
-    ProcessExpressionOperators(terms, operators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eModulo});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual});
 
     return terms.front();
 }

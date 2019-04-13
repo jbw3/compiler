@@ -16,6 +16,9 @@ fun opOrder2(a i32, b i32, c i32, d i32) i32
 fun opOrder3(a i32, b i32, c i32, d i32) bool
     a == b + c * d
 
+fun negatives(a i32, b i32, c i32) i32
+    -a - -b * -oneArg(2 + -c)
+
 fun nestedCall(x i32, y i32, z i32) i32
     twoArgs(0, x) + twoArgs(y + 42, z - 57)
 

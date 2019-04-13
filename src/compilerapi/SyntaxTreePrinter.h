@@ -16,6 +16,8 @@ public:
 
     ~SyntaxTreePrinter();
 
+    void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
+
     void Visit(SyntaxTree::BinaryExpression* binaryExpression) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;

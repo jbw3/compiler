@@ -82,6 +82,32 @@ Expression* BinaryExpression::GetRightExpression() const
     return right;
 }
 
+UnaryExpression::UnaryExpression(EOperator op, Expression* subExpr) :
+    op(op),
+    subExpression(subExpr)
+{
+}
+
+UnaryExpression::~UnaryExpression()
+{
+    delete subExpression;
+}
+
+void UnaryExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+UnaryExpression::EOperator UnaryExpression::GetOperator() const
+{
+    return op;
+}
+
+Expression* UnaryExpression::GetSubExpression() const
+{
+    return subExpression;
+}
+
 VariableExpression::VariableExpression(const string& name) : name(name)
 {
 }

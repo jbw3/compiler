@@ -16,6 +16,43 @@ bool SemanticAnalyzer::Process(SyntaxTreeNode* syntaxTree)
     return !isError;
 }
 
+void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
+{
+    Expression* subExpr = unaryExpression->GetSubExpression();
+    subExpr->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    if (!CheckUnaryOperatorType(unaryExpression->GetOperator(), subExpr->GetType()))
+    {
+        isError = true;
+        return;
+    }
+
+    unaryExpression->SetType(subExpr->GetType());
+}
+
+bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, EType subExprType)
+{
+    bool ok = false;
+
+    switch (op)
+    {
+        case UnaryExpression::eNegative:
+            ok = subExprType == EType::eInt32;
+            break;
+    }
+
+    if (!ok)
+    {
+        cerr << "Unary operator does not support type\n";
+    }
+
+    return ok;
+}
+
 void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 {
     Expression* left = binaryExpression->GetLeftExpression();

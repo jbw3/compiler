@@ -4,6 +4,7 @@
 #include "SyntaxTree.h"
 #include "Token.h"
 #include <map>
+#include <stack>
 #include <unordered_set>
 #include <vector>
 
@@ -14,6 +15,8 @@ public:
     typedef TokenSequence::const_iterator TokenIterator;
 
     static const std::string FUNCTION_KEYWORD;
+
+    static const std::map<std::string, SyntaxTree::UnaryExpression::EOperator> UNARY_EXPRESSION_OPERATORS;
 
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
 
@@ -38,6 +41,9 @@ private:
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            std::vector<SyntaxTree::VariableDefinition*>& parameters);
+
+    SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
+                                                std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const std::unordered_set<std::string>& endTokens);

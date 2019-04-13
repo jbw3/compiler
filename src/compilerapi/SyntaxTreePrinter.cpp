@@ -36,7 +36,25 @@ SyntaxTreePrinter::~SyntaxTreePrinter()
     }
 }
 
-void SyntaxTreePrinter::Visit(SyntaxTree::BinaryExpression* binaryExpression)
+void SyntaxTreePrinter::Visit(UnaryExpression* unaryExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"UnaryExpression\",\n\"operator\": \"");
+
+    switch (unaryExpression->GetOperator())
+    {
+        case UnaryExpression::eNegative:
+            Print("-");
+            break;
+    }
+
+    Print("\",\n\"expression\":\n");
+
+    unaryExpression->GetSubExpression()->Accept(this);
+}
+
+void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 

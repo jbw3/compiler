@@ -12,6 +12,8 @@ public:
 
     bool Process(SyntaxTree::SyntaxTreeNode* syntaxTree);
 
+    void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
+
     void Visit(SyntaxTree::BinaryExpression* binaryExpression) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
@@ -30,6 +32,8 @@ private:
     bool isError;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
     std::map<std::string, SyntaxTree::VariableDefinition*> variables;
+
+    bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, SyntaxTree::EType subExprType);
 
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, SyntaxTree::EType leftType, SyntaxTree::EType rightType);
 

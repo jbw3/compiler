@@ -9,12 +9,15 @@ class FunctionDefinition;
 class FunctionExpression;
 class ModuleDefinition;
 class NumericExpression;
+class UnaryExpression;
 class VariableExpression;
 } // namespace SyntaxTree
 
 class SyntaxTreeVisitor
 {
 public:
+    virtual void Visit(SyntaxTree::UnaryExpression* unaryExpression) = 0;
+
     virtual void Visit(SyntaxTree::BinaryExpression* binaryExpression) = 0;
 
     virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
