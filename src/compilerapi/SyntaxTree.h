@@ -1,6 +1,7 @@
 #ifndef SYNTAX_TREE_H_
 #define SYNTAX_TREE_H_
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -185,5 +186,17 @@ private:
     std::vector<FunctionDefinition*> functionDefinitions;
 };
 } // namespace SyntaxTree
+
+namespace std
+{
+    template<>
+    struct hash<SyntaxTree::BinaryExpression::EOperator>
+    {
+        std::size_t operator()(SyntaxTree::BinaryExpression::EOperator op) const
+        {
+            return static_cast<std::size_t>(op);
+        }
+    };
+}
 
 #endif // SYNTAX_TREE_H_

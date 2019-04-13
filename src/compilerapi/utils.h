@@ -26,4 +26,14 @@ bool stringToInteger(const std::string& str, int64_t& num);
 
 bool stringToBool(const std::string& str, bool& value);
 
+template<typename T>
+void deletePointerContainer(T& container)
+{
+    for (auto ptr : container)
+    {
+        delete ptr;
+    }
+    container.clear();
+}
+
 #endif // UTILS_H_

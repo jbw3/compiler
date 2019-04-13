@@ -265,9 +265,10 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const unordered_set<string>& endTokens)
 {
-    Expression* expression = nullptr;
     bool expectNumOrVar = true;
-    BinaryExpression::EOperator binOp = BinaryExpression::eAdd;
+    vector<Expression*> terms;
+    vector<BinaryExpression::EOperator> operators;
+
     while (iter != endIter)
     {
         string value = iter->GetValue();
@@ -282,28 +283,12 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             if (isNumber(value))
             {
                 NumericExpression* numExpr = new NumericExpression(value);
-                if (expression == nullptr)
-                {
-                    expression = numExpr;
-                }
-                else
-                {
-                    BinaryExpression* binExpr = new BinaryExpression(binOp, expression, numExpr);
-                    expression = binExpr;
-                }
+                terms.push_back(numExpr);
             }
             else if (isBool(value))
             {
                 BoolLiteralExpression* boolExpr = new BoolLiteralExpression(value);
-                if (expression == nullptr)
-                {
-                    expression = boolExpr;
-                }
-                else
-                {
-                    BinaryExpression* binExpr = new BinaryExpression(binOp, expression, boolExpr);
-                    expression = binExpr;
-                }
+                terms.push_back(boolExpr);
             }
             else if (isIdentifier(value))
             {
@@ -315,7 +300,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     if (iter == endIter)
                     {
                         cerr << "Unexpected end of file\n";
-                        delete expression;
+                        deletePointerContainer(terms);
                         return nullptr;
                     }
 
@@ -326,11 +311,8 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                         Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
                         if (argExpr == nullptr)
                         {
-                            delete expression;
-                            for (Expression* arg : arguments)
-                            {
-                                delete arg;
-                            }
+                            deletePointerContainer(terms);
+                            deletePointerContainer(arguments);
                             return nullptr;
                         }
                         arguments.push_back(argExpr);
@@ -342,36 +324,18 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     }
 
                     FunctionExpression* funcExpr = new FunctionExpression(value, arguments);
-                    if (expression == nullptr)
-                    {
-                        expression = funcExpr;
-                    }
-                    else
-                    {
-                        BinaryExpression* binExpr =
-                            new BinaryExpression(binOp, expression, funcExpr);
-                        expression = binExpr;
-                    }
+                    terms.push_back(funcExpr);
                 }
                 else // it's a variable
                 {
                     VariableExpression* varExpr = new VariableExpression(value);
-                    if (expression == nullptr)
-                    {
-                        expression = varExpr;
-                    }
-                    else
-                    {
-                        BinaryExpression* binExpr =
-                            new BinaryExpression(binOp, expression, varExpr);
-                        expression = binExpr;
-                    }
+                    terms.push_back(varExpr);
                 }
             }
             else
             {
                 cerr << "Unexpected term \"" << value << "\"\n";
-                delete expression;
+                deletePointerContainer(terms);
                 return nullptr;
             }
         }
@@ -381,11 +345,11 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             if (opIter == BINARY_EXPRESSION_OPERATORS.cend())
             {
                 cerr << "Expected an operator, but got \"" << value << "\" instead\n";
-                delete expression;
+                deletePointerContainer(terms);
                 return nullptr;
             }
 
-            binOp = opIter->second;
+            operators.push_back(opIter->second);
         }
 
         expectNumOrVar = !expectNumOrVar;
@@ -395,9 +359,42 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     if (expectNumOrVar)
     {
         cerr << "Expected another number\n";
-        delete expression;
+        deletePointerContainer(terms);
         return nullptr;
     }
 
-    return expression;
+    ProcessExpressionOperators(terms, operators, {BinaryExpression::eMultiply});
+    ProcessExpressionOperators(terms, operators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
+
+    return terms.front();
+}
+
+void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
+                                                vector<BinaryExpression::EOperator>& operators,
+                                                const unordered_set<BinaryExpression::EOperator>& opsToProcess)
+{
+    if (terms.size() != operators.size() + 1)
+    {
+        cerr << "Internal error: Expression terms and operators do not match\n";
+        return;
+    }
+
+    auto term1Iter = terms.begin();
+    auto opIter = operators.begin();
+    while (opIter != operators.end())
+    {
+        if (opsToProcess.find(*opIter) != opsToProcess.cend())
+        {
+            auto term2Iter = term1Iter + 1;
+            *term1Iter = new BinaryExpression(*opIter, *term1Iter, *term2Iter);
+
+            terms.erase(term2Iter);
+            opIter = operators.erase(opIter);
+        }
+        else
+        {
+            ++term1Iter;
+            ++opIter;
+        }
+    }
 }

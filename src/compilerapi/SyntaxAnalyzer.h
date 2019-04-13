@@ -41,6 +41,10 @@ private:
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const std::unordered_set<std::string>& endTokens);
+
+    void ProcessExpressionOperators(std::vector<SyntaxTree::Expression*>& terms,
+                                    std::vector<SyntaxTree::BinaryExpression::EOperator>& operators,
+                                    const std::unordered_set<SyntaxTree::BinaryExpression::EOperator>& opsToProcess);
 };
 
 #endif // SYNTAX_ANALYZER_H_
