@@ -58,6 +58,42 @@ entry:
   ret i32 %sub
 }
 
+define i1 @equal(i32 %a, i32 %b) {
+entry:
+  %cmpeq = icmp eq i32 %a, %b
+  ret i1 %cmpeq
+}
+
+define i1 @notEqual(i32 %a, i32 %b) {
+entry:
+  %cmpne = icmp ne i32 %a, %b
+  ret i1 %cmpne
+}
+
+define i1 @lessThan(i32 %a, i32 %b) {
+entry:
+  %cmplt = icmp slt i32 %a, %b
+  ret i1 %cmplt
+}
+
+define i1 @lessThanOrEqual(i32 %a, i32 %b) {
+entry:
+  %cmple = icmp sle i32 %a, %b
+  ret i1 %cmple
+}
+
+define i1 @greaterThan(i32 %a, i32 %b) {
+entry:
+  %cmpgt = icmp sgt i32 %a, %b
+  ret i1 %cmpgt
+}
+
+define i1 @greaterThanOrEqual(i32 %a, i32 %b) {
+entry:
+  %cmpge = icmp sge i32 %a, %b
+  ret i1 %cmpge
+}
+
 define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
 entry:
   %call = call i32 @twoArgs(i32 0, i32 %x)

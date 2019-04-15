@@ -90,6 +90,18 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eNotEqual:
             resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
             break;
+        case BinaryExpression::eLessThan:
+            resultValue = builder.CreateICmpSLT(leftValue, rightValue, "cmplt");
+            break;
+        case BinaryExpression::eLessThanOrEqual:
+            resultValue = builder.CreateICmpSLE(leftValue, rightValue, "cmple");
+            break;
+        case BinaryExpression::eGreaterThan:
+            resultValue = builder.CreateICmpSGT(leftValue, rightValue, "cmpgt");
+            break;
+        case BinaryExpression::eGreaterThanOrEqual:
+            resultValue = builder.CreateICmpSGE(leftValue, rightValue, "cmpge");
+            break;
         case BinaryExpression::eAdd:
             resultValue = builder.CreateAdd(leftValue, rightValue, "add");
             break;

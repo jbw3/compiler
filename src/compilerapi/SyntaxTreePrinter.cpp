@@ -68,6 +68,18 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eNotEqual:
             Print("!=");
             break;
+        case BinaryExpression::eLessThan:
+            Print("<");
+            break;
+        case BinaryExpression::eLessThanOrEqual:
+            Print("<=");
+            break;
+        case BinaryExpression::eGreaterThan:
+            Print(">");
+            break;
+        case BinaryExpression::eGreaterThanOrEqual:
+            Print(">=");
+            break;
         case BinaryExpression::eAdd:
             Print("+");
             break;

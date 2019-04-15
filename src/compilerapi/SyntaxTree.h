@@ -76,6 +76,10 @@ public:
     {
         eEqual,
         eNotEqual,
+        eLessThan,
+        eLessThanOrEqual,
+        eGreaterThan,
+        eGreaterThanOrEqual,
         eAdd,
         eSubtract,
         eMultiply,
