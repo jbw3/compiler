@@ -141,10 +141,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     bool ok = ProcessParameters(iter, endIter, parameters);
     if (!ok)
     {
-        for (auto param : parameters)
-        {
-            delete param;
-        }
+        deletePointerContainer(parameters);
         return nullptr;
     }
 
@@ -167,10 +164,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     if (!ok)
     {
         cerr << "Expected return type\n";
-        for (auto param : parameters)
-        {
-            delete param;
-        }
+        deletePointerContainer(parameters);
         return nullptr;
     }
 
@@ -178,20 +172,14 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     ok = SkipNewlines(iter, endIter);
     if (!ok)
     {
-        for (auto param : parameters)
-        {
-            delete param;
-        }
+        deletePointerContainer(parameters);
         return nullptr;
     }
 
     Expression* code = ProcessExpression(iter, endIter, {"\n"});
     if (code == nullptr)
     {
-        for (auto param : parameters)
-        {
-            delete param;
-        }
+        deletePointerContainer(parameters);
         return nullptr;
     }
 
