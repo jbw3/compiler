@@ -32,6 +32,8 @@ public:
 
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
+    void Visit(SyntaxTree::BranchExpression* branchExpression) override;
+
 private:
     class BracePrinter
     {

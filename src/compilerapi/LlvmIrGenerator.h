@@ -32,6 +32,8 @@ public:
 
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
+    void Visit(SyntaxTree::BranchExpression* branchExpression) override;
+
     bool GenerateCode(SyntaxTree::SyntaxTreeNode* syntaxTree);
 
 private:

@@ -28,6 +28,8 @@ public:
 
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
+    void Visit(SyntaxTree::BranchExpression* branchExpression) override;
+
 private:
     bool isError;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;

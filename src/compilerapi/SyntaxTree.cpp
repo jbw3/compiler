@@ -151,6 +151,40 @@ const vector<Expression*>& FunctionExpression::GetArguments() const
     return arguments;
 }
 
+BranchExpression::BranchExpression(Expression* ifCondition, Expression* ifExpression, Expression* elseExpression) :
+    ifCondition(ifCondition),
+    ifExpression(ifExpression),
+    elseExpression(elseExpression)
+{
+}
+
+BranchExpression::~BranchExpression()
+{
+    delete ifCondition;
+    delete ifExpression;
+    delete elseExpression;
+}
+
+void BranchExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+Expression* BranchExpression::GetIfCondition() const
+{
+    return ifCondition;
+}
+
+Expression* BranchExpression::GetIfExpression() const
+{
+    return ifExpression;
+}
+
+Expression* BranchExpression::GetElseExpression() const
+{
+    return elseExpression;
+}
+
 VariableDefinition::VariableDefinition(const string& name, EType type) :
     name(name),
     type(type)

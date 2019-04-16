@@ -268,6 +268,13 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
     resultValue = builder.CreateCall(func, args, "call");
 }
 
+void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
+{
+    // TODO: implement this
+    cerr << "Not implemented\n";
+    resultValue = nullptr;
+}
+
 bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
 {
     // generate LLVM IR from syntax tree

@@ -225,6 +225,23 @@ void SyntaxTreePrinter::Visit(FunctionExpression* functionExpression)
     }
 }
 
+void SyntaxTreePrinter::Visit(SyntaxTree::BranchExpression* branchExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"BranchExpression\",\n\"ifCondition\":\n");
+
+    branchExpression->GetIfCondition()->Accept(this);
+
+    Print(",\n\"ifExpression\":\n");
+
+    branchExpression->GetIfExpression()->Accept(this);
+
+    Print(",\n\"elseExpression\":\n");
+
+    branchExpression->GetElseExpression()->Accept(this);
+}
+
 void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)
 {
     BracePrinter printer(*this, "{", "}");

@@ -266,3 +266,46 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     // set expression's type to the function's return type
     functionExpression->SetType(funcDef->GetReturnType());
 }
+
+void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
+{
+    Expression* ifCondition = branchExpression->GetIfCondition();
+    ifCondition->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // ensure if condition is a boolean expression
+    if (ifCondition->GetType() != EType::eBool)
+    {
+        isError = true;
+        cerr << "If condition must be a boolean expression\n";
+        return;
+    }
+
+    Expression* ifExpression = branchExpression->GetIfExpression();
+    ifExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    Expression* elseExpression = branchExpression->GetElseExpression();
+    elseExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // ensure the "if" and "else" expressions return the same type
+    if (ifExpression->GetType() != elseExpression->GetType())
+    {
+        isError = true;
+        cerr << "'if' and 'else' expressions must have the same type\n";
+        return;
+    }
+
+    // set the branch expression's result type
+    branchExpression->SetType(ifExpression->GetType());
+}

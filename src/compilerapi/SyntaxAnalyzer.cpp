@@ -1,11 +1,16 @@
 #include "SyntaxAnalyzer.h"
 #include "utils.h"
 #include <iostream>
+#include <memory>
 
 using namespace std;
 using namespace SyntaxTree;
 
 const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
+
+const string SyntaxAnalyzer::IF_KEYWORD = "if";
+
+const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
 
 const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_OPERATORS =
 {
@@ -312,6 +317,18 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     Expression* expr = AddUnaryExpressions(new BoolLiteralExpression(value), unaryOperators);
                     terms.push_back(expr);
                 }
+                else if (value == IF_KEYWORD)
+                {
+                    Expression* expr = ProcessBranchExpression(iter, endIter);
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+                }
                 else if (isIdentifier(value))
                 {
                     // check if it's a function call
@@ -383,7 +400,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     if (expectTerm)
     {
-        cerr << "Expected another number\n";
+        cerr << "Expected another expression term\n";
         deletePointerContainer(terms);
         return nullptr;
     }
@@ -423,4 +440,56 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
             ++opIter;
         }
     }
+}
+
+Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter)
+{
+    // increment iter past "if" keyword
+    ++iter;
+
+    // read "if" condition
+    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {"\n"}));
+    if (ifCondition == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (!SkipNewlines(iter, endIter))
+    {
+        return nullptr;
+    }
+
+    // read "if" expression
+    unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"\n"}));
+    if (ifExpression == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (!SkipNewlines(iter, endIter))
+    {
+        return nullptr;
+    }
+
+    // we should be at the "else" clause
+    if (iter == endIter || iter->GetValue() != ELSE_KEYWORD)
+    {
+        cerr << "Expected 'else' keyword\n";
+        return nullptr;
+    }
+
+    if (!SkipNewlines(iter, endIter))
+    {
+        return nullptr;
+    }
+
+    // read "else" expression
+    unique_ptr<Expression> elseExpression(ProcessExpression(iter, endIter, {"\n"}));
+    if (elseExpression == nullptr)
+    {
+        return nullptr;
+    }
+
+    BranchExpression* expr = new BranchExpression(ifCondition.release(), ifExpression.release(), elseExpression.release());
+    return expr;
 }

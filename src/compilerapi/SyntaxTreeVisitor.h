@@ -5,6 +5,7 @@ namespace SyntaxTree
 {
 class BinaryExpression;
 class BoolLiteralExpression;
+class BranchExpression;
 class FunctionDefinition;
 class FunctionExpression;
 class ModuleDefinition;
@@ -31,6 +32,8 @@ public:
     virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
 
     virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
+
+    virtual void Visit(SyntaxTree::BranchExpression* branchExpression) = 0;
 };
 
 #endif // SYNTAX_TREE_VISITOR_H_

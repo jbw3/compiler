@@ -16,6 +16,10 @@ public:
 
     static const std::string FUNCTION_KEYWORD;
 
+    static const std::string IF_KEYWORD;
+
+    static const std::string ELSE_KEYWORD;
+
     static const std::map<std::string, SyntaxTree::UnaryExpression::EOperator> UNARY_EXPRESSION_OPERATORS;
 
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
@@ -51,6 +55,8 @@ private:
     void ProcessExpressionOperators(std::vector<SyntaxTree::Expression*>& terms,
                                     std::vector<SyntaxTree::BinaryExpression::EOperator>& operators,
                                     const std::unordered_set<SyntaxTree::BinaryExpression::EOperator>& opsToProcess);
+
+    SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

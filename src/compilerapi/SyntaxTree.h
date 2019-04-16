@@ -161,6 +161,27 @@ private:
     std::vector<Expression*> arguments;
 };
 
+class BranchExpression : public Expression
+{
+public:
+    BranchExpression(Expression* ifCondition, Expression* ifExpression, Expression* elseExpression);
+
+    virtual ~BranchExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    Expression* GetIfCondition() const;
+
+    Expression* GetIfExpression() const;
+
+    Expression* GetElseExpression() const;
+
+private:
+    Expression* ifCondition;
+    Expression* ifExpression;
+    Expression* elseExpression;
+};
+
 class VariableDefinition
 {
 public:
