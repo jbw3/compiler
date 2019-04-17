@@ -270,9 +270,59 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
 void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 {
-    // TODO: implement this
-    cerr << "Not implemented\n";
-    resultValue = nullptr;
+    // generate the if condition IR
+    branchExpression->GetIfCondition()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* ifConditionValue = resultValue;
+
+    // create the branch basic blocks
+    Function* function = builder.GetInsertBlock()->getParent();
+    BasicBlock* ifBlock = BasicBlock::Create(context, "if", function);
+    BasicBlock* elseBlock = BasicBlock::Create(context, "else");
+    BasicBlock* mergeBlock = BasicBlock::Create(context, "merge");
+
+    builder.CreateCondBr(ifConditionValue, ifBlock, elseBlock);
+
+    // generate "if" branch IR
+    builder.SetInsertPoint(ifBlock);
+    branchExpression->GetIfExpression()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* ifExprValue = resultValue;
+    builder.CreateBr(mergeBlock);
+
+    // update block in case new blocks were added when generating the "if" block
+    ifBlock = builder.GetInsertBlock();
+
+    // generate "else" branch IR
+    function->getBasicBlockList().push_back(elseBlock);
+    builder.SetInsertPoint(elseBlock);
+    branchExpression->GetElseExpression()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* elseExprValue = resultValue;
+    builder.CreateBr(mergeBlock);
+
+    // update block in case new blocks were added when generating the "else" block
+    elseBlock = builder.GetInsertBlock();
+
+    // generate merge block
+    function->getBasicBlockList().push_back(mergeBlock);
+    builder.SetInsertPoint(mergeBlock);
+
+    Type* phiType = GetType(branchExpression->GetType());
+    PHINode* phiNode = builder.CreatePHI(phiType, 2, "phi");
+    phiNode->addIncoming(ifExprValue, ifBlock);
+    phiNode->addIncoming(elseExprValue, elseBlock);
+
+    resultValue = phiNode;
 }
 
 bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
