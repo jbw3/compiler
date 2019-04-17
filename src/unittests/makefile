@@ -14,7 +14,8 @@ LLVM_CONFIG=llvm-config-8
 CXX = clang++-8
 CXXFLAGS = `$(LLVM_CONFIG) --cxxflags` $(INCLUDES) -std=c++14 -Wall -Wextra $(DEPFLAGS)
 
-LDLIBS = -L$(LIBDIR) -lcompilerapi
+API_LIB = compilerapi
+LDLIBS = -L$(LIBDIR) -l$(API_LIB)
 LDFLAGS = $(LDLIBS) `$(LLVM_CONFIG) --ldflags --system-libs --libs all`
 
 POSTCOMPILE = @mv -f $(DEPDIR)/$<.Td $(DEPDIR)/$<.d && touch $@
@@ -47,7 +48,7 @@ init:
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(BINDIR)
 
-$(TARGET): $(OBJ)
+$(TARGET): $(OBJ) $(LIBDIR)/lib$(API_LIB).a
 	$(CXX) $(OBJ) -o $(TARGET) $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.cpp $(DEPDIR)/%.cpp.d
