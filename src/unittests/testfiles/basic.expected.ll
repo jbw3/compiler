@@ -114,3 +114,23 @@ define i1 @returnBool() {
 entry:
   ret i1 true
 }
+
+define i32 @basicBranch(i32 %x, i32 %y, i32 %z) {
+entry:
+  %add = add i32 %x, 1
+  %div = sdiv i32 %y, 2
+  %cmpeq = icmp eq i32 %add, %div
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  %mul = mul i32 %z, 10
+  br label %merge
+
+else:                                             ; preds = %entry
+  %neg = sub i32 0, %z
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ %mul, %if ], [ %neg, %else ]
+  ret i32 %phi
+}
