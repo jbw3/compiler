@@ -7,7 +7,7 @@ using namespace std;
 
 const unordered_set<string> LexicalAnalyzer::SYMBOLS =
 {
-    "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "(", ")", ",", ";"
+    "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "(", ")", "{", "}", ",", ";"
 };
 
 LexicalAnalyzer::LexicalAnalyzer() : isValid(false)

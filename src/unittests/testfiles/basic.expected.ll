@@ -134,3 +134,33 @@ merge:                                            ; preds = %else, %if
   %phi = phi i32 [ %mul, %if ], [ %neg, %else ]
   ret i32 %phi
 }
+
+define i32 @nestedBranches(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %x, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  %add = add i32 %y, %z
+  br label %merge4
+
+else:                                             ; preds = %entry
+  %cmpeq1 = icmp eq i32 %x, 1
+  br i1 %cmpeq1, label %if2, label %else3
+
+if2:                                              ; preds = %else
+  %sub = sub i32 %y, %z
+  br label %merge
+
+else3:                                            ; preds = %else
+  %mul = mul i32 %y, %z
+  br label %merge
+
+merge:                                            ; preds = %else3, %if2
+  %phi = phi i32 [ %sub, %if2 ], [ %mul, %else3 ]
+  br label %merge4
+
+merge4:                                           ; preds = %merge, %if
+  %phi5 = phi i32 [ %add, %if ], [ %phi, %merge ]
+  ret i32 %phi5
+}

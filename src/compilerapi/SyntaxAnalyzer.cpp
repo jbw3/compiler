@@ -448,11 +448,14 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     ++iter;
 
     // read "if" condition
-    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {"\n"}));
+    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {"{", "\n"}));
     if (ifCondition == nullptr)
     {
         return nullptr;
     }
+
+    // increment past "{"
+    ++iter;
 
     if (!SkipNewlines(iter, endIter))
     {
@@ -460,11 +463,14 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     }
 
     // read "if" expression
-    unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"\n"}));
+    unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"}", "\n"}));
     if (ifExpression == nullptr)
     {
         return nullptr;
     }
+
+    // increment past "}"
+    ++iter;
 
     if (!SkipNewlines(iter, endIter))
     {
@@ -483,12 +489,29 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
+    if (iter == endIter || iter->GetValue() != "{")
+    {
+        cerr << "Expected '{'\n";
+        return nullptr;
+    }
+
+    // increment past "{"
+    ++iter;
+
+    if (!SkipNewlines(iter, endIter))
+    {
+        return nullptr;
+    }
+
     // read "else" expression
-    unique_ptr<Expression> elseExpression(ProcessExpression(iter, endIter, {"\n"}));
+    unique_ptr<Expression> elseExpression(ProcessExpression(iter, endIter, {"}", "\n"}));
     if (elseExpression == nullptr)
     {
         return nullptr;
     }
+
+    // increment past "}"
+    ++iter;
 
     BranchExpression* expr = new BranchExpression(ifCondition.release(), ifExpression.release(), elseExpression.release());
     return expr;

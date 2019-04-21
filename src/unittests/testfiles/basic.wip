@@ -48,6 +48,27 @@ fun returnBool() bool
 
 fun basicBranch(x i32, y i32, z i32) i32
     if x + 1 == y / 2
+    {
         z * 10
+    }
     else
+    {
         -z
+    }
+
+fun nestedBranches(x i32, y i32, z i32) i32
+    if x == 0
+    {
+        y + z
+    }
+    else
+    {
+        if x == 1
+        {
+            y - z
+        }
+        else
+        {
+            y * z
+        }
+    }
