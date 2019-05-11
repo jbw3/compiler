@@ -489,29 +489,42 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    if (iter == endIter || iter->GetValue() != "{")
+    if (iter == endIter || (iter->GetValue() != IF_KEYWORD && iter->GetValue() != "{"))
     {
-        cerr << "Expected '{'\n";
+        cerr << "Expected 'if' or '{'\n";
         return nullptr;
     }
 
-    // increment past "{"
-    ++iter;
-
-    if (!SkipNewlines(iter, endIter))
+    unique_ptr<Expression> elseExpression;
+    if (iter->GetValue() == IF_KEYWORD)
     {
-        return nullptr;
+        // parse "if else"
+        elseExpression.reset(ProcessBranchExpression(iter, endIter));
+        if (elseExpression == nullptr)
+        {
+            return nullptr;
+        }
     }
-
-    // read "else" expression
-    unique_ptr<Expression> elseExpression(ProcessExpression(iter, endIter, {"}", "\n"}));
-    if (elseExpression == nullptr)
+    else
     {
-        return nullptr;
-    }
+        // increment past "{"
+        ++iter;
 
-    // increment past "}"
-    ++iter;
+        if (!SkipNewlines(iter, endIter))
+        {
+            return nullptr;
+        }
+
+        // read "else" expression
+        elseExpression.reset(ProcessExpression(iter, endIter, {"}", "\n"}));
+        if (elseExpression == nullptr)
+        {
+            return nullptr;
+        }
+
+        // increment past "}"
+        ++iter;
+    }
 
     BranchExpression* expr = new BranchExpression(ifCondition.release(), ifExpression.release(), elseExpression.release());
     return expr;

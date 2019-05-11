@@ -164,3 +164,120 @@ merge4:                                           ; preds = %merge, %if
   %phi5 = phi i32 [ %add, %if ], [ %phi, %merge ]
   ret i32 %phi5
 }
+
+define i32 @elseIfBranches(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %x, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  %add = add i32 %y, %z
+  br label %merge9
+
+else:                                             ; preds = %entry
+  %cmpeq1 = icmp eq i32 %x, 1
+  br i1 %cmpeq1, label %if2, label %else3
+
+if2:                                              ; preds = %else
+  %sub = sub i32 %y, %z
+  br label %merge7
+
+else3:                                            ; preds = %else
+  %cmpeq4 = icmp eq i32 %x, 2
+  br i1 %cmpeq4, label %if5, label %else6
+
+if5:                                              ; preds = %else3
+  %mul = mul i32 %y, %z
+  br label %merge
+
+else6:                                            ; preds = %else3
+  br label %merge
+
+merge:                                            ; preds = %else6, %if5
+  %phi = phi i32 [ %mul, %if5 ], [ 42, %else6 ]
+  br label %merge7
+
+merge7:                                           ; preds = %merge, %if2
+  %phi8 = phi i32 [ %sub, %if2 ], [ %phi, %merge ]
+  br label %merge9
+
+merge9:                                           ; preds = %merge7, %if
+  %phi10 = phi i32 [ %add, %if ], [ %phi8, %merge7 ]
+  ret i32 %phi10
+}
+
+define i32 @elseIfBranchesNesting(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %x, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  %add = add i32 %y, %z
+  br label %merge24
+
+else:                                             ; preds = %entry
+  %cmpeq1 = icmp eq i32 %x, 1
+  br i1 %cmpeq1, label %if2, label %else3
+
+if2:                                              ; preds = %else
+  %sub = sub i32 %y, %z
+  br label %merge22
+
+else3:                                            ; preds = %else
+  %cmpeq4 = icmp eq i32 %x, 2
+  br i1 %cmpeq4, label %if5, label %else6
+
+if5:                                              ; preds = %else3
+  %mul = mul i32 %y, %z
+  br label %merge20
+
+else6:                                            ; preds = %else3
+  %cmpeq7 = icmp eq i32 %x, 3
+  br i1 %cmpeq7, label %if8, label %else12
+
+if8:                                              ; preds = %else6
+  %cmpeq9 = icmp eq i32 %z, 0
+  br i1 %cmpeq9, label %if10, label %else11
+
+if10:                                             ; preds = %if8
+  br label %merge
+
+else11:                                           ; preds = %if8
+  %div = sdiv i32 %y, %z
+  br label %merge
+
+merge:                                            ; preds = %else11, %if10
+  %phi = phi i32 [ 0, %if10 ], [ %div, %else11 ]
+  br label %merge18
+
+else12:                                           ; preds = %else6
+  %cmpeq13 = icmp eq i32 %z, 0
+  br i1 %cmpeq13, label %if14, label %else15
+
+if14:                                             ; preds = %else12
+  br label %merge16
+
+else15:                                           ; preds = %else12
+  %mod = srem i32 %y, %z
+  br label %merge16
+
+merge16:                                          ; preds = %else15, %if14
+  %phi17 = phi i32 [ 0, %if14 ], [ %mod, %else15 ]
+  br label %merge18
+
+merge18:                                          ; preds = %merge16, %merge
+  %phi19 = phi i32 [ %phi, %merge ], [ %phi17, %merge16 ]
+  br label %merge20
+
+merge20:                                          ; preds = %merge18, %if5
+  %phi21 = phi i32 [ %mul, %if5 ], [ %phi19, %merge18 ]
+  br label %merge22
+
+merge22:                                          ; preds = %merge20, %if2
+  %phi23 = phi i32 [ %sub, %if2 ], [ %phi21, %merge20 ]
+  br label %merge24
+
+merge24:                                          ; preds = %merge22, %if
+  %phi25 = phi i32 [ %add, %if ], [ %phi23, %merge22 ]
+  ret i32 %phi25
+}
