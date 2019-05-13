@@ -1,5 +1,7 @@
 #include "LexicalAnalyzerTests.h"
+#include "ErrorLogger.hpp"
 #include "LexicalAnalyzer.h"
+#include <iostream>
 #include <sstream>
 
 using namespace std;
@@ -48,13 +50,18 @@ bool LexicalAnalyzerTests::TestValidInputs()
         }
     };
 
-    LexicalAnalyzer analyzer;
+    stringstream errStream;
+    ErrorLogger logger(&errStream);
+    LexicalAnalyzer analyzer(logger);
 
     stringstream ss;
     vector<Token> actualTokens;
     bool ok = false;
     for (pair<string, vector<Token>> test : tests)
     {
+        errStream.clear();
+        errStream.str("");
+
         ss.clear();
         ss.str(test.first);
         const vector<Token>& expectedTokens = test.second;
@@ -63,6 +70,14 @@ bool LexicalAnalyzerTests::TestValidInputs()
         if (ok)
         {
             ok = TokenSequencesAreEqual(expectedTokens, actualTokens);
+        }
+        if (ok)
+        {
+            ok = (errStream.str().size() == 0);
+            if (!ok)
+            {
+                cerr << errStream.str();
+            }
         }
     }
 

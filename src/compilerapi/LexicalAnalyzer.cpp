@@ -10,7 +10,9 @@ const unordered_set<string> LexicalAnalyzer::SYMBOLS =
     "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "(", ")", "{", "}", ",", ";"
 };
 
-LexicalAnalyzer::LexicalAnalyzer() : isValid(false)
+LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :
+    logger(logger),
+    isValid(false)
 {
 }
 
@@ -27,7 +29,7 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
         if (is->fail())
         {
             delete is;
-            cerr << "Error: Could not open file \"" << inFile << "\"\n";
+            logger.LogError("Could not open file \"", inFile, "\"");
             return false;
         }
     }
@@ -172,5 +174,5 @@ bool LexicalAnalyzer::IsValidToken(const string& str) const
 
 void LexicalAnalyzer::PrintError()
 {
-    cerr << "Invalid syntax: \"" + tokenStr + "\"\n";
+    logger.LogError("Invalid syntax: \"" + tokenStr + "\"");
 }

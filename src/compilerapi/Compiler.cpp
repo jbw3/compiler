@@ -11,11 +11,14 @@
 using namespace std;
 using namespace SyntaxTree;
 
-Compiler::Compiler()
+Compiler::Compiler() :
+    logger(&cerr)
 {
 }
 
-Compiler::Compiler(const Config& config) : config(config)
+Compiler::Compiler(const Config& config) :
+    config(config),
+    logger(&cerr)
 {
 }
 
@@ -27,7 +30,7 @@ bool Compiler::Compile()
     vector<Token> tokens;
     if (ok)
     {
-        LexicalAnalyzer lexicalAnalyzer;
+        LexicalAnalyzer lexicalAnalyzer(logger);
         ok = lexicalAnalyzer.Process(config.inFilename, tokens);
     }
 

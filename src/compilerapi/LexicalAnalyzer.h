@@ -1,6 +1,7 @@
 #ifndef LEXICAL_ANALYZER_H_
 #define LEXICAL_ANALYZER_H_
 
+#include "ErrorLogger.hpp"
 #include "Token.h"
 #include <unordered_set>
 #include <vector>
@@ -8,7 +9,7 @@
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer();
+    LexicalAnalyzer(ErrorLogger& logger);
 
     bool Process(const std::string& inFile, std::vector<Token>& tokens);
 
@@ -17,6 +18,7 @@ public:
 private:
     static const std::unordered_set<std::string> SYMBOLS;
 
+    ErrorLogger& logger;
     std::string tokenStr;
     bool isValid;
     unsigned long line;

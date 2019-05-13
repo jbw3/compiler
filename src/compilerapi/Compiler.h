@@ -2,6 +2,7 @@
 #define COMPILER_H_
 
 #include "Config.h"
+#include "ErrorLogger.hpp"
 #include "Token.h"
 #include <istream>
 #include <vector>
@@ -17,6 +18,7 @@ public:
 
 private:
     Config config;
+    ErrorLogger logger;
 
     void PrintTokens(const std::vector<Token>& tokens) const;
 };
