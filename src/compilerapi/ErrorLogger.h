@@ -1,6 +1,7 @@
 #ifndef ERROR_LOGGER_H_
 #define ERROR_LOGGER_H_
 
+#include <cstring>
 #include <ostream>
 
 class ErrorLogger
@@ -12,38 +13,48 @@ public:
     }
 
     template<typename... Ts>
-    void LogWarning(Ts... args)
+    void LogWarning(const char* format, Ts... args)
     {
-        LogMessage("Warning", args...);
+        LogMessage("Warning", format, args...);
     }
 
     template<typename... Ts>
-    void LogError(Ts... args)
+    void LogError(const char* format, Ts... args)
     {
-        LogMessage("Error", args...);
+        LogMessage("Error", format, args...);
     }
 
 private:
     std::ostream* os;
 
-    template<typename T>
-    void Write(T arg)
-    {
-        *os << arg;
-    }
+    void Write(const char* format);
 
     template<typename T, typename... Ts>
-    void Write(T arg, Ts... args)
+    void Write(const char* format, T arg, Ts... args)
     {
-        Write(arg);
-        Write(args...);
+        const char* argStr = strchr(format, '{');
+
+        // if there's no arg string, print the format string
+        if (argStr == nullptr || argStr[1] != '}')
+        {
+            Write(format);
+        }
+        else
+        {
+            os->write(format, argStr - format);
+            *os << arg;
+
+            Write(argStr + 2, args...);
+        }
+
     }
 
     template<typename... Ts>
-    void LogMessage(const char* tag, Ts... args)
+    void LogMessage(const char* tag, const char* format, Ts... args)
     {
         *os << tag << ": ";
-        Write(args...);
+
+        Write(format, args...);
         *os << '\n';
     }
 };
