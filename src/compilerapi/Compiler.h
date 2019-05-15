@@ -2,7 +2,7 @@
 #define COMPILER_H_
 
 #include "Config.h"
-#include "ErrorLogger.hpp"
+#include "ErrorLogger.h"
 #include "Token.h"
 #include <istream>
 #include <vector>

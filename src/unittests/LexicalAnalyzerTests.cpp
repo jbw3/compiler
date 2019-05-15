@@ -1,5 +1,5 @@
 #include "LexicalAnalyzerTests.h"
-#include "ErrorLogger.hpp"
+#include "ErrorLogger.h"
 #include "LexicalAnalyzer.h"
 #include <iostream>
 #include <sstream>

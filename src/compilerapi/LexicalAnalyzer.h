@@ -1,7 +1,7 @@
 #ifndef LEXICAL_ANALYZER_H_
 #define LEXICAL_ANALYZER_H_
 
-#include "ErrorLogger.hpp"
+#include "ErrorLogger.h"
 #include "Token.h"
 #include <unordered_set>
 #include <vector>
