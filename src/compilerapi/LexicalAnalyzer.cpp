@@ -87,9 +87,14 @@ bool LexicalAnalyzer::Process(std::istream& is, std::vector<Token>& tokens)
     return ok;
 }
 
+unsigned long LexicalAnalyzer::GetTokenStrStartColumn()
+{
+    return column - tokenStr.size();
+}
+
 Token LexicalAnalyzer::CreateToken()
 {
-    return Token(tokenStr, line, column - tokenStr.size());
+    return Token(tokenStr, line, GetTokenStrStartColumn());
 }
 
 bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
@@ -174,5 +179,5 @@ bool LexicalAnalyzer::IsValidToken(const string& str) const
 
 void LexicalAnalyzer::PrintError()
 {
-    logger.LogError("Invalid syntax: \"{}\"", tokenStr);
+    logger.LogError(line, GetTokenStrStartColumn(), "Invalid syntax: \"{}\"", tokenStr);
 }

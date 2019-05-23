@@ -24,6 +24,8 @@ private:
     unsigned long line;
     unsigned long column;
 
+    unsigned long GetTokenStrStartColumn();
+
     Token CreateToken();
 
     bool ParseChar(char ch, std::vector<Token>& tokens);
