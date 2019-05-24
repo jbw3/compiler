@@ -16,21 +16,23 @@ bool LexicalAnalyzerTests::TestValidInputs()
     vector<pair<string, vector<Token>>> tests =
     {
         {
-            "fun test() i32 1 + 2\n",
+            "fun test() i32 { 1 + 2 }\n",
             {
                 {"fun", 1, 1},
                 {"test", 1, 5},
                 {"(", 1, 9},
                 {")", 1, 10},
                 {"i32", 1, 12},
-                {"1", 1, 16},
-                {"+", 1, 18},
-                {"2", 1, 20},
-                {"\n", 1, 21}
+                {"{", 1, 16},
+                {"1", 1, 18},
+                {"+", 1, 20},
+                {"2", 1, 22},
+                {"}", 1, 24},
+                {"\n", 1, 25}
             }
         },
         {
-            "fun a_function(param1 i32, param2 i32) i32 param1 - param2\n",
+            "fun a_function(param1 i32, param2 i32) i32 { param1 - param2 }\n",
             {
                 {"fun", 1, 1},
                 {"a_function", 1, 5},
@@ -42,10 +44,12 @@ bool LexicalAnalyzerTests::TestValidInputs()
                 {"i32", 1, 35},
                 {")", 1, 38},
                 {"i32", 1, 40},
-                {"param1", 1, 44},
-                {"-", 1, 51},
-                {"param2", 1, 53},
-                {"\n", 1, 59}
+                {"{", 1, 44},
+                {"param1", 1, 46},
+                {"-", 1, 53},
+                {"param2", 1, 55},
+                {"}", 1, 62},
+                {"\n", 1, 63}
             }
         }
     };
@@ -78,6 +82,11 @@ bool LexicalAnalyzerTests::TestValidInputs()
             {
                 cerr << errStream.str();
             }
+        }
+
+        if (!ok)
+        {
+            break;
         }
     }
 
