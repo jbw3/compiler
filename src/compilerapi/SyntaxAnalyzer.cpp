@@ -1,6 +1,5 @@
 #include "SyntaxAnalyzer.h"
 #include "utils.h"
-#include <iostream>
 #include <memory>
 
 using namespace std;
@@ -37,6 +36,11 @@ const map<string, EType> SyntaxAnalyzer::TYPES =
     {"bool", EType::eBool},
     {"i32", EType::eInt32},
 };
+
+SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
+    logger(logger)
+{
+}
 
 bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& syntaxTree)
 {
@@ -92,15 +96,38 @@ bool SyntaxAnalyzer::SkipNewlines(TokenIterator& iter, TokenIterator endIter)
 {
     do
     {
-        ++iter;
-        if (iter == endIter)
+        if (!IncrementIterator(iter, endIter))
         {
-            cerr << "Did not expect end of file\n";
             return false;
         }
     } while (iter->GetValue() == "\n");
 
     return true;
+}
+
+bool SyntaxAnalyzer::EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg)
+{
+    if (iter == endIter)
+    {
+        if (errorMsg == nullptr)
+        {
+            logger.LogError("Unexpected end of file");
+        }
+        else
+        {
+            logger.LogError("Unexpected end of file. {}", errorMsg);
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg)
+{
+    ++iter;
+    return EndIteratorCheck(iter, endIter, errorMsg);
 }
 
 EType SyntaxAnalyzer::GetType(const std::string& typeName)
@@ -119,25 +146,38 @@ EType SyntaxAnalyzer::GetType(const std::string& typeName)
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
-    if (iter == endIter || iter->GetValue() != FUNCTION_KEYWORD)
+    if (!EndIteratorCheck(iter, endIter, "Expected function keyword"))
     {
-        cerr << "Expected function keyword\n";
         return nullptr;
     }
 
-    ++iter;
-    if (iter == endIter || !isIdentifier(iter->GetValue()))
+    if (iter->GetValue() != FUNCTION_KEYWORD)
     {
-        cerr << "\"" << iter->GetValue() << "\" is not a valid function name\n";
+        logger.LogError(*iter, "Expected function keyword");
+        return nullptr;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected function name"))
+    {
+        return nullptr;
+    }
+
+    if (!isIdentifier(iter->GetValue()))
+    {
+        logger.LogError(*iter, "'{}' is not a valid function name", iter->GetValue());
         return nullptr;
     }
 
     string functionName = iter->GetValue();
 
-    ++iter;
-    if (iter == endIter || iter->GetValue() != "(")
+    if (!IncrementIterator(iter, endIter, "Expected '('"))
     {
-        cerr << "Expected \"(\"\n";
+        return nullptr;
+    }
+
+    if (iter->GetValue() != "(")
+    {
+        logger.LogError(*iter, "Expected '('");
         return nullptr;
     }
 
@@ -150,25 +190,16 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    // get return type
-    ++iter;
-    EType returnType = EType::eUnknown;
-    if (iter == endIter)
+    if (!IncrementIterator(iter, endIter, "Expected return type"))
     {
-        ok = false;
-    }
-    else
-    {
-        returnType = GetType(iter->GetValue());
-        if (returnType == EType::eUnknown)
-        {
-            ok = false;
-        }
+        return nullptr;
     }
 
-    if (!ok)
+    // get return type
+    EType returnType = GetType(iter->GetValue());
+    if (returnType == EType::eUnknown)
     {
-        cerr << "Expected return type\n";
+        logger.LogError(*iter, "Expected return type");
         deletePointerContainer(parameters);
         return nullptr;
     }
@@ -210,7 +241,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             }
             else
             {
-                cerr << "Invalid parameter name: \"" << value << "\"\n";
+                logger.LogError(*iter, "Invalid parameter name: '{}'", value);
                 return false;
             }
 
@@ -221,7 +252,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             EType paramType = GetType(value);
             if (paramType == EType::eUnknown)
             {
-                cerr << "\"" << value << "\" is not a known type\n";
+                logger.LogError(*iter, "'{}' is not a known type", value);
                 return false;
             }
 
@@ -234,7 +265,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         {
             if (value != ",")
             {
-                cerr << "Expected \",\" not \"" << value << "\"\n";
+                logger.LogError(*iter, "Expected ',' not '{}'", value);
                 return false;
             }
 
@@ -242,7 +273,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
         else
         {
-            cerr << "Internal error: Unknown state: " << state << "\n";
+            logger.LogError(*iter, "Internal error: Unknown state: {}", state);
             return false;
         }
 
@@ -251,17 +282,17 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 
     if (iter == endIter)
     {
-        cerr << "Expected \")\"\n";
+        logger.LogError("Expected ')'");
         return false;
     }
     else if (state == eName && parameters.size() > 0)
     {
-        cerr << "Expected a parameter\n";
+        logger.LogError(*iter, "Expected a parameter");
         return false;
     }
     else if (state == eType)
     {
-        cerr << "Expected a parameter type\n";
+        logger.LogError(*iter, "Expected a parameter type");
         return false;
     }
 
@@ -338,7 +369,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                         iter += 2;
                         if (iter == endIter)
                         {
-                            cerr << "Unexpected end of file\n";
+                            logger.LogError("Unexpected end of file");
                             deletePointerContainer(terms);
                             return nullptr;
                         }
@@ -373,7 +404,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 }
                 else
                 {
-                    cerr << "Unexpected term \"" << value << "\"\n";
+                    logger.LogError(*iter, "Unexpected term '{}'", value);
                     deletePointerContainer(terms);
                     return nullptr;
                 }
@@ -386,7 +417,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             auto opIter = BINARY_EXPRESSION_OPERATORS.find(value);
             if (opIter == BINARY_EXPRESSION_OPERATORS.cend())
             {
-                cerr << "Expected an operator, but got \"" << value << "\" instead\n";
+                logger.LogError(*iter, "Expected an operator, but got '{}' instead", value);
                 deletePointerContainer(terms);
                 return nullptr;
             }
@@ -400,7 +431,15 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     if (expectTerm)
     {
-        cerr << "Expected another expression term\n";
+        if (iter == endIter)
+        {
+            logger.LogError("Expected another expression term");
+        }
+        else
+        {
+            logger.LogError(*iter, "Expected another expression term");
+        }
+
         deletePointerContainer(terms);
         return nullptr;
     }
@@ -418,7 +457,7 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
 {
     if (terms.size() != operators.size() + 1)
     {
-        cerr << "Internal error: Expression terms and operators do not match\n";
+        logger.LogError("Internal error: Expression terms and operators do not match");
         return;
     }
 
@@ -478,9 +517,14 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     }
 
     // we should be at the "else" clause
-    if (iter == endIter || iter->GetValue() != ELSE_KEYWORD)
+    if (!EndIteratorCheck(iter, endIter, "Expected 'else' keyword"))
     {
-        cerr << "Expected 'else' keyword\n";
+        return nullptr;
+    }
+
+    if (iter->GetValue() != ELSE_KEYWORD)
+    {
+        logger.LogError(*iter, "Expected 'else' keyword");
         return nullptr;
     }
 
@@ -489,9 +533,14 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    if (iter == endIter || (iter->GetValue() != IF_KEYWORD && iter->GetValue() != "{"))
+    if (!EndIteratorCheck(iter, endIter, "Expected 'if' or '{'"))
     {
-        cerr << "Expected 'if' or '{'\n";
+        return nullptr;
+    }
+
+    if (iter->GetValue() != IF_KEYWORD && iter->GetValue() != "{")
+    {
+        logger.LogError(*iter, "Expected 'if' or '{'");
         return nullptr;
     }
 

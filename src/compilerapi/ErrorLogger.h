@@ -1,6 +1,7 @@
 #ifndef ERROR_LOGGER_H_
 #define ERROR_LOGGER_H_
 
+#include "Token.h"
 #include <cstring>
 #include <ostream>
 
@@ -28,6 +29,12 @@ public:
     }
 
     template<typename... Ts>
+    void LogWarning(const Token& token, const char* format, Ts... args)
+    {
+        LogMessage(WARNING_TAG, token.GetLine(), token.GetColumn(), format, args...);
+    }
+
+    template<typename... Ts>
     void LogError(unsigned long line, unsigned long column, const char* format, Ts... args)
     {
         LogMessage(ERROR_TAG, line, column, format, args...);
@@ -37,6 +44,12 @@ public:
     void LogError(const char* format, Ts... args)
     {
         LogMessage(ERROR_TAG, 0, 0, format, args...);
+    }
+
+    template<typename... Ts>
+    void LogError(const Token& token, const char* format, Ts... args)
+    {
+        LogMessage(ERROR_TAG, token.GetLine(), token.GetColumn(), format, args...);
     }
 
 private:

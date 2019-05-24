@@ -29,7 +29,7 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
         if (is->fail())
         {
             delete is;
-            logger.LogError("Could not open file \"{}\"", inFile);
+            logger.LogError("Could not open file '{}'", inFile);
             return false;
         }
     }
@@ -179,5 +179,5 @@ bool LexicalAnalyzer::IsValidToken(const string& str) const
 
 void LexicalAnalyzer::PrintError()
 {
-    logger.LogError(line, GetTokenStrStartColumn(), "Invalid syntax: \"{}\"", tokenStr);
+    logger.LogError(line, GetTokenStrStartColumn(), "Invalid syntax: '{}'", tokenStr);
 }

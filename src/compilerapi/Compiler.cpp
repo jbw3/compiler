@@ -45,7 +45,7 @@ bool Compiler::Compile()
     SyntaxTreeNode* syntaxTree = nullptr;
     if (ok)
     {
-        SyntaxAnalyzer syntaxAnalyzer;
+        SyntaxAnalyzer syntaxAnalyzer(logger);
         ok = syntaxAnalyzer.Process(tokens, syntaxTree);
     }
 

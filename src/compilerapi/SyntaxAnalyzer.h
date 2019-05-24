@@ -1,6 +1,7 @@
 #ifndef SYNTAX_ANALYZER_H_
 #define SYNTAX_ANALYZER_H_
 
+#include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "Token.h"
 #include <map>
@@ -26,6 +27,8 @@ public:
 
     static const std::map<std::string, SyntaxTree::EType> TYPES;
 
+    SyntaxAnalyzer(ErrorLogger& logger);
+
     bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
 
 private:
@@ -35,6 +38,12 @@ private:
         eType,
         eDelimiter,
     };
+
+    ErrorLogger& logger;
+
+    bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
+
+    bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
     bool SkipNewlines(TokenIterator& iter, TokenIterator endIter);
 
