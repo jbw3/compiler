@@ -212,12 +212,48 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    Expression* code = ProcessExpression(iter, endIter, {"\n"});
+    if (iter->GetValue() != "{")
+    {
+        logger.LogError(*iter, "Expected '{'");
+        deletePointerContainer(parameters);
+        return nullptr;
+    }
+
+    // increment past "{" and skip newlines
+    if (!IncrementIterator(iter, endIter) || !SkipNewlines(iter, endIter))
+    {
+        deletePointerContainer(parameters);
+        return nullptr;
+    }
+
+    Expression* code = ProcessExpression(iter, endIter, {"}", "\n"});
     if (code == nullptr)
     {
         deletePointerContainer(parameters);
         return nullptr;
     }
+
+    if (!EndIteratorCheck(iter, endIter))
+    {
+        deletePointerContainer(parameters);
+        return nullptr;
+    }
+
+    if (iter->GetValue() == "\n" && !SkipNewlines(iter, endIter))
+    {
+        deletePointerContainer(parameters);
+        return nullptr;
+    }
+
+    if (iter->GetValue() != "}")
+    {
+        logger.LogError(*iter, "Expected '}'");
+        deletePointerContainer(parameters);
+        return nullptr;
+    }
+
+    // increment past "}"
+    ++iter;
 
     FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, parameters, returnType, code);
     return functionDefinition;

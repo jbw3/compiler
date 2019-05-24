@@ -1,52 +1,85 @@
 fun noArgs() i32
+{
     42
+}
 
 fun oneArg(x i32) i32
+{
     x + 2
+}
 
 fun twoArgs(arg1 i32, arg2 i32) i32
+{
     arg1 - arg2
+}
 
 fun opOrder1(a i32, b i32, c i32, d i32) i32
+{
     a + b * c - d
+}
 
 fun opOrder2(a i32, b i32, c i32, d i32) i32
+{
     a + b * c - d / a + b % 42
+}
 
 fun opOrder3(a i32, b i32, c i32, d i32) bool
+{
     a == b + c * d
+}
 
 fun negatives(a i32, b i32, c i32) i32
+{
     -a - -b * -oneArg(2 + -c)
+}
 
 fun equal(a i32, b i32) bool
+{
     a == b
+}
 
 fun notEqual(a i32, b i32) bool
+{
     a != b
+}
 
 fun lessThan(a i32, b i32) bool
+{
     a < b
+}
 
 fun lessThanOrEqual(a i32, b i32) bool
+{
     a <= b
+}
 
 fun greaterThan(a i32, b i32) bool
+{
     a > b
+}
 
 fun greaterThanOrEqual(a i32, b i32) bool
+{
     a >= b
+}
 
 fun nestedCall(x i32, y i32, z i32) i32
+{
     twoArgs(0, x) + twoArgs(y + 42, z - 57)
+}
 
 fun call_function_defined_later() bool
+{
     returnBool()
+}
 
 fun returnBool() bool
+{
     true
+}
 
 fun basicBranch(x i32, y i32, z i32) i32
+{
     if x + 1 == y / 2
     {
         z * 10
@@ -55,8 +88,10 @@ fun basicBranch(x i32, y i32, z i32) i32
     {
         -z
     }
+}
 
 fun nestedBranches(x i32, y i32, z i32) i32
+{
     if x == 0
     {
         y + z
@@ -72,8 +107,10 @@ fun nestedBranches(x i32, y i32, z i32) i32
             y * z
         }
     }
+}
 
 fun elseIfBranches(x i32, y i32, z i32) i32
+{
     if x == 0
     {
         y + z
@@ -90,8 +127,10 @@ fun elseIfBranches(x i32, y i32, z i32) i32
     {
         42
     }
+}
 
 fun elseIfBranchesNesting(x i32, y i32, z i32) i32
+{
     if x == 0
     {
         y + z
@@ -126,3 +165,4 @@ fun elseIfBranchesNesting(x i32, y i32, z i32) i32
             y % z
         }
     }
+}
