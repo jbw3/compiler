@@ -114,6 +114,52 @@ bool isBool(const string& tokenStr)
     return tokenStr == "true" || tokenStr == "false";
 }
 
+bool binStringToInteger(const string& str, int64_t& num)
+{
+    num = 0;
+
+    // start at 2 to skip leading '0b'
+    for (size_t i = 2; i < str.size(); ++i)
+    {
+        char ch = str[i];
+        num <<= 1;
+
+        if (ch == '1')
+        {
+            num |= 1;
+        }
+        else if (ch != '0')
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool octStringToInteger(const string& str, int64_t& num)
+{
+    num = 0;
+
+    // start at 2 to skip leading '0o'
+    for (size_t i = 2; i < str.size(); ++i)
+    {
+        char ch = str[i];
+        num *= 8;
+
+        if (ch >= '0' && ch <= '7')
+        {
+            num += ch - '0';
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool decStringToInteger(const string& str, int64_t& num)
 {
     num = 0;
@@ -124,6 +170,37 @@ bool decStringToInteger(const string& str, int64_t& num)
         {
             num *= 10;
             num += ch - '0';
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool hexStringToInteger(const string& str, int64_t& num)
+{
+    num = 0;
+
+    // start at 2 to skip leading '0x'
+    for (size_t i = 2; i < str.size(); ++i)
+    {
+        char ch = str[i];
+        num *= 16;
+
+        if (isdigit(ch))
+        {
+            num += ch - '0';
+        }
+        else if (ch >= 'a' && ch <= 'f')
+        {
+            num += ch - 'a' + 10;
+        }
+        else if (ch >= 'A' && ch <= 'F')
+        {
+            num += ch - 'A' + 10;
         }
         else
         {
@@ -168,19 +245,16 @@ bool stringToInteger(const string& str, int64_t& num)
     switch (base)
     {
         case 2:
-            // TODO: support this base
-            ok = false;
+            ok = binStringToInteger(str, num);
             break;
         case 8:
-            // TODO: support this base
-            ok = false;
+            ok = octStringToInteger(str, num);
             break;
         case 10:
             ok = decStringToInteger(str, num);
             break;
         case 16:
-            // TODO: support this base
-            ok = false;
+            ok = hexStringToInteger(str, num);
             break;
         default:
             // we should not get here

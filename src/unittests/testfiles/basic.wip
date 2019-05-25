@@ -8,6 +8,11 @@ fun oneArg(x i32) i32
     x + 2
 }
 
+fun integerLiterals(x i32) i32
+{
+    0b101 + x + 0o370 + x + 123 + x + 0xa57F93
+}
+
 fun twoArgs(arg1 i32, arg2 i32) i32
 {
     arg1 - arg2

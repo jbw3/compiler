@@ -12,6 +12,17 @@ entry:
   ret i32 %add
 }
 
+define i32 @integerLiterals(i32 %x) {
+entry:
+  %add = add i32 5, %x
+  %add1 = add i32 %add, 248
+  %add2 = add i32 %add1, %x
+  %add3 = add i32 %add2, 123
+  %add4 = add i32 %add3, %x
+  %add5 = add i32 %add4, 10846099
+  ret i32 %add5
+}
+
 define i32 @twoArgs(i32 %arg1, i32 %arg2) {
 entry:
   %sub = sub i32 %arg1, %arg2
