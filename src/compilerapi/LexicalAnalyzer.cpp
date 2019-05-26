@@ -5,6 +5,10 @@
 
 using namespace std;
 
+const char LexicalAnalyzer::COMMENT_START = '#';
+
+const char LexicalAnalyzer::COMMENT_END = '\n';
+
 const unordered_set<string> LexicalAnalyzer::SYMBOLS =
 {
     "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "(", ")", "{", "}", ",", ";"
@@ -58,10 +62,21 @@ bool LexicalAnalyzer::Process(std::istream& is, std::vector<Token>& tokens)
     is.read(&ch, 1);
     while (!is.eof())
     {
-        ok = ParseChar(ch, tokens);
-        if (!ok)
+        if (ch == COMMENT_START)
         {
-            break;
+            // read to comment end
+            do
+            {
+                is.read(&ch, 1);
+            } while (!is.eof() && ch != COMMENT_END);
+        }
+        else
+        {
+            ok = ParseChar(ch, tokens);
+            if (!ok)
+            {
+                break;
+            }
         }
 
         if (ch == '\n')

@@ -16,6 +16,10 @@ public:
     bool Process(std::istream& is, std::vector<Token>& tokens);
 
 private:
+    static const char COMMENT_START;
+
+    static const char COMMENT_END;
+
     static const std::unordered_set<std::string> SYMBOLS;
 
     ErrorLogger& logger;
