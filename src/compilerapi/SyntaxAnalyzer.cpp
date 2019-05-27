@@ -42,7 +42,7 @@ SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
 {
 }
 
-bool SyntaxAnalyzer::Process(const TokenSequence& tokens, SyntaxTreeNode*& syntaxTree)
+bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syntaxTree)
 {
     TokenIterator iter = tokens.cbegin();
     TokenIterator endIter = tokens.cend();

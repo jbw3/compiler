@@ -1,4 +1,5 @@
 #include "Compiler.h"
+#include "CHeaderPrinter.h"
 #include "LexicalAnalyzer.h"
 #include "LlvmIrGenerator.h"
 #include "SemanticAnalyzer.h"
@@ -42,7 +43,7 @@ bool Compiler::Compile()
     }
 
     // syntax analysis
-    SyntaxTreeNode* syntaxTree = nullptr;
+    ModuleDefinition* syntaxTree = nullptr;
     if (ok)
     {
         SyntaxAnalyzer syntaxAnalyzer(logger);
@@ -61,6 +62,15 @@ bool Compiler::Compile()
     {
         SyntaxTreePrinter printer(config.outFilename);
         syntaxTree->Accept(&printer);
+        delete syntaxTree;
+        return ok;
+    }
+
+    // check if C header is the output
+    if (ok)
+    {
+        CHeaderPrinter printer;
+        ok = printer.Print(syntaxTree);
         delete syntaxTree;
         return ok;
     }

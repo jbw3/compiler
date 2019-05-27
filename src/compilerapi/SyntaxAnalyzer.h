@@ -29,7 +29,7 @@ public:
 
     SyntaxAnalyzer(ErrorLogger& logger);
 
-    bool Process(const TokenSequence& tokens, SyntaxTree::SyntaxTreeNode*& syntaxTree);
+    bool Process(const TokenSequence& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
 private:
     enum EParameterState
