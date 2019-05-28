@@ -67,10 +67,10 @@ bool Compiler::Compile()
     }
 
     // check if C header is the output
-    if (ok)
+    if (ok && config.outputType == Config::eCHeader)
     {
         CHeaderPrinter printer;
-        ok = printer.Print(syntaxTree);
+        ok = printer.Print(config, syntaxTree);
         delete syntaxTree;
         return ok;
     }

@@ -10,6 +10,7 @@ public:
     {
         eTokens,
         eSyntaxTree,
+        eCHeader,
         eAssembly,
     };
 

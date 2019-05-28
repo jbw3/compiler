@@ -66,6 +66,10 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             {
                 outputType = eSyntaxTree;
             }
+            else if (strcmp(outType, "c-header") == 0)
+            {
+                outputType = eCHeader;
+            }
             else if (strcmp(outType, "assembly") == 0)
             {
                 outputType = eAssembly;
@@ -125,7 +129,7 @@ void Config::PrintHelp() const
   -h, --help             Print help message
   --arch <value>         Assembly architecture
   --llvm                 Output LLVM IR
-  --out-type <value>     Type of output: assembly, tokens, tree
+  --out-type <value>     Type of output: assembly, c-header, tokens, tree
   -o, --output <file>    Specify name of output file
   -S                     Output assembly
 )";
