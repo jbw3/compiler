@@ -117,6 +117,15 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eModulo:
             resultValue = builder.CreateSRem(leftValue, rightValue, "mod");
             break;
+        case BinaryExpression::eBitwiseAnd:
+            resultValue = builder.CreateAnd(leftValue, rightValue, "bitand");
+            break;
+        case BinaryExpression::eBitwiseXor:
+            resultValue = builder.CreateXor(leftValue, rightValue, "bitxor");
+            break;
+        case BinaryExpression::eBitwiseOr:
+            resultValue = builder.CreateOr(leftValue, rightValue, "bitor");
+            break;
     }
 }
 

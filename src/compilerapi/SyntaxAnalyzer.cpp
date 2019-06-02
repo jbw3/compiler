@@ -29,6 +29,9 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"*", BinaryExpression::eMultiply},
     {"/", BinaryExpression::eDivide},
     {"%", BinaryExpression::eModulo},
+    {"&", BinaryExpression::eBitwiseAnd},
+    {"^", BinaryExpression::eBitwiseXor},
+    {"|", BinaryExpression::eBitwiseOr},
 };
 
 const map<string, EType> SyntaxAnalyzer::TYPES =
@@ -482,6 +485,9 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eModulo});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseAnd});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseXor});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
 
     return terms.front();

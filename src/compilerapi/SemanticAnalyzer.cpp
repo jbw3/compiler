@@ -99,6 +99,9 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eLessThanOrEqual:
             case BinaryExpression::eGreaterThan:
             case BinaryExpression::eGreaterThanOrEqual:
+            case BinaryExpression::eBitwiseAnd:
+            case BinaryExpression::eBitwiseXor:
+            case BinaryExpression::eBitwiseOr:
                 ok = leftType == rightType;
                 break;
             case BinaryExpression::eAdd:
@@ -135,6 +138,9 @@ EType SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator 
         case BinaryExpression::eMultiply:
         case BinaryExpression::eDivide:
         case BinaryExpression::eModulo:
+        case BinaryExpression::eBitwiseAnd:
+        case BinaryExpression::eBitwiseXor:
+        case BinaryExpression::eBitwiseOr:
             return leftType;
     }
 }

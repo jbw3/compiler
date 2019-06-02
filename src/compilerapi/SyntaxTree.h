@@ -85,6 +85,9 @@ public:
         eMultiply,
         eDivide,
         eModulo,
+        eBitwiseAnd,
+        eBitwiseXor,
+        eBitwiseOr,
     };
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);

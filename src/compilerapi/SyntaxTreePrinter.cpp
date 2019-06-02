@@ -95,6 +95,15 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eModulo:
             Print("%");
             break;
+        case BinaryExpression::eBitwiseAnd:
+            Print("&");
+            break;
+        case BinaryExpression::eBitwiseXor:
+            Print("^");
+            break;
+        case BinaryExpression::eBitwiseOr:
+            Print("|");
+            break;
     }
 
     Print("\",\n\"left\":\n");
