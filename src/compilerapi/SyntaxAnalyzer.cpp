@@ -14,6 +14,7 @@ const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
 const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_OPERATORS =
 {
     {"-", UnaryExpression::eNegative},
+    {"!", UnaryExpression::eComplement},
 };
 
 const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS =

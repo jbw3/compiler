@@ -114,6 +114,7 @@ public:
     enum EOperator
     {
         eNegative,
+        eComplement,
     };
 
     UnaryExpression(EOperator op, Expression* subExpr);

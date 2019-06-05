@@ -63,6 +63,9 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
         case UnaryExpression::eNegative:
             resultValue = builder.CreateNeg(subExprValue, "neg");
             break;
+        case UnaryExpression::eComplement:
+            resultValue = builder.CreateNot(subExprValue, "not");
+            break;
     }
 }
 

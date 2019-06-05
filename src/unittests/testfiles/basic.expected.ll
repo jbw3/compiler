@@ -77,6 +77,17 @@ entry:
   ret i32 %sub
 }
 
+define i32 @not(i32 %a, i32 %b) {
+entry:
+  %not = xor i32 %a, -1
+  %not1 = xor i32 %b, -1
+  %bitand = and i32 %not, %not1
+  %call = call i32 @noArgs()
+  %not2 = xor i32 %call, -1
+  %bitor = or i32 %bitand, %not2
+  ret i32 %bitor
+}
+
 define i1 @equal(i32 %a, i32 %b) {
 entry:
   %cmpeq = icmp eq i32 %a, %b

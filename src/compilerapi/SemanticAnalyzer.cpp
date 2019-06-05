@@ -43,6 +43,9 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, ETy
         case UnaryExpression::eNegative:
             ok = subExprType == EType::eInt32;
             break;
+        case UnaryExpression::eComplement:
+            ok = true;
+            break;
     }
 
     if (!ok)

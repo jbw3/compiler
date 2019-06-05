@@ -47,6 +47,9 @@ void SyntaxTreePrinter::Visit(UnaryExpression* unaryExpression)
         case UnaryExpression::eNegative:
             Print("-");
             break;
+        case UnaryExpression::eComplement:
+            Print("!");
+            break;
     }
 
     Print("\",\n\"expression\":\n");
