@@ -61,6 +61,8 @@ private:
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const std::unordered_set<std::string>& endTokens);
 
+    TokenIterator FindParenthesisEnd(TokenIterator iter, TokenIterator endIter);
+
     void ProcessExpressionOperators(std::vector<SyntaxTree::Expression*>& terms,
                                     std::vector<SyntaxTree::BinaryExpression::EOperator>& operators,
                                     const std::unordered_set<SyntaxTree::BinaryExpression::EOperator>& opsToProcess);

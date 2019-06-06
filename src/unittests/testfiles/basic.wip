@@ -38,6 +38,16 @@ fun opOrder4(a i32, b i32, c i32, d i32) i32
     a | b ^ c & d
 }
 
+fun opOrder5(a i32, b i32, c i32, d i32) i32
+{
+    ( -(a + b) + opOrder6(a, b, c, d) ) * d
+}
+
+fun opOrder6(a i32, b i32, c i32, d i32) i32
+{
+    (a | b) ^ (c & d)
+}
+
 fun negatives(a i32, b i32, c i32) i32
 {
     -a - -b * -oneArg(2 + -c)

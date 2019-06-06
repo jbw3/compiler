@@ -388,6 +388,27 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     Expression* expr = AddUnaryExpressions(new BoolLiteralExpression(value), unaryOperators);
                     terms.push_back(expr);
                 }
+                else if (value == "(")
+                {
+                    TokenIterator parenEndIter = FindParenthesisEnd(iter, endIter);
+                    if (parenEndIter == endIter)
+                    {
+                        logger.LogError(*iter, "Could not find end parenthesis");
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    ++iter;
+                    Expression* expr = ProcessExpression(iter, parenEndIter, {});
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+                }
                 else if (value == IF_KEYWORD)
                 {
                     Expression* expr = ProcessBranchExpression(iter, endIter);
@@ -492,6 +513,32 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
 
     return terms.front();
+}
+
+SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindParenthesisEnd(TokenIterator iter, TokenIterator endIter)
+{
+    unsigned int balance = 1;
+
+    ++iter;
+    while (iter != endIter)
+    {
+        if (iter->GetValue() == "(")
+        {
+            ++balance;
+        }
+        else if (iter->GetValue() == ")")
+        {
+            --balance;
+            if (balance == 0)
+            {
+                return iter;
+            }
+        }
+
+        ++iter;
+    }
+
+    return endIter;
 }
 
 void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,

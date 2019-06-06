@@ -64,6 +64,24 @@ entry:
   ret i32 %bitor
 }
 
+define i32 @opOrder5(i32 %a, i32 %b, i32 %c, i32 %d) {
+entry:
+  %add = add i32 %a, %b
+  %neg = sub i32 0, %add
+  %call = call i32 @opOrder6(i32 %a, i32 %b, i32 %c, i32 %d)
+  %add1 = add i32 %neg, %call
+  %mul = mul i32 %add1, %d
+  ret i32 %mul
+}
+
+define i32 @opOrder6(i32 %a, i32 %b, i32 %c, i32 %d) {
+entry:
+  %bitor = or i32 %a, %b
+  %bitand = and i32 %c, %d
+  %bitxor = xor i32 %bitor, %bitand
+  ret i32 %bitxor
+}
+
 define i32 @negatives(i32 %a, i32 %b, i32 %c) {
 entry:
   %neg = sub i32 0, %a
