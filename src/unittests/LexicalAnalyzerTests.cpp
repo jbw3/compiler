@@ -27,8 +27,7 @@ bool LexicalAnalyzerTests::TestValidInputs()
                 {"1", 1, 18},
                 {"+", 1, 20},
                 {"2", 1, 22},
-                {"}", 1, 24},
-                {"\n", 1, 25}
+                {"}", 1, 24}
             }
         },
         {
@@ -48,8 +47,7 @@ bool LexicalAnalyzerTests::TestValidInputs()
                 {"param1", 1, 46},
                 {"-", 1, 53},
                 {"param2", 1, 55},
-                {"}", 1, 62},
-                {"\n", 1, 63}
+                {"}", 1, 62}
             }
         },
         {
@@ -58,11 +56,9 @@ bool LexicalAnalyzerTests::TestValidInputs()
                 {"1", 1, 1},
                 {"+", 1, 3},
                 {"23", 1, 5},
-                {"\n", 1, 7},
                 {"not", 3, 1},
                 {"a", 3, 5},
-                {"comment", 3, 7},
-                {"\n", 3, 14}
+                {"comment", 3, 7}
             }
         }
     };

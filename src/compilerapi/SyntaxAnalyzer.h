@@ -45,8 +45,6 @@ private:
 
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
-    bool SkipNewlines(TokenIterator& iter, TokenIterator endIter);
-
     SyntaxTree::EType GetType(const std::string& typeName);
 
     SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator& iter,

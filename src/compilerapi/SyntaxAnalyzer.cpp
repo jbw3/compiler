@@ -56,26 +56,14 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     bool ok = true;
     while (ok && iter != endIter)
     {
-        const string& tokenValue = iter->GetValue();
-        if (tokenValue == "\n")
+        FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
+        if (functionDefinition == nullptr)
         {
-            ++iter;
+            ok = false;
         }
         else
         {
-            FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
-            if (functionDefinition == nullptr)
-            {
-                ok = false;
-            }
-            else
-            {
-                functions.push_back(functionDefinition);
-                if (iter != endIter)
-                {
-                    ++iter;
-                }
-            }
+            functions.push_back(functionDefinition);
         }
     }
 
@@ -94,19 +82,6 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     }
 
     return ok;
-}
-
-bool SyntaxAnalyzer::SkipNewlines(TokenIterator& iter, TokenIterator endIter)
-{
-    do
-    {
-        if (!IncrementIterator(iter, endIter))
-        {
-            return false;
-        }
-    } while (iter->GetValue() == "\n");
-
-    return true;
 }
 
 bool SyntaxAnalyzer::EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg)
@@ -209,8 +184,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     }
 
     // skip newlines
-    ok = SkipNewlines(iter, endIter);
-    if (!ok)
+    if (!IncrementIterator(iter, endIter, "Expected '{'"))
     {
         deletePointerContainer(parameters);
         return nullptr;
@@ -224,13 +198,13 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     }
 
     // increment past "{" and skip newlines
-    if (!IncrementIterator(iter, endIter) || !SkipNewlines(iter, endIter))
+    if (!IncrementIterator(iter, endIter))
     {
         deletePointerContainer(parameters);
         return nullptr;
     }
 
-    Expression* code = ProcessExpression(iter, endIter, {"}", "\n"});
+    Expression* code = ProcessExpression(iter, endIter, {"}"});
     if (code == nullptr)
     {
         deletePointerContainer(parameters);
@@ -238,12 +212,6 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     }
 
     if (!EndIteratorCheck(iter, endIter))
-    {
-        deletePointerContainer(parameters);
-        return nullptr;
-    }
-
-    if (iter->GetValue() == "\n" && !SkipNewlines(iter, endIter))
     {
         deletePointerContainer(parameters);
         return nullptr;
@@ -577,31 +545,27 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     ++iter;
 
     // read "if" condition
-    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {"{", "\n"}));
+    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {"{"}));
     if (ifCondition == nullptr)
     {
         return nullptr;
     }
 
     // increment past "{"
-    ++iter;
-
-    if (!SkipNewlines(iter, endIter))
+    if (!IncrementIterator(iter, endIter))
     {
         return nullptr;
     }
 
     // read "if" expression
-    unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"}", "\n"}));
+    unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"}"}));
     if (ifExpression == nullptr)
     {
         return nullptr;
     }
 
     // increment past "}"
-    ++iter;
-
-    if (!SkipNewlines(iter, endIter))
+    if (!IncrementIterator(iter, endIter))
     {
         return nullptr;
     }
@@ -618,12 +582,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    if (!SkipNewlines(iter, endIter))
-    {
-        return nullptr;
-    }
-
-    if (!EndIteratorCheck(iter, endIter, "Expected 'if' or '{'"))
+    if (!IncrementIterator(iter, endIter, "Expected 'if' or '{'"))
     {
         return nullptr;
     }
@@ -647,22 +606,17 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     else
     {
         // increment past "{"
-        ++iter;
-
-        if (!SkipNewlines(iter, endIter))
+        if (!IncrementIterator(iter, endIter))
         {
             return nullptr;
         }
 
         // read "else" expression
-        elseExpression.reset(ProcessExpression(iter, endIter, {"}", "\n"}));
+        elseExpression.reset(ProcessExpression(iter, endIter, {"}"}));
         if (elseExpression == nullptr)
         {
             return nullptr;
         }
-
-        // increment past "}"
-        ++iter;
     }
 
     BranchExpression* expr = new BranchExpression(ifCondition.release(), ifExpression.release(), elseExpression.release());

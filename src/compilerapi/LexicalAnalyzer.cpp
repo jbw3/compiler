@@ -114,7 +114,7 @@ Token LexicalAnalyzer::CreateToken()
 
 bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 {
-    if (isblank(ch))
+    if (isspace(ch))
     {
         if (!tokenStr.empty())
         {
@@ -131,7 +131,7 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
             }
         }
     }
-    else // ch is not blank
+    else // ch is not whitespace
     {
         if (isValid)
         {
@@ -148,39 +148,8 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
         }
         else
         {
-            if (ch == '\n')
-            {
-                // if we reached the end of a line and the last token is
-                // not valid, report an error
-                if (!tokenStr.empty())
-                {
-                    PrintError();
-                    return false;
-                }
-                else
-                {
-                    ++column;
-                    tokenStr = '\n';
-                    tokens.push_back(CreateToken());
-                    tokenStr = "";
-                    isValid = false;
-                }
-            }
-            else
-            {
-                tokenStr += ch;
-                isValid = IsValidToken(tokenStr);
-            }
-        }
-
-        // if the token string is the end of the line, go ahead
-        // and add it before line is incremented
-        if (tokenStr == "\n")
-        {
-            ++column;
-            tokens.push_back(CreateToken());
-            tokenStr = "";
-            isValid = false;
+            tokenStr += ch;
+            isValid = IsValidToken(tokenStr);
         }
     }
 
