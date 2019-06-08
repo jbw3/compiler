@@ -142,6 +142,52 @@ entry:
   ret i1 %cmpge
 }
 
+define i1 @logicalAnd2(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpne = icmp ne i32 %x, 0
+  br i1 %cmpne, label %andtrue, label %andfalse
+
+andtrue:                                          ; preds = %entry
+  %add = add i32 %z, 5
+  %cmplt = icmp slt i32 %y, %add
+  br label %andmerge
+
+andfalse:                                         ; preds = %entry
+  br label %andmerge
+
+andmerge:                                         ; preds = %andfalse, %andtrue
+  %andphi = phi i1 [ %cmplt, %andtrue ], [ false, %andfalse ]
+  ret i1 %andphi
+}
+
+define i1 @logicalAnd3(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %x, 0
+  br i1 %cmpeq, label %andtrue, label %andfalse
+
+andtrue:                                          ; preds = %entry
+  %cmpeq1 = icmp eq i32 %y, 1
+  br label %andmerge
+
+andfalse:                                         ; preds = %entry
+  br label %andmerge
+
+andmerge:                                         ; preds = %andfalse, %andtrue
+  %andphi = phi i1 [ %cmpeq1, %andtrue ], [ false, %andfalse ]
+  br i1 %andphi, label %andtrue2, label %andfalse4
+
+andtrue2:                                         ; preds = %andmerge
+  %cmpeq3 = icmp eq i32 %z, 2
+  br label %andmerge5
+
+andfalse4:                                        ; preds = %andmerge
+  br label %andmerge5
+
+andmerge5:                                        ; preds = %andfalse4, %andtrue2
+  %andphi6 = phi i1 [ %cmpeq3, %andtrue2 ], [ false, %andfalse4 ]
+  ret i1 %andphi6
+}
+
 define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
 entry:
   %call = call i32 @twoArgs(i32 0, i32 %x)
