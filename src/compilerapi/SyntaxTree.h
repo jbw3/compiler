@@ -4,18 +4,12 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include "TypeInfo.h"
 
 class SyntaxTreeVisitor;
 
 namespace SyntaxTree
 {
-enum class EType
-{
-    eUnknown,
-    eBool,
-    eInt32,
-};
-
 class SyntaxTreeNode
 {
 public:
@@ -31,12 +25,12 @@ public:
 
     virtual ~Expression() = default;
 
-    EType GetType() const;
+    const TypeInfo* GetType() const;
 
-    void SetType(EType newType);
+    void SetType(const TypeInfo* newType);
 
 private:
-    EType type;
+    const TypeInfo* type;
 };
 
 class NumericExpression : public Expression
@@ -195,24 +189,24 @@ private:
 class VariableDefinition
 {
 public:
-    VariableDefinition(const std::string& name, EType type);
+    VariableDefinition(const std::string& name, const TypeInfo* type);
 
     virtual ~VariableDefinition() = default;
 
     const std::string& GetName() const;
 
-    EType GetType() const;
+    const TypeInfo* GetType() const;
 
 private:
     std::string name;
-    EType type;
+    const TypeInfo* type;
 };
 
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:
     FunctionDefinition(const std::string& name, const std::vector<VariableDefinition*>& parameters,
-                       EType returnType, Expression* code);
+                       const TypeInfo* returnType, Expression* code);
 
     virtual ~FunctionDefinition();
 
@@ -222,14 +216,14 @@ public:
 
     const std::vector<VariableDefinition*>& GetParameters() const;
 
-    EType GetReturnType() const;
+    const TypeInfo* GetReturnType() const;
 
     Expression* GetCode() const;
 
 private:
     std::string name;
     std::vector<VariableDefinition*> parameters;
-    EType returnType;
+    const TypeInfo* returnType;
     Expression* code;
 };
 

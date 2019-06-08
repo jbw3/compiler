@@ -108,19 +108,22 @@ string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
     return macro;
 }
 
-bool CHeaderPrinter::GetCType(EType type, string& cType)
+bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
 {
-    switch (type)
+    if (type == TypeInfo::boolType)
     {
-        case EType::eUnknown:
-            cerr << "Unknown return type\n";
-            cType = "";
-            return false;
-        case EType::eBool:
-            cType = "bool";
-            return true;
-        case EType::eInt32:
-            cType = "int32_t";
-            return true;
+        cType = "bool";
+        return true;
+    }
+    else if (type == TypeInfo::int32Type)
+    {
+        cType = "int32_t";
+        return true;
+    }
+    else
+    {
+        cerr << "Unknown return type\n";
+        cType = "";
+        return false;
     }
 }

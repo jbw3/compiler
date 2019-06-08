@@ -5,9 +5,12 @@ using namespace std;
 TypeInfo boolTypeInfo(1, true, false);
 TypeInfo int32TypeInfo(32, false, true);
 
+const TypeInfo* TypeInfo::boolType = &boolTypeInfo;
+const TypeInfo* TypeInfo::int32Type = &int32TypeInfo;
+
 map<string, const TypeInfo*> TypeInfo::types = {
-    {"bool", &boolTypeInfo},
-    {"i32", &int32TypeInfo},
+    {"bool", boolType},
+    {"i32", int32Type},
 };
 
 const TypeInfo* TypeInfo::GetType(const string& typeName)

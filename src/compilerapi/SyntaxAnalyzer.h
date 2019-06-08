@@ -25,8 +25,6 @@ public:
 
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
 
-    static const std::map<std::string, SyntaxTree::EType> TYPES;
-
     SyntaxAnalyzer(ErrorLogger& logger);
 
     bool Process(const TokenSequence& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
@@ -44,8 +42,6 @@ private:
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
-
-    SyntaxTree::EType GetType(const std::string& typeName);
 
     SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter);

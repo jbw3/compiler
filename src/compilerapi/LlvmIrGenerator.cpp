@@ -393,20 +393,20 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
     return true;
 }
 
-Type* LlvmIrGenerator::GetType(EType type)
+Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     Type* llvmType = nullptr;
-    switch (type)
+    if (type == TypeInfo::boolType)
     {
-        case EType::eUnknown:
-            llvmType = nullptr;
-            break;
-        case EType::eBool:
-            llvmType = Type::getInt1Ty(context);
-            break;
-        case EType::eInt32:
-            llvmType = Type::getInt32Ty(context);
-            break;
+        llvmType = Type::getInt1Ty(context);
+    }
+    else if (type == TypeInfo::int32Type)
+    {
+        llvmType = Type::getInt32Ty(context);
+    }
+    else
+    {
+        llvmType = nullptr;
     }
 
     return llvmType;

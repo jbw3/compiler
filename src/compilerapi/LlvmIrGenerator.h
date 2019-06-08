@@ -46,7 +46,7 @@ private:
     std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
 
-    llvm::Type* GetType(SyntaxTree::EType type);
+    llvm::Type* GetType(const TypeInfo* type);
 
     bool CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef);
 

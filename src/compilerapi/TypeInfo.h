@@ -6,11 +6,14 @@
 class TypeInfo
 {
 public:
+    static const TypeInfo* boolType;
+    static const TypeInfo* int32Type;
+
+    static const TypeInfo* GetType(const std::string& typeName);
+
     unsigned numBits;
     bool isBool;
     bool isInt;
-
-    static const TypeInfo* GetType(const std::string& typeName);
 
     TypeInfo(
         unsigned numBits,

@@ -34,14 +34,14 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     unaryExpression->SetType(subExpr->GetType());
 }
 
-bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, EType subExprType)
+bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, const TypeInfo* subExprType)
 {
     bool ok = false;
 
     switch (op)
     {
         case UnaryExpression::eNegative:
-            ok = subExprType == EType::eInt32;
+            ok = subExprType->isInt;
             break;
         case UnaryExpression::eComplement:
             ok = true;
@@ -79,11 +79,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         return;
     }
 
-    EType resultType = GetBinaryOperatorResultType(binaryExpression->GetOperator(), left->GetType(), right->GetType());
+    const TypeInfo* resultType = GetBinaryOperatorResultType(binaryExpression->GetOperator(), left->GetType(), right->GetType());
     binaryExpression->SetType(resultType);
 }
 
-bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, EType leftType, EType rightType)
+bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType)
 {
     bool ok = false;
 
@@ -109,14 +109,14 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
-                ok = leftType == EType::eBool;
+                ok = leftType->isBool;
                 break;
             case BinaryExpression::eAdd:
             case BinaryExpression::eSubtract:
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eModulo:
-                ok = leftType == EType::eInt32;
+                ok = leftType->isInt;
                 break;
         }
 
@@ -129,7 +129,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     return ok;
 }
 
-EType SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator op, EType leftType, EType /*rightType*/)
+const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* /*rightType*/)
 {
     switch (op)
     {
@@ -141,7 +141,7 @@ EType SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator 
         case BinaryExpression::eGreaterThanOrEqual:
         case BinaryExpression::eLogicalAnd:
         case BinaryExpression::eLogicalOr:
-            return EType::eBool;
+            return TypeInfo::boolType;
         case BinaryExpression::eAdd:
         case BinaryExpression::eSubtract:
         case BinaryExpression::eMultiply:
@@ -211,12 +211,12 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 {
     // TODO: check number's type
-    numericExpression->SetType(EType::eInt32);
+    numericExpression->SetType(TypeInfo::int32Type);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    boolLiteralExpression->SetType(EType::eBool);
+    boolLiteralExpression->SetType(TypeInfo::boolType);
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
@@ -292,7 +292,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
 
     // ensure if condition is a boolean expression
-    if (ifCondition->GetType() != EType::eBool)
+    if (ifCondition->GetType() != TypeInfo::boolType)
     {
         isError = true;
         cerr << "If condition must be a boolean expression\n";

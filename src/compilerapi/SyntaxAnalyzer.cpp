@@ -37,12 +37,6 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"||", BinaryExpression::eLogicalOr},
 };
 
-const map<string, EType> SyntaxAnalyzer::TYPES =
-{
-    {"bool", EType::eBool},
-    {"i32", EType::eInt32},
-};
-
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
     logger(logger)
 {
@@ -111,19 +105,6 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
     return EndIteratorCheck(iter, endIter, errorMsg);
 }
 
-EType SyntaxAnalyzer::GetType(const std::string& typeName)
-{
-    auto typeIter = TYPES.find(typeName);
-    if (typeIter == TYPES.cend())
-    {
-        return EType::eUnknown;
-    }
-    else
-    {
-        return typeIter->second;
-    }
-}
-
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
@@ -177,8 +158,8 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     }
 
     // get return type
-    EType returnType = GetType(iter->GetValue());
-    if (returnType == EType::eUnknown)
+    const TypeInfo* returnType = TypeInfo::GetType(iter->GetValue());
+    if (returnType == nullptr)
     {
         logger.LogError(*iter, "Expected return type");
         deletePointerContainer(parameters);
@@ -259,8 +240,8 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
         else if (state == eType)
         {
-            EType paramType = GetType(value);
-            if (paramType == EType::eUnknown)
+            const TypeInfo* paramType = TypeInfo::GetType(value);
+            if (paramType == nullptr)
             {
                 logger.LogError(*iter, "'{}' is not a known type", value);
                 return false;

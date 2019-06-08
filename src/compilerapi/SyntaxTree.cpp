@@ -6,16 +6,16 @@ using namespace std;
 namespace SyntaxTree
 {
 Expression::Expression() :
-    type(EType::eUnknown)
+    type(nullptr)
 {
 }
 
-EType Expression::GetType() const
+const TypeInfo* Expression::GetType() const
 {
     return type;
 }
 
-void Expression::SetType(EType newType)
+void Expression::SetType(const TypeInfo* newType)
 {
     type = newType;
 }
@@ -37,14 +37,14 @@ const string& NumericExpression::GetNumber() const
 BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()
 {
     BoolLiteralExpression* expr = new BoolLiteralExpression("true");
-    expr->SetType(EType::eBool);
+    expr->SetType(TypeInfo::boolType);
     return expr;
 }
 
 BoolLiteralExpression* BoolLiteralExpression::CreateFalseExpression()
 {
     BoolLiteralExpression* expr = new BoolLiteralExpression("false");
-    expr->SetType(EType::eBool);
+    expr->SetType(TypeInfo::boolType);
     return expr;
 }
 
@@ -199,7 +199,7 @@ Expression* BranchExpression::GetElseExpression() const
     return elseExpression;
 }
 
-VariableDefinition::VariableDefinition(const string& name, EType type) :
+VariableDefinition::VariableDefinition(const string& name, const TypeInfo* type) :
     name(name),
     type(type)
 {
@@ -210,14 +210,14 @@ const string& VariableDefinition::GetName() const
     return name;
 }
 
-EType VariableDefinition::GetType() const
+const TypeInfo* VariableDefinition::GetType() const
 {
     return type;
 }
 
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
-                                       EType returnType,
+                                       const TypeInfo* returnType,
                                        Expression* code) :
     name(name),
     parameters(parameters),
@@ -250,7 +250,7 @@ const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
     return parameters;
 }
 
-EType FunctionDefinition::GetReturnType() const
+const TypeInfo* FunctionDefinition::GetReturnType() const
 {
     return returnType;
 }

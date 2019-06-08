@@ -35,11 +35,11 @@ private:
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
     std::map<std::string, SyntaxTree::VariableDefinition*> variables;
 
-    bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, SyntaxTree::EType subExprType);
+    bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);
 
-    bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, SyntaxTree::EType leftType, SyntaxTree::EType rightType);
+    bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 
-    SyntaxTree::EType GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, SyntaxTree::EType leftType, SyntaxTree::EType rightType);
+    const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 };
 
 #endif // SEMANTIC_ANALYZER_H_
