@@ -422,3 +422,41 @@ merge24:                                          ; preds = %merge22, %if
   %phi25 = phi i32 [ %add, %if ], [ %phi23, %merge22 ]
   ret i32 %phi25
 }
+
+define i32 @branchWithLogicalOperators(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %x, 0
+  br i1 %cmpeq, label %andtrue, label %andfalse
+
+andtrue:                                          ; preds = %entry
+  %cmpeq1 = icmp eq i32 %y, 1
+  br label %andmerge
+
+andfalse:                                         ; preds = %entry
+  br label %andmerge
+
+andmerge:                                         ; preds = %andfalse, %andtrue
+  %andphi = phi i1 [ %cmpeq1, %andtrue ], [ false, %andfalse ]
+  br i1 %andphi, label %ortrue, label %orfalse
+
+ortrue:                                           ; preds = %andmerge
+  br label %ormerge
+
+orfalse:                                          ; preds = %andmerge
+  %cmpeq2 = icmp eq i32 %z, 1
+  br label %ormerge
+
+ormerge:                                          ; preds = %orfalse, %ortrue
+  %orphi = phi i1 [ true, %ortrue ], [ %cmpeq2, %orfalse ]
+  br i1 %orphi, label %if, label %else
+
+if:                                               ; preds = %ormerge
+  br label %merge
+
+else:                                             ; preds = %ormerge
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ 100, %if ], [ 200, %else ]
+  ret i32 %phi
+}

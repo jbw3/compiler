@@ -211,3 +211,15 @@ fun elseIfBranchesNesting(x i32, y i32, z i32) i32
         }
     }
 }
+
+fun branchWithLogicalOperators(x i32, y i32, z i32) i32
+{
+    if x == 0 && y == 1 || z == 1
+    {
+        100
+    }
+    else
+    {
+        200
+    }
+}
