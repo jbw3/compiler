@@ -188,6 +188,53 @@ andmerge5:                                        ; preds = %andfalse4, %andtrue
   ret i1 %andphi6
 }
 
+define i1 @logicalOr2(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %z, 0
+  br i1 %cmpeq, label %ortrue, label %orfalse
+
+ortrue:                                           ; preds = %entry
+  br label %ormerge
+
+orfalse:                                          ; preds = %entry
+  %div = sdiv i32 %y, %z
+  %add = add i32 %x, %div
+  %cmplt = icmp slt i32 %add, 100
+  br label %ormerge
+
+ormerge:                                          ; preds = %orfalse, %ortrue
+  %orphi = phi i1 [ true, %ortrue ], [ %cmplt, %orfalse ]
+  ret i1 %orphi
+}
+
+define i1 @logicalOr3(i32 %x, i32 %y, i32 %z) {
+entry:
+  %cmpeq = icmp eq i32 %x, 0
+  br i1 %cmpeq, label %ortrue, label %orfalse
+
+ortrue:                                           ; preds = %entry
+  br label %ormerge
+
+orfalse:                                          ; preds = %entry
+  %cmpeq1 = icmp eq i32 %y, 1
+  br label %ormerge
+
+ormerge:                                          ; preds = %orfalse, %ortrue
+  %orphi = phi i1 [ true, %ortrue ], [ %cmpeq1, %orfalse ]
+  br i1 %orphi, label %ortrue2, label %orfalse3
+
+ortrue2:                                          ; preds = %ormerge
+  br label %ormerge5
+
+orfalse3:                                         ; preds = %ormerge
+  %cmpeq4 = icmp eq i32 %z, 2
+  br label %ormerge5
+
+ormerge5:                                         ; preds = %orfalse3, %ortrue2
+  %orphi6 = phi i1 [ true, %ortrue2 ], [ %cmpeq4, %orfalse3 ]
+  ret i1 %orphi6
+}
+
 define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
 entry:
   %call = call i32 @twoArgs(i32 0, i32 %x)
