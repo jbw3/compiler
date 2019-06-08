@@ -97,23 +97,9 @@ void Compiler::PrintTokens(const vector<Token>& tokens) const
         os = new fstream(config.outFilename, ios_base::out);
     }
 
-    if (tokens.size() > 0)
+    for (const Token& token : tokens)
     {
-        *os << '|';
-        for (const Token& token : tokens)
-        {
-            const string& value = token.GetValue();
-            if (value == "\n")
-            {
-                *os << "\\n";
-            }
-            else
-            {
-                *os << value;
-            }
-            *os << '|';
-        }
-        *os << '\n';
+        *os << token.GetValue() << '\n';
     }
 
     if (os != &cout)
