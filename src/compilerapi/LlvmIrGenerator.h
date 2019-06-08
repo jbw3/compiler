@@ -54,6 +54,8 @@ private:
                               const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
 
     llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
+
+    llvm::Value* CreateLogicalOr(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
 };
 
 #endif // LLVM_IR_GENERATOR_H_

@@ -79,8 +79,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
     }
     else if (op == BinaryExpression::eLogicalOr)
     {
-        cerr << "TODO\n";
-        resultValue = nullptr;
+        resultValue = CreateLogicalOr(binaryExpression->GetLeftExpression(), binaryExpression->GetRightExpression());
     }
     else
     {
@@ -503,11 +502,20 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
     return phiNode;
 }
 
-Value* LlvmIrGenerator::CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr)
+Value* LlvmIrGenerator::CreateLogicalAnd(Expression* leftExpr, Expression* rightExpr)
 {
     BoolLiteralExpression* falseExpr = BoolLiteralExpression::CreateFalseExpression();
     Value* value = CreateBranch(leftExpr, rightExpr, falseExpr, "andtrue", "andfalse", "andmerge", "andphi");
     delete falseExpr;
+
+    return value;
+}
+
+Value* LlvmIrGenerator::CreateLogicalOr(Expression* leftExpr, Expression* rightExpr)
+{
+    BoolLiteralExpression* trueExpr = BoolLiteralExpression::CreateTrueExpression();
+    Value* value = CreateBranch(leftExpr, trueExpr, rightExpr, "ortrue", "orfalse", "ormerge", "orphi");
+    delete trueExpr;
 
     return value;
 }
