@@ -50,6 +50,9 @@ private:
 
     bool CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef);
 
+    llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr,
+                              const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
+
     llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
 };
 

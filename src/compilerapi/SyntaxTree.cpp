@@ -34,6 +34,20 @@ const string& NumericExpression::GetNumber() const
     return number;
 }
 
+BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()
+{
+    BoolLiteralExpression* expr = new BoolLiteralExpression("true");
+    expr->SetType(EType::eBool);
+    return expr;
+}
+
+BoolLiteralExpression* BoolLiteralExpression::CreateFalseExpression()
+{
+    BoolLiteralExpression* expr = new BoolLiteralExpression("false");
+    expr->SetType(EType::eBool);
+    return expr;
+}
+
 BoolLiteralExpression::BoolLiteralExpression(const string& value) :
     value(value)
 {

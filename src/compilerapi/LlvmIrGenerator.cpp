@@ -301,59 +301,12 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
 void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 {
-    // generate the if condition IR
-    branchExpression->GetIfCondition()->Accept(this);
-    if (resultValue == nullptr)
-    {
-        return;
-    }
-    Value* ifConditionValue = resultValue;
-
-    // create the branch basic blocks
-    Function* function = builder.GetInsertBlock()->getParent();
-    BasicBlock* ifBlock = BasicBlock::Create(context, "if", function);
-    BasicBlock* elseBlock = BasicBlock::Create(context, "else");
-    BasicBlock* mergeBlock = BasicBlock::Create(context, "merge");
-
-    builder.CreateCondBr(ifConditionValue, ifBlock, elseBlock);
-
-    // generate "if" branch IR
-    builder.SetInsertPoint(ifBlock);
-    branchExpression->GetIfExpression()->Accept(this);
-    if (resultValue == nullptr)
-    {
-        return;
-    }
-    Value* ifExprValue = resultValue;
-    builder.CreateBr(mergeBlock);
-
-    // update block in case new blocks were added when generating the "if" block
-    ifBlock = builder.GetInsertBlock();
-
-    // generate "else" branch IR
-    function->getBasicBlockList().push_back(elseBlock);
-    builder.SetInsertPoint(elseBlock);
-    branchExpression->GetElseExpression()->Accept(this);
-    if (resultValue == nullptr)
-    {
-        return;
-    }
-    Value* elseExprValue = resultValue;
-    builder.CreateBr(mergeBlock);
-
-    // update block in case new blocks were added when generating the "else" block
-    elseBlock = builder.GetInsertBlock();
-
-    // generate merge block
-    function->getBasicBlockList().push_back(mergeBlock);
-    builder.SetInsertPoint(mergeBlock);
-
-    Type* phiType = GetType(branchExpression->GetType());
-    PHINode* phiNode = builder.CreatePHI(phiType, 2, "phi");
-    phiNode->addIncoming(ifExprValue, ifBlock);
-    phiNode->addIncoming(elseExprValue, elseBlock);
-
-    resultValue = phiNode;
+    resultValue = CreateBranch(
+        branchExpression->GetIfCondition(),
+        branchExpression->GetIfExpression(),
+        branchExpression->GetElseExpression(),
+        "if", "else", "merge", "phi"
+    );
 }
 
 bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
@@ -485,31 +438,33 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     return true;
 }
 
-Value* LlvmIrGenerator::CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr)
+Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* trueExpr, Expression* falseExpr,
+                                     const char* trueName, const char* falseName, const char* mergeName, const char* phiName)
 {
-    leftExpr->Accept(this);
+    // generate the condition IR
+    conditionExpr->Accept(this);
     if (resultValue == nullptr)
     {
         return nullptr;
     }
-    Value* leftValue = resultValue;
+    Value* conditionValue = resultValue;
 
     // create the branch basic blocks
     Function* function = builder.GetInsertBlock()->getParent();
-    BasicBlock* trueBlock = BasicBlock::Create(context, "andtrue", function);
-    BasicBlock* falseBlock = BasicBlock::Create(context, "andfalse");
-    BasicBlock* mergeBlock = BasicBlock::Create(context, "andmerge");
+    BasicBlock* trueBlock = BasicBlock::Create(context, trueName, function);
+    BasicBlock* falseBlock = BasicBlock::Create(context, falseName);
+    BasicBlock* mergeBlock = BasicBlock::Create(context, mergeName);
 
-    builder.CreateCondBr(leftValue, trueBlock, falseBlock);
+    builder.CreateCondBr(conditionValue, trueBlock, falseBlock);
 
     // generate "true" block IR
     builder.SetInsertPoint(trueBlock);
-    rightExpr->Accept(this);
+    trueExpr->Accept(this);
     if (resultValue == nullptr)
     {
         return nullptr;
     }
-    Value* rightValue = resultValue;
+    Value* ifExprValue = resultValue;
     builder.CreateBr(mergeBlock);
 
     // update block in case new blocks were added when generating the "true" block
@@ -518,18 +473,41 @@ Value* LlvmIrGenerator::CreateLogicalAnd(SyntaxTree::Expression* leftExpr, Synta
     // generate "false" block IR
     function->getBasicBlockList().push_back(falseBlock);
     builder.SetInsertPoint(falseBlock);
+    falseExpr->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return nullptr;
+    }
+    Value* elseExprValue = resultValue;
     builder.CreateBr(mergeBlock);
 
     // update block in case new blocks were added when generating the "false" block
     falseBlock = builder.GetInsertBlock();
 
-    // generate merge block
+    // generate merge block IR
     function->getBasicBlockList().push_back(mergeBlock);
     builder.SetInsertPoint(mergeBlock);
 
-    PHINode* phiNode = builder.CreatePHI(Type::getInt1Ty(context), 2, "andphi");
-    phiNode->addIncoming(rightValue, trueBlock);
-    phiNode->addIncoming(ConstantInt::getFalse(context), falseBlock);
+    // check if the "true" and "false" expressions have the same type
+    if (trueExpr->GetType() != falseExpr->GetType())
+    {
+        cerr << "Internal Error: Branch true and false blocks must have the same type\n";
+        return nullptr;
+    }
+
+    Type* phiType = GetType(trueExpr->GetType());
+    PHINode* phiNode = builder.CreatePHI(phiType, 2, phiName);
+    phiNode->addIncoming(ifExprValue, trueBlock);
+    phiNode->addIncoming(elseExprValue, falseBlock);
 
     return phiNode;
+}
+
+Value* LlvmIrGenerator::CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr)
+{
+    BoolLiteralExpression* falseExpr = BoolLiteralExpression::CreateFalseExpression();
+    Value* value = CreateBranch(leftExpr, rightExpr, falseExpr, "andtrue", "andfalse", "andmerge", "andphi");
+    delete falseExpr;
+
+    return value;
 }

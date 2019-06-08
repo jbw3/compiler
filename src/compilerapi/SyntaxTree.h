@@ -57,6 +57,10 @@ private:
 class BoolLiteralExpression : public Expression
 {
 public:
+    static BoolLiteralExpression* CreateTrueExpression();
+
+    static BoolLiteralExpression* CreateFalseExpression();
+
     BoolLiteralExpression(const std::string& value);
 
     virtual ~BoolLiteralExpression() = default;
