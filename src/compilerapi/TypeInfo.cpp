@@ -5,12 +5,12 @@ using namespace std;
 TypeInfo boolTypeInfo(1, true, false);
 TypeInfo int32TypeInfo(32, false, true);
 
-const TypeInfo* TypeInfo::boolType = &boolTypeInfo;
-const TypeInfo* TypeInfo::int32Type = &int32TypeInfo;
+const TypeInfo* TypeInfo::BoolType = &boolTypeInfo;
+const TypeInfo* TypeInfo::Int32Type = &int32TypeInfo;
 
 map<string, const TypeInfo*> TypeInfo::types = {
-    {"bool", boolType},
-    {"i32", int32Type},
+    {"bool", BoolType},
+    {"i32", Int32Type},
 };
 
 const TypeInfo* TypeInfo::GetType(const string& typeName)
@@ -28,8 +28,8 @@ TypeInfo::TypeInfo(
     bool isBool,
     bool isInt
 ) :
-    numBits(numBits),
-    isBool(isBool),
-    isInt(isInt)
+    NumBits(numBits),
+    IsBool(isBool),
+    IsInt(isInt)
 {
 }

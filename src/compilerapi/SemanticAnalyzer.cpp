@@ -41,7 +41,7 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, con
     switch (op)
     {
         case UnaryExpression::eNegative:
-            ok = subExprType->isInt;
+            ok = subExprType->IsInt;
             break;
         case UnaryExpression::eComplement:
             ok = true;
@@ -109,14 +109,14 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
-                ok = leftType->isBool;
+                ok = leftType->IsBool;
                 break;
             case BinaryExpression::eAdd:
             case BinaryExpression::eSubtract:
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eModulo:
-                ok = leftType->isInt;
+                ok = leftType->IsInt;
                 break;
         }
 
@@ -141,7 +141,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eGreaterThanOrEqual:
         case BinaryExpression::eLogicalAnd:
         case BinaryExpression::eLogicalOr:
-            return TypeInfo::boolType;
+            return TypeInfo::BoolType;
         case BinaryExpression::eAdd:
         case BinaryExpression::eSubtract:
         case BinaryExpression::eMultiply:
@@ -211,12 +211,12 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 {
     // TODO: check number's type
-    numericExpression->SetType(TypeInfo::int32Type);
+    numericExpression->SetType(TypeInfo::Int32Type);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    boolLiteralExpression->SetType(TypeInfo::boolType);
+    boolLiteralExpression->SetType(TypeInfo::BoolType);
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
@@ -292,7 +292,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
 
     // ensure if condition is a boolean expression
-    if (ifCondition->GetType() != TypeInfo::boolType)
+    if (ifCondition->GetType() != TypeInfo::BoolType)
     {
         isError = true;
         cerr << "If condition must be a boolean expression\n";

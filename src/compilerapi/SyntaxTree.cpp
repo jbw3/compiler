@@ -37,14 +37,14 @@ const string& NumericExpression::GetNumber() const
 BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()
 {
     BoolLiteralExpression* expr = new BoolLiteralExpression("true");
-    expr->SetType(TypeInfo::boolType);
+    expr->SetType(TypeInfo::BoolType);
     return expr;
 }
 
 BoolLiteralExpression* BoolLiteralExpression::CreateFalseExpression()
 {
     BoolLiteralExpression* expr = new BoolLiteralExpression("false");
-    expr->SetType(TypeInfo::boolType);
+    expr->SetType(TypeInfo::BoolType);
     return expr;
 }
 

@@ -110,12 +110,12 @@ string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
 
 bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
 {
-    if (type == TypeInfo::boolType)
+    if (type == TypeInfo::BoolType)
     {
         cType = "bool";
         return true;
     }
-    else if (type == TypeInfo::int32Type)
+    else if (type == TypeInfo::Int32Type)
     {
         cType = "int32_t";
         return true;
