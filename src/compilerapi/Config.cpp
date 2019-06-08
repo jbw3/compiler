@@ -125,12 +125,25 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
 
 void Config::PrintHelp() const
 {
-    cout << R"(Options:
+    cout << R"(Usage: wip <filename> [options]
+
+Options:
   -h, --help             Print help message
   --arch <value>         Assembly architecture
   --llvm                 Output LLVM IR
   --out-type <value>     Type of output: assembly, c-header, tokens, tree
   -o, --output <file>    Specify name of output file
-  -S                     Output assembly
+  -S                     Output assembly as text
+
+Examples:
+
+Compile test.wip to an object file:
+  wip test.wip
+
+Output LLVM IR:
+  wip test.wip --llvm
+
+Output a C/C++ header file:
+  wip test.wip --out-type c-header -o test.h
 )";
 }
