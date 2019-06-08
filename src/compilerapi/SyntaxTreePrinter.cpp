@@ -107,6 +107,12 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eBitwiseOr:
             Print("|");
             break;
+        case BinaryExpression::eLogicalAnd:
+            Print("&&");
+            break;
+        case BinaryExpression::eLogicalOr:
+            Print("||");
+            break;
     }
 
     Print("\",\n\"left\":\n");

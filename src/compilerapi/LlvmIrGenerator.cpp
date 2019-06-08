@@ -71,64 +71,83 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
 
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 {
-    binaryExpression->GetLeftExpression()->Accept(this);
-    if (resultValue == nullptr)
-    {
-        return;
-    }
-    Value* leftValue = resultValue;
+    BinaryExpression::EOperator op = binaryExpression->GetOperator();
 
-    binaryExpression->GetRightExpression()->Accept(this);
-    if (resultValue == nullptr)
+    if (op == BinaryExpression::eLogicalAnd)
     {
-        return;
+        resultValue = CreateLogicalAnd(binaryExpression->GetLeftExpression(), binaryExpression->GetRightExpression());
     }
-    Value* rightValue = resultValue;
-
-    switch (binaryExpression->GetOperator())
+    else if (op == BinaryExpression::eLogicalOr)
     {
-        case BinaryExpression::eEqual:
-            resultValue = builder.CreateICmpEQ(leftValue, rightValue, "cmpeq");
-            break;
-        case BinaryExpression::eNotEqual:
-            resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
-            break;
-        case BinaryExpression::eLessThan:
-            resultValue = builder.CreateICmpSLT(leftValue, rightValue, "cmplt");
-            break;
-        case BinaryExpression::eLessThanOrEqual:
-            resultValue = builder.CreateICmpSLE(leftValue, rightValue, "cmple");
-            break;
-        case BinaryExpression::eGreaterThan:
-            resultValue = builder.CreateICmpSGT(leftValue, rightValue, "cmpgt");
-            break;
-        case BinaryExpression::eGreaterThanOrEqual:
-            resultValue = builder.CreateICmpSGE(leftValue, rightValue, "cmpge");
-            break;
-        case BinaryExpression::eAdd:
-            resultValue = builder.CreateAdd(leftValue, rightValue, "add");
-            break;
-        case BinaryExpression::eSubtract:
-            resultValue = builder.CreateSub(leftValue, rightValue, "sub");
-            break;
-        case BinaryExpression::eMultiply:
-            resultValue = builder.CreateMul(leftValue, rightValue, "mul");
-            break;
-        case BinaryExpression::eDivide:
-            resultValue = builder.CreateSDiv(leftValue, rightValue, "div");
-            break;
-        case BinaryExpression::eModulo:
-            resultValue = builder.CreateSRem(leftValue, rightValue, "mod");
-            break;
-        case BinaryExpression::eBitwiseAnd:
-            resultValue = builder.CreateAnd(leftValue, rightValue, "bitand");
-            break;
-        case BinaryExpression::eBitwiseXor:
-            resultValue = builder.CreateXor(leftValue, rightValue, "bitxor");
-            break;
-        case BinaryExpression::eBitwiseOr:
-            resultValue = builder.CreateOr(leftValue, rightValue, "bitor");
-            break;
+        cerr << "TODO\n";
+        resultValue = nullptr;
+    }
+    else
+    {
+        binaryExpression->GetLeftExpression()->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+        Value* leftValue = resultValue;
+
+        binaryExpression->GetRightExpression()->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+        Value* rightValue = resultValue;
+
+        switch (op)
+        {
+            case BinaryExpression::eEqual:
+                resultValue = builder.CreateICmpEQ(leftValue, rightValue, "cmpeq");
+                break;
+            case BinaryExpression::eNotEqual:
+                resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
+                break;
+            case BinaryExpression::eLessThan:
+                resultValue = builder.CreateICmpSLT(leftValue, rightValue, "cmplt");
+                break;
+            case BinaryExpression::eLessThanOrEqual:
+                resultValue = builder.CreateICmpSLE(leftValue, rightValue, "cmple");
+                break;
+            case BinaryExpression::eGreaterThan:
+                resultValue = builder.CreateICmpSGT(leftValue, rightValue, "cmpgt");
+                break;
+            case BinaryExpression::eGreaterThanOrEqual:
+                resultValue = builder.CreateICmpSGE(leftValue, rightValue, "cmpge");
+                break;
+            case BinaryExpression::eAdd:
+                resultValue = builder.CreateAdd(leftValue, rightValue, "add");
+                break;
+            case BinaryExpression::eSubtract:
+                resultValue = builder.CreateSub(leftValue, rightValue, "sub");
+                break;
+            case BinaryExpression::eMultiply:
+                resultValue = builder.CreateMul(leftValue, rightValue, "mul");
+                break;
+            case BinaryExpression::eDivide:
+                resultValue = builder.CreateSDiv(leftValue, rightValue, "div");
+                break;
+            case BinaryExpression::eModulo:
+                resultValue = builder.CreateSRem(leftValue, rightValue, "mod");
+                break;
+            case BinaryExpression::eBitwiseAnd:
+                resultValue = builder.CreateAnd(leftValue, rightValue, "bitand");
+                break;
+            case BinaryExpression::eBitwiseXor:
+                resultValue = builder.CreateXor(leftValue, rightValue, "bitxor");
+                break;
+            case BinaryExpression::eBitwiseOr:
+                resultValue = builder.CreateOr(leftValue, rightValue, "bitor");
+                break;
+            case BinaryExpression::eLogicalAnd:
+            case BinaryExpression::eLogicalOr:
+                cerr << "Internal error: logical AND and logical OR operators should have been handled before here\n";
+                resultValue = nullptr;
+                break;
+        }
     }
 }
 
@@ -464,4 +483,53 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), &module);
 
     return true;
+}
+
+Value* LlvmIrGenerator::CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr)
+{
+    leftExpr->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return nullptr;
+    }
+    Value* leftValue = resultValue;
+
+    // create the branch basic blocks
+    Function* function = builder.GetInsertBlock()->getParent();
+    BasicBlock* trueBlock = BasicBlock::Create(context, "andtrue", function);
+    BasicBlock* falseBlock = BasicBlock::Create(context, "andfalse");
+    BasicBlock* mergeBlock = BasicBlock::Create(context, "andmerge");
+
+    builder.CreateCondBr(leftValue, trueBlock, falseBlock);
+
+    // generate "true" block IR
+    builder.SetInsertPoint(trueBlock);
+    rightExpr->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return nullptr;
+    }
+    Value* rightValue = resultValue;
+    builder.CreateBr(mergeBlock);
+
+    // update block in case new blocks were added when generating the "true" block
+    trueBlock = builder.GetInsertBlock();
+
+    // generate "false" block IR
+    function->getBasicBlockList().push_back(falseBlock);
+    builder.SetInsertPoint(falseBlock);
+    builder.CreateBr(mergeBlock);
+
+    // update block in case new blocks were added when generating the "false" block
+    falseBlock = builder.GetInsertBlock();
+
+    // generate merge block
+    function->getBasicBlockList().push_back(mergeBlock);
+    builder.SetInsertPoint(mergeBlock);
+
+    PHINode* phiNode = builder.CreatePHI(Type::getInt1Ty(context), 2, "andphi");
+    phiNode->addIncoming(rightValue, trueBlock);
+    phiNode->addIncoming(ConstantInt::getFalse(context), falseBlock);
+
+    return phiNode;
 }

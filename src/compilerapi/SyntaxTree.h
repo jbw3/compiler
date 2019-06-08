@@ -88,6 +88,8 @@ public:
         eBitwiseAnd,
         eBitwiseXor,
         eBitwiseOr,
+        eLogicalAnd,
+        eLogicalOr,
     };
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);
