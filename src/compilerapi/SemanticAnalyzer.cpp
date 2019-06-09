@@ -87,7 +87,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
 {
     bool ok = false;
 
-    if (leftType != rightType)
+    if ( (leftType != rightType) && !(leftType->IsInt && rightType->IsInt) )
     {
         cerr << "Left and right operands do not have the same type\n";
         ok = false;
@@ -101,7 +101,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseXor:
             case BinaryExpression::eBitwiseOr:
-                ok = leftType == rightType;
+                ok = (leftType == rightType) || (leftType->IsInt && rightType->IsInt);
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
@@ -116,20 +116,20 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eModulo:
-                ok = leftType->IsInt;
+                ok = leftType->IsInt && rightType->IsInt;
                 break;
         }
 
         if (!ok)
         {
-            cerr << "Binary operator does not support type\n";
+            cerr << "Binary operator does not support types\n";
         }
     }
 
     return ok;
 }
 
-const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* /*rightType*/)
+const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType)
 {
     switch (op)
     {
@@ -150,7 +150,21 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eBitwiseAnd:
         case BinaryExpression::eBitwiseXor:
         case BinaryExpression::eBitwiseOr:
-            return leftType;
+        {
+            if (leftType->IsBool)
+            {
+                return TypeInfo::BoolType;
+            }
+            else if (leftType->IsInt && rightType->IsInt)
+            {
+                return (leftType->NumBits > rightType->NumBits) ? leftType : rightType;
+            }
+            else
+            {
+                cerr << "Internal error: Could not determine result type\n";
+                return nullptr;
+            }
+        }
     }
 }
 

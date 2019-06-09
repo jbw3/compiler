@@ -72,30 +72,47 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 {
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
+    Expression* leftExpr = binaryExpression->GetLeftExpression();
+    Expression* rightExpr = binaryExpression->GetRightExpression();
 
     if (op == BinaryExpression::eLogicalAnd)
     {
-        resultValue = CreateLogicalAnd(binaryExpression->GetLeftExpression(), binaryExpression->GetRightExpression());
+        resultValue = CreateLogicalAnd(leftExpr, rightExpr);
     }
     else if (op == BinaryExpression::eLogicalOr)
     {
-        resultValue = CreateLogicalOr(binaryExpression->GetLeftExpression(), binaryExpression->GetRightExpression());
+        resultValue = CreateLogicalOr(leftExpr, rightExpr);
     }
     else
     {
-        binaryExpression->GetLeftExpression()->Accept(this);
+        leftExpr->Accept(this);
         if (resultValue == nullptr)
         {
             return;
         }
         Value* leftValue = resultValue;
 
-        binaryExpression->GetRightExpression()->Accept(this);
+        rightExpr->Accept(this);
         if (resultValue == nullptr)
         {
             return;
         }
         Value* rightValue = resultValue;
+
+        // check if values need to be sign extended
+        const TypeInfo* leftType = leftExpr->GetType();
+        const TypeInfo* rightType = rightExpr->GetType();
+        if (leftType->IsInt && rightType->IsInt && leftType->NumBits != rightType->NumBits)
+        {
+            if (leftType->NumBits < rightType->NumBits)
+            {
+                leftValue = builder.CreateSExt(leftValue, rightValue->getType(), "signext");
+            }
+            else
+            {
+                rightValue = builder.CreateSExt(rightValue, leftValue->getType(), "signext");
+            }
+        }
 
         switch (op)
         {
