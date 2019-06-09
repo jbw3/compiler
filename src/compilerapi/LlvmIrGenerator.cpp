@@ -400,9 +400,9 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     {
         llvmType = Type::getInt1Ty(context);
     }
-    else if (type == TypeInfo::Int32Type)
+    else if (type->IsInt)
     {
-        llvmType = Type::getInt32Ty(context);
+        llvmType = Type::getIntNTy(context, type->NumBits);
     }
     else
     {

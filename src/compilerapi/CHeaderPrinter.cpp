@@ -1,6 +1,7 @@
 #include "CHeaderPrinter.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -115,9 +116,11 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
         cType = "bool";
         return true;
     }
-    else if (type == TypeInfo::Int32Type)
+    else if (type->IsInt)
     {
-        cType = "int32_t";
+        stringstream ss;
+        ss << "int" << type->NumBits << "_t";
+        cType = ss.str();
         return true;
     }
     else
