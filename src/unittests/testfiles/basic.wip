@@ -113,14 +113,34 @@ fun nestedCall(x i32, y i32, z i32) i32
     twoArgs(0, x) + twoArgs(y + 42, z - 57)
 }
 
-fun call_function_defined_later() bool
+fun call_function_defined_later(a bool, b bool) bool
 {
-    returnBool()
+    types_bool(a, b)
 }
 
-fun returnBool() bool
+fun types_bool(a bool, b bool) bool
 {
-    true
+    a | b
+}
+
+fun types_i8(n1 i8, n2 i8) i8
+{
+    n1 + n2
+}
+
+fun types_i16(n1 i16, n2 i16) i16
+{
+    n1 - n2
+}
+
+fun types_i32(n1 i32, n2 i32) i32
+{
+    n1 * n2
+}
+
+fun types_i64(n1 i64, n2 i64) i64
+{
+    n1 / n2
 }
 
 fun basicBranch(x i32, y i32, z i32) i32

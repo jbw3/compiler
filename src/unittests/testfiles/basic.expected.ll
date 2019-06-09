@@ -245,15 +245,40 @@ entry:
   ret i32 %add2
 }
 
-define i1 @call_function_defined_later() {
+define i1 @call_function_defined_later(i1 %a, i1 %b) {
 entry:
-  %call = call i1 @returnBool()
+  %call = call i1 @types_bool(i1 %a, i1 %b)
   ret i1 %call
 }
 
-define i1 @returnBool() {
+define i1 @types_bool(i1 %a, i1 %b) {
 entry:
-  ret i1 true
+  %bitor = or i1 %a, %b
+  ret i1 %bitor
+}
+
+define i8 @types_i8(i8 %n1, i8 %n2) {
+entry:
+  %add = add i8 %n1, %n2
+  ret i8 %add
+}
+
+define i16 @types_i16(i16 %n1, i16 %n2) {
+entry:
+  %sub = sub i16 %n1, %n2
+  ret i16 %sub
+}
+
+define i32 @types_i32(i32 %n1, i32 %n2) {
+entry:
+  %mul = mul i32 %n1, %n2
+  ret i32 %mul
+}
+
+define i64 @types_i64(i64 %n1, i64 %n2) {
+entry:
+  %div = sdiv i64 %n1, %n2
+  ret i64 %div
 }
 
 define i32 @basicBranch(i32 %x, i32 %y, i32 %z) {
