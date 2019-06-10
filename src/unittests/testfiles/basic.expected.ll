@@ -281,7 +281,7 @@ entry:
   ret i64 %div
 }
 
-define i64 @sign_extend(i8 %a, i16 %b, i64 %c, i32 %d) {
+define i64 @sign_extend_bin_op(i8 %a, i16 %b, i64 %c, i32 %d) {
 entry:
   %signext = sext i8 %a to i16
   %mul = mul i16 %signext, %b
@@ -290,6 +290,13 @@ entry:
   %signext2 = sext i32 %d to i64
   %mod = srem i64 %div, %signext2
   ret i64 %mod
+}
+
+define i64 @sign_extend_ret(i32 %param) {
+entry:
+  %add = add i32 %param, 5
+  %signext = sext i32 %add to i64
+  ret i64 %signext
 }
 
 define i32 @basicBranch(i32 %x, i32 %y, i32 %z) {

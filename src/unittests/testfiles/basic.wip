@@ -143,9 +143,14 @@ fun types_i64(n1 i64, n2 i64) i64
     n1 / n2
 }
 
-fun sign_extend(a i8, b i16, c i64, d i32) i64
+fun sign_extend_bin_op(a i8, b i16, c i64, d i32) i64
 {
     a * b / c % d
+}
+
+fun sign_extend_ret(param i32) i64
+{
+    param + 5
 }
 
 fun basicBranch(x i32, y i32, z i32) i32

@@ -171,16 +171,21 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     Expression* code = functionDefinition->GetCode();
-    functionDefinition->GetCode()->Accept(this);
+    code->Accept(this);
     if (isError)
     {
         return;
     }
 
-    if (functionDefinition->GetReturnType() != code->GetType())
+    const TypeInfo* returnType = functionDefinition->GetReturnType();
+    const TypeInfo* codeType = code->GetType();
+    if (returnType != codeType)
     {
-        isError = true;
-        cerr << "Function return expression does not equal return type\n";
+        if ( !(codeType->IsInt && returnType->IsInt && codeType->NumBits <= returnType->NumBits) )
+        {
+            isError = true;
+            cerr << "Function return expression does not equal return type\n";
+        }
     }
 }
 

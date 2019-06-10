@@ -198,12 +198,21 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
-    functionDefinition->GetCode()->Accept(this);
+    Expression* code = functionDefinition->GetCode();
+    code->Accept(this);
     currentScope.reset(nullptr);
 
     if (resultValue == nullptr)
     {
         return;
+    }
+
+    // sign extend return value if needed
+    const TypeInfo* codeType = code->GetType();
+    const TypeInfo* returnType = functionDefinition->GetReturnType();
+    if (codeType->IsInt && returnType->IsInt && codeType->NumBits < returnType->NumBits)
+    {
+        resultValue = builder.CreateSExt(resultValue, GetType(returnType), "signext");
     }
 
     builder.CreateRet(resultValue);
