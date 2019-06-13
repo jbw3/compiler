@@ -153,6 +153,11 @@ fun sign_extend_ret(param i32) i64
     param + 5
 }
 
+fun sign_extend_call(param i8) i64
+{
+    sign_extend_ret(param)
+}
+
 fun basicBranch(x i32, y i32, z i32) i32
 {
     if x + 1 == y / 2

@@ -299,6 +299,13 @@ entry:
   ret i64 %signext
 }
 
+define i64 @sign_extend_call(i8 %param) {
+entry:
+  %signext = sext i8 %param to i32
+  %call = call i64 @sign_extend_ret(i32 %signext)
+  ret i64 %call
+}
+
 define i32 @basicBranch(i32 %x, i32 %y, i32 %z) {
 entry:
   %add = add i32 %x, 1
