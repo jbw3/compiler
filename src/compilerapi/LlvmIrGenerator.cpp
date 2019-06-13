@@ -228,9 +228,12 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
-    // create function declarations
+    // create function declarations and build function look-up table
+    functions.clear();
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
+        functions.insert({funcDef->GetName(), funcDef});
+
         bool ok = CreateFunctionDeclaration(funcDef);
         if (!ok)
         {
@@ -309,13 +312,24 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         return;
     }
 
+    FunctionDefinition* funcDef = functions.find(funcName)->second;
+    vector<Expression*> argExpressions = functionExpression->GetArguments();
     vector<Value*> args;
-    for (Expression* expr : functionExpression->GetArguments())
+    for (size_t i = 0; i < argExpressions.size(); ++i)
     {
+        Expression* expr = argExpressions[i];
         expr->Accept(this);
         if (resultValue == nullptr)
         {
             return;
+        }
+
+        // sign extend arg value if needed
+        const TypeInfo* argType = expr->GetType();
+        const TypeInfo* paramType = funcDef->GetParameters()[i]->GetType();
+        if (argType->IsInt && paramType->IsInt && argType->NumBits < paramType->NumBits)
+        {
+            resultValue = builder.CreateSExt(resultValue, GetType(paramType), "signext");
         }
 
         args.push_back(resultValue);

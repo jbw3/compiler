@@ -45,6 +45,7 @@ private:
     Config::EAssemblyType assemblyType;
     std::unique_ptr<Scope> currentScope;
     llvm::Value* resultValue;
+    std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
 
     llvm::Type* GetType(const TypeInfo* type);
 

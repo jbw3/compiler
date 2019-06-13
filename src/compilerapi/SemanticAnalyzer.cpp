@@ -289,11 +289,16 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 
         // check argument against the parameter type
         const VariableDefinition* param = params[i];
-        if (arg->GetType() != param->GetType())
+        const TypeInfo* argType = arg->GetType();
+        const TypeInfo* paramType = param->GetType();
+        if (argType != paramType)
         {
-            cerr << "Argument does not match parameter type\n";
-            isError = true;
-            return;
+            if ( !(argType->IsInt && paramType->IsInt && argType->NumBits <= paramType->NumBits) )
+            {
+                cerr << "Argument does not match parameter type\n";
+                isError = true;
+                return;
+            }
         }
     }
 
