@@ -102,17 +102,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         // check if values need to be sign extended
         const TypeInfo* leftType = leftExpr->GetType();
         const TypeInfo* rightType = rightExpr->GetType();
-        if (leftType->IsInt && rightType->IsInt && leftType->NumBits != rightType->NumBits)
-        {
-            if (leftType->NumBits < rightType->NumBits)
-            {
-                leftValue = builder.CreateSExt(leftValue, rightValue->getType(), "signext");
-            }
-            else
-            {
-                rightValue = builder.CreateSExt(rightValue, leftValue->getType(), "signext");
-            }
-        }
+        ExtendType(leftType, rightType, leftValue, rightValue);
 
         switch (op)
         {
@@ -210,10 +200,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     // sign extend return value if needed
     const TypeInfo* codeType = code->GetType();
     const TypeInfo* returnType = functionDefinition->GetReturnType();
-    if (codeType->IsInt && returnType->IsInt && codeType->NumBits < returnType->NumBits)
-    {
-        resultValue = builder.CreateSExt(resultValue, GetType(returnType), "signext");
-    }
+    ExtendType(codeType, returnType, resultValue);
 
     builder.CreateRet(resultValue);
 
@@ -327,10 +314,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         // sign extend arg value if needed
         const TypeInfo* argType = expr->GetType();
         const TypeInfo* paramType = funcDef->GetParameters()[i]->GetType();
-        if (argType->IsInt && paramType->IsInt && argType->NumBits < paramType->NumBits)
-        {
-            resultValue = builder.CreateSExt(resultValue, GetType(paramType), "signext");
-        }
+        ExtendType(argType, paramType, resultValue);
 
         args.push_back(resultValue);
     }
@@ -475,6 +459,30 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), &module);
 
     return true;
+}
+
+void LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, Value*& value)
+{
+    // sign extend value if needed
+    if (srcType->IsInt && dstType->IsInt && srcType->NumBits < dstType->NumBits)
+    {
+        value = builder.CreateSExt(value, GetType(dstType), "signext");
+    }
+}
+
+void LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, Value*& leftValue, Value*& rightValue)
+{
+    if (leftType->IsInt && rightType->IsInt && leftType->NumBits != rightType->NumBits)
+    {
+        if (leftType->NumBits < rightType->NumBits)
+        {
+            leftValue = builder.CreateSExt(leftValue, rightValue->getType(), "signext");
+        }
+        else
+        {
+            rightValue = builder.CreateSExt(rightValue, leftValue->getType(), "signext");
+        }
+    }
 }
 
 Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* trueExpr, Expression* falseExpr,
