@@ -229,8 +229,15 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 {
-    // TODO: check number's type
-    numericExpression->SetType(TypeInfo::Int32Type);
+    const TypeInfo* minSizeType = numericExpression->GetMinSizeType();
+    if (minSizeType == nullptr)
+    {
+        isError = true;
+        cerr << "Internal error: Could not get type for numeric literal\n";
+        return;
+    }
+
+    numericExpression->SetType(minSizeType);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)

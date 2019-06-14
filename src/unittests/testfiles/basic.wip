@@ -143,6 +143,12 @@ fun types_i64(n1 i64, n2 i64) i64
     n1 / n2
 }
 
+fun types_add_literal(num i8) i8
+{
+    # make sure we can add a constant literal to a number with a small size
+    num + 1
+}
+
 fun sign_extend_bin_op(a i8, b i16, c i64, d i32) i64
 {
     a * b / c % d

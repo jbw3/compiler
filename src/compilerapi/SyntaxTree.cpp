@@ -1,5 +1,7 @@
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
+#include "utils.h"
+#include <limits>
 
 using namespace std;
 
@@ -32,6 +34,34 @@ void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
 const string& NumericExpression::GetNumber() const
 {
     return number;
+}
+
+const TypeInfo* NumericExpression::GetMinSizeType() const
+{
+    const TypeInfo* type = nullptr;
+    int64_t outNum = 0;
+    bool ok = stringToInteger(number, outNum);
+    if (ok)
+    {
+        if (outNum >= numeric_limits<int8_t>::min() && outNum <= numeric_limits<int8_t>::max())
+        {
+            type = TypeInfo::Int8Type;
+        }
+        else if (outNum >= numeric_limits<int16_t>::min() && outNum <= numeric_limits<int16_t>::max())
+        {
+            type = TypeInfo::Int16Type;
+        }
+        else if (outNum >= numeric_limits<int32_t>::min() && outNum <= numeric_limits<int32_t>::max())
+        {
+            type = TypeInfo::Int32Type;
+        }
+        else if (outNum >= numeric_limits<int64_t>::min() && outNum <= numeric_limits<int64_t>::max())
+        {
+            type = TypeInfo::Int64Type;
+        }
+    }
+
+    return type;
 }
 
 BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()

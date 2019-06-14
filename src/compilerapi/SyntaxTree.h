@@ -44,6 +44,8 @@ public:
 
     const std::string& GetNumber() const;
 
+    const TypeInfo* GetMinSizeType() const;
+
 private:
     std::string number;
 };

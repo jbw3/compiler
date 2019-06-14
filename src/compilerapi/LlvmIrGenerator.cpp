@@ -246,7 +246,8 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
     bool ok = stringToInteger(numericExpression->GetNumber(), number);
     if (ok)
     {
-        resultValue = ConstantInt::get(context, APInt(32, number, true));
+        unsigned int numBits = numericExpression->GetType()->NumBits;
+        resultValue = ConstantInt::get(context, APInt(numBits, number, true));
     }
     else
     {

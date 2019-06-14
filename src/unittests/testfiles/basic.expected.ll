@@ -281,6 +281,12 @@ entry:
   ret i64 %div
 }
 
+define i8 @types_add_literal(i8 %num) {
+entry:
+  %add = add i8 %num, 1
+  ret i8 %add
+}
+
 define i64 @sign_extend_bin_op(i8 %a, i16 %b, i64 %c, i32 %d) {
 entry:
   %signext = sext i8 %a to i16
@@ -528,6 +534,7 @@ else:                                             ; preds = %ormerge
   br label %merge
 
 merge:                                            ; preds = %else, %if
-  %phi = phi i32 [ 100, %if ], [ 200, %else ]
-  ret i32 %phi
+  %phi = phi i16 [ 100, %if ], [ 200, %else ]
+  %signext = sext i16 %phi to i32
+  ret i32 %signext
 }
