@@ -326,6 +326,27 @@ merge:                                            ; preds = %else, %if
   ret i32 %phi
 }
 
+define i64 @signExtendBranch(i1 %b, i16 %x, i16 %y) {
+entry:
+  br i1 %b, label %if, label %else
+
+if:                                               ; preds = %entry
+  %call = call i16 @types_i16(i16 %x, i16 %y)
+  %signext = sext i16 %call to i32
+  br label %merge
+
+else:                                             ; preds = %entry
+  %signext1 = sext i16 %x to i32
+  %signext2 = sext i16 %y to i32
+  %call3 = call i32 @types_i32(i32 %signext1, i32 %signext2)
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ %signext, %if ], [ %call3, %else ]
+  %signext4 = sext i32 %phi to i64
+  ret i64 %signext4
+}
+
 define i32 @nestedBranches(i32 %x, i32 %y, i32 %z) {
 entry:
   %cmpeq = icmp eq i32 %x, 0

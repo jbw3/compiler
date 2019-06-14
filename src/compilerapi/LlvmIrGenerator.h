@@ -51,9 +51,9 @@ private:
 
     bool CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef);
 
-    void ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, llvm::Value*& value);
+    const TypeInfo* ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, llvm::Value*& value);
 
-    void ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, llvm::Value*& leftValue, llvm::Value*& rightValue);
+    const TypeInfo* ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, llvm::Value*& leftValue, llvm::Value*& rightValue);
 
     llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr,
                               const char* trueName, const char* falseName, const char* mergeName, const char* phiName);

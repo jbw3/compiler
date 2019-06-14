@@ -170,6 +170,18 @@ fun basicBranch(x i32, y i32, z i32) i32
     }
 }
 
+fun signExtendBranch(b bool, x i16, y i16) i64
+{
+    if b
+    {
+        types_i16(x, y)
+    }
+    else
+    {
+        types_i32(x, y)
+    }
+}
+
 fun nestedBranches(x i32, y i32, z i32) i32
 {
     if x == 0

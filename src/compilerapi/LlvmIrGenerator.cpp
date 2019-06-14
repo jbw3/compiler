@@ -461,28 +461,43 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     return true;
 }
 
-void LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, Value*& value)
+const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, Value*& value)
 {
+    const TypeInfo* resultType = nullptr;
+
     // sign extend value if needed
     if (srcType->IsInt && dstType->IsInt && srcType->NumBits < dstType->NumBits)
     {
         value = builder.CreateSExt(value, GetType(dstType), "signext");
+        resultType = dstType;
     }
+    else
+    {
+        resultType = srcType;
+    }
+
+    return resultType;
 }
 
-void LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, Value*& leftValue, Value*& rightValue)
+const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, Value*& leftValue, Value*& rightValue)
 {
+    const TypeInfo* resultType = nullptr;
+
     if (leftType->IsInt && rightType->IsInt && leftType->NumBits != rightType->NumBits)
     {
         if (leftType->NumBits < rightType->NumBits)
         {
             leftValue = builder.CreateSExt(leftValue, rightValue->getType(), "signext");
+            resultType = rightType;
         }
         else
         {
             rightValue = builder.CreateSExt(rightValue, leftValue->getType(), "signext");
+            resultType = leftType;
         }
     }
+
+    return resultType;
 }
 
 Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* trueExpr, Expression* falseExpr,
@@ -511,6 +526,10 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
     {
         return nullptr;
     }
+
+    // extend type if necessary
+    const TypeInfo* trueType = ExtendType(trueExpr->GetType(), falseExpr->GetType(), resultValue);
+
     Value* ifExprValue = resultValue;
     builder.CreateBr(mergeBlock);
 
@@ -525,6 +544,10 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
     {
         return nullptr;
     }
+
+    // extend type if necessary
+    const TypeInfo* falseType = ExtendType(falseExpr->GetType(), trueExpr->GetType(), resultValue);
+
     Value* elseExprValue = resultValue;
     builder.CreateBr(mergeBlock);
 
@@ -536,13 +559,13 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
     builder.SetInsertPoint(mergeBlock);
 
     // check if the "true" and "false" expressions have the same type
-    if (trueExpr->GetType() != falseExpr->GetType())
+    if (trueType != falseType)
     {
         cerr << "Internal Error: Branch true and false blocks must have the same type\n";
         return nullptr;
     }
 
-    Type* phiType = GetType(trueExpr->GetType());
+    Type* phiType = GetType(trueType);
     PHINode* phiNode = builder.CreatePHI(phiType, 2, phiName);
     phiNode->addIncoming(ifExprValue, trueBlock);
     phiNode->addIncoming(elseExprValue, falseBlock);

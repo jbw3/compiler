@@ -337,8 +337,26 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         return;
     }
 
-    // ensure the "if" and "else" expressions return the same type
-    if (ifExpression->GetType() != elseExpression->GetType())
+    // check the "if" and "else" expression return types
+    const TypeInfo* ifType = ifExpression->GetType();
+    const TypeInfo* elseType = elseExpression->GetType();
+    const TypeInfo* resultType = nullptr;
+    if (ifType == elseType)
+    {
+        resultType = ifType;
+    }
+    else if (ifType->IsInt && elseType->IsInt)
+    {
+        if (ifType->NumBits >= elseType->NumBits)
+        {
+            resultType = ifType;
+        }
+        else
+        {
+            resultType = elseType;
+        }
+    }
+    else
     {
         isError = true;
         cerr << "'if' and 'else' expressions must have the same type\n";
@@ -346,5 +364,5 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
 
     // set the branch expression's result type
-    branchExpression->SetType(ifExpression->GetType());
+    branchExpression->SetType(resultType);
 }
