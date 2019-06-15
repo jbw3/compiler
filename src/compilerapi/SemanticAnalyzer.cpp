@@ -118,6 +118,12 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eModulo:
                 ok = leftType->IsInt && rightType->IsInt;
                 break;
+            case BinaryExpression::eShiftLeft:
+            case BinaryExpression::eShiftRightArithmetic:
+                // the return type should be the left type, so the right type has to be the
+                // same size or smaller
+                ok = leftType->IsInt && rightType->IsInt && leftType->NumBits >= rightType->NumBits;
+                break;
         }
 
         if (!ok)
@@ -165,6 +171,9 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
                 return nullptr;
             }
         }
+        case BinaryExpression::eShiftLeft:
+        case BinaryExpression::eShiftRightArithmetic:
+            return leftType;
     }
 }
 

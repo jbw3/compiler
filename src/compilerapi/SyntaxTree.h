@@ -85,6 +85,8 @@ public:
         eMultiply,
         eDivide,
         eModulo,
+        eShiftLeft,
+        eShiftRightArithmetic,
         eBitwiseAnd,
         eBitwiseXor,
         eBitwiseOr,

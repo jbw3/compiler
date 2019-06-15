@@ -98,6 +98,12 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eModulo:
             Print("%");
             break;
+        case BinaryExpression::eShiftLeft:
+            Print("<<");
+            break;
+        case BinaryExpression::eShiftRightArithmetic:
+            Print(">>");
+            break;
         case BinaryExpression::eBitwiseAnd:
             Print("&");
             break;

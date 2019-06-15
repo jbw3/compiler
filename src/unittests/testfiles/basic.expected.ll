@@ -56,9 +56,11 @@ entry:
   ret i1 %cmpeq
 }
 
-define i32 @opOrder4(i32 %a, i32 %b, i32 %c, i32 %d) {
+define i32 @opOrder4(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f) {
 entry:
-  %bitand = and i32 %c, %d
+  %shl = shl i32 %d, %e
+  %ashr = ashr i32 %shl, %f
+  %bitand = and i32 %c, %ashr
   %bitxor = xor i32 %b, %bitand
   %bitor = or i32 %a, %bitxor
   ret i32 %bitor
