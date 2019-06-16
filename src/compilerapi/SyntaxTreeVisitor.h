@@ -3,6 +3,7 @@
 
 namespace SyntaxTree
 {
+class Assignment;
 class BinaryExpression;
 class BoolLiteralExpression;
 class BranchExpression;
@@ -20,6 +21,8 @@ public:
     virtual void Visit(SyntaxTree::UnaryExpression* unaryExpression) = 0;
 
     virtual void Visit(SyntaxTree::BinaryExpression* binaryExpression) = 0;
+
+    virtual void Visit(SyntaxTree::Assignment* assignment) = 0;
 
     virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
 

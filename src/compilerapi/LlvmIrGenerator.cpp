@@ -163,6 +163,12 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(SyntaxTree::Assignment* assignment)
+{
+    cerr << "Internal error: not implemented\n";
+    resultValue = nullptr;
+}
+
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
     const string& funcName = functionDefinition->GetName();

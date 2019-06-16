@@ -20,6 +20,8 @@ public:
 
     void Visit(SyntaxTree::BinaryExpression* binaryExpression) override;
 
+    void Visit(SyntaxTree::Assignment* assignment) override;
+
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;

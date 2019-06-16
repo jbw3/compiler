@@ -130,6 +130,18 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
     binaryExpression->GetRightExpression()->Accept(this);
 }
 
+void SyntaxTreePrinter::Visit(Assignment* assignment)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"Assignment\",\n\"variableName\": \"");
+    Print(assignment->GetVariableName());
+    Print("\",\n\"expression\":\n");
+
+    // print expression
+    assignment->GetExpression()->Accept(this);
+}
+
 void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 {
     BracePrinter printer(*this, "{", "}");

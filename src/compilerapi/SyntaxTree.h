@@ -206,6 +206,24 @@ private:
     const TypeInfo* type;
 };
 
+class Assignment : public SyntaxTreeNode
+{
+public:
+    Assignment(const std::string& variableName, Expression* expression);
+
+    virtual ~Assignment();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const std::string& GetVariableName() const;
+
+    Expression* GetExpression() const;
+
+private:
+    std::string variableName;
+    Expression* expression;
+};
+
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:

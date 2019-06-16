@@ -177,6 +177,12 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
     }
 }
 
+void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
+{
+    isError = true;
+    cerr << "Internal error: Not implemented\n";
+}
+
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     Expression* code = functionDefinition->GetCode();

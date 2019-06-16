@@ -245,6 +245,32 @@ const TypeInfo* VariableDefinition::GetType() const
     return type;
 }
 
+Assignment::Assignment(const string& variableName, Expression* expression) :
+    variableName(variableName),
+    expression(expression)
+{
+}
+
+Assignment::~Assignment()
+{
+    delete expression;
+}
+
+void Assignment::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const string& Assignment::GetVariableName() const
+{
+    return variableName;
+}
+
+Expression* Assignment::GetExpression() const
+{
+    return expression;
+}
+
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
                                        const TypeInfo* returnType,
