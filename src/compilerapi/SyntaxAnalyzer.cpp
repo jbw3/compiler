@@ -341,6 +341,35 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
     return assignment;
 }
 
+SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindStatementEnd(TokenIterator iter, TokenIterator endIter)
+{
+    unsigned int balance = 0;
+
+    while (iter != endIter)
+    {
+        const string& value = iter->GetValue();
+        if (balance == 0)
+        {
+            if (value == ";" || value == "}")
+            {
+                break;
+            }
+        }
+        else if (value == "{")
+        {
+            ++balance;
+        }
+        else if (value == "}")
+        {
+            --balance;
+        }
+
+        ++iter;
+    }
+
+    return iter;
+}
+
 Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<UnaryExpression::EOperator>& unaryOperators)
 {
     Expression* result = baseExpr;

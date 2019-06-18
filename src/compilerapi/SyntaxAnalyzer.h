@@ -55,6 +55,8 @@ private:
 
     SyntaxTree::Assignment* ProcessAssignment(TokenIterator& iter, TokenIterator endIter);
 
+    TokenIterator FindStatementEnd(TokenIterator iter, TokenIterator endIter);
+
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);
 
