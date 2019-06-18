@@ -17,6 +17,10 @@ public:
 
     static const std::string FUNCTION_KEYWORD;
 
+    static const std::string VARIABLE_KEYWORD;
+
+    static const std::string ASSIGNMENT_OPERATOR;
+
     static const std::string IF_KEYWORD;
 
     static const std::string ELSE_KEYWORD;
@@ -48,6 +52,8 @@ private:
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            std::vector<SyntaxTree::VariableDefinition*>& parameters);
+
+    SyntaxTree::Assignment* ProcessAssignment(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);

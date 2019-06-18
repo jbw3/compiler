@@ -7,6 +7,10 @@ using namespace SyntaxTree;
 
 const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
 
+const string SyntaxAnalyzer::VARIABLE_KEYWORD = "var";
+
+const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
+
 const string SyntaxAnalyzer::IF_KEYWORD = "if";
 
 const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
@@ -290,6 +294,51 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     }
 
     return true;
+}
+
+Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator endIter)
+{
+    string varName;
+
+    // make sure the statement is not empty
+    if (iter == endIter)
+    {
+        logger.LogError("Empty statement");
+        return nullptr;
+    }
+
+    if (!isIdentifier(iter->GetValue()))
+    {
+        logger.LogError(*iter, "Expected a variable name");
+        return nullptr;
+    }
+
+    varName = iter->GetValue();
+
+    if (!IncrementIterator(iter, endIter, "Expected operator"))
+    {
+        return nullptr;
+    }
+
+    if (iter->GetValue() != ASSIGNMENT_OPERATOR)
+    {
+        logger.LogError(*iter, "Expected an assignment operator");
+        return nullptr;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected expression"))
+    {
+        return nullptr;
+    }
+
+    Expression* expression = ProcessExpression(iter, endIter, {});
+    if (expression == nullptr)
+    {
+        return nullptr;
+    }
+
+    Assignment* assignment = new Assignment(varName, expression);
+    return assignment;
 }
 
 Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<UnaryExpression::EOperator>& unaryOperators)
