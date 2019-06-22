@@ -2,19 +2,20 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "Scope.h"
 #include "llvm/ADT/StringRef.h"
-#include "llvm/IR/Value.h"
+#include "llvm/IR/Instructions.h"
 #pragma clang diagnostic pop
 
 using namespace llvm;
 using namespace std;
+using namespace SyntaxTree;
 
-bool Scope::AddVariable(Value* variable)
+bool Scope::AddVariable(const string& name, VariableDefinition* variable, AllocaInst* value)
 {
-    auto rv = variables.insert({variable->getName(), variable});
+    auto rv = variables.insert({name, {variable, value}});
     return rv.second;
 }
 
-Value* Scope::GetVariable(const string& name) const
+VariableDefinition* Scope::GetVariable(const string& name) const
 {
     auto iter = variables.find(name);
     if (iter == variables.cend())
@@ -22,7 +23,18 @@ Value* Scope::GetVariable(const string& name) const
         return nullptr;
     }
 
-    return iter->second;
+    return iter->second.variable;
+}
+
+AllocaInst* Scope::GetValue(const string& name) const
+{
+    auto iter = variables.find(name);
+    if (iter == variables.cend())
+    {
+        return nullptr;
+    }
+
+    return iter->second.value;
 }
 
 bool Scope::Contains(const string& name) const

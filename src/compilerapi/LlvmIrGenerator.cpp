@@ -165,8 +165,28 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
 void LlvmIrGenerator::Visit(SyntaxTree::Assignment* assignment)
 {
-    cerr << "Internal error: not implemented\n";
-    resultValue = nullptr;
+    Expression* expression = assignment->GetExpression();
+    expression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    const string& name = assignment->GetVariableName();
+    AllocaInst* alloca = currentScope->GetValue(name);
+    if (alloca == nullptr)
+    {
+        resultValue = nullptr;
+        cerr << "\"" << name << "\" has not been defined\n";
+        return;
+    }
+
+    // sign extend expression value if needed
+    const TypeInfo* expressionType = expression->GetType();
+    const TypeInfo* varType = currentScope->GetVariable(name)->GetType();
+    ExtendType(expressionType, varType, resultValue);
+
+    resultValue = builder.CreateStore(resultValue, alloca);
 }
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
@@ -194,18 +214,24 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     size_t idx = 0;
     for (Argument& arg : func->args())
     {
-        string paramName = functionDefinition->GetParameters()[idx]->GetName();
+        VariableDefinition* param = functionDefinition->GetParameters()[idx];
+        const string& paramName = param->GetName();
         arg.setName(paramName);
-        currentScope->AddVariable(&arg);
+        AllocaInst* alloca = builder.CreateAlloca(arg.getType(), nullptr, paramName);
+        builder.CreateStore(&arg, alloca);
+        currentScope->AddVariable(paramName, param, alloca);
+
         ++idx;
     }
 
     // process statements
     for (SyntaxTreeNode* statement : functionDefinition->GetStatements())
     {
-        cerr << "Internal error: not implemented\n";
-        resultValue = nullptr;
-        return;
+        statement->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
     }
 
     // process return expression
@@ -295,12 +321,15 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 {
     const string& name = variableExpression->GetName();
-    resultValue = currentScope->GetVariable(name);
-    if (resultValue == nullptr)
+    AllocaInst* alloca = currentScope->GetValue(name);
+    if (alloca == nullptr)
     {
+        resultValue = nullptr;
         cerr << "\"" << name << "\" has not been defined\n";
         return;
     }
+
+    resultValue = builder.CreateLoad(alloca, name);
 }
 
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
