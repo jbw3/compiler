@@ -207,6 +207,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         return;
     }
 
+    // create entry block
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);
 
@@ -217,7 +218,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         VariableDefinition* param = functionDefinition->GetParameters()[idx];
         const string& paramName = param->GetName();
         arg.setName(paramName);
-        AllocaInst* alloca = builder.CreateAlloca(arg.getType(), nullptr, paramName);
+        AllocaInst* alloca = CreateVariableAlloc(func, arg, paramName);
         builder.CreateStore(&arg, alloca);
         currentScope->AddVariable(paramName, param, alloca);
 
@@ -510,6 +511,16 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), &module);
 
     return true;
+}
+
+AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, const Argument& arg, const string& paramName)
+{
+    // create builder to insert alloca at beginning of function
+    BasicBlock& entryBlock = function->getEntryBlock();
+    IRBuilder<> tempBuilder(&entryBlock, entryBlock.begin());
+
+    AllocaInst* alloca = tempBuilder.CreateAlloca(arg.getType(), nullptr, paramName);
+    return alloca;
 }
 
 const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, Value*& value)
