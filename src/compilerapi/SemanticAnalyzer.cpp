@@ -179,24 +179,64 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
 
 void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
 {
-    isError = true;
-    cerr << "Internal error: Not implemented\n";
+    // find variable
+    const string& varName = assignment->GetVariableName();
+    auto iter = variables.find(varName);
+    if (iter == variables.cend())
+    {
+        cerr << "Variable \"" << varName << "\" is not defined\n";
+        isError = true;
+        return;
+    }
+    VariableDefinition* varDef = iter->second;
+
+    // check expression
+    Expression* expression = assignment->GetExpression();
+    expression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // check expression against the variable type
+    const TypeInfo* exprType = expression->GetType();
+    const TypeInfo* varType = varDef->GetType();
+    if (exprType != varType)
+    {
+        if ( !(exprType->IsInt && varType->IsInt && exprType->NumBits <= varType->NumBits) )
+        {
+            cerr << "Expression does not match argument type\n";
+            isError = true;
+            return;
+        }
+    }
 }
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
-    Expression* code = functionDefinition->GetCode();
-    code->Accept(this);
+    // check statements
+    for (SyntaxTreeNode* statement : functionDefinition->GetStatements())
+    {
+        statement->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+    }
+
+    // check return expression
+    Expression* returnExpression = functionDefinition->GetReturnExpression();
+    returnExpression->Accept(this);
     if (isError)
     {
         return;
     }
 
     const TypeInfo* returnType = functionDefinition->GetReturnType();
-    const TypeInfo* codeType = code->GetType();
-    if (returnType != codeType)
+    const TypeInfo* returnExpressionType = returnExpression->GetType();
+    if (returnType != returnExpressionType)
     {
-        if ( !(codeType->IsInt && returnType->IsInt && codeType->NumBits <= returnType->NumBits) )
+        if ( !(returnExpressionType->IsInt && returnType->IsInt && returnExpressionType->NumBits <= returnType->NumBits) )
         {
             isError = true;
             cerr << "Function return expression does not equal return type\n";

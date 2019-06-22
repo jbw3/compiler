@@ -11,6 +11,8 @@ const string SyntaxAnalyzer::VARIABLE_KEYWORD = "var";
 
 const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
 
+const string SyntaxAnalyzer::STATEMENT_END = ";";
+
 const string SyntaxAnalyzer::IF_KEYWORD = "if";
 
 const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
@@ -193,16 +195,33 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    Expression* code = ProcessExpression(iter, endIter, {"}"});
-    if (code == nullptr)
+    vector<SyntaxTreeNode*> statements;
+    statements.reserve(8);
+    while (iter != endIter && (iter + 1) != endIter && (iter + 1)->GetValue() == ASSIGNMENT_OPERATOR)
+    {
+        SyntaxTreeNode* statement = ProcessAssignment(iter, endIter);
+        if (statement == nullptr)
+        {
+            deletePointerContainer(parameters);
+            deletePointerContainer(statements);
+            return nullptr;
+        }
+
+        statements.push_back(statement);
+    }
+
+    Expression* returnExpression = ProcessExpression(iter, endIter, {"}"});
+    if (returnExpression == nullptr)
     {
         deletePointerContainer(parameters);
+        deletePointerContainer(statements);
         return nullptr;
     }
 
     if (!EndIteratorCheck(iter, endIter))
     {
         deletePointerContainer(parameters);
+        deletePointerContainer(statements);
         return nullptr;
     }
 
@@ -210,13 +229,16 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     {
         logger.LogError(*iter, "Expected '}'");
         deletePointerContainer(parameters);
+        deletePointerContainer(statements);
         return nullptr;
     }
 
     // increment past "}"
     ++iter;
 
-    FunctionDefinition* functionDefinition = new FunctionDefinition(functionName, parameters, returnType, code);
+    FunctionDefinition* functionDefinition = new FunctionDefinition(
+        functionName, parameters, returnType, statements, returnExpression
+    );
     return functionDefinition;
 }
 
@@ -331,8 +353,14 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    Expression* expression = ProcessExpression(iter, endIter, {});
+    Expression* expression = ProcessExpression(iter, endIter, {STATEMENT_END});
     if (expression == nullptr)
+    {
+        return nullptr;
+    }
+
+    // increment past ";"
+    if (!IncrementIterator(iter, endIter))
     {
         return nullptr;
     }

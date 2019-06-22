@@ -21,6 +21,8 @@ public:
 
     static const std::string ASSIGNMENT_OPERATOR;
 
+    static const std::string STATEMENT_END;
+
     static const std::string IF_KEYWORD;
 
     static const std::string ELSE_KEYWORD;

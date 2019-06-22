@@ -274,11 +274,13 @@ Expression* Assignment::GetExpression() const
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
                                        const TypeInfo* returnType,
-                                       Expression* code) :
+                                       const vector<SyntaxTreeNode*>& statements,
+                                       Expression* returnExpression) :
     name(name),
     parameters(parameters),
     returnType(returnType),
-    code(code)
+    statements(statements),
+    returnExpression(returnExpression)
 {
 }
 
@@ -288,7 +290,11 @@ FunctionDefinition::~FunctionDefinition()
     {
         delete param;
     }
-    delete code;
+    for (SyntaxTreeNode* statement : statements)
+    {
+        delete statement;
+    }
+    delete returnExpression;
 }
 
 void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
@@ -311,9 +317,14 @@ const TypeInfo* FunctionDefinition::GetReturnType() const
     return returnType;
 }
 
-Expression* FunctionDefinition::GetCode() const
+const vector<SyntaxTreeNode*>& FunctionDefinition::GetStatements() const
 {
-    return code;
+    return statements;
+}
+
+Expression* FunctionDefinition::GetReturnExpression() const
+{
+    return returnExpression;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<FunctionDefinition*>& functionDefinitions) :

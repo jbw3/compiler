@@ -200,8 +200,17 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
-    Expression* code = functionDefinition->GetCode();
-    code->Accept(this);
+    // process statements
+    for (SyntaxTreeNode* statement : functionDefinition->GetStatements())
+    {
+        cerr << "Internal error: not implemented\n";
+        resultValue = nullptr;
+        return;
+    }
+
+    // process return expression
+    Expression* returnExpression = functionDefinition->GetReturnExpression();
+    returnExpression->Accept(this);
     currentScope.reset(nullptr);
 
     if (resultValue == nullptr)
@@ -210,9 +219,9 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 
     // sign extend return value if needed
-    const TypeInfo* codeType = code->GetType();
+    const TypeInfo* returnExpressionType = returnExpression->GetType();
     const TypeInfo* returnType = functionDefinition->GetReturnType();
-    ExtendType(codeType, returnType, resultValue);
+    ExtendType(returnExpressionType, returnType, resultValue);
 
     builder.CreateRet(resultValue);
 

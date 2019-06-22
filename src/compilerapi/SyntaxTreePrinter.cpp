@@ -171,9 +171,30 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
         }
     }
 
-    // print code
-    Print(",\n\"code\":\n");
-    functionDefinition->GetCode()->Accept(this);
+    // print statements
+    const vector<SyntaxTreeNode*>& statements = functionDefinition->GetStatements();
+    Print(",\n\"statements\": ");
+    if (statements.size() == 0)
+    {
+        Print("[]");
+    }
+    else
+    {
+        BracePrinter printer3(*this, "[", "]");
+
+        for (size_t i = 0; i < statements.size(); ++i)
+        {
+            statements[i]->Accept(this);
+            if (i < statements.size() - 1)
+            {
+                Print(",\n");
+            }
+        }
+    }
+
+    // print return expression
+    Print(",\n\"returnExpression\":\n");
+    functionDefinition->GetReturnExpression()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
