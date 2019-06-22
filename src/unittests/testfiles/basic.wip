@@ -276,3 +276,26 @@ fun branchWithLogicalOperators(x i32, y i32, z i32) i32
         200
     }
 }
+
+fun assign(a i32, b i32, c i32) i32
+{
+    a = b * c;
+    b = a + 3 * b + c;
+    c = c + 42;
+    c
+}
+
+fun assignWithBranch(a i32, b i32, c i64) i64
+{
+    c =
+        if b <= 0
+        {
+            a * b + c
+        }
+        else
+        {
+            a / b - c
+        };
+    c = c * 2;
+    c
+}

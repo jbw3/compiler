@@ -872,3 +872,69 @@ merge:                                            ; preds = %else, %if
   %signext = sext i16 %phi to i32
   ret i32 %signext
 }
+
+define i32 @assign(i32 %a, i32 %b, i32 %c) {
+entry:
+  %c3 = alloca i32
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  store i32 %b, i32* %b2
+  store i32 %c, i32* %c3
+  %b4 = load i32, i32* %b2
+  %c5 = load i32, i32* %c3
+  %mul = mul i32 %b4, %c5
+  store i32 %mul, i32* %a1
+  %a6 = load i32, i32* %a1
+  %b7 = load i32, i32* %b2
+  %mul8 = mul i32 3, %b7
+  %add = add i32 %a6, %mul8
+  %c9 = load i32, i32* %c3
+  %add10 = add i32 %add, %c9
+  store i32 %add10, i32* %b2
+  %c11 = load i32, i32* %c3
+  %add12 = add i32 %c11, 42
+  store i32 %add12, i32* %c3
+  %c13 = load i32, i32* %c3
+  ret i32 %c13
+}
+
+define i64 @assignWithBranch(i32 %a, i32 %b, i64 %c) {
+entry:
+  %c3 = alloca i64
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  store i32 %b, i32* %b2
+  store i64 %c, i64* %c3
+  %b4 = load i32, i32* %b2
+  %cmple = icmp sle i32 %b4, 0
+  br i1 %cmple, label %if, label %else
+
+if:                                               ; preds = %entry
+  %a5 = load i32, i32* %a1
+  %b6 = load i32, i32* %b2
+  %mul = mul i32 %a5, %b6
+  %c7 = load i64, i64* %c3
+  %signext = sext i32 %mul to i64
+  %add = add i64 %signext, %c7
+  br label %merge
+
+else:                                             ; preds = %entry
+  %a8 = load i32, i32* %a1
+  %b9 = load i32, i32* %b2
+  %div = sdiv i32 %a8, %b9
+  %c10 = load i64, i64* %c3
+  %signext11 = sext i32 %div to i64
+  %sub = sub i64 %signext11, %c10
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i64 [ %add, %if ], [ %sub, %else ]
+  store i64 %phi, i64* %c3
+  %c12 = load i64, i64* %c3
+  %mul13 = mul i64 %c12, 2
+  store i64 %mul13, i64* %c3
+  %c14 = load i64, i64* %c3
+  ret i64 %c14
+}
