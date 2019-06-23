@@ -3,9 +3,11 @@
 
 #include "SyntaxTreeVisitor.h"
 #include <string>
+#include <vector>
 
 namespace SyntaxTree
 {
+class SyntaxTreeNode;
 class VariableDefinition;
 }
 
@@ -54,6 +56,8 @@ private:
     unsigned int level;
 
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
+
+    void PrintStatements(const std::string& name, const std::vector<SyntaxTree::SyntaxTreeNode*> statements);
 
     void Print(const std::string& str) const;
 };

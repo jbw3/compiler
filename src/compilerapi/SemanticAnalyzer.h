@@ -42,6 +42,8 @@ private:
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
+
+    void CheckStatements(const std::vector<SyntaxTree::SyntaxTreeNode*>& statements);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

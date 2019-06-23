@@ -215,13 +215,10 @@ void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     // check statements
-    for (SyntaxTreeNode* statement : functionDefinition->GetStatements())
+    CheckStatements(functionDefinition->GetStatements());
+    if (isError)
     {
-        statement->Accept(this);
-        if (isError)
-        {
-            return;
-        }
+        return;
     }
 
     // check return expression
@@ -385,8 +382,22 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         return;
     }
 
+    // check if statements
+    CheckStatements(branchExpression->GetIfStatements());
+    if (isError)
+    {
+        return;
+    }
+
     Expression* ifExpression = branchExpression->GetIfExpression();
     ifExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // check else statements
+    CheckStatements(branchExpression->GetElseStatements());
     if (isError)
     {
         return;
@@ -427,4 +438,16 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
     // set the branch expression's result type
     branchExpression->SetType(resultType);
+}
+
+void SemanticAnalyzer::CheckStatements(const vector<SyntaxTreeNode*>& statements)
+{
+    for (SyntaxTreeNode* statement : statements)
+    {
+        statement->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+    }
 }

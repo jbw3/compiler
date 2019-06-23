@@ -172,7 +172,11 @@ private:
 class BranchExpression : public Expression
 {
 public:
-    BranchExpression(Expression* ifCondition, Expression* ifExpression, Expression* elseExpression);
+    BranchExpression(Expression* ifCondition,
+                     const std::vector<SyntaxTree::SyntaxTreeNode*>& ifStatements,
+                     Expression* ifExpression,
+                     const std::vector<SyntaxTree::SyntaxTreeNode*>& elseStatements,
+                     Expression* elseExpression);
 
     virtual ~BranchExpression();
 
@@ -180,13 +184,19 @@ public:
 
     Expression* GetIfCondition() const;
 
+    const std::vector<SyntaxTreeNode*>& GetIfStatements() const;
+
     Expression* GetIfExpression() const;
+
+    const std::vector<SyntaxTreeNode*>& GetElseStatements() const;
 
     Expression* GetElseExpression() const;
 
 private:
     Expression* ifCondition;
+    std::vector<SyntaxTreeNode*> ifStatements;
     Expression* ifExpression;
+    std::vector<SyntaxTreeNode*> elseStatements;
     Expression* elseExpression;
 };
 

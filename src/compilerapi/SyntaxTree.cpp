@@ -195,9 +195,15 @@ const vector<Expression*>& FunctionExpression::GetArguments() const
     return arguments;
 }
 
-BranchExpression::BranchExpression(Expression* ifCondition, Expression* ifExpression, Expression* elseExpression) :
+BranchExpression::BranchExpression(Expression* ifCondition,
+                                   const std::vector<SyntaxTree::SyntaxTreeNode*>& ifStatements,
+                                   Expression* ifExpression,
+                                   const std::vector<SyntaxTree::SyntaxTreeNode*>& elseStatements,
+                                   Expression* elseExpression) :
     ifCondition(ifCondition),
+    ifStatements(ifStatements),
     ifExpression(ifExpression),
+    elseStatements(elseStatements),
     elseExpression(elseExpression)
 {
 }
@@ -219,9 +225,19 @@ Expression* BranchExpression::GetIfCondition() const
     return ifCondition;
 }
 
+const vector<SyntaxTreeNode*>& BranchExpression::GetIfStatements() const
+{
+    return ifStatements;
+}
+
 Expression* BranchExpression::GetIfExpression() const
 {
     return ifExpression;
+}
+
+const vector<SyntaxTreeNode*>& BranchExpression::GetElseStatements() const
+{
+    return elseStatements;
 }
 
 Expression* BranchExpression::GetElseExpression() const

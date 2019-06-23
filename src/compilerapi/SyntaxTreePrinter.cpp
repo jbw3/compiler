@@ -173,24 +173,7 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 
     // print statements
     const vector<SyntaxTreeNode*>& statements = functionDefinition->GetStatements();
-    Print(",\n\"statements\": ");
-    if (statements.size() == 0)
-    {
-        Print("[]");
-    }
-    else
-    {
-        BracePrinter printer3(*this, "[", "]");
-
-        for (size_t i = 0; i < statements.size(); ++i)
-        {
-            statements[i]->Accept(this);
-            if (i < statements.size() - 1)
-            {
-                Print(",\n");
-            }
-        }
-    }
+    PrintStatements("statements", statements);
 
     // print return expression
     Print(",\n\"returnExpression\":\n");
@@ -287,15 +270,16 @@ void SyntaxTreePrinter::Visit(SyntaxTree::BranchExpression* branchExpression)
     BracePrinter printer(*this, "{", "}");
 
     Print("\"type\": \"BranchExpression\",\n\"ifCondition\":\n");
-
     branchExpression->GetIfCondition()->Accept(this);
 
-    Print(",\n\"ifExpression\":\n");
+    PrintStatements("ifStatements", branchExpression->GetIfStatements());
 
+    Print(",\n\"ifExpression\":\n");
     branchExpression->GetIfExpression()->Accept(this);
 
-    Print(",\n\"elseExpression\":\n");
+    PrintStatements("elseStatements", branchExpression->GetElseStatements());
 
+    Print(",\n\"elseExpression\":\n");
     branchExpression->GetElseExpression()->Accept(this);
 }
 
@@ -306,6 +290,31 @@ void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variab
     Print("\"type\": \"VariableDefinition\",\n\"name\": \"");
     Print(variableDefinition->GetName());
     Print("\"");
+}
+
+void SyntaxTreePrinter::PrintStatements(const string& name, const vector<SyntaxTreeNode*> statements)
+{
+    Print(",\n\"");
+    Print(name);
+    Print("\": ");
+
+    if (statements.size() == 0)
+    {
+        Print("[]");
+    }
+    else
+    {
+        BracePrinter printer3(*this, "[", "]");
+
+        for (size_t i = 0; i < statements.size(); ++i)
+        {
+            statements[i]->Accept(this);
+            if (i < statements.size() - 1)
+            {
+                Print(",\n");
+            }
+        }
+    }
 }
 
 void SyntaxTreePrinter::Print(const string& str) const

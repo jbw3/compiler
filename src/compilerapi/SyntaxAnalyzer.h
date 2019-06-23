@@ -72,6 +72,8 @@ private:
                                     const std::unordered_set<SyntaxTree::BinaryExpression::EOperator>& opsToProcess);
 
     SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
+
+    bool ProcessStatements(std::vector<SyntaxTree::SyntaxTreeNode*>& statements, TokenIterator& iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

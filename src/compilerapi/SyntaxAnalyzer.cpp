@@ -196,18 +196,12 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     }
 
     vector<SyntaxTreeNode*> statements;
-    statements.reserve(8);
-    while (iter != endIter && (iter + 1) != endIter && (iter + 1)->GetValue() == ASSIGNMENT_OPERATOR)
+    ok = ProcessStatements(statements, iter, endIter);
+    if (!ok)
     {
-        SyntaxTreeNode* statement = ProcessAssignment(iter, endIter);
-        if (statement == nullptr)
-        {
-            deletePointerContainer(parameters);
-            deletePointerContainer(statements);
-            return nullptr;
-        }
-
-        statements.push_back(statement);
+        deletePointerContainer(parameters);
+        deletePointerContainer(statements);
+        return nullptr;
     }
 
     Expression* returnExpression = ProcessExpression(iter, endIter, {"}"});
@@ -650,42 +644,57 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
+    // read "if" statements
+    vector<SyntaxTreeNode*> ifStatements;
+    bool ok = ProcessStatements(ifStatements, iter, endIter);
+    if (!ok)
+    {
+        return nullptr;
+    }
+
     // read "if" expression
     unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"}"}));
     if (ifExpression == nullptr)
     {
+        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     // increment past "}"
     if (!IncrementIterator(iter, endIter))
     {
+        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     // we should be at the "else" clause
     if (!EndIteratorCheck(iter, endIter, "Expected 'else' keyword"))
     {
+        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     if (iter->GetValue() != ELSE_KEYWORD)
     {
         logger.LogError(*iter, "Expected 'else' keyword");
+        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     if (!IncrementIterator(iter, endIter, "Expected 'if' or '{'"))
     {
+        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     if (iter->GetValue() != IF_KEYWORD && iter->GetValue() != "{")
     {
         logger.LogError(*iter, "Expected 'if' or '{'");
+        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
+    vector<SyntaxTreeNode*> elseStatements;
     unique_ptr<Expression> elseExpression;
     if (iter->GetValue() == IF_KEYWORD)
     {
@@ -693,6 +702,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         elseExpression.reset(ProcessBranchExpression(iter, endIter));
         if (elseExpression == nullptr)
         {
+            deletePointerContainer(ifStatements);
             return nullptr;
         }
     }
@@ -701,6 +711,16 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         // increment past "{"
         if (!IncrementIterator(iter, endIter))
         {
+            deletePointerContainer(ifStatements);
+            return nullptr;
+        }
+
+        // read "else" statements
+        bool ok = ProcessStatements(elseStatements, iter, endIter);
+        if (!ok)
+        {
+            deletePointerContainer(ifStatements);
+            deletePointerContainer(elseStatements);
             return nullptr;
         }
 
@@ -708,10 +728,34 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         elseExpression.reset(ProcessExpression(iter, endIter, {"}"}));
         if (elseExpression == nullptr)
         {
+            deletePointerContainer(ifStatements);
+            deletePointerContainer(elseStatements);
             return nullptr;
         }
     }
 
-    BranchExpression* expr = new BranchExpression(ifCondition.release(), ifExpression.release(), elseExpression.release());
+    BranchExpression* expr = new BranchExpression(ifCondition.release(),
+                                                  ifStatements, ifExpression.release(),
+                                                  elseStatements, elseExpression.release());
     return expr;
+}
+
+bool SyntaxAnalyzer::ProcessStatements(vector<SyntaxTreeNode*>& statements, TokenIterator& iter, TokenIterator endIter)
+{
+    statements.clear();
+    statements.reserve(8);
+
+    while (iter != endIter && (iter + 1) != endIter && (iter + 1)->GetValue() == ASSIGNMENT_OPERATOR)
+    {
+        SyntaxTreeNode* statement = ProcessAssignment(iter, endIter);
+        if (statement == nullptr)
+        {
+            deletePointerContainer(statements);
+            return false;
+        }
+
+        statements.push_back(statement);
+    }
+
+    return true;
 }
