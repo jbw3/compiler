@@ -225,14 +225,11 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
-    // process statements
-    for (SyntaxTreeNode* statement : functionDefinition->GetStatements())
+    bool ok = ProcessStatements(functionDefinition->GetStatements());
+    if (!ok)
     {
-        statement->Accept(this);
-        if (resultValue == nullptr)
-        {
-            return;
-        }
+        resultValue = nullptr;
+        return;
     }
 
     // process return expression
@@ -378,7 +375,9 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 {
     resultValue = CreateBranch(
         branchExpression->GetIfCondition(),
+        branchExpression->GetIfStatements(),
         branchExpression->GetIfExpression(),
+        branchExpression->GetElseStatements(),
         branchExpression->GetElseExpression(),
         "if", "else", "merge", "phi"
     );
@@ -565,6 +564,19 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const Type
 Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* trueExpr, Expression* falseExpr,
                                      const char* trueName, const char* falseName, const char* mergeName, const char* phiName)
 {
+    Statements trueStatements;
+    Statements falseStatements;
+    return CreateBranch(conditionExpr, trueStatements, trueExpr, falseStatements, falseExpr,
+                        trueName, falseName, mergeName, phiName);
+}
+
+Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr,
+                                     const Statements& trueStatements,
+                                     Expression* trueExpr,
+                                     const Statements& falseStatements,
+                                     Expression* falseExpr,
+                                     const char* trueName, const char* falseName, const char* mergeName, const char* phiName)
+{
     // generate the condition IR
     conditionExpr->Accept(this);
     if (resultValue == nullptr)
@@ -583,6 +595,13 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
 
     // generate "true" block IR
     builder.SetInsertPoint(trueBlock);
+
+    bool ok = ProcessStatements(trueStatements);
+    if (!ok)
+    {
+        return nullptr;
+    }
+
     trueExpr->Accept(this);
     if (resultValue == nullptr)
     {
@@ -601,6 +620,13 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
     // generate "false" block IR
     function->getBasicBlockList().push_back(falseBlock);
     builder.SetInsertPoint(falseBlock);
+
+    ok = ProcessStatements(falseStatements);
+    if (!ok)
+    {
+        return nullptr;
+    }
+
     falseExpr->Accept(this);
     if (resultValue == nullptr)
     {
@@ -651,4 +677,19 @@ Value* LlvmIrGenerator::CreateLogicalOr(Expression* leftExpr, Expression* rightE
     delete trueExpr;
 
     return value;
+}
+
+bool LlvmIrGenerator::ProcessStatements(const Statements& statements)
+{
+    // process statements
+    for (SyntaxTreeNode* statement : statements)
+    {
+        statement->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

@@ -62,9 +62,18 @@ private:
     llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr,
                               const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
 
+    llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr,
+                              const SyntaxTree::Statements& trueStatements,
+                              SyntaxTree::Expression* trueExpr,
+                              const SyntaxTree::Statements& falseStatements,
+                              SyntaxTree::Expression* falseExpr,
+                              const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
+
     llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
 
     llvm::Value* CreateLogicalOr(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
+
+    bool ProcessStatements(const SyntaxTree::Statements& statements);
 };
 
 #endif // LLVM_IR_GENERATOR_H_
