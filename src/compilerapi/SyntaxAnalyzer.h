@@ -73,7 +73,7 @@ private:
 
     SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
 
-    bool ProcessStatements(std::vector<SyntaxTree::SyntaxTreeNode*>& statements, TokenIterator& iter, TokenIterator endIter);
+    bool ProcessStatements(SyntaxTree::Statements& statements, TokenIterator& iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

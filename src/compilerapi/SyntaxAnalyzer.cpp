@@ -195,7 +195,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    vector<SyntaxTreeNode*> statements;
+    Statements statements;
     ok = ProcessStatements(statements, iter, endIter);
     if (!ok)
     {
@@ -645,7 +645,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     }
 
     // read "if" statements
-    vector<SyntaxTreeNode*> ifStatements;
+    Statements ifStatements;
     bool ok = ProcessStatements(ifStatements, iter, endIter);
     if (!ok)
     {
@@ -694,7 +694,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    vector<SyntaxTreeNode*> elseStatements;
+    Statements elseStatements;
     unique_ptr<Expression> elseExpression;
     if (iter->GetValue() == IF_KEYWORD)
     {
@@ -740,7 +740,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     return expr;
 }
 
-bool SyntaxAnalyzer::ProcessStatements(vector<SyntaxTreeNode*>& statements, TokenIterator& iter, TokenIterator endIter)
+bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& iter, TokenIterator endIter)
 {
     statements.clear();
     statements.reserve(8);

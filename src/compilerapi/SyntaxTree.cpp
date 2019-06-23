@@ -196,9 +196,9 @@ const vector<Expression*>& FunctionExpression::GetArguments() const
 }
 
 BranchExpression::BranchExpression(Expression* ifCondition,
-                                   const std::vector<SyntaxTree::SyntaxTreeNode*>& ifStatements,
+                                   const Statements& ifStatements,
                                    Expression* ifExpression,
-                                   const std::vector<SyntaxTree::SyntaxTreeNode*>& elseStatements,
+                                   const Statements& elseStatements,
                                    Expression* elseExpression) :
     ifCondition(ifCondition),
     ifStatements(ifStatements),
@@ -225,7 +225,7 @@ Expression* BranchExpression::GetIfCondition() const
     return ifCondition;
 }
 
-const vector<SyntaxTreeNode*>& BranchExpression::GetIfStatements() const
+const Statements& BranchExpression::GetIfStatements() const
 {
     return ifStatements;
 }
@@ -235,7 +235,7 @@ Expression* BranchExpression::GetIfExpression() const
     return ifExpression;
 }
 
-const vector<SyntaxTreeNode*>& BranchExpression::GetElseStatements() const
+const Statements& BranchExpression::GetElseStatements() const
 {
     return elseStatements;
 }
@@ -290,7 +290,7 @@ Expression* Assignment::GetExpression() const
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
                                        const TypeInfo* returnType,
-                                       const vector<SyntaxTreeNode*>& statements,
+                                       const Statements& statements,
                                        Expression* returnExpression) :
     name(name),
     parameters(parameters),
@@ -333,7 +333,7 @@ const TypeInfo* FunctionDefinition::GetReturnType() const
     return returnType;
 }
 
-const vector<SyntaxTreeNode*>& FunctionDefinition::GetStatements() const
+const Statements& FunctionDefinition::GetStatements() const
 {
     return statements;
 }

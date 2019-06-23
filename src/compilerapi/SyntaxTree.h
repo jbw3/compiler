@@ -33,6 +33,8 @@ private:
     const TypeInfo* type;
 };
 
+typedef std::vector<SyntaxTreeNode*> Statements;
+
 class NumericExpression : public Expression
 {
 public:
@@ -173,9 +175,9 @@ class BranchExpression : public Expression
 {
 public:
     BranchExpression(Expression* ifCondition,
-                     const std::vector<SyntaxTree::SyntaxTreeNode*>& ifStatements,
+                     const Statements& ifStatements,
                      Expression* ifExpression,
-                     const std::vector<SyntaxTree::SyntaxTreeNode*>& elseStatements,
+                     const Statements& elseStatements,
                      Expression* elseExpression);
 
     virtual ~BranchExpression();
@@ -184,19 +186,19 @@ public:
 
     Expression* GetIfCondition() const;
 
-    const std::vector<SyntaxTreeNode*>& GetIfStatements() const;
+    const Statements& GetIfStatements() const;
 
     Expression* GetIfExpression() const;
 
-    const std::vector<SyntaxTreeNode*>& GetElseStatements() const;
+    const Statements& GetElseStatements() const;
 
     Expression* GetElseExpression() const;
 
 private:
     Expression* ifCondition;
-    std::vector<SyntaxTreeNode*> ifStatements;
+    Statements ifStatements;
     Expression* ifExpression;
-    std::vector<SyntaxTreeNode*> elseStatements;
+    Statements elseStatements;
     Expression* elseExpression;
 };
 
@@ -238,7 +240,7 @@ class FunctionDefinition : public SyntaxTreeNode
 {
 public:
     FunctionDefinition(const std::string& name, const std::vector<VariableDefinition*>& parameters,
-                       const TypeInfo* returnType, const std::vector<SyntaxTreeNode*>& statements,
+                       const TypeInfo* returnType, const Statements& statements,
                        Expression* returnExpression);
 
     virtual ~FunctionDefinition();
@@ -251,7 +253,7 @@ public:
 
     const TypeInfo* GetReturnType() const;
 
-    const std::vector<SyntaxTreeNode*>& GetStatements() const;
+    const Statements& GetStatements() const;
 
     Expression* GetReturnExpression() const;
 
@@ -259,7 +261,7 @@ private:
     std::string name;
     std::vector<VariableDefinition*> parameters;
     const TypeInfo* returnType;
-    std::vector<SyntaxTreeNode*> statements;
+    Statements statements;
     Expression* returnExpression;
 };
 

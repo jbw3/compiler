@@ -440,7 +440,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     branchExpression->SetType(resultType);
 }
 
-void SemanticAnalyzer::CheckStatements(const vector<SyntaxTreeNode*>& statements)
+void SemanticAnalyzer::CheckStatements(const SyntaxTree::Statements& statements)
 {
     for (SyntaxTreeNode* statement : statements)
     {
