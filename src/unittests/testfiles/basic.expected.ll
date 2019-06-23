@@ -938,3 +938,38 @@ merge:                                            ; preds = %else, %if
   %c14 = load i64, i64* %c3
   ret i64 %c14
 }
+
+define i32 @assignInBranch(i32 %a, i32 %b, i32 %c) {
+entry:
+  %c3 = alloca i32
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  store i32 %b, i32* %b2
+  store i32 %c, i32* %c3
+  %a4 = load i32, i32* %a1
+  %cmple = icmp sle i32 %a4, 0
+  br i1 %cmple, label %if, label %else
+
+if:                                               ; preds = %entry
+  store i32 10, i32* %b2
+  %c5 = load i32, i32* %c3
+  %add = add i32 %c5, 1
+  br label %merge
+
+else:                                             ; preds = %entry
+  store i32 10000, i32* %b2
+  %c6 = load i32, i32* %c3
+  %add7 = add i32 %c6, 2
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ %add, %if ], [ %add7, %else ]
+  store i32 %phi, i32* %c3
+  %b8 = load i32, i32* %b2
+  %c9 = load i32, i32* %c3
+  %mul = mul i32 %b8, %c9
+  store i32 %mul, i32* %c3
+  %c10 = load i32, i32* %c3
+  ret i32 %c10
+}
