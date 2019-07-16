@@ -218,11 +218,19 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         VariableDefinition* param = functionDefinition->GetParameters()[idx];
         const string& paramName = param->GetName();
         arg.setName(paramName);
-        AllocaInst* alloca = CreateVariableAlloc(func, arg, paramName);
+        AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
         currentScope->AddVariable(paramName, param, alloca);
 
         ++idx;
+    }
+
+    for (VariableDefinition* varDef : functionDefinition->GetVariableDefinitions())
+    {
+        const string& varName = varDef->GetName();
+        Type* type = GetType(varDef->GetType());
+        AllocaInst* alloca = CreateVariableAlloc(func, type, varName);
+        currentScope->AddVariable(varName, varDef, alloca);
     }
 
     bool ok = ProcessStatements(functionDefinition->GetStatements());
@@ -512,13 +520,13 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     return true;
 }
 
-AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, const Argument& arg, const string& paramName)
+AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, Type* type, const string& paramName)
 {
     // create builder to insert alloca at beginning of function
     BasicBlock& entryBlock = function->getEntryBlock();
     IRBuilder<> tempBuilder(&entryBlock, entryBlock.begin());
 
-    AllocaInst* alloca = tempBuilder.CreateAlloca(arg.getType(), nullptr, paramName);
+    AllocaInst* alloca = tempBuilder.CreateAlloca(type, nullptr, paramName);
     return alloca;
 }
 

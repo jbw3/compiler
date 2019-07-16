@@ -316,3 +316,19 @@ fun assignInBranch(a i32, b i32, c i32) i32
     c = b * c;
     c
 }
+
+fun createVars(num i32) i64
+{
+    var rv i64 =
+        if num < 0
+        {
+            var temp1 i32 = num * 10;
+            temp1
+        }
+        else
+        {
+            var temp2 i64 = num / 10;
+            temp2
+        };
+    rv
+}

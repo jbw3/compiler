@@ -53,7 +53,7 @@ private:
 
     bool CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef);
 
-    llvm::AllocaInst* CreateVariableAlloc(llvm::Function* function, const llvm::Argument& arg, const std::string& paramName);
+    llvm::AllocaInst* CreateVariableAlloc(llvm::Function* function, llvm::Type* type, const std::string& paramName);
 
     const TypeInfo* ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, llvm::Value*& value);
 

@@ -973,3 +973,37 @@ merge:                                            ; preds = %else, %if
   %c10 = load i32, i32* %c3
   ret i32 %c10
 }
+
+define i64 @createVars(i32 %num) {
+entry:
+  %rv = alloca i64
+  %temp2 = alloca i64
+  %temp1 = alloca i32
+  %num1 = alloca i32
+  store i32 %num, i32* %num1
+  %num2 = load i32, i32* %num1
+  %cmplt = icmp slt i32 %num2, 0
+  br i1 %cmplt, label %if, label %else
+
+if:                                               ; preds = %entry
+  %num3 = load i32, i32* %num1
+  %mul = mul i32 %num3, 10
+  store i32 %mul, i32* %temp1
+  %temp14 = load i32, i32* %temp1
+  %signext = sext i32 %temp14 to i64
+  br label %merge
+
+else:                                             ; preds = %entry
+  %num5 = load i32, i32* %num1
+  %div = sdiv i32 %num5, 10
+  %signext6 = sext i32 %div to i64
+  store i64 %signext6, i64* %temp2
+  %temp27 = load i64, i64* %temp2
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i64 [ %signext, %if ], [ %temp27, %else ]
+  store i64 %phi, i64* %rv
+  %rv8 = load i64, i64* %rv
+  ret i64 %rv8
+}
