@@ -37,6 +37,8 @@ private:
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
     std::map<std::string, SyntaxTree::VariableDefinition*> variables;
 
+    bool AddVariables(const SyntaxTree::VariableDefinitions& varDefs);
+
     bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);
 
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);

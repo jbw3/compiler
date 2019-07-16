@@ -151,7 +151,7 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
     Print("\",\n");
 
     // print parameters
-    const vector<VariableDefinition*>& parameters = functionDefinition->GetParameters();
+    const VariableDefinitions& parameters = functionDefinition->GetParameters();
     Print("\"parameters\": ");
     if (parameters.size() == 0)
     {
@@ -170,9 +170,31 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
             }
         }
     }
+    Print(",\n");
+
+    // print variable definitions
+    const VariableDefinitions& variableDefinitions = functionDefinition->GetVariableDefinitions();
+    Print("\"variableDefinitions\": ");
+    if (variableDefinitions.size() == 0)
+    {
+        Print("[]");
+    }
+    else
+    {
+        BracePrinter printer3(*this, "[", "]");
+
+        for (size_t i = 0; i < variableDefinitions.size(); ++i)
+        {
+            PrintVariableDefinition(variableDefinitions[i]);
+            if (i < variableDefinitions.size() - 1)
+            {
+                Print(",\n");
+            }
+        }
+    }
 
     // print statements
-    const vector<SyntaxTreeNode*>& statements = functionDefinition->GetStatements();
+    const Statements& statements = functionDefinition->GetStatements();
     PrintStatements("statements", statements);
 
     // print return expression

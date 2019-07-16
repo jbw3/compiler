@@ -44,6 +44,7 @@ private:
     };
 
     ErrorLogger& logger;
+    SyntaxTree::VariableDefinitions variableDefinitions;
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 

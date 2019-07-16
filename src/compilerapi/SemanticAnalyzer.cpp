@@ -260,15 +260,10 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
         variables.clear();
-        for (VariableDefinition* varDef : funcDef->GetParameters())
+        if (!AddVariables(funcDef->GetParameters()) || !AddVariables(funcDef->GetVariableDefinitions()))
         {
-            auto rv = variables.insert({varDef->GetName(), varDef});
-            if (!rv.second)
-            {
-                isError = true;
-                cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
-                return;
-            }
+            isError = true;
+            return;
         }
 
         funcDef->Accept(this);
@@ -277,6 +272,21 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
             break;
         }
     }
+}
+
+bool SemanticAnalyzer::AddVariables(const VariableDefinitions& varDefs)
+{
+    for (VariableDefinition* varDef : varDefs)
+    {
+        auto rv = variables.insert({varDef->GetName(), varDef});
+        if (!rv.second)
+        {
+            cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)

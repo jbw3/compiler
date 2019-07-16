@@ -218,6 +218,8 @@ private:
     const TypeInfo* type;
 };
 
+typedef std::vector<VariableDefinition*> VariableDefinitions;
+
 class Assignment : public SyntaxTreeNode
 {
 public:
@@ -239,9 +241,9 @@ private:
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:
-    FunctionDefinition(const std::string& name, const std::vector<VariableDefinition*>& parameters,
-                       const TypeInfo* returnType, const Statements& statements,
-                       Expression* returnExpression);
+    FunctionDefinition(const std::string& name, const VariableDefinitions& parameters,
+                       const TypeInfo* returnType, const VariableDefinitions& variableDefinitions,
+                       const Statements& statements, Expression* returnExpression);
 
     virtual ~FunctionDefinition();
 
@@ -249,9 +251,11 @@ public:
 
     const std::string& GetName() const;
 
-    const std::vector<VariableDefinition*>& GetParameters() const;
+    const VariableDefinitions& GetParameters() const;
 
     const TypeInfo* GetReturnType() const;
+
+    const VariableDefinitions& GetVariableDefinitions() const;
 
     const Statements& GetStatements() const;
 
@@ -259,8 +263,9 @@ public:
 
 private:
     std::string name;
-    std::vector<VariableDefinition*> parameters;
+    VariableDefinitions parameters;
     const TypeInfo* returnType;
+    VariableDefinitions variableDefinitions;
     Statements statements;
     Expression* returnExpression;
 };

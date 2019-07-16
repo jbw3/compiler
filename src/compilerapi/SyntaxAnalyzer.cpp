@@ -116,6 +116,8 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
+    variableDefinitions.clear();
+
     if (!EndIteratorCheck(iter, endIter, "Expected function keyword"))
     {
         return nullptr;
@@ -201,6 +203,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     {
         deletePointerContainer(parameters);
         deletePointerContainer(statements);
+        deletePointerContainer(variableDefinitions);
         return nullptr;
     }
 
@@ -209,6 +212,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     {
         deletePointerContainer(parameters);
         deletePointerContainer(statements);
+        deletePointerContainer(variableDefinitions);
         return nullptr;
     }
 
@@ -216,6 +220,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     {
         deletePointerContainer(parameters);
         deletePointerContainer(statements);
+        deletePointerContainer(variableDefinitions);
         return nullptr;
     }
 
@@ -224,6 +229,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         logger.LogError(*iter, "Expected '}'");
         deletePointerContainer(parameters);
         deletePointerContainer(statements);
+        deletePointerContainer(variableDefinitions);
         return nullptr;
     }
 
@@ -231,7 +237,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     ++iter;
 
     FunctionDefinition* functionDefinition = new FunctionDefinition(
-        functionName, parameters, returnType, statements, returnExpression
+        functionName, parameters, returnType, variableDefinitions, statements, returnExpression
     );
     return functionDefinition;
 }
@@ -323,6 +329,16 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
+    // check if this is a variable declaration
+    bool isVarDef = iter->GetValue() == VARIABLE_KEYWORD;
+    if (isVarDef)
+    {
+        if (!IncrementIterator(iter, endIter, "Expected a variable name"))
+        {
+            return nullptr;
+        }
+    }
+
     if (!isIdentifier(iter->GetValue()))
     {
         logger.LogError(*iter, "Expected a variable name");
@@ -330,6 +346,22 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
     }
 
     varName = iter->GetValue();
+
+    const TypeInfo* varType = nullptr;
+    if (isVarDef)
+    {
+        if (!IncrementIterator(iter, endIter, "Expected variable type"))
+        {
+            return nullptr;
+        }
+
+        string varTypeName = iter->GetValue();
+        varType = TypeInfo::GetType(varTypeName);
+        if (varType == nullptr)
+        {
+            logger.LogError(*iter, "'{}' is not a known type", varTypeName);
+        }
+    }
 
     if (!IncrementIterator(iter, endIter, "Expected operator"))
     {
@@ -357,6 +389,12 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
     if (!IncrementIterator(iter, endIter))
     {
         return nullptr;
+    }
+
+    if (isVarDef)
+    {
+        VariableDefinition* varDef = new VariableDefinition(varName, varType);
+        variableDefinitions.push_back(varDef);
     }
 
     Assignment* assignment = new Assignment(varName, expression);
@@ -745,7 +783,11 @@ bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& it
     statements.clear();
     statements.reserve(8);
 
-    while (iter != endIter && (iter + 1) != endIter && (iter + 1)->GetValue() == ASSIGNMENT_OPERATOR)
+    while (iter != endIter && (
+              ( iter->GetValue() == VARIABLE_KEYWORD )
+              ||
+              ( (iter + 1) != endIter && (iter + 1)->GetValue() == ASSIGNMENT_OPERATOR )
+          ))
     {
         SyntaxTreeNode* statement = ProcessAssignment(iter, endIter);
         if (statement == nullptr)

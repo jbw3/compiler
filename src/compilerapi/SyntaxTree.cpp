@@ -290,11 +290,13 @@ Expression* Assignment::GetExpression() const
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
                                        const TypeInfo* returnType,
+                                       const VariableDefinitions& variableDefinitions,
                                        const Statements& statements,
                                        Expression* returnExpression) :
     name(name),
     parameters(parameters),
     returnType(returnType),
+    variableDefinitions(variableDefinitions),
     statements(statements),
     returnExpression(returnExpression)
 {
@@ -305,6 +307,10 @@ FunctionDefinition::~FunctionDefinition()
     for (VariableDefinition* param : parameters)
     {
         delete param;
+    }
+    for (VariableDefinition* varDef : variableDefinitions)
+    {
+        delete varDef;
     }
     for (SyntaxTreeNode* statement : statements)
     {
@@ -331,6 +337,11 @@ const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
 const TypeInfo* FunctionDefinition::GetReturnType() const
 {
     return returnType;
+}
+
+const VariableDefinitions& FunctionDefinition::GetVariableDefinitions() const
+{
+    return variableDefinitions;
 }
 
 const Statements& FunctionDefinition::GetStatements() const
