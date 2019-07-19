@@ -181,7 +181,7 @@ void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
 {
     // find variable
     const string& varName = assignment->GetVariableName();
-    VariableDefinition* varDef = scope.GetVariable(varName);
+    VariableDefinition* varDef = symbolTable.GetVariable(varName);
     if (varDef == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not defined\n";
@@ -258,7 +258,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     // perform semantic analysis on all functions
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        scope.Push();
+        symbolTable.Push();
 
         if (!AddVariables(funcDef->GetParameters()) || !AddVariables(funcDef->GetVariableDefinitions()))
         {
@@ -272,7 +272,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
             break;
         }
 
-        scope.Pop();
+        symbolTable.Pop();
     }
 }
 
@@ -280,7 +280,7 @@ bool SemanticAnalyzer::AddVariables(const VariableDefinitions& varDefs)
 {
     for (VariableDefinition* varDef : varDefs)
     {
-        bool ok = scope.AddVariable(varDef->GetName(), varDef);
+        bool ok = symbolTable.AddVariable(varDef->GetName(), varDef);
         if (!ok)
         {
             cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
@@ -312,7 +312,7 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     const string& varName = variableExpression->GetName();
-    VariableDefinition* varDef = scope.GetVariable(varName);
+    VariableDefinition* varDef = symbolTable.GetVariable(varName);
     if (varDef == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not defined\n";

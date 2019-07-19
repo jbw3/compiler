@@ -1,5 +1,5 @@
-#ifndef SCOPE_H_
-#define SCOPE_H_
+#ifndef SYMBOL_TABLE_H_
+#define SYMBOL_TABLE_H_
 
 #include <unordered_map>
 #include <vector>
@@ -14,12 +14,12 @@ namespace SyntaxTree
 class VariableDefinition;
 } // namespace SyntaxTree
 
-class Scope
+class SymbolTable
 {
 public:
-    Scope();
+    SymbolTable();
 
-    ~Scope();
+    ~SymbolTable();
 
     void Push();
 
@@ -50,4 +50,4 @@ private:
     VariableData* GetVariableData(const std::string& name) const;
 };
 
-#endif // SCOPE_H_
+#endif // SYMBOL_TABLE_H_

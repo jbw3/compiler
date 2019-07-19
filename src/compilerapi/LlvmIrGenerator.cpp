@@ -173,7 +173,7 @@ void LlvmIrGenerator::Visit(SyntaxTree::Assignment* assignment)
     }
 
     const string& name = assignment->GetVariableName();
-    AllocaInst* alloca = currentScope->GetValue(name);
+    AllocaInst* alloca = symbolTable.GetValue(name);
     if (alloca == nullptr)
     {
         resultValue = nullptr;
@@ -183,7 +183,7 @@ void LlvmIrGenerator::Visit(SyntaxTree::Assignment* assignment)
 
     // sign extend expression value if needed
     const TypeInfo* expressionType = expression->GetType();
-    const TypeInfo* varType = currentScope->GetVariable(name)->GetType();
+    const TypeInfo* varType = symbolTable.GetVariable(name)->GetType();
     ExtendType(expressionType, varType, resultValue);
 
     resultValue = builder.CreateStore(resultValue, alloca);
@@ -211,7 +211,8 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);
 
-    currentScope.reset(new Scope());
+    symbolTable.Push();
+
     size_t idx = 0;
     for (Argument& arg : func->args())
     {
@@ -220,7 +221,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         arg.setName(paramName);
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
-        currentScope->AddVariable(paramName, param, alloca);
+        symbolTable.AddVariable(paramName, param, alloca);
 
         ++idx;
     }
@@ -230,7 +231,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         const string& varName = varDef->GetName();
         Type* type = GetType(varDef->GetType());
         AllocaInst* alloca = CreateVariableAlloc(func, type, varName);
-        currentScope->AddVariable(varName, varDef, alloca);
+        symbolTable.AddVariable(varName, varDef, alloca);
     }
 
     bool ok = ProcessStatements(functionDefinition->GetStatements());
@@ -243,7 +244,8 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     // process return expression
     Expression* returnExpression = functionDefinition->GetReturnExpression();
     returnExpression->Accept(this);
-    currentScope.reset(nullptr);
+
+    symbolTable.Pop();
 
     if (resultValue == nullptr)
     {
@@ -327,7 +329,7 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 {
     const string& name = variableExpression->GetName();
-    AllocaInst* alloca = currentScope->GetValue(name);
+    AllocaInst* alloca = symbolTable.GetValue(name);
     if (alloca == nullptr)
     {
         resultValue = nullptr;

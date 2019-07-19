@@ -4,7 +4,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "Config.h"
-#include "Scope.h"
+#include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include "llvm/IR/IRBuilder.h"
@@ -45,7 +45,7 @@ private:
     std::string outFilename;
     std::string architecture;
     Config::EAssemblyType assemblyType;
-    std::unique_ptr<Scope> currentScope;
+    SymbolTable symbolTable;
     llvm::Value* resultValue;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
 

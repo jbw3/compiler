@@ -1,7 +1,7 @@
 #ifndef SEMANTIC_ANALYZER_H_
 #define SEMANTIC_ANALYZER_H_
 
-#include "Scope.h"
+#include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include <map>
@@ -36,7 +36,7 @@ public:
 private:
     bool isError;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
-    Scope scope;
+    SymbolTable symbolTable;
 
     bool AddVariables(const SyntaxTree::VariableDefinitions& varDefs);
 
