@@ -9,36 +9,83 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
+Scope::Scope()
+{
+    Push();
+}
+
+Scope::~Scope()
+{
+    for (ScopeData* scope : scopes)
+    {
+        delete scope;
+    }
+}
+
+void Scope::Push()
+{
+    scopes.push_back(new ScopeData);
+}
+
+void Scope::Pop()
+{
+    if (!scopes.empty())
+    {
+        delete scopes.back();
+        scopes.pop_back();
+    }
+
+    // always make sure there is at least one scope on the stack
+    if (scopes.empty())
+    {
+        Push();
+    }
+}
+
+bool Scope::AddVariable(const std::string& name, SyntaxTree::VariableDefinition* variable)
+{
+    return AddVariable(name, variable, nullptr);
+}
+
 bool Scope::AddVariable(const string& name, VariableDefinition* variable, AllocaInst* value)
 {
-    auto rv = variables.insert({name, {variable, value}});
+    auto rv = scopes.back()->variables.insert({name, {variable, value}});
     return rv.second;
 }
 
 VariableDefinition* Scope::GetVariable(const string& name) const
 {
-    auto iter = variables.find(name);
-    if (iter == variables.cend())
+    VariableData* varData = GetVariableData(name);
+    if (varData == nullptr)
     {
         return nullptr;
     }
 
-    return iter->second.variable;
+    return varData->variable;
 }
 
 AllocaInst* Scope::GetValue(const string& name) const
 {
-    auto iter = variables.find(name);
-    if (iter == variables.cend())
+    VariableData* varData = GetVariableData(name);
+    if (varData == nullptr)
     {
         return nullptr;
     }
 
-    return iter->second.value;
+    return varData->value;
 }
 
-bool Scope::Contains(const string& name) const
+Scope::VariableData* Scope::GetVariableData(const string& name) const
 {
-    auto iter = variables.find(name);
-    return iter != variables.cend();
+    for (auto iter = scopes.rbegin(); iter != scopes.rend(); ++iter)
+    {
+        unordered_map<string, VariableData>& variables = (*iter)->variables;
+        auto varIter = variables.find(name);
+        if (varIter != variables.cend())
+        {
+            return &varIter->second;
+        }
+    }
+
+    return nullptr;
 }

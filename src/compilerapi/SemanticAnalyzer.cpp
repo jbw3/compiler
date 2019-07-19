@@ -181,14 +181,13 @@ void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
 {
     // find variable
     const string& varName = assignment->GetVariableName();
-    auto iter = variables.find(varName);
-    if (iter == variables.cend())
+    VariableDefinition* varDef = scope.GetVariable(varName);
+    if (varDef == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not defined\n";
         isError = true;
         return;
     }
-    VariableDefinition* varDef = iter->second;
 
     // check expression
     Expression* expression = assignment->GetExpression();
@@ -259,7 +258,8 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     // perform semantic analysis on all functions
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        variables.clear();
+        scope.Push();
+
         if (!AddVariables(funcDef->GetParameters()) || !AddVariables(funcDef->GetVariableDefinitions()))
         {
             isError = true;
@@ -271,6 +271,8 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         {
             break;
         }
+
+        scope.Pop();
     }
 }
 
@@ -278,8 +280,8 @@ bool SemanticAnalyzer::AddVariables(const VariableDefinitions& varDefs)
 {
     for (VariableDefinition* varDef : varDefs)
     {
-        auto rv = variables.insert({varDef->GetName(), varDef});
-        if (!rv.second)
+        bool ok = scope.AddVariable(varDef->GetName(), varDef);
+        if (!ok)
         {
             cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
             return false;
@@ -310,15 +312,15 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     const string& varName = variableExpression->GetName();
-    auto iter = variables.find(varName);
-    if (iter == variables.cend())
+    VariableDefinition* varDef = scope.GetVariable(varName);
+    if (varDef == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not defined\n";
         isError = true;
     }
     else
     {
-        variableExpression->SetType(iter->second->GetType());
+        variableExpression->SetType(varDef->GetType());
     }
 }
 

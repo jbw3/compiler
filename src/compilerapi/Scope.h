@@ -2,6 +2,7 @@
 #define SCOPE_H_
 
 #include <unordered_map>
+#include <vector>
 
 namespace llvm
 {
@@ -16,22 +17,37 @@ class VariableDefinition;
 class Scope
 {
 public:
+    Scope();
+
+    ~Scope();
+
+    void Push();
+
+    void Pop();
+
+    bool AddVariable(const std::string& name, SyntaxTree::VariableDefinition* variable);
+
     bool AddVariable(const std::string& name, SyntaxTree::VariableDefinition* variable, llvm::AllocaInst* value);
 
     SyntaxTree::VariableDefinition* GetVariable(const std::string& name) const;
 
     llvm::AllocaInst* GetValue(const std::string& name) const;
 
-    bool Contains(const std::string& name) const;
-
 private:
-    struct Data
+    struct VariableData
     {
         SyntaxTree::VariableDefinition* variable;
         llvm::AllocaInst* value;
     };
 
-    std::unordered_map<std::string, Data> variables;
+    struct ScopeData
+    {
+        std::unordered_map<std::string, VariableData> variables;
+    };
+
+    std::vector<ScopeData*> scopes;
+
+    VariableData* GetVariableData(const std::string& name) const;
 };
 
 #endif // SCOPE_H_
