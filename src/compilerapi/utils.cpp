@@ -171,6 +171,7 @@ bool binStringToInteger(const string& str, int64_t& num)
         }
         else if (ch != '0')
         {
+            num = 0;
             return false;
         }
     }
@@ -194,6 +195,7 @@ bool octStringToInteger(const string& str, int64_t& num)
         }
         else
         {
+            num = 0;
             return false;
         }
     }
@@ -214,6 +216,7 @@ bool decStringToInteger(const string& str, int64_t& num)
         }
         else
         {
+            num = 0;
             return false;
         }
     }
@@ -245,6 +248,7 @@ bool hexStringToInteger(const string& str, int64_t& num)
         }
         else
         {
+            num = 0;
             return false;
         }
     }
@@ -258,7 +262,7 @@ bool stringToInteger(const string& str, int64_t& num)
 
     // determine base
     int base = 10;
-    if (str.size() >= 2 && str[0] == '0')
+    if (str.size() > 2 && str[0] == '0')
     {
         switch (str[1])
         {
@@ -299,6 +303,7 @@ bool stringToInteger(const string& str, int64_t& num)
             break;
         default:
             // we should not get here
+            num = 0;
             ok = false;
             break;
     }

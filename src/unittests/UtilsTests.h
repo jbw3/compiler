@@ -9,7 +9,7 @@ public:
     UtilsTests();
 
 private:
-    static bool TestIsPotentialNumber();
+    static bool TestNumberConversion();
 };
 
 #endif // UTILS_TEST_H_
