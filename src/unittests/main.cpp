@@ -1,5 +1,6 @@
 #include "CompilerTests.h"
 #include "LexicalAnalyzerTests.h"
+#include "UtilsTests.h"
 #include <iostream>
 #include <memory>
 
@@ -9,8 +10,9 @@ int main()
 {
     vector<shared_ptr<TestClass>> testClasses =
     {
-        shared_ptr<TestClass>(new LexicalAnalyzerTests()),
-        shared_ptr<TestClass>(new CompilerTests()),
+        shared_ptr<TestClass>(new LexicalAnalyzerTests),
+        shared_ptr<TestClass>(new CompilerTests),
+        shared_ptr<TestClass>(new UtilsTests),
     };
 
     bool passed = true;

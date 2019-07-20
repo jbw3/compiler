@@ -20,6 +20,8 @@ bool isIdentifier(const std::string& str);
 
 bool isNumber(const std::string& tokenStr);
 
+bool isPotentialNumber(const std::string& tokenStr);
+
 bool isBool(const std::string& tokenStr);
 
 bool stringToInteger(const std::string& str, int64_t& num);

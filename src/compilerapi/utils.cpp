@@ -25,41 +25,8 @@ bool isIdentifier(const string& str)
     return true;
 }
 
-// TODO: This function incorrectly marks strings like "0x" as valid numbers
-bool isNumber(const string& tokenStr)
+bool isNumber(const string& tokenStr, int base, size_t idx)
 {
-    size_t idx = 0;
-
-    // determine base
-    int base = 10;
-    if (tokenStr.size() >= 2 && tokenStr[0] == '0')
-    {
-        switch (tokenStr[1])
-        {
-            case 'b':
-            case 'B':
-                base = 2;
-                idx += 2;
-                break;
-
-            case 'o':
-            case 'O':
-                base = 8;
-                idx += 2;
-                break;
-
-            case 'x':
-            case 'X':
-                base = 16;
-                idx += 2;
-                break;
-
-            default:
-                base = 10;
-                break;
-        }
-    }
-
     if (base == 2)
     {
         for (; idx < tokenStr.size(); ++idx)
@@ -107,6 +74,80 @@ bool isNumber(const string& tokenStr)
 
     // should not get here
     return false;
+}
+
+bool isNumber(const string& tokenStr)
+{
+    size_t idx = 0;
+
+    // determine base
+    int base = 10;
+    if (tokenStr.size() > 2 && tokenStr[0] == '0')
+    {
+        switch (tokenStr[1])
+        {
+            case 'b':
+            case 'B':
+                base = 2;
+                idx += 2;
+                break;
+
+            case 'o':
+            case 'O':
+                base = 8;
+                idx += 2;
+                break;
+
+            case 'x':
+            case 'X':
+                base = 16;
+                idx += 2;
+                break;
+
+            default:
+                base = 10;
+                break;
+        }
+    }
+
+    return isNumber(tokenStr, base, idx);
+}
+
+bool isPotentialNumber(const string& tokenStr)
+{
+    size_t idx = 0;
+
+    // determine base
+    int base = 10;
+    if (tokenStr.size() >= 2 && tokenStr[0] == '0')
+    {
+        switch (tokenStr[1])
+        {
+            case 'b':
+            case 'B':
+                base = 2;
+                idx += 2;
+                break;
+
+            case 'o':
+            case 'O':
+                base = 8;
+                idx += 2;
+                break;
+
+            case 'x':
+            case 'X':
+                base = 16;
+                idx += 2;
+                break;
+
+            default:
+                base = 10;
+                break;
+        }
+    }
+
+    return isNumber(tokenStr, base, idx);
 }
 
 bool isBool(const string& tokenStr)

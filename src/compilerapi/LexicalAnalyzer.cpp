@@ -159,7 +159,7 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 
 bool LexicalAnalyzer::IsValidToken(const string& str) const
 {
-    return SYMBOLS.find(str) != SYMBOLS.end() || isIdentifier(str) || isNumber(str);
+    return SYMBOLS.find(str) != SYMBOLS.end() || isIdentifier(str) || isPotentialNumber(str);
 }
 
 void LexicalAnalyzer::PrintError()
