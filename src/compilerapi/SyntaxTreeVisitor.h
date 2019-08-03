@@ -13,6 +13,7 @@ class ModuleDefinition;
 class NumericExpression;
 class UnaryExpression;
 class VariableExpression;
+class WhileLoop;
 } // namespace SyntaxTree
 
 class SyntaxTreeVisitor
@@ -23,6 +24,8 @@ public:
     virtual void Visit(SyntaxTree::BinaryExpression* binaryExpression) = 0;
 
     virtual void Visit(SyntaxTree::Assignment* assignment) = 0;
+
+    virtual void Visit(SyntaxTree::WhileLoop* whileLoop) = 0;
 
     virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
 

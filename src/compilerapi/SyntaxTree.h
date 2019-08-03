@@ -238,6 +238,24 @@ private:
     Expression* expression;
 };
 
+class WhileLoop : public SyntaxTreeNode
+{
+public:
+    WhileLoop(Expression* condition, const Statements& statements);
+
+    virtual ~WhileLoop();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Expression* GetCondition() const;
+
+    const Statements& GetStatements() const;
+
+private:
+    Expression* condition;
+    Statements statements;
+};
+
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:

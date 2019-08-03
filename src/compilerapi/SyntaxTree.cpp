@@ -287,6 +287,33 @@ Expression* Assignment::GetExpression() const
     return expression;
 }
 
+WhileLoop::WhileLoop(Expression* condition, const Statements& statements) :
+    condition(condition),
+    statements(statements)
+{
+}
+
+WhileLoop::~WhileLoop()
+{
+    delete condition;
+    deletePointerContainer(statements);
+}
+
+void WhileLoop::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const Expression* WhileLoop::GetCondition() const
+{
+    return condition;
+}
+
+const Statements& WhileLoop::GetStatements() const
+{
+    return statements;
+}
+
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
                                        const TypeInfo* returnType,
