@@ -247,7 +247,7 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const Expression* GetCondition() const;
+    Expression* GetCondition() const;
 
     const Statements& GetStatements() const;
 

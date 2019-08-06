@@ -17,6 +17,8 @@ const string SyntaxAnalyzer::IF_KEYWORD = "if";
 
 const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
 
+const string SyntaxAnalyzer::WHILE_KEYWORD = "while";
+
 const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_OPERATORS =
 {
     {"-", UnaryExpression::eNegative},
@@ -401,6 +403,36 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
     return assignment;
 }
 
+WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter)
+{
+    // increment iter past "while" keyword
+    ++iter;
+
+    // read "while" condition
+    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, {"{"}));
+    if (whileCondition == nullptr)
+    {
+        return nullptr;
+    }
+
+    // increment past "{"
+    if (!IncrementIterator(iter, endIter))
+    {
+        return nullptr;
+    }
+
+    // read "while" loop statements
+    Statements statements;
+    bool ok = ProcessStatements(statements, iter, endIter);
+    if (!ok)
+    {
+        return nullptr;
+    }
+
+    WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), statements);
+    return whileLoop;
+}
+
 SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindStatementEnd(TokenIterator iter, TokenIterator endIter)
 {
     unsigned int balance = 0;
@@ -783,13 +815,24 @@ bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& it
     statements.clear();
     statements.reserve(8);
 
-    while (iter != endIter && (
-              ( iter->GetValue() == VARIABLE_KEYWORD )
-              ||
-              ( (iter + 1) != endIter && (iter + 1)->GetValue() == ASSIGNMENT_OPERATOR )
-          ))
+    while (iter != endIter)
     {
-        SyntaxTreeNode* statement = ProcessAssignment(iter, endIter);
+        auto nextIter = iter + 1;
+
+        SyntaxTreeNode* statement = nullptr;
+        if ( (iter->GetValue() == VARIABLE_KEYWORD) || (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR) )
+        {
+            statement = ProcessAssignment(iter, endIter);
+        }
+        else if (iter->GetValue() == WHILE_KEYWORD)
+        {
+            statement = ProcessWhileLoop(iter, endIter);
+        }
+        else
+        {
+            logger.LogError(*iter, "Unexpected token '{}'", *iter);
+        }
+
         if (statement == nullptr)
         {
             deletePointerContainer(statements);

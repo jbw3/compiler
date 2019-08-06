@@ -142,6 +142,16 @@ void SyntaxTreePrinter::Visit(Assignment* assignment)
     assignment->GetExpression()->Accept(this);
 }
 
+void SyntaxTreePrinter::Visit(WhileLoop* whileLoop)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"WhileLoop\",\n\"condition\":\n");
+    whileLoop->GetCondition()->Accept(this);
+
+    PrintStatements("statements", whileLoop->GetStatements());
+}
+
 void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 {
     BracePrinter printer(*this, "{", "}");

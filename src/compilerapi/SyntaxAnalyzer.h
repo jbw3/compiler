@@ -27,6 +27,8 @@ public:
 
     static const std::string ELSE_KEYWORD;
 
+    static const std::string WHILE_KEYWORD;
+
     static const std::map<std::string, SyntaxTree::UnaryExpression::EOperator> UNARY_EXPRESSION_OPERATORS;
 
     static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
@@ -57,6 +59,8 @@ private:
                            std::vector<SyntaxTree::VariableDefinition*>& parameters);
 
     SyntaxTree::Assignment* ProcessAssignment(TokenIterator& iter, TokenIterator endIter);
+
+    SyntaxTree::WhileLoop* ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter);
 
     TokenIterator FindStatementEnd(TokenIterator iter, TokenIterator endIter);
 
