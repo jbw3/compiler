@@ -191,9 +191,44 @@ void LlvmIrGenerator::Visit(Assignment* assignment)
 
 void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 {
-    // TODO: support while loops
-    cerr << "while loop is not supported\n";
-    resultValue = nullptr;
+    Function* function = builder.GetInsertBlock()->getParent();
+
+    // create the loop basic blocks
+    BasicBlock* loopCondBlock = BasicBlock::Create(context, "whileCond", function);
+    BasicBlock* loopBodyBlock = BasicBlock::Create(context, "whileBody", function);
+    BasicBlock* loopExitBlock = BasicBlock::Create(context, "whileExit", function);
+
+    // create unconditional branch from current block to loop condition block
+    builder.CreateBr(loopCondBlock);
+
+    // set insert point to the loop condition block
+    builder.SetInsertPoint(loopCondBlock);
+
+    // generate the condition IR
+    whileLoop->GetCondition()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    builder.CreateCondBr(resultValue, loopBodyBlock, loopExitBlock);
+
+    // set insert point to the loop body block
+    builder.SetInsertPoint(loopBodyBlock);
+
+    // generate loop body IR
+    bool ok = ProcessStatements(whileLoop->GetStatements());
+    if (!ok)
+    {
+        resultValue = nullptr;
+        return;
+    }
+
+    // create unconditional branch to loop condition block
+    builder.CreateBr(loopCondBlock);
+
+    // set insert point to the loop exit block
+    builder.SetInsertPoint(loopExitBlock);
 }
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
