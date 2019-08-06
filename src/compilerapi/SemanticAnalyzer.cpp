@@ -211,6 +211,13 @@ void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
     }
 }
 
+void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
+{
+    // TODO: support while loops
+    cerr << "while loop is not supported\n";
+    isError = true;
+}
+
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     // check statements

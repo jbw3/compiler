@@ -830,7 +830,7 @@ bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& it
         }
         else
         {
-            logger.LogError(*iter, "Unexpected token '{}'", *iter);
+            logger.LogError(*iter, "Unexpected token '{}'", iter->GetValue());
         }
 
         if (statement == nullptr)

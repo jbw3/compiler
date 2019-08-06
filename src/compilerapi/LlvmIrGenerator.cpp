@@ -163,7 +163,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(SyntaxTree::Assignment* assignment)
+void LlvmIrGenerator::Visit(Assignment* assignment)
 {
     Expression* expression = assignment->GetExpression();
     expression->Accept(this);
@@ -187,6 +187,13 @@ void LlvmIrGenerator::Visit(SyntaxTree::Assignment* assignment)
     ExtendType(expressionType, varType, resultValue);
 
     resultValue = builder.CreateStore(resultValue, alloca);
+}
+
+void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
+{
+    // TODO: support while loops
+    cerr << "while loop is not supported\n";
+    resultValue = nullptr;
 }
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)

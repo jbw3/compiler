@@ -304,7 +304,7 @@ void WhileLoop::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const Expression* WhileLoop::GetCondition() const
+Expression* WhileLoop::GetCondition() const
 {
     return condition;
 }
