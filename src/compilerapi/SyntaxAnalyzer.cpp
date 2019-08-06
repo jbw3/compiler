@@ -429,6 +429,27 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
         return nullptr;
     }
 
+    // we should be at the closing "}"
+    if (!EndIteratorCheck(iter, endIter, "Expected '}'"))
+    {
+        deletePointerContainer(statements);
+        return nullptr;
+    }
+
+    if (iter->GetValue() != "}")
+    {
+        logger.LogError(*iter, "Expected '}'");
+        deletePointerContainer(statements);
+        return nullptr;
+    }
+
+    // increment past "}"
+    if (!IncrementIterator(iter, endIter))
+    {
+        deletePointerContainer(statements);
+        return nullptr;
+    }
+
     WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), statements);
     return whileLoop;
 }
