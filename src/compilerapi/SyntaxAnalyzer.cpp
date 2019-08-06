@@ -815,6 +815,7 @@ bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& it
     statements.clear();
     statements.reserve(8);
 
+    bool isError = false;
     while (iter != endIter)
     {
         auto nextIter = iter + 1;
@@ -823,23 +824,27 @@ bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& it
         if ( (iter->GetValue() == VARIABLE_KEYWORD) || (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR) )
         {
             statement = ProcessAssignment(iter, endIter);
+            isError = (statement == nullptr);
         }
         else if (iter->GetValue() == WHILE_KEYWORD)
         {
             statement = ProcessWhileLoop(iter, endIter);
+            isError = (statement == nullptr);
         }
         else
         {
-            logger.LogError(*iter, "Unexpected token '{}'", iter->GetValue());
+            break;
         }
 
-        if (statement == nullptr)
+        if (isError)
         {
             deletePointerContainer(statements);
             return false;
         }
-
-        statements.push_back(statement);
+        else
+        {
+            statements.push_back(statement);
+        }
     }
 
     return true;
