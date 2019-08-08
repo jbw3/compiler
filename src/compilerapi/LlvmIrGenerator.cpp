@@ -193,10 +193,7 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 {
     Function* function = builder.GetInsertBlock()->getParent();
 
-    // create the loop basic blocks
     BasicBlock* loopCondBlock = BasicBlock::Create(context, "whileCond", function);
-    BasicBlock* loopBodyBlock = BasicBlock::Create(context, "whileBody", function);
-    BasicBlock* loopExitBlock = BasicBlock::Create(context, "whileExit", function);
 
     // create unconditional branch from current block to loop condition block
     builder.CreateBr(loopCondBlock);
@@ -210,8 +207,9 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     {
         return;
     }
+    Value* conditionResult = resultValue;
 
-    builder.CreateCondBr(resultValue, loopBodyBlock, loopExitBlock);
+    BasicBlock* loopBodyBlock = BasicBlock::Create(context, "whileBody", function);
 
     // set insert point to the loop body block
     builder.SetInsertPoint(loopBodyBlock);
@@ -226,6 +224,13 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
     // create unconditional branch to loop condition block
     builder.CreateBr(loopCondBlock);
+
+    BasicBlock* loopExitBlock = BasicBlock::Create(context, "whileExit", function);
+
+    // create conditional branch from condition block to either the loop body
+    // or the loop exit
+    builder.SetInsertPoint(loopCondBlock);
+    builder.CreateCondBr(conditionResult, loopBodyBlock, loopExitBlock);
 
     // set insert point to the loop exit block
     builder.SetInsertPoint(loopExitBlock);

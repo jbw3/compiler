@@ -1037,3 +1037,68 @@ whileExit:                                        ; preds = %whileCond
   %rv6 = load i32, i32* %rv
   ret i32 %rv6
 }
+
+define i32 @nestedLoop(i32 %num) {
+entry:
+  %j = alloca i32
+  %rv = alloca i32
+  %i = alloca i32
+  %num1 = alloca i32
+  store i32 %num, i32* %num1
+  store i32 0, i32* %i
+  store i32 1, i32* %rv
+  br label %whileCond
+
+whileCond:                                        ; preds = %whileExit, %entry
+  %i2 = load i32, i32* %i
+  %num3 = load i32, i32* %num1
+  %cmplt = icmp slt i32 %i2, %num3
+  br i1 %cmplt, label %whileBody, label %whileExit18
+
+whileBody:                                        ; preds = %whileCond
+  %i4 = load i32, i32* %i
+  %mod = srem i32 %i4, 2
+  %cmpeq = icmp eq i32 %mod, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %whileBody
+  %rv5 = load i32, i32* %rv
+  %mul = mul i32 %rv5, 2
+  br label %merge
+
+else:                                             ; preds = %whileBody
+  %rv6 = load i32, i32* %rv
+  %mul7 = mul i32 %rv6, 3
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ %mul, %if ], [ %mul7, %else ]
+  store i32 %phi, i32* %rv
+  store i32 0, i32* %j
+  br label %whileCond8
+
+whileCond8:                                       ; preds = %whileBody12, %merge
+  %j9 = load i32, i32* %j
+  %i10 = load i32, i32* %i
+  %cmplt11 = icmp slt i32 %j9, %i10
+  br i1 %cmplt11, label %whileBody12, label %whileExit
+
+whileBody12:                                      ; preds = %whileCond8
+  %rv13 = load i32, i32* %rv
+  %add = add i32 %rv13, 1
+  store i32 %add, i32* %rv
+  %j14 = load i32, i32* %j
+  %add15 = add i32 %j14, 1
+  store i32 %add15, i32* %j
+  br label %whileCond8
+
+whileExit:                                        ; preds = %whileCond8
+  %i16 = load i32, i32* %i
+  %add17 = add i32 %i16, 1
+  store i32 %add17, i32* %i
+  br label %whileCond
+
+whileExit18:                                      ; preds = %whileCond
+  %rv19 = load i32, i32* %rv
+  ret i32 %rv19
+}
