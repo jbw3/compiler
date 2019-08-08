@@ -1007,3 +1007,33 @@ merge:                                            ; preds = %else, %if
   %rv8 = load i64, i64* %rv
   ret i64 %rv8
 }
+
+define i32 @whileLoop(i32 %num) {
+entry:
+  %rv = alloca i32
+  %i = alloca i32
+  %num1 = alloca i32
+  store i32 %num, i32* %num1
+  store i32 0, i32* %i
+  store i32 1, i32* %rv
+  br label %whileCond
+
+whileCond:                                        ; preds = %whileBody, %entry
+  %i2 = load i32, i32* %i
+  %num3 = load i32, i32* %num1
+  %cmplt = icmp slt i32 %i2, %num3
+  br i1 %cmplt, label %whileBody, label %whileExit
+
+whileBody:                                        ; preds = %whileCond
+  %rv4 = load i32, i32* %rv
+  %mul = mul i32 %rv4, 2
+  store i32 %mul, i32* %rv
+  %i5 = load i32, i32* %i
+  %add = add i32 %i5, 1
+  store i32 %add, i32* %i
+  br label %whileCond
+
+whileExit:                                        ; preds = %whileCond
+  %rv6 = load i32, i32* %rv
+  ret i32 %rv6
+}
