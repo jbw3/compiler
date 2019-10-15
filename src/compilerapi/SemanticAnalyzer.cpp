@@ -41,7 +41,7 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, con
     switch (op)
     {
         case UnaryExpression::eNegative:
-            ok = subExprType->IsInt;
+            ok = subExprType->IsInt();
             break;
         case UnaryExpression::eComplement:
             ok = true;
@@ -87,7 +87,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
 {
     bool ok = false;
 
-    if ( !(leftType->IsSameAs(*rightType)) && !(leftType->IsInt && rightType->IsInt) )
+    if ( !(leftType->IsSameAs(*rightType)) && !(leftType->IsInt() && rightType->IsInt()) )
     {
         cerr << "Left and right operands do not have the same type\n";
         ok = false;
@@ -101,11 +101,11 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseXor:
             case BinaryExpression::eBitwiseOr:
-                ok = (leftType == rightType) || (leftType->IsInt && rightType->IsInt);
+                ok = (leftType == rightType) || (leftType->IsInt() && rightType->IsInt());
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
-                ok = leftType->IsBool;
+                ok = leftType->IsBool();
                 break;
             case BinaryExpression::eLessThan:
             case BinaryExpression::eLessThanOrEqual:
@@ -116,13 +116,13 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eModulo:
-                ok = leftType->IsInt && rightType->IsInt;
+                ok = leftType->IsInt() && rightType->IsInt();
                 break;
             case BinaryExpression::eShiftLeft:
             case BinaryExpression::eShiftRightArithmetic:
                 // the return type should be the left type, so the right type has to be the
                 // same size or smaller
-                ok = leftType->IsInt && rightType->IsInt && leftType->NumBits >= rightType->NumBits;
+                ok = leftType->IsInt() && rightType->IsInt() && leftType->GetNumBits() >= rightType->GetNumBits();
                 break;
         }
 
@@ -157,13 +157,13 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eBitwiseXor:
         case BinaryExpression::eBitwiseOr:
         {
-            if (leftType->IsBool)
+            if (leftType->IsBool())
             {
                 return TypeInfo::BoolType;
             }
-            else if (leftType->IsInt && rightType->IsInt)
+            else if (leftType->IsInt() && rightType->IsInt())
             {
-                return (leftType->NumBits > rightType->NumBits) ? leftType : rightType;
+                return (leftType->GetNumBits() > rightType->GetNumBits()) ? leftType : rightType;
             }
             else
             {
@@ -202,7 +202,7 @@ void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
     const TypeInfo* varType = varDef->GetType();
     if (exprType != varType)
     {
-        if ( !(exprType->IsInt && varType->IsInt && exprType->NumBits <= varType->NumBits) )
+        if ( !(exprType->IsInt() && varType->IsInt() && exprType->GetNumBits() <= varType->GetNumBits()) )
         {
             cerr << "Expression does not match argument type\n";
             isError = true;
@@ -257,7 +257,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     const TypeInfo* returnExpressionType = returnExpression->GetType();
     if (returnType != returnExpressionType)
     {
-        if ( !(returnExpressionType->IsInt && returnType->IsInt && returnExpressionType->NumBits <= returnType->NumBits) )
+        if ( !(returnExpressionType->IsInt() && returnType->IsInt() && returnExpressionType->GetNumBits() <= returnType->GetNumBits()) )
         {
             isError = true;
             cerr << "Function return expression does not equal return type\n";
@@ -389,7 +389,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const TypeInfo* paramType = param->GetType();
         if (argType != paramType)
         {
-            if ( !(argType->IsInt && paramType->IsInt && argType->NumBits <= paramType->NumBits) )
+            if ( !(argType->IsInt() && paramType->IsInt() && argType->GetNumBits() <= paramType->GetNumBits()) )
             {
                 cerr << "Argument does not match parameter type\n";
                 isError = true;
@@ -455,9 +455,9 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     {
         resultType = ifType;
     }
-    else if (ifType->IsInt && elseType->IsInt)
+    else if (ifType->IsInt() && elseType->IsInt())
     {
-        if (ifType->NumBits >= elseType->NumBits)
+        if (ifType->GetNumBits() >= elseType->GetNumBits())
         {
             resultType = ifType;
         }

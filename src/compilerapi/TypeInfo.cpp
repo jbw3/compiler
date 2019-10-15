@@ -38,10 +38,25 @@ TypeInfo::TypeInfo(
     bool isBool,
     bool isInt
 ) :
-    NumBits(numBits),
-    IsBool(isBool),
-    IsInt(isInt)
+    numBits(numBits),
+    isBool(isBool),
+    isInt(isInt)
 {
+}
+
+bool TypeInfo::IsBool() const
+{
+    return isBool;
+}
+
+bool TypeInfo::IsInt() const
+{
+    return isInt;
+}
+
+unsigned TypeInfo::GetNumBits() const
+{
+    return numBits;
 }
 
 PrimitiveType::PrimitiveType(
@@ -61,7 +76,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
     }
 
     const PrimitiveType& primitiveOther = static_cast<const PrimitiveType&>(other);
-    return NumBits == primitiveOther.NumBits
-        && IsBool == primitiveOther.IsBool
-        && IsInt == primitiveOther.IsInt;
+    return GetNumBits() == primitiveOther.GetNumBits()
+        && IsBool() == primitiveOther.IsBool()
+        && IsInt() == primitiveOther.IsInt();
 }

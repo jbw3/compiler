@@ -14,10 +14,6 @@ public:
 
     static const TypeInfo* GetType(const std::string& typeName);
 
-    unsigned NumBits;
-    bool IsBool;
-    bool IsInt;
-
     TypeInfo(
         unsigned numBits,
         bool isBool,
@@ -26,8 +22,18 @@ public:
 
     virtual bool IsSameAs(const TypeInfo& other) const = 0;
 
+    bool IsBool() const;
+
+    bool IsInt() const;
+
+    unsigned GetNumBits() const;
+
 private:
     static std::map<std::string, const TypeInfo*> types;
+
+    unsigned numBits;
+    bool isBool;
+    bool isInt;
 };
 
 class PrimitiveType : public TypeInfo

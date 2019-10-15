@@ -111,15 +111,15 @@ string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
 
 bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
 {
-    if (type->IsBool)
+    if (type->IsBool())
     {
         cType = "bool";
         return true;
     }
-    else if (type->IsInt)
+    else if (type->IsInt())
     {
         stringstream ss;
-        ss << "int" << type->NumBits << "_t";
+        ss << "int" << type->GetNumBits() << "_t";
         cType = ss.str();
         return true;
     }

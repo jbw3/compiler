@@ -348,7 +348,7 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
     bool ok = stringToInteger(numericExpression->GetNumber(), number);
     if (ok)
     {
-        unsigned int numBits = numericExpression->GetType()->NumBits;
+        unsigned int numBits = numericExpression->GetType()->GetNumBits();
         resultValue = ConstantInt::get(context, APInt(numBits, number, true));
     }
     else
@@ -528,13 +528,13 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     Type* llvmType = nullptr;
-    if (type->IsBool)
+    if (type->IsBool())
     {
         llvmType = Type::getInt1Ty(context);
     }
-    else if (type->IsInt)
+    else if (type->IsInt())
     {
-        llvmType = Type::getIntNTy(context, type->NumBits);
+        llvmType = Type::getIntNTy(context, type->GetNumBits());
     }
     else
     {
@@ -584,7 +584,7 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeI
     const TypeInfo* resultType = nullptr;
 
     // sign extend value if needed
-    if (srcType->IsInt && dstType->IsInt && srcType->NumBits < dstType->NumBits)
+    if (srcType->IsInt() && dstType->IsInt() && srcType->GetNumBits() < dstType->GetNumBits())
     {
         value = builder.CreateSExt(value, GetType(dstType), "signext");
         resultType = dstType;
@@ -601,9 +601,9 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const Type
 {
     const TypeInfo* resultType = nullptr;
 
-    if (leftType->IsInt && rightType->IsInt && leftType->NumBits != rightType->NumBits)
+    if (leftType->IsInt() && rightType->IsInt() && leftType->GetNumBits() != rightType->GetNumBits())
     {
-        if (leftType->NumBits < rightType->NumBits)
+        if (leftType->GetNumBits() < rightType->GetNumBits())
         {
             leftValue = builder.CreateSExt(leftValue, rightValue->getType(), "signext");
             resultType = rightType;
