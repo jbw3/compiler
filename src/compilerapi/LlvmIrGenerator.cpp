@@ -704,7 +704,7 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr,
     builder.SetInsertPoint(mergeBlock);
 
     // check if the "true" and "false" expressions have the same type
-    if (trueType != falseType)
+    if (!trueType->IsSameAs(*falseType))
     {
         cerr << "Internal Error: Branch true and false blocks must have the same type\n";
         return nullptr;

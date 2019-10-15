@@ -200,7 +200,7 @@ void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
     // check expression against the variable type
     const TypeInfo* exprType = expression->GetType();
     const TypeInfo* varType = varDef->GetType();
-    if (exprType != varType)
+    if (!exprType->IsSameAs(*varType))
     {
         if ( !(exprType->IsInt() && varType->IsInt() && exprType->GetNumBits() <= varType->GetNumBits()) )
         {
@@ -221,7 +221,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     }
 
     // ensure condition is a boolean expression
-    if (condition->GetType() != TypeInfo::BoolType)
+    if (!condition->GetType()->IsBool())
     {
         isError = true;
         cerr << "While loop condition must be a boolean expression\n";
@@ -255,7 +255,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 
     const TypeInfo* returnType = functionDefinition->GetReturnType();
     const TypeInfo* returnExpressionType = returnExpression->GetType();
-    if (returnType != returnExpressionType)
+    if (!returnType->IsSameAs(*returnExpressionType))
     {
         if ( !(returnExpressionType->IsInt() && returnType->IsInt() && returnExpressionType->GetNumBits() <= returnType->GetNumBits()) )
         {
@@ -387,7 +387,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const VariableDefinition* param = params[i];
         const TypeInfo* argType = arg->GetType();
         const TypeInfo* paramType = param->GetType();
-        if (argType != paramType)
+        if (!argType->IsSameAs(*paramType))
         {
             if ( !(argType->IsInt() && paramType->IsInt() && argType->GetNumBits() <= paramType->GetNumBits()) )
             {
@@ -412,7 +412,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
 
     // ensure if condition is a boolean expression
-    if (ifCondition->GetType() != TypeInfo::BoolType)
+    if (!ifCondition->GetType()->IsBool())
     {
         isError = true;
         cerr << "If condition must be a boolean expression\n";
