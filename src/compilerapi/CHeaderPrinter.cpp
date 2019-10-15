@@ -111,7 +111,7 @@ string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
 
 bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
 {
-    if (type == TypeInfo::BoolType)
+    if (type->IsBool)
     {
         cType = "bool";
         return true;

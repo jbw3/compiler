@@ -24,8 +24,22 @@ public:
         bool isInt
     );
 
+    virtual bool IsSameAs(const TypeInfo& other) const = 0;
+
 private:
     static std::map<std::string, const TypeInfo*> types;
+};
+
+class PrimitiveType : public TypeInfo
+{
+public:
+    PrimitiveType(
+        unsigned numBits,
+        bool isBool,
+        bool isInt
+    );
+
+    bool IsSameAs(const TypeInfo& other) const override;
 };
 
 #endif // TYPE_INFO_H_

@@ -87,7 +87,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
 {
     bool ok = false;
 
-    if ( (leftType != rightType) && !(leftType->IsInt && rightType->IsInt) )
+    if ( !(leftType->IsSameAs(*rightType)) && !(leftType->IsInt && rightType->IsInt) )
     {
         cerr << "Left and right operands do not have the same type\n";
         ok = false;
@@ -451,7 +451,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     const TypeInfo* ifType = ifExpression->GetType();
     const TypeInfo* elseType = elseExpression->GetType();
     const TypeInfo* resultType = nullptr;
-    if (ifType == elseType)
+    if (ifType->IsSameAs(*elseType))
     {
         resultType = ifType;
     }

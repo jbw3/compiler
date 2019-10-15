@@ -528,7 +528,7 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     Type* llvmType = nullptr;
-    if (type == TypeInfo::BoolType)
+    if (type->IsBool)
     {
         llvmType = Type::getInt1Ty(context);
     }
