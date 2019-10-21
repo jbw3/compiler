@@ -119,7 +119,12 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     else if (type->IsInt())
     {
         stringstream ss;
+        if (!type->IsSigned())
+        {
+            ss << 'u';
+        }
         ss << "int" << type->GetNumBits() << "_t";
+
         cType = ss.str();
         return true;
     }
