@@ -103,6 +103,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         const TypeInfo* leftType = leftExpr->GetType();
         const TypeInfo* rightType = rightExpr->GetType();
         ExtendType(leftType, rightType, leftValue, rightValue);
+        bool isSigned = leftType->IsSigned();
 
         switch (op)
         {
@@ -113,16 +114,16 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
                 break;
             case BinaryExpression::eLessThan:
-                resultValue = builder.CreateICmpSLT(leftValue, rightValue, "cmplt");
+                resultValue = isSigned ? builder.CreateICmpSLT(leftValue, rightValue, "cmplt") : builder.CreateICmpULT(leftValue, rightValue, "cmplt");
                 break;
             case BinaryExpression::eLessThanOrEqual:
-                resultValue = builder.CreateICmpSLE(leftValue, rightValue, "cmple");
+                resultValue = isSigned ? builder.CreateICmpSLE(leftValue, rightValue, "cmple") : builder.CreateICmpULE(leftValue, rightValue, "cmple");
                 break;
             case BinaryExpression::eGreaterThan:
-                resultValue = builder.CreateICmpSGT(leftValue, rightValue, "cmpgt");
+                resultValue = isSigned ? builder.CreateICmpSGT(leftValue, rightValue, "cmpgt") : builder.CreateICmpUGT(leftValue, rightValue, "cmpgt");
                 break;
             case BinaryExpression::eGreaterThanOrEqual:
-                resultValue = builder.CreateICmpSGE(leftValue, rightValue, "cmpge");
+                resultValue = isSigned ? builder.CreateICmpSGE(leftValue, rightValue, "cmpge") : builder.CreateICmpUGE(leftValue, rightValue, "cmpge");
                 break;
             case BinaryExpression::eAdd:
                 resultValue = builder.CreateAdd(leftValue, rightValue, "add");
@@ -134,10 +135,10 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 resultValue = builder.CreateMul(leftValue, rightValue, "mul");
                 break;
             case BinaryExpression::eDivide:
-                resultValue = builder.CreateSDiv(leftValue, rightValue, "div");
+                resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
                 break;
             case BinaryExpression::eModulo:
-                resultValue = builder.CreateSRem(leftValue, rightValue, "mod");
+                resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "mod") : builder.CreateURem(leftValue, rightValue, "mod");
                 break;
             case BinaryExpression::eShiftLeft:
                 resultValue = builder.CreateShl(leftValue, rightValue, "shl");
