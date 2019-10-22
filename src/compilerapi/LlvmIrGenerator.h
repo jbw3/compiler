@@ -61,6 +61,8 @@ private:
 
     const TypeInfo* ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, llvm::Value*& leftValue, llvm::Value*& rightValue);
 
+    llvm::Value* CreateExt(llvm::Value* value, const TypeInfo* dstType);
+
     llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr,
                               const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
 

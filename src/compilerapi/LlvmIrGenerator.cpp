@@ -586,7 +586,7 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeI
     // sign extend value if needed
     if (srcType->IsInt() && dstType->IsInt() && srcType->GetNumBits() < dstType->GetNumBits())
     {
-        value = builder.CreateSExt(value, GetType(dstType), "signext");
+        value = CreateExt(value, dstType);
         resultType = dstType;
     }
     else
@@ -605,17 +605,31 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const Type
     {
         if (leftType->GetNumBits() < rightType->GetNumBits())
         {
-            leftValue = builder.CreateSExt(leftValue, rightValue->getType(), "signext");
+            leftValue = CreateExt(leftValue, rightType);
             resultType = rightType;
         }
         else
         {
-            rightValue = builder.CreateSExt(rightValue, leftValue->getType(), "signext");
+            rightValue = CreateExt(rightValue, leftType);
             resultType = leftType;
         }
     }
 
     return resultType;
+}
+
+Value* LlvmIrGenerator::CreateExt(llvm::Value* value, const TypeInfo* dstType)
+{
+    if (dstType->IsSigned())
+    {
+        value = builder.CreateSExt(value, GetType(dstType), "signext");
+    }
+    else
+    {
+        value = builder.CreateZExt(value, GetType(dstType), "zeroext");
+    }
+
+    return value;
 }
 
 Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* trueExpr, Expression* falseExpr,
