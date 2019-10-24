@@ -143,6 +143,26 @@ fun types_i64(n1 i64, n2 i64) i64
     n1 / n2
 }
 
+fun types_u8(n1 u8, n2 u8) u8
+{
+    n1 + n2
+}
+
+fun types_u16(n1 u16, n2 u16) u16
+{
+    n1 * n2
+}
+
+fun types_u32(n1 u32, n2 u32) u32
+{
+    n1 / n2
+}
+
+fun types_u64(n1 u64, n2 u64) u64
+{
+    n1 % n2
+}
+
 fun types_add_literal(num i8) i8
 {
     # make sure we can add a constant literal to a number with a small size
