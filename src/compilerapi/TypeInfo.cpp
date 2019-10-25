@@ -3,6 +3,7 @@
 
 using namespace std;
 
+UnitTypeInfo unitType;
 PrimitiveType boolTypeInfo(1, true, false, false);
 PrimitiveType int8TypeInfo(8, false, true, true);
 PrimitiveType int16TypeInfo(16, false, true, true);
@@ -13,6 +14,7 @@ PrimitiveType uInt16TypeInfo(16, false, true, false);
 PrimitiveType uInt32TypeInfo(32, false, true, false);
 PrimitiveType uInt64TypeInfo(64, false, true, false);
 
+const UnitTypeInfo* TypeInfo::UnitType = &unitType;
 const TypeInfo* TypeInfo::BoolType = &boolTypeInfo;
 const TypeInfo* TypeInfo::Int8Type = &int8TypeInfo;
 const TypeInfo* TypeInfo::Int16Type = &int16TypeInfo;
@@ -77,6 +79,17 @@ bool TypeInfo::IsSigned() const
 unsigned TypeInfo::GetNumBits() const
 {
     return numBits;
+}
+
+UnitTypeInfo::UnitTypeInfo() :
+    TypeInfo(0, false, false, false)
+{
+}
+
+bool UnitTypeInfo::IsSameAs(const TypeInfo& other) const
+{
+    bool isSame = typeid(other) == typeid(UnitTypeInfo);
+    return isSame;
 }
 
 PrimitiveType::PrimitiveType(

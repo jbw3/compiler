@@ -3,9 +3,12 @@
 
 #include <map>
 
+class UnitTypeInfo;
+
 class TypeInfo
 {
 public:
+    static const UnitTypeInfo* UnitType;
     static const TypeInfo* BoolType;
     static const TypeInfo* Int8Type;
     static const TypeInfo* Int16Type;
@@ -42,6 +45,14 @@ private:
     bool isBool;
     bool isInt;
     bool isSigned;
+};
+
+class UnitTypeInfo : public TypeInfo
+{
+public:
+    UnitTypeInfo();
+
+    bool IsSameAs(const TypeInfo& other) const override;
 };
 
 class PrimitiveType : public TypeInfo
