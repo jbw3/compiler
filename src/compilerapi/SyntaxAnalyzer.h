@@ -23,6 +23,10 @@ public:
 
     static const std::string STATEMENT_END;
 
+    static const std::string BLOCK_START;
+
+    static const std::string BLOCK_END;
+
     static const std::string IF_KEYWORD;
 
     static const std::string ELSE_KEYWORD;
@@ -66,6 +70,8 @@ private:
 
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);
+
+    SyntaxTree::Expression* ProcessBlockEndExpression(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const std::unordered_set<std::string>& endTokens);

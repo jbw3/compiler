@@ -13,6 +13,10 @@ const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
 
 const string SyntaxAnalyzer::STATEMENT_END = ";";
 
+const string SyntaxAnalyzer::BLOCK_START = "{";
+
+const string SyntaxAnalyzer::BLOCK_END = "}";
+
 const string SyntaxAnalyzer::IF_KEYWORD = "if";
 
 const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
@@ -169,27 +173,37 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    // get return type
-    const TypeInfo* returnType = TypeInfo::GetType(iter->GetValue());
-    if (returnType == nullptr)
-    {
-        logger.LogError(*iter, "Expected return type");
-        deletePointerContainer(parameters);
-        return nullptr;
-    }
+    const TypeInfo* returnType = nullptr;
 
-    // skip newlines
-    if (!IncrementIterator(iter, endIter, "Expected '{'"))
+    // if no return type is specified, default to the unit type
+    if (iter->GetValue() == BLOCK_START)
     {
-        deletePointerContainer(parameters);
-        return nullptr;
+        returnType = TypeInfo::UnitType;
     }
-
-    if (iter->GetValue() != "{")
+    else // parse the return type
     {
-        logger.LogError(*iter, "Expected '{'");
-        deletePointerContainer(parameters);
-        return nullptr;
+        // get return type
+        returnType = TypeInfo::GetType(iter->GetValue());
+        if (returnType == nullptr)
+        {
+            logger.LogError(*iter, "Expected return type");
+            deletePointerContainer(parameters);
+            return nullptr;
+        }
+
+        // skip newlines
+        if (!IncrementIterator(iter, endIter, "Expected '{'"))
+        {
+            deletePointerContainer(parameters);
+            return nullptr;
+        }
+
+        if (iter->GetValue() != BLOCK_START)
+        {
+            logger.LogError(*iter, "Expected '{'");
+            deletePointerContainer(parameters);
+            return nullptr;
+        }
     }
 
     // increment past "{" and skip newlines
@@ -209,7 +223,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    Expression* returnExpression = ProcessExpression(iter, endIter, {"}"});
+    Expression* returnExpression = ProcessBlockEndExpression(iter, endIter);
     if (returnExpression == nullptr)
     {
         deletePointerContainer(parameters);
@@ -409,7 +423,7 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
     ++iter;
 
     // read "while" condition
-    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, {"{"}));
+    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, {BLOCK_START}));
     if (whileCondition == nullptr)
     {
         return nullptr;
@@ -493,6 +507,25 @@ Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<Unar
     }
 
     return result;
+}
+
+SyntaxTree::Expression* SyntaxAnalyzer::ProcessBlockEndExpression(TokenIterator& iter, TokenIterator endIter)
+{
+    if (iter == endIter)
+    {
+        logger.LogError("Unexpected end of block");
+        return nullptr;
+    }
+
+    // if there is no expression, return the unit type
+    if (iter->GetValue() == BLOCK_END)
+    {
+        return new UnitTypeLiteralExpression();
+    }
+    else // process the expression
+    {
+        return ProcessExpression(iter, endIter, {BLOCK_END});
+    }
 }
 
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
@@ -723,7 +756,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     ++iter;
 
     // read "if" condition
-    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {"{"}));
+    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {BLOCK_START}));
     if (ifCondition == nullptr)
     {
         return nullptr;
@@ -744,7 +777,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     }
 
     // read "if" expression
-    unique_ptr<Expression> ifExpression(ProcessExpression(iter, endIter, {"}"}));
+    unique_ptr<Expression> ifExpression(ProcessBlockEndExpression(iter, endIter));
     if (ifExpression == nullptr)
     {
         deletePointerContainer(ifStatements);
@@ -816,7 +849,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         }
 
         // read "else" expression
-        elseExpression.reset(ProcessExpression(iter, endIter, {"}"}));
+        elseExpression.reset(ProcessBlockEndExpression(iter, endIter));
         if (elseExpression == nullptr)
         {
             deletePointerContainer(ifStatements);
