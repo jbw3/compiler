@@ -28,6 +28,8 @@ public:
 
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
+    void Visit(SyntaxTree::UnitTypeLiteralExpression* unitTypeLiteralExpression) override;
+
     void Visit(SyntaxTree::NumericExpression* numericExpression) override;
 
     void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) override;

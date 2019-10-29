@@ -22,6 +22,15 @@ void Expression::SetType(const TypeInfo* newType)
     type = newType;
 }
 
+UnitTypeLiteralExpression::UnitTypeLiteralExpression()
+{
+}
+
+void UnitTypeLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
 NumericExpression::NumericExpression(string number) : number(number)
 {
 }

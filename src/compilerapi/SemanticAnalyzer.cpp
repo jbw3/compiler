@@ -177,7 +177,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
     }
 }
 
-void SemanticAnalyzer::Visit(SyntaxTree::Assignment* assignment)
+void SemanticAnalyzer::Visit(Assignment* assignment)
 {
     // find variable
     const string& varName = assignment->GetVariableName();
@@ -314,6 +314,11 @@ bool SemanticAnalyzer::AddVariables(const VariableDefinitions& varDefs)
     }
 
     return true;
+}
+
+void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
+{
+    unitTypeLiteralExpression->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)

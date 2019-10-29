@@ -35,6 +35,16 @@ private:
 
 typedef std::vector<SyntaxTreeNode*> Statements;
 
+class UnitTypeLiteralExpression : public Expression
+{
+public:
+    UnitTypeLiteralExpression();
+
+    virtual ~UnitTypeLiteralExpression() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+};
+
 class NumericExpression : public Expression
 {
 public:

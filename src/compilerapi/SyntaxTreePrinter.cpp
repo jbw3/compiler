@@ -240,6 +240,13 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
+void SyntaxTreePrinter::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"UnitTypeLiteralExpression\"");
+}
+
 void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
 {
     BracePrinter printer(*this, "{", "}");
@@ -249,7 +256,7 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     Print("\"");
 }
 
-void SyntaxTreePrinter::Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression)
+void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     BracePrinter printer(*this, "{", "}");
 

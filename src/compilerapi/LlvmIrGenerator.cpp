@@ -343,6 +343,11 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
+void LlvmIrGenerator::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
+{
+    // nothing to do
+}
+
 void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 {
     int64_t number = 0;
