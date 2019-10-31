@@ -1,6 +1,8 @@
 ; ModuleID = 'module'
 source_filename = "module"
 
+%UnitType = type {}
+
 define i32 @noArgs() {
 entry:
   ret i32 42
@@ -451,6 +453,19 @@ entry:
   %b4 = load i1, i1* %b2
   %call = call i1 @types_bool(i1 %a3, i1 %b4)
   ret i1 %call
+}
+
+define %UnitType @types_unit(i64 %number) {
+entry:
+  %number1 = alloca i64
+  store i64 %number, i64* %number1
+  ret %UnitType zeroinitializer
+}
+
+define %UnitType @types_unit2() {
+entry:
+  %call = call %UnitType @types_unit(i64 123)
+  ret %UnitType %call
 }
 
 define i1 @types_bool(i1 %a, i1 %b) {

@@ -118,6 +118,15 @@ fun call_function_defined_later(a bool, b bool) bool
     types_bool(a, b)
 }
 
+fun types_unit(number i64)
+{
+}
+
+fun types_unit2()
+{
+    types_unit(123)
+}
+
 fun types_bool(a bool, b bool) bool
 {
     a | b
