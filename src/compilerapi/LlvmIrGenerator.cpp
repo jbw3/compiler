@@ -25,6 +25,9 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     assemblyType(config.assemblyType),
     resultValue(nullptr)
 {
+    llvm::ArrayRef<Type*> emptyArray;
+    unitType = StructType::create(context, emptyArray, "UnitType");
+
     if (config.outFilename.empty())
     {
         size_t idx = config.inFilename.rfind('.');
@@ -345,7 +348,7 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void LlvmIrGenerator::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
 {
-    // nothing to do
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
@@ -534,7 +537,11 @@ bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     Type* llvmType = nullptr;
-    if (type->IsBool())
+    if (type->IsSameAs(*TypeInfo::UnitType))
+    {
+        llvmType = unitType;
+    }
+    else if (type->IsBool())
     {
         llvmType = Type::getInt1Ty(context);
     }

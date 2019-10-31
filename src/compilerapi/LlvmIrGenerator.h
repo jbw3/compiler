@@ -51,6 +51,7 @@ private:
     Config::EAssemblyType assemblyType;
     SymbolTable symbolTable;
     llvm::Value* resultValue;
+    llvm::StructType* unitType;
     std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
 
     llvm::Type* GetType(const TypeInfo* type);
