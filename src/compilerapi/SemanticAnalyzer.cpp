@@ -115,7 +115,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eSubtract:
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
-            case BinaryExpression::eModulo:
+            case BinaryExpression::eRemainder:
                 ok = leftType->IsInt() && rightType->IsInt() && leftType->IsSigned() == rightType->IsSigned();
                 break;
             case BinaryExpression::eShiftLeft:
@@ -152,7 +152,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eSubtract:
         case BinaryExpression::eMultiply:
         case BinaryExpression::eDivide:
-        case BinaryExpression::eModulo:
+        case BinaryExpression::eRemainder:
         case BinaryExpression::eBitwiseAnd:
         case BinaryExpression::eBitwiseXor:
         case BinaryExpression::eBitwiseOr:

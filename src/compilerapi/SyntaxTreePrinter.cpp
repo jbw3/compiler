@@ -95,7 +95,7 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eDivide:
             Print("/");
             break;
-        case BinaryExpression::eModulo:
+        case BinaryExpression::eRemainder:
             Print("%");
             break;
         case BinaryExpression::eShiftLeft:

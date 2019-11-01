@@ -41,7 +41,7 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"-", BinaryExpression::eSubtract},
     {"*", BinaryExpression::eMultiply},
     {"/", BinaryExpression::eDivide},
-    {"%", BinaryExpression::eModulo},
+    {"%", BinaryExpression::eRemainder},
     {"<<", BinaryExpression::eShiftLeft},
     {">>", BinaryExpression::eShiftRightArithmetic},
     {"&", BinaryExpression::eBitwiseAnd},
@@ -682,7 +682,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eModulo});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eRemainder});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightArithmetic});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseAnd});

@@ -85,8 +85,8 @@ entry:
   %div = sdiv i32 %d8, %a9
   %sub = sub i32 %add, %div
   %b10 = load i32, i32* %b2
-  %mod = srem i32 %b10, 42
-  %add11 = add i32 %sub, %mod
+  %rem = srem i32 %b10, 42
+  %add11 = add i32 %sub, %rem
   ret i32 %add11
 }
 
@@ -572,8 +572,8 @@ entry:
   store i64 %n2, i64* %n22
   %n13 = load i64, i64* %n11
   %n24 = load i64, i64* %n22
-  %mod = urem i64 %n13, %n24
-  ret i64 %mod
+  %rem = urem i64 %n13, %n24
+  ret i64 %rem
 }
 
 define i8 @types_add_literal(i8 %num) {
@@ -604,8 +604,8 @@ entry:
   %div = sdiv i64 %signext8, %c7
   %d9 = load i32, i32* %d4
   %signext10 = sext i32 %d9 to i64
-  %mod = srem i64 %div, %signext10
-  ret i64 %mod
+  %rem = srem i64 %div, %signext10
+  ret i64 %rem
 }
 
 define i64 @sign_extend_ret(i32 %param) {
@@ -864,11 +864,11 @@ if31:                                             ; preds = %else28
 else32:                                           ; preds = %else28
   %y33 = load i32, i32* %y2
   %z34 = load i32, i32* %z3
-  %mod = srem i32 %y33, %z34
+  %rem = srem i32 %y33, %z34
   br label %merge35
 
 merge35:                                          ; preds = %else32, %if31
-  %phi36 = phi i32 [ 0, %if31 ], [ %mod, %else32 ]
+  %phi36 = phi i32 [ 0, %if31 ], [ %rem, %else32 ]
   br label %merge37
 
 merge37:                                          ; preds = %merge35, %merge
@@ -1120,8 +1120,8 @@ whileCond:                                        ; preds = %whileExit, %entry
 
 whileBody:                                        ; preds = %whileCond
   %i4 = load i32, i32* %i
-  %mod = srem i32 %i4, 2
-  %cmpeq = icmp eq i32 %mod, 0
+  %rem = srem i32 %i4, 2
+  %cmpeq = icmp eq i32 %rem, 0
   br i1 %cmpeq, label %if, label %else
 
 if:                                               ; preds = %whileBody

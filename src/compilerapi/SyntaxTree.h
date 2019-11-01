@@ -96,7 +96,7 @@ public:
         eSubtract,
         eMultiply,
         eDivide,
-        eModulo,
+        eRemainder,
         eShiftLeft,
         eShiftRightArithmetic,
         eBitwiseAnd,

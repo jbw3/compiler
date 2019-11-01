@@ -140,8 +140,8 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             case BinaryExpression::eDivide:
                 resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
                 break;
-            case BinaryExpression::eModulo:
-                resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "mod") : builder.CreateURem(leftValue, rightValue, "mod");
+            case BinaryExpression::eRemainder:
+                resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "rem") : builder.CreateURem(leftValue, rightValue, "rem");
                 break;
             case BinaryExpression::eShiftLeft:
                 resultValue = builder.CreateShl(leftValue, rightValue, "shl");
