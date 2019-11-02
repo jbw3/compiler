@@ -35,6 +35,8 @@ private:
 
 typedef std::vector<SyntaxTreeNode*> Statements;
 
+typedef std::vector<Expression*> Expressions;
+
 class UnitTypeLiteralExpression : public Expression
 {
 public:
@@ -79,6 +81,21 @@ public:
 
 private:
     std::string value;
+};
+
+class BlockExpression : public Expression
+{
+public:
+    BlockExpression(const Expressions& expressions);
+
+    virtual ~BlockExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Expressions& GetExpressions() const;
+
+private:
+    Expressions expressions;
 };
 
 class BinaryExpression : public Expression
@@ -166,7 +183,7 @@ private:
 class FunctionExpression : public Expression
 {
 public:
-    FunctionExpression(const std::string& name, const std::vector<Expression*>& arguments);
+    FunctionExpression(const std::string& name, const Expressions& arguments);
 
     virtual ~FunctionExpression();
 
@@ -174,11 +191,11 @@ public:
 
     const std::string& GetName() const;
 
-    const std::vector<Expression*>& GetArguments() const;
+    const Expressions& GetArguments() const;
 
 private:
     std::string name;
-    std::vector<Expression*> arguments;
+    Expressions arguments;
 };
 
 class BranchExpression : public Expression

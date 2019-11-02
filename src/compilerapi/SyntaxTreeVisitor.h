@@ -6,6 +6,7 @@ namespace SyntaxTree
 class Assignment;
 class BinaryExpression;
 class BoolLiteralExpression;
+class BlockExpression;
 class BranchExpression;
 class FunctionDefinition;
 class FunctionExpression;
@@ -37,6 +38,8 @@ public:
     virtual void Visit(SyntaxTree::NumericExpression* numericExpression) = 0;
 
     virtual void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) = 0;
+
+    virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
 
     virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
 

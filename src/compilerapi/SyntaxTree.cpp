@@ -102,6 +102,26 @@ const string& BoolLiteralExpression::GetValue() const
     return value;
 }
 
+BlockExpression::BlockExpression(const Expressions& expressions) :
+    expressions(expressions)
+{
+}
+
+BlockExpression::~BlockExpression()
+{
+    deletePointerContainer(expressions);
+}
+
+void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const Expressions& BlockExpression::GetExpressions() const
+{
+    return expressions;
+}
+
 BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right) :
     op(op),
     left(left),
@@ -175,7 +195,7 @@ const string& VariableExpression::GetName() const
     return name;
 }
 
-FunctionExpression::FunctionExpression(const string& name, const vector<Expression*>& arguments) :
+FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments) :
     name(name),
     arguments(arguments)
 {
@@ -199,7 +219,7 @@ const string& FunctionExpression::GetName() const
     return name;
 }
 
-const vector<Expression*>& FunctionExpression::GetArguments() const
+const Expressions& FunctionExpression::GetArguments() const
 {
     return arguments;
 }
