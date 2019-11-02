@@ -1,15 +1,10 @@
 #include "SyntaxAnalyzer.h"
+#include "keywords.h"
 #include "utils.h"
 #include <memory>
 
 using namespace std;
 using namespace SyntaxTree;
-
-const string SyntaxAnalyzer::FUNCTION_KEYWORD = "fun";
-
-const string SyntaxAnalyzer::VARIABLE_KEYWORD = "var";
-
-const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
 
 const string SyntaxAnalyzer::STATEMENT_END = ";";
 
@@ -17,11 +12,7 @@ const string SyntaxAnalyzer::BLOCK_START = "{";
 
 const string SyntaxAnalyzer::BLOCK_END = "}";
 
-const string SyntaxAnalyzer::IF_KEYWORD = "if";
-
-const string SyntaxAnalyzer::ELSE_KEYWORD = "else";
-
-const string SyntaxAnalyzer::WHILE_KEYWORD = "while";
+const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
 
 const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_OPERATORS =
 {
@@ -94,6 +85,29 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     return ok;
 }
 
+
+bool SyntaxAnalyzer::IsValidName(const Token& name)
+{
+    const string& value = name.GetValue();
+
+    if (!isIdentifier(value))
+    {
+        return false;
+    }
+
+    if (KEYWORDS.find(value) != KEYWORDS.cend())
+    {
+        return false;
+    }
+
+    if (RESERVED_KEYWORDS.find(value) != RESERVED_KEYWORDS.cend())
+    {
+        logger.LogWarning(name, "'{}' is a reserved keyword and may be an invalid identifier in a future version of the language", value);
+    }
+
+    return true;
+}
+
 bool SyntaxAnalyzer::EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg)
 {
     if (iter == endIter)
@@ -140,7 +154,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    if (!isIdentifier(iter->GetValue()))
+    if (!IsValidName(*iter))
     {
         logger.LogError(*iter, "'{}' is not a valid function name", iter->GetValue());
         return nullptr;
@@ -270,7 +284,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         const string& value = iter->GetValue();
         if (state == eName)
         {
-            if (isIdentifier(value))
+            if (IsValidName(*iter))
             {
                 paramName = value;
             }
@@ -355,9 +369,9 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
         }
     }
 
-    if (!isIdentifier(iter->GetValue()))
+    if (!IsValidName(*iter))
     {
-        logger.LogError(*iter, "Expected a variable name");
+        logger.LogError(*iter, "Invalid variable name");
         return nullptr;
     }
 
@@ -598,7 +612,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     expr = AddUnaryExpressions(expr, unaryOperators);
                     terms.push_back(expr);
                 }
-                else if (isIdentifier(value))
+                else if (IsValidName(*iter))
                 {
                     // check if it's a function call
                     TokenIterator next = iter + 1;

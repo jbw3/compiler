@@ -1,4 +1,5 @@
 #include "TypeInfo.h"
+#include "keywords.h"
 #include <typeinfo>
 
 using namespace std;
@@ -27,15 +28,15 @@ const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
 
 map<string, const TypeInfo*> TypeInfo::types =
 {
-    {"bool", BoolType},
-    {"i8", Int8Type},
-    {"i16", Int16Type},
-    {"i32", Int32Type},
-    {"i64", Int64Type},
-    {"u8", UInt8Type},
-    {"u16", UInt16Type},
-    {"u32", UInt32Type},
-    {"u64", UInt64Type},
+    {BOOL_KEYWORD, BoolType},
+    {INT8_KEYWORD, Int8Type},
+    {INT16_KEYWORD, Int16Type},
+    {INT32_KEYWORD, Int32Type},
+    {INT64_KEYWORD, Int64Type},
+    {UINT8_KEYWORD, UInt8Type},
+    {UINT16_KEYWORD, UInt16Type},
+    {UINT32_KEYWORD, UInt32Type},
+    {UINT64_KEYWORD, UInt64Type},
 };
 
 const TypeInfo* TypeInfo::GetType(const string& typeName)

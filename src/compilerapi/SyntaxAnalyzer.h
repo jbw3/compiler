@@ -15,23 +15,13 @@ public:
     typedef std::vector<Token> TokenSequence;
     typedef TokenSequence::const_iterator TokenIterator;
 
-    static const std::string FUNCTION_KEYWORD;
-
-    static const std::string VARIABLE_KEYWORD;
-
-    static const std::string ASSIGNMENT_OPERATOR;
-
     static const std::string STATEMENT_END;
 
     static const std::string BLOCK_START;
 
     static const std::string BLOCK_END;
 
-    static const std::string IF_KEYWORD;
-
-    static const std::string ELSE_KEYWORD;
-
-    static const std::string WHILE_KEYWORD;
+    static const std::string ASSIGNMENT_OPERATOR;
 
     static const std::map<std::string, SyntaxTree::UnaryExpression::EOperator> UNARY_EXPRESSION_OPERATORS;
 
@@ -48,6 +38,8 @@ private:
         eType,
         eDelimiter,
     };
+
+    bool IsValidName(const Token& name);
 
     ErrorLogger& logger;
     SyntaxTree::VariableDefinitions variableDefinitions;
