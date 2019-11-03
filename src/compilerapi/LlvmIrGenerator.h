@@ -36,6 +36,8 @@ public:
 
     void Visit(SyntaxTree::VariableExpression* variableExpression) override;
 
+    void Visit(SyntaxTree::BlockExpression* blockExpression) override;
+
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;

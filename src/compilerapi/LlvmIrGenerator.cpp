@@ -396,6 +396,31 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
     resultValue = builder.CreateLoad(alloca, name);
 }
 
+void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
+{
+    const Expressions& expressions = blockExpression->GetExpressions();
+    size_t size = expressions.size();
+
+    if (size == 0)
+    {
+        resultValue = nullptr;
+        cerr << "Internal error: Block expression has no sub-expressions\n";
+    }
+    else
+    {
+        for (Expression* expression : expressions)
+        {
+            expression->Accept(this);
+            if (resultValue == nullptr)
+            {
+                break;
+            }
+        }
+
+        // the block expression's result is the result of its last expression
+    }
+}
+
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();

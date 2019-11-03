@@ -354,6 +354,35 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     }
 }
 
+void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
+{
+    const Expressions& expressions = blockExpression->GetExpressions();
+    size_t size = expressions.size();
+
+    if (size == 0)
+    {
+        isError = true;
+        cerr << "Internal error: Block expression has no sub-expressions\n";
+    }
+    else
+    {
+        for (Expression* expression : expressions)
+        {
+            expression->Accept(this);
+            if (isError)
+            {
+                break;
+            }
+        }
+
+        if (!isError)
+        {
+            // the block expression's type is the type of its last expression
+            blockExpression->SetType(expressions[size - 1]->GetType());
+        }
+    }
+}
+
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();
