@@ -274,37 +274,27 @@ void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
     Print("\"");
 }
 
+void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    Print("\"type\": \"BlockExpression\"");
+    PrintExpressions("expressions", blockExpression->GetExpressions());
+}
+
 void SyntaxTreePrinter::Visit(FunctionExpression* functionExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
     Print("\"type\": \"FunctionExpression\",\n\"name\": \"");
     Print(functionExpression->GetName());
-    Print("\",\n");
+    Print("\"");
 
     // print arguments
-    const vector<Expression*>& arguments = functionExpression->GetArguments();
-    Print("\"arguments\": ");
-    if (arguments.size() == 0)
-    {
-        Print("[]");
-    }
-    else
-    {
-        BracePrinter printer2(*this, "[", "]");
-
-        for (size_t i = 0; i < arguments.size(); ++i)
-        {
-            arguments[i]->Accept(this);
-            if (i < arguments.size() - 1)
-            {
-                Print(",\n");
-            }
-        }
-    }
+    PrintExpressions("arguments", functionExpression->GetArguments());
 }
 
-void SyntaxTreePrinter::Visit(SyntaxTree::BranchExpression* branchExpression)
+void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
@@ -349,6 +339,31 @@ void SyntaxTreePrinter::PrintStatements(const string& name, const vector<SyntaxT
         {
             statements[i]->Accept(this);
             if (i < statements.size() - 1)
+            {
+                Print(",\n");
+            }
+        }
+    }
+}
+
+void SyntaxTreePrinter::PrintExpressions(const string& attributeName, const Expressions& expressions)
+{
+    Print(",\n\"");
+    Print(attributeName);
+    Print("\": ");
+
+    if (expressions.size() == 0)
+    {
+        Print("[]");
+    }
+    else
+    {
+        BracePrinter printer3(*this, "[", "]");
+
+        for (size_t i = 0; i < expressions.size(); ++i)
+        {
+            expressions[i]->Accept(this);
+            if (i < expressions.size() - 1)
             {
                 Print(",\n");
             }

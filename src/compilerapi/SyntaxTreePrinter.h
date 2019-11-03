@@ -2,14 +2,9 @@
 #define SYNTAX_TREE_PRINTER_H_
 
 #include "SyntaxTreeVisitor.h"
+#include "SyntaxTree.h"
 #include <string>
 #include <vector>
-
-namespace SyntaxTree
-{
-class SyntaxTreeNode;
-class VariableDefinition;
-}
 
 class SyntaxTreePrinter : public SyntaxTreeVisitor
 {
@@ -38,6 +33,8 @@ public:
 
     void Visit(SyntaxTree::VariableExpression* variableExpression) override;
 
+    void Visit(SyntaxTree::BlockExpression* blockExpression) override;
+
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
@@ -62,6 +59,8 @@ private:
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
     void PrintStatements(const std::string& name, const std::vector<SyntaxTree::SyntaxTreeNode*> statements);
+
+    void PrintExpressions(const std::string& attributeName, const SyntaxTree::Expressions& expressions);
 
     void Print(const std::string& str) const;
 };

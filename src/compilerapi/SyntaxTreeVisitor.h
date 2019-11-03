@@ -39,9 +39,9 @@ public:
 
     virtual void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) = 0;
 
-    virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
-
     virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
+
+    virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
 
     virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
 
