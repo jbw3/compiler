@@ -74,17 +74,12 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     }
     else
     {
-        for (FunctionDefinition* funcDef : functions)
-        {
-            delete funcDef;
-        }
-        functions.clear();
+        deletePointerContainer(functions);
         syntaxTree = nullptr;
     }
 
     return ok;
 }
-
 
 bool SyntaxAnalyzer::IsValidName(const Token& name)
 {
@@ -205,7 +200,6 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
             return nullptr;
         }
 
-        // skip newlines
         if (!IncrementIterator(iter, endIter, "Expected '{'"))
         {
             deletePointerContainer(parameters);
@@ -220,7 +214,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         }
     }
 
-    // increment past "{" and skip newlines
+    // increment past "{"
     if (!IncrementIterator(iter, endIter))
     {
         deletePointerContainer(parameters);
@@ -600,6 +594,18 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     expr = AddUnaryExpressions(expr, unaryOperators);
                     terms.push_back(expr);
                 }
+                else if (value == BLOCK_START)
+                {
+                    Expression* expr = ProcessBlockExpression(iter, endIter);
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+                }
                 else if (value == IF_KEYWORD)
                 {
                     Expression* expr = ProcessBranchExpression(iter, endIter);
@@ -762,6 +768,69 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
             ++opIter;
         }
     }
+}
+
+BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter)
+{
+    bool needsUnitType = true;
+    Expressions expressions;
+
+    // increment iter past "{"
+    ++iter;
+
+    while (iter != endIter && iter->GetValue() != BLOCK_END)
+    {
+        // process the sub-expression
+        Expression* expr = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
+
+        // if there was an error, return null
+        if (expr == nullptr)
+        {
+            deletePointerContainer(expressions);
+            return nullptr;
+        }
+
+        expressions.push_back(expr);
+
+        // if we reached the end, log an error and return null
+        if (!EndIteratorCheck(iter, endIter, "Expected block end"))
+        {
+            deletePointerContainer(expressions);
+            return nullptr;
+        }
+
+        // if we reached the end of a statement, increment the iterator
+        if (iter->GetValue() == STATEMENT_END)
+        {
+            ++iter;
+        }
+        // if we reached the end of a block, we're done, and the last expression is the
+        // block's return type (so we don't need the unit type expression)
+        else if (iter->GetValue() == BLOCK_END)
+        {
+            needsUnitType = false;
+        }
+        else
+        {
+            deletePointerContainer(expressions);
+            logger.LogError("Internal error: Expected either a statement end or a block end");
+            return nullptr;
+        }
+    }
+
+    if (!EndIteratorCheck(iter, endIter, "Expected block end"))
+    {
+        deletePointerContainer(expressions);
+        return nullptr;
+    }
+
+    if (needsUnitType)
+    {
+        expressions.push_back(new UnitTypeLiteralExpression());
+    }
+
+    BlockExpression* blockExpression = new BlockExpression(expressions);
+    return blockExpression;
 }
 
 Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter)
