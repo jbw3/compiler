@@ -209,6 +209,9 @@ void SemanticAnalyzer::Visit(Assignment* assignment)
             return;
         }
     }
+
+    // assignment expressions always evaluate to the unit type
+    assignment->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)

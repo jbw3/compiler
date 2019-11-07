@@ -344,8 +344,6 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 
 Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator endIter)
 {
-    string varName;
-
     // make sure the statement is not empty
     if (iter == endIter)
     {
@@ -369,7 +367,7 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    varName = iter->GetValue();
+    string varName = iter->GetValue();
 
     const TypeInfo* varType = nullptr;
     if (isVarDef)
@@ -547,6 +545,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     while (iter != endIter)
     {
         string value = iter->GetValue();
+        TokenIterator nextIter = iter + 1;
 
         if (endTokens.find(value) != endTokens.cend())
         {
@@ -621,8 +620,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 else if (IsValidName(*iter))
                 {
                     // check if it's a function call
-                    TokenIterator next = iter + 1;
-                    if (next != endIter && next->GetValue() == "(")
+                    if (nextIter != endIter && nextIter->GetValue() == "(")
                     {
                         iter += 2;
                         if (iter == endIter)

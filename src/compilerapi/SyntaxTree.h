@@ -247,7 +247,7 @@ private:
 
 typedef std::vector<VariableDefinition*> VariableDefinitions;
 
-class Assignment : public SyntaxTreeNode
+class Assignment : public Expression
 {
 public:
     Assignment(const std::string& variableName, Expression* expression);

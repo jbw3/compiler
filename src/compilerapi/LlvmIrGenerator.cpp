@@ -190,7 +190,10 @@ void LlvmIrGenerator::Visit(Assignment* assignment)
     const TypeInfo* varType = symbolTable.GetVariable(name)->GetType();
     ExtendType(expressionType, varType, resultValue);
 
-    resultValue = builder.CreateStore(resultValue, alloca);
+    builder.CreateStore(resultValue, alloca);
+
+    // assignment expressions always evaluate to the unit type
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
