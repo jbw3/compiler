@@ -241,6 +241,9 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
     // set insert point to the loop exit block
     builder.SetInsertPoint(loopExitBlock);
+
+    // while loop expressions always evaluate to the unit type
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)

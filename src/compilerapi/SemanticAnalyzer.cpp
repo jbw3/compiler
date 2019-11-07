@@ -237,6 +237,9 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     {
         return;
     }
+
+    // while loop expressions always evaluate to the unit type
+    whileLoop->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)

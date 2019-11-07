@@ -265,7 +265,7 @@ private:
     Expression* expression;
 };
 
-class WhileLoop : public SyntaxTreeNode
+class WhileLoop : public Expression
 {
 public:
     WhileLoop(Expression* condition, const Statements& statements);
