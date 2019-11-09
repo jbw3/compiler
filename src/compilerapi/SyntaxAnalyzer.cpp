@@ -214,28 +214,10 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         }
     }
 
-    // increment past "{"
-    if (!IncrementIterator(iter, endIter))
+    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
+    if (expression == nullptr)
     {
         deletePointerContainer(parameters);
-        return nullptr;
-    }
-
-    Statements statements;
-    ok = ProcessStatements(statements, iter, endIter);
-    if (!ok)
-    {
-        deletePointerContainer(parameters);
-        deletePointerContainer(statements);
-        deletePointerContainer(variableDefinitions);
-        return nullptr;
-    }
-
-    Expression* returnExpression = ProcessBlockEndExpression(iter, endIter);
-    if (returnExpression == nullptr)
-    {
-        deletePointerContainer(parameters);
-        deletePointerContainer(statements);
         deletePointerContainer(variableDefinitions);
         return nullptr;
     }
@@ -243,7 +225,6 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     if (!EndIteratorCheck(iter, endIter))
     {
         deletePointerContainer(parameters);
-        deletePointerContainer(statements);
         deletePointerContainer(variableDefinitions);
         return nullptr;
     }
@@ -252,7 +233,6 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     {
         logger.LogError(*iter, "Expected '}'");
         deletePointerContainer(parameters);
-        deletePointerContainer(statements);
         deletePointerContainer(variableDefinitions);
         return nullptr;
     }
@@ -261,7 +241,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     ++iter;
 
     FunctionDefinition* functionDefinition = new FunctionDefinition(
-        functionName, parameters, returnType, variableDefinitions, statements, returnExpression
+        functionName, parameters, returnType, variableDefinitions, expression.release()
     );
     return functionDefinition;
 }
@@ -435,16 +415,14 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
         return nullptr;
     }
 
-    // increment past "{"
-    if (!IncrementIterator(iter, endIter))
+    if (iter == endIter || iter->GetValue() != BLOCK_START)
     {
+        logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
 
-    // read "while" loop statements
-    Statements statements;
-    bool ok = ProcessStatements(statements, iter, endIter);
-    if (!ok)
+    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
+    if (expression == nullptr)
     {
         return nullptr;
     }
@@ -452,25 +430,22 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
     // we should be at the closing "}"
     if (!EndIteratorCheck(iter, endIter, "Expected '}'"))
     {
-        deletePointerContainer(statements);
         return nullptr;
     }
 
     if (iter->GetValue() != "}")
     {
         logger.LogError(*iter, "Expected '}'");
-        deletePointerContainer(statements);
         return nullptr;
     }
 
     // increment past "}"
     if (!IncrementIterator(iter, endIter))
     {
-        deletePointerContainer(statements);
         return nullptr;
     }
 
-    WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), statements);
+    WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), expression.release());
     return whileLoop;
 }
 
@@ -843,63 +818,48 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    // increment past "{"
-    if (!IncrementIterator(iter, endIter))
+    if (iter == endIter || iter->GetValue() != BLOCK_START)
     {
-        return nullptr;
-    }
-
-    // read "if" statements
-    Statements ifStatements;
-    bool ok = ProcessStatements(ifStatements, iter, endIter);
-    if (!ok)
-    {
+        logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
 
     // read "if" expression
-    unique_ptr<Expression> ifExpression(ProcessBlockEndExpression(iter, endIter));
+    unique_ptr<Expression> ifExpression(ProcessBlockExpression(iter, endIter));
     if (ifExpression == nullptr)
     {
-        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     // increment past "}"
     if (!IncrementIterator(iter, endIter))
     {
-        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     // we should be at the "else" clause
     if (!EndIteratorCheck(iter, endIter, "Expected 'else' keyword"))
     {
-        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     if (iter->GetValue() != ELSE_KEYWORD)
     {
         logger.LogError(*iter, "Expected 'else' keyword");
-        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     if (!IncrementIterator(iter, endIter, "Expected 'if' or '{'"))
     {
-        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
     if (iter->GetValue() != IF_KEYWORD && iter->GetValue() != "{")
     {
         logger.LogError(*iter, "Expected 'if' or '{'");
-        deletePointerContainer(ifStatements);
         return nullptr;
     }
 
-    Statements elseStatements;
     unique_ptr<Expression> elseExpression;
     if (iter->GetValue() == IF_KEYWORD)
     {
@@ -907,41 +867,28 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         elseExpression.reset(ProcessBranchExpression(iter, endIter));
         if (elseExpression == nullptr)
         {
-            deletePointerContainer(ifStatements);
             return nullptr;
         }
     }
     else
     {
-        // increment past "{"
-        if (!IncrementIterator(iter, endIter))
+        if (iter == endIter || iter->GetValue() != BLOCK_START)
         {
-            deletePointerContainer(ifStatements);
-            return nullptr;
-        }
-
-        // read "else" statements
-        bool ok = ProcessStatements(elseStatements, iter, endIter);
-        if (!ok)
-        {
-            deletePointerContainer(ifStatements);
-            deletePointerContainer(elseStatements);
+            logger.LogError(*iter, "Expected '{'");
             return nullptr;
         }
 
         // read "else" expression
-        elseExpression.reset(ProcessBlockEndExpression(iter, endIter));
+        elseExpression.reset(ProcessBlockExpression(iter, endIter));
         if (elseExpression == nullptr)
         {
-            deletePointerContainer(ifStatements);
-            deletePointerContainer(elseStatements);
             return nullptr;
         }
     }
 
     BranchExpression* expr = new BranchExpression(ifCondition.release(),
-                                                  ifStatements, ifExpression.release(),
-                                                  elseStatements, elseExpression.release());
+                                                  ifExpression.release(),
+                                                  elseExpression.release());
     return expr;
 }
 

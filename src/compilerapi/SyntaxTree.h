@@ -202,9 +202,7 @@ class BranchExpression : public Expression
 {
 public:
     BranchExpression(Expression* ifCondition,
-                     const Statements& ifStatements,
                      Expression* ifExpression,
-                     const Statements& elseStatements,
                      Expression* elseExpression);
 
     virtual ~BranchExpression();
@@ -213,19 +211,13 @@ public:
 
     Expression* GetIfCondition() const;
 
-    const Statements& GetIfStatements() const;
-
     Expression* GetIfExpression() const;
-
-    const Statements& GetElseStatements() const;
 
     Expression* GetElseExpression() const;
 
 private:
     Expression* ifCondition;
-    Statements ifStatements;
     Expression* ifExpression;
-    Statements elseStatements;
     Expression* elseExpression;
 };
 
@@ -268,7 +260,7 @@ private:
 class WhileLoop : public Expression
 {
 public:
-    WhileLoop(Expression* condition, const Statements& statements);
+    WhileLoop(Expression* condition, Expression* expression);
 
     virtual ~WhileLoop();
 
@@ -276,11 +268,11 @@ public:
 
     Expression* GetCondition() const;
 
-    const Statements& GetStatements() const;
+    Expression* GetExpression() const;
 
 private:
     Expression* condition;
-    Statements statements;
+    Expression* expression;
 };
 
 class FunctionDefinition : public SyntaxTreeNode
@@ -288,7 +280,7 @@ class FunctionDefinition : public SyntaxTreeNode
 public:
     FunctionDefinition(const std::string& name, const VariableDefinitions& parameters,
                        const TypeInfo* returnType, const VariableDefinitions& variableDefinitions,
-                       const Statements& statements, Expression* returnExpression);
+                       Expression* expression);
 
     virtual ~FunctionDefinition();
 
@@ -302,17 +294,14 @@ public:
 
     const VariableDefinitions& GetVariableDefinitions() const;
 
-    const Statements& GetStatements() const;
-
-    Expression* GetReturnExpression() const;
+    Expression* GetExpression() const;
 
 private:
     std::string name;
     VariableDefinitions parameters;
     const TypeInfo* returnType;
     VariableDefinitions variableDefinitions;
-    Statements statements;
-    Expression* returnExpression;
+    Expression* expression;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

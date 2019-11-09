@@ -232,9 +232,17 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     }
 
     // check statements
-    CheckStatements(whileLoop->GetStatements());
+    Expression* expression = whileLoop->GetExpression();
+    expression->Accept(this);
     if (isError)
     {
+        return;
+    }
+
+    if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
+    {
+        isError = true;
+        cerr << "While loop block expression must return the unit type\n";
         return;
     }
 
@@ -244,26 +252,19 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
-    // check statements
-    CheckStatements(functionDefinition->GetStatements());
-    if (isError)
-    {
-        return;
-    }
-
     // check return expression
-    Expression* returnExpression = functionDefinition->GetReturnExpression();
-    returnExpression->Accept(this);
+    Expression* expression = functionDefinition->GetExpression();
+    expression->Accept(this);
     if (isError)
     {
         return;
     }
 
     const TypeInfo* returnType = functionDefinition->GetReturnType();
-    const TypeInfo* returnExpressionType = returnExpression->GetType();
-    if (!returnType->IsSameAs(*returnExpressionType))
+    const TypeInfo* expressionType = expression->GetType();
+    if (!returnType->IsSameAs(*expressionType))
     {
-        if ( !(returnExpressionType->IsInt() && returnType->IsInt() && returnExpressionType->IsSigned() == returnType->IsSigned() && returnExpressionType->GetNumBits() <= returnType->GetNumBits()) )
+        if ( !(expressionType->IsInt() && returnType->IsInt() && expressionType->IsSigned() == returnType->IsSigned() && expressionType->GetNumBits() <= returnType->GetNumBits()) )
         {
             isError = true;
             cerr << "Function return expression does not equal return type\n";
@@ -459,22 +460,8 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         return;
     }
 
-    // check if statements
-    CheckStatements(branchExpression->GetIfStatements());
-    if (isError)
-    {
-        return;
-    }
-
     Expression* ifExpression = branchExpression->GetIfExpression();
     ifExpression->Accept(this);
-    if (isError)
-    {
-        return;
-    }
-
-    // check else statements
-    CheckStatements(branchExpression->GetElseStatements());
     if (isError)
     {
         return;
@@ -515,16 +502,4 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
     // set the branch expression's result type
     branchExpression->SetType(resultType);
-}
-
-void SemanticAnalyzer::CheckStatements(const SyntaxTree::Statements& statements)
-{
-    for (SyntaxTreeNode* statement : statements)
-    {
-        statement->Accept(this);
-        if (isError)
-        {
-            return;
-        }
-    }
 }

@@ -58,8 +58,6 @@ private:
 
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
-    void PrintStatements(const std::string& name, const std::vector<SyntaxTree::SyntaxTreeNode*> statements);
-
     void PrintExpressions(const std::string& attributeName, const SyntaxTree::Expressions& expressions);
 
     void Print(const std::string& str) const;

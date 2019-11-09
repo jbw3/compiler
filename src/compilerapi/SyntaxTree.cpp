@@ -225,14 +225,10 @@ const Expressions& FunctionExpression::GetArguments() const
 }
 
 BranchExpression::BranchExpression(Expression* ifCondition,
-                                   const Statements& ifStatements,
                                    Expression* ifExpression,
-                                   const Statements& elseStatements,
                                    Expression* elseExpression) :
     ifCondition(ifCondition),
-    ifStatements(ifStatements),
     ifExpression(ifExpression),
-    elseStatements(elseStatements),
     elseExpression(elseExpression)
 {
 }
@@ -254,19 +250,9 @@ Expression* BranchExpression::GetIfCondition() const
     return ifCondition;
 }
 
-const Statements& BranchExpression::GetIfStatements() const
-{
-    return ifStatements;
-}
-
 Expression* BranchExpression::GetIfExpression() const
 {
     return ifExpression;
-}
-
-const Statements& BranchExpression::GetElseStatements() const
-{
-    return elseStatements;
 }
 
 Expression* BranchExpression::GetElseExpression() const
@@ -316,16 +302,16 @@ Expression* Assignment::GetExpression() const
     return expression;
 }
 
-WhileLoop::WhileLoop(Expression* condition, const Statements& statements) :
+WhileLoop::WhileLoop(Expression* condition, Expression* expression) :
     condition(condition),
-    statements(statements)
+    expression(expression)
 {
 }
 
 WhileLoop::~WhileLoop()
 {
     delete condition;
-    deletePointerContainer(statements);
+    delete expression;
 }
 
 void WhileLoop::Accept(SyntaxTreeVisitor* visitor)
@@ -338,23 +324,21 @@ Expression* WhileLoop::GetCondition() const
     return condition;
 }
 
-const Statements& WhileLoop::GetStatements() const
+Expression* WhileLoop::GetExpression() const
 {
-    return statements;
+    return expression;
 }
 
 FunctionDefinition::FunctionDefinition(const string& name,
                                        const vector<VariableDefinition*>& parameters,
                                        const TypeInfo* returnType,
                                        const VariableDefinitions& variableDefinitions,
-                                       const Statements& statements,
-                                       Expression* returnExpression) :
+                                       Expression* expression) :
     name(name),
     parameters(parameters),
     returnType(returnType),
     variableDefinitions(variableDefinitions),
-    statements(statements),
-    returnExpression(returnExpression)
+    expression(expression)
 {
 }
 
@@ -368,11 +352,7 @@ FunctionDefinition::~FunctionDefinition()
     {
         delete varDef;
     }
-    for (SyntaxTreeNode* statement : statements)
-    {
-        delete statement;
-    }
-    delete returnExpression;
+    delete expression;
 }
 
 void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
@@ -400,14 +380,9 @@ const VariableDefinitions& FunctionDefinition::GetVariableDefinitions() const
     return variableDefinitions;
 }
 
-const Statements& FunctionDefinition::GetStatements() const
+Expression* FunctionDefinition::GetExpression() const
 {
-    return statements;
-}
-
-Expression* FunctionDefinition::GetReturnExpression() const
-{
-    return returnExpression;
+    return expression;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<FunctionDefinition*>& functionDefinitions) :

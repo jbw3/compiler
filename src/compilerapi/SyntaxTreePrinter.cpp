@@ -149,7 +149,10 @@ void SyntaxTreePrinter::Visit(WhileLoop* whileLoop)
     Print("\"type\": \"WhileLoop\",\n\"condition\":\n");
     whileLoop->GetCondition()->Accept(this);
 
-    PrintStatements("statements", whileLoop->GetStatements());
+    Print(",\n\"expression\":\n");
+
+    // print expression
+    whileLoop->GetExpression()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
@@ -203,13 +206,9 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
         }
     }
 
-    // print statements
-    const Statements& statements = functionDefinition->GetStatements();
-    PrintStatements("statements", statements);
-
-    // print return expression
-    Print(",\n\"returnExpression\":\n");
-    functionDefinition->GetReturnExpression()->Accept(this);
+    // print expression
+    Print(",\n\"expression\":\n");
+    functionDefinition->GetExpression()->Accept(this);
 }
 
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
@@ -301,12 +300,8 @@ void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
     Print("\"type\": \"BranchExpression\",\n\"ifCondition\":\n");
     branchExpression->GetIfCondition()->Accept(this);
 
-    PrintStatements("ifStatements", branchExpression->GetIfStatements());
-
     Print(",\n\"ifExpression\":\n");
     branchExpression->GetIfExpression()->Accept(this);
-
-    PrintStatements("elseStatements", branchExpression->GetElseStatements());
 
     Print(",\n\"elseExpression\":\n");
     branchExpression->GetElseExpression()->Accept(this);
@@ -319,31 +314,6 @@ void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variab
     Print("\"type\": \"VariableDefinition\",\n\"name\": \"");
     Print(variableDefinition->GetName());
     Print("\"");
-}
-
-void SyntaxTreePrinter::PrintStatements(const string& name, const vector<SyntaxTreeNode*> statements)
-{
-    Print(",\n\"");
-    Print(name);
-    Print("\": ");
-
-    if (statements.size() == 0)
-    {
-        Print("[]");
-    }
-    else
-    {
-        BracePrinter printer3(*this, "[", "]");
-
-        for (size_t i = 0; i < statements.size(); ++i)
-        {
-            statements[i]->Accept(this);
-            if (i < statements.size() - 1)
-            {
-                Print(",\n");
-            }
-        }
-    }
 }
 
 void SyntaxTreePrinter::PrintExpressions(const string& attributeName, const Expressions& expressions)

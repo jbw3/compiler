@@ -222,10 +222,9 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     builder.SetInsertPoint(loopBodyBlock);
 
     // generate loop body IR
-    bool ok = ProcessStatements(whileLoop->GetStatements());
-    if (!ok)
+    whileLoop->GetExpression()->Accept(this);
+    if (resultValue == nullptr)
     {
-        resultValue = nullptr;
         return;
     }
 
@@ -291,16 +290,9 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         symbolTable.AddVariable(varName, varDef, alloca);
     }
 
-    bool ok = ProcessStatements(functionDefinition->GetStatements());
-    if (!ok)
-    {
-        resultValue = nullptr;
-        return;
-    }
-
     // process return expression
-    Expression* returnExpression = functionDefinition->GetReturnExpression();
-    returnExpression->Accept(this);
+    Expression* expression = functionDefinition->GetExpression();
+    expression->Accept(this);
 
     symbolTable.Pop();
 
@@ -310,9 +302,9 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 
     // sign extend return value if needed
-    const TypeInfo* returnExpressionType = returnExpression->GetType();
+    const TypeInfo* expressionType = expression->GetType();
     const TypeInfo* returnType = functionDefinition->GetReturnType();
-    ExtendType(returnExpressionType, returnType, resultValue);
+    ExtendType(expressionType, returnType, resultValue);
 
     builder.CreateRet(resultValue);
 
@@ -472,9 +464,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 {
     resultValue = CreateBranch(
         branchExpression->GetIfCondition(),
-        branchExpression->GetIfStatements(),
         branchExpression->GetIfExpression(),
-        branchExpression->GetElseStatements(),
         branchExpression->GetElseExpression(),
         "if", "else", "merge", "phi"
     );
@@ -679,19 +669,6 @@ Value* LlvmIrGenerator::CreateExt(llvm::Value* value, const TypeInfo* dstType)
 Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* trueExpr, Expression* falseExpr,
                                      const char* trueName, const char* falseName, const char* mergeName, const char* phiName)
 {
-    Statements trueStatements;
-    Statements falseStatements;
-    return CreateBranch(conditionExpr, trueStatements, trueExpr, falseStatements, falseExpr,
-                        trueName, falseName, mergeName, phiName);
-}
-
-Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr,
-                                     const Statements& trueStatements,
-                                     Expression* trueExpr,
-                                     const Statements& falseStatements,
-                                     Expression* falseExpr,
-                                     const char* trueName, const char* falseName, const char* mergeName, const char* phiName)
-{
     // generate the condition IR
     conditionExpr->Accept(this);
     if (resultValue == nullptr)
@@ -711,12 +688,6 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr,
     // generate "true" block IR
     builder.SetInsertPoint(trueBlock);
 
-    bool ok = ProcessStatements(trueStatements);
-    if (!ok)
-    {
-        return nullptr;
-    }
-
     trueExpr->Accept(this);
     if (resultValue == nullptr)
     {
@@ -735,12 +706,6 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr,
     // generate "false" block IR
     function->getBasicBlockList().push_back(falseBlock);
     builder.SetInsertPoint(falseBlock);
-
-    ok = ProcessStatements(falseStatements);
-    if (!ok)
-    {
-        return nullptr;
-    }
 
     falseExpr->Accept(this);
     if (resultValue == nullptr)
@@ -792,19 +757,4 @@ Value* LlvmIrGenerator::CreateLogicalOr(Expression* leftExpr, Expression* rightE
     delete trueExpr;
 
     return value;
-}
-
-bool LlvmIrGenerator::ProcessStatements(const Statements& statements)
-{
-    // process statements
-    for (SyntaxTreeNode* statement : statements)
-    {
-        statement->Accept(this);
-        if (resultValue == nullptr)
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
