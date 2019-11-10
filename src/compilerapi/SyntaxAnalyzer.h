@@ -63,8 +63,6 @@ private:
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);
 
-    SyntaxTree::Expression* ProcessBlockEndExpression(TokenIterator& iter, TokenIterator endIter);
-
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const std::unordered_set<std::string>& endTokens);
 
@@ -77,8 +75,6 @@ private:
     SyntaxTree::BlockExpression* ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
-
-    bool ProcessStatements(SyntaxTree::Statements& statements, TokenIterator& iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

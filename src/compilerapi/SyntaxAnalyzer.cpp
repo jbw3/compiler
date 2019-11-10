@@ -381,14 +381,8 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    Expression* expression = ProcessExpression(iter, endIter, {STATEMENT_END});
+    Expression* expression = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
     if (expression == nullptr)
-    {
-        return nullptr;
-    }
-
-    // increment past ";"
-    if (!IncrementIterator(iter, endIter))
     {
         return nullptr;
     }
@@ -423,24 +417,6 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
 
     unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
     if (expression == nullptr)
-    {
-        return nullptr;
-    }
-
-    // we should be at the closing "}"
-    if (!EndIteratorCheck(iter, endIter, "Expected '}'"))
-    {
-        return nullptr;
-    }
-
-    if (iter->GetValue() != "}")
-    {
-        logger.LogError(*iter, "Expected '}'");
-        return nullptr;
-    }
-
-    // increment past "}"
-    if (!IncrementIterator(iter, endIter))
     {
         return nullptr;
     }
@@ -490,29 +466,12 @@ Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<Unar
     return result;
 }
 
-SyntaxTree::Expression* SyntaxAnalyzer::ProcessBlockEndExpression(TokenIterator& iter, TokenIterator endIter)
-{
-    if (iter == endIter)
-    {
-        logger.LogError("Unexpected end of block");
-        return nullptr;
-    }
-
-    // if there is no expression, return the unit type
-    if (iter->GetValue() == BLOCK_END)
-    {
-        return new UnitTypeLiteralExpression();
-    }
-    else // process the expression
-    {
-        return ProcessExpression(iter, endIter, {BLOCK_END});
-    }
-}
-
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const unordered_set<string>& endTokens)
 {
     bool expectTerm = true;
+    bool isEnd = false;
+    bool isPotentialEnd = false;
     vector<Expression*> terms;
     stack<UnaryExpression::EOperator> unaryOperators;
     vector<BinaryExpression::EOperator> binOperators;
@@ -527,8 +486,11 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             break;
         }
 
+        isEnd = false;
         if (expectTerm)
         {
+            isPotentialEnd = false;
+
             auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
             if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
             {
@@ -591,6 +553,36 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
                     expr = AddUnaryExpressions(expr, unaryOperators);
                     terms.push_back(expr);
+
+                    isPotentialEnd = true;
+                }
+                else if ( (iter->GetValue() == VARIABLE_KEYWORD) || (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR) )
+                {
+                    Expression* expr = ProcessAssignment(iter, endIter);
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+
+                    isEnd = true;
+                }
+                else if (iter->GetValue() == WHILE_KEYWORD)
+                {
+                    Expression* expr = ProcessWhileLoop(iter, endIter);
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+
+                    isPotentialEnd = true;
                 }
                 else if (IsValidName(*iter))
                 {
@@ -646,15 +638,29 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         else
         {
             auto opIter = BINARY_EXPRESSION_OPERATORS.find(value);
-            if (opIter == BINARY_EXPRESSION_OPERATORS.cend())
+
+            // if the token is a binary operator, add it to the list
+            if (opIter != BINARY_EXPRESSION_OPERATORS.cend())
+            {
+                binOperators.push_back(opIter->second);
+                expectTerm = true;
+            }
+            // if we are at the end of an expression, we're done
+            else if (isPotentialEnd)
+            {
+                break;
+            }
+            else
             {
                 logger.LogError(*iter, "Expected an operator, but got '{}' instead", value);
                 deletePointerContainer(terms);
                 return nullptr;
             }
+        }
 
-            binOperators.push_back(opIter->second);
-            expectTerm = true;
+        if (isEnd)
+        {
+            break;
         }
 
         ++iter;
@@ -783,12 +789,6 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         {
             needsUnitType = false;
         }
-        else
-        {
-            deletePointerContainer(expressions);
-            logger.LogError("Internal error: Expected either a statement end or a block end");
-            return nullptr;
-        }
     }
 
     if (!EndIteratorCheck(iter, endIter, "Expected block end"))
@@ -890,44 +890,4 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
                                                   ifExpression.release(),
                                                   elseExpression.release());
     return expr;
-}
-
-bool SyntaxAnalyzer::ProcessStatements(Statements& statements, TokenIterator& iter, TokenIterator endIter)
-{
-    statements.clear();
-    statements.reserve(8);
-
-    bool isError = false;
-    while (iter != endIter)
-    {
-        auto nextIter = iter + 1;
-
-        SyntaxTreeNode* statement = nullptr;
-        if ( (iter->GetValue() == VARIABLE_KEYWORD) || (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR) )
-        {
-            statement = ProcessAssignment(iter, endIter);
-            isError = (statement == nullptr);
-        }
-        else if (iter->GetValue() == WHILE_KEYWORD)
-        {
-            statement = ProcessWhileLoop(iter, endIter);
-            isError = (statement == nullptr);
-        }
-        else
-        {
-            break;
-        }
-
-        if (isError)
-        {
-            deletePointerContainer(statements);
-            return false;
-        }
-        else
-        {
-            statements.push_back(statement);
-        }
-    }
-
-    return true;
 }
