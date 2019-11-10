@@ -44,7 +44,7 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, con
             ok = subExprType->IsInt() && subExprType->IsSigned();
             break;
         case UnaryExpression::eComplement:
-            ok = true;
+            ok = subExprType->IsSameAs(*TypeInfo::BoolType) || subExprType->IsInt();
             break;
     }
 
@@ -101,7 +101,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseXor:
             case BinaryExpression::eBitwiseOr:
-                ok = (leftType->IsSameAs(*rightType)) || (leftType->IsInt() && rightType->IsInt() && leftType->IsSigned() == rightType->IsSigned());
+                ok = (leftType->IsSameAs(*UnitTypeInfo::BoolType)) || (leftType->IsInt() && rightType->IsInt() && leftType->IsSigned() == rightType->IsSigned());
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
