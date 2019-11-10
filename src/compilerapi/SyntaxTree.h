@@ -33,8 +33,6 @@ private:
     const TypeInfo* type;
 };
 
-typedef std::vector<SyntaxTreeNode*> Statements;
-
 typedef std::vector<Expression*> Expressions;
 
 class UnitTypeLiteralExpression : public Expression
