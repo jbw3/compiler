@@ -888,6 +888,32 @@ merge43:                                          ; preds = %merge41, %if
   ret i32 %phi44
 }
 
+define i32 @branchInExpression(i32 %x, i32 %y, i32 %z) {
+entry:
+  %z3 = alloca i32
+  %y2 = alloca i32
+  %x1 = alloca i32
+  store i32 %x, i32* %x1
+  store i32 %y, i32* %y2
+  store i32 %z, i32* %z3
+  %x4 = load i32, i32* %x1
+  %cmpeq = icmp eq i32 %x4, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  %y5 = load i32, i32* %y2
+  br label %merge
+
+else:                                             ; preds = %entry
+  %z6 = load i32, i32* %z3
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ %y5, %if ], [ %z6, %else ]
+  %add = add i32 %phi, 58
+  ret i32 %add
+}
+
 define i32 @branchWithLogicalOperators(i32 %x, i32 %y, i32 %z) {
 entry:
   %z3 = alloca i32
@@ -1164,4 +1190,24 @@ whileExit:                                        ; preds = %whileCond8
 whileExit18:                                      ; preds = %whileCond
   %rv19 = load i32, i32* %rv
   ret i32 %rv19
+}
+
+define i32 @blockExpression(i32 %param) {
+entry:
+  %x = alloca i32
+  %param1 = alloca i32
+  store i32 %param, i32* %param1
+  %call = call %UnitType @types_unit(i64 100)
+  %param2 = load i32, i32* %param1
+  %cmpgt = icmp sgt i32 %param2, 0
+  %param3 = load i32, i32* %param1
+  %rem = srem i32 %param3, 12
+  %cmpeq = icmp eq i32 %rem, 5
+  %call4 = call i1 @types_bool(i1 %cmpgt, i1 %cmpeq)
+  %param5 = load i32, i32* %param1
+  %param6 = load i32, i32* %param1
+  %call7 = call i32 @types_i32(i32 %param5, i32 %param6)
+  store i32 %call7, i32* %x
+  %x8 = load i32, i32* %x
+  ret i32 %x8
 }

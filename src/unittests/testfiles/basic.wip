@@ -294,6 +294,18 @@ fun elseIfBranchesNesting(x i32, y i32, z i32) i32
     }
 }
 
+fun branchInExpression(x i32, y i32, z i32) i32
+{
+    if x == 0
+    {
+        y
+    }
+    else
+    {
+        z
+    } + 58
+}
+
 fun branchWithLogicalOperators(x i32, y i32, z i32) i32
 {
     if x == 0 && y == 1 || z == 1
@@ -394,4 +406,15 @@ fun nestedLoop(num i32) i32
     }
 
     rv
+}
+
+fun blockExpression(param i32) i32
+{
+    var x i32 = {
+        types_unit(100);
+        types_bool(param > 0, param % 12 == 5);
+        types_i32(param, param)
+    };
+
+    x
 }
