@@ -10,7 +10,7 @@ fun oneArg(x i32) i32
 
 fun integerLiterals(x i32) i32
 {
-    0b101 + x + 0o370 + x + 123 + x + 0xa57F93
+    0b101 + x + 0o370 + x + 123 + x + 0x_a5_7F93
 }
 
 fun twoArgs(arg1 i32, arg2 i32) i32
@@ -351,7 +351,7 @@ fun assignInBranch(a i32, b i32, c i32) i32
         }
         else
         {
-            b = 10000;
+            b = 10_000;
             c + 2
         };
     c = b * c;
