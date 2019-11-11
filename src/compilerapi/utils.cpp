@@ -1,6 +1,10 @@
 #include "utils.h"
+#include <tuple>
+#include <vector>
 
 using namespace std;
+
+constexpr char NUMERIC_LITERAL_SEPERATOR = '_';
 
 bool isIdentifier(const string& str)
 {
@@ -25,59 +29,71 @@ bool isIdentifier(const string& str)
     return true;
 }
 
-bool isNumber(const string& tokenStr, int base, size_t idx)
+bool isNumber(const string& tokenStr, int base, size_t idx, bool isPotential)
 {
+    vector<tuple<char, char>> ranges;
+
     if (base == 2)
     {
-        for (; idx < tokenStr.size(); ++idx)
-        {
-            if (tokenStr[idx] != '0' && tokenStr[idx] != '1')
-            {
-                return false;
-            }
-        }
-        return true;
+        ranges.push_back(make_tuple('0', '1'));
     }
     else if (base == 8)
     {
-        for (; idx < tokenStr.size(); ++idx)
-        {
-            if (tokenStr[idx] < '0' || tokenStr[idx] > '7')
-            {
-                return false;
-            }
-        }
-        return true;
+        ranges.push_back(make_tuple('0', '7'));
     }
     else if (base == 10)
     {
-        for (; idx < tokenStr.size(); ++idx)
-        {
-            if (!isdigit(tokenStr[idx]))
-            {
-                return false;
-            }
-        }
-        return true;
+        ranges.push_back(make_tuple('0', '9'));
     }
     else if (base == 16)
     {
-        for (; idx < tokenStr.size(); ++idx)
+        ranges.push_back(make_tuple('0', '9'));
+        ranges.push_back(make_tuple('a', 'f'));
+        ranges.push_back(make_tuple('A', 'F'));
+    }
+    else
+    {
+        // should not get here
+        return false;
+    }
+
+    bool hasDigit = false;
+    for (; idx < tokenStr.size(); ++idx)
+    {
+        char ch = tokenStr[idx];
+
+        if (ch != NUMERIC_LITERAL_SEPERATOR)
         {
-            if (!isxdigit(tokenStr[idx]))
+            bool found = false;
+            for (tuple<char, char> range : ranges)
+            {
+                if (ch >= get<0>(range) && ch <= get<1>(range))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            // if we could not find the char in any of the valid ranges, return false
+            if (!found)
             {
                 return false;
             }
+
+            hasDigit = true;
         }
-        return true;
     }
 
-    // should not get here
-    return false;
+    return hasDigit | isPotential;
 }
 
 bool isNumber(const string& tokenStr)
 {
+    if (tokenStr.size() == 0 || tokenStr[0] == NUMERIC_LITERAL_SEPERATOR)
+    {
+        return false;
+    }
+
     size_t idx = 0;
 
     // determine base
@@ -110,11 +126,16 @@ bool isNumber(const string& tokenStr)
         }
     }
 
-    return isNumber(tokenStr, base, idx);
+    return isNumber(tokenStr, base, idx, false);
 }
 
 bool isPotentialNumber(const string& tokenStr)
 {
+    if (tokenStr.size() == 0 || tokenStr[0] == NUMERIC_LITERAL_SEPERATOR)
+    {
+        return false;
+    }
+
     size_t idx = 0;
 
     // determine base
@@ -147,7 +168,7 @@ bool isPotentialNumber(const string& tokenStr)
         }
     }
 
-    return isNumber(tokenStr, base, idx);
+    return isNumber(tokenStr, base, idx, true);
 }
 
 bool isBool(const string& tokenStr)
@@ -158,154 +179,186 @@ bool isBool(const string& tokenStr)
 bool binStringToInteger(const string& str, int64_t& num)
 {
     num = 0;
+    bool hasDigit = false;
 
     // start at 2 to skip leading '0b'
     for (size_t i = 2; i < str.size(); ++i)
     {
         char ch = str[i];
-        num <<= 1;
+        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        {
+            hasDigit = true;
 
-        if (ch == '1')
-        {
-            num |= 1;
-        }
-        else if (ch != '0')
-        {
-            num = 0;
-            return false;
+            num <<= 1;
+
+            if (ch == '1')
+            {
+                num |= 1;
+            }
+            else if (ch != '0')
+            {
+                num = 0;
+                return false;
+            }
         }
     }
 
-    return true;
+    return hasDigit;
 }
 
 bool octStringToInteger(const string& str, int64_t& num)
 {
     num = 0;
+    bool hasDigit = false;
 
     // start at 2 to skip leading '0o'
     for (size_t i = 2; i < str.size(); ++i)
     {
         char ch = str[i];
-        num *= 8;
+        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        {
+            hasDigit = true;
 
-        if (ch >= '0' && ch <= '7')
-        {
-            num += ch - '0';
-        }
-        else
-        {
-            num = 0;
-            return false;
+            num *= 8;
+
+            if (ch >= '0' && ch <= '7')
+            {
+                num += ch - '0';
+            }
+            else
+            {
+                num = 0;
+                return false;
+            }
         }
     }
 
-    return true;
+    return hasDigit;
 }
 
 bool decStringToInteger(const string& str, int64_t& num)
 {
     num = 0;
+    bool hasDigit = false;
 
     for (char ch : str)
     {
-        if (isdigit(ch))
+        if (ch != NUMERIC_LITERAL_SEPERATOR)
         {
-            num *= 10;
-            num += ch - '0';
-        }
-        else
-        {
-            num = 0;
-            return false;
+            hasDigit = true;
+
+            if (isdigit(ch))
+            {
+                num *= 10;
+                num += ch - '0';
+            }
+            else
+            {
+                num = 0;
+                return false;
+            }
         }
     }
 
-    return true;
+    return hasDigit;
 }
 
 bool hexStringToInteger(const string& str, int64_t& num)
 {
     num = 0;
+    bool hasDigit = false;
 
     // start at 2 to skip leading '0x'
     for (size_t i = 2; i < str.size(); ++i)
     {
         char ch = str[i];
-        num *= 16;
+        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        {
+            hasDigit = true;
 
-        if (isdigit(ch))
-        {
-            num += ch - '0';
-        }
-        else if (ch >= 'a' && ch <= 'f')
-        {
-            num += ch - 'a' + 10;
-        }
-        else if (ch >= 'A' && ch <= 'F')
-        {
-            num += ch - 'A' + 10;
-        }
-        else
-        {
-            num = 0;
-            return false;
+            num *= 16;
+
+            if (isdigit(ch))
+            {
+                num += ch - '0';
+            }
+            else if (ch >= 'a' && ch <= 'f')
+            {
+                num += ch - 'a' + 10;
+            }
+            else if (ch >= 'A' && ch <= 'F')
+            {
+                num += ch - 'A' + 10;
+            }
+            else
+            {
+                num = 0;
+                return false;
+            }
         }
     }
 
-    return true;
+    return hasDigit;
 }
 
 bool stringToInteger(const string& str, int64_t& num)
 {
     bool ok = false;
 
-    // determine base
-    int base = 10;
-    if (str.size() > 2 && str[0] == '0')
+    if (str.size() == 0 || str[0] == NUMERIC_LITERAL_SEPERATOR)
     {
-        switch (str[1])
+        num = 0;
+        ok = false;
+    }
+    else
+    {
+        // determine base
+        int base = 10;
+        if (str.size() > 2 && str[0] == '0')
         {
-            case 'b':
-            case 'B':
-                base = 2;
-                break;
+            switch (str[1])
+            {
+                case 'b':
+                case 'B':
+                    base = 2;
+                    break;
 
-            case 'o':
-            case 'O':
-                base = 8;
-                break;
+                case 'o':
+                case 'O':
+                    base = 8;
+                    break;
 
-            case 'x':
-            case 'X':
-                base = 16;
-                break;
+                case 'x':
+                case 'X':
+                    base = 16;
+                    break;
 
+                default:
+                    base = 10;
+                    break;
+            }
+        }
+
+        switch (base)
+        {
+            case 2:
+                ok = binStringToInteger(str, num);
+                break;
+            case 8:
+                ok = octStringToInteger(str, num);
+                break;
+            case 10:
+                ok = decStringToInteger(str, num);
+                break;
+            case 16:
+                ok = hexStringToInteger(str, num);
+                break;
             default:
-                base = 10;
+                // we should not get here
+                num = 0;
+                ok = false;
                 break;
         }
-    }
-
-    switch (base)
-    {
-        case 2:
-            ok = binStringToInteger(str, num);
-            break;
-        case 8:
-            ok = octStringToInteger(str, num);
-            break;
-        case 10:
-            ok = decStringToInteger(str, num);
-            break;
-        case 16:
-            ok = hexStringToInteger(str, num);
-            break;
-        default:
-            // we should not get here
-            num = 0;
-            ok = false;
-            break;
     }
 
     return ok;
