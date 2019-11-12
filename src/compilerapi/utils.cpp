@@ -29,8 +29,46 @@ bool isIdentifier(const string& str)
     return true;
 }
 
-bool isNumber(const string& tokenStr, int base, size_t idx, bool isPotential)
+bool isNumber(const string& tokenStr, bool isPotential)
 {
+    if (tokenStr.size() == 0 || tokenStr[0] == NUMERIC_LITERAL_SEPERATOR)
+    {
+        return false;
+    }
+
+    size_t idx = 0;
+
+    // determine base
+    bool sizeCheck = isPotential ? (tokenStr.size() >= 2) : (tokenStr.size() > 2);
+    int base = 10;
+    if (sizeCheck && tokenStr[0] == '0')
+    {
+        switch (tokenStr[1])
+        {
+            case 'b':
+            case 'B':
+                base = 2;
+                idx += 2;
+                break;
+
+            case 'o':
+            case 'O':
+                base = 8;
+                idx += 2;
+                break;
+
+            case 'x':
+            case 'X':
+                base = 16;
+                idx += 2;
+                break;
+
+            default:
+                base = 10;
+                break;
+        }
+    }
+
     vector<tuple<char, char>> ranges;
 
     if (base == 2)
@@ -89,86 +127,12 @@ bool isNumber(const string& tokenStr, int base, size_t idx, bool isPotential)
 
 bool isNumber(const string& tokenStr)
 {
-    if (tokenStr.size() == 0 || tokenStr[0] == NUMERIC_LITERAL_SEPERATOR)
-    {
-        return false;
-    }
-
-    size_t idx = 0;
-
-    // determine base
-    int base = 10;
-    if (tokenStr.size() > 2 && tokenStr[0] == '0')
-    {
-        switch (tokenStr[1])
-        {
-            case 'b':
-            case 'B':
-                base = 2;
-                idx += 2;
-                break;
-
-            case 'o':
-            case 'O':
-                base = 8;
-                idx += 2;
-                break;
-
-            case 'x':
-            case 'X':
-                base = 16;
-                idx += 2;
-                break;
-
-            default:
-                base = 10;
-                break;
-        }
-    }
-
-    return isNumber(tokenStr, base, idx, false);
+    return isNumber(tokenStr, false);
 }
 
 bool isPotentialNumber(const string& tokenStr)
 {
-    if (tokenStr.size() == 0 || tokenStr[0] == NUMERIC_LITERAL_SEPERATOR)
-    {
-        return false;
-    }
-
-    size_t idx = 0;
-
-    // determine base
-    int base = 10;
-    if (tokenStr.size() >= 2 && tokenStr[0] == '0')
-    {
-        switch (tokenStr[1])
-        {
-            case 'b':
-            case 'B':
-                base = 2;
-                idx += 2;
-                break;
-
-            case 'o':
-            case 'O':
-                base = 8;
-                idx += 2;
-                break;
-
-            case 'x':
-            case 'X':
-                base = 16;
-                idx += 2;
-                break;
-
-            default:
-                base = 10;
-                break;
-        }
-    }
-
-    return isNumber(tokenStr, base, idx, true);
+    return isNumber(tokenStr, true);
 }
 
 bool isBool(const string& tokenStr)
