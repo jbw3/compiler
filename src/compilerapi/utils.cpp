@@ -46,19 +46,16 @@ bool isNumber(const string& tokenStr, bool isPotential)
         switch (tokenStr[1])
         {
             case 'b':
-            case 'B':
                 base = 2;
                 idx += 2;
                 break;
 
             case 'o':
-            case 'O':
                 base = 8;
                 idx += 2;
                 break;
 
             case 'x':
-            case 'X':
                 base = 16;
                 idx += 2;
                 break;
@@ -283,17 +280,14 @@ bool stringToInteger(const string& str, int64_t& num)
             switch (str[1])
             {
                 case 'b':
-                case 'B':
                     base = 2;
                     break;
 
                 case 'o':
-                case 'O':
                     base = 8;
                     break;
 
                 case 'x':
-                case 'X':
                     base = 16;
                     break;
 
