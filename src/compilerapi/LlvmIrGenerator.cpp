@@ -2,54 +2,22 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "LlvmIrGenerator.h"
 #include "SyntaxTree.h"
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Verifier.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/TargetRegistry.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
 #include "utils.h"
 #include <iostream>
 #pragma clang diagnostic pop
 
+using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
-using namespace llvm;
 
-LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
+LlvmIrGenerator::LlvmIrGenerator() :
     builder(context),
-    module("module", context),
-    architecture(config.architecture),
-    assemblyType(config.assemblyType),
+    module(nullptr),
     resultValue(nullptr)
 {
     llvm::ArrayRef<Type*> emptyArray;
     unitType = StructType::create(context, emptyArray, "UnitType");
-
-    if (config.outFilename.empty())
-    {
-        size_t idx = config.inFilename.rfind('.');
-        string baseName = config.inFilename.substr(0, idx);
-
-        switch (config.assemblyType)
-        {
-            case Config::eLlvmIr:
-                outFilename = baseName + ".ll";
-                break;
-            case Config::eMachineText:
-                outFilename = baseName + ".s";
-                break;
-            case Config::eMachineBinary:
-                outFilename = baseName + ".o";
-                break;
-        }
-    }
-    else
-    {
-        outFilename = config.outFilename;
-    }
 }
 
 void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
@@ -248,7 +216,7 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
     const string& funcName = functionDefinition->GetName();
-    Function* func = module.getFunction(funcName);
+    Function* func = module->getFunction(funcName);
     if (func == nullptr)
     {
         cerr << "Internal error: Function '" << funcName << "' was not declared\n";
@@ -422,7 +390,7 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();
-    Function* func = module.getFunction(funcName);
+    Function* func = module->getFunction(funcName);
     if (func == nullptr)
     {
         resultValue = nullptr;
@@ -470,89 +438,24 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     );
 }
 
-bool LlvmIrGenerator::GenerateCode(SyntaxTreeNode* syntaxTree)
+bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 {
+    module = new Module("module", context);
+
     // generate LLVM IR from syntax tree
+    this->module = module;
     syntaxTree->Accept(this);
+
     if (resultValue == nullptr)
     {
+        delete module;
+        module = nullptr;
         return false;
-    }
-
-    if (assemblyType == Config::eLlvmIr)
-    {
-        error_code ec;
-        raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
-        if (ec)
-        {
-            cerr << ec.message();
-            return false;
-        }
-
-        // print LLVM IR
-        module.print(outFile, nullptr);
-    }
-    else if (assemblyType == Config::eMachineText || assemblyType == Config::eMachineBinary)
-    {
-        // default target triple to the current machine
-        Triple targetTripple(sys::getDefaultTargetTriple());
-
-        // override the architecture if configured
-        if (!architecture.empty())
-        {
-            Triple::ArchType archType = Triple::getArchTypeForLLVMName(architecture);
-            targetTripple.setArch(archType);
-        }
-
-        InitializeAllTargetInfos();
-        InitializeAllTargets();
-        InitializeAllTargetMCs();
-        InitializeAllAsmParsers();
-        InitializeAllAsmPrinters();
-
-        string errorMsg;
-        const Target* target = TargetRegistry::lookupTarget(targetTripple.str(), errorMsg);
-        if (target == nullptr)
-        {
-            cerr << errorMsg;
-            return false;
-        }
-
-        TargetOptions options;
-        auto relocModel = Optional<Reloc::Model>();
-        TargetMachine* targetMachine =
-            target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel);
-
-        module.setDataLayout(targetMachine->createDataLayout());
-        module.setTargetTriple(targetTripple.str());
-
-        error_code ec;
-        raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
-        if (ec)
-        {
-            cerr << ec.message();
-            return false;
-        }
-
-        legacy::PassManager passManager;
-        TargetMachine::CodeGenFileType fileType = (assemblyType == Config::eMachineBinary)
-                                                      ? TargetMachine::CGFT_ObjectFile
-                                                      : TargetMachine::CGFT_AssemblyFile;
-        if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
-        {
-            cerr << "Target machine cannot emit a file of this type\n";
-            return false;
-        }
-
-        passManager.run(module);
     }
     else
     {
-        cerr << "Internal error: Unknown assembly type\n";
-        return false;
+        return true;
     }
-
-    return true;
 }
 
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
@@ -598,7 +501,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
     }
 
     FunctionType* funcType = FunctionType::get(returnType, parameters, false);
-    llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), &module);
+    llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), module);
 
     return true;
 }

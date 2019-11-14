@@ -1,4 +1,5 @@
 #include "Compiler.h"
+#include "AssemblyGenerator.h"
 #include "CHeaderPrinter.h"
 #include "LexicalAnalyzer.h"
 #include "LlvmIrGenerator.h"
@@ -77,8 +78,18 @@ bool Compiler::Compile()
 
     if (ok && config.outputType == Config::eAssembly)
     {
-        LlvmIrGenerator generator(config);
-        ok = generator.GenerateCode(syntaxTree);
+        llvm::Module* module = nullptr;
+
+        LlvmIrGenerator irGenerator;
+        ok = irGenerator.Generate(syntaxTree, module);
+
+        if (ok)
+        {
+            AssemblyGenerator asmGenerator(config);
+            ok = asmGenerator.Generate(module);
+        }
+
+        delete module;
     }
 
     delete syntaxTree;

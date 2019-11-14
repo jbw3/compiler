@@ -3,7 +3,6 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
-#include "Config.h"
 #include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
@@ -14,7 +13,7 @@
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator(const Config& config);
+    LlvmIrGenerator();
 
     void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
 
@@ -42,15 +41,12 @@ public:
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
 
-    bool GenerateCode(SyntaxTree::SyntaxTreeNode* syntaxTree);
+    bool Generate(SyntaxTree::SyntaxTreeNode* syntaxTree, llvm::Module*& module);
 
 private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
-    llvm::Module module;
-    std::string outFilename;
-    std::string architecture;
-    Config::EAssemblyType assemblyType;
+    llvm::Module* module;
     SymbolTable symbolTable;
     llvm::Value* resultValue;
     llvm::StructType* unitType;
