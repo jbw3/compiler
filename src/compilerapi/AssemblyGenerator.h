@@ -4,8 +4,12 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "Config.h"
-#include "llvm/IR/Module.h"
 #pragma clang diagnostic pop
+
+namespace llvm
+{
+class Module;
+}
 
 class AssemblyGenerator
 {
