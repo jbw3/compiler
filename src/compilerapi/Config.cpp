@@ -164,7 +164,7 @@ Options:
   --arch <value>         Assembly architecture
   --llvm                 Output LLVM IR
   --out-type <value>     Type of output: assembly, c-header, tokens, tree
-  -O <0, 1, 2>           Optimization level
+  -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
   -S                     Output assembly as text
 
@@ -172,6 +172,9 @@ Examples:
 
 Compile test.wip to an object file:
   wip test.wip
+
+Compile test.wip to an object file with optimization enabled:
+  wip test.wip -O 2
 
 Output LLVM IR:
   wip test.wip --llvm
