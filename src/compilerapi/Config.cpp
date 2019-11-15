@@ -10,6 +10,7 @@ Config::Config()
     assemblyType = eMachineBinary;
     outFilename = "";
     architecture = "";
+    optimizationLevel = 0;
 }
 
 bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
@@ -44,6 +45,37 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
         {
             outFilename = argv[idx + 1];
             ++idx;
+        }
+    }
+    else if (strcmp(arg, "-O") == 0)
+    {
+        if (idx + 1 >= argc)
+        {
+            cerr << "Error: Expected an argument after " << arg << "\n";
+            ok = false;
+        }
+        else
+        {
+            ++idx;
+            const char* level = argv[idx];
+
+            if (strcmp(level, "0") == 0)
+            {
+                optimizationLevel = 0;
+            }
+            else if (strcmp(level, "1") == 0)
+            {
+                optimizationLevel = 1;
+            }
+            else if (strcmp(level, "2") == 0)
+            {
+                optimizationLevel = 2;
+            }
+            else
+            {
+                cerr << "Error: Unknown optimization level " << level << "\n";
+                ok = false;
+            }
         }
     }
     else if (strcmp(arg, "--out-type") == 0)
@@ -132,6 +164,7 @@ Options:
   --arch <value>         Assembly architecture
   --llvm                 Output LLVM IR
   --out-type <value>     Type of output: assembly, c-header, tokens, tree
+  -O <0, 1, 2>           Optimization level
   -o, --output <file>    Specify name of output file
   -S                     Output assembly as text
 

@@ -26,6 +26,7 @@ public:
     std::string inFilename;
     std::string outFilename;
     std::string architecture;
+    unsigned optimizationLevel;
 
     Config();
 

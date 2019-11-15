@@ -3,6 +3,7 @@
 #include "CHeaderPrinter.h"
 #include "LexicalAnalyzer.h"
 #include "LlvmIrGenerator.h"
+#include "LlvmIrOptimizer.h"
 #include "SemanticAnalyzer.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
@@ -82,6 +83,12 @@ bool Compiler::Compile()
 
         LlvmIrGenerator irGenerator;
         ok = irGenerator.Generate(syntaxTree, module);
+
+        if (ok)
+        {
+            LlvmOptimizer optimizer(config);
+            ok = optimizer.Optimize(module);
+        }
 
         if (ok)
         {

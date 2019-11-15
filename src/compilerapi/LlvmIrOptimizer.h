@@ -5,13 +5,17 @@ namespace llvm
 {
 class Module;
 }
+class Config;
 
 class LlvmOptimizer
 {
 public:
-    LlvmOptimizer();
+    LlvmOptimizer(const Config& config);
 
     bool Optimize(llvm::Module* module);
+
+private:
+    unsigned optimizationLevel;
 };
 
 #endif // LLVM_OPTIMIZER_H_
