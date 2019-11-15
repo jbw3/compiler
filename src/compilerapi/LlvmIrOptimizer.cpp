@@ -5,6 +5,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils.h"
 #pragma clang diagnostic pop
 
@@ -23,6 +24,12 @@ bool LlvmOptimizer::Optimize(Module* module)
 
         funPassMgr.add(createPromoteMemoryToRegisterPass());
         funPassMgr.add(createInstructionCombiningPass());
+
+        if (optimizationLevel >= 2)
+        {
+            funPassMgr.add(createCFGSimplificationPass());
+            funPassMgr.add(createTailCallEliminationPass());
+        }
 
         funPassMgr.doInitialization();
         for (Function& fun : module->functions())
