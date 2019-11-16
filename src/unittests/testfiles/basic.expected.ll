@@ -530,6 +530,18 @@ entry:
   ret i64 %div
 }
 
+define i64 @types_isize(i64 %n1, i64 %n2) {
+entry:
+  %n22 = alloca i64
+  %n11 = alloca i64
+  store i64 %n1, i64* %n11
+  store i64 %n2, i64* %n22
+  %n13 = load i64, i64* %n11
+  %n24 = load i64, i64* %n22
+  %rem = srem i64 %n13, %n24
+  ret i64 %rem
+}
+
 define i8 @types_u8(i8 %n1, i8 %n2) {
 entry:
   %n22 = alloca i8
@@ -538,8 +550,8 @@ entry:
   store i8 %n2, i8* %n22
   %n13 = load i8, i8* %n11
   %n24 = load i8, i8* %n22
-  %add = add i8 %n13, %n24
-  ret i8 %add
+  %rem = urem i8 %n13, %n24
+  ret i8 %rem
 }
 
 define i16 @types_u16(i16 %n1, i16 %n2) {
@@ -550,8 +562,8 @@ entry:
   store i16 %n2, i16* %n22
   %n13 = load i16, i16* %n11
   %n24 = load i16, i16* %n22
-  %mul = mul i16 %n13, %n24
-  ret i16 %mul
+  %div = udiv i16 %n13, %n24
+  ret i16 %div
 }
 
 define i32 @types_u32(i32 %n1, i32 %n2) {
@@ -562,8 +574,8 @@ entry:
   store i32 %n2, i32* %n22
   %n13 = load i32, i32* %n11
   %n24 = load i32, i32* %n22
-  %div = udiv i32 %n13, %n24
-  ret i32 %div
+  %mul = mul i32 %n13, %n24
+  ret i32 %mul
 }
 
 define i64 @types_u64(i64 %n1, i64 %n2) {
@@ -574,8 +586,20 @@ entry:
   store i64 %n2, i64* %n22
   %n13 = load i64, i64* %n11
   %n24 = load i64, i64* %n22
-  %rem = urem i64 %n13, %n24
-  ret i64 %rem
+  %sub = sub i64 %n13, %n24
+  ret i64 %sub
+}
+
+define i64 @types_usize(i64 %n1, i64 %n2) {
+entry:
+  %n22 = alloca i64
+  %n11 = alloca i64
+  store i64 %n1, i64* %n11
+  store i64 %n2, i64* %n22
+  %n13 = load i64, i64* %n11
+  %n24 = load i64, i64* %n22
+  %add = add i64 %n13, %n24
+  ret i64 %add
 }
 
 define i8 @types_add_literal(i8 %num) {
