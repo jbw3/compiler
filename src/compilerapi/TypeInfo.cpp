@@ -1,7 +1,12 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 #include "TypeInfo.h"
 #include "keywords.h"
+#include "llvm/Target/TargetMachine.h"
 #include <typeinfo>
+#pragma clang diagnostic pop
 
+using namespace llvm;
 using namespace std;
 
 UnitTypeInfo unitType;
@@ -39,6 +44,14 @@ map<string, const TypeInfo*> TypeInfo::types =
     {UINT64_KEYWORD, UInt64Type},
 };
 
+void TypeInfo::InitTypes(const TargetMachine* targetMachine)
+{
+    unsigned numBits = 8 * targetMachine->getAllocaPointerSize();
+
+    RegisterType(INT_SIZE_KEYWORD, new PrimitiveType(numBits, false, true, true));
+    RegisterType(UINT_SIZE_KEYWORD, new PrimitiveType(numBits, false, true, false));
+}
+
 const TypeInfo* TypeInfo::GetType(const string& typeName)
 {
     auto iter = types.find(typeName);
@@ -47,6 +60,12 @@ const TypeInfo* TypeInfo::GetType(const string& typeName)
         return nullptr;
     }
     return iter->second;
+}
+
+bool TypeInfo::RegisterType(const std::string& typeName, const TypeInfo* typeInfo)
+{
+    auto pair = types.insert({ typeName, typeInfo });
+    return pair.second;
 }
 
 TypeInfo::TypeInfo(

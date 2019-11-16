@@ -3,6 +3,10 @@
 
 #include <map>
 
+namespace llvm
+{
+class TargetMachine;
+}
 class UnitTypeInfo;
 
 class TypeInfo
@@ -19,7 +23,11 @@ public:
     static const TypeInfo* UInt32Type;
     static const TypeInfo* UInt64Type;
 
+    static void InitTypes(const llvm::TargetMachine* targetMachine);
+
     static const TypeInfo* GetType(const std::string& typeName);
+
+    static bool RegisterType(const std::string& typeName, const TypeInfo* typeInfo);
 
     TypeInfo(
         unsigned numBits,

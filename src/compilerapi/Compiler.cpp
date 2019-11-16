@@ -23,6 +23,8 @@ Compiler::Compiler(const Config& config) :
     config(config),
     logger(&cerr)
 {
+    // initialize types
+    TypeInfo::InitTypes(config.targetMachine);
 }
 
 bool Compiler::Compile()
