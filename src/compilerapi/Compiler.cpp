@@ -81,7 +81,7 @@ bool Compiler::Compile()
     {
         llvm::Module* module = nullptr;
 
-        LlvmIrGenerator irGenerator;
+        LlvmIrGenerator irGenerator(config);
         ok = irGenerator.Generate(syntaxTree, module);
 
         if (ok)

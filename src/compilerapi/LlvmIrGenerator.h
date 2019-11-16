@@ -10,10 +10,16 @@
 #include "llvm/IR/LLVMContext.h"
 #pragma clang diagnostic pop
 
+namespace llvm
+{
+class TargetMachine;
+}
+class Config;
+
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator();
+    LlvmIrGenerator(const Config& config);
 
     void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
 
@@ -44,6 +50,7 @@ public:
     bool Generate(SyntaxTree::SyntaxTreeNode* syntaxTree, llvm::Module*& module);
 
 private:
+    llvm::TargetMachine* targetMachine;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::Module* module;

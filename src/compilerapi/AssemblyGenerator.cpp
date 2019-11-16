@@ -8,7 +8,6 @@
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
 #include <iostream>
 #pragma clang diagnostic pop
 
@@ -16,7 +15,7 @@ using namespace llvm;
 using namespace std;
 
 AssemblyGenerator::AssemblyGenerator(const Config& config) :
-    architecture(config.architecture),
+    targetMachine(config.targetMachine),
     assemblyType(config.assemblyType)
 {
     if (config.outFilename.empty())
@@ -60,37 +59,8 @@ bool AssemblyGenerator::Generate(Module* module)
     }
     else if (assemblyType == Config::eMachineText || assemblyType == Config::eMachineBinary)
     {
-        // default target triple to the current machine
-        Triple targetTripple(sys::getDefaultTargetTriple());
-
-        // override the architecture if configured
-        if (!architecture.empty())
-        {
-            Triple::ArchType archType = Triple::getArchTypeForLLVMName(architecture);
-            targetTripple.setArch(archType);
-        }
-
-        InitializeAllTargetInfos();
-        InitializeAllTargets();
-        InitializeAllTargetMCs();
         InitializeAllAsmParsers();
         InitializeAllAsmPrinters();
-
-        string errorMsg;
-        const Target* target = TargetRegistry::lookupTarget(targetTripple.str(), errorMsg);
-        if (target == nullptr)
-        {
-            cerr << errorMsg;
-            return false;
-        }
-
-        TargetOptions options;
-        auto relocModel = Optional<Reloc::Model>();
-        TargetMachine* targetMachine =
-            target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel);
-
-        module->setDataLayout(targetMachine->createDataLayout());
-        module->setTargetTriple(targetTripple.str());
 
         error_code ec;
         raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);

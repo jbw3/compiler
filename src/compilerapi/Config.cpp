@@ -1,7 +1,15 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 #include "Config.h"
+#include "llvm/Support/Host.h"
+#include "llvm/Support/TargetRegistry.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Target/TargetOptions.h"
 #include <cstring>
 #include <iostream>
+#pragma clang diagnostic pop
 
+using namespace llvm;
 using namespace std;
 
 Config::Config()
@@ -9,8 +17,8 @@ Config::Config()
     outputType = eAssembly;
     assemblyType = eMachineBinary;
     outFilename = "";
-    architecture = "";
     optimizationLevel = 0;
+    targetMachine = CreateTargetMachine("");
 }
 
 bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
@@ -27,6 +35,37 @@ bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
     }
 
     return ok;
+}
+
+TargetMachine* Config::CreateTargetMachine(const string& architecture)
+{
+    // default target triple to the current machine
+    Triple targetTripple(sys::getDefaultTargetTriple());
+
+    // override the architecture if configured
+    if (!architecture.empty())
+    {
+        Triple::ArchType archType = Triple::getArchTypeForLLVMName(architecture);
+        targetTripple.setArch(archType);
+    }
+
+    InitializeAllTargetInfos();
+    InitializeAllTargets();
+    InitializeAllTargetMCs();
+
+    string errorMsg;
+    const Target* target = TargetRegistry::lookupTarget(targetTripple.str(), errorMsg);
+    if (target == nullptr)
+    {
+        cerr << errorMsg;
+        return nullptr;
+    }
+
+    TargetOptions options;
+    auto relocModel = Optional<Reloc::Model>();
+    TargetMachine* targetMachine = target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel);
+
+    return targetMachine;
 }
 
 bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& help)
@@ -123,7 +162,8 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
         else
         {
             ++idx;
-            architecture = argv[idx];
+            targetMachine = CreateTargetMachine(argv[idx]);
+            ok = targetMachine != nullptr;
         }
     }
     else if (strcmp(arg, "-S") == 0)

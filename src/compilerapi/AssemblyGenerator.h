@@ -1,14 +1,12 @@
 #ifndef ASSEMBLY_GENERATOR_H_
 #define ASSEMBLY_GENERATOR_H_
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
 #include "Config.h"
-#pragma clang diagnostic pop
 
 namespace llvm
 {
 class Module;
+class TargetMachine;
 }
 
 class AssemblyGenerator
@@ -20,7 +18,7 @@ public:
 
 private:
     std::string outFilename;
-    std::string architecture;
+    llvm::TargetMachine* targetMachine;
     Config::EAssemblyType assemblyType;
 };
 

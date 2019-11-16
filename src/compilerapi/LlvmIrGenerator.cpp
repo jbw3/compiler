@@ -1,8 +1,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "LlvmIrGenerator.h"
+#include "Config.h"
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Target/TargetMachine.h"
 #include "utils.h"
 #include <iostream>
 #pragma clang diagnostic pop
@@ -11,7 +13,8 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
-LlvmIrGenerator::LlvmIrGenerator() :
+LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
+    targetMachine(config.targetMachine),
     builder(context),
     module(nullptr),
     resultValue(nullptr)
@@ -441,6 +444,8 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 {
     module = new Module("module", context);
+    module->setDataLayout(targetMachine->createDataLayout());
+    module->setTargetTriple(targetMachine->getTargetTriple().str());
 
     // generate LLVM IR from syntax tree
     this->module = module;
