@@ -6,6 +6,8 @@
 
 const std::string BOOL_KEYWORD = "bool";
 
+const std::string ELIF_KEYWORD = "elif";
+
 const std::string ELSE_KEYWORD = "else";
 
 const std::string FUNCTION_KEYWORD = "fun";
@@ -39,6 +41,10 @@ const std::string WHILE_KEYWORD = "while";
 const std::unordered_set<std::string> KEYWORDS =
 {
     BOOL_KEYWORD,
+    ELIF_KEYWORD,
+    ELSE_KEYWORD,
+    FUNCTION_KEYWORD,
+    IF_KEYWORD,
     INT8_KEYWORD,
     INT16_KEYWORD,
     INT32_KEYWORD,
@@ -49,9 +55,6 @@ const std::unordered_set<std::string> KEYWORDS =
     UINT32_KEYWORD,
     UINT64_KEYWORD,
     UINT_SIZE_KEYWORD,
-    ELSE_KEYWORD,
-    FUNCTION_KEYWORD,
-    IF_KEYWORD,
     VARIABLE_KEYWORD,
     WHILE_KEYWORD,
 };
@@ -65,16 +68,21 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "const",
     "continue",
     "default",
-    "elif",
     "enum",
     "extern",
+    "f32",
+    "f64",
     "for",
     "import",
     "in",
+    "interface",
     "match",
     "namespace",
+    "private",
+    "public",
     "return",
     "struct",
+    "typedef",
     "yield",
 };
 

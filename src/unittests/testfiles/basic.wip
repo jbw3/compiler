@@ -252,11 +252,11 @@ fun elseIfBranches(x i32, y i32, z i32) i32
     {
         y + z
     }
-    else if x == 1
+    elif x == 1
     {
         y - z
     }
-    else if x == 2
+    elif x == 2
     {
         y * z
     }
@@ -272,15 +272,15 @@ fun elseIfBranchesNesting(x i32, y i32, z i32) i32
     {
         y + z
     }
-    else if x == 1
+    elif x == 1
     {
         y - z
     }
-    else if x == 2
+    elif x == 2
     {
         y * z
     }
-    else if x == 3
+    elif x == 3
     {
         if z == 0
         {

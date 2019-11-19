@@ -808,7 +808,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
 
 Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter)
 {
-    // increment iter past "if" keyword
+    // increment iter past "if" or "elif" keyword
     ++iter;
 
     // read "if" condition
@@ -831,39 +831,22 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    // increment past "}"
-    if (!IncrementIterator(iter, endIter))
+    // increment past "}"; we should be at an "elif" or "else" clause
+    if (!IncrementIterator(iter, endIter, "Expected 'elif' or 'else' keyword"))
     {
         return nullptr;
     }
 
-    // we should be at the "else" clause
-    if (!EndIteratorCheck(iter, endIter, "Expected 'else' keyword"))
+    if (iter->GetValue() != ELIF_KEYWORD && iter->GetValue() != ELSE_KEYWORD)
     {
-        return nullptr;
-    }
-
-    if (iter->GetValue() != ELSE_KEYWORD)
-    {
-        logger.LogError(*iter, "Expected 'else' keyword");
-        return nullptr;
-    }
-
-    if (!IncrementIterator(iter, endIter, "Expected 'if' or '{'"))
-    {
-        return nullptr;
-    }
-
-    if (iter->GetValue() != IF_KEYWORD && iter->GetValue() != "{")
-    {
-        logger.LogError(*iter, "Expected 'if' or '{'");
+        logger.LogError(*iter, "Expected 'elif' or 'else'");
         return nullptr;
     }
 
     unique_ptr<Expression> elseExpression;
-    if (iter->GetValue() == IF_KEYWORD)
+    if (iter->GetValue() == ELIF_KEYWORD)
     {
-        // parse "if else"
+        // parse "elif"
         elseExpression.reset(ProcessBranchExpression(iter, endIter));
         if (elseExpression == nullptr)
         {
@@ -872,7 +855,12 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     }
     else
     {
-        if (iter == endIter || iter->GetValue() != BLOCK_START)
+        if (!IncrementIterator(iter, endIter, "Expected '{'"))
+        {
+            return nullptr;
+        }
+
+        if (iter->GetValue() != BLOCK_START)
         {
             logger.LogError(*iter, "Expected '{'");
             return nullptr;
