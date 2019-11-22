@@ -61,11 +61,43 @@ private:
 
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
-    void PrintExpressions(const std::string& attributeName, const SyntaxTree::Expressions& expressions);
-
     void PrintProperty(const std::string& name, const std::string& value);
 
     void PrintProperty(const std::string& name, SyntaxTree::SyntaxTreeNode* value);
+
+    template<typename T>
+    void PrintProperty(const std::string& name, const std::vector<T>& value)
+    {
+        if (firstItem)
+        {
+            firstItem = false;
+        }
+        else
+        {
+            Print(",\n");
+        }
+
+        Print("\"");
+        Print(name);
+        Print("\": ");
+
+        size_t numExpressions = value.size();
+        if (numExpressions == 0)
+        {
+            Print("[]");
+        }
+        else
+        {
+            BracePrinter printer3(*this, "[", "]");
+
+            value[0]->Accept(this);
+            for (size_t i = 1; i < numExpressions; ++i)
+            {
+                Print(",\n");
+                value[i]->Accept(this);
+            }
+        }
+    }
 
     void Print(const std::string& str);
 };

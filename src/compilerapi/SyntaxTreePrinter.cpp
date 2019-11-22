@@ -208,28 +208,8 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"ModuleDefinition\",\n");
-
-    // print function definitions
-    const vector<FunctionDefinition*>& functions = moduleDefinition->GetFunctionDefinitions();
-    Print("\"functions\": ");
-    if (functions.size() == 0)
-    {
-        Print("[]");
-    }
-    else
-    {
-        BracePrinter printer2(*this, "[", "]");
-
-        for (size_t i = 0; i < functions.size(); ++i)
-        {
-            functions[i]->Accept(this);
-            if (i < functions.size() - 1)
-            {
-                Print(",\n");
-            }
-        }
-    }
+    PrintProperty(NODE_TYPE_PROPERTY, "ModuleDefinition");
+    PrintProperty("functions", moduleDefinition->GetFunctionDefinitions());
 }
 
 void SyntaxTreePrinter::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
@@ -267,20 +247,17 @@ void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"BlockExpression\"");
-    PrintExpressions("expressions", blockExpression->GetExpressions());
+    PrintProperty(NODE_TYPE_PROPERTY, "BlockExpression");
+    PrintProperty("expressions", blockExpression->GetExpressions());
 }
 
 void SyntaxTreePrinter::Visit(FunctionExpression* functionExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"FunctionExpression\",\n\"name\": \"");
-    Print(functionExpression->GetName());
-    Print("\"");
-
-    // print arguments
-    PrintExpressions("arguments", functionExpression->GetArguments());
+    PrintProperty(NODE_TYPE_PROPERTY, "FunctionExpression");
+    PrintProperty("name", functionExpression->GetName());
+    PrintProperty("arguments", functionExpression->GetArguments());
 }
 
 void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
@@ -299,31 +276,6 @@ void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variab
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDefinition");
     PrintProperty("name", variableDefinition->GetName());
-}
-
-void SyntaxTreePrinter::PrintExpressions(const string& attributeName, const Expressions& expressions)
-{
-    Print(",\n\"");
-    Print(attributeName);
-    Print("\": ");
-
-    if (expressions.size() == 0)
-    {
-        Print("[]");
-    }
-    else
-    {
-        BracePrinter printer3(*this, "[", "]");
-
-        for (size_t i = 0; i < expressions.size(); ++i)
-        {
-            expressions[i]->Accept(this);
-            if (i < expressions.size() - 1)
-            {
-                Print(",\n");
-            }
-        }
-    }
 }
 
 void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)
@@ -373,7 +325,7 @@ void SyntaxTreePrinter::Print(const string& str)
             string padding(level * 4, ' ');
             *os << padding;
         }
-        else if ((ch == '}' || ch == ']') && level == 0)
+        else if (level == 0 && (ch == '}' || ch == ']'))
         {
             *os << '\n';
         }
