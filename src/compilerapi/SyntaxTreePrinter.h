@@ -66,7 +66,7 @@ private:
     void PrintProperty(const std::string& name, SyntaxTree::SyntaxTreeNode* value);
 
     template<typename T>
-    void PrintProperty(const std::string& name, const std::vector<T>& value)
+    void PrintProperty(const std::string& name, const std::vector<T>& values, std::function<void (T)> printValue)
     {
         if (firstItem)
         {
@@ -81,7 +81,7 @@ private:
         Print(name);
         Print("\": ");
 
-        size_t numExpressions = value.size();
+        size_t numExpressions = values.size();
         if (numExpressions == 0)
         {
             Print("[]");
@@ -90,13 +90,20 @@ private:
         {
             BracePrinter printer3(*this, "[", "]");
 
-            value[0]->Accept(this);
+            printValue(values[0]);
             for (size_t i = 1; i < numExpressions; ++i)
             {
                 Print(",\n");
-                value[i]->Accept(this);
+                printValue(values[i]);
             }
         }
+    }
+
+    template<typename T>
+    void PrintProperty(const std::string& name, const std::vector<T>& values)
+    {
+        std::function<void (T)> fun = [this](T v){ v->Accept(this); };
+        PrintProperty(name, values, fun);
     }
 
     void Print(const std::string& str);
