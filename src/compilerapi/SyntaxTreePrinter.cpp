@@ -6,7 +6,7 @@
 using namespace std;
 using namespace SyntaxTree;
 
-const string SyntaxTreePrinter::NODE_TYPE_PROPERTY = "type";
+const string SyntaxTreePrinter::NODE_TYPE_PROPERTY = "nodeType";
 
 SyntaxTreePrinter::BracePrinter::BracePrinter(SyntaxTreePrinter& printer, string start,
                                               string end) :
