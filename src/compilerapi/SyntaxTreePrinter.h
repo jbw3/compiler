@@ -9,6 +9,8 @@
 class SyntaxTreePrinter : public SyntaxTreeVisitor
 {
 public:
+    static const std::string NODE_TYPE_PROPERTY;
+
     SyntaxTreePrinter(const std::string& outFilename);
 
     ~SyntaxTreePrinter();

@@ -6,6 +6,8 @@
 using namespace std;
 using namespace SyntaxTree;
 
+const string SyntaxTreePrinter::NODE_TYPE_PROPERTY = "type";
+
 SyntaxTreePrinter::BracePrinter::BracePrinter(SyntaxTreePrinter& printer, string start,
                                               string end) :
     printer(printer)
@@ -54,7 +56,7 @@ void SyntaxTreePrinter::Visit(UnaryExpression* unaryExpression)
             break;
     }
 
-    PrintProperty("type", "UnaryExpression");
+    PrintProperty(NODE_TYPE_PROPERTY, "UnaryExpression");
     PrintProperty("operator", op);
     PrintProperty("expression", unaryExpression->GetSubExpression());
 }
@@ -63,98 +65,87 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"BinaryExpression\",\n\"operator\": \"");
-
+    string op;
     switch (binaryExpression->GetOperator())
     {
         case BinaryExpression::eEqual:
-            Print("==");
+            op = "==";
             break;
         case BinaryExpression::eNotEqual:
-            Print("!=");
+            op = "!=";
             break;
         case BinaryExpression::eLessThan:
-            Print("<");
+            op = "<";
             break;
         case BinaryExpression::eLessThanOrEqual:
-            Print("<=");
+            op = "<=";
             break;
         case BinaryExpression::eGreaterThan:
-            Print(">");
+            op = ">";
             break;
         case BinaryExpression::eGreaterThanOrEqual:
-            Print(">=");
+            op = ">=";
             break;
         case BinaryExpression::eAdd:
-            Print("+");
+            op = "+";
             break;
         case BinaryExpression::eSubtract:
-            Print("-");
+            op = "-";
             break;
         case BinaryExpression::eMultiply:
-            Print("*");
+            op = "*";
             break;
         case BinaryExpression::eDivide:
-            Print("/");
+            op = "/";
             break;
         case BinaryExpression::eRemainder:
-            Print("%");
+            op = "%";
             break;
         case BinaryExpression::eShiftLeft:
-            Print("<<");
+            op = "<<";
             break;
         case BinaryExpression::eShiftRightArithmetic:
-            Print(">>");
+            op = ">>";
             break;
         case BinaryExpression::eBitwiseAnd:
-            Print("&");
+            op = "&";
             break;
         case BinaryExpression::eBitwiseXor:
-            Print("^");
+            op = "^";
             break;
         case BinaryExpression::eBitwiseOr:
-            Print("|");
+            op = "|";
             break;
         case BinaryExpression::eLogicalAnd:
-            Print("&&");
+            op = "&&";
             break;
         case BinaryExpression::eLogicalOr:
-            Print("||");
+            op = "||";
             break;
     }
 
-    Print("\",\n\"left\":\n");
-
-    binaryExpression->GetLeftExpression()->Accept(this);
-
-    Print(",\n\"right\":\n");
-
-    binaryExpression->GetRightExpression()->Accept(this);
+    PrintProperty(NODE_TYPE_PROPERTY, "BinaryExpression");
+    PrintProperty("operator", op);
+    PrintProperty("left", binaryExpression->GetLeftExpression());
+    PrintProperty("right", binaryExpression->GetRightExpression());
 }
 
 void SyntaxTreePrinter::Visit(Assignment* assignment)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"Assignment\",\n\"variableName\": \"");
-    Print(assignment->GetVariableName());
-    Print("\",\n\"expression\":\n");
-
-    // print expression
-    assignment->GetExpression()->Accept(this);
+    PrintProperty(NODE_TYPE_PROPERTY, "Assignment");
+    PrintProperty("variableName", assignment->GetVariableName());
+    PrintProperty("expression", assignment->GetExpression());
 }
 
 void SyntaxTreePrinter::Visit(WhileLoop* whileLoop)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"WhileLoop\",\n\"condition\":\n");
-    whileLoop->GetCondition()->Accept(this);
-
-    Print(",\n\"expression\":\n");
-
-    // print expression
-    whileLoop->GetExpression()->Accept(this);
+    PrintProperty(NODE_TYPE_PROPERTY, "WhileLoop");
+    PrintProperty("condition", whileLoop->GetCondition());
+    PrintProperty("expression", whileLoop->GetExpression());
 }
 
 void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
@@ -245,34 +236,31 @@ void SyntaxTreePrinter::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpre
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"UnitTypeLiteralExpression\"");
+    PrintProperty(NODE_TYPE_PROPERTY, "UnitTypeLiteralExpression");
 }
 
 void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"NumericExpression\",\n\"value\": \"");
-    Print(numericExpression->GetNumber());
-    Print("\"");
+    PrintProperty(NODE_TYPE_PROPERTY, "NumericExpression");
+    PrintProperty("value", numericExpression->GetNumber());
 }
 
 void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"BoolLiteralExpression\",\n\"value\": \"");
-    Print(boolLiteralExpression->GetValue());
-    Print("\"");
+    PrintProperty(NODE_TYPE_PROPERTY, "BoolLiteralExpression");
+    PrintProperty("value", boolLiteralExpression->GetValue());
 }
 
 void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"VariableExpression\",\n\"name\": \"");
-    Print(variableExpression->GetName());
-    Print("\"");
+    PrintProperty(NODE_TYPE_PROPERTY, "VariableExpression");
+    PrintProperty("name", variableExpression->GetName());
 }
 
 void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
@@ -299,23 +287,18 @@ void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"BranchExpression\",\n\"ifCondition\":\n");
-    branchExpression->GetIfCondition()->Accept(this);
-
-    Print(",\n\"ifExpression\":\n");
-    branchExpression->GetIfExpression()->Accept(this);
-
-    Print(",\n\"elseExpression\":\n");
-    branchExpression->GetElseExpression()->Accept(this);
+    PrintProperty(NODE_TYPE_PROPERTY, "BranchExpression");
+    PrintProperty("ifCondition", branchExpression->GetIfCondition());
+    PrintProperty("ifExpression", branchExpression->GetIfExpression());
+    PrintProperty("elseExpression", branchExpression->GetElseExpression());
 }
 
 void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"VariableDefinition\",\n\"name\": \"");
-    Print(variableDefinition->GetName());
-    Print("\"");
+    PrintProperty(NODE_TYPE_PROPERTY, "VariableDefinition");
+    PrintProperty("name", variableDefinition->GetName());
 }
 
 void SyntaxTreePrinter::PrintExpressions(const string& attributeName, const Expressions& expressions)
