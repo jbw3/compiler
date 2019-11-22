@@ -55,12 +55,17 @@ private:
 
     std::ostream* os;
     unsigned int level;
+    bool firstItem;
 
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
     void PrintExpressions(const std::string& attributeName, const SyntaxTree::Expressions& expressions);
 
-    void Print(const std::string& str) const;
+    void PrintProperty(const std::string& name, const std::string& value);
+
+    void PrintProperty(const std::string& name, SyntaxTree::SyntaxTreeNode* value);
+
+    void Print(const std::string& str);
 };
 
 #endif // SYNTAX_TREE_PRINTER_H_

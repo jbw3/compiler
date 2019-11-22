@@ -14,6 +14,7 @@ SyntaxTreePrinter::BracePrinter::BracePrinter(SyntaxTreePrinter& printer, string
     endStr = "\n" + end;
 
     ++printer.level;
+    printer.firstItem = true;
     printer.Print(startStr);
 }
 
@@ -23,7 +24,9 @@ SyntaxTreePrinter::BracePrinter::~BracePrinter()
     printer.Print(endStr);
 }
 
-SyntaxTreePrinter::SyntaxTreePrinter(const string& outFilename) : level(0)
+SyntaxTreePrinter::SyntaxTreePrinter(const string& outFilename) :
+    level(0),
+    firstItem(true)
 {
     os = outFilename.empty() ? &cout : new fstream(outFilename, ios_base::out);
 }
@@ -40,21 +43,20 @@ void SyntaxTreePrinter::Visit(UnaryExpression* unaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    Print("\"type\": \"UnaryExpression\",\n\"operator\": \"");
-
+    string op;
     switch (unaryExpression->GetOperator())
     {
         case UnaryExpression::eNegative:
-            Print("-");
+            op = "-";
             break;
         case UnaryExpression::eComplement:
-            Print("!");
+            op = "!";
             break;
     }
 
-    Print("\",\n\"expression\":\n");
-
-    unaryExpression->GetSubExpression()->Accept(this);
+    PrintProperty("type", "UnaryExpression");
+    PrintProperty("operator", op);
+    PrintProperty("expression", unaryExpression->GetSubExpression());
 }
 
 void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
@@ -341,16 +343,51 @@ void SyntaxTreePrinter::PrintExpressions(const string& attributeName, const Expr
     }
 }
 
-void SyntaxTreePrinter::Print(const string& str) const
+void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)
 {
-    string padding(level * 4, ' ');
+    if (firstItem)
+    {
+        firstItem = false;
+    }
+    else
+    {
+        Print(",\n");
+    }
 
+    Print("\"");
+    Print(name);
+    Print("\": \"");
+    Print(value);
+    Print("\"");
+}
+
+void SyntaxTreePrinter::PrintProperty(const string& name, SyntaxTreeNode* value)
+{
+    if (firstItem)
+    {
+        firstItem = false;
+    }
+    else
+    {
+        Print(",\n");
+    }
+
+    Print("\"");
+    Print(name);
+    Print("\":\n");
+
+    value->Accept(this);
+}
+
+void SyntaxTreePrinter::Print(const string& str)
+{
     for (char ch : str)
     {
         os->put(ch);
 
         if (ch == '\n')
         {
+            string padding(level * 4, ' ');
             *os << padding;
         }
         else if ((ch == '}' || ch == ']') && level == 0)
