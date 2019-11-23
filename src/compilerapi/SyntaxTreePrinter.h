@@ -61,9 +61,29 @@ private:
 
     void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
+    void PrintFunctionDeclaration(const SyntaxTree::FunctionDeclaration* declaration);
+
     void PrintProperty(const std::string& name, const std::string& value);
 
     void PrintProperty(const std::string& name, SyntaxTree::SyntaxTreeNode* value);
+
+    template<typename T>
+    void PrintProperty(const std::string& name, T value, std::function<void (T)> printValue)
+    {
+        if (firstItem)
+        {
+            firstItem = false;
+        }
+        else
+        {
+            Print(",\n");
+        }
+
+        Print("\"");
+        Print(name);
+        Print("\":\n");
+        printValue(value);
+    }
 
     template<typename T>
     void PrintProperty(const std::string& name, const std::vector<T>& values, std::function<void (T)> printValue)

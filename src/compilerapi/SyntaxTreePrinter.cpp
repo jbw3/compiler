@@ -152,11 +152,11 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
+    function<void (const FunctionDeclaration*)> printDecl = [this](const FunctionDeclaration* decl){ PrintFunctionDeclaration(decl); };
     function<void (VariableDefinition*)> printVarDef = [this](VariableDefinition* def){ PrintVariableDefinition(def); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionDefinition");
-    PrintProperty("name", functionDefinition->GetName());
-    PrintProperty("parameters", functionDefinition->GetParameters(), printVarDef);
+    PrintProperty("declaration", functionDefinition->GetDeclaration(), printDecl);
     PrintProperty("variableDefinitions", functionDefinition->GetVariableDefinitions(), printVarDef);
     PrintProperty("expression", functionDefinition->GetExpression());
 }
@@ -225,6 +225,17 @@ void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
     PrintProperty("ifCondition", branchExpression->GetIfCondition());
     PrintProperty("ifExpression", branchExpression->GetIfExpression());
     PrintProperty("elseExpression", branchExpression->GetElseExpression());
+}
+
+void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* declaration)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    function<void (VariableDefinition*)> printVarDef = [this](VariableDefinition* def){ PrintVariableDefinition(def); };
+
+    PrintProperty(NODE_TYPE_PROPERTY, "FunctionDeclaration");
+    PrintProperty("name", declaration->GetName());
+    PrintProperty("parameters", declaration->GetParameters(), printVarDef);
 }
 
 void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)

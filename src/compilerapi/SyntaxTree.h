@@ -273,16 +273,14 @@ private:
     Expression* expression;
 };
 
-class FunctionDefinition : public SyntaxTreeNode
+class FunctionDeclaration
 {
 public:
-    FunctionDefinition(const std::string& name, const VariableDefinitions& parameters,
-                       const TypeInfo* returnType, const VariableDefinitions& variableDefinitions,
-                       Expression* expression);
+    FunctionDeclaration(const std::string& name,
+                        const VariableDefinitions& parameters,
+                        const TypeInfo* returnType);
 
-    virtual ~FunctionDefinition();
-
-    void Accept(SyntaxTreeVisitor* visitor) override;
+    virtual ~FunctionDeclaration();
 
     const std::string& GetName() const;
 
@@ -290,14 +288,31 @@ public:
 
     const TypeInfo* GetReturnType() const;
 
+private:
+    std::string name;
+    VariableDefinitions parameters;
+    const TypeInfo* returnType;
+};
+
+class FunctionDefinition : public SyntaxTreeNode
+{
+public:
+    FunctionDefinition(FunctionDeclaration* declaration,
+                       const VariableDefinitions& variableDefinitions,
+                       Expression* expression);
+
+    virtual ~FunctionDefinition();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const FunctionDeclaration* GetDeclaration() const;
+
     const VariableDefinitions& GetVariableDefinitions() const;
 
     Expression* GetExpression() const;
 
 private:
-    std::string name;
-    VariableDefinitions parameters;
-    const TypeInfo* returnType;
+    FunctionDeclaration* declaration;
     VariableDefinitions variableDefinitions;
     Expression* expression;
 };

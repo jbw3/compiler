@@ -218,7 +218,8 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
-    const string& funcName = functionDefinition->GetName();
+    const FunctionDeclaration* declaration = functionDefinition->GetDeclaration();
+    const string& funcName = declaration->GetName();
     Function* func = module->getFunction(funcName);
     if (func == nullptr)
     {
@@ -243,7 +244,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     size_t idx = 0;
     for (Argument& arg : func->args())
     {
-        VariableDefinition* param = functionDefinition->GetParameters()[idx];
+        VariableDefinition* param = declaration->GetParameters()[idx];
         const string& paramName = param->GetName();
         arg.setName(paramName);
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
@@ -274,7 +275,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     // sign extend return value if needed
     const TypeInfo* expressionType = expression->GetType();
-    const TypeInfo* returnType = functionDefinition->GetReturnType();
+    const TypeInfo* returnType = declaration->GetReturnType();
     ExtendType(expressionType, returnType, resultValue);
 
     builder.CreateRet(resultValue);
@@ -294,9 +295,9 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     functions.clear();
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        functions.insert({funcDef->GetName(), funcDef});
+        functions.insert({funcDef->GetDeclaration()->GetName(), funcDef});
 
-        bool ok = CreateFunctionDeclaration(funcDef);
+        bool ok = CreateFunctionDeclaration(funcDef->GetDeclaration());
         if (!ok)
         {
             resultValue = nullptr;
@@ -409,6 +410,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
     }
 
     FunctionDefinition* funcDef = functions.find(funcName)->second;
+    const FunctionDeclaration* funcDecl = funcDef->GetDeclaration();
     vector<Expression*> argExpressions = functionExpression->GetArguments();
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)
@@ -422,7 +424,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
         // sign extend arg value if needed
         const TypeInfo* argType = expr->GetType();
-        const TypeInfo* paramType = funcDef->GetParameters()[i]->GetType();
+        const TypeInfo* paramType = funcDecl->GetParameters()[i]->GetType();
         ExtendType(argType, paramType, resultValue);
 
         args.push_back(resultValue);
@@ -486,10 +488,10 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     return llvmType;
 }
 
-bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* funcDef)
+bool LlvmIrGenerator::CreateFunctionDeclaration(const SyntaxTree::FunctionDeclaration* funcDecl)
 {
     // get the return type
-    Type* returnType = GetType(funcDef->GetReturnType());
+    Type* returnType = GetType(funcDecl->GetReturnType());
     if (returnType == nullptr)
     {
         cerr << "Internal error: invalid function return type\n";
@@ -498,15 +500,15 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(SyntaxTree::FunctionDefinition* 
 
     // get the parameter types
     vector<Type*> parameters;
-    parameters.reserve(funcDef->GetParameters().size());
-    for (const VariableDefinition* varDef : funcDef->GetParameters())
+    parameters.reserve(funcDecl->GetParameters().size());
+    for (const VariableDefinition* varDef : funcDecl->GetParameters())
     {
         Type* varType = GetType(varDef->GetType());
         parameters.push_back(varType);
     }
 
     FunctionType* funcType = FunctionType::get(returnType, parameters, false);
-    llvm::Function::Create(funcType, Function::ExternalLinkage, funcDef->GetName(), module);
+    llvm::Function::Create(funcType, Function::ExternalLinkage, funcDecl->GetName(), module);
 
     return true;
 }

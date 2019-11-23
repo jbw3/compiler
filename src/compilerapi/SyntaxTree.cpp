@@ -329,14 +329,39 @@ Expression* WhileLoop::GetExpression() const
     return expression;
 }
 
-FunctionDefinition::FunctionDefinition(const string& name,
-                                       const vector<VariableDefinition*>& parameters,
-                                       const TypeInfo* returnType,
-                                       const VariableDefinitions& variableDefinitions,
-                                       Expression* expression) :
+FunctionDeclaration::FunctionDeclaration(const std::string& name,
+                                         const VariableDefinitions& parameters,
+                                         const TypeInfo* returnType) :
     name(name),
     parameters(parameters),
-    returnType(returnType),
+    returnType(returnType)
+{
+}
+
+FunctionDeclaration::~FunctionDeclaration()
+{
+    deletePointerContainer(parameters);
+}
+
+const string& FunctionDeclaration::GetName() const
+{
+    return name;
+}
+
+const vector<VariableDefinition*>& FunctionDeclaration::GetParameters() const
+{
+    return parameters;
+}
+
+const TypeInfo* FunctionDeclaration::GetReturnType() const
+{
+    return returnType;
+}
+
+FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
+                                       const VariableDefinitions& variableDefinitions,
+                                       Expression* expression) :
+    declaration(declaration),
     variableDefinitions(variableDefinitions),
     expression(expression)
 {
@@ -344,14 +369,8 @@ FunctionDefinition::FunctionDefinition(const string& name,
 
 FunctionDefinition::~FunctionDefinition()
 {
-    for (VariableDefinition* param : parameters)
-    {
-        delete param;
-    }
-    for (VariableDefinition* varDef : variableDefinitions)
-    {
-        delete varDef;
-    }
+    delete declaration;
+    deletePointerContainer(variableDefinitions);
     delete expression;
 }
 
@@ -360,19 +379,9 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const string& FunctionDefinition::GetName() const
+const FunctionDeclaration* FunctionDefinition::GetDeclaration() const
 {
-    return name;
-}
-
-const vector<VariableDefinition*>& FunctionDefinition::GetParameters() const
-{
-    return parameters;
-}
-
-const TypeInfo* FunctionDefinition::GetReturnType() const
-{
-    return returnType;
+    return declaration;
 }
 
 const VariableDefinitions& FunctionDefinition::GetVariableDefinitions() const

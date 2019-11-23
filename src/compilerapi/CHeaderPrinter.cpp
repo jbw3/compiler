@@ -27,18 +27,20 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
     string cType;
     for (const FunctionDefinition* function : module->GetFunctionDefinitions())
     {
-        if (!GetCType(function->GetReturnType(), cType))
+        const FunctionDeclaration* declaration = function->GetDeclaration();
+
+        if (!GetCType(declaration->GetReturnType(), cType))
         {
             return false;
         }
 
-        outFile << cType << " " << function->GetName() << "(";
+        outFile << cType << " " << declaration->GetName() << "(";
 
         // print function parameters
-        size_t numParams = function->GetParameters().size();
+        size_t numParams = declaration->GetParameters().size();
         for (size_t i = 0; i < numParams; ++i)
         {
-            const VariableDefinition* param = function->GetParameters()[i];
+            const VariableDefinition* param = declaration->GetParameters()[i];
             if (!GetCType(param->GetType(), cType))
             {
                 return false;

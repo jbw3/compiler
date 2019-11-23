@@ -240,8 +240,10 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     // increment past "}"
     ++iter;
 
+    FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
+        functionName, parameters, returnType);
     FunctionDefinition* functionDefinition = new FunctionDefinition(
-        functionName, parameters, returnType, variableDefinitions, expression.release()
+        functionDeclaration, variableDefinitions, expression.release()
     );
     return functionDefinition;
 }

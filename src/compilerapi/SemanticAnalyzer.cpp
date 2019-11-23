@@ -260,7 +260,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         return;
     }
 
-    const TypeInfo* returnType = functionDefinition->GetReturnType();
+    const TypeInfo* returnType = functionDefinition->GetDeclaration()->GetReturnType();
     const TypeInfo* expressionType = expression->GetType();
     if (!returnType->IsSameAs(*expressionType))
     {
@@ -278,11 +278,12 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     functions.clear();
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        auto rv = functions.insert({funcDef->GetName(), funcDef});
+        const string& name = funcDef->GetDeclaration()->GetName();
+        auto rv = functions.insert({name, funcDef});
         if (!rv.second)
         {
             isError = true;
-            cerr << "Function \"" << funcDef->GetName() << "\" has already been defined\n";
+            cerr << "Function \"" << name << "\" has already been defined\n";
             return;
         }
     }
@@ -292,7 +293,9 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     {
         symbolTable.Push();
 
-        if (!AddVariables(funcDef->GetParameters()) || !AddVariables(funcDef->GetVariableDefinitions()))
+        const FunctionDeclaration* funcDecl = funcDef->GetDeclaration();
+
+        if (!AddVariables(funcDecl->GetParameters()) || !AddVariables(funcDef->GetVariableDefinitions()))
         {
             isError = true;
             return;
@@ -402,10 +405,11 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     }
 
     const FunctionDefinition* funcDef = iter->second;
+    const FunctionDeclaration* funcDecl = funcDef->GetDeclaration();
 
     // check argument count
     const vector<Expression*>& args = functionExpression->GetArguments();
-    const vector<VariableDefinition*>& params = funcDef->GetParameters();
+    const vector<VariableDefinition*>& params = funcDecl->GetParameters();
     if (args.size() != params.size())
     {
         cerr << "Function '" << funcName << "' expected " << params.size() << " arguments but got " << args.size() << "\n";
@@ -440,7 +444,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     }
 
     // set expression's type to the function's return type
-    functionExpression->SetType(funcDef->GetReturnType());
+    functionExpression->SetType(funcDecl->GetReturnType());
 }
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
