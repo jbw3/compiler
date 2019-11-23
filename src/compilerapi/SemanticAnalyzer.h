@@ -43,7 +43,7 @@ public:
 
 private:
     bool isError;
-    std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
+    std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
 
     bool AddVariables(const SyntaxTree::VariableDefinitions& varDefs);

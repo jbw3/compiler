@@ -280,11 +280,27 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
     // build a look-up table for all functions
+
     functions.clear();
+
+    for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
+    {
+        const FunctionDeclaration* decl = externFunc->GetDeclaration();
+        const string& name = decl->GetName();
+        auto rv = functions.insert({name, decl});
+        if (!rv.second)
+        {
+            isError = true;
+            cerr << "Function \"" << name << "\" has already been defined\n";
+            return;
+        }
+    }
+
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        const string& name = funcDef->GetDeclaration()->GetName();
-        auto rv = functions.insert({name, funcDef});
+        const FunctionDeclaration* decl = funcDef->GetDeclaration();
+        const string& name = decl->GetName();
+        auto rv = functions.insert({name, decl});
         if (!rv.second)
         {
             isError = true;
@@ -409,8 +425,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         return;
     }
 
-    const FunctionDefinition* funcDef = iter->second;
-    const FunctionDeclaration* funcDecl = funcDef->GetDeclaration();
+    const FunctionDeclaration* funcDecl = iter->second;
 
     // check argument count
     const vector<Expression*>& args = functionExpression->GetArguments();
