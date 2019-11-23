@@ -48,8 +48,15 @@ private:
 
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
+    SyntaxTree::ExternFunctionDeclaration* ProcessExternFunction(TokenIterator& iter,
+                                                                 TokenIterator endIter);
+
     SyntaxTree::FunctionDefinition* ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter);
+
+    SyntaxTree::FunctionDeclaration* ProcessFunctionDeclaration(TokenIterator& iter,
+                                                                TokenIterator endIter,
+                                                                const std::string& endToken);
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            std::vector<SyntaxTree::VariableDefinition*>& parameters);

@@ -10,6 +10,8 @@ const std::string ELIF_KEYWORD = "elif";
 
 const std::string ELSE_KEYWORD = "else";
 
+const std::string EXTERN_KEYWORD = "extern";
+
 const std::string FUNCTION_KEYWORD = "fun";
 
 const std::string IF_KEYWORD = "if";
@@ -43,6 +45,7 @@ const std::unordered_set<std::string> KEYWORDS =
     BOOL_KEYWORD,
     ELIF_KEYWORD,
     ELSE_KEYWORD,
+    EXTERN_KEYWORD,
     FUNCTION_KEYWORD,
     IF_KEYWORD,
     INT8_KEYWORD,
@@ -69,19 +72,20 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "continue",
     "default",
     "enum",
-    "extern",
     "f32",
     "f64",
     "for",
     "import",
     "in",
     "interface",
+    "let",
     "match",
     "namespace",
     "private",
     "public",
     "return",
     "struct",
+    "type",
     "typedef",
     "yield",
 };

@@ -414,17 +414,17 @@ Expression* FunctionDefinition::GetExpression() const
     return expression;
 }
 
-ModuleDefinition::ModuleDefinition(const vector<FunctionDefinition*>& functionDefinitions) :
-    functionDefinitions(functionDefinitions)
+ModuleDefinition::ModuleDefinition(const vector<FunctionDefinition*>& functionDefinitions,
+                                   const vector<ExternFunctionDeclaration*>& externFunctionDeclarations) :
+    functionDefinitions(functionDefinitions),
+    externFunctionDeclarations(externFunctionDeclarations)
 {
 }
 
 ModuleDefinition::~ModuleDefinition()
 {
-    for (FunctionDefinition* funcDef : functionDefinitions)
-    {
-        delete funcDef;
-    }
+    deletePointerContainer(functionDefinitions);
+    deletePointerContainer(externFunctionDeclarations);
 }
 
 void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
@@ -435,5 +435,10 @@ void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
 const vector<FunctionDefinition*>& ModuleDefinition::GetFunctionDefinitions() const
 {
     return functionDefinitions;
+}
+
+const vector<ExternFunctionDeclaration*>& ModuleDefinition::GetExternFunctionDeclarations() const
+{
+    return externFunctionDeclarations;
 }
 } // namespace SyntaxTree

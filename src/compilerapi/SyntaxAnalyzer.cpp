@@ -53,28 +53,50 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     TokenIterator endIter = tokens.cend();
 
     vector<FunctionDefinition*> functions;
+    vector<ExternFunctionDeclaration*> externFunctions;
 
     bool ok = true;
     while (ok && iter != endIter)
     {
-        FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
-        if (functionDefinition == nullptr)
+        if (iter->GetValue() == FUNCTION_KEYWORD)
         {
-            ok = false;
+            FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
+            if (functionDefinition == nullptr)
+            {
+                ok = false;
+            }
+            else
+            {
+                functions.push_back(functionDefinition);
+            }
+        }
+        else if (iter->GetValue() == EXTERN_KEYWORD)
+        {
+            ExternFunctionDeclaration* externDecl = ProcessExternFunction(iter, endIter);
+            if (externDecl == nullptr)
+            {
+                ok = false;
+            }
+            else
+            {
+                externFunctions.push_back(externDecl);
+            }
         }
         else
         {
-            functions.push_back(functionDefinition);
+            ok = false;
+            logger.LogError(*iter, "Unexpected token '{}'", iter->GetValue());
         }
     }
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(functions);
+        syntaxTree = new ModuleDefinition(functions, externFunctions);
     }
     else
     {
         deletePointerContainer(functions);
+        deletePointerContainer(externFunctions);
         syntaxTree = nullptr;
     }
 
@@ -128,11 +150,83 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
     return EndIteratorCheck(iter, endIter, errorMsg);
 }
 
+
+ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& iter,
+                                                                 TokenIterator endIter)
+{
+    if (!EndIteratorCheck(iter, endIter, "Expected extern keyword"))
+    {
+        return nullptr;
+    }
+
+    if (iter->GetValue() != EXTERN_KEYWORD)
+    {
+        logger.LogError(*iter, "Expected extern keyword");
+        return nullptr;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected function keyword"))
+    {
+        return nullptr;
+    }
+
+    FunctionDeclaration* decl = ProcessFunctionDeclaration(iter, endIter, STATEMENT_END);
+    if (decl == nullptr)
+    {
+        return nullptr;
+    }
+
+    // increment past ";"
+    ++iter;
+
+    ExternFunctionDeclaration* externFun = new ExternFunctionDeclaration(decl);
+    return externFun;
+}
+
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
     variableDefinitions.clear();
 
+    unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, BLOCK_START));
+    if (functionDeclaration == nullptr)
+    {
+        return nullptr;
+    }
+
+    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
+    if (expression == nullptr)
+    {
+        deletePointerContainer(variableDefinitions);
+        return nullptr;
+    }
+
+    if (!EndIteratorCheck(iter, endIter))
+    {
+        deletePointerContainer(variableDefinitions);
+        return nullptr;
+    }
+
+    if (iter->GetValue() != "}")
+    {
+        logger.LogError(*iter, "Expected '}'");
+        deletePointerContainer(variableDefinitions);
+        return nullptr;
+    }
+
+    // increment past "}"
+    ++iter;
+
+    FunctionDefinition* functionDefinition = new FunctionDefinition(
+        functionDeclaration.release(), variableDefinitions, expression.release()
+    );
+    return functionDefinition;
+}
+
+FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& iter,
+                                                                TokenIterator endIter,
+                                                                const string& endToken)
+{
     if (!EndIteratorCheck(iter, endIter, "Expected function keyword"))
     {
         return nullptr;
@@ -185,7 +279,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     const TypeInfo* returnType = nullptr;
 
     // if no return type is specified, default to the unit type
-    if (iter->GetValue() == BLOCK_START)
+    if (iter->GetValue() == endToken)
     {
         returnType = TypeInfo::UnitType;
     }
@@ -200,52 +294,23 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
             return nullptr;
         }
 
-        if (!IncrementIterator(iter, endIter, "Expected '{'"))
+        if (!IncrementIterator(iter, endIter, "Expected end of function"))
         {
             deletePointerContainer(parameters);
             return nullptr;
         }
 
-        if (iter->GetValue() != BLOCK_START)
+        if (iter->GetValue() != endToken)
         {
-            logger.LogError(*iter, "Expected '{'");
+            logger.LogError(*iter, "Expected '{}'", endToken);
             deletePointerContainer(parameters);
             return nullptr;
         }
     }
-
-    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
-    if (expression == nullptr)
-    {
-        deletePointerContainer(parameters);
-        deletePointerContainer(variableDefinitions);
-        return nullptr;
-    }
-
-    if (!EndIteratorCheck(iter, endIter))
-    {
-        deletePointerContainer(parameters);
-        deletePointerContainer(variableDefinitions);
-        return nullptr;
-    }
-
-    if (iter->GetValue() != "}")
-    {
-        logger.LogError(*iter, "Expected '}'");
-        deletePointerContainer(parameters);
-        deletePointerContainer(variableDefinitions);
-        return nullptr;
-    }
-
-    // increment past "}"
-    ++iter;
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
         functionName, parameters, returnType);
-    FunctionDefinition* functionDefinition = new FunctionDefinition(
-        functionDeclaration, variableDefinitions, expression.release()
-    );
-    return functionDefinition;
+    return functionDeclaration;
 }
 
 bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIter,

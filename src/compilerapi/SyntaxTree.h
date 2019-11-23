@@ -335,7 +335,8 @@ private:
 class ModuleDefinition : public SyntaxTreeNode
 {
 public:
-    ModuleDefinition(const std::vector<FunctionDefinition*>& functionDefinitions);
+    ModuleDefinition(const std::vector<FunctionDefinition*>& functionDefinitions,
+                     const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations);
 
     virtual ~ModuleDefinition();
 
@@ -343,8 +344,11 @@ public:
 
     const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
 
+    const std::vector<ExternFunctionDeclaration*>& GetExternFunctionDeclarations() const;
+
 private:
     std::vector<FunctionDefinition*> functionDefinitions;
+    std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
 };
 } // namespace SyntaxTree
 
