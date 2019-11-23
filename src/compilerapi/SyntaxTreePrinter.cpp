@@ -148,6 +148,16 @@ void SyntaxTreePrinter::Visit(WhileLoop* whileLoop)
     PrintProperty("expression", whileLoop->GetExpression());
 }
 
+void SyntaxTreePrinter::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    function<void (const FunctionDeclaration*)> printDecl = [this](const FunctionDeclaration* decl){ PrintFunctionDeclaration(decl); };
+
+    PrintProperty(NODE_TYPE_PROPERTY, "ExternFunctionDeclaration");
+    PrintProperty("declaration", externFunctionDeclaration->GetDeclaration(), printDecl);
+}
+
 void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 {
     BracePrinter printer(*this, "{", "}");

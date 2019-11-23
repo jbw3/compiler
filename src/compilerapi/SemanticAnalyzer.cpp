@@ -250,6 +250,11 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     whileLoop->SetType(TypeInfo::UnitType);
 }
 
+void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
+{
+    // nothing to do here
+}
+
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     // check return expression

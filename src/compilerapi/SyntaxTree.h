@@ -294,6 +294,21 @@ private:
     const TypeInfo* returnType;
 };
 
+class ExternFunctionDeclaration : public SyntaxTreeNode
+{
+public:
+    ExternFunctionDeclaration(FunctionDeclaration* declaration);
+
+    virtual ~ExternFunctionDeclaration();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const FunctionDeclaration* GetDeclaration() const;
+
+private:
+    FunctionDeclaration* declaration;
+};
+
 class FunctionDefinition : public SyntaxTreeNode
 {
 public:

@@ -391,6 +391,13 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
+{
+    // TODO: implement
+    cerr << "Internal error: Not implemented\n";
+    resultValue = nullptr;
+}
+
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();

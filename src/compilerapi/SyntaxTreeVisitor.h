@@ -8,6 +8,7 @@ class BinaryExpression;
 class BoolLiteralExpression;
 class BlockExpression;
 class BranchExpression;
+class ExternFunctionDeclaration;
 class FunctionDefinition;
 class FunctionExpression;
 class ModuleDefinition;
@@ -28,6 +29,8 @@ public:
     virtual void Visit(SyntaxTree::Assignment* assignment) = 0;
 
     virtual void Visit(SyntaxTree::WhileLoop* whileLoop) = 0;
+
+    virtual void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) = 0;
 
     virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
 

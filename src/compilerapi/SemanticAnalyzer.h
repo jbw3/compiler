@@ -21,6 +21,8 @@ public:
 
     void Visit(SyntaxTree::WhileLoop* whileLoop) override;
 
+    void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) override;
+
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;

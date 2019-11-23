@@ -358,6 +358,26 @@ const TypeInfo* FunctionDeclaration::GetReturnType() const
     return returnType;
 }
 
+ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :
+    declaration(declaration)
+{
+}
+
+ExternFunctionDeclaration::~ExternFunctionDeclaration()
+{
+    delete declaration;
+}
+
+void ExternFunctionDeclaration::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
+{
+    return declaration;
+}
+
 FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
                                        const VariableDefinitions& variableDefinitions,
                                        Expression* expression) :
