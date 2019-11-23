@@ -176,6 +176,7 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "ModuleDefinition");
+    PrintProperty("externFunctions", moduleDefinition->GetExternFunctionDeclarations());
     PrintProperty("functions", moduleDefinition->GetFunctionDefinitions());
 }
 

@@ -91,7 +91,7 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(functions, externFunctions);
+        syntaxTree = new ModuleDefinition(externFunctions, functions);
     }
     else
     {

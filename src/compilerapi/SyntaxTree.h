@@ -335,20 +335,20 @@ private:
 class ModuleDefinition : public SyntaxTreeNode
 {
 public:
-    ModuleDefinition(const std::vector<FunctionDefinition*>& functionDefinitions,
-                     const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations);
+    ModuleDefinition(const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
+                     const std::vector<FunctionDefinition*>& functionDefinitions);
 
     virtual ~ModuleDefinition();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
-
     const std::vector<ExternFunctionDeclaration*>& GetExternFunctionDeclarations() const;
 
+    const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
+
 private:
-    std::vector<FunctionDefinition*> functionDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
+    std::vector<FunctionDefinition*> functionDefinitions;
 };
 } // namespace SyntaxTree
 
