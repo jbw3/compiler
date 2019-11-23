@@ -5,6 +5,10 @@ target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
 
+declare %UnitType @extern1()
+
+declare i64 @extern2(i32, i1)
+
 define i32 @noArgs() {
 entry:
   ret i32 42
@@ -1236,4 +1240,11 @@ entry:
   store i32 %call7, i32* %x
   %x8 = load i32, i32* %x
   ret i32 %x8
+}
+
+define i64 @externTest() {
+entry:
+  %call = call %UnitType @extern1()
+  %call1 = call i64 @extern2(i32 5, i1 true)
+  ret i64 %call1
 }

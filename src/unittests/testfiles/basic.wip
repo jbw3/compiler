@@ -428,3 +428,16 @@ fun blockExpression(param i32) i32
 
     x
 }
+
+extern fun extern1();
+
+fun externTest() u64
+{
+    # call extern function declared before this function
+    extern1();
+
+    # call extern function declared after this function
+    extern2(5, true)
+}
+
+extern fun extern2(p1 i32, p2 bool) u64;
