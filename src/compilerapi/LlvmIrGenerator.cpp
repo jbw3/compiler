@@ -216,6 +216,11 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     resultValue = ConstantStruct::get(unitType);
 }
 
+void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
+{
+    // nothing to do here
+}
+
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
     const FunctionDeclaration* declaration = functionDefinition->GetDeclaration();
@@ -292,12 +297,28 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     // create function declarations and build function look-up table
+
     functions.clear();
+
+    for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
+    {
+        const FunctionDeclaration* decl = externFunc->GetDeclaration();
+        functions.insert({decl->GetName(), decl});
+
+        bool ok = CreateFunctionDeclaration(decl);
+        if (!ok)
+        {
+            resultValue = nullptr;
+            return;
+        }
+    }
+
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        functions.insert({funcDef->GetDeclaration()->GetName(), funcDef});
+        const FunctionDeclaration* decl = funcDef->GetDeclaration();
+        functions.insert({decl->GetName(), decl});
 
-        bool ok = CreateFunctionDeclaration(funcDef->GetDeclaration());
+        bool ok = CreateFunctionDeclaration(decl);
         if (!ok)
         {
             resultValue = nullptr;
@@ -391,13 +412,6 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
-{
-    // TODO: implement
-    cerr << "Internal error: Not implemented\n";
-    resultValue = nullptr;
-}
-
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();
@@ -416,8 +430,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         return;
     }
 
-    FunctionDefinition* funcDef = functions.find(funcName)->second;
-    const FunctionDeclaration* funcDecl = funcDef->GetDeclaration();
+    const FunctionDeclaration* funcDecl = functions.find(funcName)->second;
     vector<Expression*> argExpressions = functionExpression->GetArguments();
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)

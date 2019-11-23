@@ -59,7 +59,7 @@ private:
     SymbolTable symbolTable;
     llvm::Value* resultValue;
     llvm::StructType* unitType;
-    std::map<std::string, SyntaxTree::FunctionDefinition*> functions;
+    std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
 
     llvm::Type* GetType(const TypeInfo* type);
 
