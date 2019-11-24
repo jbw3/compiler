@@ -89,3 +89,14 @@ SymbolTable::VariableData* SymbolTable::GetVariableData(const string& name) cons
 
     return nullptr;
 }
+
+Scope::Scope(SymbolTable& symbolTable) :
+    symbolTable(symbolTable)
+{
+    symbolTable.Push();
+}
+
+Scope::~Scope()
+{
+    symbolTable.Pop();
+}

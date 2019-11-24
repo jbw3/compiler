@@ -46,6 +46,8 @@ private:
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
 
+    bool AddVariable(SyntaxTree::VariableDefinition* varDef);
+
     bool AddVariables(const SyntaxTree::VariableDefinitions& varDefs);
 
     bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);

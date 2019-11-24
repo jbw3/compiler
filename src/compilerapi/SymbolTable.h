@@ -50,4 +50,15 @@ private:
     VariableData* GetVariableData(const std::string& name) const;
 };
 
+class Scope
+{
+public:
+    Scope(SymbolTable& symbolTable);
+
+    ~Scope();
+
+private:
+    SymbolTable& symbolTable;
+};
+
 #endif // SYMBOL_TABLE_H_

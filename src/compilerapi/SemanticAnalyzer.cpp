@@ -257,6 +257,17 @@ void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclarat
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
+    const FunctionDeclaration* funcDecl = functionDefinition->GetDeclaration();
+
+    // create new scope for parameters and add them
+    Scope scope(symbolTable);
+
+    if (!AddVariables(funcDecl->GetParameters()) || !AddVariables(functionDefinition->GetVariableDefinitions()))
+    {
+        isError = true;
+        return;
+    }
+
     // check return expression
     Expression* expression = functionDefinition->GetExpression();
     expression->Accept(this);
@@ -265,7 +276,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         return;
     }
 
-    const TypeInfo* returnType = functionDefinition->GetDeclaration()->GetReturnType();
+    const TypeInfo* returnType = funcDecl->GetReturnType();
     const TypeInfo* expressionType = expression->GetType();
     if (!returnType->IsSameAs(*expressionType))
     {
@@ -312,34 +323,32 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     // perform semantic analysis on all functions
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        symbolTable.Push();
-
-        const FunctionDeclaration* funcDecl = funcDef->GetDeclaration();
-
-        if (!AddVariables(funcDecl->GetParameters()) || !AddVariables(funcDef->GetVariableDefinitions()))
-        {
-            isError = true;
-            return;
-        }
-
         funcDef->Accept(this);
         if (isError)
         {
             break;
         }
-
-        symbolTable.Pop();
     }
+}
+
+bool SemanticAnalyzer::AddVariable(VariableDefinition* varDef)
+{
+    bool ok = symbolTable.AddVariable(varDef->GetName(), varDef);
+    if (!ok)
+    {
+        cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
+    }
+
+    return ok;
 }
 
 bool SemanticAnalyzer::AddVariables(const VariableDefinitions& varDefs)
 {
     for (VariableDefinition* varDef : varDefs)
     {
-        bool ok = symbolTable.AddVariable(varDef->GetName(), varDef);
+        bool ok = AddVariable(varDef);
         if (!ok)
         {
-            cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
             return false;
         }
     }

@@ -267,7 +267,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         symbolTable.AddVariable(varName, varDef, alloca);
     }
 
-    // process return expression
+    // process function body expression
     Expression* expression = functionDefinition->GetExpression();
     expression->Accept(this);
 
