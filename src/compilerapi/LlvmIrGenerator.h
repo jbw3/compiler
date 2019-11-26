@@ -49,6 +49,8 @@ public:
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
 
+    void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
+
     bool Generate(SyntaxTree::SyntaxTreeNode* syntaxTree, llvm::Module*& module);
 
 private:

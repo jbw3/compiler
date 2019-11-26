@@ -42,7 +42,7 @@ private:
     bool IsValidName(const Token& name);
 
     ErrorLogger& logger;
-    SyntaxTree::VariableDefinitions variableDefinitions;
+    SyntaxTree::VariableDeclarations variableDeclarations;
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
@@ -59,7 +59,7 @@ private:
                                                                 const std::string& endToken);
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
-                           std::vector<SyntaxTree::VariableDefinition*>& parameters);
+                           SyntaxTree::VariableDeclarations& parameters);
 
     SyntaxTree::Assignment* ProcessAssignment(TokenIterator& iter, TokenIterator endIter);
 

@@ -181,8 +181,8 @@ void SemanticAnalyzer::Visit(Assignment* assignment)
 {
     // find variable
     const string& varName = assignment->GetVariableName();
-    VariableDefinition* varDef = symbolTable.GetVariable(varName);
-    if (varDef == nullptr)
+    VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
+    if (varDecl == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not defined\n";
         isError = true;
@@ -199,7 +199,7 @@ void SemanticAnalyzer::Visit(Assignment* assignment)
 
     // check expression against the variable type
     const TypeInfo* exprType = expression->GetType();
-    const TypeInfo* varType = varDef->GetType();
+    const TypeInfo* varType = varDecl->GetType();
     if (!exprType->IsSameAs(*varType))
     {
         if ( !(exprType->IsInt() && varType->IsInt() && exprType->IsSigned() == varType->IsSigned() && exprType->GetNumBits() <= varType->GetNumBits()) )
@@ -262,7 +262,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     // create new scope for parameters and add them
     Scope scope(symbolTable);
 
-    if (!AddVariables(funcDecl->GetParameters()) || !AddVariables(functionDefinition->GetVariableDefinitions()))
+    if (!AddVariables(funcDecl->GetParameters()) || !AddVariables(functionDefinition->GetVariableDeclarations()))
     {
         isError = true;
         return;
@@ -331,23 +331,12 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
-bool SemanticAnalyzer::AddVariable(VariableDefinition* varDef)
+bool SemanticAnalyzer::AddVariables(const VariableDeclarations& varDecls)
 {
-    bool ok = symbolTable.AddVariable(varDef->GetName(), varDef);
-    if (!ok)
+    for (VariableDeclaration* varDecl : varDecls)
     {
-        cerr << "Variable \"" << varDef->GetName() << "\" has already been defined\n";
-    }
-
-    return ok;
-}
-
-bool SemanticAnalyzer::AddVariables(const VariableDefinitions& varDefs)
-{
-    for (VariableDefinition* varDef : varDefs)
-    {
-        bool ok = AddVariable(varDef);
-        if (!ok)
+        Visit(varDecl);
+        if (isError)
         {
             return false;
         }
@@ -382,15 +371,15 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     const string& varName = variableExpression->GetName();
-    VariableDefinition* varDef = symbolTable.GetVariable(varName);
-    if (varDef == nullptr)
+    VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
+    if (varDecl == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not defined\n";
         isError = true;
     }
     else
     {
-        variableExpression->SetType(varDef->GetType());
+        variableExpression->SetType(varDecl->GetType());
     }
 }
 
@@ -438,7 +427,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 
     // check argument count
     const vector<Expression*>& args = functionExpression->GetArguments();
-    const vector<VariableDefinition*>& params = funcDecl->GetParameters();
+    const VariableDeclarations& params = funcDecl->GetParameters();
     if (args.size() != params.size())
     {
         cerr << "Function '" << funcName << "' expected " << params.size() << " arguments but got " << args.size() << "\n";
@@ -458,7 +447,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         }
 
         // check argument against the parameter type
-        const VariableDefinition* param = params[i];
+        const VariableDeclaration* param = params[i];
         const TypeInfo* argType = arg->GetType();
         const TypeInfo* paramType = param->GetType();
         if (!argType->IsSameAs(*paramType))
@@ -535,4 +524,16 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
     // set the branch expression's result type
     branchExpression->SetType(resultType);
+}
+
+void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
+{
+    bool ok = symbolTable.AddVariable(variableDeclaration->GetName(), variableDeclaration);
+    if (!ok)
+    {
+        isError = true;
+        cerr << "Variable \"" << variableDeclaration->GetName() << "\" has already been defined\n";
+    }
+
+    variableDeclaration->SetType(TypeInfo::UnitType);
 }

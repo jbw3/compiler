@@ -163,11 +163,10 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
     BracePrinter printer(*this, "{", "}");
 
     function<void (const FunctionDeclaration*)> printDecl = [this](const FunctionDeclaration* decl){ PrintFunctionDeclaration(decl); };
-    function<void (VariableDefinition*)> printVarDef = [this](VariableDefinition* def){ PrintVariableDefinition(def); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionDefinition");
     PrintProperty("declaration", functionDefinition->GetDeclaration(), printDecl);
-    PrintProperty("variableDefinitions", functionDefinition->GetVariableDefinitions(), printVarDef);
+    PrintProperty("variableDeclarations", functionDefinition->GetVariableDeclarations());
     PrintProperty("expression", functionDefinition->GetExpression());
 }
 
@@ -238,23 +237,21 @@ void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
     PrintProperty("elseExpression", branchExpression->GetElseExpression());
 }
 
+void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
+    PrintProperty("name", variableDeclaration->GetName());
+}
+
 void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* declaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (VariableDefinition*)> printVarDef = [this](VariableDefinition* def){ PrintVariableDefinition(def); };
-
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionDeclaration");
     PrintProperty("name", declaration->GetName());
-    PrintProperty("parameters", declaration->GetParameters(), printVarDef);
-}
-
-void SyntaxTreePrinter::PrintVariableDefinition(const VariableDefinition* variableDefinition)
-{
-    BracePrinter printer(*this, "{", "}");
-
-    PrintProperty(NODE_TYPE_PROPERTY, "VariableDefinition");
-    PrintProperty("name", variableDefinition->GetName());
+    PrintProperty("parameters", declaration->GetParameters());
 }
 
 void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)

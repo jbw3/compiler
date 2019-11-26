@@ -41,14 +41,14 @@ public:
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
 
+    void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
+
 private:
     bool isError;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
 
-    bool AddVariable(SyntaxTree::VariableDefinition* varDef);
-
-    bool AddVariables(const SyntaxTree::VariableDefinitions& varDefs);
+    bool AddVariables(const SyntaxTree::VariableDeclarations& varDecls);
 
     bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);
 

@@ -219,12 +219,14 @@ private:
     Expression* elseExpression;
 };
 
-class VariableDefinition
+class VariableDeclaration : public Expression
 {
 public:
-    VariableDefinition(const std::string& name, const TypeInfo* type);
+    VariableDeclaration(const std::string& name, const TypeInfo* type);
 
-    virtual ~VariableDefinition() = default;
+    virtual ~VariableDeclaration() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetName() const;
 
@@ -235,7 +237,7 @@ private:
     const TypeInfo* type;
 };
 
-typedef std::vector<VariableDefinition*> VariableDefinitions;
+typedef std::vector<VariableDeclaration*> VariableDeclarations;
 
 class Assignment : public Expression
 {
@@ -277,20 +279,20 @@ class FunctionDeclaration
 {
 public:
     FunctionDeclaration(const std::string& name,
-                        const VariableDefinitions& parameters,
+                        const VariableDeclarations& parameters,
                         const TypeInfo* returnType);
 
     virtual ~FunctionDeclaration();
 
     const std::string& GetName() const;
 
-    const VariableDefinitions& GetParameters() const;
+    const VariableDeclarations& GetParameters() const;
 
     const TypeInfo* GetReturnType() const;
 
 private:
     std::string name;
-    VariableDefinitions parameters;
+    VariableDeclarations parameters;
     const TypeInfo* returnType;
 };
 
@@ -313,7 +315,7 @@ class FunctionDefinition : public SyntaxTreeNode
 {
 public:
     FunctionDefinition(FunctionDeclaration* declaration,
-                       const VariableDefinitions& variableDefinitions,
+                       const VariableDeclarations& variableDeclarations,
                        Expression* expression);
 
     virtual ~FunctionDefinition();
@@ -322,13 +324,13 @@ public:
 
     const FunctionDeclaration* GetDeclaration() const;
 
-    const VariableDefinitions& GetVariableDefinitions() const;
+    const VariableDeclarations& GetVariableDeclarations() const;
 
     Expression* GetExpression() const;
 
 private:
     FunctionDeclaration* declaration;
-    VariableDefinitions variableDefinitions;
+    VariableDeclarations variableDeclarations;
     Expression* expression;
 };
 

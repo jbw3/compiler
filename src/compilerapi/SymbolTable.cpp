@@ -42,18 +42,18 @@ void SymbolTable::Pop()
     }
 }
 
-bool SymbolTable::AddVariable(const std::string& name, SyntaxTree::VariableDefinition* variable)
+bool SymbolTable::AddVariable(const std::string& name, SyntaxTree::VariableDeclaration* variable)
 {
     return AddVariable(name, variable, nullptr);
 }
 
-bool SymbolTable::AddVariable(const string& name, VariableDefinition* variable, AllocaInst* value)
+bool SymbolTable::AddVariable(const string& name, VariableDeclaration* variable, AllocaInst* value)
 {
     auto rv = scopes.back()->variables.insert({name, {variable, value}});
     return rv.second;
 }
 
-VariableDefinition* SymbolTable::GetVariable(const string& name) const
+VariableDeclaration* SymbolTable::GetVariable(const string& name) const
 {
     VariableData* varData = GetVariableData(name);
     if (varData == nullptr)

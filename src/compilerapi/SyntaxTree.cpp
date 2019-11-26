@@ -260,18 +260,23 @@ Expression* BranchExpression::GetElseExpression() const
     return elseExpression;
 }
 
-VariableDefinition::VariableDefinition(const string& name, const TypeInfo* type) :
+VariableDeclaration::VariableDeclaration(const string& name, const TypeInfo* type) :
     name(name),
     type(type)
 {
 }
 
-const string& VariableDefinition::GetName() const
+void VariableDeclaration::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const string& VariableDeclaration::GetName() const
 {
     return name;
 }
 
-const TypeInfo* VariableDefinition::GetType() const
+const TypeInfo* VariableDeclaration::GetType() const
 {
     return type;
 }
@@ -330,7 +335,7 @@ Expression* WhileLoop::GetExpression() const
 }
 
 FunctionDeclaration::FunctionDeclaration(const std::string& name,
-                                         const VariableDefinitions& parameters,
+                                         const VariableDeclarations& parameters,
                                          const TypeInfo* returnType) :
     name(name),
     parameters(parameters),
@@ -348,7 +353,7 @@ const string& FunctionDeclaration::GetName() const
     return name;
 }
 
-const vector<VariableDefinition*>& FunctionDeclaration::GetParameters() const
+const VariableDeclarations& FunctionDeclaration::GetParameters() const
 {
     return parameters;
 }
@@ -379,10 +384,10 @@ const FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
 }
 
 FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
-                                       const VariableDefinitions& variableDefinitions,
+                                       const VariableDeclarations& variableDeclarations,
                                        Expression* expression) :
     declaration(declaration),
-    variableDefinitions(variableDefinitions),
+    variableDeclarations(variableDeclarations),
     expression(expression)
 {
 }
@@ -390,7 +395,7 @@ FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
 FunctionDefinition::~FunctionDefinition()
 {
     delete declaration;
-    deletePointerContainer(variableDefinitions);
+    deletePointerContainer(variableDeclarations);
     delete expression;
 }
 
@@ -404,9 +409,9 @@ const FunctionDeclaration* FunctionDefinition::GetDeclaration() const
     return declaration;
 }
 
-const VariableDefinitions& FunctionDefinition::GetVariableDefinitions() const
+const VariableDeclarations& FunctionDefinition::GetVariableDeclarations() const
 {
-    return variableDefinitions;
+    return variableDeclarations;
 }
 
 Expression* FunctionDefinition::GetExpression() const

@@ -43,6 +43,8 @@ public:
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
 
+    void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
+
 private:
     class BracePrinter
     {
@@ -60,8 +62,6 @@ private:
     std::ostream* os;
     unsigned int level;
     bool firstItem;
-
-    void PrintVariableDefinition(const SyntaxTree::VariableDefinition* variableDefinition);
 
     void PrintFunctionDeclaration(const SyntaxTree::FunctionDeclaration* declaration);
 

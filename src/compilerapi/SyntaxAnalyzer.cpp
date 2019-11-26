@@ -186,7 +186,7 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
-    variableDefinitions.clear();
+    variableDeclarations.clear();
 
     unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, BLOCK_START));
     if (functionDeclaration == nullptr)
@@ -197,20 +197,20 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
     if (expression == nullptr)
     {
-        deletePointerContainer(variableDefinitions);
+        deletePointerContainer(variableDeclarations);
         return nullptr;
     }
 
     if (!EndIteratorCheck(iter, endIter))
     {
-        deletePointerContainer(variableDefinitions);
+        deletePointerContainer(variableDeclarations);
         return nullptr;
     }
 
     if (iter->GetValue() != "}")
     {
         logger.LogError(*iter, "Expected '}'");
-        deletePointerContainer(variableDefinitions);
+        deletePointerContainer(variableDeclarations);
         return nullptr;
     }
 
@@ -218,7 +218,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     ++iter;
 
     FunctionDefinition* functionDefinition = new FunctionDefinition(
-        functionDeclaration.release(), variableDefinitions, expression.release()
+        functionDeclaration.release(), variableDeclarations, expression.release()
     );
     return functionDefinition;
 }
@@ -263,7 +263,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     ++iter;
-    vector<VariableDefinition*> parameters;
+    VariableDeclarations parameters;
     bool ok = ProcessParameters(iter, endIter, parameters);
     if (!ok)
     {
@@ -314,7 +314,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
 }
 
 bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIter,
-                                       vector<VariableDefinition*>& parameters)
+                                       VariableDeclarations& parameters)
 {
     EParameterState state = eName;
     parameters.clear();
@@ -346,7 +346,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
                 return false;
             }
 
-            VariableDefinition* param = new VariableDefinition(paramName, paramType);
+            VariableDeclaration* param = new VariableDeclaration(paramName, paramType);
             parameters.push_back(param);
 
             state = eDelimiter;
@@ -456,8 +456,8 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
 
     if (isVarDef)
     {
-        VariableDefinition* varDef = new VariableDefinition(varName, varType);
-        variableDefinitions.push_back(varDef);
+        VariableDeclaration* varDef = new VariableDeclaration(varName, varType);
+        variableDeclarations.push_back(varDef);
     }
 
     Assignment* assignment = new Assignment(varName, expression);

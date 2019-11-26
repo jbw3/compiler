@@ -249,7 +249,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     size_t idx = 0;
     for (Argument& arg : func->args())
     {
-        VariableDefinition* param = declaration->GetParameters()[idx];
+        VariableDeclaration* param = declaration->GetParameters()[idx];
         const string& paramName = param->GetName();
         arg.setName(paramName);
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
@@ -259,7 +259,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
-    for (VariableDefinition* varDef : functionDefinition->GetVariableDefinitions())
+    for (VariableDeclaration* varDef : functionDefinition->GetVariableDeclarations())
     {
         const string& varName = varDef->GetName();
         Type* type = GetType(varDef->GetType());
@@ -463,6 +463,12 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     );
 }
 
+void LlvmIrGenerator::Visit(VariableDeclaration* /*variableDeclaration*/)
+{
+    // Nothing to do here. Variable declarations are handled when processing
+    // function definitions
+}
+
 bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 {
     module = new Module("module", context);
@@ -521,7 +527,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const SyntaxTree::FunctionDeclar
     // get the parameter types
     vector<Type*> parameters;
     parameters.reserve(funcDecl->GetParameters().size());
-    for (const VariableDefinition* varDef : funcDecl->GetParameters())
+    for (const VariableDeclaration* varDef : funcDecl->GetParameters())
     {
         Type* varType = GetType(varDef->GetType());
         parameters.push_back(varType);

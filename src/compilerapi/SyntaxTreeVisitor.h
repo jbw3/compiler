@@ -15,6 +15,7 @@ class ModuleDefinition;
 class NumericExpression;
 class UnaryExpression;
 class UnitTypeLiteralExpression;
+class VariableDeclaration;
 class VariableExpression;
 class WhileLoop;
 } // namespace SyntaxTree
@@ -49,6 +50,8 @@ public:
     virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
 
     virtual void Visit(SyntaxTree::BranchExpression* branchExpression) = 0;
+
+    virtual void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) = 0;
 };
 
 #endif // SYNTAX_TREE_VISITOR_H_
