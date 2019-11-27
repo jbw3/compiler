@@ -395,7 +395,6 @@ FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
 FunctionDefinition::~FunctionDefinition()
 {
     delete declaration;
-    deletePointerContainer(variableDeclarations);
     delete expression;
 }
 

@@ -464,6 +464,71 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
     return assignment;
 }
 
+void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, VariableDeclaration*& varDecl, Expression*& assignment)
+{
+    varDecl = nullptr;
+    assignment = nullptr;
+
+    if (iter->GetValue() != VARIABLE_KEYWORD)
+    {
+        logger.LogError("Expected '{}'", VARIABLE_KEYWORD);
+        return;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected a variable name"))
+    {
+        return;
+    }
+
+    if (!IsValidName(*iter))
+    {
+        logger.LogError(*iter, "Invalid variable name");
+        return;
+    }
+
+    string varName = iter->GetValue();
+
+    if (!IncrementIterator(iter, endIter, "Expected variable type"))
+    {
+        return;
+    }
+
+    string varTypeName = iter->GetValue();
+    const TypeInfo* varType = TypeInfo::GetType(varTypeName);
+    if (varType == nullptr)
+    {
+        logger.LogError(*iter, "'{}' is not a known type", varTypeName);
+        return;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected operator"))
+    {
+        return;
+    }
+
+    if (iter->GetValue() != ASSIGNMENT_OPERATOR)
+    {
+        logger.LogError(*iter, "Expected an assignment operator");
+        return;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected expression"))
+    {
+        return;
+    }
+
+    Expression* expression = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
+    if (expression == nullptr)
+    {
+        return;
+    }
+
+    varDecl = new VariableDeclaration(varName, varType);
+    variableDeclarations.push_back(varDecl);
+
+    assignment = new Assignment(varName, expression);
+}
+
 WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter)
 {
     // increment iter past "while" keyword
@@ -623,7 +688,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
                     isPotentialEnd = true;
                 }
-                else if ( (iter->GetValue() == VARIABLE_KEYWORD) || (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR) )
+                else if (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR)
                 {
                     Expression* expr = ProcessAssignment(iter, endIter);
                     if (expr == nullptr)
@@ -826,8 +891,23 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
 
     while (iter != endIter && iter->GetValue() != BLOCK_END)
     {
-        // process the sub-expression
-        Expression* expr = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
+        Expression* expr = nullptr;
+
+        if (iter->GetValue() == VARIABLE_KEYWORD)
+        {
+            VariableDeclaration* varDecl = nullptr;
+            ProcessVariableDeclaration(iter, endIter, varDecl, expr);
+
+            if (varDecl != nullptr)
+            {
+                expressions.push_back(varDecl);
+            }
+        }
+        else
+        {
+            // process the sub-expression
+            expr = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
+        }
 
         // if there was an error, return null
         if (expr == nullptr)

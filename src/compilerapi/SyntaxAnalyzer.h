@@ -63,6 +63,8 @@ private:
 
     SyntaxTree::Assignment* ProcessAssignment(TokenIterator& iter, TokenIterator endIter);
 
+    void ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, SyntaxTree::VariableDeclaration*& varDecl, SyntaxTree::Expression*& assignment);
+
     SyntaxTree::WhileLoop* ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter);
 
     TokenIterator FindStatementEnd(TokenIterator iter, TokenIterator endIter);

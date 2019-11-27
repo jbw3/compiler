@@ -262,7 +262,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     // create new scope for parameters and add them
     Scope scope(symbolTable);
 
-    if (!AddVariables(funcDecl->GetParameters()) || !AddVariables(functionDefinition->GetVariableDeclarations()))
+    if (!AddVariables(funcDecl->GetParameters()))
     {
         isError = true;
         return;
@@ -533,6 +533,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     {
         isError = true;
         cerr << "Variable \"" << variableDeclaration->GetName() << "\" has already been defined\n";
+        return;
     }
 
     variableDeclaration->SetType(TypeInfo::UnitType);
