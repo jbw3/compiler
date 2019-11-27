@@ -85,8 +85,11 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "public",
     "return",
     "struct",
+    "trusted",
     "type",
     "typedef",
+    "using",
+    "where",
     "yield",
 };
 
