@@ -15,6 +15,7 @@ using namespace SyntaxTree;
 
 LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     targetMachine(config.targetMachine),
+    inFilename(config.inFilename),
     builder(context),
     module(nullptr),
     currentFunction(nullptr),
@@ -469,7 +470,7 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 
 bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 {
-    module = new Module("module", context);
+    module = new Module(inFilename, context);
     module->setDataLayout(targetMachine->createDataLayout());
     module->setTargetTriple(targetMachine->getTargetTriple().str());
 

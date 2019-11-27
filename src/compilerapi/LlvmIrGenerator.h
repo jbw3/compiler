@@ -55,6 +55,7 @@ public:
 
 private:
     llvm::TargetMachine* targetMachine;
+    std::string inFilename;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::Module* module;
