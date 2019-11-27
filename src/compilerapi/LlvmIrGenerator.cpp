@@ -244,7 +244,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
     builder.SetInsertPoint(basicBlock);
 
-    symbolTable.Push();
+    Scope scope(symbolTable);
 
     size_t idx = 0;
     for (Argument& arg : func->args())
@@ -270,8 +270,6 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     // process function body expression
     Expression* expression = functionDefinition->GetExpression();
     expression->Accept(this);
-
-    symbolTable.Pop();
 
     if (resultValue == nullptr)
     {
