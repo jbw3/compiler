@@ -374,7 +374,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
     if (varDecl == nullptr)
     {
-        cerr << "Variable \"" << varName << "\" is not defined\n";
+        cerr << "Variable \"" << varName << "\" is not defined in the current scope\n";
         isError = true;
     }
     else
@@ -385,6 +385,9 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 
 void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
 {
+    // create new scope for block
+    Scope scope(symbolTable);
+
     const Expressions& expressions = blockExpression->GetExpressions();
     size_t size = expressions.size();
 
