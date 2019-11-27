@@ -184,7 +184,7 @@ void SemanticAnalyzer::Visit(Assignment* assignment)
     VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
     if (varDecl == nullptr)
     {
-        cerr << "Variable \"" << varName << "\" is not defined\n";
+        cerr << "Variable \"" << varName << "\" is not declared in the current scope\n";
         isError = true;
         return;
     }
@@ -374,7 +374,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
     if (varDecl == nullptr)
     {
-        cerr << "Variable \"" << varName << "\" is not defined in the current scope\n";
+        cerr << "Variable \"" << varName << "\" is not declared in the current scope\n";
         isError = true;
     }
     else
@@ -535,7 +535,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     if (!ok)
     {
         isError = true;
-        cerr << "Variable \"" << variableDeclaration->GetName() << "\" has already been defined\n";
+        cerr << "Variable \"" << variableDeclaration->GetName() << "\" has already been declared\n";
         return;
     }
 

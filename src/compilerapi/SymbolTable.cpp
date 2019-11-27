@@ -49,8 +49,18 @@ bool SymbolTable::AddVariable(const std::string& name, SyntaxTree::VariableDecla
 
 bool SymbolTable::AddVariable(const string& name, VariableDeclaration* variable, AllocaInst* value)
 {
-    auto rv = scopes.back()->variables.insert({name, {variable, value}});
-    return rv.second;
+    VariableData* varData = GetVariableData(name);
+
+    // only insert if there is not already a variable with this name
+    if (varData == nullptr)
+    {
+        scopes.back()->variables.insert({name, {variable, value}});
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 VariableDeclaration* SymbolTable::GetVariable(const string& name) const
