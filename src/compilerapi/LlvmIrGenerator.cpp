@@ -382,6 +382,9 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 
 void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
 {
+    // create new scope for block
+    Scope scope(symbolTable);
+
     const Expressions& expressions = blockExpression->GetExpressions();
     size_t size = expressions.size();
 
