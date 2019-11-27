@@ -441,3 +441,20 @@ fun externTest() u64
 }
 
 extern fun extern2(p1 i32, p2 bool) u64;
+
+fun scopes(x i32) i32
+{
+    var rv i32 = 0;
+    if x < 0
+    {
+        var y i32 = 5;
+        rv = y;
+    }
+    else
+    {
+        var y i16 = 12;
+        rv = y;
+    }
+
+    rv
+}

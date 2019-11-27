@@ -1248,3 +1248,34 @@ entry:
   %call1 = call i64 @extern2(i32 5, i1 true)
   ret i64 %call1
 }
+
+define i32 @scopes(i32 %x) {
+entry:
+  %y4 = alloca i16
+  %y = alloca i32
+  %rv = alloca i32
+  %x1 = alloca i32
+  store i32 %x, i32* %x1
+  store i32 0, i32* %rv
+  %x2 = load i32, i32* %x1
+  %cmplt = icmp slt i32 %x2, 0
+  br i1 %cmplt, label %if, label %else
+
+if:                                               ; preds = %entry
+  store i32 5, i32* %y
+  %y3 = load i32, i32* %y
+  store i32 %y3, i32* %rv
+  br label %merge
+
+else:                                             ; preds = %entry
+  store i16 12, i16* %y4
+  %y5 = load i16, i16* %y4
+  %signext = sext i16 %y5 to i32
+  store i32 %signext, i32* %rv
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi %UnitType [ zeroinitializer, %if ], [ zeroinitializer, %else ]
+  %rv6 = load i32, i32* %rv
+  ret i32 %rv6
+}
