@@ -59,6 +59,7 @@ private:
     llvm::IRBuilder<> builder;
     llvm::Module* module;
     SymbolTable symbolTable;
+    llvm::Function* currentFunction;
     llvm::Value* resultValue;
     llvm::StructType* unitType;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;

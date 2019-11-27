@@ -17,6 +17,7 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     targetMachine(config.targetMachine),
     builder(context),
     module(nullptr),
+    currentFunction(nullptr),
     resultValue(nullptr)
 {
     llvm::ArrayRef<Type*> emptyArray;
@@ -259,17 +260,11 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
-    for (VariableDeclaration* varDef : functionDefinition->GetVariableDeclarations())
-    {
-        const string& varName = varDef->GetName();
-        Type* type = GetType(varDef->GetType());
-        AllocaInst* alloca = CreateVariableAlloc(func, type, varName);
-        symbolTable.AddVariable(varName, varDef, alloca);
-    }
-
     // process function body expression
+    currentFunction = func;
     Expression* expression = functionDefinition->GetExpression();
     expression->Accept(this);
+    currentFunction = nullptr;
 
     if (resultValue == nullptr)
     {
@@ -461,10 +456,12 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     );
 }
 
-void LlvmIrGenerator::Visit(VariableDeclaration* /*variableDeclaration*/)
+void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
-    // Nothing to do here. Variable declarations are handled when processing
-    // function definitions
+    const string& varName = variableDeclaration->GetName();
+    Type* type = GetType(variableDeclaration->GetType());
+    AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
+    symbolTable.AddVariable(varName, variableDeclaration, alloca);
 }
 
 bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)

@@ -1095,9 +1095,9 @@ merge:                                            ; preds = %else, %if
 
 define i64 @createVars(i32 %num) {
 entry:
-  %rv = alloca i64
   %temp2 = alloca i64
   %temp1 = alloca i32
+  %rv = alloca i64
   %num1 = alloca i32
   store i32 %num, i32* %num1
   %num2 = load i32, i32* %num1
