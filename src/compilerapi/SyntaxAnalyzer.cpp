@@ -186,8 +186,6 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
-    variableDeclarations.clear();
-
     unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, BLOCK_START));
     if (functionDeclaration == nullptr)
     {
@@ -197,20 +195,17 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
     if (expression == nullptr)
     {
-        deletePointerContainer(variableDeclarations);
         return nullptr;
     }
 
     if (!EndIteratorCheck(iter, endIter))
     {
-        deletePointerContainer(variableDeclarations);
         return nullptr;
     }
 
     if (iter->GetValue() != "}")
     {
         logger.LogError(*iter, "Expected '}'");
-        deletePointerContainer(variableDeclarations);
         return nullptr;
     }
 
@@ -218,7 +213,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
     ++iter;
 
     FunctionDefinition* functionDefinition = new FunctionDefinition(
-        functionDeclaration.release(), variableDeclarations, expression.release()
+        functionDeclaration.release(), expression.release()
     );
     return functionDefinition;
 }
@@ -454,12 +449,6 @@ Assignment* SyntaxAnalyzer::ProcessAssignment(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    if (isVarDef)
-    {
-        VariableDeclaration* varDef = new VariableDeclaration(varName, varType);
-        variableDeclarations.push_back(varDef);
-    }
-
     Assignment* assignment = new Assignment(varName, expression);
     return assignment;
 }
@@ -524,8 +513,6 @@ void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterat
     }
 
     varDecl = new VariableDeclaration(varName, varType);
-    variableDeclarations.push_back(varDecl);
-
     assignment = new Assignment(varName, expression);
 }
 

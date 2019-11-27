@@ -166,7 +166,6 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionDefinition");
     PrintProperty("declaration", functionDefinition->GetDeclaration(), printDecl);
-    PrintProperty("variableDeclarations", functionDefinition->GetVariableDeclarations());
     PrintProperty("expression", functionDefinition->GetExpression());
 }
 

@@ -384,10 +384,8 @@ const FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
 }
 
 FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
-                                       const VariableDeclarations& variableDeclarations,
                                        Expression* expression) :
     declaration(declaration),
-    variableDeclarations(variableDeclarations),
     expression(expression)
 {
 }
@@ -406,11 +404,6 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
 const FunctionDeclaration* FunctionDefinition::GetDeclaration() const
 {
     return declaration;
-}
-
-const VariableDeclarations& FunctionDefinition::GetVariableDeclarations() const
-{
-    return variableDeclarations;
 }
 
 Expression* FunctionDefinition::GetExpression() const

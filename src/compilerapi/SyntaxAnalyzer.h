@@ -42,7 +42,6 @@ private:
     bool IsValidName(const Token& name);
 
     ErrorLogger& logger;
-    SyntaxTree::VariableDeclarations variableDeclarations;
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 

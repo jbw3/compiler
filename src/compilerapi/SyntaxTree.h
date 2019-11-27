@@ -315,7 +315,6 @@ class FunctionDefinition : public SyntaxTreeNode
 {
 public:
     FunctionDefinition(FunctionDeclaration* declaration,
-                       const VariableDeclarations& variableDeclarations,
                        Expression* expression);
 
     virtual ~FunctionDefinition();
@@ -324,13 +323,10 @@ public:
 
     const FunctionDeclaration* GetDeclaration() const;
 
-    const VariableDeclarations& GetVariableDeclarations() const;
-
     Expression* GetExpression() const;
 
 private:
     FunctionDeclaration* declaration;
-    VariableDeclarations variableDeclarations;
     Expression* expression;
 };
 
