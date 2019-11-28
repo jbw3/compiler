@@ -32,6 +32,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     }
 
     unaryExpression->SetType(subExpr->GetType());
+    unaryExpression->SetIsAssignable(false);
 }
 
 bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, const TypeInfo* subExprType)
@@ -81,6 +82,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
     const TypeInfo* resultType = GetBinaryOperatorResultType(binaryExpression->GetOperator(), left->GetType(), right->GetType());
     binaryExpression->SetType(resultType);
+    binaryExpression->SetIsAssignable(false);
 }
 
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType)
@@ -212,6 +214,7 @@ void SemanticAnalyzer::Visit(Assignment* assignment)
 
     // assignment expressions always evaluate to the unit type
     assignment->SetType(TypeInfo::UnitType);
+    assignment->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
@@ -248,6 +251,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 
     // while loop expressions always evaluate to the unit type
     whileLoop->SetType(TypeInfo::UnitType);
+    whileLoop->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
@@ -348,6 +352,7 @@ bool SemanticAnalyzer::AddVariables(const VariableDeclarations& varDecls)
 void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
 {
     unitTypeLiteralExpression->SetType(TypeInfo::UnitType);
+    unitTypeLiteralExpression->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
@@ -361,11 +366,13 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     }
 
     numericExpression->SetType(minSizeType);
+    numericExpression->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     boolLiteralExpression->SetType(TypeInfo::BoolType);
+    boolLiteralExpression->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
@@ -380,6 +387,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     else
     {
         variableExpression->SetType(varDecl->GetType());
+        variableExpression->SetIsAssignable(true);
     }
 }
 
@@ -411,6 +419,7 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
         {
             // the block expression's type is the type of its last expression
             blockExpression->SetType(expressions[size - 1]->GetType());
+            blockExpression->SetIsAssignable(false);
         }
     }
 }
@@ -466,6 +475,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 
     // set expression's type to the function's return type
     functionExpression->SetType(funcDecl->GetReturnType());
+    functionExpression->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
@@ -527,6 +537,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
     // set the branch expression's result type
     branchExpression->SetType(resultType);
+    branchExpression->SetIsAssignable(false);
 }
 
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
@@ -540,4 +551,5 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     variableDeclaration->SetType(TypeInfo::UnitType);
+    variableDeclaration->SetIsAssignable(false);
 }

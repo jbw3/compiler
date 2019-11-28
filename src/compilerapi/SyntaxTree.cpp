@@ -8,7 +8,8 @@ using namespace std;
 namespace SyntaxTree
 {
 Expression::Expression() :
-    type(nullptr)
+    type(nullptr),
+    isAssignable(false)
 {
 }
 
@@ -20,6 +21,16 @@ const TypeInfo* Expression::GetType() const
 void Expression::SetType(const TypeInfo* newType)
 {
     type = newType;
+}
+
+bool Expression::GetIsAssignable() const
+{
+    return isAssignable;
+}
+
+void Expression::SetIsAssignable(bool newIsAssignable)
+{
+    isAssignable = newIsAssignable;
 }
 
 UnitTypeLiteralExpression::UnitTypeLiteralExpression()

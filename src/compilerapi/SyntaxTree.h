@@ -29,8 +29,13 @@ public:
 
     void SetType(const TypeInfo* newType);
 
+    bool GetIsAssignable() const;
+
+    void SetIsAssignable(bool newIsAssignable);
+
 private:
     const TypeInfo* type;
+    bool isAssignable;
 };
 
 typedef std::vector<Expression*> Expressions;
