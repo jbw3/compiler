@@ -122,6 +122,9 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eLogicalOr:
             op = "||";
             break;
+        case BinaryExpression::eAssign:
+            op = "=";
+            break;
     }
 
     PrintProperty(NODE_TYPE_PROPERTY, "BinaryExpression");

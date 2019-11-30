@@ -88,14 +88,17 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType)
 {
     bool ok = false;
+    bool bothAreInts = leftType->IsInt() & rightType->IsInt();
 
-    if ( !(leftType->IsSameAs(*rightType)) && !(leftType->IsInt() && rightType->IsInt()) )
+    if ( !(leftType->IsSameAs(*rightType)) && !bothAreInts )
     {
         cerr << "Left and right operands do not have the same type\n";
         ok = false;
     }
     else
     {
+        bool haveSameSign = leftType->IsSigned() == rightType->IsSigned();
+
         switch (op)
         {
             case BinaryExpression::eEqual:
@@ -103,7 +106,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseXor:
             case BinaryExpression::eBitwiseOr:
-                ok = (leftType->IsSameAs(*UnitTypeInfo::BoolType)) || (leftType->IsInt() && rightType->IsInt() && leftType->IsSigned() == rightType->IsSigned());
+                ok = (leftType->IsSameAs(*UnitTypeInfo::BoolType)) || (bothAreInts && haveSameSign);
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
@@ -118,13 +121,16 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eRemainder:
-                ok = leftType->IsInt() && rightType->IsInt() && leftType->IsSigned() == rightType->IsSigned();
+                ok = bothAreInts && haveSameSign;
                 break;
             case BinaryExpression::eShiftLeft:
             case BinaryExpression::eShiftRightArithmetic:
                 // the return type should be the left type, so the right type has to be the
                 // same size or smaller
-                ok = leftType->IsInt() && rightType->IsInt() && leftType->GetNumBits() >= rightType->GetNumBits();
+                ok = bothAreInts && leftType->GetNumBits() >= rightType->GetNumBits();
+                break;
+            case BinaryExpression::eAssign:
+                ok = leftType->IsSameAs(*rightType) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
                 break;
         }
 
@@ -176,6 +182,8 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eShiftLeft:
         case BinaryExpression::eShiftRightArithmetic:
             return leftType;
+        case BinaryExpression::eAssign:
+            return TypeInfo::UnitType;
     }
 }
 

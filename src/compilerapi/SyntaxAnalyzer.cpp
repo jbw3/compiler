@@ -40,6 +40,7 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"|", BinaryExpression::eBitwiseOr},
     {"&&", BinaryExpression::eLogicalAnd},
     {"||", BinaryExpression::eLogicalOr},
+    {ASSIGNMENT_OPERATOR, BinaryExpression::eAssign},
 };
 
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
@@ -513,7 +514,7 @@ void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterat
     }
 
     varDecl = new VariableDeclaration(varName, varType);
-    assignment = new Assignment(varName, expression);
+    assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName), expression);
 }
 
 WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter)
@@ -675,20 +676,6 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
                     isPotentialEnd = true;
                 }
-                else if (nextIter != endIter && nextIter->GetValue() == ASSIGNMENT_OPERATOR)
-                {
-                    Expression* expr = ProcessAssignment(iter, endIter);
-                    if (expr == nullptr)
-                    {
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-
-                    isEnd = true;
-                }
                 else if (iter->GetValue() == WHILE_KEYWORD)
                 {
                     Expression* expr = ProcessWhileLoop(iter, endIter);
@@ -808,6 +795,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eLogicalAnd, BinaryExpression::eLogicalOr});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAssign});
 
     return terms.front();
 }

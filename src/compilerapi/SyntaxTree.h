@@ -124,6 +124,7 @@ public:
         eBitwiseOr,
         eLogicalAnd,
         eLogicalOr,
+        eAssign,
     };
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);
