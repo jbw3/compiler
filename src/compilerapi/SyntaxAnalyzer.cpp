@@ -41,6 +41,7 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"&&", BinaryExpression::eLogicalAnd},
     {"||", BinaryExpression::eLogicalOr},
     {ASSIGNMENT_OPERATOR, BinaryExpression::eAssign},
+    {"+=", BinaryExpression::eAddAssign},
 };
 
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
@@ -726,7 +727,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eLogicalAnd, BinaryExpression::eLogicalOr});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAssign});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAssign, BinaryExpression::eAddAssign});
 
     return terms.front();
 }

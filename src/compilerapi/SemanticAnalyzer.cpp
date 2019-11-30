@@ -144,6 +144,9 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eAssign:
                 ok = leftType->IsSameAs(*rightType) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
                 break;
+            case BinaryExpression::eAddAssign:
+                ok = bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits();
+                break;
         }
 
         if (!ok)
@@ -195,6 +198,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eShiftRightArithmetic:
             return leftType;
         case BinaryExpression::eAssign:
+        case BinaryExpression::eAddAssign:
             return TypeInfo::UnitType;
     }
 }

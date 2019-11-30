@@ -136,9 +136,12 @@ public:
         eLogicalAnd,
         eLogicalOr,
         eAssign,
+        eAddAssign,
     };
 
     static bool IsAssignment(EOperator op);
+
+    static bool IsComputationAssignment(EOperator op);
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);
 

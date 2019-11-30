@@ -81,9 +81,18 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         const TypeInfo* leftType = leftExpr->GetType();
         const TypeInfo* rightType = rightExpr->GetType();
 
+        Value* storeValue = nullptr;
         if (isAssignment)
         {
             ExtendType(rightType, leftType, rightValue);
+
+            storeValue = leftValue;
+
+            // if we are also doing a computation (e.g. +=), we need to load the left value
+            if (BinaryExpression::IsComputationAssignment(op))
+            {
+                leftValue = builder.CreateLoad(leftValue, "load");
+            }
         }
         else
         {
@@ -113,6 +122,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 resultValue = isSigned ? builder.CreateICmpSGE(leftValue, rightValue, "cmpge") : builder.CreateICmpUGE(leftValue, rightValue, "cmpge");
                 break;
             case BinaryExpression::eAdd:
+            case BinaryExpression::eAddAssign:
                 resultValue = builder.CreateAdd(leftValue, rightValue, "add");
                 break;
             case BinaryExpression::eSubtract:
@@ -154,7 +164,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
         if (isAssignment)
         {
-            builder.CreateStore(resultValue, leftValue);
+            builder.CreateStore(resultValue, storeValue);
 
             // assignment expressions always evaluate to the unit type
             resultValue = ConstantStruct::get(unitType);
