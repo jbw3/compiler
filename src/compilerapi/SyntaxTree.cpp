@@ -9,7 +9,8 @@ namespace SyntaxTree
 {
 Expression::Expression() :
     type(nullptr),
-    isAssignable(false)
+    isAssignable(false),
+    accessType(eLoad)
 {
 }
 
@@ -31,6 +32,16 @@ bool Expression::GetIsAssignable() const
 void Expression::SetIsAssignable(bool newIsAssignable)
 {
     isAssignable = newIsAssignable;
+}
+
+Expression::EAccessType Expression::GetAccessType() const
+{
+    return accessType;
+}
+
+void Expression::SetAccessType(EAccessType newAccessType)
+{
+    accessType = newAccessType;
 }
 
 UnitTypeLiteralExpression::UnitTypeLiteralExpression()
@@ -131,6 +142,34 @@ void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
 const Expressions& BlockExpression::GetExpressions() const
 {
     return expressions;
+}
+
+bool BinaryExpression::IsAssignment(EOperator op)
+{
+    switch (op)
+    {
+        case BinaryExpression::eEqual:
+        case BinaryExpression::eNotEqual:
+        case BinaryExpression::eLessThan:
+        case BinaryExpression::eLessThanOrEqual:
+        case BinaryExpression::eGreaterThan:
+        case BinaryExpression::eGreaterThanOrEqual:
+        case BinaryExpression::eAdd:
+        case BinaryExpression::eSubtract:
+        case BinaryExpression::eMultiply:
+        case BinaryExpression::eDivide:
+        case BinaryExpression::eRemainder:
+        case BinaryExpression::eShiftLeft:
+        case BinaryExpression::eShiftRightArithmetic:
+        case BinaryExpression::eBitwiseAnd:
+        case BinaryExpression::eBitwiseXor:
+        case BinaryExpression::eBitwiseOr:
+        case BinaryExpression::eLogicalAnd:
+        case BinaryExpression::eLogicalOr:
+            return false;
+        case BinaryExpression::eAssign:
+            return true;
+    }
 }
 
 BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right) :

@@ -75,10 +75,21 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         }
         Value* rightValue = resultValue;
 
+        bool isAssignment = BinaryExpression::IsAssignment(op);
+
         // check if values need to be sign extended
         const TypeInfo* leftType = leftExpr->GetType();
         const TypeInfo* rightType = rightExpr->GetType();
-        ExtendType(leftType, rightType, leftValue, rightValue);
+
+        if (isAssignment)
+        {
+            ExtendType(rightType, leftType, rightValue);
+        }
+        else
+        {
+            ExtendType(leftType, rightType, leftValue, rightValue);
+        }
+
         bool isSigned = leftType->IsSigned();
 
         switch (op)
@@ -136,6 +147,17 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 cerr << "Internal error: logical AND and logical OR operators should have been handled before here\n";
                 resultValue = nullptr;
                 break;
+            case BinaryExpression::eAssign:
+                resultValue = rightValue;
+                break;
+        }
+
+        if (isAssignment)
+        {
+            builder.CreateStore(resultValue, leftValue);
+
+            // assignment expressions always evaluate to the unit type
+            resultValue = ConstantStruct::get(unitType);
         }
     }
 }
@@ -378,7 +400,16 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
         return;
     }
 
-    resultValue = builder.CreateLoad(alloca, name);
+    Expression::EAccessType accessType = variableExpression->GetAccessType();
+    switch (accessType)
+    {
+        case Expression::eLoad:
+            resultValue = builder.CreateLoad(alloca, name);
+            break;
+        case Expression::eStore:
+            resultValue = alloca;
+            break;
+    }
 }
 
 void LlvmIrGenerator::Visit(BlockExpression* blockExpression)

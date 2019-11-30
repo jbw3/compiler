@@ -21,6 +21,12 @@ public:
 class Expression : public SyntaxTreeNode
 {
 public:
+    enum EAccessType
+    {
+        eLoad,
+        eStore,
+    };
+
     Expression();
 
     virtual ~Expression() = default;
@@ -33,9 +39,14 @@ public:
 
     void SetIsAssignable(bool newIsAssignable);
 
+    EAccessType GetAccessType() const;
+
+    void SetAccessType(EAccessType newAccessType);
+
 private:
     const TypeInfo* type;
     bool isAssignable;
+    EAccessType accessType;
 };
 
 typedef std::vector<Expression*> Expressions;
@@ -126,6 +137,8 @@ public:
         eLogicalOr,
         eAssign,
     };
+
+    static bool IsAssignment(EOperator op);
 
     BinaryExpression(EOperator op, Expression* left, Expression* right);
 
