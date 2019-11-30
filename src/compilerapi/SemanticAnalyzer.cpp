@@ -74,15 +74,52 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         return;
     }
 
-    if (!CheckBinaryOperatorTypes(binaryExpression->GetOperator(), left->GetType(), right->GetType()))
+    BinaryExpression::EOperator op = binaryExpression->GetOperator();
+
+    if (IsAssignment(op) && !left->GetIsAssignable())
+    {
+        cerr << "Cannot assign to expression\n";
+        isError = true;
+        return;
+    }
+
+    if (!CheckBinaryOperatorTypes(op, left->GetType(), right->GetType()))
     {
         isError = true;
         return;
     }
 
-    const TypeInfo* resultType = GetBinaryOperatorResultType(binaryExpression->GetOperator(), left->GetType(), right->GetType());
+    const TypeInfo* resultType = GetBinaryOperatorResultType(op, left->GetType(), right->GetType());
     binaryExpression->SetType(resultType);
     binaryExpression->SetIsAssignable(false);
+}
+
+bool SemanticAnalyzer::IsAssignment(BinaryExpression::EOperator op)
+{
+    switch (op)
+    {
+        case BinaryExpression::eEqual:
+        case BinaryExpression::eNotEqual:
+        case BinaryExpression::eLessThan:
+        case BinaryExpression::eLessThanOrEqual:
+        case BinaryExpression::eGreaterThan:
+        case BinaryExpression::eGreaterThanOrEqual:
+        case BinaryExpression::eAdd:
+        case BinaryExpression::eSubtract:
+        case BinaryExpression::eMultiply:
+        case BinaryExpression::eDivide:
+        case BinaryExpression::eRemainder:
+        case BinaryExpression::eShiftLeft:
+        case BinaryExpression::eShiftRightArithmetic:
+        case BinaryExpression::eBitwiseAnd:
+        case BinaryExpression::eBitwiseXor:
+        case BinaryExpression::eBitwiseOr:
+        case BinaryExpression::eLogicalAnd:
+        case BinaryExpression::eLogicalOr:
+            return false;
+        case BinaryExpression::eAssign:
+            return true;
+    }
 }
 
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType)
