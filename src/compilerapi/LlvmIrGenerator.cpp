@@ -466,6 +466,9 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     Type* type = GetType(variableDeclaration->GetType());
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, variableDeclaration, alloca);
+
+    // variable declaration expressions always evaluate to the unit type
+    resultValue = ConstantStruct::get(unitType);
 }
 
 bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
