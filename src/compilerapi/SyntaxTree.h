@@ -258,24 +258,6 @@ private:
 
 typedef std::vector<VariableDeclaration*> VariableDeclarations;
 
-class Assignment : public Expression
-{
-public:
-    Assignment(const std::string& variableName, Expression* expression);
-
-    virtual ~Assignment();
-
-    void Accept(SyntaxTreeVisitor* visitor) override;
-
-    const std::string& GetVariableName() const;
-
-    Expression* GetExpression() const;
-
-private:
-    std::string variableName;
-    Expression* expression;
-};
-
 class WhileLoop : public Expression
 {
 public:

@@ -60,8 +60,6 @@ private:
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            SyntaxTree::VariableDeclarations& parameters);
 
-    SyntaxTree::Assignment* ProcessAssignment(TokenIterator& iter, TokenIterator endIter);
-
     void ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, SyntaxTree::VariableDeclaration*& varDecl, SyntaxTree::Expression*& assignment);
 
     SyntaxTree::WhileLoop* ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter);

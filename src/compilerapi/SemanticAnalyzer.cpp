@@ -199,43 +199,6 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
     }
 }
 
-void SemanticAnalyzer::Visit(Assignment* assignment)
-{
-    // find variable
-    const string& varName = assignment->GetVariableName();
-    VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
-    if (varDecl == nullptr)
-    {
-        cerr << "Variable \"" << varName << "\" is not declared in the current scope\n";
-        isError = true;
-        return;
-    }
-
-    // check expression
-    Expression* expression = assignment->GetExpression();
-    expression->Accept(this);
-    if (isError)
-    {
-        return;
-    }
-
-    // check expression against the variable type
-    const TypeInfo* exprType = expression->GetType();
-    const TypeInfo* varType = varDecl->GetType();
-    if (!exprType->IsSameAs(*varType))
-    {
-        if ( !(exprType->IsInt() && varType->IsInt() && exprType->IsSigned() == varType->IsSigned() && exprType->GetNumBits() <= varType->GetNumBits()) )
-        {
-            cerr << "Expression does not match argument type\n";
-            isError = true;
-            return;
-        }
-    }
-
-    // assignment expressions always evaluate to the unit type
-    assignment->SetType(TypeInfo::UnitType);
-}
-
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 {
     Expression* condition = whileLoop->GetCondition();

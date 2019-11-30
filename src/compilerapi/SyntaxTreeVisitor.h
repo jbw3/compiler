@@ -3,7 +3,6 @@
 
 namespace SyntaxTree
 {
-class Assignment;
 class BinaryExpression;
 class BoolLiteralExpression;
 class BlockExpression;
@@ -26,8 +25,6 @@ public:
     virtual void Visit(SyntaxTree::UnaryExpression* unaryExpression) = 0;
 
     virtual void Visit(SyntaxTree::BinaryExpression* binaryExpression) = 0;
-
-    virtual void Visit(SyntaxTree::Assignment* assignment) = 0;
 
     virtual void Visit(SyntaxTree::WhileLoop* whileLoop) = 0;
 

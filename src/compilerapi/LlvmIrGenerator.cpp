@@ -162,35 +162,6 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(Assignment* assignment)
-{
-    Expression* expression = assignment->GetExpression();
-    expression->Accept(this);
-    if (resultValue == nullptr)
-    {
-        return;
-    }
-
-    const string& name = assignment->GetVariableName();
-    AllocaInst* alloca = symbolTable.GetValue(name);
-    if (alloca == nullptr)
-    {
-        resultValue = nullptr;
-        cerr << "\"" << name << "\" has not been defined\n";
-        return;
-    }
-
-    // sign extend expression value if needed
-    const TypeInfo* expressionType = expression->GetType();
-    const TypeInfo* varType = symbolTable.GetVariable(name)->GetType();
-    ExtendType(expressionType, varType, resultValue);
-
-    builder.CreateStore(resultValue, alloca);
-
-    // assignment expressions always evaluate to the unit type
-    resultValue = ConstantStruct::get(unitType);
-}
-
 void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 {
     Function* function = builder.GetInsertBlock()->getParent();

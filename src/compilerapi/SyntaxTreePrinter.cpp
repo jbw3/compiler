@@ -133,15 +133,6 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
     PrintProperty("right", binaryExpression->GetRightExpression());
 }
 
-void SyntaxTreePrinter::Visit(Assignment* assignment)
-{
-    BracePrinter printer(*this, "{", "}");
-
-    PrintProperty(NODE_TYPE_PROPERTY, "Assignment");
-    PrintProperty("variableName", assignment->GetVariableName());
-    PrintProperty("expression", assignment->GetExpression());
-}
-
 void SyntaxTreePrinter::Visit(WhileLoop* whileLoop)
 {
     BracePrinter printer(*this, "{", "}");
