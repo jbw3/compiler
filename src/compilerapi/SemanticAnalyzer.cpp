@@ -118,7 +118,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseXor:
             case BinaryExpression::eBitwiseOr:
-                ok = (leftType->IsSameAs(*UnitTypeInfo::BoolType)) || (bothAreInts && haveSameSign);
+                ok = (leftType->IsBool() && rightType->IsBool()) || (bothAreInts && haveSameSign);
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
@@ -149,12 +149,16 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiplyAssign:
             case BinaryExpression::eDivideAssign:
             case BinaryExpression::eRemainderAssign:
+                ok = bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits();
+                break;
             case BinaryExpression::eShiftLeftAssign:
             case BinaryExpression::eShiftRightArithmeticAssign:
+                ok = bothAreInts && leftType->GetNumBits() >= rightType->GetNumBits();
+                break;
             case BinaryExpression::eBitwiseAndAssign:
             case BinaryExpression::eBitwiseXorAssign:
             case BinaryExpression::eBitwiseOrAssign:
-                ok = bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits();
+                ok = (leftType->IsBool() && rightType->IsBool()) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
                 break;
         }
 
