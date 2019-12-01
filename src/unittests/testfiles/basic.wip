@@ -108,6 +108,20 @@ fun logicalOr3(x i32, y i32, z i32) bool
     x == 0 || y == 1 || z == 2
 }
 
+fun assignOps(a i8, b i16, c i32)
+{
+    c += a;
+    c -= a + b;
+    c *= a;
+    c /= a + b;
+    c %= a;
+    c <<= a + b;
+    c >>= a;
+    c &= a + b;
+    c ^= a;
+    c |= a + b;
+}
+
 fun nestedCall(x i32, y i32, z i32) i32
 {
     twoArgs(0, x) + twoArgs(y + 42, z - 57)

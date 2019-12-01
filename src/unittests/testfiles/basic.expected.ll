@@ -430,6 +430,82 @@ ormerge11:                                        ; preds = %orfalse8, %ortrue7
   ret i1 %orphi12
 }
 
+define %UnitType @assignOps(i8 %a, i16 %b, i32 %c) {
+entry:
+  %c3 = alloca i32
+  %b2 = alloca i16
+  %a1 = alloca i8
+  store i8 %a, i8* %a1
+  store i16 %b, i16* %b2
+  store i32 %c, i32* %c3
+  %a4 = load i8, i8* %a1
+  %signext = sext i8 %a4 to i32
+  %load = load i32, i32* %c3
+  %add = add i32 %load, %signext
+  store i32 %add, i32* %c3
+  %a5 = load i8, i8* %a1
+  %b6 = load i16, i16* %b2
+  %signext7 = sext i8 %a5 to i16
+  %add8 = add i16 %signext7, %b6
+  %signext9 = sext i16 %add8 to i32
+  %load10 = load i32, i32* %c3
+  %sub = sub i32 %load10, %signext9
+  store i32 %sub, i32* %c3
+  %a11 = load i8, i8* %a1
+  %signext12 = sext i8 %a11 to i32
+  %load13 = load i32, i32* %c3
+  %mul = mul i32 %load13, %signext12
+  store i32 %mul, i32* %c3
+  %a14 = load i8, i8* %a1
+  %b15 = load i16, i16* %b2
+  %signext16 = sext i8 %a14 to i16
+  %add17 = add i16 %signext16, %b15
+  %signext18 = sext i16 %add17 to i32
+  %load19 = load i32, i32* %c3
+  %div = sdiv i32 %load19, %signext18
+  store i32 %div, i32* %c3
+  %a20 = load i8, i8* %a1
+  %signext21 = sext i8 %a20 to i32
+  %load22 = load i32, i32* %c3
+  %rem = srem i32 %load22, %signext21
+  store i32 %rem, i32* %c3
+  %a23 = load i8, i8* %a1
+  %b24 = load i16, i16* %b2
+  %signext25 = sext i8 %a23 to i16
+  %add26 = add i16 %signext25, %b24
+  %signext27 = sext i16 %add26 to i32
+  %load28 = load i32, i32* %c3
+  %shl = shl i32 %load28, %signext27
+  store i32 %shl, i32* %c3
+  %a29 = load i8, i8* %a1
+  %signext30 = sext i8 %a29 to i32
+  %load31 = load i32, i32* %c3
+  %ashr = ashr i32 %load31, %signext30
+  store i32 %ashr, i32* %c3
+  %a32 = load i8, i8* %a1
+  %b33 = load i16, i16* %b2
+  %signext34 = sext i8 %a32 to i16
+  %add35 = add i16 %signext34, %b33
+  %signext36 = sext i16 %add35 to i32
+  %load37 = load i32, i32* %c3
+  %bitand = and i32 %load37, %signext36
+  store i32 %bitand, i32* %c3
+  %a38 = load i8, i8* %a1
+  %signext39 = sext i8 %a38 to i32
+  %load40 = load i32, i32* %c3
+  %bitxor = xor i32 %load40, %signext39
+  store i32 %bitxor, i32* %c3
+  %a41 = load i8, i8* %a1
+  %b42 = load i16, i16* %b2
+  %signext43 = sext i8 %a41 to i16
+  %add44 = add i16 %signext43, %b42
+  %signext45 = sext i16 %add44 to i32
+  %load46 = load i32, i32* %c3
+  %bitor = or i32 %load46, %signext45
+  store i32 %bitor, i32* %c3
+  ret %UnitType zeroinitializer
+}
+
 define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
 entry:
   %z3 = alloca i32
