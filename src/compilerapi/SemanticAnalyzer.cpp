@@ -145,6 +145,15 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 ok = leftType->IsSameAs(*rightType) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
                 break;
             case BinaryExpression::eAddAssign:
+            case BinaryExpression::eSubtractAssign:
+            case BinaryExpression::eMultiplyAssign:
+            case BinaryExpression::eDivideAssign:
+            case BinaryExpression::eRemainderAssign:
+            case BinaryExpression::eShiftLeftAssign:
+            case BinaryExpression::eShiftRightArithmeticAssign:
+            case BinaryExpression::eBitwiseAndAssign:
+            case BinaryExpression::eBitwiseXorAssign:
+            case BinaryExpression::eBitwiseOrAssign:
                 ok = bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits();
                 break;
         }
@@ -199,6 +208,15 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             return leftType;
         case BinaryExpression::eAssign:
         case BinaryExpression::eAddAssign:
+        case BinaryExpression::eSubtractAssign:
+        case BinaryExpression::eMultiplyAssign:
+        case BinaryExpression::eDivideAssign:
+        case BinaryExpression::eRemainderAssign:
+        case BinaryExpression::eShiftLeftAssign:
+        case BinaryExpression::eShiftRightArithmeticAssign:
+        case BinaryExpression::eBitwiseAndAssign:
+        case BinaryExpression::eBitwiseXorAssign:
+        case BinaryExpression::eBitwiseOrAssign:
             return TypeInfo::UnitType;
     }
 }

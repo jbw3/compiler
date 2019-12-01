@@ -137,6 +137,15 @@ public:
         eLogicalOr,
         eAssign,
         eAddAssign,
+        eSubtractAssign,
+        eMultiplyAssign,
+        eDivideAssign,
+        eRemainderAssign,
+        eShiftLeftAssign,
+        eShiftRightArithmeticAssign,
+        eBitwiseAndAssign,
+        eBitwiseXorAssign,
+        eBitwiseOrAssign,
     };
 
     static bool IsAssignment(EOperator op);

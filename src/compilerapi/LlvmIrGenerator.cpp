@@ -126,30 +126,39 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 resultValue = builder.CreateAdd(leftValue, rightValue, "add");
                 break;
             case BinaryExpression::eSubtract:
+            case BinaryExpression::eSubtractAssign:
                 resultValue = builder.CreateSub(leftValue, rightValue, "sub");
                 break;
             case BinaryExpression::eMultiply:
+            case BinaryExpression::eMultiplyAssign:
                 resultValue = builder.CreateMul(leftValue, rightValue, "mul");
                 break;
             case BinaryExpression::eDivide:
+            case BinaryExpression::eDivideAssign:
                 resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
                 break;
             case BinaryExpression::eRemainder:
+            case BinaryExpression::eRemainderAssign:
                 resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "rem") : builder.CreateURem(leftValue, rightValue, "rem");
                 break;
             case BinaryExpression::eShiftLeft:
+            case BinaryExpression::eShiftLeftAssign:
                 resultValue = builder.CreateShl(leftValue, rightValue, "shl");
                 break;
             case BinaryExpression::eShiftRightArithmetic:
+            case BinaryExpression::eShiftRightArithmeticAssign:
                 resultValue = builder.CreateAShr(leftValue, rightValue, "ashr");
                 break;
             case BinaryExpression::eBitwiseAnd:
+            case BinaryExpression::eBitwiseAndAssign:
                 resultValue = builder.CreateAnd(leftValue, rightValue, "bitand");
                 break;
             case BinaryExpression::eBitwiseXor:
+            case BinaryExpression::eBitwiseXorAssign:
                 resultValue = builder.CreateXor(leftValue, rightValue, "bitxor");
                 break;
             case BinaryExpression::eBitwiseOr:
+            case BinaryExpression::eBitwiseOrAssign:
                 resultValue = builder.CreateOr(leftValue, rightValue, "bitor");
                 break;
             case BinaryExpression::eLogicalAnd:

@@ -128,6 +128,33 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eAddAssign:
             op = "+=";
             break;
+        case BinaryExpression::eSubtractAssign:
+            op = "==";
+            break;
+        case BinaryExpression::eMultiplyAssign:
+            op = "*=";
+            break;
+        case BinaryExpression::eDivideAssign:
+            op = "/=";
+            break;
+        case BinaryExpression::eRemainderAssign:
+            op = "%=";
+            break;
+        case BinaryExpression::eShiftLeftAssign:
+            op = "<<=";
+            break;
+        case BinaryExpression::eShiftRightArithmeticAssign:
+            op = ">>=";
+            break;
+        case BinaryExpression::eBitwiseAndAssign:
+            op = "&=";
+            break;
+        case BinaryExpression::eBitwiseXorAssign:
+            op = "^=";
+            break;
+        case BinaryExpression::eBitwiseOrAssign:
+            op = "|=";
+            break;
     }
 
     PrintProperty(NODE_TYPE_PROPERTY, "BinaryExpression");

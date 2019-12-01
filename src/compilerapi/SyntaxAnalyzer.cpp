@@ -42,6 +42,15 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"||", BinaryExpression::eLogicalOr},
     {ASSIGNMENT_OPERATOR, BinaryExpression::eAssign},
     {"+=", BinaryExpression::eAddAssign},
+    {"-=", BinaryExpression::eSubtractAssign},
+    {"*=", BinaryExpression::eMultiplyAssign},
+    {"/=", BinaryExpression::eDivideAssign},
+    {"%=", BinaryExpression::eRemainderAssign},
+    {"<<=", BinaryExpression::eShiftLeftAssign},
+    {">>=", BinaryExpression::eShiftRightArithmeticAssign},
+    {"&=", BinaryExpression::eBitwiseAndAssign},
+    {"^=", BinaryExpression::eBitwiseXorAssign},
+    {"|=", BinaryExpression::eBitwiseOrAssign},
 };
 
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
@@ -727,7 +736,19 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eLogicalAnd, BinaryExpression::eLogicalOr});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAssign, BinaryExpression::eAddAssign});
+    ProcessExpressionOperators(terms, binOperators, {
+            BinaryExpression::eAssign,
+            BinaryExpression::eAddAssign,
+            BinaryExpression::eSubtractAssign,
+            BinaryExpression::eMultiplyAssign,
+            BinaryExpression::eDivideAssign,
+            BinaryExpression::eRemainderAssign,
+            BinaryExpression::eShiftLeftAssign,
+            BinaryExpression::eShiftRightArithmeticAssign,
+            BinaryExpression::eBitwiseAndAssign,
+            BinaryExpression::eBitwiseXorAssign,
+            BinaryExpression::eBitwiseOrAssign,
+        });
 
     return terms.front();
 }

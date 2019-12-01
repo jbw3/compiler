@@ -169,6 +169,15 @@ bool BinaryExpression::IsAssignment(EOperator op)
             return false;
         case BinaryExpression::eAssign:
         case BinaryExpression::eAddAssign:
+        case BinaryExpression::eSubtractAssign:
+        case BinaryExpression::eMultiplyAssign:
+        case BinaryExpression::eDivideAssign:
+        case BinaryExpression::eRemainderAssign:
+        case BinaryExpression::eShiftLeftAssign:
+        case BinaryExpression::eShiftRightArithmeticAssign:
+        case BinaryExpression::eBitwiseAndAssign:
+        case BinaryExpression::eBitwiseXorAssign:
+        case BinaryExpression::eBitwiseOrAssign:
             return true;
     }
 }
@@ -198,6 +207,15 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eAssign:
             return false;
         case BinaryExpression::eAddAssign:
+        case BinaryExpression::eSubtractAssign:
+        case BinaryExpression::eMultiplyAssign:
+        case BinaryExpression::eDivideAssign:
+        case BinaryExpression::eRemainderAssign:
+        case BinaryExpression::eShiftLeftAssign:
+        case BinaryExpression::eShiftRightArithmeticAssign:
+        case BinaryExpression::eBitwiseAndAssign:
+        case BinaryExpression::eBitwiseXorAssign:
+        case BinaryExpression::eBitwiseOrAssign:
             return true;
     }
 }
