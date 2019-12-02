@@ -280,6 +280,26 @@ fun elseIfBranches(x i32, y i32, z i32) i32
     }
 }
 
+fun noElseBranches(x i32, y i32) i32
+{
+    var z i32 = 0;
+    if x == 0
+    {
+        z = x + y;
+    }
+
+    if y < -5
+    {
+        z *= 2;
+    }
+    elif y > 5
+    {
+        z /= 2;
+    }
+
+    z
+}
+
 fun elseIfBranchesNesting(x i32, y i32, z i32) i32
 {
     if x == 0

@@ -906,21 +906,22 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         return nullptr;
     }
 
-    // increment past "}"; we should be at an "elif" or "else" clause
-    if (!IncrementIterator(iter, endIter, "Expected 'elif' or 'else' keyword"))
+    string nextValue = "";
+    if (iter != endIter)
     {
-        return nullptr;
-    }
-
-    if (iter->GetValue() != ELIF_KEYWORD && iter->GetValue() != ELSE_KEYWORD)
-    {
-        logger.LogError(*iter, "Expected 'elif' or 'else'");
-        return nullptr;
+        auto nextIter = iter + 1;
+        if (nextIter != endIter)
+        {
+            nextValue = nextIter->GetValue();
+        }
     }
 
     unique_ptr<Expression> elseExpression;
-    if (iter->GetValue() == ELIF_KEYWORD)
+    if (nextValue == ELIF_KEYWORD)
     {
+        // move to 'elif' keyword
+        ++iter;
+
         // parse "elif"
         elseExpression.reset(ProcessBranchExpression(iter, endIter));
         if (elseExpression == nullptr)
@@ -928,8 +929,11 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
             return nullptr;
         }
     }
-    else
+    else if (nextValue == ELSE_KEYWORD)
     {
+        // move to 'else' keyword
+        ++iter;
+
         if (!IncrementIterator(iter, endIter, "Expected '{'"))
         {
             return nullptr;
@@ -947,6 +951,12 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         {
             return nullptr;
         }
+    }
+    else
+    {
+        // if there is no 'elif' or 'else' clause, set the else expression
+        // to a unit type literal
+        elseExpression.reset(new UnitTypeLiteralExpression());
     }
 
     BranchExpression* expr = new BranchExpression(ifCondition.release(),

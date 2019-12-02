@@ -896,6 +896,64 @@ merge21:                                          ; preds = %merge19, %if
   ret i32 %phi22
 }
 
+define i32 @noElseBranches(i32 %x, i32 %y) {
+entry:
+  %z = alloca i32
+  %y2 = alloca i32
+  %x1 = alloca i32
+  store i32 %x, i32* %x1
+  store i32 %y, i32* %y2
+  store i32 0, i32* %z
+  %x3 = load i32, i32* %x1
+  %cmpeq = icmp eq i32 %x3, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  %x4 = load i32, i32* %x1
+  %y5 = load i32, i32* %y2
+  %add = add i32 %x4, %y5
+  store i32 %add, i32* %z
+  br label %merge
+
+else:                                             ; preds = %entry
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi %UnitType [ zeroinitializer, %if ], [ zeroinitializer, %else ]
+  %y6 = load i32, i32* %y2
+  %cmplt = icmp slt i32 %y6, -5
+  br i1 %cmplt, label %if7, label %else8
+
+if7:                                              ; preds = %merge
+  %load = load i32, i32* %z
+  %mul = mul i32 %load, 2
+  store i32 %mul, i32* %z
+  br label %merge15
+
+else8:                                            ; preds = %merge
+  %y9 = load i32, i32* %y2
+  %cmpgt = icmp sgt i32 %y9, 5
+  br i1 %cmpgt, label %if10, label %else12
+
+if10:                                             ; preds = %else8
+  %load11 = load i32, i32* %z
+  %div = sdiv i32 %load11, 2
+  store i32 %div, i32* %z
+  br label %merge13
+
+else12:                                           ; preds = %else8
+  br label %merge13
+
+merge13:                                          ; preds = %else12, %if10
+  %phi14 = phi %UnitType [ zeroinitializer, %if10 ], [ zeroinitializer, %else12 ]
+  br label %merge15
+
+merge15:                                          ; preds = %merge13, %if7
+  %phi16 = phi %UnitType [ zeroinitializer, %if7 ], [ %phi14, %merge13 ]
+  %z17 = load i32, i32* %z
+  ret i32 %z17
+}
+
 define i32 @elseIfBranchesNesting(i32 %x, i32 %y, i32 %z) {
 entry:
   %z3 = alloca i32
