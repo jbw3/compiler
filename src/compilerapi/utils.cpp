@@ -137,6 +137,68 @@ bool isBool(const string& tokenStr)
     return tokenStr == "true" || tokenStr == "false";
 }
 
+bool isString(const std::string& tokenStr)
+{
+    if (tokenStr.size() < 2)
+    {
+        return false;
+    }
+
+    for (size_t i = 1; i < tokenStr.size() - 1; ++i)
+    {
+        char ch = tokenStr[i];
+        if (ch == '"' || !isprint(ch))
+        {
+            return false;
+        }
+    }
+
+    if (tokenStr[tokenStr.size() - 1] != '"')
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool isPotentialString(const std::string& tokenStr)
+{
+    if (tokenStr.empty())
+    {
+        return false;
+    }
+
+    size_t idx = 0;
+
+    if (tokenStr[idx] != '"')
+    {
+        return false;
+    }
+
+    ++idx;
+    while (idx < tokenStr.size() - 1)
+    {
+        char ch = tokenStr[idx];
+        if (ch == '"' || !isprint(ch))
+        {
+            return false;
+        }
+
+        ++idx;
+    }
+
+    if (idx < tokenStr.size())
+    {
+        char ch = tokenStr[idx];
+        if (ch != '"' && !isprint(ch))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool binStringToInteger(const string& str, int64_t& num)
 {
     num = 0;

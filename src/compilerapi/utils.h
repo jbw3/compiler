@@ -24,6 +24,10 @@ bool isPotentialNumber(const std::string& tokenStr);
 
 bool isBool(const std::string& tokenStr);
 
+bool isString(const std::string& tokenStr);
+
+bool isPotentialString(const std::string& tokenStr);
+
 bool stringToInteger(const std::string& str, int64_t& num);
 
 bool stringToBool(const std::string& str, bool& value);

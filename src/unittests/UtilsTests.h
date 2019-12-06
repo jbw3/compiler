@@ -10,6 +10,8 @@ public:
 
 private:
     static bool TestNumberConversion();
+
+    static bool TestStringParsing();
 };
 
 #endif // UTILS_TEST_H_
