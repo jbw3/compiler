@@ -31,6 +31,8 @@ const TypeInfo* TypeInfo::UInt16Type = &uInt16TypeInfo;
 const TypeInfo* TypeInfo::UInt32Type = &uInt32TypeInfo;
 const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
 
+TypeInfo* TypeInfo::stringPointerType = nullptr;
+
 map<string, const TypeInfo*> TypeInfo::types =
 {
     {BOOL_KEYWORD, BoolType},
@@ -50,7 +52,14 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 
     RegisterType(INT_SIZE_KEYWORD, new PrimitiveType(numBits, false, true, true));
     RegisterType(UINT_SIZE_KEYWORD, new PrimitiveType(numBits, false, true, false));
-    RegisterType(STR_KEYWORD, new StringPointerType(numBits));
+
+    stringPointerType = new StringPointerType(numBits);
+    RegisterType(STR_KEYWORD, stringPointerType);
+}
+
+const TypeInfo* TypeInfo::GetStringPointerType()
+{
+    return stringPointerType;
 }
 
 const TypeInfo* TypeInfo::GetType(const string& typeName)

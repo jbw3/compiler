@@ -381,8 +381,7 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    isError = true;
-    cerr << "Internal error: not implemented yet\n";
+    stringLiteralExpression->SetType(TypeInfo::GetStringPointerType());
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)

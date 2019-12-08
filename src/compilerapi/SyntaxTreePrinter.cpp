@@ -227,6 +227,17 @@ void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
 {
+    BracePrinter printer(*this, "{", "}");
+
+    string value = "";
+    for (char ch : stringLiteralExpression->GetCharacters())
+    {
+        // TODO: need to escape some characters
+        value += ch;
+    }
+
+    PrintProperty(NODE_TYPE_PROPERTY, "StringLiteralExpression");
+    PrintProperty("value", value);
 }
 
 void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
