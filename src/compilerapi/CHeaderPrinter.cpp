@@ -137,7 +137,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     }
     else
     {
-        cerr << "Unknown return type\n";
+        cerr << "Unsupported return type\n";
         cType = "";
         return false;
     }
