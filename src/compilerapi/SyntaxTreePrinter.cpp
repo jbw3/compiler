@@ -225,6 +225,10 @@ void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
     PrintProperty("value", boolLiteralExpression->GetValue());
 }
 
+void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
+{
+}
+
 void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
 {
     BracePrinter printer(*this, "{", "}");

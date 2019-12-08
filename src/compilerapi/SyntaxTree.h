@@ -97,6 +97,21 @@ private:
     std::string value;
 };
 
+class StringLiteralExpression : public Expression
+{
+public:
+    StringLiteralExpression(const std::vector<char> characters);
+
+    virtual ~StringLiteralExpression() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const std::vector<char>& GetCharacters() const;
+
+private:
+    std::vector<char> characters;
+};
+
 class BlockExpression : public Expression
 {
 public:

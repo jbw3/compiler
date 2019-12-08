@@ -124,6 +124,21 @@ const string& BoolLiteralExpression::GetValue() const
     return value;
 }
 
+StringLiteralExpression::StringLiteralExpression(const vector<char> characters) :
+    characters(characters)
+{
+}
+
+void StringLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+const vector<char>& StringLiteralExpression::GetCharacters() const
+{
+    return characters;
+}
+
 BlockExpression::BlockExpression(const Expressions& expressions) :
     expressions(expressions)
 {

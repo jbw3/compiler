@@ -33,6 +33,8 @@ public:
 
     void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) override;
 
+    void Visit(SyntaxTree::StringLiteralExpression* stringLiteralExpression) override;
+
     void Visit(SyntaxTree::VariableExpression* variableExpression) override;
 
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;

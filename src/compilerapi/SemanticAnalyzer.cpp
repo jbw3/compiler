@@ -379,6 +379,12 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
     boolLiteralExpression->SetType(TypeInfo::BoolType);
 }
 
+void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
+{
+    isError = true;
+    cerr << "Internal error: not implemented yet\n";
+}
+
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     const string& varName = variableExpression->GetName();

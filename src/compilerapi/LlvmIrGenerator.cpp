@@ -379,6 +379,12 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
+{
+    resultValue = nullptr;
+    cerr << "Internal error: not implemented yet\n";
+}
+
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 {
     const string& name = variableExpression->GetName();

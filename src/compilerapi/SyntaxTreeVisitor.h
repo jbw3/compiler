@@ -12,6 +12,7 @@ class FunctionDefinition;
 class FunctionExpression;
 class ModuleDefinition;
 class NumericExpression;
+class StringLiteralExpression;
 class UnaryExpression;
 class UnitTypeLiteralExpression;
 class VariableDeclaration;
@@ -39,6 +40,8 @@ public:
     virtual void Visit(SyntaxTree::NumericExpression* numericExpression) = 0;
 
     virtual void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) = 0;
+
+    virtual void Visit(SyntaxTree::StringLiteralExpression* stringLiteralExpression) = 0;
 
     virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
 
