@@ -491,6 +491,13 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     const string& varName = variableDeclaration->GetName();
     Type* type = GetType(variableDeclaration->GetType());
+    if (type == nullptr)
+    {
+        resultValue = nullptr;
+        cerr << "Internal error: Unknown variable declaration type\n";
+        return;
+    }
+
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, variableDeclaration, alloca);
 
