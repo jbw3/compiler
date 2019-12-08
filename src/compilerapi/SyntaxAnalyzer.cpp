@@ -570,6 +570,18 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     Expression* expr = AddUnaryExpressions(new BoolLiteralExpression(value), unaryOperators);
                     terms.push_back(expr);
                 }
+                else if (value[0] == '"')
+                {
+                    Expression* expr = ProcessStringExpression(iter);
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+                }
                 else if (value == "(")
                 {
                     TokenIterator parenEndIter = FindParenthesisEnd(iter, endIter);
@@ -807,6 +819,40 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
             ++opIter;
         }
     }
+}
+
+StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator iter)
+{
+    const string& value = iter->GetValue();
+
+    size_t idx = 0;
+    if (value.size() < 1 || value[idx] != '"')
+    {
+        logger.LogError(*iter, "String doesn't start with '\"'");
+        return nullptr;
+    }
+
+    vector<char> chars;
+    chars.reserve(value.size());
+
+    ++idx;
+    size_t endCharsIdx = value.size() - 1;
+    while (idx < endCharsIdx)
+    {
+        // TODO: Handle escaped chars
+        chars.push_back(value[idx]);
+
+        ++idx;
+    }
+
+    if (value[value.size() - 1] != '"')
+    {
+        logger.LogError(*iter, "String doesn't end with '\"'");
+        return nullptr;
+    }
+
+    StringLiteralExpression* expr = new StringLiteralExpression(chars);
+    return expr;
 }
 
 BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter)

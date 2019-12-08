@@ -78,6 +78,8 @@ private:
                                     std::vector<SyntaxTree::BinaryExpression::EOperator>& operators,
                                     const std::unordered_set<SyntaxTree::BinaryExpression::EOperator>& opsToProcess);
 
+    SyntaxTree::StringLiteralExpression* ProcessStringExpression(TokenIterator iter);
+
     SyntaxTree::BlockExpression* ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
