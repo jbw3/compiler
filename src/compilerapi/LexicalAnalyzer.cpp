@@ -17,7 +17,8 @@ const unordered_set<string> LexicalAnalyzer::SYMBOLS =
 
 LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :
     logger(logger),
-    isValid(false)
+    isValid(false),
+    isString(false)
 {
 }
 
@@ -63,7 +64,7 @@ bool LexicalAnalyzer::Process(std::istream& is, std::vector<Token>& tokens)
     is.read(&ch, 1);
     while (!is.eof())
     {
-        if (ch == COMMENT_START)
+        if (ch == COMMENT_START && !isString)
         {
             // read to comment end
             do
@@ -115,7 +116,27 @@ Token LexicalAnalyzer::CreateToken()
 
 bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 {
-    if (isspace(ch))
+    if (isString)
+    {
+        if (ch == '"')
+        {
+            tokenStr += ch;
+            tokens.push_back(CreateToken());
+            tokenStr = "";
+            isValid = false;
+            isString = false;
+        }
+        else if (ch == '\n')
+        {
+            logger.LogError(line, column, "Unexpected string end");
+            return false;
+        }
+        else
+        {
+            tokenStr += ch;
+        }
+    }
+    else if (isspace(ch))
     {
         if (!tokenStr.empty())
         {
@@ -132,9 +153,22 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
             }
         }
     }
-    else // ch is not whitespace
+    else // we're not in a string and ch is not whitespace
     {
-        if (isValid)
+        if (ch == '"')
+        {
+            if (tokenStr.empty())
+            {
+                tokenStr = ch;
+                isString = true;
+            }
+            else
+            {
+                PrintError();
+                return false;
+            }
+        }
+        else if (isValid)
         {
             if (IsValidToken(tokenStr + ch))
             {

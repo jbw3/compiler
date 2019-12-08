@@ -25,6 +25,7 @@ private:
     ErrorLogger& logger;
     std::string tokenStr;
     bool isValid;
+    bool isString;
     unsigned long line;
     unsigned long column;
 
