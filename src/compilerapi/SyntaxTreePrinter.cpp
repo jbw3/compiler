@@ -1,7 +1,9 @@
 #include "SyntaxTreePrinter.h"
 #include "SyntaxTree.h"
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -229,15 +231,46 @@ void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    string value = "";
+    stringstream ss;
+    ss << hex;
+
     for (char ch : stringLiteralExpression->GetCharacters())
     {
-        // TODO: need to escape some characters
-        value += ch;
+        if (ch == '\\')
+        {
+            ss << "\\\\";
+        }
+        else if (ch == '"')
+        {
+            ss << "\\\"";
+        }
+        else if (isprint(ch))
+        {
+            ss << ch;
+        }
+        else if (ch == '\n')
+        {
+            ss << "\\n";
+        }
+        else if (ch == '\r')
+        {
+            ss << "\\r";
+        }
+        else if (ch == '\t')
+        {
+            ss << "\\t";
+        }
+        else
+        {
+            // TODO: this is not valid for all unicode code points
+            ss << "\\u00"
+               << setfill('0') << setw(2)
+               << static_cast<unsigned int>(ch);
+        }
     }
 
     PrintProperty(NODE_TYPE_PROPERTY, "StringLiteralExpression");
-    PrintProperty("value", value);
+    PrintProperty("value", ss.str());
 }
 
 void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
