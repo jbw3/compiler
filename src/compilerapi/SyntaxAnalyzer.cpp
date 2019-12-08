@@ -839,8 +839,16 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
     size_t endCharsIdx = value.size() - 1;
     while (idx < endCharsIdx)
     {
-        // TODO: Handle escaped chars
-        chars.push_back(value[idx]);
+        char ch = value[idx];
+        if (isprint(ch))
+        {
+            chars.push_back(ch);
+        }
+        else
+        {
+            logger.LogError(*iter, "Invalid character in string");
+            return nullptr;
+        }
 
         ++idx;
     }
