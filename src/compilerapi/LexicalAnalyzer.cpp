@@ -157,16 +157,22 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
     {
         if (ch == '"')
         {
-            if (tokenStr.empty())
+            if (!tokenStr.empty())
             {
-                tokenStr = ch;
-                isString = true;
+                if (isValid)
+                {
+                    tokens.push_back(CreateToken());
+                }
+                else
+                {
+                    PrintError();
+                    return false;
+                }
             }
-            else
-            {
-                PrintError();
-                return false;
-            }
+
+            tokenStr = ch;
+            isValid = false;
+            isString = true;
         }
         else if (isValid)
         {
