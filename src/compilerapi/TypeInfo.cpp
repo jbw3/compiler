@@ -50,6 +50,7 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 
     RegisterType(INT_SIZE_KEYWORD, new PrimitiveType(numBits, false, true, true));
     RegisterType(UINT_SIZE_KEYWORD, new PrimitiveType(numBits, false, true, false));
+    RegisterType(STR_KEYWORD, new StringPointerType(numBits));
 }
 
 const TypeInfo* TypeInfo::GetType(const string& typeName)
@@ -134,4 +135,15 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && IsBool() == primitiveOther.IsBool()
         && IsInt() == primitiveOther.IsInt()
         && IsSigned() == primitiveOther.IsSigned();
+}
+
+StringPointerType::StringPointerType(unsigned numBits) :
+    TypeInfo(numBits, false, false, false)
+{
+}
+
+bool StringPointerType::IsSameAs(const TypeInfo& other) const
+{
+    bool isSame = typeid(other) == typeid(StringPointerType);
+    return isSame;
 }

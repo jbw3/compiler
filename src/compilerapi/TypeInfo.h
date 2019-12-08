@@ -76,4 +76,12 @@ public:
     bool IsSameAs(const TypeInfo& other) const override;
 };
 
+class StringPointerType : public TypeInfo
+{
+public:
+    StringPointerType(unsigned numBits);
+
+    bool IsSameAs(const TypeInfo& other) const override;
+};
+
 #endif // TYPE_INFO_H_

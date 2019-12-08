@@ -26,6 +26,8 @@ const std::string INT64_KEYWORD = "i64";
 
 const std::string INT_SIZE_KEYWORD = "isize";
 
+const std::string STR_KEYWORD = "str";
+
 const std::string UINT8_KEYWORD = "u8";
 
 const std::string UINT16_KEYWORD = "u16";
@@ -53,6 +55,7 @@ const std::unordered_set<std::string> KEYWORDS =
     INT32_KEYWORD,
     INT64_KEYWORD,
     INT_SIZE_KEYWORD,
+    STR_KEYWORD,
     UINT8_KEYWORD,
     UINT16_KEYWORD,
     UINT32_KEYWORD,
