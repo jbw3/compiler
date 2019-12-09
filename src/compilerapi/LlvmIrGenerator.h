@@ -63,6 +63,9 @@ private:
     llvm::Function* currentFunction;
     llvm::Value* resultValue;
     llvm::StructType* unitType;
+    llvm::StructType* strStructType;
+    llvm::PointerType* strPointerType;
+    unsigned int globalStringCounter;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
 
     llvm::Type* GetType(const TypeInfo* type);

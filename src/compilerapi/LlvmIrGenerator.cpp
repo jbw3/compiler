@@ -7,6 +7,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "utils.h"
 #include <iostream>
+#include <sstream>
 #pragma clang diagnostic pop
 
 using namespace llvm;
@@ -19,10 +20,12 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     builder(context),
     module(nullptr),
     currentFunction(nullptr),
-    resultValue(nullptr)
+    resultValue(nullptr),
+    unitType(nullptr),
+    strStructType(nullptr),
+    strPointerType(nullptr),
+    globalStringCounter(0)
 {
-    llvm::ArrayRef<Type*> emptyArray;
-    unitType = StructType::create(context, emptyArray, "UnitType");
 }
 
 void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
@@ -381,8 +384,24 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    resultValue = nullptr;
-    cerr << "Internal error: not implemented yet\n";
+    const vector<char>& chars = stringLiteralExpression->GetCharacters();
+
+    const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
+
+    vector<Constant*> initValues;
+    initValues.push_back(ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)));
+    Constant* initializer = ConstantStruct::get(strStructType, initValues);
+
+    // create name
+    stringstream ss;
+    ss << "str" << globalStringCounter;
+    ++globalStringCounter;
+
+    GlobalVariable* globalValue = (GlobalVariable*)module->getOrInsertGlobal(ss.str(), strStructType);
+    globalValue->setConstant(true);
+    globalValue->setInitializer(initializer);
+
+    resultValue = globalValue;
 }
 
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
@@ -511,6 +530,13 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     module->setDataLayout(targetMachine->createDataLayout());
     module->setTargetTriple(targetMachine->getTargetTriple().str());
 
+    ArrayRef<Type*> emptyArray;
+    unitType = StructType::create(context, emptyArray, "UnitType");
+
+    ArrayRef<Type*> strArray = { GetType(TypeInfo::GetUIntSizeType()) };
+    strStructType = StructType::create(context, strArray, "str");
+    strPointerType = PointerType::get(strStructType, module->getDataLayout().getProgramAddressSpace());
+
     // generate LLVM IR from syntax tree
     this->module = module;
     syntaxTree->Accept(this);
@@ -541,6 +567,10 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     else if (type->IsInt())
     {
         llvmType = Type::getIntNTy(context, type->GetNumBits());
+    }
+    else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
+    {
+        llvmType =  strPointerType;
     }
     else
     {

@@ -25,6 +25,10 @@ public:
 
     static void InitTypes(const llvm::TargetMachine* targetMachine);
 
+    static const TypeInfo* GetIntSizeType();
+
+    static const TypeInfo* GetUIntSizeType();
+
     static const TypeInfo* GetStringPointerType();
 
     static const TypeInfo* GetType(const std::string& typeName);
@@ -49,6 +53,8 @@ public:
     unsigned GetNumBits() const;
 
 private:
+    static TypeInfo* intSizeType;
+    static TypeInfo* uintSizeType;
     static TypeInfo* stringPointerType;
     static std::map<std::string, const TypeInfo*> types;
 
