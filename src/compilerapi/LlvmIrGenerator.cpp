@@ -388,20 +388,33 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 
     const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
 
-    vector<Constant*> initValues;
-    initValues.push_back(ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)));
+    // create name
+    stringstream strName;
+    strName << "str" << globalStringCounter;
+
+    module->getOrInsertGlobal(strName.str(), ArrayType::get(Type::getInt8Ty(context), chars.size()));
+    GlobalVariable* globalStr = module->getNamedGlobal(strName.str());
+    globalStr->setConstant(true);
+    globalStr->setInitializer(ConstantDataArray::getString(context, StringRef(chars.data(), chars.size()), false));
+
+    vector<Constant*> initValues =
+    {
+        ConstantExpr::getBitCast(globalStr, Type::getInt8PtrTy(context)),
+        ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)),
+    };
     Constant* initializer = ConstantStruct::get(strStructType, initValues);
 
     // create name
-    stringstream ss;
-    ss << "str" << globalStringCounter;
+    stringstream structName;
+    structName << "strStruct" << globalStringCounter;
+
+    module->getOrInsertGlobal(structName.str(), strStructType);
+    GlobalVariable* globalStruct = module->getNamedGlobal(structName.str());
+    globalStruct->setConstant(true);
+    globalStruct->setInitializer(initializer);
+
     ++globalStringCounter;
-
-    GlobalVariable* globalValue = (GlobalVariable*)module->getOrInsertGlobal(ss.str(), strStructType);
-    globalValue->setConstant(true);
-    globalValue->setInitializer(initializer);
-
-    resultValue = globalValue;
+    resultValue = globalStruct;
 }
 
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
@@ -533,9 +546,15 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     ArrayRef<Type*> emptyArray;
     unitType = StructType::create(context, emptyArray, "UnitType");
 
-    ArrayRef<Type*> strArray = { GetType(TypeInfo::GetUIntSizeType()) };
+    unsigned int addressSpace = module->getDataLayout().getProgramAddressSpace();
+
+    ArrayRef<Type*> strArray =
+    {
+        Type::getInt8PtrTy(context, addressSpace),
+        GetType(TypeInfo::GetUIntSizeType()),
+    };
     strStructType = StructType::create(context, strArray, "str");
-    strPointerType = PointerType::get(strStructType, module->getDataLayout().getProgramAddressSpace());
+    strPointerType = strStructType->getPointerTo(addressSpace);
 
     // generate LLVM IR from syntax tree
     this->module = module;
