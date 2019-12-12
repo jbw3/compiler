@@ -845,7 +845,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             // make sure we're not at the end of the string
             if (idx >= endCharsIdx - 1)
             {
-                logger.LogError(*iter, "Invalid backslash (\\) at end of string");
+                logger.LogError(*iter, "Start of escape sequence at end of string");
                 return nullptr;
             }
 
@@ -882,8 +882,31 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
                 return nullptr;
             }
         }
-        else if (isprint(ch))
+        else if ((ch & 0x80) == 0) // 1-byte UTF-8 sequence
         {
+            chars.push_back(ch);
+        }
+        else if ((ch & 0xe0) == 0xc0) // 2-byte UTF-8 sequence
+        {
+            chars.push_back(ch);
+
+            // make sure we're not at the end of the string
+            if (idx >= endCharsIdx - 1)
+            {
+                logger.LogError(*iter, "Start of 2-byte UTF-8 sequence at end of string");
+                return nullptr;
+            }
+
+            ++idx;
+            ch = value[idx];
+
+            // make sure the second byte is valid
+            if ((ch & 0xc0) != 0x80)
+            {
+                logger.LogError(*iter, "Invalid second byte of 2-byte UTF-8 sequence");
+                return nullptr;
+            }
+
             chars.push_back(ch);
         }
         else
