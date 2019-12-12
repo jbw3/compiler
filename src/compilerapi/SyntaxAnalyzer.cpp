@@ -860,6 +860,10 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             {
                 chars.push_back('\'');
             }
+            else if (ch == '"')
+            {
+                chars.push_back('"');
+            }
             else if (ch == 'n')
             {
                 chars.push_back('\n');

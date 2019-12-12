@@ -118,7 +118,7 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 {
     if (isString)
     {
-        if (ch == '"')
+        if (ch == '"' && tokenStr.back() != '\\')
         {
             tokenStr += ch;
             tokens.push_back(CreateToken());
