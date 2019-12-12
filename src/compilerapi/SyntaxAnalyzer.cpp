@@ -840,7 +840,45 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
     while (idx < endCharsIdx)
     {
         char ch = value[idx];
-        if (isprint(ch))
+        if (ch == '\\')
+        {
+            // make sure we're not at the end of the string
+            if (idx >= endCharsIdx - 1)
+            {
+                logger.LogError(*iter, "Invalid backslash (\\) at end of string");
+                return nullptr;
+            }
+
+            ++idx;
+            ch = value[idx];
+
+            if (ch == '\\')
+            {
+                chars.push_back('\\');
+            }
+            else if (ch == '\'')
+            {
+                chars.push_back('\'');
+            }
+            else if (ch == 'n')
+            {
+                chars.push_back('\n');
+            }
+            else if (ch == 'r')
+            {
+                chars.push_back('\r');
+            }
+            else if (ch == 't')
+            {
+                chars.push_back('\t');
+            }
+            else
+            {
+                logger.LogError(*iter, "Invalid escape sequence '\\{}'", ch);
+                return nullptr;
+            }
+        }
+        else if (isprint(ch))
         {
             chars.push_back(ch);
         }
