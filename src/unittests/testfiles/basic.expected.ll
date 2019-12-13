@@ -3,7 +3,15 @@ source_filename = "src/unittests/testfiles/basic.wip"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
+%str = type { i8*, i64 }
 %UnitType = type {}
+
+@str0 = constant [0 x i8] zeroinitializer
+@strStruct0 = constant %str { i8* getelementptr inbounds ([0 x i8], [0 x i8]* @str0, i32 0, i32 0), i64 0 }
+@str1 = constant [15 x i8] c"Is this a test?"
+@strStruct1 = constant %str { i8* getelementptr inbounds ([15 x i8], [15 x i8]* @str1, i32 0, i32 0), i64 15 }
+@str2 = constant [6 x i8] c"\09\0D\0A\5C\22'"
+@strStruct2 = constant %str { i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str2, i32 0, i32 0), i64 6 }
 
 declare %UnitType @extern1()
 
@@ -680,6 +688,17 @@ entry:
   %n24 = load i64, i64* %n22
   %add = add i64 %n13, %n24
   ret i64 %add
+}
+
+define %UnitType @types_str() {
+entry:
+  %s3 = alloca %str*
+  %s2 = alloca %str*
+  %s1 = alloca %str*
+  store %str* @strStruct0, %str** %s1
+  store %str* @strStruct1, %str** %s2
+  store %str* @strStruct2, %str** %s3
+  ret %UnitType zeroinitializer
 }
 
 define i8 @types_add_literal(i8 %num) {

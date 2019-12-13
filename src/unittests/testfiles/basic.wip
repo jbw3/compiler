@@ -196,6 +196,13 @@ fun types_usize(n1 usize, n2 usize) usize
     n1 + n2
 }
 
+fun types_str()
+{
+    var s1 str = ""; # empty string
+    var s2 str = "Is this a test?"; # simple chars
+    var s3 str = "\t\r\n\\\"\'"; # escape sequences
+}
+
 fun types_add_literal(num i8) i8
 {
     # make sure we can add a constant literal to a number with a small size
