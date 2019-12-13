@@ -267,23 +267,38 @@ void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
         }
         else
         {
-            // TODO: this is not valid for all unicode code points
-
-            unsigned int value = 0;
+            unsigned continuingByteCount = 0;
+            unsigned value = 0;
             if (is1ByteUtf8(ch)) // 1-byte UTF-8 sequence
             {
                 value |= ch;
+                continuingByteCount = 0;
             }
             else if (is2ByteUtf8Start(ch)) // 2-byte UTF-8 sequence
             {
                 value |= ch & 0x1f;
+                continuingByteCount = 1;
+            }
+            else if (is3ByteUtf8Start(ch)) // 3-byte UTF-8 sequence
+            {
+                value |= ch & 0x0f;
+                continuingByteCount = 2;
+            }
+            else if (is4ByteUtf8Start(ch)) // 4-byte UTF-8 sequence
+            {
+                value |= ch & 0x07;
+                continuingByteCount = 3;
+            }
 
+            // add any continuing bytes in a multi-byte UTF-8 sequence
+            for (unsigned i = 0; i < continuingByteCount; ++i)
+            {
                 if (idx < charsSize - 1)
                 {
                     ++idx;
                     ch = chars[idx];
 
-                    // make sure the second byte is valid
+                    // make sure the continuing byte is valid
                     if (isUtf8Continuation(ch))
                     {
                         value <<= 6;

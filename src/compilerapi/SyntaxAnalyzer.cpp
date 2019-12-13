@@ -839,6 +839,8 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
     size_t endCharsIdx = value.size() - 1;
     while (idx < endCharsIdx)
     {
+        unsigned continuingByteCount = 0;
+
         char ch = value[idx];
         if (ch == '\\')
         {
@@ -885,34 +887,50 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
         else if (is1ByteUtf8(ch)) // 1-byte UTF-8 sequence
         {
             chars.push_back(ch);
+            continuingByteCount = 0;
         }
         else if (is2ByteUtf8Start(ch)) // 2-byte UTF-8 sequence
         {
             chars.push_back(ch);
+            continuingByteCount = 1;
+        }
+        else if (is3ByteUtf8Start(ch)) // 3-byte UTF-8 sequence
+        {
+            chars.push_back(ch);
+            continuingByteCount = 2;
+        }
+        else if (is4ByteUtf8Start(ch)) // 4-byte UTF-8 sequence
+        {
+            chars.push_back(ch);
+            continuingByteCount = 3;
+        }
+        else
+        {
+            logger.LogError(*iter, "Invalid character in string");
+            return nullptr;
+        }
 
+        // check and add any continuing bytes in a multi-byte UTF-8 sequence
+        for (unsigned i = 0; i < continuingByteCount; ++i)
+        {
             // make sure we're not at the end of the string
             if (idx >= endCharsIdx - 1)
             {
-                logger.LogError(*iter, "Start of 2-byte UTF-8 sequence at end of string");
+                logger.LogError(*iter, "Start of multi-byte UTF-8 sequence at end of string");
                 return nullptr;
             }
 
             ++idx;
             ch = value[idx];
 
-            // make sure the second byte is valid
+            // make sure the continuing byte is valid
             if (!isUtf8Continuation(ch))
             {
-                logger.LogError(*iter, "Invalid second byte of 2-byte UTF-8 sequence");
+                logger.LogError(*iter, "Invalid continuing byte of multi-byte UTF-8 sequence");
                 return nullptr;
             }
 
             chars.push_back(ch);
-        }
-        else
-        {
-            logger.LogError(*iter, "Invalid character in string");
-            return nullptr;
         }
 
         ++idx;
