@@ -4,6 +4,31 @@
 #include <cctype>
 #include <string>
 
+constexpr bool is1ByteUtf8(char ch)
+{
+    return (ch & 0x80) == 0;
+}
+
+constexpr bool is2ByteUtf8Start(char ch)
+{
+    return (ch & 0xe0) == 0xc0;
+}
+
+constexpr bool is3ByteUtf8Start(char ch)
+{
+    return (ch & 0xf0) == 0xe0;
+}
+
+constexpr bool is4ByteUtf8Start(char ch)
+{
+    return (ch & 0xf1) == 0xf0;
+}
+
+constexpr bool isUtf8Continuation(char ch)
+{
+    return (ch & 0xc0) == 0x80;
+}
+
 constexpr bool isIdentifierChar(char ch, bool isFirstChar)
 {
     if (isFirstChar)

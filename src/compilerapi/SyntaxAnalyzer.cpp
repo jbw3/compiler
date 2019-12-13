@@ -882,11 +882,11 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
                 return nullptr;
             }
         }
-        else if ((ch & 0x80) == 0) // 1-byte UTF-8 sequence
+        else if (is1ByteUtf8(ch)) // 1-byte UTF-8 sequence
         {
             chars.push_back(ch);
         }
-        else if ((ch & 0xe0) == 0xc0) // 2-byte UTF-8 sequence
+        else if (is2ByteUtf8Start(ch)) // 2-byte UTF-8 sequence
         {
             chars.push_back(ch);
 
@@ -901,7 +901,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             ch = value[idx];
 
             // make sure the second byte is valid
-            if ((ch & 0xc0) != 0x80)
+            if (!isUtf8Continuation(ch))
             {
                 logger.LogError(*iter, "Invalid second byte of 2-byte UTF-8 sequence");
                 return nullptr;

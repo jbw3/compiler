@@ -1,5 +1,6 @@
 #include "SyntaxTreePrinter.h"
 #include "SyntaxTree.h"
+#include "utils.h"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -234,8 +235,12 @@ void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
     stringstream ss;
     ss << hex;
 
-    for (char ch : stringLiteralExpression->GetCharacters())
+    const vector<char>& chars = stringLiteralExpression->GetCharacters();
+    size_t charsSize = chars.size();
+    for (size_t idx = 0; idx < charsSize; ++idx)
     {
+        char ch = chars[idx];
+
         if (ch == '\\')
         {
             ss << "\\\\";
@@ -263,9 +268,33 @@ void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
         else
         {
             // TODO: this is not valid for all unicode code points
-            ss << "\\u00"
-               << setfill('0') << setw(2)
-               << static_cast<unsigned int>(ch);
+
+            unsigned int value = 0;
+            if (is1ByteUtf8(ch)) // 1-byte UTF-8 sequence
+            {
+                value |= ch;
+            }
+            else if (is2ByteUtf8Start(ch)) // 2-byte UTF-8 sequence
+            {
+                value |= ch & 0x1f;
+
+                if (idx < charsSize - 1)
+                {
+                    ++idx;
+                    ch = chars[idx];
+
+                    // make sure the second byte is valid
+                    if (isUtf8Continuation(ch))
+                    {
+                        value <<= 6;
+                        value |= ch & 0x3f;
+                    }
+                }
+            }
+
+            ss << "\\u"
+               << setfill('0') << setw(4)
+               << value;
         }
     }
 
