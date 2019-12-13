@@ -589,7 +589,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
     else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
     {
-        llvmType =  strPointerType;
+        llvmType = strPointerType;
     }
     else
     {
