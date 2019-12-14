@@ -201,6 +201,11 @@ fun types_str()
     var s1 str = ""; # empty string
     var s2 str = "Is this a test?"; # simple chars
     var s3 str = "\t\r\n\\\"\'"; # escape sequences
+    var s4 str = "café"; # unicode
+
+    # these should point to the same constant
+    var dup1 str = "abc";
+    var dup2 str = "abc";
 }
 
 fun types_add_literal(num i8) i8
