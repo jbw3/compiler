@@ -17,11 +17,18 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
     outFile << "#ifndef " << macro << "\n"
                "#define " << macro << "\n\n"
                "#include <stdbool.h>\n"
+               "#include <stddef.h>\n"
                "#include <stdint.h>\n\n"
                "#ifdef __cplusplus\n"
                "extern \"C\"\n"
                "{\n"
-               "#endif\n\n";
+               "#endif\n\n"
+               "struct StrData\n"
+               "{\n"
+               "    size_t Size;\n"
+               "    char Data[0];\n"
+               "};\n\n"
+               "typedef const struct StrData* str;\n\n";
 
     // print function declarations
     string cType;
@@ -135,9 +142,14 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
         cType = ss.str();
         return true;
     }
+    else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
+    {
+        cType = "str";
+        return true;
+    }
     else
     {
-        cerr << "Unsupported return type\n";
+        cerr << "Unsupported type\n";
         cType = "";
         return false;
     }
