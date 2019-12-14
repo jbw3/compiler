@@ -390,33 +390,24 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 
     const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
 
-    // create name
-    stringstream strName;
-    strName << "str" << globalStringCounter;
-
-    module->getOrInsertGlobal(strName.str(), ArrayType::get(Type::getInt8Ty(context), chars.size()));
-    GlobalVariable* globalStr = module->getNamedGlobal(strName.str());
-    globalStr->setConstant(true);
-    globalStr->setInitializer(ConstantDataArray::getString(context, StringRef(chars.data(), chars.size()), false));
-
     vector<Constant*> initValues =
     {
-        ConstantExpr::getBitCast(globalStr, Type::getInt8PtrTy(context)),
         ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)),
+        ConstantDataArray::getString(context, StringRef(chars.data(), chars.size()), false),
     };
-    Constant* initializer = ConstantStruct::get(strStructType, initValues);
+    Constant* initializer = ConstantStruct::getAnon(context, initValues);
 
     // create name
     stringstream structName;
     structName << "strStruct" << globalStringCounter;
 
-    module->getOrInsertGlobal(structName.str(), strStructType);
+    module->getOrInsertGlobal(structName.str(), initializer->getType());
     GlobalVariable* globalStruct = module->getNamedGlobal(structName.str());
     globalStruct->setConstant(true);
     globalStruct->setInitializer(initializer);
 
     ++globalStringCounter;
-    resultValue = globalStruct;
+    resultValue = ConstantExpr::getBitCast(globalStruct, strPointerType);
 }
 
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
@@ -550,8 +541,8 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 
     unsigned int addressSpace = module->getDataLayout().getProgramAddressSpace();
 
-    strStructElements[0] = Type::getInt8PtrTy(context, addressSpace);
-    strStructElements[1] = GetType(TypeInfo::GetUIntSizeType());
+    strStructElements[0] = GetType(TypeInfo::GetUIntSizeType());
+    strStructElements[1] = ArrayType::get(Type::getInt8Ty(context), 0);
 
     ArrayRef<Type*> strArrayRef(strStructElements, STR_STRUCT_ELEMENTS_SIZE);
     strStructType = StructType::create(context, strArrayRef, "str");

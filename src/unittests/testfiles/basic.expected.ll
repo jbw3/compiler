@@ -3,15 +3,12 @@ source_filename = "src/unittests/testfiles/basic.wip"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
-%str = type { i8*, i64 }
 %UnitType = type {}
+%str = type { i64, [0 x i8] }
 
-@str0 = constant [0 x i8] zeroinitializer
-@strStruct0 = constant %str { i8* getelementptr inbounds ([0 x i8], [0 x i8]* @str0, i32 0, i32 0), i64 0 }
-@str1 = constant [15 x i8] c"Is this a test?"
-@strStruct1 = constant %str { i8* getelementptr inbounds ([15 x i8], [15 x i8]* @str1, i32 0, i32 0), i64 15 }
-@str2 = constant [6 x i8] c"\09\0D\0A\5C\22'"
-@strStruct2 = constant %str { i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str2, i32 0, i32 0), i64 6 }
+@strStruct0 = constant { i64, [0 x i8] } zeroinitializer
+@strStruct1 = constant { i64, [15 x i8] } { i64 15, [15 x i8] c"Is this a test?" }
+@strStruct2 = constant { i64, [6 x i8] } { i64 6, [6 x i8] c"\09\0D\0A\5C\22'" }
 
 declare %UnitType @extern1()
 
@@ -695,9 +692,9 @@ entry:
   %s3 = alloca %str*
   %s2 = alloca %str*
   %s1 = alloca %str*
-  store %str* @strStruct0, %str** %s1
-  store %str* @strStruct1, %str** %s2
-  store %str* @strStruct2, %str** %s3
+  store %str* bitcast ({ i64, [0 x i8] }* @strStruct0 to %str*), %str** %s1
+  store %str* bitcast ({ i64, [15 x i8] }* @strStruct1 to %str*), %str** %s2
+  store %str* bitcast ({ i64, [6 x i8] }* @strStruct2 to %str*), %str** %s3
   ret %UnitType zeroinitializer
 }
 
