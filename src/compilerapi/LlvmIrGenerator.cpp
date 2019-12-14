@@ -388,26 +388,39 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     const vector<char>& chars = stringLiteralExpression->GetCharacters();
 
-    const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
-
-    vector<Constant*> initValues =
+    // if we already have a constant for this string, then reuse it
+    auto iter = strings.find(chars);
+    if (iter != strings.end())
     {
-        ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)),
-        ConstantDataArray::getString(context, StringRef(chars.data(), chars.size()), false),
-    };
-    Constant* initializer = ConstantStruct::getAnon(context, initValues);
+        resultValue = iter->second;
+    }
+    else // create a new string constant
+    {
+        const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
 
-    // create name
-    stringstream structName;
-    structName << "strStruct" << globalStringCounter;
+        vector<Constant*> initValues =
+        {
+            ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)),
+            ConstantDataArray::getString(context, StringRef(chars.data(), chars.size()), false),
+        };
+        Constant* initializer = ConstantStruct::getAnon(context, initValues);
 
-    module->getOrInsertGlobal(structName.str(), initializer->getType());
-    GlobalVariable* globalStruct = module->getNamedGlobal(structName.str());
-    globalStruct->setConstant(true);
-    globalStruct->setInitializer(initializer);
+        // create name
+        stringstream structName;
+        structName << "strStruct" << globalStringCounter;
+        ++globalStringCounter;
 
-    ++globalStringCounter;
-    resultValue = ConstantExpr::getBitCast(globalStruct, strPointerType);
+        module->getOrInsertGlobal(structName.str(), initializer->getType());
+        GlobalVariable* globalStruct = module->getNamedGlobal(structName.str());
+        globalStruct->setConstant(true);
+        globalStruct->setInitializer(initializer);
+
+        Constant* constant = ConstantExpr::getBitCast(globalStruct, strPointerType);
+
+        strings[chars] = constant;
+
+        resultValue = constant;
+    }
 }
 
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)

@@ -8,6 +8,8 @@
 #include "SyntaxTreeVisitor.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
+#include <algorithm>
+#include <unordered_map>
 #pragma clang diagnostic pop
 
 namespace llvm
@@ -15,6 +17,32 @@ namespace llvm
 class TargetMachine;
 }
 class Config;
+
+namespace std
+{
+    template<>
+    struct hash<vector<char>>
+    {
+        size_t operator()(vector<char> vec) const
+        {
+            size_t h = 1'550'029'601; // large prime
+
+            size_t size = vec.size();
+            h ^= size * 8'191;
+            h *= 31;
+
+            size_t numChars = min(size, sizeof(h));
+            for (size_t i = 0; i < numChars; ++i)
+            {
+                size_t temp = vec[i] << (i * 8);
+                h ^= temp;
+            }
+            h *= 31;
+
+            return h;
+        }
+    };
+}
 
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
@@ -74,6 +102,7 @@ private:
     llvm::StructType* strStructType;
     llvm::PointerType* strPointerType;
     unsigned int globalStringCounter;
+    std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
 
     llvm::Type* GetType(const TypeInfo* type);
