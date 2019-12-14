@@ -54,6 +54,14 @@ public:
     bool Generate(SyntaxTree::SyntaxTreeNode* syntaxTree, llvm::Module*& module);
 
 private:
+    static constexpr size_t STR_STRUCT_ELEMENTS_SIZE = 2;
+
+    // This has to be static because the types will be
+    // reference in the generated module after this class
+    // has gone out of scope. Probably need to find a
+    // better way to do this.
+    static llvm::Type* strStructElements[STR_STRUCT_ELEMENTS_SIZE];
+
     llvm::TargetMachine* targetMachine;
     std::string inFilename;
     llvm::LLVMContext context;

@@ -14,6 +14,8 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
+Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
+
 LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     targetMachine(config.targetMachine),
     inFilename(config.inFilename),
@@ -548,12 +550,11 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 
     unsigned int addressSpace = module->getDataLayout().getProgramAddressSpace();
 
-    ArrayRef<Type*> strArray =
-    {
-        Type::getInt8PtrTy(context, addressSpace),
-        GetType(TypeInfo::GetUIntSizeType()),
-    };
-    strStructType = StructType::create(context, strArray, "str");
+    strStructElements[0] = Type::getInt8PtrTy(context, addressSpace);
+    strStructElements[1] = GetType(TypeInfo::GetUIntSizeType());
+
+    ArrayRef<Type*> strArrayRef(strStructElements, STR_STRUCT_ELEMENTS_SIZE);
+    strStructType = StructType::create(context, strArrayRef, "str");
     strPointerType = strStructType->getPointerTo(addressSpace);
 
     // generate LLVM IR from syntax tree
