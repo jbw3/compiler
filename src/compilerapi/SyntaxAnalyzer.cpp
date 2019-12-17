@@ -878,6 +878,48 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             {
                 chars.push_back('\t');
             }
+            else if (ch == 'x')
+            {
+                uint8_t byte = '\0';
+                for (size_t i = 0; i < 2; ++i)
+                {
+                    byte <<= 4;
+
+                    ++idx;
+                    if (idx >= endCharsIdx)
+                    {
+                        logger.LogError(*iter, "Reached end of string before end of '\\x' escape sequence");
+                        return nullptr;
+                    }
+
+                    ch = value[idx];
+                    if (ch >= '0' && ch <= '9')
+                    {
+                        byte |= ch - '0';
+                    }
+                    else if (ch >= 'A' && ch <= 'F')
+                    {
+                        byte |= ch - 'A' + 10;
+                    }
+                    else if (ch >= 'a' && ch <= 'f')
+                    {
+                        byte |= ch - 'a' + 10;
+                    }
+                    else
+                    {
+                        logger.LogError(*iter, "Invalid hexadecimal digit in '\\x' escape sequence");
+                        return nullptr;
+                    }
+                }
+
+                if (byte > 0x7f)
+                {
+                    logger.LogError(*iter, "Invalid '\\x' escape sequence");
+                    return nullptr;
+                }
+
+                chars.push_back(byte);
+            }
             else
             {
                 logger.LogError(*iter, "Invalid escape sequence '\\{}'", ch);
