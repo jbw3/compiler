@@ -878,41 +878,13 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             {
                 chars.push_back('\t');
             }
-            else if (ch == 'x')
+            else if (ch == 'x' || ch == 'u')
             {
-                char byte = '\0';
-                for (size_t i = 0; i < 2; ++i)
+                bool ok = ProcessUnicodeEscapeSequence(iter, idx, chars);
+                if (!ok)
                 {
-                    byte <<= 4;
-
-                    ++idx;
-                    if (idx >= endCharsIdx)
-                    {
-                        logger.LogError(*iter, "Reached end of string before end of '\\x' escape sequence");
-                        return nullptr;
-                    }
-
-                    ch = value[idx];
-
-                    char digitNum = '\0';
-                    if (hexDigitToNum(ch, digitNum))
-                    {
-                        byte |= digitNum;
-                    }
-                    else
-                    {
-                        logger.LogError(*iter, "Invalid hexadecimal digit in '\\x' escape sequence");
-                        return nullptr;
-                    }
-                }
-
-                if (!is1ByteUtf8(byte))
-                {
-                    logger.LogError(*iter, "Invalid '\\x' escape sequence");
                     return nullptr;
                 }
-
-                chars.push_back(byte);
             }
             else
             {
@@ -980,6 +952,107 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
 
     StringLiteralExpression* expr = new StringLiteralExpression(chars);
     return expr;
+}
+
+bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
+{
+    const string& value = iter->GetValue();
+    size_t endCharsIdx = value.size() - 1;
+    char escapeChar = value[idx];
+
+    size_t byteCount = 0;
+    switch (escapeChar)
+    {
+        case 'x':
+            byteCount = 1;
+            break;
+
+        case 'u':
+            byteCount = 2;
+            break;
+
+        default:
+            logger.LogError("Internal error: Invalid escape sequence '{}'", escapeChar);
+            return false;
+    }
+
+    uint32_t codePoint = 0;
+    for (size_t byteIdx = 0; byteIdx < byteCount; ++byteIdx)
+    {
+        char ch = '\0';
+        for (size_t i = 0; i < 2; ++i)
+        {
+            codePoint <<= 4;
+
+            ++idx;
+            if (idx >= endCharsIdx)
+            {
+                logger.LogError(*iter, "Reached end of string before end of '\\{}' escape sequence", escapeChar);
+                return false;
+            }
+
+            ch = value[idx];
+
+            char digitNum = '\0';
+            if (hexDigitToNum(ch, digitNum))
+            {
+                codePoint |= digitNum;
+            }
+            else
+            {
+                logger.LogError(*iter, "Invalid hexadecimal digit in '\\{}' escape sequence", escapeChar);
+                return false;
+            }
+        }
+    }
+
+    // check byte
+    if (byteCount == 1)
+    {
+        uint8_t byte = (uint8_t)codePoint;
+        if (!is1ByteUtf8(byte))
+        {
+            logger.LogError(*iter, "Invalid UTF-8 byte in '\\{}' escape sequence", escapeChar);
+            return false;
+        }
+
+        chars.push_back(byte);
+    }
+    else if (byteCount == 2)
+    {
+        // check if we can encode in 2 UTF-8 bytes
+        if (codePoint <= 0x07ff)
+        {
+            uint8_t byte = (codePoint & 0x07c0) >> 6;
+            byte |= 0xc0;
+            chars.push_back(byte);
+
+            byte = codePoint & 0x003f;
+            byte |= 0x80;
+            chars.push_back(byte);
+        }
+        else // we need 3 UTF-8 bytes
+        {
+            uint8_t byte = (codePoint & 0xf000) >> 12;
+            byte |= 0xe0;
+            chars.push_back(byte);
+
+            byte = (codePoint & 0x0fc0) >> 6;
+            byte |= 0x80;
+            chars.push_back(byte);
+
+            byte = codePoint & 0x003f;
+            byte |= 0x80;
+            chars.push_back(byte);
+        }
+    }
+    else
+    {
+        logger.LogError("Internal error: Invalid byte count in escape sequence processing");
+        return false;
+    }
+
+    return true;
 }
 
 BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter)
