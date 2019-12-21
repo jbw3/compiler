@@ -1020,8 +1020,14 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
     }
     else if (byteCount == 2)
     {
+        // check if we can encode in 1 UTF-8 byte
+        if (codePoint <= 0x7f)
+        {
+            uint8_t byte = codePoint & 0x007f;
+            chars.push_back(byte);
+        }
         // check if we can encode in 2 UTF-8 bytes
-        if (codePoint <= 0x07ff)
+        else if (codePoint <= 0x07ff)
         {
             uint8_t byte = (codePoint & 0x07c0) >> 6;
             byte |= 0xc0;
