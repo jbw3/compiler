@@ -878,7 +878,15 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             {
                 chars.push_back('\t');
             }
-            else if (ch == 'x' || ch == 'u' || ch == 'U')
+            else if (ch == 'x')
+            {
+                bool ok = ProcessByteEscapeSequence(iter, idx, chars);
+                if (!ok)
+                {
+                    return nullptr;
+                }
+            }
+            else if (ch == 'u')
             {
                 bool ok = ProcessUnicodeEscapeSequence(iter, idx, chars);
                 if (!ok)
@@ -954,170 +962,169 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
     return expr;
 }
 
+bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
+{
+    const string& value = iter->GetValue();
+    size_t endCharsIdx = value.size() - 1;
+
+    char ch = '\0';
+    uint8_t byte = 0;
+    for (size_t i = 0; i < 2; ++i)
+    {
+        byte <<= 4;
+
+        ++idx;
+        if (idx >= endCharsIdx)
+        {
+            logger.LogError(*iter, "Reached end of string before end of '\\x' escape sequence");
+            return false;
+        }
+
+        ch = value[idx];
+
+        char digitNum = '\0';
+        if (hexDigitToNum(ch, digitNum))
+        {
+            byte |= digitNum;
+        }
+        else
+        {
+            logger.LogError(*iter, "Invalid hexadecimal digit in '\\x' escape sequence");
+            return false;
+        }
+    }
+
+    if (!is1ByteUtf8(byte))
+    {
+        logger.LogError(*iter, "Invalid UTF-8 byte in '\\x' escape sequence");
+        return false;
+    }
+
+    chars.push_back(byte);
+    return true;
+}
+
 bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
 {
     const string& value = iter->GetValue();
     size_t endCharsIdx = value.size() - 1;
-    char escapeChar = value[idx];
 
-    size_t byteCount = 0;
-    switch (escapeChar)
+    ++idx;
+    if (idx >= endCharsIdx)
     {
-        case 'x':
-            byteCount = 1;
-            break;
-
-        case 'u':
-            byteCount = 2;
-            break;
-
-        case 'U':
-            byteCount = 4;
-            break;
-
-        default:
-            logger.LogError("Internal error: Invalid escape sequence '{}'", escapeChar);
-            return false;
+        logger.LogError(*iter, "Reached end of string before end of '\\u' escape sequence");
+        return false;
     }
 
+    char ch = value[idx];
+    if (ch != '{')
+    {
+        logger.LogError(*iter, "Expected '{' after '\\u'");
+        return false;
+    }
+
+    ++idx;
+    if (idx >= endCharsIdx)
+    {
+        logger.LogError(*iter, "Reached end of string before end of '\\u' escape sequence");
+        return false;
+    }
+
+    ch = value[idx];
+    if (ch == '}')
+    {
+        logger.LogError(*iter, "Unexpected '}' after '{'");
+        return false;
+    }
+
+    unsigned digitCount = 0;
     uint32_t codePoint = 0;
-    for (size_t byteIdx = 0; byteIdx < byteCount; ++byteIdx)
+    while (ch != '}')
     {
-        char ch = '\0';
-        for (size_t i = 0; i < 2; ++i)
+        ++digitCount;
+        if (digitCount > 8)
         {
-            codePoint <<= 4;
-
-            ++idx;
-            if (idx >= endCharsIdx)
-            {
-                logger.LogError(*iter, "Reached end of string before end of '\\{}' escape sequence", escapeChar);
-                return false;
-            }
-
-            ch = value[idx];
-
-            char digitNum = '\0';
-            if (hexDigitToNum(ch, digitNum))
-            {
-                codePoint |= digitNum;
-            }
-            else
-            {
-                logger.LogError(*iter, "Invalid hexadecimal digit in '\\{}' escape sequence", escapeChar);
-                return false;
-            }
-        }
-    }
-
-    // check byte
-    if (byteCount == 1)
-    {
-        uint8_t byte = (uint8_t)codePoint;
-        if (!is1ByteUtf8(byte))
-        {
-            logger.LogError(*iter, "Invalid UTF-8 byte in '\\{}' escape sequence", escapeChar);
+            logger.LogError(*iter, "'\\u' escape sequence cannot contain more than 8 digits");
             return false;
         }
 
-        chars.push_back(byte);
-    }
-    else if (byteCount == 2)
-    {
-        // check if we can encode in a 1-byte UTF-8 sequence
-        if (codePoint <= 0x7f)
+        codePoint <<= 4;
+
+        char digitNum = '\0';
+        if (hexDigitToNum(ch, digitNum))
         {
-            uint8_t byte = codePoint & 0x007f;
-            chars.push_back(byte);
-        }
-        // check if we can encode in a 2-byte UTF-8 sequence
-        else if (codePoint <= 0x07ff)
-        {
-            uint8_t byte = (codePoint & 0x07c0) >> 6;
-            byte |= 0xc0;
-            chars.push_back(byte);
-
-            byte = codePoint & 0x003f;
-            byte |= 0x80;
-            chars.push_back(byte);
-        }
-        else // we need a 3-byte UTF-8 sequence
-        {
-            uint8_t byte = (codePoint & 0xf000) >> 12;
-            byte |= 0xe0;
-            chars.push_back(byte);
-
-            byte = (codePoint & 0x0fc0) >> 6;
-            byte |= 0x80;
-            chars.push_back(byte);
-
-            byte = codePoint & 0x003f;
-            byte |= 0x80;
-            chars.push_back(byte);
-        }
-    }
-    else if (byteCount == 4)
-    {
-        // check if we can encode in a 1-byte UTF-8 sequence
-        if (codePoint <= 0x7f)
-        {
-            uint8_t byte = codePoint & 0x007f;
-            chars.push_back(byte);
-        }
-        // check if we can encode in a 2-byte UTF-8 sequence
-        else if (codePoint <= 0x07ff)
-        {
-            uint8_t byte = (codePoint & 0x07c0) >> 6;
-            byte |= 0xc0;
-            chars.push_back(byte);
-
-            byte = codePoint & 0x003f;
-            byte |= 0x80;
-            chars.push_back(byte);
-        }
-        // check if we can encode in a 3-byte UTF-8 sequence
-        else if (codePoint <= 0xffff)
-        {
-            uint8_t byte = (codePoint & 0xf000) >> 12;
-            byte |= 0xe0;
-            chars.push_back(byte);
-
-            byte = (codePoint & 0x0fc0) >> 6;
-            byte |= 0x80;
-            chars.push_back(byte);
-
-            byte = codePoint & 0x003f;
-            byte |= 0x80;
-            chars.push_back(byte);
-        }
-        // check if we can encode in a 4-byte UTF-8 sequence
-        else if (codePoint <= 0x10'ffff)
-        {
-            uint8_t byte = (codePoint & 0x1c'0000) >> 18;
-            byte |= 0xf0;
-            chars.push_back(byte);
-
-            byte = (codePoint & 0x03'f000) >> 12;
-            byte |= 0x80;
-            chars.push_back(byte);
-
-            byte = (codePoint & 0x00'0fc0) >> 6;
-            byte |= 0x80;
-            chars.push_back(byte);
-
-            byte = codePoint & 0x00'003f;
-            byte |= 0x80;
-            chars.push_back(byte);
+            codePoint |= digitNum;
         }
         else
         {
-            logger.LogError(*iter, "UTF-32 sequence exceeds max value");
+            logger.LogError(*iter, "Invalid hexadecimal digit in '\\u' escape sequence");
             return false;
         }
+
+        ++idx;
+        if (idx >= endCharsIdx)
+        {
+            logger.LogError(*iter, "Reached end of string before end of '\\u' escape sequence");
+            return false;
+        }
+
+        ch = value[idx];
+    }
+
+    // check if we can encode in a 1-byte UTF-8 sequence
+    if (codePoint <= 0x7f)
+    {
+        uint8_t byte = codePoint & 0x007f;
+        chars.push_back(byte);
+    }
+    // check if we can encode in a 2-byte UTF-8 sequence
+    else if (codePoint <= 0x07ff)
+    {
+        uint8_t byte = (codePoint & 0x07c0) >> 6;
+        byte |= 0xc0;
+        chars.push_back(byte);
+
+        byte = codePoint & 0x003f;
+        byte |= 0x80;
+        chars.push_back(byte);
+    }
+    // check if we can encode in a 3-byte UTF-8 sequence
+    else if (codePoint <= 0xffff)
+    {
+        uint8_t byte = (codePoint & 0xf000) >> 12;
+        byte |= 0xe0;
+        chars.push_back(byte);
+
+        byte = (codePoint & 0x0fc0) >> 6;
+        byte |= 0x80;
+        chars.push_back(byte);
+
+        byte = codePoint & 0x003f;
+        byte |= 0x80;
+        chars.push_back(byte);
+    }
+    // check if we can encode in a 4-byte UTF-8 sequence
+    else if (codePoint <= 0x10'ffff)
+    {
+        uint8_t byte = (codePoint & 0x1c'0000) >> 18;
+        byte |= 0xf0;
+        chars.push_back(byte);
+
+        byte = (codePoint & 0x03'f000) >> 12;
+        byte |= 0x80;
+        chars.push_back(byte);
+
+        byte = (codePoint & 0x00'0fc0) >> 6;
+        byte |= 0x80;
+        chars.push_back(byte);
+
+        byte = codePoint & 0x00'003f;
+        byte |= 0x80;
+        chars.push_back(byte);
     }
     else
     {
-        logger.LogError("Internal error: Invalid byte count in escape sequence processing");
+        logger.LogError(*iter, "Unicode sequence exceeds max value");
         return false;
     }
 

@@ -80,6 +80,8 @@ private:
 
     SyntaxTree::StringLiteralExpression* ProcessStringExpression(TokenIterator iter);
 
+    bool ProcessByteEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars);
+
     bool ProcessUnicodeEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars);
 
     SyntaxTree::BlockExpression* ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter);
