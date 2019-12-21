@@ -41,6 +41,30 @@ constexpr bool isIdentifierChar(char ch, bool isFirstChar)
     }
 }
 
+constexpr bool hexDigitToNum(char ch, char& num)
+{
+    if (ch >= '0' && ch <= '9')
+    {
+        num = ch - '0';
+        return true;
+    }
+    else if (ch >= 'A' && ch <= 'F')
+    {
+        num = ch - 'A' + 10;
+        return true;
+    }
+    else if (ch >= 'a' && ch <= 'f')
+    {
+        num = ch - 'a' + 10;
+        return true;
+    }
+    else
+    {
+        num = '\0';
+        return false;
+    }
+}
+
 bool isIdentifier(const std::string& str);
 
 bool isNumber(const std::string& tokenStr);

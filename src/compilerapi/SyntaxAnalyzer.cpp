@@ -880,7 +880,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             }
             else if (ch == 'x')
             {
-                uint8_t byte = '\0';
+                char byte = '\0';
                 for (size_t i = 0; i < 2; ++i)
                 {
                     byte <<= 4;
@@ -893,17 +893,11 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
                     }
 
                     ch = value[idx];
-                    if (ch >= '0' && ch <= '9')
+
+                    char digitNum = '\0';
+                    if (hexDigitToNum(ch, digitNum))
                     {
-                        byte |= ch - '0';
-                    }
-                    else if (ch >= 'A' && ch <= 'F')
-                    {
-                        byte |= ch - 'A' + 10;
-                    }
-                    else if (ch >= 'a' && ch <= 'f')
-                    {
-                        byte |= ch - 'a' + 10;
+                        byte |= digitNum;
                     }
                     else
                     {
@@ -912,7 +906,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
                     }
                 }
 
-                if (byte > 0x7f)
+                if (!is1ByteUtf8(byte))
                 {
                     logger.LogError(*iter, "Invalid '\\x' escape sequence");
                     return nullptr;

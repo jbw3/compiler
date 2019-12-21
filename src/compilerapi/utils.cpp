@@ -301,17 +301,10 @@ bool hexStringToInteger(const string& str, int64_t& num)
 
             num *= 16;
 
-            if (isdigit(ch))
+            char digitNum = '\0';
+            if (hexDigitToNum(ch, digitNum))
             {
-                num += ch - '0';
-            }
-            else if (ch >= 'a' && ch <= 'f')
-            {
-                num += ch - 'a' + 10;
-            }
-            else if (ch >= 'A' && ch <= 'F')
-            {
-                num += ch - 'A' + 10;
+                num += digitNum;
             }
             else
             {
