@@ -878,7 +878,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             {
                 chars.push_back('\t');
             }
-            else if (ch == 'x' || ch == 'u')
+            else if (ch == 'x' || ch == 'u' || ch == 'U')
             {
                 bool ok = ProcessUnicodeEscapeSequence(iter, idx, chars);
                 if (!ok)
@@ -971,6 +971,10 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
             byteCount = 2;
             break;
 
+        case 'U':
+            byteCount = 4;
+            break;
+
         default:
             logger.LogError("Internal error: Invalid escape sequence '{}'", escapeChar);
             return false;
@@ -1020,13 +1024,13 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
     }
     else if (byteCount == 2)
     {
-        // check if we can encode in 1 UTF-8 byte
+        // check if we can encode in a 1-byte UTF-8 sequence
         if (codePoint <= 0x7f)
         {
             uint8_t byte = codePoint & 0x007f;
             chars.push_back(byte);
         }
-        // check if we can encode in 2 UTF-8 bytes
+        // check if we can encode in a 2-byte UTF-8 sequence
         else if (codePoint <= 0x07ff)
         {
             uint8_t byte = (codePoint & 0x07c0) >> 6;
@@ -1037,7 +1041,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
             byte |= 0x80;
             chars.push_back(byte);
         }
-        else // we need 3 UTF-8 bytes
+        else // we need a 3-byte UTF-8 sequence
         {
             uint8_t byte = (codePoint & 0xf000) >> 12;
             byte |= 0xe0;
@@ -1050,6 +1054,65 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
             byte = codePoint & 0x003f;
             byte |= 0x80;
             chars.push_back(byte);
+        }
+    }
+    else if (byteCount == 4)
+    {
+        // check if we can encode in a 1-byte UTF-8 sequence
+        if (codePoint <= 0x7f)
+        {
+            uint8_t byte = codePoint & 0x007f;
+            chars.push_back(byte);
+        }
+        // check if we can encode in a 2-byte UTF-8 sequence
+        else if (codePoint <= 0x07ff)
+        {
+            uint8_t byte = (codePoint & 0x07c0) >> 6;
+            byte |= 0xc0;
+            chars.push_back(byte);
+
+            byte = codePoint & 0x003f;
+            byte |= 0x80;
+            chars.push_back(byte);
+        }
+        // check if we can encode in a 3-byte UTF-8 sequence
+        else if (codePoint <= 0xffff)
+        {
+            uint8_t byte = (codePoint & 0xf000) >> 12;
+            byte |= 0xe0;
+            chars.push_back(byte);
+
+            byte = (codePoint & 0x0fc0) >> 6;
+            byte |= 0x80;
+            chars.push_back(byte);
+
+            byte = codePoint & 0x003f;
+            byte |= 0x80;
+            chars.push_back(byte);
+        }
+        // check if we can encode in a 4-byte UTF-8 sequence
+        else if (codePoint <= 0x10'ffff)
+        {
+            uint8_t byte = (codePoint & 0x1c'0000) >> 18;
+            byte |= 0xf0;
+            chars.push_back(byte);
+
+            byte = (codePoint & 0x03'f000) >> 12;
+            byte |= 0x80;
+            chars.push_back(byte);
+
+            byte = (codePoint & 0x00'0fc0) >> 6;
+            byte |= 0x80;
+            chars.push_back(byte);
+
+            byte = codePoint & 0x00'003f;
+            byte |= 0x80;
+            chars.push_back(byte);
+        }
+        else
+        {
+            logger.LogError(*iter, "UTF-32 sequence exceeds max value");
+            return false;
         }
     }
     else

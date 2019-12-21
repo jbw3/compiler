@@ -202,7 +202,7 @@ fun types_str()
     var s2 str = "Is this a test?"; # simple chars
     var s3 str = "\t\r\n\\\"\'"; # escape sequences
     var s4 str = "café"; # unicode
-    var s5 str = "\x41\u0042\u03c0\u20BF"; # unicode escape sequences
+    var s5 str = "\x41\u0042\u03c0\u20BF\U00000043\U000003b8\U0000222B\U0001F600"; # unicode escape sequences
 
     # these should point to the same constant
     var dup1 str = "abc";

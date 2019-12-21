@@ -10,7 +10,7 @@ target triple = "x86_64-pc-linux-gnu"
 @strStruct1 = constant { i64, [15 x i8] } { i64 15, [15 x i8] c"Is this a test?" }
 @strStruct2 = constant { i64, [6 x i8] } { i64 6, [6 x i8] c"\09\0D\0A\5C\22'" }
 @strStruct3 = constant { i64, [5 x i8] } { i64 5, [5 x i8] c"caf\C3\A9" }
-@strStruct4 = constant { i64, [7 x i8] } { i64 7, [7 x i8] c"AB\CF\80\E2\82\BF" }
+@strStruct4 = constant { i64, [17 x i8] } { i64 17, [17 x i8] c"AB\CF\80\E2\82\BFC\CE\B8\E2\88\AB\F0\9F\98\80" }
 @strStruct5 = constant { i64, [3 x i8] } { i64 3, [3 x i8] c"abc" }
 
 declare %UnitType @extern1()
@@ -703,7 +703,7 @@ entry:
   store %str* bitcast ({ i64, [15 x i8] }* @strStruct1 to %str*), %str** %s2
   store %str* bitcast ({ i64, [6 x i8] }* @strStruct2 to %str*), %str** %s3
   store %str* bitcast ({ i64, [5 x i8] }* @strStruct3 to %str*), %str** %s4
-  store %str* bitcast ({ i64, [7 x i8] }* @strStruct4 to %str*), %str** %s5
+  store %str* bitcast ({ i64, [17 x i8] }* @strStruct4 to %str*), %str** %s5
   store %str* bitcast ({ i64, [3 x i8] }* @strStruct5 to %str*), %str** %dup1
   store %str* bitcast ({ i64, [3 x i8] }* @strStruct5 to %str*), %str** %dup2
   ret %UnitType zeroinitializer
