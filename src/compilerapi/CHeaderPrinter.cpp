@@ -1,4 +1,5 @@
 #include "CHeaderPrinter.h"
+#include "keywords.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -132,14 +133,28 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     }
     else if (type->IsInt())
     {
-        stringstream ss;
-        if (!type->IsSigned())
-        {
-            ss << 'u';
-        }
-        ss << "int" << type->GetNumBits() << "_t";
+        const string shortName = type->GetShortName();
 
-        cType = ss.str();
+        if (shortName == INT_SIZE_KEYWORD)
+        {
+            cType = "intptr_t";
+        }
+        else if (shortName == UINT_SIZE_KEYWORD)
+        {
+            cType = "uintptr_t";
+        }
+        else
+        {
+            stringstream ss;
+            if (!type->IsSigned())
+            {
+                ss << 'u';
+            }
+            ss << "int" << type->GetNumBits() << "_t";
+
+            cType = ss.str();
+        }
+
         return true;
     }
     else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
