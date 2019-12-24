@@ -39,7 +39,8 @@ public:
         unsigned numBits,
         bool isBool,
         bool isInt,
-        bool isSigned
+        bool isSigned,
+        const std::string& shortName
     );
 
     virtual bool IsSameAs(const TypeInfo& other) const = 0;
@@ -52,6 +53,8 @@ public:
 
     unsigned GetNumBits() const;
 
+    const std::string& GetShortName() const;
+
 private:
     static TypeInfo* intSizeType;
     static TypeInfo* uintSizeType;
@@ -62,6 +65,7 @@ private:
     bool isBool;
     bool isInt;
     bool isSigned;
+    std::string shortName;
 };
 
 class UnitTypeInfo : public TypeInfo
@@ -79,7 +83,8 @@ public:
         unsigned numBits,
         bool isBool,
         bool isInt,
-        bool isSigned
+        bool isSigned,
+        const std::string& shortName
     );
 
     bool IsSameAs(const TypeInfo& other) const override;

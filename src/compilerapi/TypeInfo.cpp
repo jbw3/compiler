@@ -10,15 +10,15 @@ using namespace llvm;
 using namespace std;
 
 UnitTypeInfo unitType;
-PrimitiveType boolTypeInfo(1, true, false, false);
-PrimitiveType int8TypeInfo(8, false, true, true);
-PrimitiveType int16TypeInfo(16, false, true, true);
-PrimitiveType int32TypeInfo(32, false, true, true);
-PrimitiveType int64TypeInfo(64, false, true, true);
-PrimitiveType uInt8TypeInfo(8, false, true, false);
-PrimitiveType uInt16TypeInfo(16, false, true, false);
-PrimitiveType uInt32TypeInfo(32, false, true, false);
-PrimitiveType uInt64TypeInfo(64, false, true, false);
+PrimitiveType boolTypeInfo(1, true, false, false, BOOL_KEYWORD);
+PrimitiveType int8TypeInfo(8, false, true, true, INT8_KEYWORD);
+PrimitiveType int16TypeInfo(16, false, true, true, INT16_KEYWORD);
+PrimitiveType int32TypeInfo(32, false, true, true, INT32_KEYWORD);
+PrimitiveType int64TypeInfo(64, false, true, true, INT64_KEYWORD);
+PrimitiveType uInt8TypeInfo(8, false, true, false, UINT8_KEYWORD);
+PrimitiveType uInt16TypeInfo(16, false, true, false, UINT16_KEYWORD);
+PrimitiveType uInt32TypeInfo(32, false, true, false, UINT32_KEYWORD);
+PrimitiveType uInt64TypeInfo(64, false, true, false, UINT64_KEYWORD);
 
 const UnitTypeInfo* TypeInfo::UnitType = &unitType;
 const TypeInfo* TypeInfo::BoolType = &boolTypeInfo;
@@ -52,9 +52,9 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 {
     unsigned numBits = 8 * targetMachine->getAllocaPointerSize();
 
-    intSizeType = new PrimitiveType(numBits, false, true, true);
+    intSizeType = new PrimitiveType(numBits, false, true, true, INT_SIZE_KEYWORD);
     RegisterType(INT_SIZE_KEYWORD, intSizeType);
-    uintSizeType = new PrimitiveType(numBits, false, true, false);
+    uintSizeType = new PrimitiveType(numBits, false, true, false, UINT_SIZE_KEYWORD);
     RegisterType(UINT_SIZE_KEYWORD, uintSizeType);
 
     stringPointerType = new StringPointerType(numBits);
@@ -96,12 +96,14 @@ TypeInfo::TypeInfo(
     unsigned numBits,
     bool isBool,
     bool isInt,
-    bool isSigned
+    bool isSigned,
+    const string& shortName
 ) :
     numBits(numBits),
     isBool(isBool),
     isInt(isInt),
-    isSigned(isSigned)
+    isSigned(isSigned),
+    shortName(shortName)
 {
 }
 
@@ -125,8 +127,13 @@ unsigned TypeInfo::GetNumBits() const
     return numBits;
 }
 
+const string& TypeInfo::GetShortName() const
+{
+    return shortName;
+}
+
 UnitTypeInfo::UnitTypeInfo() :
-    TypeInfo(0, false, false, false)
+    TypeInfo(0, false, false, false, "Unit")
 {
 }
 
@@ -140,9 +147,10 @@ PrimitiveType::PrimitiveType(
     unsigned numBits,
     bool isBool,
     bool isInt,
-    bool isSigned
+    bool isSigned,
+    const string& shortName
 ) :
-    TypeInfo(numBits, isBool, isInt, isSigned)
+    TypeInfo(numBits, isBool, isInt, isSigned, shortName)
 {
 }
 
@@ -161,7 +169,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 }
 
 StringPointerType::StringPointerType(unsigned numBits) :
-    TypeInfo(numBits, false, false, false)
+    TypeInfo(numBits, false, false, false, STR_KEYWORD)
 {
 }
 
