@@ -295,7 +295,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         returnType = TypeInfo::GetType(iter->GetValue());
         if (returnType == nullptr)
         {
-            logger.LogError(*iter, "Expected return type");
+            logger.LogError(*iter, "'{}' is not a known type", iter->GetValue());
             deletePointerContainer(parameters);
             return nullptr;
         }
