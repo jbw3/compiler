@@ -1,6 +1,7 @@
 #ifndef SEMANTIC_ANALYZER_H_
 #define SEMANTIC_ANALYZER_H_
 
+#include "ErrorLogger.h"
 #include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
@@ -9,7 +10,7 @@
 class SemanticAnalyzer : public SyntaxTreeVisitor
 {
 public:
-    SemanticAnalyzer();
+    SemanticAnalyzer(ErrorLogger& logger);
 
     bool Process(SyntaxTree::SyntaxTreeNode* syntaxTree);
 
@@ -44,6 +45,7 @@ public:
     void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
 
 private:
+    ErrorLogger& logger;
     bool isError;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;

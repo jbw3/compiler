@@ -57,7 +57,7 @@ bool Compiler::Compile()
     // semantic analysis
     if (ok)
     {
-        SemanticAnalyzer semanticAnalyzer;
+        SemanticAnalyzer semanticAnalyzer(logger);
         ok = semanticAnalyzer.Process(syntaxTree);
     }
 

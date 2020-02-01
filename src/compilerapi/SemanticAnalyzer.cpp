@@ -5,7 +5,8 @@
 using namespace std;
 using namespace SyntaxTree;
 
-SemanticAnalyzer::SemanticAnalyzer() :
+SemanticAnalyzer::SemanticAnalyzer(ErrorLogger& logger) :
+    logger(logger),
     isError(false)
 {
 }
@@ -50,7 +51,7 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, con
 
     if (!ok)
     {
-        cerr << "Unary operator does not support type\n";
+        logger.LogError("Unary operator does not support type '{}'", subExprType->GetShortName());
     }
 
     return ok;
@@ -104,7 +105,6 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
 
     if ( !(leftType->IsSameAs(*rightType)) && !bothAreInts )
     {
-        cerr << "Left and right operands do not have the same type\n";
         ok = false;
     }
     else
@@ -161,11 +161,11 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 ok = (leftType->IsBool() && rightType->IsBool()) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
                 break;
         }
+    }
 
-        if (!ok)
-        {
-            cerr << "Binary operator does not support types\n";
-        }
+    if (!ok)
+    {
+        logger.LogError("Binary operator does not support types '{}' and '{}'", leftType->GetShortName(), rightType->GetShortName());
     }
 
     return ok;
@@ -294,7 +294,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         if ( !(expressionType->IsInt() && returnType->IsInt() && expressionType->IsSigned() == returnType->IsSigned() && expressionType->GetNumBits() <= returnType->GetNumBits()) )
         {
             isError = true;
-            cerr << "Function return expression does not equal return type\n";
+            logger.LogError("Invalid function return type. Expected '{}' but got '{}'", returnType->GetShortName(), expressionType->GetShortName());
         }
     }
 }
