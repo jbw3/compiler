@@ -538,7 +538,9 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     else
     {
         isError = true;
-        cerr << "'if' and 'else' expressions must have the same type\n";
+        logger.LogError("'if' and 'else' expressions have mismatching types ('{}' and '{}')",
+            ifType->GetShortName(),
+            elseType->GetShortName());
         return;
     }
 
