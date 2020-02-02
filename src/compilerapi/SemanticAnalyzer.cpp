@@ -137,6 +137,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 break;
             case BinaryExpression::eShiftLeft:
             case BinaryExpression::eShiftRightArithmetic:
+            case BinaryExpression::eShiftRightLogical:
                 // the return type should be the left type, so the right type has to be the
                 // same size or smaller
                 ok = bothAreInts && leftType->GetNumBits() >= rightType->GetNumBits();
@@ -153,6 +154,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 break;
             case BinaryExpression::eShiftLeftAssign:
             case BinaryExpression::eShiftRightArithmeticAssign:
+            case BinaryExpression::eShiftRightLogicalAssign:
                 ok = bothAreInts && leftType->GetNumBits() >= rightType->GetNumBits();
                 break;
             case BinaryExpression::eBitwiseAndAssign:
@@ -209,6 +211,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         }
         case BinaryExpression::eShiftLeft:
         case BinaryExpression::eShiftRightArithmetic:
+        case BinaryExpression::eShiftRightLogical:
             return leftType;
         case BinaryExpression::eAssign:
         case BinaryExpression::eAddAssign:
@@ -218,6 +221,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eRemainderAssign:
         case BinaryExpression::eShiftLeftAssign:
         case BinaryExpression::eShiftRightArithmeticAssign:
+        case BinaryExpression::eShiftRightLogicalAssign:
         case BinaryExpression::eBitwiseAndAssign:
         case BinaryExpression::eBitwiseXorAssign:
         case BinaryExpression::eBitwiseOrAssign:
