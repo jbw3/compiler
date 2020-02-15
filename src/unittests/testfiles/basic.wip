@@ -35,7 +35,7 @@ fun opOrder3(a i32, b i32, c i32, d i32) bool
 
 fun opOrder4(a i32, b i32, c i32, d i32, e i32, f i32) i32
 {
-    a | b ^ c & d << e >> f
+    a | b ^ c & d << e >> f >>> a
 }
 
 fun opOrder5(a i32, b i32, c i32, d i32) i32
@@ -117,6 +117,7 @@ fun assignOps(a i8, b i16, c i32)
     c %= a;
     c <<= a + b;
     c >>= a;
+    c >>>= b;
     c &= a + b;
     c ^= a;
     c |= a + b;
