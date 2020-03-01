@@ -20,6 +20,22 @@ PrimitiveType uInt16TypeInfo(16, false, true, false, UINT16_KEYWORD);
 PrimitiveType uInt32TypeInfo(32, false, true, false, UINT32_KEYWORD);
 PrimitiveType uInt64TypeInfo(64, false, true, false, UINT64_KEYWORD);
 
+MemberInfo::MemberInfo(const string& name, const TypeInfo* type) :
+    name(name),
+    type(type)
+{
+}
+
+const string& MemberInfo::GetName() const
+{
+    return name;
+}
+
+const TypeInfo* MemberInfo::GetType() const
+{
+    return type;
+}
+
 const UnitTypeInfo* TypeInfo::UnitType = &unitType;
 const TypeInfo* TypeInfo::BoolType = &boolTypeInfo;
 const TypeInfo* TypeInfo::Int8Type = &int8TypeInfo;
@@ -130,6 +146,17 @@ unsigned TypeInfo::GetNumBits() const
 const string& TypeInfo::GetShortName() const
 {
     return shortName;
+}
+
+const MemberInfo* TypeInfo::GetMember(const string& memberName) const
+{
+    auto iter = members.find(memberName);
+    if (iter == members.cend())
+    {
+        return nullptr;
+    }
+
+    return iter->second;
 }
 
 UnitTypeInfo::UnitTypeInfo() :

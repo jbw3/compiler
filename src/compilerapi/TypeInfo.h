@@ -7,7 +7,22 @@ namespace llvm
 {
 class TargetMachine;
 }
+class TypeInfo;
 class UnitTypeInfo;
+
+class MemberInfo
+{
+public:
+    MemberInfo(const std::string& name, const TypeInfo* type);
+
+    const std::string& GetName() const;
+
+    const TypeInfo* GetType() const;
+
+private:
+    std::string name;
+    const TypeInfo* type;
+};
 
 class TypeInfo
 {
@@ -55,6 +70,8 @@ public:
 
     const std::string& GetShortName() const;
 
+    const MemberInfo* GetMember(const std::string& memberName) const;
+
 private:
     static TypeInfo* intSizeType;
     static TypeInfo* uintSizeType;
@@ -66,6 +83,7 @@ private:
     bool isInt;
     bool isSigned;
     std::string shortName;
+    std::map<std::string, const MemberInfo*> members;
 };
 
 class UnitTypeInfo : public TypeInfo
