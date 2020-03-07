@@ -489,6 +489,12 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     functionExpression->SetType(funcDecl->GetReturnType());
 }
 
+void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
+{
+    logger.LogError("TODO: implement");
+    isError = true;
+}
+
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 {
     Expression* ifCondition = branchExpression->GetIfCondition();

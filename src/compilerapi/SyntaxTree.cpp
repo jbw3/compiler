@@ -341,6 +341,32 @@ const Expressions& FunctionExpression::GetArguments() const
     return arguments;
 }
 
+MemberExpression::MemberExpression(Expression* subExpr, const std::string& memberName) :
+    subExpression(subExpr),
+    memberName(memberName)
+{
+}
+
+MemberExpression::~MemberExpression()
+{
+    delete subExpression;
+}
+
+void MemberExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+Expression* MemberExpression::GetSubExpression() const
+{
+    return subExpression;
+}
+
+const string& MemberExpression::GetMemberName() const
+{
+    return memberName;
+}
+
 BranchExpression::BranchExpression(Expression* ifCondition,
                                    Expression* ifExpression,
                                    Expression* elseExpression) :

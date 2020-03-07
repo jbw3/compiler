@@ -40,6 +40,8 @@ public:
 
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
+    void Visit(SyntaxTree::MemberExpression* memberExpression) override;
+
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
 
     void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;

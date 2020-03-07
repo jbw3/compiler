@@ -519,6 +519,12 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
     resultValue = builder.CreateCall(func, args, "call");
 }
 
+void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
+{
+    resultValue = nullptr;
+    cerr << "TODO: implement\n";
+}
+
 void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 {
     resultValue = CreateBranch(

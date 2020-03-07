@@ -10,6 +10,7 @@ class BranchExpression;
 class ExternFunctionDeclaration;
 class FunctionDefinition;
 class FunctionExpression;
+class MemberExpression;
 class ModuleDefinition;
 class NumericExpression;
 class StringLiteralExpression;
@@ -48,6 +49,8 @@ public:
     virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
 
     virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
+
+    virtual void Visit(SyntaxTree::MemberExpression* memberExpression) = 0;
 
     virtual void Visit(SyntaxTree::BranchExpression* branchExpression) = 0;
 

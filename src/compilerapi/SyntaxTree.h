@@ -244,6 +244,24 @@ private:
     Expressions arguments;
 };
 
+class MemberExpression : public Expression
+{
+public:
+    MemberExpression(Expression* subExpr, const std::string& memberName);
+
+    virtual ~MemberExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    Expression* GetSubExpression() const;
+
+    const std::string& GetMemberName() const;
+
+private:
+    Expression* subExpression;
+    std::string memberName;
+};
+
 class BranchExpression : public Expression
 {
 public:

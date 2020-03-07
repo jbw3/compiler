@@ -348,6 +348,15 @@ void SyntaxTreePrinter::Visit(FunctionExpression* functionExpression)
     PrintProperty("arguments", functionExpression->GetArguments());
 }
 
+void SyntaxTreePrinter::Visit(MemberExpression* memberExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "MemberExpression");
+    PrintProperty("expression", memberExpression->GetSubExpression());
+    PrintProperty("memberName", memberExpression->GetMemberName());
+}
+
 void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
 {
     BracePrinter printer(*this, "{", "}");
