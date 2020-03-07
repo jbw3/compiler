@@ -69,6 +69,8 @@ private:
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);
 
+    SyntaxTree::Expression* ProcessTerm(TokenIterator& iter, TokenIterator nextIter, TokenIterator endIter, bool& isPotentialEnd);
+
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const std::unordered_set<std::string>& endTokens);
 

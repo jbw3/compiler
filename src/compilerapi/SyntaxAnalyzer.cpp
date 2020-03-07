@@ -529,6 +529,117 @@ Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<Unar
     return result;
 }
 
+Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextIter, TokenIterator endIter, bool& isPotentialEnd)
+{
+    string value = iter->GetValue();
+    Expression* expr = nullptr;
+
+    if (isNumber(value))
+    {
+        expr = new NumericExpression(value);
+    }
+    else if (isBool(value))
+    {
+        expr = new BoolLiteralExpression(value);
+    }
+    else if (value[0] == '"')
+    {
+        expr = ProcessStringExpression(iter);
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
+    }
+    else if (value == "(")
+    {
+        TokenIterator parenEndIter = FindParenthesisEnd(iter, endIter);
+        if (parenEndIter == endIter)
+        {
+            logger.LogError(*iter, "Could not find end parenthesis");
+            return nullptr;
+        }
+
+        ++iter;
+        expr = ProcessExpression(iter, parenEndIter, {});
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
+    }
+    else if (value == BLOCK_START)
+    {
+        expr = ProcessBlockExpression(iter, endIter);
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
+    }
+    else if (value == IF_KEYWORD)
+    {
+        expr = ProcessBranchExpression(iter, endIter);
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
+
+        isPotentialEnd = true;
+    }
+    else if (iter->GetValue() == WHILE_KEYWORD)
+    {
+        expr = ProcessWhileLoop(iter, endIter);
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
+
+        isPotentialEnd = true;
+    }
+    else if (IsValidName(*iter))
+    {
+        // check if it's a function call
+        if (nextIter != endIter && nextIter->GetValue() == "(")
+        {
+            iter += 2;
+            if (iter == endIter)
+            {
+                logger.LogError("Unexpected end of file");
+                return nullptr;
+            }
+
+            // process arguments
+            vector<Expression*> arguments;
+            while (iter->GetValue() != ")")
+            {
+                Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
+                if (argExpr == nullptr)
+                {
+                    deletePointerContainer(arguments);
+                    return nullptr;
+                }
+                arguments.push_back(argExpr);
+
+                if (iter->GetValue() == ",")
+                {
+                    ++iter;
+                }
+            }
+
+            expr = new FunctionExpression(value, arguments);
+        }
+        else // it's a variable
+        {
+            expr = new VariableExpression(value);
+        }
+    }
+    else
+    {
+        logger.LogError(*iter, "Unexpected term '{}'", value);
+        return nullptr;
+    }
+
+    return expr;
+}
+
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               const unordered_set<string>& endTokens)
 {
@@ -562,136 +673,15 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             }
             else
             {
-                if (isNumber(value))
+                Expression* expr = ProcessTerm(iter, nextIter, endIter, isPotentialEnd);
+                if (expr == nullptr)
                 {
-                    Expression* expr = AddUnaryExpressions(new NumericExpression(value), unaryOperators);
-                    terms.push_back(expr);
-                }
-                else if (isBool(value))
-                {
-                    Expression* expr = AddUnaryExpressions(new BoolLiteralExpression(value), unaryOperators);
-                    terms.push_back(expr);
-                }
-                else if (value[0] == '"')
-                {
-                    Expression* expr = ProcessStringExpression(iter);
-                    if (expr == nullptr)
-                    {
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-                }
-                else if (value == "(")
-                {
-                    TokenIterator parenEndIter = FindParenthesisEnd(iter, endIter);
-                    if (parenEndIter == endIter)
-                    {
-                        logger.LogError(*iter, "Could not find end parenthesis");
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    ++iter;
-                    Expression* expr = ProcessExpression(iter, parenEndIter, {});
-                    if (expr == nullptr)
-                    {
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-                }
-                else if (value == BLOCK_START)
-                {
-                    Expression* expr = ProcessBlockExpression(iter, endIter);
-                    if (expr == nullptr)
-                    {
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-                }
-                else if (value == IF_KEYWORD)
-                {
-                    Expression* expr = ProcessBranchExpression(iter, endIter);
-                    if (expr == nullptr)
-                    {
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-
-                    isPotentialEnd = true;
-                }
-                else if (iter->GetValue() == WHILE_KEYWORD)
-                {
-                    Expression* expr = ProcessWhileLoop(iter, endIter);
-                    if (expr == nullptr)
-                    {
-                        deletePointerContainer(terms);
-                        return nullptr;
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-
-                    isPotentialEnd = true;
-                }
-                else if (IsValidName(*iter))
-                {
-                    // check if it's a function call
-                    if (nextIter != endIter && nextIter->GetValue() == "(")
-                    {
-                        iter += 2;
-                        if (iter == endIter)
-                        {
-                            logger.LogError("Unexpected end of file");
-                            deletePointerContainer(terms);
-                            return nullptr;
-                        }
-
-                        // process arguments
-                        vector<Expression*> arguments;
-                        while (iter->GetValue() != ")")
-                        {
-                            Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
-                            if (argExpr == nullptr)
-                            {
-                                deletePointerContainer(terms);
-                                deletePointerContainer(arguments);
-                                return nullptr;
-                            }
-                            arguments.push_back(argExpr);
-
-                            if (iter->GetValue() == ",")
-                            {
-                                ++iter;
-                            }
-                        }
-
-                        Expression* expr = AddUnaryExpressions(new FunctionExpression(value, arguments), unaryOperators);
-                        terms.push_back(expr);
-                    }
-                    else // it's a variable
-                    {
-                        Expression* expr = AddUnaryExpressions(new VariableExpression(value), unaryOperators);
-                        terms.push_back(expr);
-                    }
-                }
-                else
-                {
-                    logger.LogError(*iter, "Unexpected term '{}'", value);
                     deletePointerContainer(terms);
                     return nullptr;
                 }
+
+                expr = AddUnaryExpressions(expr, unaryOperators);
+                terms.push_back(expr);
 
                 expectTerm = false;
             }
