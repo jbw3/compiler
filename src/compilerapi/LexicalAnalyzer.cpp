@@ -12,7 +12,7 @@ const char LexicalAnalyzer::COMMENT_END = '\n';
 const unordered_set<string> LexicalAnalyzer::SYMBOLS =
 {
     "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "<<", ">>", ">>>", "!", "&", "^", "|", "&&", "||", "(", ")", "{", "}", ",",
-    ";", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", ">>>=", "&=", "^=", "|=",
+    ".", ";", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", ">>>=", "&=", "^=", "|=",
 };
 
 LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :

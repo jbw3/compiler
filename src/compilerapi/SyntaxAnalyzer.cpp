@@ -680,6 +680,16 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     return nullptr;
                 }
 
+                if (nextIter != endIter && nextIter->GetValue() == ".")
+                {
+                    expr = ProcessMemberExpression(expr, iter, endIter);
+                    if (expr == nullptr)
+                    {
+                        deletePointerContainer(terms);
+                        return nullptr;
+                    }
+                }
+
                 expr = AddUnaryExpressions(expr, unaryOperators);
                 terms.push_back(expr);
 
@@ -1277,5 +1287,35 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     BranchExpression* expr = new BranchExpression(ifCondition.release(),
                                                   ifExpression.release(),
                                                   elseExpression.release());
+    return expr;
+}
+
+Expression* SyntaxAnalyzer::ProcessMemberExpression(Expression* expr, TokenIterator& iter, TokenIterator endIter)
+{
+    TokenIterator nextIter = iter + 1;
+
+    while (nextIter != endIter && nextIter->GetValue() == ".")
+    {
+        // skip to token after "."
+        iter += 2;
+
+        if (iter == endIter)
+        {
+            logger.LogError(*iter, "No member name after member operator");
+            delete expr;
+            return nullptr;
+        }
+        else if (!IsValidName(*iter))
+        {
+            logger.LogError(*iter, "Invalid member name");
+            delete expr;
+            return nullptr;
+        }
+
+        expr = new MemberExpression(expr, iter->GetValue());
+
+        nextIter = iter + 1;
+    }
+
     return expr;
 }
