@@ -123,6 +123,16 @@ TypeInfo::TypeInfo(
 {
 }
 
+TypeInfo::~TypeInfo()
+{
+    for (auto iter = members.begin(); iter != members.end(); ++iter)
+    {
+        delete iter->second;
+    }
+
+    members.clear();
+}
+
 bool TypeInfo::IsBool() const
 {
     return isBool;
@@ -157,6 +167,11 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     }
 
     return iter->second;
+}
+
+void TypeInfo::AddMember(const MemberInfo* member)
+{
+    members.insert({member->GetName(), member});
 }
 
 UnitTypeInfo::UnitTypeInfo() :
@@ -198,6 +213,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 StringPointerType::StringPointerType(unsigned numBits) :
     TypeInfo(numBits, false, false, false, STR_KEYWORD)
 {
+    AddMember(new MemberInfo("Size", TypeInfo::GetUIntSizeType()));
 }
 
 bool StringPointerType::IsSameAs(const TypeInfo& other) const

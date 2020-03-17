@@ -58,6 +58,8 @@ public:
         const std::string& shortName
     );
 
+    virtual ~TypeInfo();
+
     virtual bool IsSameAs(const TypeInfo& other) const = 0;
 
     bool IsBool() const;
@@ -71,6 +73,9 @@ public:
     const std::string& GetShortName() const;
 
     const MemberInfo* GetMember(const std::string& memberName) const;
+
+protected:
+    void AddMember(const MemberInfo* member);
 
 private:
     static TypeInfo* intSizeType;
