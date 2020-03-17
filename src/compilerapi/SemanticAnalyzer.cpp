@@ -491,8 +491,25 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
 {
-    logger.LogError("TODO: implement");
-    isError = true;
+    Expression* expr = memberExpression->GetSubExpression();
+    expr->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // check if member is available for this type
+    const TypeInfo* exprType = expr->GetType();
+    const string& memberName = memberExpression->GetMemberName();
+    const MemberInfo* member = exprType->GetMember(memberName);
+    if (member == nullptr)
+    {
+        logger.LogError("Type '{}' has no member named '{}'", exprType->GetShortName(), memberName);
+        isError = true;
+        return;
+    }
+
+    memberExpression->SetType(member->GetType());
 }
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
