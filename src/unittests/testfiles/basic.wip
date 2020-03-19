@@ -211,6 +211,13 @@ fun types_str()
     var dup2 str = "abc";
 }
 
+fun str_member() u64
+{
+    var s str = "abc";
+    var size u64 = s.Size;
+    size
+}
+
 fun types_add_literal(num i8) i8
 {
     # make sure we can add a constant literal to a number with a small size

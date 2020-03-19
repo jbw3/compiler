@@ -719,6 +719,19 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+define i64 @str_member() {
+entry:
+  %size = alloca i64
+  %s = alloca %str*
+  store %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), %str** %s
+  %s1 = load %str*, %str** %s
+  %mber = getelementptr %str, %str* %s1, i64 0, i32 0
+  %load = load i64, i64* %mber
+  store i64 %load, i64* %size
+  %size2 = load i64, i64* %size
+  ret i64 %size2
+}
+
 define i8 @types_add_literal(i8 %num) {
 entry:
   %num1 = alloca i8
