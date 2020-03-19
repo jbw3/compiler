@@ -521,8 +521,33 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
 void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 {
-    resultValue = nullptr;
-    cerr << "TODO: implement\n";
+    Expression* expr = memberExpression->GetSubExpression();
+    expr->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    const TypeInfo* exprType = expr->GetType();
+    const string& memberName = memberExpression->GetMemberName();
+    const MemberInfo* member = exprType->GetMember(memberName);
+    if (member == nullptr)
+    {
+        cerr << "Internal error: Member is null\n";
+        resultValue = nullptr;
+        return;
+    }
+    unsigned memberIndex = member->GetIndex();
+
+    vector<Value*> indices;
+    indices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
+    indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
+
+    // calculate member address
+    Value* memberPointer = builder.CreateGEP(resultValue, indices, "mber");
+
+    // load member
+    resultValue = builder.CreateLoad(memberPointer, "load");
 }
 
 void LlvmIrGenerator::Visit(BranchExpression* branchExpression)

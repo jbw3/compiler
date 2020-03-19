@@ -13,14 +13,17 @@ class UnitTypeInfo;
 class MemberInfo
 {
 public:
-    MemberInfo(const std::string& name, const TypeInfo* type);
+    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type);
 
     const std::string& GetName() const;
+
+    unsigned GetIndex() const;
 
     const TypeInfo* GetType() const;
 
 private:
     std::string name;
+    unsigned index;
     const TypeInfo* type;
 };
 

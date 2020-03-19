@@ -20,8 +20,9 @@ PrimitiveType uInt16TypeInfo(16, false, true, false, UINT16_KEYWORD);
 PrimitiveType uInt32TypeInfo(32, false, true, false, UINT32_KEYWORD);
 PrimitiveType uInt64TypeInfo(64, false, true, false, UINT64_KEYWORD);
 
-MemberInfo::MemberInfo(const string& name, const TypeInfo* type) :
+MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type) :
     name(name),
+    index(index),
     type(type)
 {
 }
@@ -29,6 +30,11 @@ MemberInfo::MemberInfo(const string& name, const TypeInfo* type) :
 const string& MemberInfo::GetName() const
 {
     return name;
+}
+
+unsigned MemberInfo::GetIndex() const
+{
+    return index;
 }
 
 const TypeInfo* MemberInfo::GetType() const
@@ -213,7 +219,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 StringPointerType::StringPointerType(unsigned numBits) :
     TypeInfo(numBits, false, false, false, STR_KEYWORD)
 {
-    AddMember(new MemberInfo("Size", TypeInfo::GetUIntSizeType()));
+    AddMember(new MemberInfo("Size", 0, TypeInfo::GetUIntSizeType()));
 }
 
 bool StringPointerType::IsSameAs(const TypeInfo& other) const
