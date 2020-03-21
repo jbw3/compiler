@@ -680,6 +680,9 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                     return nullptr;
                 }
 
+                // update nextIter since iter may have changed in ProcessTerm()
+                nextIter = (iter == endIter) ? endIter : iter + 1;
+
                 if (nextIter != endIter && nextIter->GetValue() == ".")
                 {
                     expr = ProcessMemberExpression(expr, iter, endIter);

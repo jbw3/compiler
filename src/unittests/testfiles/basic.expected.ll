@@ -719,7 +719,7 @@ entry:
   ret %UnitType zeroinitializer
 }
 
-define i64 @str_member() {
+define i64 @str_member1() {
 entry:
   %size = alloca i64
   %s = alloca %str*
@@ -730,6 +730,27 @@ entry:
   store i64 %load, i64* %size
   %size2 = load i64, i64* %size
   ret i64 %size2
+}
+
+define i64 @str_member2(i32 %x) {
+entry:
+  %x1 = alloca i32
+  store i32 %x, i32* %x1
+  %x2 = load i32, i32* %x1
+  %cmpeq = icmp eq i32 %x2, 0
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %entry
+  br label %merge
+
+else:                                             ; preds = %entry
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi %str* [ bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), %if ], [ bitcast ({ i64, [5 x i8] }* @strStruct3 to %str*), %else ]
+  %mber = getelementptr %str, %str* %phi, i64 0, i32 0
+  %load = load i64, i64* %mber
+  ret i64 %load
 }
 
 define i8 @types_add_literal(i8 %num) {
