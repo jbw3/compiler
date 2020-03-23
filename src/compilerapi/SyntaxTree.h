@@ -378,21 +378,35 @@ private:
     Expression* expression;
 };
 
+class TypeDefinition : public SyntaxTreeNode
+{
+public:
+    TypeDefinition();
+
+    virtual ~TypeDefinition();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+};
+
 class ModuleDefinition : public SyntaxTreeNode
 {
 public:
-    ModuleDefinition(const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
+    ModuleDefinition(const std::vector<TypeDefinition*>& typeDefinitions,
+                     const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                      const std::vector<FunctionDefinition*>& functionDefinitions);
 
     virtual ~ModuleDefinition();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
+    const std::vector<TypeDefinition*>& GetTypeDefinitions() const;
+
     const std::vector<ExternFunctionDeclaration*>& GetExternFunctionDeclarations() const;
 
     const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
 
 private:
+    std::vector<TypeDefinition*> typeDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
     std::vector<FunctionDefinition*> functionDefinitions;
 };

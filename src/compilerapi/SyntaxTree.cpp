@@ -528,8 +528,22 @@ Expression* FunctionDefinition::GetExpression() const
     return expression;
 }
 
-ModuleDefinition::ModuleDefinition(const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
+TypeDefinition::TypeDefinition()
+{
+}
+
+TypeDefinition::~TypeDefinition()
+{
+}
+
+void TypeDefinition::Accept(SyntaxTreeVisitor* visitor)
+{
+}
+
+ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinitions,
+                                   const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
+    typeDefinitions(typeDefinitions),
     externFunctionDeclarations(externFunctionDeclarations),
     functionDefinitions(functionDefinitions)
 {
@@ -537,6 +551,7 @@ ModuleDefinition::ModuleDefinition(const vector<ExternFunctionDeclaration*>& ext
 
 ModuleDefinition::~ModuleDefinition()
 {
+    deletePointerContainer(typeDefinitions);
     deletePointerContainer(externFunctionDeclarations);
     deletePointerContainer(functionDefinitions);
 }
@@ -544,6 +559,11 @@ ModuleDefinition::~ModuleDefinition()
 void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
+}
+
+const vector<TypeDefinition*>& ModuleDefinition::GetTypeDefinitions() const
+{
+    return typeDefinitions;
 }
 
 const vector<ExternFunctionDeclaration*>& ModuleDefinition::GetExternFunctionDeclarations() const
