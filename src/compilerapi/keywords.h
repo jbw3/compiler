@@ -28,6 +28,8 @@ const std::string INT_SIZE_KEYWORD = "isize";
 
 const std::string STR_KEYWORD = "str";
 
+const std::string TYPE_KEYWORD = "type";
+
 const std::string UINT8_KEYWORD = "u8";
 
 const std::string UINT16_KEYWORD = "u16";
@@ -56,6 +58,7 @@ const std::unordered_set<std::string> KEYWORDS =
     INT64_KEYWORD,
     INT_SIZE_KEYWORD,
     STR_KEYWORD,
+    TYPE_KEYWORD,
     UINT8_KEYWORD,
     UINT16_KEYWORD,
     UINT32_KEYWORD,
@@ -87,9 +90,7 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "private",
     "public",
     "return",
-    "struct",
     "trusted",
-    "type",
     "typedef",
     "using",
     "where",
