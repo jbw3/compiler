@@ -528,7 +528,8 @@ Expression* FunctionDefinition::GetExpression() const
     return expression;
 }
 
-TypeDefinition::TypeDefinition()
+TypeDefinition::TypeDefinition(const string& name) :
+    name(name)
 {
 }
 
@@ -538,6 +539,11 @@ TypeDefinition::~TypeDefinition()
 
 void TypeDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
+}
+
+const string& TypeDefinition::GetName() const
+{
+    return name;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinitions,

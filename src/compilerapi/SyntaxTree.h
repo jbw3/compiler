@@ -381,11 +381,16 @@ private:
 class TypeDefinition : public SyntaxTreeNode
 {
 public:
-    TypeDefinition();
+    TypeDefinition(const std::string& name);
 
     virtual ~TypeDefinition();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const std::string& GetName() const;
+
+private:
+    std::string name;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

@@ -65,6 +65,7 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     TokenIterator iter = tokens.cbegin();
     TokenIterator endIter = tokens.cend();
 
+    vector<TypeDefinition*> types;
     vector<FunctionDefinition*> functions;
     vector<ExternFunctionDeclaration*> externFunctions;
 
@@ -81,6 +82,18 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
             else
             {
                 functions.push_back(functionDefinition);
+            }
+        }
+        else if (iter->GetValue() == TYPE_KEYWORD)
+        {
+            TypeDefinition* typeDefinition = ProcessTypeDefinition(iter, endIter);
+            if (typeDefinition == nullptr)
+            {
+                ok = false;
+            }
+            else
+            {
+                types.push_back(typeDefinition);
             }
         }
         else if (iter->GetValue() == EXTERN_KEYWORD)
@@ -104,10 +117,11 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(externFunctions, functions);
+        syntaxTree = new ModuleDefinition(types, externFunctions, functions);
     }
     else
     {
+        deletePointerContainer(types);
         deletePointerContainer(functions);
         deletePointerContainer(externFunctions);
         syntaxTree = nullptr;
@@ -395,6 +409,60 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     }
 
     return true;
+}
+
+TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, TokenIterator endIter)
+{
+    if (!EndIteratorCheck(iter, endIter, "Expected type keyword"))
+    {
+        return nullptr;
+    }
+
+    if (iter->GetValue() != TYPE_KEYWORD)
+    {
+        logger.LogError("Expected type keyword");
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected type name"))
+    {
+        return nullptr;
+    }
+
+    if (!IsValidName(*iter))
+    {
+        logger.LogError(*iter, "'{}' is not a valid type name", iter->GetValue());
+        return nullptr;
+    }
+
+    string typeName = iter->GetValue();
+
+    if (!IncrementIterator(iter, endIter, "Expected '{'"))
+    {
+        return nullptr;
+    }
+
+    if (iter->GetValue() != "{")
+    {
+        logger.LogError(*iter, "Expected '{'");
+        return nullptr;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected '}'"))
+    {
+        return nullptr;
+    }
+
+    if (iter->GetValue() != "}")
+    {
+        logger.LogError(*iter, "Expected '}'");
+        return nullptr;
+    }
+
+    // increment past "}"
+    ++iter;
+
+    TypeDefinition* typeDef = new TypeDefinition(typeName);
+    return typeDef;
 }
 
 void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, VariableDeclaration*& varDecl, Expression*& assignment)
