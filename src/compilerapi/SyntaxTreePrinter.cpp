@@ -204,6 +204,10 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
 
 void SyntaxTreePrinter::Visit(TypeDefinition* typeDefinition)
 {
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "TypeDefinition");
+    PrintProperty("name", typeDefinition->GetName());
 }
 
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
@@ -211,6 +215,7 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "ModuleDefinition");
+    PrintProperty("types", moduleDefinition->GetTypeDefinitions());
     PrintProperty("externFunctions", moduleDefinition->GetExternFunctionDeclarations());
     PrintProperty("functions", moduleDefinition->GetFunctionDefinitions());
 }
