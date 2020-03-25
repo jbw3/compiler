@@ -75,12 +75,12 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
     unsigned numBits = 8 * targetMachine->getAllocaPointerSize();
 
     intSizeType = new PrimitiveType(numBits, false, true, true, INT_SIZE_KEYWORD);
-    RegisterType(INT_SIZE_KEYWORD, intSizeType);
+    RegisterType(intSizeType);
     uintSizeType = new PrimitiveType(numBits, false, true, false, UINT_SIZE_KEYWORD);
-    RegisterType(UINT_SIZE_KEYWORD, uintSizeType);
+    RegisterType(uintSizeType);
 
     stringPointerType = new StringPointerType(numBits);
-    RegisterType(STR_KEYWORD, stringPointerType);
+    RegisterType(stringPointerType);
 }
 
 const TypeInfo* TypeInfo::GetIntSizeType()
@@ -108,9 +108,9 @@ const TypeInfo* TypeInfo::GetType(const string& typeName)
     return iter->second;
 }
 
-bool TypeInfo::RegisterType(const std::string& typeName, const TypeInfo* typeInfo)
+bool TypeInfo::RegisterType(const TypeInfo* typeInfo)
 {
-    auto pair = types.insert({ typeName, typeInfo });
+    auto pair = types.insert({ typeInfo->GetShortName(), typeInfo });
     return pair.second;
 }
 
@@ -225,5 +225,22 @@ StringPointerType::StringPointerType(unsigned numBits) :
 bool StringPointerType::IsSameAs(const TypeInfo& other) const
 {
     bool isSame = typeid(other) == typeid(StringPointerType);
+    return isSame;
+}
+
+UserType::UserType(const string& name) :
+    TypeInfo(0, false, false, false, name)
+{
+}
+
+bool UserType::IsSameAs(const TypeInfo& other) const
+{
+    const UserType* otherUserType = dynamic_cast<const UserType*>(&other);
+    if (otherUserType == nullptr)
+    {
+        return false;
+    }
+
+    bool isSame = GetShortName() == otherUserType->GetShortName();
     return isSame;
 }

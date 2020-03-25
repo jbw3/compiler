@@ -51,7 +51,7 @@ public:
 
     static const TypeInfo* GetType(const std::string& typeName);
 
-    static bool RegisterType(const std::string& typeName, const TypeInfo* typeInfo);
+    static bool RegisterType(const TypeInfo* typeInfo);
 
     TypeInfo(
         unsigned numBits,
@@ -120,6 +120,14 @@ class StringPointerType : public TypeInfo
 {
 public:
     StringPointerType(unsigned numBits);
+
+    bool IsSameAs(const TypeInfo& other) const override;
+};
+
+class UserType : public TypeInfo
+{
+public:
+    UserType(const std::string& name);
 
     bool IsSameAs(const TypeInfo& other) const override;
 };

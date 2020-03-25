@@ -305,12 +305,33 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 
 void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
 {
-    isError = true;
-    logger.LogError("TODO: Implement this");
+    const string& typeName = typeDefinition->GetName();
+
+    TypeInfo* newType = new UserType(typeName);
+
+    bool added = TypeInfo::RegisterType(newType);
+    if (!added)
+    {
+        delete newType;
+
+        isError = true;
+        logger.LogError("Type '{}' has already been defined", typeName);
+        return;
+    }
 }
 
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
+    // process user-defined types
+    for (TypeDefinition* typeDef : moduleDefinition->GetTypeDefinitions())
+    {
+        typeDef->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+    }
+
     // build a look-up table for all functions
 
     functions.clear();
@@ -347,7 +368,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         funcDef->Accept(this);
         if (isError)
         {
-            break;
+            return;
         }
     }
 }
