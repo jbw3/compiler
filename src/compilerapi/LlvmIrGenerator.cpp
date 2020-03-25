@@ -309,6 +309,12 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 }
 
+void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
+{
+    resultValue = nullptr;
+    cerr << "TODO: Implement this\n";
+}
+
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     // create function declarations and build function look-up table

@@ -24,6 +24,8 @@ public:
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
+    void Visit(SyntaxTree::TypeDefinition* typeDefinition) override;
+
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
     void Visit(SyntaxTree::UnitTypeLiteralExpression* unitTypeLiteralExpression) override;

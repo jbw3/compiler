@@ -539,6 +539,7 @@ TypeDefinition::~TypeDefinition()
 
 void TypeDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
+    visitor->Visit(this);
 }
 
 const string& TypeDefinition::GetName() const

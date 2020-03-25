@@ -303,6 +303,12 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     }
 }
 
+void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
+{
+    isError = true;
+    logger.LogError("TODO: Implement this");
+}
+
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
     // build a look-up table for all functions

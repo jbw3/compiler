@@ -202,6 +202,10 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
     PrintProperty("expression", functionDefinition->GetExpression());
 }
 
+void SyntaxTreePrinter::Visit(TypeDefinition* typeDefinition)
+{
+}
+
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
 {
     BracePrinter printer(*this, "{", "}");
