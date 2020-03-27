@@ -339,6 +339,14 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
     {
         const FunctionDeclaration* decl = externFunc->GetDeclaration();
+
+        bool ok = SetFunctionParameterTypes(decl);
+        if (!ok)
+        {
+            isError = true;
+            return;
+        }
+
         const string& name = decl->GetName();
         auto rv = functions.insert({name, decl});
         if (!rv.second)
@@ -352,6 +360,14 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
         const FunctionDeclaration* decl = funcDef->GetDeclaration();
+
+        bool ok = SetFunctionParameterTypes(decl);
+        if (!ok)
+        {
+            isError = true;
+            return;
+        }
+
         const string& name = decl->GetName();
         auto rv = functions.insert({name, decl});
         if (!rv.second)
@@ -426,7 +442,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     }
     else
     {
-        variableExpression->SetType(varDecl->GetType());
+        variableExpression->SetType(varDecl->GetVariableType());
         variableExpression->SetIsAssignable(true);
     }
 }
@@ -500,7 +516,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         // check argument against the parameter type
         const VariableDeclaration* param = params[i];
         const TypeInfo* argType = arg->GetType();
-        const TypeInfo* paramType = param->GetType();
+        const TypeInfo* paramType = param->GetVariableType();
         if (!argType->IsSameAs(*paramType))
         {
             if ( !(argType->IsInt() && paramType->IsInt() && argType->IsSigned() == paramType->IsSigned() && argType->GetNumBits() <= paramType->GetNumBits()) )
@@ -604,7 +620,14 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 {
-    bool ok = symbolTable.AddVariable(variableDeclaration->GetName(), variableDeclaration);
+    bool ok = SetVariableDeclarationType(variableDeclaration);
+    if (!ok)
+    {
+        isError = true;
+        return;
+    }
+
+    ok = symbolTable.AddVariable(variableDeclaration->GetName(), variableDeclaration);
     if (!ok)
     {
         isError = true;
@@ -613,4 +636,33 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     variableDeclaration->SetType(TypeInfo::UnitType);
+}
+
+bool SemanticAnalyzer::SetVariableDeclarationType(VariableDeclaration* variableDeclaration)
+{
+    const string& typeName = variableDeclaration->GetTypeName();
+    const TypeInfo* type = TypeInfo::GetType(typeName);
+    if (type == nullptr)
+    {
+        logger.LogError("'{}' is not a known type", typeName);
+        return false;
+    }
+
+    variableDeclaration->SetVariableType(type);
+
+    return true;
+}
+
+bool SemanticAnalyzer::SetFunctionParameterTypes(const FunctionDeclaration* functionDeclaration)
+{
+    for (VariableDeclaration* varDecl : functionDeclaration->GetParameters())
+    {
+        bool ok = SetVariableDeclarationType(varDecl);
+        if (!ok)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

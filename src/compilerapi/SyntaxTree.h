@@ -288,7 +288,7 @@ private:
 class VariableDeclaration : public Expression
 {
 public:
-    VariableDeclaration(const std::string& name, const TypeInfo* type);
+    VariableDeclaration(const std::string& name, const std::string& typeName);
 
     virtual ~VariableDeclaration() = default;
 
@@ -296,11 +296,16 @@ public:
 
     const std::string& GetName() const;
 
-    const TypeInfo* GetType() const;
+    const std::string& GetTypeName() const;
+
+    const TypeInfo* GetVariableType() const;
+
+    void SetVariableType(const TypeInfo* newType);
 
 private:
     std::string name;
-    const TypeInfo* type;
+    std::string typeName;
+    const TypeInfo* variableType;
 };
 
 typedef std::vector<VariableDeclaration*> VariableDeclarations;

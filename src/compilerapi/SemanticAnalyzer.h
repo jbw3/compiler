@@ -61,6 +61,10 @@ private:
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
+
+    bool SetVariableDeclarationType(SyntaxTree::VariableDeclaration* variableDeclaration);
+
+    bool SetFunctionParameterTypes(const SyntaxTree::FunctionDeclaration* functionDeclaration);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

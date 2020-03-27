@@ -361,14 +361,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
         else if (state == eType)
         {
-            const TypeInfo* paramType = TypeInfo::GetType(value);
-            if (paramType == nullptr)
-            {
-                logger.LogError(*iter, "'{}' is not a known type", value);
-                return false;
-            }
-
-            VariableDeclaration* param = new VariableDeclaration(paramName, paramType);
+            VariableDeclaration* param = new VariableDeclaration(paramName, value);
             parameters.push_back(param);
 
             state = eDelimiter;
@@ -495,12 +488,6 @@ void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterat
     }
 
     string varTypeName = iter->GetValue();
-    const TypeInfo* varType = TypeInfo::GetType(varTypeName);
-    if (varType == nullptr)
-    {
-        logger.LogError(*iter, "'{}' is not a known type", varTypeName);
-        return;
-    }
 
     if (!IncrementIterator(iter, endIter, "Expected operator"))
     {
@@ -524,7 +511,7 @@ void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterat
         return;
     }
 
-    varDecl = new VariableDeclaration(varName, varType);
+    varDecl = new VariableDeclaration(varName, varTypeName);
     assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName), expression);
 }
 

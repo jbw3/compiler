@@ -49,7 +49,7 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
         for (size_t i = 0; i < numParams; ++i)
         {
             const VariableDeclaration* param = declaration->GetParameters()[i];
-            if (!GetCType(param->GetType(), cType))
+            if (!GetCType(param->GetVariableType(), cType))
             {
                 return false;
             }

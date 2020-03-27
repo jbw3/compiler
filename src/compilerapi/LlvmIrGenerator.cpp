@@ -516,7 +516,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
         // sign extend arg value if needed
         const TypeInfo* argType = expr->GetType();
-        const TypeInfo* paramType = funcDecl->GetParameters()[i]->GetType();
+        const TypeInfo* paramType = funcDecl->GetParameters()[i]->GetVariableType();
         ExtendType(argType, paramType, resultValue);
 
         args.push_back(resultValue);
@@ -569,7 +569,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     const string& varName = variableDeclaration->GetName();
-    Type* type = GetType(variableDeclaration->GetType());
+    Type* type = GetType(variableDeclaration->GetVariableType());
     if (type == nullptr)
     {
         resultValue = nullptr;
@@ -660,7 +660,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const SyntaxTree::FunctionDeclar
     parameters.reserve(funcDecl->GetParameters().size());
     for (const VariableDeclaration* varDef : funcDecl->GetParameters())
     {
-        Type* varType = GetType(varDef->GetType());
+        Type* varType = GetType(varDef->GetVariableType());
         parameters.push_back(varType);
     }
 
