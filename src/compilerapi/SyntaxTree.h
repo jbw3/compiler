@@ -333,7 +333,7 @@ class FunctionDeclaration
 public:
     FunctionDeclaration(const std::string& name,
                         const VariableDeclarations& parameters,
-                        const TypeInfo* returnType);
+                        const std::string& returnTypeName);
 
     virtual ~FunctionDeclaration();
 
@@ -341,11 +341,16 @@ public:
 
     const VariableDeclarations& GetParameters() const;
 
+    const std::string& GetReturnTypeName() const;
+
     const TypeInfo* GetReturnType() const;
+
+    void SetReturnType(const TypeInfo* newType);
 
 private:
     std::string name;
     VariableDeclarations parameters;
+    std::string returnTypeName;
     const TypeInfo* returnType;
 };
 
@@ -358,7 +363,7 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const FunctionDeclaration* GetDeclaration() const;
+    FunctionDeclaration* GetDeclaration() const;
 
 private:
     FunctionDeclaration* declaration;
@@ -374,7 +379,7 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const FunctionDeclaration* GetDeclaration() const;
+    FunctionDeclaration* GetDeclaration() const;
 
     Expression* GetExpression() const;
 

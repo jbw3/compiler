@@ -464,10 +464,11 @@ Expression* WhileLoop::GetExpression() const
 
 FunctionDeclaration::FunctionDeclaration(const std::string& name,
                                          const VariableDeclarations& parameters,
-                                         const TypeInfo* returnType) :
+                                         const std::string& returnTypeName) :
     name(name),
     parameters(parameters),
-    returnType(returnType)
+    returnTypeName(returnTypeName),
+    returnType(nullptr)
 {
 }
 
@@ -486,9 +487,19 @@ const VariableDeclarations& FunctionDeclaration::GetParameters() const
     return parameters;
 }
 
+const string& FunctionDeclaration::GetReturnTypeName() const
+{
+    return returnTypeName;
+}
+
 const TypeInfo* FunctionDeclaration::GetReturnType() const
 {
     return returnType;
+}
+
+void FunctionDeclaration::SetReturnType(const TypeInfo* newType)
+{
+    returnType = newType;
 }
 
 ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :
@@ -506,7 +517,7 @@ void ExternFunctionDeclaration::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
+FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
 {
     return declaration;
 }
@@ -529,7 +540,7 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const FunctionDeclaration* FunctionDefinition::GetDeclaration() const
+FunctionDeclaration* FunctionDefinition::GetDeclaration() const
 {
     return declaration;
 }

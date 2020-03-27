@@ -64,7 +64,7 @@ private:
 
     bool SetVariableDeclarationType(SyntaxTree::VariableDeclaration* variableDeclaration);
 
-    bool SetFunctionParameterTypes(const SyntaxTree::FunctionDeclaration* functionDeclaration);
+    bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

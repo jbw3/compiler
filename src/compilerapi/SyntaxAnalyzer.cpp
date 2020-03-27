@@ -298,23 +298,17 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    const TypeInfo* returnType = nullptr;
+    string returnTypeName;
 
     // if no return type is specified, default to the unit type
     if (iter->GetValue() == endToken)
     {
-        returnType = TypeInfo::UnitType;
+        returnTypeName = "";
     }
     else // parse the return type
     {
-        // get return type
-        returnType = TypeInfo::GetType(iter->GetValue());
-        if (returnType == nullptr)
-        {
-            logger.LogError(*iter, "'{}' is not a known type", iter->GetValue());
-            deletePointerContainer(parameters);
-            return nullptr;
-        }
+        // get return type name
+        returnTypeName = iter->GetValue();
 
         if (!IncrementIterator(iter, endIter, "Expected end of function"))
         {
@@ -331,7 +325,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
-        functionName, parameters, returnType);
+        functionName, parameters, returnTypeName);
     return functionDeclaration;
 }
 

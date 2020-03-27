@@ -338,9 +338,9 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
     for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
     {
-        const FunctionDeclaration* decl = externFunc->GetDeclaration();
+        FunctionDeclaration* decl = externFunc->GetDeclaration();
 
-        bool ok = SetFunctionParameterTypes(decl);
+        bool ok = SetFunctionDeclarationTypes(decl);
         if (!ok)
         {
             isError = true;
@@ -359,9 +359,9 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
-        const FunctionDeclaration* decl = funcDef->GetDeclaration();
+        FunctionDeclaration* decl = funcDef->GetDeclaration();
 
-        bool ok = SetFunctionParameterTypes(decl);
+        bool ok = SetFunctionDeclarationTypes(decl);
         if (!ok)
         {
             isError = true;
@@ -653,8 +653,9 @@ bool SemanticAnalyzer::SetVariableDeclarationType(VariableDeclaration* variableD
     return true;
 }
 
-bool SemanticAnalyzer::SetFunctionParameterTypes(const FunctionDeclaration* functionDeclaration)
+bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* functionDeclaration)
 {
+    // set parameter types
     for (VariableDeclaration* varDecl : functionDeclaration->GetParameters())
     {
         bool ok = SetVariableDeclarationType(varDecl);
@@ -663,6 +664,25 @@ bool SemanticAnalyzer::SetFunctionParameterTypes(const FunctionDeclaration* func
             return false;
         }
     }
+
+    // set return type
+    const TypeInfo* returnType = nullptr;
+    const string& returnTypeName = functionDeclaration->GetReturnTypeName();
+    if (returnTypeName.empty())
+    {
+        returnType = TypeInfo::UnitType;
+    }
+    else
+    {
+        returnType = TypeInfo::GetType(returnTypeName);
+        if (returnType == nullptr)
+        {
+            logger.LogError("'{}' is not a known type", returnTypeName);
+            return false;
+        }
+    }
+
+    functionDeclaration->SetReturnType(returnType);
 
     return true;
 }
