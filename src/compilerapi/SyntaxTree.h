@@ -388,10 +388,24 @@ private:
     Expression* expression;
 };
 
+class MemberDefinition
+{
+public:
+    MemberDefinition(const std::string& name, const std::string& typeName);
+
+    const std::string& GetName() const;
+
+    const std::string& GetTypeName() const;
+
+private:
+    std::string name;
+    std::string typeName;
+};
+
 class TypeDefinition : public SyntaxTreeNode
 {
 public:
-    TypeDefinition(const std::string& name);
+    TypeDefinition(const std::string& name, const std::vector<MemberDefinition*>& members);
 
     virtual ~TypeDefinition();
 
@@ -399,8 +413,11 @@ public:
 
     const std::string& GetName() const;
 
+    const std::vector<MemberDefinition*>& GetMembers() const;
+
 private:
     std::string name;
+    std::vector<MemberDefinition*> members;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

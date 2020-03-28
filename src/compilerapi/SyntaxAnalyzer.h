@@ -47,6 +47,8 @@ private:
 
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
+    bool IncrementIteratorCheckValue(TokenIterator& iter, const TokenIterator& endIter, const std::string& expectedValue, const char* errorMsg = nullptr);
+
     SyntaxTree::ExternFunctionDeclaration* ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter);
 

@@ -206,8 +206,11 @@ void SyntaxTreePrinter::Visit(TypeDefinition* typeDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
+    function<void (MemberDefinition*)> printMemberDef = [this](MemberDefinition* member){ PrintMemberDefinition(member); };
+
     PrintProperty(NODE_TYPE_PROPERTY, "TypeDefinition");
     PrintProperty("name", typeDefinition->GetName());
+    PrintProperty("members", typeDefinition->GetMembers(), printMemberDef);
 }
 
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
@@ -391,6 +394,15 @@ void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* decl
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionDeclaration");
     PrintProperty("name", declaration->GetName());
     PrintProperty("parameters", declaration->GetParameters());
+}
+
+void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
+    PrintProperty("name", member->GetName());
+    PrintProperty("typeName", member->GetTypeName());
 }
 
 void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)

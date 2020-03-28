@@ -550,13 +550,31 @@ Expression* FunctionDefinition::GetExpression() const
     return expression;
 }
 
-TypeDefinition::TypeDefinition(const string& name) :
-    name(name)
+MemberDefinition::MemberDefinition(const std::string& name, const std::string& typeName) :
+    name(name),
+    typeName(typeName)
+{
+}
+
+const std::string& MemberDefinition::GetName() const
+{
+    return name;
+}
+
+const std::string& MemberDefinition::GetTypeName() const
+{
+    return typeName;
+}
+
+TypeDefinition::TypeDefinition(const string& name, const vector<MemberDefinition*>& members) :
+    name(name),
+    members(members)
 {
 }
 
 TypeDefinition::~TypeDefinition()
 {
+    deletePointerContainer(members);
 }
 
 void TypeDefinition::Accept(SyntaxTreeVisitor* visitor)
@@ -567,6 +585,11 @@ void TypeDefinition::Accept(SyntaxTreeVisitor* visitor)
 const string& TypeDefinition::GetName() const
 {
     return name;
+}
+
+const vector<MemberDefinition*>& TypeDefinition::GetMembers() const
+{
+    return members;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinitions,

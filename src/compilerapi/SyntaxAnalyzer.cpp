@@ -177,6 +177,20 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
     return EndIteratorCheck(iter, endIter, errorMsg);
 }
 
+bool SyntaxAnalyzer::IncrementIteratorCheckValue(TokenIterator& iter, const TokenIterator& endIter, const string& expectedValue, const char* errorMsg)
+{
+    bool ok = IncrementIterator(iter, endIter, errorMsg);
+    if (ok)
+    {
+        if (iter->GetValue() != expectedValue)
+        {
+            ok = false;
+            logger.LogError(*iter, "Expected '{}'", expectedValue);
+        }
+    }
+
+    return ok;
+}
 
 ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter)
@@ -434,13 +448,62 @@ TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, Token
         return nullptr;
     }
 
-    if (!IncrementIterator(iter, endIter, "Expected '}'"))
+    // increment past "}"
+    ++iter;
+
+    vector<MemberDefinition*> members;
+    while (iter != endIter && iter->GetValue() != "}")
     {
-        return nullptr;
+        // get member name
+        if (!IsValidName(*iter))
+        {
+            deletePointerContainer(members);
+            logger.LogError(*iter, "Invalid member name: '{}'", iter->GetValue());
+            return nullptr;
+        }
+        const string& memberName = iter->GetValue();
+
+        // get member type
+        if (!IncrementIterator(iter, endIter, "Expected member type"))
+        {
+            deletePointerContainer(members);
+            return nullptr;
+        }
+        const string& memberType = iter->GetValue();
+
+        MemberDefinition* member = new MemberDefinition(memberName, memberType);
+        members.push_back(member);
+
+        if (!IncrementIterator(iter, endIter, "Expected ',' or '}'"))
+        {
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        const string& delimiter = iter->GetValue();
+        if (delimiter == "}")
+        {
+            break;
+        }
+        else if (delimiter != ",")
+        {
+            logger.LogError(*iter, "Expected ',' or '}'");
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        ++iter;
     }
 
-    if (iter->GetValue() != "}")
+    if (iter == endIter)
     {
+        deletePointerContainer(members);
+        logger.LogError(*iter, "Expected '}'");
+        return nullptr;
+    }
+    else if (iter->GetValue() != "}")
+    {
+        deletePointerContainer(members);
         logger.LogError(*iter, "Expected '}'");
         return nullptr;
     }
@@ -448,7 +511,7 @@ TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, Token
     // increment past "}"
     ++iter;
 
-    TypeDefinition* typeDef = new TypeDefinition(typeName);
+    TypeDefinition* typeDef = new TypeDefinition(typeName, members);
     return typeDef;
 }
 

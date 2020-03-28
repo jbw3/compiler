@@ -69,6 +69,8 @@ private:
 
     void PrintFunctionDeclaration(const SyntaxTree::FunctionDeclaration* declaration);
 
+    void PrintMemberDefinition(const SyntaxTree::MemberDefinition* member);
+
     void PrintProperty(const std::string& name, const std::string& value);
 
     void PrintProperty(const std::string& name, SyntaxTree::SyntaxTreeNode* value);
