@@ -307,13 +307,31 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
 {
     const string& typeName = typeDefinition->GetName();
 
-    TypeInfo* newType = new UserType(typeName);
+    UserType* newType = new UserType(typeName);
+
+    unsigned index = 0;
+    for (const MemberDefinition* member : typeDefinition->GetMembers())
+    {
+        const string& memberTypeName = member->GetTypeName();
+        const TypeInfo* memberType = TypeInfo::GetType(memberTypeName);
+        if (memberType == nullptr)
+        {
+            delete newType;
+            isError = true;
+            logger.LogError("'{}' is not a known type", memberTypeName);
+            return;
+        }
+
+        MemberInfo* memberInfo = new MemberInfo(member->GetName(), index, memberType);
+        newType->AddMember(memberInfo);
+
+        ++index;
+    }
 
     bool added = TypeInfo::RegisterType(newType);
     if (!added)
     {
         delete newType;
-
         isError = true;
         logger.LogError("Type '{}' has already been defined", typeName);
         return;
