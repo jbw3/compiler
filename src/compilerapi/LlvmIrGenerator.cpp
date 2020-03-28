@@ -612,6 +612,10 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     strStructType = StructType::create(context, strArrayRef, "str");
     strPointerType = strStructType->getPointerTo(addressSpace);
 
+    // register types
+    types.insert({TypeInfo::BoolType->GetShortName(), Type::getInt1Ty(context)});
+    types.insert({TypeInfo::GetStringPointerType()->GetShortName(), strPointerType});
+
     // generate LLVM IR from syntax tree
     this->module = module;
     syntaxTree->Accept(this);
@@ -635,17 +639,9 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     {
         llvmType = unitType;
     }
-    else if (type->IsBool())
-    {
-        llvmType = Type::getInt1Ty(context);
-    }
     else if (type->IsInt())
     {
         llvmType = Type::getIntNTy(context, type->GetNumBits());
-    }
-    else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
-    {
-        llvmType = strPointerType;
     }
     else
     {
