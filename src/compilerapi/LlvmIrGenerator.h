@@ -108,6 +108,7 @@ private:
     unsigned int globalStringCounter;
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
+    std::unordered_map<std::string, llvm::Type*> types;
 
     llvm::Type* GetType(const TypeInfo* type);
 

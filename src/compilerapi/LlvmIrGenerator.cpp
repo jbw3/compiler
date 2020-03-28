@@ -311,12 +311,22 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
 {
-    resultValue = nullptr;
-    cerr << "TODO: Implement this\n";
+    const string& typeName = typeDefinition->GetName();
+
+    ArrayRef<Type*> emptyArray;
+    StructType* structType = StructType::create(context, emptyArray, typeName);
+
+    types.insert({typeName, structType});
 }
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
+    // generate type declarations
+    for (TypeDefinition* typeDef : moduleDefinition->GetTypeDefinitions())
+    {
+        typeDef->Accept(this);
+    }
+
     // create function declarations and build function look-up table
 
     functions.clear();
@@ -639,13 +649,21 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
     else
     {
-        llvmType = nullptr;
+        auto iter = types.find(type->GetShortName());
+        if (iter != types.end())
+        {
+            llvmType = iter->second;
+        }
+        else
+        {
+            llvmType = nullptr;
+        }
     }
 
     return llvmType;
 }
 
-bool LlvmIrGenerator::CreateFunctionDeclaration(const SyntaxTree::FunctionDeclaration* funcDecl)
+bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcDecl)
 {
     // get the return type
     Type* returnType = GetType(funcDecl->GetReturnType());
