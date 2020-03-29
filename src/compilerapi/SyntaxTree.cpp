@@ -568,7 +568,8 @@ const std::string& MemberDefinition::GetTypeName() const
 
 TypeDefinition::TypeDefinition(const string& name, const vector<MemberDefinition*>& members) :
     name(name),
-    members(members)
+    members(members),
+    type(nullptr)
 {
 }
 
@@ -590,6 +591,16 @@ const string& TypeDefinition::GetName() const
 const vector<MemberDefinition*>& TypeDefinition::GetMembers() const
 {
     return members;
+}
+
+const TypeInfo* TypeDefinition::GetType() const
+{
+    return type;
+}
+
+void TypeDefinition::SetType(const TypeInfo* newType)
+{
+    type = newType;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinitions,

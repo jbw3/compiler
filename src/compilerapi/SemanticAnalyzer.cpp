@@ -336,6 +336,8 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
         logger.LogError("Type '{}' has already been defined", typeName);
         return;
     }
+
+    typeDefinition->SetType(newType);
 }
 
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)

@@ -415,9 +415,14 @@ public:
 
     const std::vector<MemberDefinition*>& GetMembers() const;
 
+    const TypeInfo* GetType() const;
+
+    void SetType(const TypeInfo* newType);
+
 private:
     std::string name;
     std::vector<MemberDefinition*> members;
+    const TypeInfo* type;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

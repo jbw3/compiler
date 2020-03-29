@@ -312,10 +312,24 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
 {
     const string& typeName = typeDefinition->GetName();
+    const TypeInfo* typeInfo = typeDefinition->GetType();
 
-    ArrayRef<Type*> emptyArray;
-    StructType* structType = StructType::create(context, emptyArray, typeName);
+    vector<Type*> members;
+    for (const MemberDefinition* memberDef : typeDefinition->GetMembers())
+    {
+        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->GetName());
+        Type* memberType = GetType(memberInfo->GetType());
+        if (memberType == nullptr)
+        {
+            resultValue = nullptr;
+            cerr << "Internal error: Unknown member definition type\n";
+            return;
+        }
 
+        members.push_back(memberType);
+    }
+
+    StructType* structType = StructType::create(context, members, typeName);
     types.insert({typeName, structType});
 }
 
