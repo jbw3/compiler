@@ -468,23 +468,15 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
         return;
     }
 
-    const TypeInfo* type = variableExpression->GetType();
-    if (type->IsComposite())
+    Expression::EAccessType accessType = variableExpression->GetAccessType();
+    switch (accessType)
     {
-        resultValue = alloca;
-    }
-    else
-    {
-        Expression::EAccessType accessType = variableExpression->GetAccessType();
-        switch (accessType)
-        {
-            case Expression::eLoad:
-                resultValue = builder.CreateLoad(alloca, name);
-                break;
-            case Expression::eStore:
-                resultValue = alloca;
-                break;
-        }
+        case Expression::eLoad:
+            resultValue = builder.CreateLoad(alloca, name);
+            break;
+        case Expression::eStore:
+            resultValue = alloca;
+            break;
     }
 }
 
@@ -577,21 +569,24 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
     }
     unsigned memberIndex = member->GetIndex();
 
-    vector<Value*> indices;
-    indices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
-    indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
-
-    // calculate member address
-    Value* memberPointer = builder.CreateGEP(resultValue, indices, "mber");
-
-    if (member->GetType()->IsComposite())
+    if (resultValue->getType()->isPointerTy())
     {
-        resultValue = memberPointer;
+        vector<Value*> indices;
+        indices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
+        indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
+
+        // calculate member address
+        Value* memberPointer = builder.CreateGEP(resultValue, indices, "mber");
+
+        // load member
+        resultValue = builder.CreateLoad(memberPointer, "load");
     }
     else
     {
-        // load member
-        resultValue = builder.CreateLoad(memberPointer, "load");
+        vector<unsigned> indices;
+        indices.push_back(memberIndex);
+
+        resultValue = builder.CreateExtractValue(resultValue, indices, "mber");
     }
 }
 
