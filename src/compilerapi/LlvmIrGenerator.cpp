@@ -468,15 +468,23 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
         return;
     }
 
-    Expression::EAccessType accessType = variableExpression->GetAccessType();
-    switch (accessType)
+    const TypeInfo* type = variableExpression->GetType();
+    if (type->IsComposite())
     {
-        case Expression::eLoad:
-            resultValue = builder.CreateLoad(alloca, name);
-            break;
-        case Expression::eStore:
-            resultValue = alloca;
-            break;
+        resultValue = alloca;
+    }
+    else
+    {
+        Expression::EAccessType accessType = variableExpression->GetAccessType();
+        switch (accessType)
+        {
+            case Expression::eLoad:
+                resultValue = builder.CreateLoad(alloca, name);
+                break;
+            case Expression::eStore:
+                resultValue = alloca;
+                break;
+        }
     }
 }
 

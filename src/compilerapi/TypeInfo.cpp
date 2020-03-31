@@ -119,12 +119,14 @@ TypeInfo::TypeInfo(
     bool isBool,
     bool isInt,
     bool isSigned,
+    bool isComposite,
     const string& shortName
 ) :
     numBits(numBits),
     isBool(isBool),
     isInt(isInt),
     isSigned(isSigned),
+    isComposite(isComposite),
     shortName(shortName)
 {
 }
@@ -154,6 +156,11 @@ bool TypeInfo::IsSigned() const
     return isSigned;
 }
 
+bool TypeInfo::IsComposite() const
+{
+    return isComposite;
+}
+
 unsigned TypeInfo::GetNumBits() const
 {
     return numBits;
@@ -181,7 +188,7 @@ void TypeInfo::AddMember(const MemberInfo* member)
 }
 
 UnitTypeInfo::UnitTypeInfo() :
-    TypeInfo(0, false, false, false, "Unit")
+    TypeInfo(0, false, false, false, false, "Unit")
 {
 }
 
@@ -198,7 +205,7 @@ PrimitiveType::PrimitiveType(
     bool isSigned,
     const string& shortName
 ) :
-    TypeInfo(numBits, isBool, isInt, isSigned, shortName)
+    TypeInfo(numBits, isBool, isInt, isSigned, false, shortName)
 {
 }
 
@@ -217,7 +224,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 }
 
 StringPointerType::StringPointerType(unsigned numBits) :
-    TypeInfo(numBits, false, false, false, STR_KEYWORD)
+    TypeInfo(numBits, false, false, false, false, STR_KEYWORD)
 {
     AddMember(new MemberInfo("Size", 0, TypeInfo::GetUIntSizeType()));
 }
@@ -229,7 +236,7 @@ bool StringPointerType::IsSameAs(const TypeInfo& other) const
 }
 
 UserType::UserType(const string& name) :
-    TypeInfo(0, false, false, false, name)
+    TypeInfo(0, false, false, false, true, name)
 {
 }
 

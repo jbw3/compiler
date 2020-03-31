@@ -58,6 +58,7 @@ public:
         bool isBool,
         bool isInt,
         bool isSigned,
+        bool isComposite,
         const std::string& shortName
     );
 
@@ -70,6 +71,8 @@ public:
     bool IsInt() const;
 
     bool IsSigned() const;
+
+    bool IsComposite() const;
 
     unsigned GetNumBits() const;
 
@@ -89,6 +92,7 @@ private:
     bool isBool;
     bool isInt;
     bool isSigned;
+    bool isComposite;
     std::string shortName;
     std::map<std::string, const MemberInfo*> members;
 };
