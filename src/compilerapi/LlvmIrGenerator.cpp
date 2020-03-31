@@ -584,8 +584,15 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
     // calculate member address
     Value* memberPointer = builder.CreateGEP(resultValue, indices, "mber");
 
-    // load member
-    resultValue = builder.CreateLoad(memberPointer, "load");
+    if (member->GetType()->IsComposite())
+    {
+        resultValue = memberPointer;
+    }
+    else
+    {
+        // load member
+        resultValue = builder.CreateLoad(memberPointer, "load");
+    }
 }
 
 void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
