@@ -731,7 +731,7 @@ entry:
   %s = alloca %str*
   store %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), %str** %s
   %s1 = load %str*, %str** %s
-  %mber = getelementptr %str, %str* %s1, i64 0, i32 0
+  %mber = getelementptr inbounds %str, %str* %s1, i64 0, i32 0
   %load = load i64, i64* %mber
   store i64 %load, i64* %size
   %size2 = load i64, i64* %size
@@ -754,7 +754,7 @@ else:                                             ; preds = %entry
 
 merge:                                            ; preds = %else, %if
   %phi = phi %str* [ bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), %if ], [ bitcast ({ i64, [5 x i8] }* @strStruct3 to %str*), %else ]
-  %mber = getelementptr %str, %str* %phi, i64 0, i32 0
+  %mber = getelementptr inbounds %str, %str* %phi, i64 0, i32 0
   %load = load i64, i64* %mber
   ret i64 %load
 }

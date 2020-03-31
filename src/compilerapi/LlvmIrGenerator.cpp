@@ -576,7 +576,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
 
         // calculate member address
-        Value* memberPointer = builder.CreateGEP(resultValue, indices, "mber");
+        Value* memberPointer = builder.CreateInBoundsGEP(resultValue, indices, "mber");
 
         // load member
         resultValue = builder.CreateLoad(memberPointer, "load");
