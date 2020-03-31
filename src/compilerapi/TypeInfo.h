@@ -80,7 +80,7 @@ public:
 
     const MemberInfo* GetMember(const std::string& memberName) const;
 
-    void AddMember(const MemberInfo* member);
+    bool AddMember(const MemberInfo* member);
 
 private:
     static TypeInfo* intSizeType;

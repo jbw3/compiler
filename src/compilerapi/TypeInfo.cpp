@@ -182,9 +182,10 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     return iter->second;
 }
 
-void TypeInfo::AddMember(const MemberInfo* member)
+bool TypeInfo::AddMember(const MemberInfo* member)
 {
-    members.insert({member->GetName(), member});
+    auto rv = members.insert({member->GetName(), member});
+    return rv.second;
 }
 
 UnitTypeInfo::UnitTypeInfo() :

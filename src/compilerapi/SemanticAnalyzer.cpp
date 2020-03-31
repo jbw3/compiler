@@ -322,8 +322,16 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
             return;
         }
 
-        MemberInfo* memberInfo = new MemberInfo(member->GetName(), index, memberType);
-        newType->AddMember(memberInfo);
+        const string& memberName = member->GetName();
+        MemberInfo* memberInfo = new MemberInfo(memberName, index, memberType);
+        bool added = newType->AddMember(memberInfo);
+        if (!added)
+        {
+            delete newType;
+            isError = true;
+            logger.LogError("Duplicate member '{}' in type '{}'", memberName, typeName);
+            return;
+        }
 
         ++index;
     }
