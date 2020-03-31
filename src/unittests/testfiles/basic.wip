@@ -526,3 +526,15 @@ fun scopes(x i32) i32
 
     rv
 }
+
+extern fun returnType1() EmptyType;
+extern fun returnType2() Test1;
+
+type EmptyType {}
+
+type Test1
+{
+    a i32,
+    b u64,
+    c str
+}

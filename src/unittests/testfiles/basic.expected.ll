@@ -4,6 +4,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
+%EmptyType = type {}
+%Test1 = type { i32, i64, %str* }
 %str = type { i64, [0 x i8] }
 
 @strStruct0 = constant { i64, [0 x i8] } zeroinitializer
@@ -17,6 +19,10 @@ target triple = "x86_64-pc-linux-gnu"
 declare %UnitType @extern1()
 
 declare i64 @extern2(i32, i1)
+
+declare %EmptyType @returnType1()
+
+declare %Test1 @returnType2()
 
 define i32 @noArgs() {
 entry:
