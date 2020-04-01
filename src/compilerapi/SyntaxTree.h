@@ -436,6 +436,8 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
+    void SwapTypeDefinitions(std::vector<TypeDefinition*>& newTypeDefinitions);
+
     const std::vector<TypeDefinition*>& GetTypeDefinitions() const;
 
     const std::vector<ExternFunctionDeclaration*>& GetExternFunctionDeclarations() const;

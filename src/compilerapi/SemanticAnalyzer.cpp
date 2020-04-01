@@ -348,9 +348,97 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
     typeDefinition->SetType(newType);
 }
 
+bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
+{
+    const vector<TypeDefinition*>& typeDefs = moduleDefinition->GetTypeDefinitions();
+    size_t numTypeDefs = typeDefs.size();
+
+    unordered_map<string, TypeDefinition*> nameMap;
+    nameMap.reserve(numTypeDefs);
+
+    // build map for fast lookup
+    for (TypeDefinition* typeDef : typeDefs)
+    {
+        const string& typeName = typeDef->GetName();
+        auto rv = nameMap.insert({typeName, typeDef});
+        if (!rv.second)
+        {
+            logger.LogError("Type '{}' has already been defined", typeName);
+            return false;
+        }
+    }
+
+    vector<TypeDefinition*> ordered;
+    ordered.reserve(numTypeDefs);
+
+    unordered_set<string> resolved;
+    resolved.reserve(numTypeDefs);
+
+    unordered_set<string> dependents;
+
+    // resolve dependencies
+    for (TypeDefinition* typeDef : typeDefs)
+    {
+        const string& typeName = typeDef->GetName();
+
+        // resolve this type's dependencies if we have not done so already
+        if (resolved.find(typeName) == resolved.end())
+        {
+            bool ok = ResolveDependencies(typeDef, nameMap, ordered, resolved, dependents);
+            if (!ok)
+            {
+                return false;
+            }
+        }
+    }
+
+    moduleDefinition->SwapTypeDefinitions(ordered);
+
+    return true;
+}
+
+bool SemanticAnalyzer::ResolveDependencies(
+    TypeDefinition* typeDef,
+    const unordered_map<string, TypeDefinition*>& nameMap,
+    vector<TypeDefinition*>& ordered,
+    unordered_set<string>& resolved,
+    unordered_set<string>& dependents)
+{
+    for (const MemberDefinition* member : typeDef->GetMembers())
+    {
+        const string& memberTypeName = member->GetTypeName();
+
+        // if we have not seen this member's type yet, resolve its dependencies
+        if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
+        {
+            auto iter = nameMap.find(memberTypeName);
+            TypeDefinition* memberType = iter->second;
+
+            bool ok = ResolveDependencies(memberType, nameMap, ordered, resolved, dependents);
+            if (!ok)
+            {
+                return false;
+            }
+        }
+    }
+
+    ordered.push_back(typeDef);
+    resolved.insert(typeDef->GetName());
+
+    return true;
+}
+
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
-    // process user-defined types
+    // sort type definitions so each comes after any type definitions it depends on
+    bool ok = SortTypeDefinitions(moduleDefinition);
+    if (!ok)
+    {
+        isError = true;
+        return;
+    }
+
+    // process type definitions
     for (TypeDefinition* typeDef : moduleDefinition->GetTypeDefinitions())
     {
         typeDef->Accept(this);
@@ -368,7 +456,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     {
         FunctionDeclaration* decl = externFunc->GetDeclaration();
 
-        bool ok = SetFunctionDeclarationTypes(decl);
+        ok = SetFunctionDeclarationTypes(decl);
         if (!ok)
         {
             isError = true;
@@ -389,7 +477,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     {
         FunctionDeclaration* decl = funcDef->GetDeclaration();
 
-        bool ok = SetFunctionDeclarationTypes(decl);
+        ok = SetFunctionDeclarationTypes(decl);
         if (!ok)
         {
             isError = true;

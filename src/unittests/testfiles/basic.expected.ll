@@ -7,6 +7,7 @@ target triple = "x86_64-pc-linux-gnu"
 %EmptyType = type {}
 %Test1 = type { i32, i64, %str* }
 %str = type { i64, [0 x i8] }
+%Test2 = type { %Test1 }
 
 @strStruct0 = constant { i64, [0 x i8] } zeroinitializer
 @strStruct1 = constant { i64, [15 x i8] } { i64 15, [15 x i8] c"Is this a test?" }
@@ -23,6 +24,8 @@ declare i64 @extern2(i32, i1)
 declare %EmptyType @returnType1()
 
 declare %Test1 @returnType2()
+
+declare %Test2 @returnType3()
 
 define i32 @noArgs() {
 entry:

@@ -6,6 +6,8 @@
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 class SemanticAnalyzer : public SyntaxTreeVisitor
 {
@@ -53,6 +55,15 @@ private:
     bool isError;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
+
+    bool SortTypeDefinitions(SyntaxTree::ModuleDefinition* moduleDefinition);
+
+    bool ResolveDependencies(
+        SyntaxTree::TypeDefinition* typeDef,
+        const std::unordered_map<std::string, SyntaxTree::TypeDefinition*>& nameMap,
+        std::vector<SyntaxTree::TypeDefinition*>& ordered,
+        std::unordered_set<std::string>& resolved,
+        std::unordered_set<std::string>& dependents);
 
     bool AddVariables(const SyntaxTree::VariableDeclarations& varDecls);
 

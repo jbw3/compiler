@@ -624,6 +624,11 @@ void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+void ModuleDefinition::SwapTypeDefinitions(vector<TypeDefinition*>& newTypeDefinitions)
+{
+    typeDefinitions.swap(newTypeDefinitions);
+}
+
 const vector<TypeDefinition*>& ModuleDefinition::GetTypeDefinitions() const
 {
     return typeDefinitions;
