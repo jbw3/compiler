@@ -404,6 +404,8 @@ bool SemanticAnalyzer::ResolveDependencies(
     unordered_set<string>& resolved,
     unordered_set<string>& dependents)
 {
+    const string& typeName = typeDef->GetName();
+
     for (const MemberDefinition* member : typeDef->GetMembers())
     {
         const string& memberTypeName = member->GetTypeName();
@@ -411,19 +413,30 @@ bool SemanticAnalyzer::ResolveDependencies(
         // if we have not seen this member's type yet, resolve its dependencies
         if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
         {
-            auto iter = nameMap.find(memberTypeName);
-            TypeDefinition* memberType = iter->second;
+            // check for a recursive dependency
+            auto iter = dependents.find(memberTypeName);
+            if (iter != dependents.end())
+            {
+                const string& memberName = member->GetName();
+                logger.LogError("In type '{}', member '{}' with type '{}' creates recursive dependency", typeName, memberName, memberTypeName);
+                return false;
+            }
 
+            dependents.insert(typeName);
+
+            TypeDefinition* memberType = nameMap.find(memberTypeName)->second;
             bool ok = ResolveDependencies(memberType, nameMap, ordered, resolved, dependents);
             if (!ok)
             {
                 return false;
             }
+
+            dependents.erase(typeName);
         }
     }
 
     ordered.push_back(typeDef);
-    resolved.insert(typeDef->GetName());
+    resolved.insert(typeName);
 
     return true;
 }
