@@ -31,8 +31,28 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                "};\n\n"
                "typedef const struct StrData* str;\n\n";
 
-    // print function declarations
     string cType;
+
+    // print structs
+    for (const TypeDefinition* typeDef : module->GetTypeDefinitions())
+    {
+        outFile << "struct " << typeDef->GetName() << "\n{\n";
+
+        for (const MemberDefinition* member : typeDef->GetMembers())
+        {
+            const TypeInfo* memberType = TypeInfo::GetType(member->GetTypeName());
+            if (!GetCType(memberType, cType))
+            {
+                return false;
+            }
+
+            outFile << "    " << cType << " " << member->GetName() << ";\n";
+        }
+
+        outFile << "};\n\n";
+    }
+
+    // print function declarations
     for (const FunctionDefinition* function : module->GetFunctionDefinitions())
     {
         const FunctionDeclaration* declaration = function->GetDeclaration();
@@ -160,6 +180,11 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
     {
         cType = "str";
+        return true;
+    }
+    else if (type->IsComposite())
+    {
+        cType = type->GetShortName();
         return true;
     }
     else
