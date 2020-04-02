@@ -182,7 +182,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
         cType = "str";
         return true;
     }
-    else if (type->IsComposite())
+    else if (type->IsAggregate())
     {
         cType = type->GetShortName();
         return true;

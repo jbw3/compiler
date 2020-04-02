@@ -119,14 +119,14 @@ TypeInfo::TypeInfo(
     bool isBool,
     bool isInt,
     bool isSigned,
-    bool isComposite,
+    bool isAggregate,
     const string& shortName
 ) :
     numBits(numBits),
     isBool(isBool),
     isInt(isInt),
     isSigned(isSigned),
-    isComposite(isComposite),
+    isAggregate(isAggregate),
     shortName(shortName)
 {
 }
@@ -156,9 +156,9 @@ bool TypeInfo::IsSigned() const
     return isSigned;
 }
 
-bool TypeInfo::IsComposite() const
+bool TypeInfo::IsAggregate() const
 {
-    return isComposite;
+    return isAggregate;
 }
 
 unsigned TypeInfo::GetNumBits() const
@@ -236,19 +236,19 @@ bool StringPointerType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-UserType::UserType(const string& name) :
+AggregateType::AggregateType(const string& name) :
     TypeInfo(0, false, false, false, true, name)
 {
 }
 
-bool UserType::IsSameAs(const TypeInfo& other) const
+bool AggregateType::IsSameAs(const TypeInfo& other) const
 {
-    const UserType* otherUserType = dynamic_cast<const UserType*>(&other);
-    if (otherUserType == nullptr)
+    const AggregateType* otherAggType = dynamic_cast<const AggregateType*>(&other);
+    if (otherAggType == nullptr)
     {
         return false;
     }
 
-    bool isSame = GetShortName() == otherUserType->GetShortName();
+    bool isSame = GetShortName() == otherAggType->GetShortName();
     return isSame;
 }

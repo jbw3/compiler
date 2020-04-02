@@ -58,7 +58,7 @@ public:
         bool isBool,
         bool isInt,
         bool isSigned,
-        bool isComposite,
+        bool isAggregate,
         const std::string& shortName
     );
 
@@ -72,7 +72,7 @@ public:
 
     bool IsSigned() const;
 
-    bool IsComposite() const;
+    bool IsAggregate() const;
 
     unsigned GetNumBits() const;
 
@@ -92,7 +92,7 @@ private:
     bool isBool;
     bool isInt;
     bool isSigned;
-    bool isComposite;
+    bool isAggregate;
     std::string shortName;
     std::map<std::string, const MemberInfo*> members;
 };
@@ -127,10 +127,10 @@ public:
     bool IsSameAs(const TypeInfo& other) const override;
 };
 
-class UserType : public TypeInfo
+class AggregateType : public TypeInfo
 {
 public:
-    UserType(const std::string& name);
+    AggregateType(const std::string& name);
 
     bool IsSameAs(const TypeInfo& other) const override;
 };

@@ -307,7 +307,7 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
 {
     const string& typeName = typeDefinition->GetName();
 
-    UserType* newType = new UserType(typeName);
+    AggregateType* newType = new AggregateType(typeName);
 
     unsigned index = 0;
     for (const MemberDefinition* member : typeDefinition->GetMembers())
