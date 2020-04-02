@@ -425,6 +425,40 @@ private:
     const TypeInfo* type;
 };
 
+class MemberInitialization
+{
+public:
+    MemberInitialization(const std::string& name, Expression* expression);
+
+    virtual ~MemberInitialization();
+
+    const std::string& GetName() const;
+
+    Expression* GetExpression() const;
+
+private:
+    std::string name;
+    Expression* expression;
+};
+
+class TypeInitializationExpression : public Expression
+{
+public:
+    TypeInitializationExpression(const std::string& typeName, const std::vector<MemberInitialization*>& memberInitializations);
+
+    virtual ~TypeInitializationExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const std::string& GetTypeName() const;
+
+    const std::vector<MemberInitialization*>& GetMemberInitializations() const;
+
+private:
+    std::string typeName;
+    std::vector<MemberInitialization*> memberInitializations;
+};
+
 class ModuleDefinition : public SyntaxTreeNode
 {
 public:

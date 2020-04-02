@@ -603,6 +603,53 @@ void TypeDefinition::SetType(const TypeInfo* newType)
     type = newType;
 }
 
+MemberInitialization::MemberInitialization(const string& name, Expression* expression) :
+    name(name),
+    expression(expression)
+{
+}
+
+MemberInitialization::~MemberInitialization()
+{
+    delete expression;
+}
+
+const string& MemberInitialization::GetName() const
+{
+    return name;
+}
+
+Expression* MemberInitialization::GetExpression() const
+{
+    return expression;
+}
+
+TypeInitializationExpression::TypeInitializationExpression(const string& typeName, const vector<MemberInitialization*>& memberInitializations) :
+    typeName(typeName),
+    memberInitializations(memberInitializations)
+{
+}
+
+TypeInitializationExpression::~TypeInitializationExpression()
+{
+    deletePointerContainer(memberInitializations);
+}
+
+void TypeInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO: Implement this
+}
+
+const string& TypeInitializationExpression::GetTypeName() const
+{
+    return typeName;
+}
+
+const vector<MemberInitialization*>& TypeInitializationExpression::GetMemberInitializations() const
+{
+    return memberInitializations;
+}
+
 ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
