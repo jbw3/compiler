@@ -498,7 +498,7 @@ TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, Token
     if (iter == endIter)
     {
         deletePointerContainer(members);
-        logger.LogError(*iter, "Expected '}'");
+        logger.LogError("Expected '}'");
         return nullptr;
     }
     else if (iter->GetValue() != "}")
@@ -513,6 +513,118 @@ TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, Token
 
     TypeDefinition* typeDef = new TypeDefinition(typeName, members);
     return typeDef;
+}
+
+bool SyntaxAnalyzer::IsTypeInitialization(TokenIterator iter, TokenIterator endIter)
+{
+    if (iter == endIter)
+    {
+        return false;
+    }
+
+    ++iter;
+    if (iter == endIter || iter->GetValue() != "{")
+    {
+        return false;
+    }
+
+    ++iter;
+    if (iter == endIter)
+    {
+        return false;
+    }
+    else if (iter->GetValue() == "}")
+    {
+        return true;
+    }
+    else if (!IsValidName(*iter))
+    {
+        return false;
+    }
+
+    ++iter;
+    if (iter == endIter || iter->GetValue() != ":")
+    {
+        return false;
+    }
+
+    return true;
+}
+
+TypeInitializationExpression* SyntaxAnalyzer::ProcessTypeInitialization(TokenIterator& iter, TokenIterator endIter)
+{
+    const string& typeName = iter->GetValue();
+
+    // skip type name and '{'
+    iter += 2;
+    if (iter == endIter)
+    {
+        logger.LogError("Unexpected end of file in the middle of a type initialization");
+        return nullptr;
+    }
+
+    // process member initializations
+    vector<MemberInitialization*> members;
+    while (iter != endIter && iter->GetValue() != "}")
+    {
+        // get member name
+        if (!IsValidName(*iter))
+        {
+            deletePointerContainer(members);
+            logger.LogError(*iter, "Invalid member name: '{}'", iter->GetValue());
+            return nullptr;
+        }
+        const string& memberName = iter->GetValue();
+
+        // make sure member name is followed by ':'
+        if (!IncrementIteratorCheckValue(iter, endIter, ":", "Expected ':' after member"))
+        {
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        // get member expression
+        ++iter;
+        Expression* memberExpr = ProcessExpression(iter, endIter, {",", "}"});
+        if (memberExpr == nullptr)
+        {
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        MemberInitialization* member = new MemberInitialization(memberName, memberExpr);
+        members.push_back(member);
+
+        const string& delimiter = iter->GetValue();
+        if (delimiter == "}")
+        {
+            break;
+        }
+        else if (delimiter != ",")
+        {
+            logger.LogError(*iter, "Expected ',' or '}'");
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        ++iter;
+    }
+
+    if (iter == endIter)
+    {
+        deletePointerContainer(members);
+        logger.LogError("Expected '}'");
+        return nullptr;
+    }
+    else if (iter->GetValue() != "}")
+    {
+        deletePointerContainer(members);
+        logger.LogError(*iter, "Expected '}'");
+        return nullptr;
+    }
+
+    TypeInitializationExpression* typeInit = new TypeInitializationExpression(typeName, members);
+    return typeInit;
 }
 
 void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, VariableDeclaration*& varDecl, Expression*& assignment)
@@ -714,7 +826,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             iter += 2;
             if (iter == endIter)
             {
-                logger.LogError("Unexpected end of file");
+                logger.LogError("Unexpected end of file in the middle of a function call");
                 return nullptr;
             }
 
@@ -737,6 +849,15 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             }
 
             expr = new FunctionExpression(value, arguments);
+        }
+        // check if it's a type initialization
+        else if (IsTypeInitialization(iter, endIter))
+        {
+            expr = ProcessTypeInitialization(iter, endIter);
+            if (expr == nullptr)
+            {
+                return nullptr;
+            }
         }
         else // it's a variable
         {
