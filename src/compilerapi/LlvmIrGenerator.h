@@ -61,6 +61,8 @@ public:
 
     void Visit(SyntaxTree::TypeDefinition* typeDefinition) override;
 
+    void Visit(SyntaxTree::TypeInitializationExpression* typeInitializationExpression) override;
+
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
     void Visit(SyntaxTree::UnitTypeLiteralExpression* unitTypeLiteralExpression) override;

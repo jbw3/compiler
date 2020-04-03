@@ -348,6 +348,57 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
     typeDefinition->SetType(newType);
 }
 
+void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExpression)
+{
+    const string& typeName = typeInitializationExpression->GetTypeName();
+    const TypeInfo* type = TypeInfo::GetType(typeName);
+    if (type == nullptr)
+    {
+        isError = true;
+        logger.LogError("'{}' is not a known type", typeName);
+        return;
+    }
+
+    typeInitializationExpression->SetType(type);
+
+    for (MemberInitialization* member : typeInitializationExpression->GetMemberInitializations())
+    {
+        // get member info
+        const string& memberName = member->GetName();
+        const MemberInfo* memberInfo = type->GetMember(memberName);
+        if (memberInfo == nullptr)
+        {
+            isError = true;
+            logger.LogError("Type '{}' does not have a member named '{}'", typeName, memberName);
+            return;
+        }
+
+        // evaluate expression
+        Expression* expr = member->GetExpression();
+        expr->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        // check types
+        const TypeInfo* memberType = memberInfo->GetType();
+        const TypeInfo* exprType = expr->GetType();
+        if (!memberType->IsSameAs(*exprType))
+        {
+            bool bothAreInts = memberType->IsInt() & memberType->IsInt();
+            bool haveSameSign = memberType->IsSigned() == memberType->IsSigned();
+            if (!bothAreInts || !haveSameSign || memberType->GetNumBits() < exprType->GetNumBits())
+            {
+                isError = true;
+                logger.LogError("Cannot assign expression of type '{}' to member of type '{}'",
+                                exprType->GetShortName(), memberType->GetShortName());
+                return;
+            }
+        }
+    }
+}
+
 bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
 {
     const vector<TypeDefinition*>& typeDefs = moduleDefinition->GetTypeDefinitions();

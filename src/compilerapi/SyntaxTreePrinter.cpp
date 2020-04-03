@@ -213,6 +213,17 @@ void SyntaxTreePrinter::Visit(TypeDefinition* typeDefinition)
     PrintProperty("members", typeDefinition->GetMembers(), printMemberDef);
 }
 
+void SyntaxTreePrinter::Visit(TypeInitializationExpression* typeInitializationExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    function<void (MemberInitialization*)> printMemberInit = [this](MemberInitialization* member){ PrintMemberInitialization(member); };
+
+    PrintProperty(NODE_TYPE_PROPERTY, "TypeInitializationExpression");
+    PrintProperty("typeName", typeInitializationExpression->GetTypeName());
+    PrintProperty("memberInitializations", typeInitializationExpression->GetMemberInitializations(), printMemberInit);
+}
+
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
 {
     BracePrinter printer(*this, "{", "}");
@@ -403,6 +414,15 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->GetName());
     PrintProperty("typeName", member->GetTypeName());
+}
+
+void SyntaxTreePrinter::PrintMemberInitialization(const MemberInitialization* memberInitialization)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "MemberInitialization");
+    PrintProperty("name", memberInitialization->GetName());
+    PrintProperty("expression", memberInitialization->GetExpression());
 }
 
 void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)

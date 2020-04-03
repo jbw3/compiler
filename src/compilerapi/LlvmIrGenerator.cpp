@@ -333,6 +333,12 @@ void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
     types.insert({typeName, structType});
 }
 
+void LlvmIrGenerator::Visit(TypeInitializationExpression* typeInitializationExpression)
+{
+    resultValue = nullptr;
+    cerr << "TODO: Implement this\n";
+}
+
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     // generate type declarations

@@ -637,7 +637,7 @@ TypeInitializationExpression::~TypeInitializationExpression()
 
 void TypeInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO: Implement this
+    visitor->Visit(this);
 }
 
 const string& TypeInitializationExpression::GetTypeName() const

@@ -15,6 +15,7 @@ class ModuleDefinition;
 class NumericExpression;
 class StringLiteralExpression;
 class TypeDefinition;
+class TypeInitializationExpression;
 class UnaryExpression;
 class UnitTypeLiteralExpression;
 class VariableDeclaration;
@@ -36,6 +37,8 @@ public:
     virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
 
     virtual void Visit(SyntaxTree::TypeDefinition* typeDefinition) = 0;
+
+    virtual void Visit(SyntaxTree::TypeInitializationExpression* typeInitializationExpression) = 0;
 
     virtual void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) = 0;
 

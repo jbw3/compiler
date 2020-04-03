@@ -27,6 +27,8 @@ public:
 
     void Visit(SyntaxTree::TypeDefinition* typeDefinition) override;
 
+    void Visit(SyntaxTree::TypeInitializationExpression* typeInitializationExpression) override;
+
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
     void Visit(SyntaxTree::NumericExpression* numericExpression) override;
@@ -70,6 +72,8 @@ private:
     void PrintFunctionDeclaration(const SyntaxTree::FunctionDeclaration* declaration);
 
     void PrintMemberDefinition(const SyntaxTree::MemberDefinition* member);
+
+    void PrintMemberInitialization(const SyntaxTree::MemberInitialization* memberInitialization);
 
     void PrintProperty(const std::string& name, const std::string& value);
 
