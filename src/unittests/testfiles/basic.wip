@@ -527,20 +527,40 @@ fun scopes(x i32) i32
     rv
 }
 
-extern fun returnType1() EmptyType;
-extern fun returnType2() Test1;
-extern fun returnType3() Test2;
+fun initTypes()
+{
+    var empty EmptyType = EmptyType { };
+
+    var test1 Test1 = Test1
+    {
+        c: "café",
+        a: types_i16(1, 2),
+        b: true
+    };
+
+    var test2 Test2 = Test2
+    {
+        test: Test1
+        {
+            a: 1,
+            b: false,
+            c: "abc",
+        },
+        n: 12,
+    };
+}
 
 type EmptyType {}
 
 type Test2
 {
     test Test1,
+    n i32,
 }
 
 type Test1
 {
     a i32,
-    b u64,
+    b bool,
     c str
 }

@@ -4,10 +4,10 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
-%EmptyType = type {}
-%Test1 = type { i32, i64, %str* }
 %str = type { i64, [0 x i8] }
-%Test2 = type { %Test1 }
+%Test2 = type { %Test1, i32 }
+%Test1 = type { i32, i1, %str* }
+%EmptyType = type {}
 
 @strStruct0 = constant { i64, [0 x i8] } zeroinitializer
 @strStruct1 = constant { i64, [15 x i8] } { i64 15, [15 x i8] c"Is this a test?" }
@@ -20,12 +20,6 @@ target triple = "x86_64-pc-linux-gnu"
 declare %UnitType @extern1()
 
 declare i64 @extern2(i32, i1)
-
-declare %EmptyType @returnType1()
-
-declare %Test1 @returnType2()
-
-declare %Test2 @returnType3()
 
 define i32 @noArgs() {
 entry:
@@ -1492,4 +1486,19 @@ merge:                                            ; preds = %else, %if
   %phi = phi %UnitType [ zeroinitializer, %if ], [ zeroinitializer, %else ]
   %rv6 = load i32, i32* %rv
   ret i32 %rv6
+}
+
+define %UnitType @initTypes() {
+entry:
+  %test2 = alloca %Test2
+  %test1 = alloca %Test1
+  %empty = alloca %EmptyType
+  store %EmptyType undef, %EmptyType* %empty
+  %call = call i16 @types_i16(i16 1, i16 2)
+  %signext = sext i16 %call to i32
+  %agg = insertvalue %Test1 { i32 undef, i1 undef, %str* bitcast ({ i64, [5 x i8] }* @strStruct3 to %str*) }, i32 %signext, 0
+  %agg1 = insertvalue %Test1 %agg, i1 true, 1
+  store %Test1 %agg1, %Test1* %test1
+  store %Test2 { %Test1 { i32 1, i1 false, %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*) }, i32 12 }, %Test2* %test2
+  ret %UnitType zeroinitializer
 }
