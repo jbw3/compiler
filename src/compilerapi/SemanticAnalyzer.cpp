@@ -361,15 +361,30 @@ void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExp
 
     typeInitializationExpression->SetType(type);
 
+    unordered_set<string> membersToInit;
+    for (auto pair : type->GetMembers())
+    {
+        membersToInit.insert(pair.first);
+    }
+
     for (MemberInitialization* member : typeInitializationExpression->GetMemberInitializations())
     {
-        // get member info
         const string& memberName = member->GetName();
+
+        // get member info
         const MemberInfo* memberInfo = type->GetMember(memberName);
         if (memberInfo == nullptr)
         {
             isError = true;
             logger.LogError("Type '{}' does not have a member named '{}'", typeName, memberName);
+            return;
+        }
+
+        size_t num = membersToInit.erase(memberName);
+        if (num == 0)
+        {
+            isError = true;
+            logger.LogError("Member '{}' has already been initialized", memberName);
             return;
         }
 
@@ -396,6 +411,22 @@ void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExp
                 return;
             }
         }
+    }
+
+    if (membersToInit.size() > 0)
+    {
+        auto iter = membersToInit.cbegin();
+        string errorMsg = "The following members were not initialized: " + *iter;
+        ++iter;
+        for (; iter != membersToInit.cend(); ++iter)
+        {
+            errorMsg += ", ";
+            errorMsg += *iter;
+        }
+
+        isError = true;
+        logger.LogError(errorMsg.c_str());
+        return;
     }
 }
 

@@ -182,6 +182,11 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     return iter->second;
 }
 
+const map<string, const MemberInfo*>& TypeInfo::GetMembers() const
+{
+    return members;
+}
+
 size_t TypeInfo::GetMemberCount() const
 {
     return members.size();
