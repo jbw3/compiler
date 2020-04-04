@@ -1500,5 +1500,12 @@ entry:
   %agg1 = insertvalue %Test1 %agg, i1 true, 1
   store %Test1 %agg1, %Test1* %test1
   store %Test2 { %Test1 { i32 1, i1 false, %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*) }, i32 12 }, %Test2* %test2
+  %mber = getelementptr inbounds %Test1, %Test1* %test1, i64 0, i32 1
+  store i1 false, i1* %mber
+  %mber2 = getelementptr inbounds %Test2, %Test2* %test2, i64 0, i32 0
+  %mber3 = getelementptr inbounds %Test1, %Test1* %mber2, i64 0, i32 0
+  %load = load i32, i32* %mber3
+  %add = add i32 %load, 7
+  store i32 %add, i32* %mber3
   ret %UnitType zeroinitializer
 }

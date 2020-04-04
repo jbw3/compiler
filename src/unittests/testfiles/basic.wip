@@ -548,6 +548,9 @@ fun initTypes()
         },
         n: 12,
     };
+
+    test1.b = false;
+    test2.test.a += 7;
 }
 
 type EmptyType {}
