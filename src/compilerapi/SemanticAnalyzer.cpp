@@ -309,7 +309,6 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
 
     AggregateType* newType = new AggregateType(typeName);
 
-    unsigned index = 0;
     for (const MemberDefinition* member : typeDefinition->GetMembers())
     {
         const string& memberTypeName = member->GetTypeName();
@@ -323,8 +322,7 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
         }
 
         const string& memberName = member->GetName();
-        MemberInfo* memberInfo = new MemberInfo(memberName, index, memberType);
-        bool added = newType->AddMember(memberInfo);
+        bool added = newType->AddMember(memberName, memberType);
         if (!added)
         {
             delete newType;
@@ -332,8 +330,6 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
             logger.LogError("Duplicate member '{}' in type '{}'", memberName, typeName);
             return;
         }
-
-        ++index;
     }
 
     bool added = TypeInfo::RegisterType(newType);

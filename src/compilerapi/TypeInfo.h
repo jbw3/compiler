@@ -84,7 +84,7 @@ public:
 
     size_t GetMemberCount() const;
 
-    bool AddMember(const MemberInfo* member);
+    bool AddMember(const std::string& name, const TypeInfo* type);
 
 private:
     static TypeInfo* intSizeType;

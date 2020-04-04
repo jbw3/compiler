@@ -192,10 +192,18 @@ size_t TypeInfo::GetMemberCount() const
     return members.size();
 }
 
-bool TypeInfo::AddMember(const MemberInfo* member)
+bool TypeInfo::AddMember(const string& name, const TypeInfo* type)
 {
-    auto rv = members.insert({member->GetName(), member});
-    return rv.second;
+    MemberInfo* member = new MemberInfo(name, members.size(), type);
+    auto rv = members.insert({name, member});
+
+    bool inserted = rv.second;
+    if (!inserted)
+    {
+        delete member;
+    }
+
+    return inserted;
 }
 
 UnitTypeInfo::UnitTypeInfo() :
@@ -237,7 +245,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 StringPointerType::StringPointerType(unsigned numBits) :
     TypeInfo(numBits, false, false, false, false, STR_KEYWORD)
 {
-    AddMember(new MemberInfo("Size", 0, TypeInfo::GetUIntSizeType()));
+    AddMember("Size", TypeInfo::GetUIntSizeType());
 }
 
 bool StringPointerType::IsSameAs(const TypeInfo& other) const
