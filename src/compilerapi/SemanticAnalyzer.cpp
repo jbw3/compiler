@@ -863,14 +863,25 @@ bool SemanticAnalyzer::SetVariableDeclarationType(VariableDeclaration* variableD
 
 bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* functionDeclaration)
 {
+    unordered_set<string> processedParams;
+
     // set parameter types
     for (VariableDeclaration* varDecl : functionDeclaration->GetParameters())
     {
+        const string& paramName = varDecl->GetName();
+        if (processedParams.find(paramName) != processedParams.end())
+        {
+            logger.LogError("Function '{}' has multiple parameters named '{}'", functionDeclaration->GetName(), paramName);
+            return false;
+        }
+
         bool ok = SetVariableDeclarationType(varDecl);
         if (!ok)
         {
             return false;
         }
+
+        processedParams.insert(paramName);
     }
 
     // set return type
