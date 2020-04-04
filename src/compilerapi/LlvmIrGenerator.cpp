@@ -602,7 +602,9 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
     }
     unsigned memberIndex = member->GetIndex();
 
-    if (resultValue->getType()->isPointerTy())
+    Expression::EAccessType accessType = memberExpression->GetAccessType();
+
+    if (accessType == Expression::eStore || resultValue->getType()->isPointerTy())
     {
         vector<Value*> indices;
         indices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
@@ -611,8 +613,15 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         // calculate member address
         Value* memberPointer = builder.CreateInBoundsGEP(resultValue, indices, "mber");
 
-        // load member
-        resultValue = builder.CreateLoad(memberPointer, "load");
+        if (accessType == Expression::eLoad)
+        {
+            // load member
+            resultValue = builder.CreateLoad(memberPointer, "load");
+        }
+        else
+        {
+            resultValue = memberPointer;
+        }
     }
     else
     {

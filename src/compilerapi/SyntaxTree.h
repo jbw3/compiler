@@ -41,7 +41,7 @@ public:
 
     EAccessType GetAccessType() const;
 
-    void SetAccessType(EAccessType newAccessType);
+    virtual void SetAccessType(EAccessType newAccessType);
 
 private:
     const TypeInfo* type;
@@ -252,6 +252,8 @@ public:
     virtual ~MemberExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
+
+    void SetAccessType(EAccessType newAccessType) override;
 
     Expression* GetSubExpression() const;
 

@@ -322,7 +322,7 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
         }
 
         const string& memberName = member->GetName();
-        bool added = newType->AddMember(memberName, memberType);
+        bool added = newType->AddMember(memberName, memberType, true);
         if (!added)
         {
             delete newType;
@@ -760,6 +760,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
     }
 
     memberExpression->SetType(member->GetType());
+    memberExpression->SetIsAssignable(expr->GetIsAssignable() && member->GetIsAssignable());
 }
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)

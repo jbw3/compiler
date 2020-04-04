@@ -13,7 +13,7 @@ class UnitTypeInfo;
 class MemberInfo
 {
 public:
-    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type);
+    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isAssignable);
 
     const std::string& GetName() const;
 
@@ -21,10 +21,13 @@ public:
 
     const TypeInfo* GetType() const;
 
+    bool GetIsAssignable() const;
+
 private:
     std::string name;
     unsigned index;
     const TypeInfo* type;
+    bool isAssignable;
 };
 
 class TypeInfo
@@ -84,7 +87,7 @@ public:
 
     size_t GetMemberCount() const;
 
-    bool AddMember(const std::string& name, const TypeInfo* type);
+    bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable);
 
 private:
     static TypeInfo* intSizeType;

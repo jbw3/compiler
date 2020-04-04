@@ -20,10 +20,11 @@ PrimitiveType uInt16TypeInfo(16, false, true, false, UINT16_KEYWORD);
 PrimitiveType uInt32TypeInfo(32, false, true, false, UINT32_KEYWORD);
 PrimitiveType uInt64TypeInfo(64, false, true, false, UINT64_KEYWORD);
 
-MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type) :
+MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable) :
     name(name),
     index(index),
-    type(type)
+    type(type),
+    isAssignable(isAssignable)
 {
 }
 
@@ -40,6 +41,11 @@ unsigned MemberInfo::GetIndex() const
 const TypeInfo* MemberInfo::GetType() const
 {
     return type;
+}
+
+bool MemberInfo::GetIsAssignable() const
+{
+    return isAssignable;
 }
 
 const UnitTypeInfo* TypeInfo::UnitType = &unitType;
@@ -192,9 +198,9 @@ size_t TypeInfo::GetMemberCount() const
     return members.size();
 }
 
-bool TypeInfo::AddMember(const string& name, const TypeInfo* type)
+bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable)
 {
-    MemberInfo* member = new MemberInfo(name, members.size(), type);
+    MemberInfo* member = new MemberInfo(name, members.size(), type, isAssignable);
     auto rv = members.insert({name, member});
 
     bool inserted = rv.second;
@@ -245,7 +251,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 StringPointerType::StringPointerType(unsigned numBits) :
     TypeInfo(numBits, false, false, false, false, STR_KEYWORD)
 {
-    AddMember("Size", TypeInfo::GetUIntSizeType());
+    AddMember("Size", TypeInfo::GetUIntSizeType(), false);
 }
 
 bool StringPointerType::IsSameAs(const TypeInfo& other) const

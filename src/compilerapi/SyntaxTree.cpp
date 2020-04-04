@@ -357,6 +357,12 @@ void MemberExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+void MemberExpression::SetAccessType(EAccessType newAccessType)
+{
+    Expression::SetAccessType(newAccessType);
+    subExpression->SetAccessType(newAccessType);
+}
+
 Expression* MemberExpression::GetSubExpression() const
 {
     return subExpression;
