@@ -80,6 +80,8 @@ public:
 
     const MemberInfo* GetMember(const std::string& memberName) const;
 
+    size_t GetMemberCount() const;
+
     bool AddMember(const MemberInfo* member);
 
 private:

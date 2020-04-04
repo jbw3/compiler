@@ -182,6 +182,11 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     return iter->second;
 }
 
+size_t TypeInfo::GetMemberCount() const
+{
+    return members.size();
+}
+
 bool TypeInfo::AddMember(const MemberInfo* member)
 {
     auto rv = members.insert({member->GetName(), member});
