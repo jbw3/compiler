@@ -335,8 +335,35 @@ void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
 
 void LlvmIrGenerator::Visit(TypeInitializationExpression* typeInitializationExpression)
 {
-    resultValue = nullptr;
-    cerr << "TODO: Implement this\n";
+    const TypeInfo* typeInfo = typeInitializationExpression->GetType();
+    Type* type = GetType(typeInfo);
+    if (type == nullptr)
+    {
+        resultValue = nullptr;
+        cerr << "Internal error: Unknown member definition type\n";
+        return;
+    }
+
+    vector<unsigned> index(1);
+    Value* initValue = UndefValue::get(type);
+    for (const MemberInitialization* member : typeInitializationExpression->GetMemberInitializations())
+    {
+        Expression* expr = member->GetExpression();
+        expr->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+
+        const MemberInfo* memberInfo = typeInfo->GetMember(member->GetName());
+
+        ExtendType(expr->GetType(), memberInfo->GetType(), resultValue);
+
+        index[0] = memberInfo->GetIndex();
+        initValue = builder.CreateInsertValue(initValue, resultValue, index, "agg");
+    }
+
+    resultValue = initValue;
 }
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
