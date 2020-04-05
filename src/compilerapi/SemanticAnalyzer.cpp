@@ -492,8 +492,8 @@ bool SemanticAnalyzer::ResolveDependencies(
         if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
         {
             // check for a recursive dependency
-            auto iter = dependents.find(memberTypeName);
-            if (iter != dependents.end())
+            auto dependentsIter = dependents.find(memberTypeName);
+            if (dependentsIter != dependents.end())
             {
                 const string& memberName = member->GetName();
                 logger.LogError("In type '{}', member '{}' with type '{}' creates recursive dependency", typeName, memberName, memberTypeName);
@@ -502,7 +502,14 @@ bool SemanticAnalyzer::ResolveDependencies(
 
             dependents.insert(typeName);
 
-            TypeDefinition* memberType = nameMap.find(memberTypeName)->second;
+            auto nameMapIter = nameMap.find(memberTypeName);
+            if (nameMapIter == nameMap.end())
+            {
+                logger.LogError("'{}' is not a known type", memberTypeName);
+                return false;
+            }
+
+            TypeDefinition* memberType = nameMapIter->second;
             bool ok = ResolveDependencies(memberType, nameMap, ordered, resolved, dependents);
             if (!ok)
             {
