@@ -102,23 +102,48 @@ bool LexicalAnalyzerTests::TestValidInputs()
     return ok;
 }
 
-bool LexicalAnalyzerTests::TokensAreEqual(const Token& token1, const Token& token2)
+bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Token& actualToken)
 {
-    return token1.GetValue() == token2.GetValue() && token1.GetLine() == token2.GetLine() &&
-           token1.GetColumn() == token2.GetColumn();
+    bool areEqual = true;
+
+    const string& expectedValue = expectedToken.GetValue();
+    const string& actualValue = actualToken.GetValue();
+    if (expectedValue != actualValue)
+    {
+        cerr << "Token values are not equal: expected: " << expectedValue << ", actual: " << actualValue << "\n";
+        areEqual = false;
+    }
+
+    unsigned long expectedLine = expectedToken.GetLine();
+    unsigned long actualLine = actualToken.GetLine();
+    if (expectedLine != actualLine)
+    {
+        cerr << "Token line numbers are not equal: expected: " << expectedLine << ", actual: " << actualLine << "\n";
+        areEqual = false;
+    }
+
+    unsigned long expectedColumn = expectedToken.GetColumn();
+    unsigned long actualColumn = actualToken.GetColumn();
+    if (expectedColumn != actualColumn)
+    {
+        cerr << "Token column numbers are not equal: expected: " << expectedColumn << ", actual: " << actualColumn << "\n";
+        areEqual = false;
+    }
+
+    return areEqual;
 }
 
-bool LexicalAnalyzerTests::TokenSequencesAreEqual(const std::vector<Token>& sequence1,
-                                                  const std::vector<Token>& sequence2)
+bool LexicalAnalyzerTests::TokenSequencesAreEqual(const std::vector<Token>& expectedTokens,
+                                                  const std::vector<Token>& actualTokens)
 {
-    if (sequence1.size() != sequence2.size())
+    if (expectedTokens.size() != actualTokens.size())
     {
         return false;
     }
 
-    for (size_t i = 0; i < sequence1.size(); ++i)
+    for (size_t i = 0; i < expectedTokens.size(); ++i)
     {
-        bool areEqual = TokensAreEqual(sequence1[i], sequence2[i]);
+        bool areEqual = TokensAreEqual(expectedTokens[i], actualTokens[i]);
         if (!areEqual)
         {
             return false;
