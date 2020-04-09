@@ -18,7 +18,9 @@ public:
 private:
     static const char COMMENT_START;
 
-    static const char COMMENT_END;
+    static const char BLOCK_COMMENT_INNER;
+
+    static const char LINE_COMMENT_END;
 
     static const std::unordered_set<std::string> SYMBOLS;
 
@@ -36,6 +38,10 @@ private:
     bool ParseChar(char ch, std::vector<Token>& tokens);
 
     bool IsValidToken(const std::string& str) const;
+
+    void ParseLineComment(std::istream& is);
+
+    bool ParseBlockComment(std::istream& is);
 
     void PrintError();
 };

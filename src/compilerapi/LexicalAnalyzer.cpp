@@ -7,7 +7,9 @@ using namespace std;
 
 const char LexicalAnalyzer::COMMENT_START = '#';
 
-const char LexicalAnalyzer::COMMENT_END = '\n';
+const char LexicalAnalyzer::BLOCK_COMMENT_INNER = '!';
+
+const char LexicalAnalyzer::LINE_COMMENT_END = '\n';
 
 const unordered_set<string> LexicalAnalyzer::SYMBOLS =
 {
@@ -50,12 +52,14 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
     return ok;
 }
 
-bool LexicalAnalyzer::Process(std::istream& is, std::vector<Token>& tokens)
+bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 {
     tokens.clear();
     tokens.reserve(256);
 
     tokenStr = "";
+    isValid = false;
+    isString = false;
     line = 1;
     column = 1;
 
@@ -66,29 +70,36 @@ bool LexicalAnalyzer::Process(std::istream& is, std::vector<Token>& tokens)
     {
         if (ch == COMMENT_START && !isString)
         {
-            // read to comment end
-            do
+            is.read(&ch, 1);
+            if (!is.eof())
             {
-                is.read(&ch, 1);
-            } while (!is.eof() && ch != COMMENT_END);
+                if (ch == BLOCK_COMMENT_INNER)
+                {
+                    ok = ParseBlockComment(is);
+                }
+                else
+                {
+                    ParseLineComment(is);
+                }
+            }
         }
         else
         {
             ok = ParseChar(ch, tokens);
-            if (!ok)
+            if (ch == '\n')
             {
-                break;
+                ++line;
+                column = 1;
+            }
+            else
+            {
+                ++column;
             }
         }
 
-        if (ch == '\n')
+        if (!ok)
         {
-            ++line;
-            column = 1;
-        }
-        else
-        {
-            ++column;
+            break;
         }
 
         is.read(&ch, 1);
@@ -114,7 +125,7 @@ Token LexicalAnalyzer::CreateToken()
     return Token(tokenStr, line, GetTokenStrStartColumn());
 }
 
-bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
+bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
 {
     if (isString)
     {
@@ -200,6 +211,62 @@ bool LexicalAnalyzer::ParseChar(char ch, std::vector<Token>& tokens)
 bool LexicalAnalyzer::IsValidToken(const string& str) const
 {
     return SYMBOLS.find(str) != SYMBOLS.end() || isIdentifier(str) || isPotentialNumber(str);
+}
+
+void LexicalAnalyzer::ParseLineComment(istream& is)
+{
+    char ch = '\0';
+    do
+    {
+        is.read(&ch, 1);
+    } while (!is.eof() && ch != LINE_COMMENT_END);
+
+    ++line;
+}
+
+bool LexicalAnalyzer::ParseBlockComment(istream& is)
+{
+    unsigned level = 0;
+    char prev = BLOCK_COMMENT_INNER;
+    char current = '\0';
+
+    // add 2 for comment start chars
+    column += 2;
+
+    is.read(&current, 1);
+    while (!is.eof())
+    {
+        if (current == '\n')
+        {
+            ++line;
+            column = 1;
+        }
+        else
+        {
+            ++column;
+        }
+
+        if (prev == BLOCK_COMMENT_INNER && current == COMMENT_START)
+        {
+            if (level == 0)
+            {
+                break;
+            }
+            else
+            {
+                --level;
+            }
+        }
+        else if (prev == COMMENT_START && current == BLOCK_COMMENT_INNER)
+        {
+            ++level;
+        }
+
+        prev = current;
+        is.read(&current, 1);
+    }
+
+    return true;
 }
 
 void LexicalAnalyzer::PrintError()
