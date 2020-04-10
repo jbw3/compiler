@@ -250,7 +250,7 @@ void LexicalAnalyzer::ParseLineComment(istream& is)
 bool LexicalAnalyzer::ParseBlockComment(istream& is)
 {
     unsigned level = 0;
-    char prev = BLOCK_COMMENT_INNER;
+    char prev = '\0';
     char current = '\0';
 
     // add 2 for comment start chars
@@ -283,6 +283,10 @@ bool LexicalAnalyzer::ParseBlockComment(istream& is)
         else if (prev == COMMENT_START && current == BLOCK_COMMENT_INNER)
         {
             ++level;
+
+            // reset previous char to prevent a following COMMENT_START
+            // char from ending the comment
+            prev = '\0';
         }
 
         prev = current;

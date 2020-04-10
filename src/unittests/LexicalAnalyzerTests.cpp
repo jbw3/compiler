@@ -87,6 +87,14 @@ bool LexicalAnalyzerTests::TestValidInputs()
             }
         },
         {
+            "x = #!# 1 !# 2",
+            {
+                {"x", 1, 1},
+                {"=", 1, 3},
+                {"2", 1, 14},
+            }
+        },
+        {
             R"("abc""1\n2\n""#""#!")",
             {
                 {R"("abc")", 1, 1},
