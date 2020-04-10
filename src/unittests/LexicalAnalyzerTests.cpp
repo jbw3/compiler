@@ -60,7 +60,32 @@ bool LexicalAnalyzerTests::TestValidInputs()
                 {"a", 3, 5},
                 {"comment", 3, 7}
             }
-        }
+        },
+        {
+            "1 + #! comment !# 2",
+            {
+                {"1", 1, 1},
+                {"+", 1, 3},
+                {"2", 1, 19},
+            }
+        },
+        {
+            "abc #! comment #! nested comment !# back in outer comment !# ()",
+            {
+                {"abc", 1, 1},
+                {"(", 1, 62},
+                {")", 1, 63},
+            }
+        },
+        {
+            "x=#! multi-\nline\ncomment\n!# true;",
+            {
+                {"x", 1, 1},
+                {"=", 1, 2},
+                {"true", 4, 4},
+                {";", 4, 8},
+            }
+        },
     };
 
     stringstream errStream;
