@@ -70,16 +70,21 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     {
         if (ch == COMMENT_START && !isString)
         {
-            is.read(&ch, 1);
-            if (!is.eof())
+            ok = AddTokenIfValid(tokens);
+
+            if (ok)
             {
-                if (ch == BLOCK_COMMENT_INNER)
+                is.read(&ch, 1);
+                if (!is.eof())
                 {
-                    ok = ParseBlockComment(is);
-                }
-                else
-                {
-                    ParseLineComment(is);
+                    if (ch == BLOCK_COMMENT_INNER)
+                    {
+                        ok = ParseBlockComment(is);
+                    }
+                    else
+                    {
+                        ParseLineComment(is);
+                    }
                 }
             }
         }
@@ -149,19 +154,10 @@ bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
     }
     else if (isspace(ch))
     {
-        if (!tokenStr.empty())
+        bool ok = AddTokenIfValid(tokens);
+        if (!ok)
         {
-            if (isValid)
-            {
-                tokens.push_back(CreateToken());
-                tokenStr = "";
-                isValid = false;
-            }
-            else
-            {
-                PrintError();
-                return false;
-            }
+            return false;
         }
     }
     else // we're not in a string and ch is not whitespace
@@ -211,6 +207,28 @@ bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
 bool LexicalAnalyzer::IsValidToken(const string& str) const
 {
     return SYMBOLS.find(str) != SYMBOLS.end() || isIdentifier(str) || isPotentialNumber(str);
+}
+
+bool LexicalAnalyzer::AddTokenIfValid(vector<Token>& tokens)
+{
+    bool ok = true;
+
+    if (!tokenStr.empty())
+    {
+        if (isValid)
+        {
+            tokens.push_back(CreateToken());
+            tokenStr = "";
+            isValid = false;
+        }
+        else
+        {
+            PrintError();
+            ok = false;
+        }
+    }
+
+    return ok;
 }
 
 void LexicalAnalyzer::ParseLineComment(istream& is)

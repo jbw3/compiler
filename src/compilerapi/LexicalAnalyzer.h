@@ -39,6 +39,8 @@ private:
 
     bool IsValidToken(const std::string& str) const;
 
+    bool AddTokenIfValid(std::vector<Token>& tokens);
+
     void ParseLineComment(std::istream& is);
 
     bool ParseBlockComment(std::istream& is);
