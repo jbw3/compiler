@@ -33,7 +33,7 @@ private:
 
     unsigned long GetTokenStrStartColumn();
 
-    Token CreateToken();
+    Token CreateToken(unsigned long columnNum = 0);
 
     bool ParseChar(char ch, std::vector<Token>& tokens);
 

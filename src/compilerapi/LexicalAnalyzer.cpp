@@ -125,9 +125,14 @@ unsigned long LexicalAnalyzer::GetTokenStrStartColumn()
     return column - tokenStr.size();
 }
 
-Token LexicalAnalyzer::CreateToken()
+Token LexicalAnalyzer::CreateToken(unsigned long columnNum)
 {
-    return Token(tokenStr, line, GetTokenStrStartColumn());
+    if (columnNum == 0)
+    {
+        columnNum = GetTokenStrStartColumn();
+    }
+
+    return Token(tokenStr, line, columnNum);
 }
 
 bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
@@ -137,7 +142,7 @@ bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
         if (ch == '"' && tokenStr.back() != '\\')
         {
             tokenStr += ch;
-            tokens.push_back(CreateToken());
+            tokens.push_back(CreateToken(column - tokenStr.size() + 1));
             tokenStr = "";
             isValid = false;
             isString = false;

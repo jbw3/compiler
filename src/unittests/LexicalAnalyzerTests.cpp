@@ -86,6 +86,15 @@ bool LexicalAnalyzerTests::TestValidInputs()
                 {";", 4, 8},
             }
         },
+        {
+            R"("abc""1\n2\n""#""#!")",
+            {
+                {R"("abc")", 1, 1},
+                {R"("1\n2\n")", 1, 6},
+                {R"("#")", 1, 14},
+                {R"("#!")", 1, 17},
+            }
+        },
     };
 
     stringstream errStream;
