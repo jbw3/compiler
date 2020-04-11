@@ -27,8 +27,15 @@ bool LlvmOptimizer::Optimize(Module* module)
 
         if (optimizationLevel >= 2)
         {
-            funPassMgr.add(createCFGSimplificationPass());
             funPassMgr.add(createTailCallEliminationPass());
+
+            // loop optimization
+            funPassMgr.add(createIndVarSimplifyPass());
+            funPassMgr.add(createLoopUnrollPass());
+            funPassMgr.add(createLoopDeletionPass());
+
+            funPassMgr.add(createCFGSimplificationPass());
+            funPassMgr.add(createInstructionCombiningPass());
         }
 
         funPassMgr.doInitialization();
