@@ -65,11 +65,12 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
         outFile << cType << " " << declaration->GetName() << "(";
 
         // print function parameters
-        size_t numParams = declaration->GetParameters().size();
+        const Parameters& params = declaration->GetParameters();
+        size_t numParams = params.size();
         for (size_t i = 0; i < numParams; ++i)
         {
-            const VariableDeclaration* param = declaration->GetParameters()[i];
-            if (!GetCType(param->GetVariableType(), cType))
+            const Parameter* param = params[i];
+            if (!GetCType(param->GetType(), cType))
             {
                 return false;
             }

@@ -69,6 +69,8 @@ private:
     unsigned int level;
     bool firstItem;
 
+    void PrintParameter(const SyntaxTree::Parameter* parameter);
+
     void PrintFunctionDeclaration(const SyntaxTree::FunctionDeclaration* declaration);
 
     void PrintMemberDefinition(const SyntaxTree::MemberDefinition* member);

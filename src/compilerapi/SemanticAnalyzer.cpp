@@ -277,10 +277,16 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     // create new scope for parameters and add them
     Scope scope(symbolTable);
 
-    if (!AddVariables(funcDecl->GetParameters()))
+    for (const Parameter* param : funcDecl->GetParameters())
     {
-        isError = true;
-        return;
+        const string& paramName = param->GetName();
+        bool ok = symbolTable.AddVariable(paramName, param->GetType());
+        if (!ok)
+        {
+            isError = true;
+            logger.LogError("Variable '{}' has already been declared", paramName);
+            return;
+        }
     }
 
     // check return expression
@@ -603,20 +609,6 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
-bool SemanticAnalyzer::AddVariables(const VariableDeclarations& varDecls)
-{
-    for (VariableDeclaration* varDecl : varDecls)
-    {
-        Visit(varDecl);
-        if (isError)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
 {
     unitTypeLiteralExpression->SetType(TypeInfo::UnitType);
@@ -648,15 +640,15 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     const string& varName = variableExpression->GetName();
-    VariableDeclaration* varDecl = symbolTable.GetVariable(varName);
-    if (varDecl == nullptr)
+    const TypeInfo* varType = symbolTable.GetVariableType(varName);
+    if (varType == nullptr)
     {
         cerr << "Variable \"" << varName << "\" is not declared in the current scope\n";
         isError = true;
     }
     else
     {
-        variableExpression->SetType(varDecl->GetVariableType());
+        variableExpression->SetType(varType);
         variableExpression->SetIsAssignable(true);
     }
 }
@@ -708,7 +700,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 
     // check argument count
     const vector<Expression*>& args = functionExpression->GetArguments();
-    const VariableDeclarations& params = funcDecl->GetParameters();
+    const Parameters& params = funcDecl->GetParameters();
     if (args.size() != params.size())
     {
         cerr << "Function '" << funcName << "' expected " << params.size() << " arguments but got " << args.size() << "\n";
@@ -728,9 +720,9 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         }
 
         // check argument against the parameter type
-        const VariableDeclaration* param = params[i];
+        const Parameter* param = params[i];
         const TypeInfo* argType = arg->GetType();
-        const TypeInfo* paramType = param->GetVariableType();
+        const TypeInfo* paramType = param->GetType();
         if (!argType->IsSameAs(*paramType))
         {
             if ( !(argType->IsInt() && paramType->IsInt() && argType->IsSigned() == paramType->IsSigned() && argType->GetNumBits() <= paramType->GetNumBits()) )
@@ -842,11 +834,12 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
         return;
     }
 
-    ok = symbolTable.AddVariable(variableDeclaration->GetName(), variableDeclaration);
+    const string& varName = variableDeclaration->GetName();
+    ok = symbolTable.AddVariable(varName, variableDeclaration->GetVariableType());
     if (!ok)
     {
         isError = true;
-        cerr << "Variable \"" << variableDeclaration->GetName() << "\" has already been declared\n";
+        cerr << "Variable \"" << varName << "\" has already been declared\n";
         return;
     }
 
@@ -873,21 +866,23 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     unordered_set<string> processedParams;
 
     // set parameter types
-    for (VariableDeclaration* varDecl : functionDeclaration->GetParameters())
+    for (Parameter* param : functionDeclaration->GetParameters())
     {
-        const string& paramName = varDecl->GetName();
+        const string& paramName = param->GetName();
         if (processedParams.find(paramName) != processedParams.end())
         {
             logger.LogError("Function '{}' has multiple parameters named '{}'", functionDeclaration->GetName(), paramName);
             return false;
         }
 
-        bool ok = SetVariableDeclarationType(varDecl);
-        if (!ok)
+        const string& paramTypeName = param->GetTypeName();
+        const TypeInfo* paramType = TypeInfo::GetType(paramTypeName);
+        if (paramType == nullptr)
         {
             return false;
         }
 
+        param->SetType(paramType);
         processedParams.insert(paramName);
     }
 

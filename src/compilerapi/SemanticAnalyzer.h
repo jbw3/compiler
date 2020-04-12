@@ -67,8 +67,6 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
-    bool AddVariables(const SyntaxTree::VariableDeclarations& varDecls);
-
     bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);
 
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);

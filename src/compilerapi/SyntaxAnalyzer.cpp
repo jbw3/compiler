@@ -299,7 +299,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     ++iter;
-    VariableDeclarations parameters;
+    Parameters parameters;
     bool ok = ProcessParameters(iter, endIter, parameters);
     if (!ok)
     {
@@ -344,7 +344,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
 }
 
 bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIter,
-                                       VariableDeclarations& parameters)
+                                       Parameters& parameters)
 {
     EParameterState state = eName;
     parameters.clear();
@@ -369,7 +369,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
         else if (state == eType)
         {
-            VariableDeclaration* param = new VariableDeclaration(paramName, value);
+            Parameter* param = new Parameter(paramName, value);
             parameters.push_back(param);
 
             state = eDelimiter;

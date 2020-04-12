@@ -60,7 +60,7 @@ private:
                                                                 const std::string& endToken);
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
-                           SyntaxTree::VariableDeclarations& parameters);
+                           SyntaxTree::Parameters& parameters);
 
     SyntaxTree::TypeDefinition* ProcessTypeDefinition(TokenIterator& iter,
                                                       TokenIterator endIter);

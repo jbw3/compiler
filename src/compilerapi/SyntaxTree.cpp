@@ -468,8 +468,35 @@ Expression* WhileLoop::GetExpression() const
     return expression;
 }
 
+Parameter::Parameter(const string& name, const string& typeName) :
+    name(name),
+    typeName(typeName),
+    type(nullptr)
+{
+}
+
+const string& Parameter::GetName() const
+{
+    return name;
+}
+
+const string& Parameter::GetTypeName() const
+{
+    return typeName;
+}
+
+const TypeInfo* Parameter::GetType() const
+{
+    return type;
+}
+
+void Parameter::SetType(const TypeInfo* newType)
+{
+    type = newType;
+}
+
 FunctionDeclaration::FunctionDeclaration(const std::string& name,
-                                         const VariableDeclarations& parameters,
+                                         const Parameters& parameters,
                                          const std::string& returnTypeName) :
     name(name),
     parameters(parameters),
@@ -488,7 +515,7 @@ const string& FunctionDeclaration::GetName() const
     return name;
 }
 
-const VariableDeclarations& FunctionDeclaration::GetParameters() const
+const Parameters& FunctionDeclaration::GetParameters() const
 {
     return parameters;
 }

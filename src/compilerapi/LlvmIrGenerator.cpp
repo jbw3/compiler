@@ -270,14 +270,15 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     Scope scope(symbolTable);
 
     size_t idx = 0;
+    const Parameters& params = declaration->GetParameters();
     for (Argument& arg : func->args())
     {
-        VariableDeclaration* param = declaration->GetParameters()[idx];
+        const Parameter* param = params[idx];
         const string& paramName = param->GetName();
         arg.setName(paramName);
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
-        symbolTable.AddVariable(paramName, param, alloca);
+        symbolTable.AddVariable(paramName, param->GetType(), alloca);
 
         ++idx;
     }
@@ -560,6 +561,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
     }
 
     const FunctionDeclaration* funcDecl = functions.find(funcName)->second;
+    const Parameters& declParams = funcDecl->GetParameters();
     vector<Expression*> argExpressions = functionExpression->GetArguments();
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)
@@ -573,7 +575,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
         // sign extend arg value if needed
         const TypeInfo* argType = expr->GetType();
-        const TypeInfo* paramType = funcDecl->GetParameters()[i]->GetVariableType();
+        const TypeInfo* paramType = declParams[i]->GetType();
         ExtendType(argType, paramType, resultValue);
 
         args.push_back(resultValue);
@@ -645,7 +647,8 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     const string& varName = variableDeclaration->GetName();
-    Type* type = GetType(variableDeclaration->GetVariableType());
+    const TypeInfo* varType = variableDeclaration->GetVariableType();
+    Type* type = GetType(varType);
     if (type == nullptr)
     {
         resultValue = nullptr;
@@ -654,7 +657,7 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     }
 
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
-    symbolTable.AddVariable(varName, variableDeclaration, alloca);
+    symbolTable.AddVariable(varName, varType, alloca);
 
     // variable declaration expressions always evaluate to the unit type
     resultValue = ConstantStruct::get(unitType);
@@ -736,11 +739,12 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     }
 
     // get the parameter types
+    const Parameters& declParams = funcDecl->GetParameters();
     vector<Type*> parameters;
-    parameters.reserve(funcDecl->GetParameters().size());
-    for (const VariableDeclaration* varDef : funcDecl->GetParameters())
+    parameters.reserve(declParams.size());
+    for (const Parameter* declParam : declParams)
     {
-        Type* varType = GetType(varDef->GetVariableType());
+        Type* varType = GetType(declParam->GetType());
         parameters.push_back(varType);
     }
 

@@ -7,7 +7,6 @@
 
 using namespace llvm;
 using namespace std;
-using namespace SyntaxTree;
 
 SymbolTable::SymbolTable()
 {
@@ -42,19 +41,19 @@ void SymbolTable::Pop()
     }
 }
 
-bool SymbolTable::AddVariable(const std::string& name, SyntaxTree::VariableDeclaration* variable)
+bool SymbolTable::AddVariable(const std::string& name, const TypeInfo* type)
 {
-    return AddVariable(name, variable, nullptr);
+    return AddVariable(name, type, nullptr);
 }
 
-bool SymbolTable::AddVariable(const string& name, VariableDeclaration* variable, AllocaInst* value)
+bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaInst* value)
 {
     VariableData* varData = GetVariableData(name);
 
     // only insert if there is not already a variable with this name
     if (varData == nullptr)
     {
-        scopes.back()->variables.insert({name, {variable, value}});
+        scopes.back()->variables.insert({name, {type, value}});
         return true;
     }
     else
@@ -63,7 +62,7 @@ bool SymbolTable::AddVariable(const string& name, VariableDeclaration* variable,
     }
 }
 
-VariableDeclaration* SymbolTable::GetVariable(const string& name) const
+const TypeInfo* SymbolTable::GetVariableType(const string& name) const
 {
     VariableData* varData = GetVariableData(name);
     if (varData == nullptr)
@@ -71,7 +70,7 @@ VariableDeclaration* SymbolTable::GetVariable(const string& name) const
         return nullptr;
     }
 
-    return varData->variable;
+    return varData->type;
 }
 
 AllocaInst* SymbolTable::GetValue(const string& name) const

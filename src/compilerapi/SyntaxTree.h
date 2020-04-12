@@ -330,18 +330,41 @@ private:
     Expression* expression;
 };
 
+class Parameter
+{
+public:
+    Parameter(const std::string& name, const std::string& typeName);
+
+    ~Parameter() = default;
+
+    const std::string& GetName() const;
+
+    const std::string& GetTypeName() const;
+
+    const TypeInfo* GetType() const;
+
+    void SetType(const TypeInfo* newType);
+
+private:
+    std::string name;
+    std::string typeName;
+    const TypeInfo* type;
+};
+
+typedef std::vector<Parameter*> Parameters;
+
 class FunctionDeclaration
 {
 public:
     FunctionDeclaration(const std::string& name,
-                        const VariableDeclarations& parameters,
+                        const Parameters& parameters,
                         const std::string& returnTypeName);
 
     virtual ~FunctionDeclaration();
 
     const std::string& GetName() const;
 
-    const VariableDeclarations& GetParameters() const;
+    const Parameters& GetParameters() const;
 
     const std::string& GetReturnTypeName() const;
 
@@ -351,7 +374,7 @@ public:
 
 private:
     std::string name;
-    VariableDeclarations parameters;
+    Parameters parameters;
     std::string returnTypeName;
     const TypeInfo* returnType;
 };

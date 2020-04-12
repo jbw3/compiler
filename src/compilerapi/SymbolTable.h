@@ -9,10 +9,7 @@ namespace llvm
 class AllocaInst;
 } // namespace llvm
 
-namespace SyntaxTree
-{
-class VariableDeclaration;
-} // namespace SyntaxTree
+class TypeInfo;
 
 class SymbolTable
 {
@@ -25,18 +22,18 @@ public:
 
     void Pop();
 
-    bool AddVariable(const std::string& name, SyntaxTree::VariableDeclaration* variable);
+    bool AddVariable(const std::string& name, const TypeInfo* type);
 
-    bool AddVariable(const std::string& name, SyntaxTree::VariableDeclaration* variable, llvm::AllocaInst* value);
+    bool AddVariable(const std::string& name, const TypeInfo* type, llvm::AllocaInst* value);
 
-    SyntaxTree::VariableDeclaration* GetVariable(const std::string& name) const;
+    const TypeInfo* GetVariableType(const std::string& name) const;
 
     llvm::AllocaInst* GetValue(const std::string& name) const;
 
 private:
     struct VariableData
     {
-        SyntaxTree::VariableDeclaration* variable;
+        const TypeInfo* type;
         llvm::AllocaInst* value;
     };
 
