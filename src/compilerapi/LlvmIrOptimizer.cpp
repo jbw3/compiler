@@ -31,6 +31,7 @@ bool LlvmOptimizer::Optimize(Module* module)
 
             // loop optimization
             funPassMgr.add(createIndVarSimplifyPass());
+            funPassMgr.add(createLoopRotatePass());
             funPassMgr.add(createLoopUnrollPass());
             funPassMgr.add(createLoopDeletionPass());
 
