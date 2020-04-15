@@ -70,7 +70,7 @@ private:
     SyntaxTree::TypeInitializationExpression* ProcessTypeInitialization(TokenIterator& iter,
                                                                         TokenIterator endIter);
 
-    void ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, SyntaxTree::VariableDeclaration*& varDecl, SyntaxTree::Expression*& assignment);
+    SyntaxTree::VariableDeclaration* ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::WhileLoop* ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter);
 

@@ -827,38 +827,37 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 {
-    bool ok = SetVariableDeclarationType(variableDeclaration);
-    if (!ok)
+    BinaryExpression* assignmentExpression = variableDeclaration->GetAssignmentExpression();
+    if (assignmentExpression->GetOperator() != BinaryExpression::eAssign)
     {
         isError = true;
+        logger.LogError("Internal error: Binary expression in variable declaration is not an assignment");
         return;
     }
 
-    const string& varName = variableDeclaration->GetName();
-    ok = symbolTable.AddVariable(varName, variableDeclaration->GetVariableType());
-    if (!ok)
-    {
-        isError = true;
-        cerr << "Variable \"" << varName << "\" has already been declared\n";
-        return;
-    }
-
-    variableDeclaration->SetType(TypeInfo::UnitType);
-}
-
-bool SemanticAnalyzer::SetVariableDeclarationType(VariableDeclaration* variableDeclaration)
-{
     const string& typeName = variableDeclaration->GetTypeName();
     const TypeInfo* type = TypeInfo::GetType(typeName);
     if (type == nullptr)
     {
+        isError = true;
         logger.LogError("'{}' is not a known type", typeName);
-        return false;
+        return;
     }
 
     variableDeclaration->SetVariableType(type);
 
-    return true;
+    const string& varName = variableDeclaration->GetName();
+    bool ok = symbolTable.AddVariable(varName, variableDeclaration->GetVariableType());
+    if (!ok)
+    {
+        isError = true;
+        logger.LogError("Variable '{}' has already been declared", varName);
+        return;
+    }
+
+    assignmentExpression->Accept(this);
+
+    variableDeclaration->SetType(TypeInfo::UnitType);
 }
 
 bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* functionDeclaration)

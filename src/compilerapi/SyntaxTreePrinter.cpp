@@ -396,6 +396,8 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->GetName());
+    PrintProperty("typeName", variableDeclaration->GetTypeName());
+    PrintProperty("assignmentExpression", variableDeclaration->GetAssignmentExpression());
 }
 
 void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)

@@ -73,8 +73,6 @@ private:
 
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 
-    bool SetVariableDeclarationType(SyntaxTree::VariableDeclaration* variableDeclaration);
-
     bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
 };
 

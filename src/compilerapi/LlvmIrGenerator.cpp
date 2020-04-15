@@ -659,6 +659,8 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, varType, alloca);
 
+    variableDeclaration->GetAssignmentExpression()->Accept(this);
+
     // variable declaration expressions always evaluate to the unit type
     resultValue = ConstantStruct::get(unitType);
 }

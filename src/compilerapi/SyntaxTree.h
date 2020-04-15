@@ -290,7 +290,7 @@ private:
 class VariableDeclaration : public Expression
 {
 public:
-    VariableDeclaration(const std::string& name, const std::string& typeName);
+    VariableDeclaration(const std::string& name, const std::string& typeName, BinaryExpression* assignmentExpression);
 
     virtual ~VariableDeclaration() = default;
 
@@ -304,10 +304,13 @@ public:
 
     void SetVariableType(const TypeInfo* newType);
 
+    BinaryExpression* GetAssignmentExpression() const;
+
 private:
     std::string name;
     std::string typeName;
     const TypeInfo* variableType;
+    BinaryExpression* assignmentExpression;
 };
 
 typedef std::vector<VariableDeclaration*> VariableDeclarations;

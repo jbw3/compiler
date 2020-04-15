@@ -627,61 +627,59 @@ TypeInitializationExpression* SyntaxAnalyzer::ProcessTypeInitialization(TokenIte
     return typeInit;
 }
 
-void SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter, VariableDeclaration*& varDecl, Expression*& assignment)
+VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter)
 {
-    varDecl = nullptr;
-    assignment = nullptr;
-
     if (iter->GetValue() != VARIABLE_KEYWORD)
     {
         logger.LogError("Expected '{}'", VARIABLE_KEYWORD);
-        return;
+        return nullptr;
     }
 
     if (!IncrementIterator(iter, endIter, "Expected a variable name"))
     {
-        return;
+        return nullptr;
     }
 
     if (!IsValidName(*iter))
     {
         logger.LogError(*iter, "Invalid variable name");
-        return;
+        return nullptr;
     }
 
     string varName = iter->GetValue();
 
     if (!IncrementIterator(iter, endIter, "Expected variable type"))
     {
-        return;
+        return nullptr;
     }
 
     string varTypeName = iter->GetValue();
 
     if (!IncrementIterator(iter, endIter, "Expected operator"))
     {
-        return;
+        return nullptr;
     }
 
     if (iter->GetValue() != ASSIGNMENT_OPERATOR)
     {
         logger.LogError(*iter, "Expected an assignment operator");
-        return;
+        return nullptr;
     }
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
     {
-        return;
+        return nullptr;
     }
 
     Expression* expression = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
     if (expression == nullptr)
     {
-        return;
+        return nullptr;
     }
 
-    varDecl = new VariableDeclaration(varName, varTypeName);
-    assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName), expression);
+    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName), expression);
+    VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment);
+    return varDecl;
 }
 
 WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter)
@@ -1384,13 +1382,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
 
         if (iter->GetValue() == VARIABLE_KEYWORD)
         {
-            VariableDeclaration* varDecl = nullptr;
-            ProcessVariableDeclaration(iter, endIter, varDecl, expr);
-
-            if (varDecl != nullptr)
-            {
-                expressions.push_back(varDecl);
-            }
+            expr = ProcessVariableDeclaration(iter, endIter);
         }
         else
         {
