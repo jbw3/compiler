@@ -648,22 +648,30 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     string varName = iter->GetValue();
 
-    if (!IncrementIterator(iter, endIter, "Expected variable type"))
+    if (!IncrementIterator(iter, endIter, "Expected variable type or assignment operator"))
     {
         return nullptr;
     }
 
-    string varTypeName = iter->GetValue();
-
-    if (!IncrementIterator(iter, endIter, "Expected operator"))
+    string varTypeName;
+    if (iter->GetValue() == ASSIGNMENT_OPERATOR)
     {
-        return nullptr;
+        varTypeName = "";
     }
-
-    if (iter->GetValue() != ASSIGNMENT_OPERATOR)
+    else
     {
-        logger.LogError(*iter, "Expected an assignment operator");
-        return nullptr;
+        varTypeName = iter->GetValue();
+
+        if (!IncrementIterator(iter, endIter, "Expected an assignment operator"))
+        {
+            return nullptr;
+        }
+
+        if (iter->GetValue() != ASSIGNMENT_OPERATOR)
+        {
+            logger.LogError(*iter, "Expected an assignment operator");
+            return nullptr;
+        }
     }
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))

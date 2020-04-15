@@ -62,16 +62,22 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     Expression* left = binaryExpression->GetLeftExpression();
     Expression* right = binaryExpression->GetRightExpression();
 
-    left->Accept(this);
-    if (isError)
+    if (left->GetType() == nullptr)
     {
-        return;
+        left->Accept(this);
+        if (isError)
+        {
+            return;
+        }
     }
 
-    right->Accept(this);
-    if (isError)
+    if (right->GetType() == nullptr)
     {
-        return;
+        right->Accept(this);
+        if (isError)
+        {
+            return;
+        }
     }
 
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
@@ -836,12 +842,30 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     const string& typeName = variableDeclaration->GetTypeName();
-    const TypeInfo* type = TypeInfo::GetType(typeName);
-    if (type == nullptr)
+    bool deduceTypeName = typeName.empty();
+    const TypeInfo* type = nullptr;
+
+    // if no type name was given, deduce it from the expression
+    if (deduceTypeName)
     {
-        isError = true;
-        logger.LogError("'{}' is not a known type", typeName);
-        return;
+        Expression* rightExpr = assignmentExpression->GetRightExpression();
+        rightExpr->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        type = rightExpr->GetType();
+    }
+    else // get the type from the name given
+    {
+        type = TypeInfo::GetType(typeName);
+        if (type == nullptr)
+        {
+            isError = true;
+            logger.LogError("'{}' is not a known type", typeName);
+            return;
+        }
     }
 
     variableDeclaration->SetVariableType(type);
