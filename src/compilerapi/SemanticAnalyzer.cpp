@@ -841,6 +841,15 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
         return;
     }
 
+    // process right of assignment expression before adding variable to symbol
+    // table in order to detect if the variable is referenced before it is assigned
+    Expression* rightExpr = assignmentExpression->GetRightExpression();
+    rightExpr->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
     const string& typeName = variableDeclaration->GetTypeName();
     bool deduceTypeName = typeName.empty();
     const TypeInfo* type = nullptr;
@@ -848,13 +857,6 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     // if no type name was given, deduce it from the expression
     if (deduceTypeName)
     {
-        Expression* rightExpr = assignmentExpression->GetRightExpression();
-        rightExpr->Accept(this);
-        if (isError)
-        {
-            return;
-        }
-
         type = rightExpr->GetType();
     }
     else // get the type from the name given
