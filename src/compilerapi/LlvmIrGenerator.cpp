@@ -660,6 +660,10 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     symbolTable.AddVariable(varName, varType, alloca);
 
     variableDeclaration->GetAssignmentExpression()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
 
     // variable declaration expressions always evaluate to the unit type
     resultValue = ConstantStruct::get(unitType);

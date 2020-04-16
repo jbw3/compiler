@@ -880,6 +880,10 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     assignmentExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
 
     variableDeclaration->SetType(TypeInfo::UnitType);
 }
