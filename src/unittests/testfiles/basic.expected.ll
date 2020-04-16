@@ -1335,6 +1335,36 @@ merge:                                            ; preds = %else, %if
   ret i64 %rv8
 }
 
+define i32 @deduceTypes(i32 %a, i32 %b) {
+entry:
+  %quotient = alloca i32
+  %bIsZero = alloca i1
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  store i32 %b, i32* %b2
+  %b3 = load i32, i32* %b2
+  %cmpeq = icmp eq i32 %b3, 0
+  store i1 %cmpeq, i1* %bIsZero
+  %bIsZero4 = load i1, i1* %bIsZero
+  br i1 %bIsZero4, label %if, label %else
+
+if:                                               ; preds = %entry
+  br label %merge
+
+else:                                             ; preds = %entry
+  %a5 = load i32, i32* %a1
+  %b6 = load i32, i32* %b2
+  %div = sdiv i32 %a5, %b6
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i32 [ 0, %if ], [ %div, %else ]
+  store i32 %phi, i32* %quotient
+  %quotient7 = load i32, i32* %quotient
+  ret i32 %quotient7
+}
+
 define i32 @whileLoop(i32 %num) {
 entry:
   %rv = alloca i32

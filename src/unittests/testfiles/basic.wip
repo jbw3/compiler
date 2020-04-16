@@ -452,6 +452,22 @@ fun createVars(num i32) i64
     rv
 }
 
+fun deduceTypes(a i32, b i32) i32
+{
+    var bIsZero = b == 0;
+    var quotient =
+        if bIsZero
+        {
+            0
+        }
+        else
+        {
+            a / b
+        };
+
+    quotient
+}
+
 fun whileLoop(num i32) i32
 {
     var i i32 = 0;
