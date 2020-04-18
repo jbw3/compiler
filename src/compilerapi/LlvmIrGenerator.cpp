@@ -22,6 +22,8 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     optimizationLevel(config.optimizationLevel),
     logger(logger),
     builder(context),
+    diBuilder(nullptr),
+    diCompileUnit(nullptr),
     module(nullptr),
     currentFunction(nullptr),
     resultValue(nullptr),
@@ -30,6 +32,11 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     strPointerType(nullptr),
     globalStringCounter(0)
 {
+}
+
+LlvmIrGenerator::~LlvmIrGenerator()
+{
+    delete diBuilder;
 }
 
 void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
@@ -306,6 +313,12 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
+    DIFile* file = diCompileUnit->getFile();
+    DISubroutineType* subroutine = diBuilder->createSubroutineType(DITypeRefArray());
+    DISubprogram* subprogram = diBuilder->createFunction(file, funcName, "", file, 74, subroutine, 0);
+    func->setSubprogram(subprogram);
+    // builder.SetCurrentDebugLocation(DebugLoc::get(76, 5, subprogram));
+
     // process function body expression
     currentFunction = func;
     Expression* expression = functionDefinition->GetExpression();
@@ -321,6 +334,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     const TypeInfo* expressionType = expression->GetType();
     const TypeInfo* returnType = declaration->GetReturnType();
     ExtendType(expressionType, returnType, resultValue);
+
 
     builder.CreateRet(resultValue);
 
@@ -720,6 +734,27 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     types.insert({TypeInfo::BoolType->GetShortName(), Type::getInt1Ty(context)});
     types.insert({TypeInfo::GetStringPointerType()->GetShortName(), strPointerType});
 
+    // initialize debug info builder
+    diBuilder = new DIBuilder(*module);
+
+    string dirName;
+    string filename;
+    size_t splitIdx = inFilename.find_last_of("/\\");
+    if (splitIdx == string::npos)
+    {
+        dirName = ".";
+        filename = inFilename;
+    }
+    else
+    {
+        dirName = inFilename.substr(0, splitIdx);
+        filename = inFilename.substr(splitIdx + 1);
+    }
+
+    bool isOptimized = optimizationLevel > 0;
+    DIFile* diFile = diBuilder->createFile(filename, dirName);
+    diCompileUnit = diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
+
     // generate LLVM IR from syntax tree
     this->module = module;
     syntaxTree->Accept(this);
@@ -730,10 +765,10 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
         module = nullptr;
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    diBuilder->finalize();
+
+    return true;
 }
 
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)

@@ -6,6 +6,7 @@
 #include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
+#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include <algorithm>
@@ -49,6 +50,8 @@ class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
     LlvmIrGenerator(const Config& config, ErrorLogger& logger);
+
+    ~LlvmIrGenerator();
 
     void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
 
@@ -103,6 +106,8 @@ private:
     ErrorLogger& logger;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
+    llvm::DIBuilder* diBuilder;
+    llvm::DICompileUnit* diCompileUnit;
     llvm::Module* module;
     SymbolTable symbolTable;
     llvm::Function* currentFunction;
