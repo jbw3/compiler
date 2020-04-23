@@ -107,10 +107,10 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
         case BinaryExpression::eShiftLeft:
             op = "<<";
             break;
-        case BinaryExpression::eShiftRightArithmetic:
+        case BinaryExpression::eShiftRightLogical:
             op = ">>";
             break;
-        case BinaryExpression::eShiftRightLogical:
+        case BinaryExpression::eShiftRightArithmetic:
             op = ">>>";
             break;
         case BinaryExpression::eBitwiseAnd:

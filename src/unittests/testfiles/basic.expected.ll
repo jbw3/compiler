@@ -149,10 +149,10 @@ entry:
   %e11 = load i32, i32* %e5
   %shl = shl i32 %d10, %e11
   %f12 = load i32, i32* %f6
-  %ashr = ashr i32 %shl, %f12
+  %lshr = lshr i32 %shl, %f12
   %a13 = load i32, i32* %a1
-  %lshr = lshr i32 %ashr, %a13
-  %bitand = and i32 %c9, %lshr
+  %ashr = ashr i32 %lshr, %a13
+  %bitand = and i32 %c9, %ashr
   %bitxor = xor i32 %b8, %bitand
   %bitor = or i32 %a7, %bitxor
   ret i32 %bitor
@@ -494,13 +494,13 @@ entry:
   %a29 = load i8, i8* %a1
   %signext30 = sext i8 %a29 to i32
   %load31 = load i32, i32* %c3
-  %ashr = ashr i32 %load31, %signext30
-  store i32 %ashr, i32* %c3
+  %lshr = lshr i32 %load31, %signext30
+  store i32 %lshr, i32* %c3
   %b32 = load i16, i16* %b2
   %signext33 = sext i16 %b32 to i32
   %load34 = load i32, i32* %c3
-  %lshr = lshr i32 %load34, %signext33
-  store i32 %lshr, i32* %c3
+  %ashr = ashr i32 %load34, %signext33
+  store i32 %ashr, i32* %c3
   %a35 = load i8, i8* %a1
   %b36 = load i16, i16* %b2
   %signext37 = sext i8 %a35 to i16

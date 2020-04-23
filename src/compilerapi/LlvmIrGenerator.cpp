@@ -150,13 +150,13 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             case BinaryExpression::eShiftLeftAssign:
                 resultValue = builder.CreateShl(leftValue, rightValue, "shl");
                 break;
-            case BinaryExpression::eShiftRightArithmetic:
-            case BinaryExpression::eShiftRightArithmeticAssign:
-                resultValue = builder.CreateAShr(leftValue, rightValue, "ashr");
-                break;
             case BinaryExpression::eShiftRightLogical:
             case BinaryExpression::eShiftRightLogicalAssign:
                 resultValue = builder.CreateLShr(leftValue, rightValue, "lshr");
+                break;
+            case BinaryExpression::eShiftRightArithmetic:
+            case BinaryExpression::eShiftRightArithmeticAssign:
+                resultValue = builder.CreateAShr(leftValue, rightValue, "ashr");
                 break;
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseAndAssign:

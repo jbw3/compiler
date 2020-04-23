@@ -175,8 +175,8 @@ bool BinaryExpression::IsAssignment(EOperator op)
         case BinaryExpression::eDivide:
         case BinaryExpression::eRemainder:
         case BinaryExpression::eShiftLeft:
-        case BinaryExpression::eShiftRightArithmetic:
         case BinaryExpression::eShiftRightLogical:
+        case BinaryExpression::eShiftRightArithmetic:
         case BinaryExpression::eBitwiseAnd:
         case BinaryExpression::eBitwiseXor:
         case BinaryExpression::eBitwiseOr:
@@ -190,8 +190,8 @@ bool BinaryExpression::IsAssignment(EOperator op)
         case BinaryExpression::eDivideAssign:
         case BinaryExpression::eRemainderAssign:
         case BinaryExpression::eShiftLeftAssign:
-        case BinaryExpression::eShiftRightArithmeticAssign:
         case BinaryExpression::eShiftRightLogicalAssign:
+        case BinaryExpression::eShiftRightArithmeticAssign:
         case BinaryExpression::eBitwiseAndAssign:
         case BinaryExpression::eBitwiseXorAssign:
         case BinaryExpression::eBitwiseOrAssign:
@@ -215,8 +215,8 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eDivide:
         case BinaryExpression::eRemainder:
         case BinaryExpression::eShiftLeft:
-        case BinaryExpression::eShiftRightArithmetic:
         case BinaryExpression::eShiftRightLogical:
+        case BinaryExpression::eShiftRightArithmetic:
         case BinaryExpression::eBitwiseAnd:
         case BinaryExpression::eBitwiseXor:
         case BinaryExpression::eBitwiseOr:
@@ -230,8 +230,8 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eDivideAssign:
         case BinaryExpression::eRemainderAssign:
         case BinaryExpression::eShiftLeftAssign:
-        case BinaryExpression::eShiftRightArithmeticAssign:
         case BinaryExpression::eShiftRightLogicalAssign:
+        case BinaryExpression::eShiftRightArithmeticAssign:
         case BinaryExpression::eBitwiseAndAssign:
         case BinaryExpression::eBitwiseXorAssign:
         case BinaryExpression::eBitwiseOrAssign:

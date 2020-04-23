@@ -34,8 +34,8 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"/", BinaryExpression::eDivide},
     {"%", BinaryExpression::eRemainder},
     {"<<", BinaryExpression::eShiftLeft},
-    {">>", BinaryExpression::eShiftRightArithmetic},
-    {">>>", BinaryExpression::eShiftRightLogical},
+    {">>", BinaryExpression::eShiftRightLogical},
+    {">>>", BinaryExpression::eShiftRightArithmetic},
     {"&", BinaryExpression::eBitwiseAnd},
     {"^", BinaryExpression::eBitwiseXor},
     {"|", BinaryExpression::eBitwiseOr},
@@ -48,8 +48,8 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"/=", BinaryExpression::eDivideAssign},
     {"%=", BinaryExpression::eRemainderAssign},
     {"<<=", BinaryExpression::eShiftLeftAssign},
-    {">>=", BinaryExpression::eShiftRightArithmeticAssign},
-    {">>>=", BinaryExpression::eShiftRightLogicalAssign},
+    {">>=", BinaryExpression::eShiftRightLogicalAssign},
+    {">>>=", BinaryExpression::eShiftRightArithmeticAssign},
     {"&=", BinaryExpression::eBitwiseAndAssign},
     {"^=", BinaryExpression::eBitwiseXorAssign},
     {"|=", BinaryExpression::eBitwiseOrAssign},
@@ -986,7 +986,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eRemainder});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightArithmetic, BinaryExpression::eShiftRightLogical});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightLogical, BinaryExpression::eShiftRightArithmetic});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseAnd});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseXor});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
@@ -1000,8 +1000,8 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             BinaryExpression::eDivideAssign,
             BinaryExpression::eRemainderAssign,
             BinaryExpression::eShiftLeftAssign,
-            BinaryExpression::eShiftRightArithmeticAssign,
             BinaryExpression::eShiftRightLogicalAssign,
+            BinaryExpression::eShiftRightArithmeticAssign,
             BinaryExpression::eBitwiseAndAssign,
             BinaryExpression::eBitwiseXorAssign,
             BinaryExpression::eBitwiseOrAssign,
