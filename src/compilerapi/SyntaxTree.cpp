@@ -605,39 +605,39 @@ const std::string& MemberDefinition::GetTypeName() const
     return typeName;
 }
 
-TypeDefinition::TypeDefinition(const string& name, const vector<MemberDefinition*>& members) :
+StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members) :
     name(name),
     members(members),
     type(nullptr)
 {
 }
 
-TypeDefinition::~TypeDefinition()
+StructDefinition::~StructDefinition()
 {
     deletePointerContainer(members);
 }
 
-void TypeDefinition::Accept(SyntaxTreeVisitor* visitor)
+void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
 
-const string& TypeDefinition::GetName() const
+const string& StructDefinition::GetName() const
 {
     return name;
 }
 
-const vector<MemberDefinition*>& TypeDefinition::GetMembers() const
+const vector<MemberDefinition*>& StructDefinition::GetMembers() const
 {
     return members;
 }
 
-const TypeInfo* TypeDefinition::GetType() const
+const TypeInfo* StructDefinition::GetType() const
 {
     return type;
 }
 
-void TypeDefinition::SetType(const TypeInfo* newType)
+void StructDefinition::SetType(const TypeInfo* newType)
 {
     type = newType;
 }
@@ -663,36 +663,36 @@ Expression* MemberInitialization::GetExpression() const
     return expression;
 }
 
-TypeInitializationExpression::TypeInitializationExpression(const string& typeName, const vector<MemberInitialization*>& memberInitializations) :
-    typeName(typeName),
+StructInitializationExpression::StructInitializationExpression(const string& structName, const vector<MemberInitialization*>& memberInitializations) :
+    structName(structName),
     memberInitializations(memberInitializations)
 {
 }
 
-TypeInitializationExpression::~TypeInitializationExpression()
+StructInitializationExpression::~StructInitializationExpression()
 {
     deletePointerContainer(memberInitializations);
 }
 
-void TypeInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
+void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }
 
-const string& TypeInitializationExpression::GetTypeName() const
+const string& StructInitializationExpression::GetStructName() const
 {
-    return typeName;
+    return structName;
 }
 
-const vector<MemberInitialization*>& TypeInitializationExpression::GetMemberInitializations() const
+const vector<MemberInitialization*>& StructInitializationExpression::GetMemberInitializations() const
 {
     return memberInitializations;
 }
 
-ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinitions,
+ModuleDefinition::ModuleDefinition(const vector<StructDefinition*>& structDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
-    typeDefinitions(typeDefinitions),
+    structDefinitions(structDefinitions),
     externFunctionDeclarations(externFunctionDeclarations),
     functionDefinitions(functionDefinitions)
 {
@@ -700,7 +700,7 @@ ModuleDefinition::ModuleDefinition(const vector<TypeDefinition*>& typeDefinition
 
 ModuleDefinition::~ModuleDefinition()
 {
-    deletePointerContainer(typeDefinitions);
+    deletePointerContainer(structDefinitions);
     deletePointerContainer(externFunctionDeclarations);
     deletePointerContainer(functionDefinitions);
 }
@@ -710,14 +710,14 @@ void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-void ModuleDefinition::SwapTypeDefinitions(vector<TypeDefinition*>& newTypeDefinitions)
+void ModuleDefinition::SwapStructDefinitions(vector<StructDefinition*>& newStructDefinitions)
 {
-    typeDefinitions.swap(newTypeDefinitions);
+    structDefinitions.swap(newStructDefinitions);
 }
 
-const vector<TypeDefinition*>& ModuleDefinition::GetTypeDefinitions() const
+const vector<StructDefinition*>& ModuleDefinition::GetStructDefinitions() const
 {
-    return typeDefinitions;
+    return structDefinitions;
 }
 
 const vector<ExternFunctionDeclaration*>& ModuleDefinition::GetExternFunctionDeclarations() const

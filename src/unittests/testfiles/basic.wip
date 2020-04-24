@@ -569,15 +569,15 @@ fun initTypes()
     test2.test.a += 7;
 }
 
-type EmptyType {}
+struct EmptyType {}
 
-type Test2
+struct Test2
 {
     test Test1,
     n i32,
 }
 
-type Test1
+struct Test1
 {
     a i32,
     b bool,

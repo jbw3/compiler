@@ -65,7 +65,7 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     TokenIterator iter = tokens.cbegin();
     TokenIterator endIter = tokens.cend();
 
-    vector<TypeDefinition*> types;
+    vector<StructDefinition*> structs;
     vector<FunctionDefinition*> functions;
     vector<ExternFunctionDeclaration*> externFunctions;
 
@@ -84,16 +84,16 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
                 functions.push_back(functionDefinition);
             }
         }
-        else if (iter->GetValue() == TYPE_KEYWORD)
+        else if (iter->GetValue() == STRUCT_KEYWORD)
         {
-            TypeDefinition* typeDefinition = ProcessTypeDefinition(iter, endIter);
-            if (typeDefinition == nullptr)
+            StructDefinition* structDefinition = ProcessStructDefinition(iter, endIter);
+            if (structDefinition == nullptr)
             {
                 ok = false;
             }
             else
             {
-                types.push_back(typeDefinition);
+                structs.push_back(structDefinition);
             }
         }
         else if (iter->GetValue() == EXTERN_KEYWORD)
@@ -117,11 +117,11 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(types, externFunctions, functions);
+        syntaxTree = new ModuleDefinition(structs, externFunctions, functions);
     }
     else
     {
-        deletePointerContainer(types);
+        deletePointerContainer(structs);
         deletePointerContainer(functions);
         deletePointerContainer(externFunctions);
         syntaxTree = nullptr;
@@ -412,30 +412,30 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     return true;
 }
 
-TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, TokenIterator endIter)
+StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, TokenIterator endIter)
 {
-    if (!EndIteratorCheck(iter, endIter, "Expected type keyword"))
+    if (!EndIteratorCheck(iter, endIter, "Expected struct keyword"))
     {
         return nullptr;
     }
 
-    if (iter->GetValue() != TYPE_KEYWORD)
+    if (iter->GetValue() != STRUCT_KEYWORD)
     {
-        logger.LogError("Expected type keyword");
+        logger.LogError("Expected struct keyword");
     }
 
-    if (!IncrementIterator(iter, endIter, "Expected type name"))
+    if (!IncrementIterator(iter, endIter, "Expected struct name"))
     {
         return nullptr;
     }
 
     if (!IsValidName(*iter))
     {
-        logger.LogError(*iter, "'{}' is not a valid type name", iter->GetValue());
+        logger.LogError(*iter, "'{}' is not a valid struct name", iter->GetValue());
         return nullptr;
     }
 
-    string typeName = iter->GetValue();
+    string structName = iter->GetValue();
 
     if (!IncrementIterator(iter, endIter, "Expected '{'"))
     {
@@ -511,11 +511,11 @@ TypeDefinition* SyntaxAnalyzer::ProcessTypeDefinition(TokenIterator& iter, Token
     // increment past "}"
     ++iter;
 
-    TypeDefinition* typeDef = new TypeDefinition(typeName, members);
-    return typeDef;
+    StructDefinition* structDef = new StructDefinition(structName, members);
+    return structDef;
 }
 
-bool SyntaxAnalyzer::IsTypeInitialization(TokenIterator iter, TokenIterator endIter)
+bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator endIter)
 {
     if (iter == endIter)
     {
@@ -551,15 +551,15 @@ bool SyntaxAnalyzer::IsTypeInitialization(TokenIterator iter, TokenIterator endI
     return true;
 }
 
-TypeInitializationExpression* SyntaxAnalyzer::ProcessTypeInitialization(TokenIterator& iter, TokenIterator endIter)
+StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(TokenIterator& iter, TokenIterator endIter)
 {
-    const string& typeName = iter->GetValue();
+    const string& structName = iter->GetValue();
 
-    // skip type name and '{'
+    // skip struct name and '{'
     iter += 2;
     if (iter == endIter)
     {
-        logger.LogError("Unexpected end of file in the middle of a type initialization");
+        logger.LogError("Unexpected end of file in the middle of a struct initialization");
         return nullptr;
     }
 
@@ -623,8 +623,8 @@ TypeInitializationExpression* SyntaxAnalyzer::ProcessTypeInitialization(TokenIte
         return nullptr;
     }
 
-    TypeInitializationExpression* typeInit = new TypeInitializationExpression(typeName, members);
-    return typeInit;
+    StructInitializationExpression* structInit = new StructInitializationExpression(structName, members);
+    return structInit;
 }
 
 VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter)
@@ -856,10 +856,10 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
             expr = new FunctionExpression(value, arguments);
         }
-        // check if it's a type initialization
-        else if (IsTypeInitialization(iter, endIter))
+        // check if it's a struct initialization
+        else if (IsStructInitialization(iter, endIter))
         {
-            expr = ProcessTypeInitialization(iter, endIter);
+            expr = ProcessStructInitialization(iter, endIter);
             if (expr == nullptr)
             {
                 return nullptr;

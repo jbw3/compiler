@@ -310,13 +310,13 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 }
 
-void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
+void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
 {
-    const string& typeName = typeDefinition->GetName();
-    const TypeInfo* typeInfo = typeDefinition->GetType();
+    const string& structName = structDefinition->GetName();
+    const TypeInfo* typeInfo = structDefinition->GetType();
 
     vector<Type*> members;
-    for (const MemberDefinition* memberDef : typeDefinition->GetMembers())
+    for (const MemberDefinition* memberDef : structDefinition->GetMembers())
     {
         const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->GetName());
         Type* memberType = GetType(memberInfo->GetType());
@@ -330,13 +330,13 @@ void LlvmIrGenerator::Visit(TypeDefinition* typeDefinition)
         members.push_back(memberType);
     }
 
-    StructType* structType = StructType::create(context, members, typeName);
-    types.insert({typeName, structType});
+    StructType* structType = StructType::create(context, members, structName);
+    types.insert({structName, structType});
 }
 
-void LlvmIrGenerator::Visit(TypeInitializationExpression* typeInitializationExpression)
+void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    const TypeInfo* typeInfo = typeInitializationExpression->GetType();
+    const TypeInfo* typeInfo = structInitializationExpression->GetType();
     Type* type = GetType(typeInfo);
     if (type == nullptr)
     {
@@ -347,7 +347,7 @@ void LlvmIrGenerator::Visit(TypeInitializationExpression* typeInitializationExpr
 
     vector<unsigned> index(1);
     Value* initValue = UndefValue::get(type);
-    for (const MemberInitialization* member : typeInitializationExpression->GetMemberInitializations())
+    for (const MemberInitialization* member : structInitializationExpression->GetMemberInitializations())
     {
         Expression* expr = member->GetExpression();
         expr->Accept(this);
@@ -369,10 +369,10 @@ void LlvmIrGenerator::Visit(TypeInitializationExpression* typeInitializationExpr
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
-    // generate type declarations
-    for (TypeDefinition* typeDef : moduleDefinition->GetTypeDefinitions())
+    // generate struct declarations
+    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
     {
-        typeDef->Accept(this);
+        structDef->Accept(this);
     }
 
     // create function declarations and build function look-up table

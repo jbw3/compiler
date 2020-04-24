@@ -26,9 +26,9 @@ public:
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
-    void Visit(SyntaxTree::TypeDefinition* typeDefinition) override;
+    void Visit(SyntaxTree::StructDefinition* structDefinition) override;
 
-    void Visit(SyntaxTree::TypeInitializationExpression* typeInitializationExpression) override;
+    void Visit(SyntaxTree::StructInitializationExpression* structInitializationExpression) override;
 
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
@@ -61,9 +61,9 @@ private:
     bool SortTypeDefinitions(SyntaxTree::ModuleDefinition* moduleDefinition);
 
     bool ResolveDependencies(
-        SyntaxTree::TypeDefinition* typeDef,
-        const std::unordered_map<std::string, SyntaxTree::TypeDefinition*>& nameMap,
-        std::vector<SyntaxTree::TypeDefinition*>& ordered,
+        SyntaxTree::StructDefinition* structDef,
+        const std::unordered_map<std::string, SyntaxTree::StructDefinition*>& nameMap,
+        std::vector<SyntaxTree::StructDefinition*>& ordered,
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 

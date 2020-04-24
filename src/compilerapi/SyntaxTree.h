@@ -430,12 +430,12 @@ private:
     std::string typeName;
 };
 
-class TypeDefinition : public SyntaxTreeNode
+class StructDefinition : public SyntaxTreeNode
 {
 public:
-    TypeDefinition(const std::string& name, const std::vector<MemberDefinition*>& members);
+    StructDefinition(const std::string& name, const std::vector<MemberDefinition*>& members);
 
-    virtual ~TypeDefinition();
+    virtual ~StructDefinition();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
@@ -469,28 +469,28 @@ private:
     Expression* expression;
 };
 
-class TypeInitializationExpression : public Expression
+class StructInitializationExpression : public Expression
 {
 public:
-    TypeInitializationExpression(const std::string& typeName, const std::vector<MemberInitialization*>& memberInitializations);
+    StructInitializationExpression(const std::string& structName, const std::vector<MemberInitialization*>& memberInitializations);
 
-    virtual ~TypeInitializationExpression();
+    virtual ~StructInitializationExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetTypeName() const;
+    const std::string& GetStructName() const;
 
     const std::vector<MemberInitialization*>& GetMemberInitializations() const;
 
 private:
-    std::string typeName;
+    std::string structName;
     std::vector<MemberInitialization*> memberInitializations;
 };
 
 class ModuleDefinition : public SyntaxTreeNode
 {
 public:
-    ModuleDefinition(const std::vector<TypeDefinition*>& typeDefinitions,
+    ModuleDefinition(const std::vector<StructDefinition*>& structDefinitions,
                      const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                      const std::vector<FunctionDefinition*>& functionDefinitions);
 
@@ -498,16 +498,16 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    void SwapTypeDefinitions(std::vector<TypeDefinition*>& newTypeDefinitions);
+    void SwapStructDefinitions(std::vector<StructDefinition*>& newStructDefinitions);
 
-    const std::vector<TypeDefinition*>& GetTypeDefinitions() const;
+    const std::vector<StructDefinition*>& GetStructDefinitions() const;
 
     const std::vector<ExternFunctionDeclaration*>& GetExternFunctionDeclarations() const;
 
     const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
 
 private:
-    std::vector<TypeDefinition*> typeDefinitions;
+    std::vector<StructDefinition*> structDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
     std::vector<FunctionDefinition*> functionDefinitions;
 };

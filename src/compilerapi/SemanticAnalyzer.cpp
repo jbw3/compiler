@@ -315,13 +315,13 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     }
 }
 
-void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
+void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 {
-    const string& typeName = typeDefinition->GetName();
+    const string& structName = structDefinition->GetName();
 
-    AggregateType* newType = new AggregateType(typeName);
+    AggregateType* newType = new AggregateType(structName);
 
-    for (const MemberDefinition* member : typeDefinition->GetMembers())
+    for (const MemberDefinition* member : structDefinition->GetMembers())
     {
         const string& memberTypeName = member->GetTypeName();
         const TypeInfo* memberType = TypeInfo::GetType(memberTypeName);
@@ -339,7 +339,7 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
         {
             delete newType;
             isError = true;
-            logger.LogError("Duplicate member '{}' in type '{}'", memberName, typeName);
+            logger.LogError("Duplicate member '{}' in struct '{}'", memberName, structName);
             return;
         }
     }
@@ -349,25 +349,25 @@ void SemanticAnalyzer::Visit(TypeDefinition* typeDefinition)
     {
         delete newType;
         isError = true;
-        logger.LogError("Type '{}' has already been defined", typeName);
+        logger.LogError("Type '{}' has already been defined", structName);
         return;
     }
 
-    typeDefinition->SetType(newType);
+    structDefinition->SetType(newType);
 }
 
-void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExpression)
+void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    const string& typeName = typeInitializationExpression->GetTypeName();
-    const TypeInfo* type = TypeInfo::GetType(typeName);
+    const string& structName = structInitializationExpression->GetStructName();
+    const TypeInfo* type = TypeInfo::GetType(structName);
     if (type == nullptr)
     {
         isError = true;
-        logger.LogError("'{}' is not a known type", typeName);
+        logger.LogError("'{}' is not a known type", structName);
         return;
     }
 
-    typeInitializationExpression->SetType(type);
+    structInitializationExpression->SetType(type);
 
     unordered_set<string> membersToInit;
     for (auto pair : type->GetMembers())
@@ -375,7 +375,7 @@ void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExp
         membersToInit.insert(pair.first);
     }
 
-    for (MemberInitialization* member : typeInitializationExpression->GetMemberInitializations())
+    for (MemberInitialization* member : structInitializationExpression->GetMemberInitializations())
     {
         const string& memberName = member->GetName();
 
@@ -384,7 +384,7 @@ void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExp
         if (memberInfo == nullptr)
         {
             isError = true;
-            logger.LogError("Type '{}' does not have a member named '{}'", typeName, memberName);
+            logger.LogError("Struct '{}' does not have a member named '{}'", structName, memberName);
             return;
         }
 
@@ -440,41 +440,41 @@ void SemanticAnalyzer::Visit(TypeInitializationExpression* typeInitializationExp
 
 bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
 {
-    const vector<TypeDefinition*>& typeDefs = moduleDefinition->GetTypeDefinitions();
-    size_t numTypeDefs = typeDefs.size();
+    const vector<StructDefinition*>& structDefs = moduleDefinition->GetStructDefinitions();
+    size_t numStructDefs = structDefs.size();
 
-    unordered_map<string, TypeDefinition*> nameMap;
-    nameMap.reserve(numTypeDefs);
+    unordered_map<string, StructDefinition*> nameMap;
+    nameMap.reserve(numStructDefs);
 
     // build map for fast lookup
-    for (TypeDefinition* typeDef : typeDefs)
+    for (StructDefinition* structDef : structDefs)
     {
-        const string& typeName = typeDef->GetName();
-        auto rv = nameMap.insert({typeName, typeDef});
+        const string& structName = structDef->GetName();
+        auto rv = nameMap.insert({structName, structDef});
         if (!rv.second)
         {
-            logger.LogError("Type '{}' has already been defined", typeName);
+            logger.LogError("Struct '{}' has already been defined", structName);
             return false;
         }
     }
 
-    vector<TypeDefinition*> ordered;
-    ordered.reserve(numTypeDefs);
+    vector<StructDefinition*> ordered;
+    ordered.reserve(numStructDefs);
 
     unordered_set<string> resolved;
-    resolved.reserve(numTypeDefs);
+    resolved.reserve(numStructDefs);
 
     unordered_set<string> dependents;
 
     // resolve dependencies
-    for (TypeDefinition* typeDef : typeDefs)
+    for (StructDefinition* structDef : structDefs)
     {
-        const string& typeName = typeDef->GetName();
+        const string& structName = structDef->GetName();
 
-        // resolve this type's dependencies if we have not done so already
-        if (resolved.find(typeName) == resolved.end())
+        // resolve this struct's dependencies if we have not done so already
+        if (resolved.find(structName) == resolved.end())
         {
-            bool ok = ResolveDependencies(typeDef, nameMap, ordered, resolved, dependents);
+            bool ok = ResolveDependencies(structDef, nameMap, ordered, resolved, dependents);
             if (!ok)
             {
                 return false;
@@ -482,21 +482,21 @@ bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
         }
     }
 
-    moduleDefinition->SwapTypeDefinitions(ordered);
+    moduleDefinition->SwapStructDefinitions(ordered);
 
     return true;
 }
 
 bool SemanticAnalyzer::ResolveDependencies(
-    TypeDefinition* typeDef,
-    const unordered_map<string, TypeDefinition*>& nameMap,
-    vector<TypeDefinition*>& ordered,
+    StructDefinition* structDef,
+    const unordered_map<string, StructDefinition*>& nameMap,
+    vector<StructDefinition*>& ordered,
     unordered_set<string>& resolved,
     unordered_set<string>& dependents)
 {
-    const string& typeName = typeDef->GetName();
+    const string& structName = structDef->GetName();
 
-    for (const MemberDefinition* member : typeDef->GetMembers())
+    for (const MemberDefinition* member : structDef->GetMembers())
     {
         const string& memberTypeName = member->GetTypeName();
 
@@ -508,11 +508,11 @@ bool SemanticAnalyzer::ResolveDependencies(
             if (dependentsIter != dependents.end())
             {
                 const string& memberName = member->GetName();
-                logger.LogError("In type '{}', member '{}' with type '{}' creates recursive dependency", typeName, memberName, memberTypeName);
+                logger.LogError("In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
                 return false;
             }
 
-            dependents.insert(typeName);
+            dependents.insert(structName);
 
             auto nameMapIter = nameMap.find(memberTypeName);
             if (nameMapIter == nameMap.end())
@@ -521,26 +521,26 @@ bool SemanticAnalyzer::ResolveDependencies(
                 return false;
             }
 
-            TypeDefinition* memberType = nameMapIter->second;
-            bool ok = ResolveDependencies(memberType, nameMap, ordered, resolved, dependents);
+            StructDefinition* memberStruct = nameMapIter->second;
+            bool ok = ResolveDependencies(memberStruct, nameMap, ordered, resolved, dependents);
             if (!ok)
             {
                 return false;
             }
 
-            dependents.erase(typeName);
+            dependents.erase(structName);
         }
     }
 
-    ordered.push_back(typeDef);
-    resolved.insert(typeName);
+    ordered.push_back(structDef);
+    resolved.insert(structName);
 
     return true;
 }
 
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
-    // sort type definitions so each comes after any type definitions it depends on
+    // sort struct definitions so each comes after any struct definitions it depends on
     bool ok = SortTypeDefinitions(moduleDefinition);
     if (!ok)
     {
@@ -548,10 +548,10 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         return;
     }
 
-    // process type definitions
-    for (TypeDefinition* typeDef : moduleDefinition->GetTypeDefinitions())
+    // process struct definitions
+    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
     {
-        typeDef->Accept(this);
+        structDef->Accept(this);
         if (isError)
         {
             return;

@@ -202,26 +202,26 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
     PrintProperty("expression", functionDefinition->GetExpression());
 }
 
-void SyntaxTreePrinter::Visit(TypeDefinition* typeDefinition)
+void SyntaxTreePrinter::Visit(StructDefinition* structDefinition)
 {
     BracePrinter printer(*this, "{", "}");
 
     function<void (MemberDefinition*)> printMemberDef = [this](MemberDefinition* member){ PrintMemberDefinition(member); };
 
-    PrintProperty(NODE_TYPE_PROPERTY, "TypeDefinition");
-    PrintProperty("name", typeDefinition->GetName());
-    PrintProperty("members", typeDefinition->GetMembers(), printMemberDef);
+    PrintProperty(NODE_TYPE_PROPERTY, "StructDefinition");
+    PrintProperty("name", structDefinition->GetName());
+    PrintProperty("members", structDefinition->GetMembers(), printMemberDef);
 }
 
-void SyntaxTreePrinter::Visit(TypeInitializationExpression* typeInitializationExpression)
+void SyntaxTreePrinter::Visit(StructInitializationExpression* structInitializationExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
     function<void (MemberInitialization*)> printMemberInit = [this](MemberInitialization* member){ PrintMemberInitialization(member); };
 
-    PrintProperty(NODE_TYPE_PROPERTY, "TypeInitializationExpression");
-    PrintProperty("typeName", typeInitializationExpression->GetTypeName());
-    PrintProperty("memberInitializations", typeInitializationExpression->GetMemberInitializations(), printMemberInit);
+    PrintProperty(NODE_TYPE_PROPERTY, "StructInitializationExpression");
+    PrintProperty("structName", structInitializationExpression->GetStructName());
+    PrintProperty("memberInitializations", structInitializationExpression->GetMemberInitializations(), printMemberInit);
 }
 
 void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
@@ -229,7 +229,7 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "ModuleDefinition");
-    PrintProperty("types", moduleDefinition->GetTypeDefinitions());
+    PrintProperty("structs", moduleDefinition->GetStructDefinitions());
     PrintProperty("externFunctions", moduleDefinition->GetExternFunctionDeclarations());
     PrintProperty("functions", moduleDefinition->GetFunctionDefinitions());
 }

@@ -62,13 +62,13 @@ private:
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            SyntaxTree::Parameters& parameters);
 
-    SyntaxTree::TypeDefinition* ProcessTypeDefinition(TokenIterator& iter,
-                                                      TokenIterator endIter);
+    SyntaxTree::StructDefinition* ProcessStructDefinition(TokenIterator& iter,
+                                                          TokenIterator endIter);
 
-    bool IsTypeInitialization(TokenIterator iter, TokenIterator endIter);
+    bool IsStructInitialization(TokenIterator iter, TokenIterator endIter);
 
-    SyntaxTree::TypeInitializationExpression* ProcessTypeInitialization(TokenIterator& iter,
-                                                                        TokenIterator endIter);
+    SyntaxTree::StructInitializationExpression* ProcessStructInitialization(TokenIterator& iter,
+                                                                            TokenIterator endIter);
 
     SyntaxTree::VariableDeclaration* ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter);
 

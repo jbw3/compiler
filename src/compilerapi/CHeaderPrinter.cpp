@@ -34,11 +34,11 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
     string cType;
 
     // print structs
-    for (const TypeDefinition* typeDef : module->GetTypeDefinitions())
+    for (const StructDefinition* structDef : module->GetStructDefinitions())
     {
-        outFile << "struct " << typeDef->GetName() << "\n{\n";
+        outFile << "struct " << structDef->GetName() << "\n{\n";
 
-        for (const MemberDefinition* member : typeDef->GetMembers())
+        for (const MemberDefinition* member : structDef->GetMembers())
         {
             const TypeInfo* memberType = TypeInfo::GetType(member->GetTypeName());
             if (!GetCType(memberType, cType))
