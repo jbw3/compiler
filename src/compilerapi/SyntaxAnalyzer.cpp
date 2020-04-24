@@ -398,11 +398,6 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         logger.LogError("Expected ')'");
         return false;
     }
-    else if (state == eName && parameters.size() > 0)
-    {
-        logger.LogError(*iter, "Expected a parameter");
-        return false;
-    }
     else if (state == eType)
     {
         logger.LogError(*iter, "Expected a parameter type");

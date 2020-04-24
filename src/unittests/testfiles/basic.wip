@@ -13,7 +13,8 @@ fun integerLiterals(x i32) i32
     0b101 + x + 0o370 + x + 123 + x + 0x_a5_7F93
 }
 
-fun twoArgs(arg1 i32, arg2 i32) i32
+# test trailing command in parameter list
+fun twoArgs(arg1 i32, arg2 i32,) i32
 {
     arg1 - arg2
 }
@@ -125,7 +126,7 @@ fun assignOps(a i8, b i16, c i32)
 
 fun nestedCall(x i32, y i32, z i32) i32
 {
-    twoArgs(0, x) + twoArgs(y + 42, z - 57)
+    twoArgs(0, x) + twoArgs(y + 42, z - 57,) # test trailing comma in function call
 }
 
 fun call_function_defined_later(a bool, b bool) bool
@@ -524,7 +525,8 @@ fun externTest() u64
     extern2(5, true)
 }
 
-extern fun extern2(p1 i32, p2 bool) u64;
+# test trailing command in parameter list
+extern fun extern2(p1 i32, p2 bool,) u64;
 
 fun scopes(x i32) i32
 {
