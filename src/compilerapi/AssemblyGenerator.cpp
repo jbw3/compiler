@@ -71,9 +71,9 @@ bool AssemblyGenerator::Generate(Module* module)
         }
 
         legacy::PassManager passManager;
-        TargetMachine::CodeGenFileType fileType = (assemblyType == Config::eMachineBinary)
-                                                      ? TargetMachine::CGFT_ObjectFile
-                                                      : TargetMachine::CGFT_AssemblyFile;
+        CodeGenFileType fileType = (assemblyType == Config::eMachineBinary)
+                                    ? CGFT_ObjectFile
+                                    : CGFT_AssemblyFile;
         if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
         {
             cerr << "Target machine cannot emit a file of this type\n";

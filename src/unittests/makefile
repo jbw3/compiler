@@ -9,9 +9,9 @@ BINDIR = ../../bin
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$<.Td
 
-LLVM_CONFIG=llvm-config-8
+LLVM_CONFIG=llvm-config-10
 
-CXX = clang++-8
+CXX = clang++-10
 CXXFLAGS = `$(LLVM_CONFIG) --cxxflags` $(INCLUDES) -std=c++14 -Wall -Wextra $(DEPFLAGS)
 
 API_LIB = compilerapi
