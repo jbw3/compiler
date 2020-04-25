@@ -1,6 +1,6 @@
 ; ModuleID = 'src/unittests/testfiles/basic.wip'
 source_filename = "src/unittests/testfiles/basic.wip"
-target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
@@ -11,7 +11,7 @@ target triple = "x86_64-pc-linux-gnu"
 
 @strStruct0 = constant { i64, [0 x i8] } zeroinitializer
 @strStruct1 = constant { i64, [15 x i8] } { i64 15, [15 x i8] c"Is this a test?" }
-@strStruct2 = constant { i64, [6 x i8] } { i64 6, [6 x i8] c"\09\0D\0A\5C\22'" }
+@strStruct2 = constant { i64, [6 x i8] } { i64 6, [6 x i8] c"\09\0D\0A\\\22'" }
 @strStruct3 = constant { i64, [5 x i8] } { i64 5, [5 x i8] c"caf\C3\A9" }
 @strStruct4 = constant { i64, [3 x i8] } { i64 3, [3 x i8] c"JBW" }
 @strStruct5 = constant { i64, [11 x i8] } { i64 11, [11 x i8] c"\0A0\CF\80\E2\82\BF\F0\9F\98\80" }
