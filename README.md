@@ -4,18 +4,18 @@
 
 ### Dependencies
 
-LLVM 8 is required to build the compiler.
+LLVM 10 is required to build the compiler.
 LLVM's website has [instructions](https://apt.llvm.org) for installing on several popular Linux distributions.
-For example, run the following commands to install LLVM 8 on Ubuntu 16.04:
+For example, run the following commands to install LLVM 10 on Ubuntu 18.04:
 
 ```bash
 # add repository to package manager
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key 2>/dev/null | apt-key add -
-apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main"
+apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
 
 # install
 sudo apt-get update
-sudo apt-get install -y clang-8
+sudo apt-get install -y clang-10
 ```
 
 ### Building
