@@ -314,10 +314,13 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 
     DIFile* file = diCompileUnit->getFile();
-    DISubroutineType* subroutine = diBuilder->createSubroutineType(DITypeRefArray());
-    DISubprogram* subprogram = diBuilder->createFunction(file, funcName, "", file, 74, subroutine, 0);
+    SmallVector<Metadata*, 1> funTypes;
+    funTypes.push_back(diBuilder->createBasicType("i32", 0, dwarf::DW_ATE_signed));
+    DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
+    DISubprogram* subprogram =
+        diBuilder->createFunction(file, funcName, "", file, 8, subroutine, 0, DINode::FlagPrototyped);
     func->setSubprogram(subprogram);
-    // builder.SetCurrentDebugLocation(DebugLoc::get(76, 5, subprogram));
+    builder.SetCurrentDebugLocation(DebugLoc::get(8, 5, subprogram));
 
     // process function body expression
     currentFunction = func;
@@ -335,8 +338,10 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     const TypeInfo* returnType = declaration->GetReturnType();
     ExtendType(expressionType, returnType, resultValue);
 
-
     builder.CreateRet(resultValue);
+
+    // have to finalize subprogram before verifyFunction() is called
+    diBuilder->finalizeSubprogram(subprogram);
 
 #ifdef DEBUG
     bool error = verifyFunction(*func, &errs());
