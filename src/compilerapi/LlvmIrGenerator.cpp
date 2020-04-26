@@ -318,9 +318,9 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     funTypes.push_back(diBuilder->createBasicType("i32", 0, dwarf::DW_ATE_signed));
     DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
     DISubprogram* subprogram =
-        diBuilder->createFunction(file, funcName, "", file, 8, subroutine, 0, DINode::FlagPrototyped);
+        diBuilder->createFunction(file, funcName, "", file, 28, subroutine, 0, DINode::FlagPrototyped);
     func->setSubprogram(subprogram);
-    builder.SetCurrentDebugLocation(DebugLoc::get(8, 5, subprogram));
+    builder.SetCurrentDebugLocation(DebugLoc::get(30, 5, subprogram));
 
     // process function body expression
     currentFunction = func;
