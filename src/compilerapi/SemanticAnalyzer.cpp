@@ -409,8 +409,8 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         const TypeInfo* exprType = expr->GetType();
         if (!memberType->IsSameAs(*exprType))
         {
-            bool bothAreInts = memberType->IsInt() & memberType->IsInt();
-            bool haveSameSign = memberType->IsSigned() == memberType->IsSigned();
+            bool bothAreInts = memberType->IsInt() & exprType->IsInt();
+            bool haveSameSign = memberType->IsSigned() == exprType->IsSigned();
             if (!bothAreInts || !haveSameSign || memberType->GetNumBits() < exprType->GetNumBits())
             {
                 isError = true;
