@@ -104,7 +104,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             ExtendType(leftType, rightType, leftValue, rightValue);
         }
 
-        bool isSigned = leftType->IsSigned();
+        bool isSigned = leftType->GetSign() == TypeInfo::eSigned;
 
         switch (op)
         {
@@ -811,7 +811,7 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const Type
 
 Value* LlvmIrGenerator::CreateExt(llvm::Value* value, const TypeInfo* dstType)
 {
-    if (dstType->IsSigned())
+    if (dstType->GetSign() == TypeInfo::eSigned)
     {
         value = builder.CreateSExt(value, GetType(dstType), "signext");
     }

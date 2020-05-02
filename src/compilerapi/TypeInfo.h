@@ -33,6 +33,14 @@ private:
 class TypeInfo
 {
 public:
+    enum ESign
+    {
+        eNotApplicable,
+        eSigned,
+        eUnsigned,
+        eContextDependent,
+    };
+
     static const UnitTypeInfo* UnitType;
     static const TypeInfo* BoolType;
     static const TypeInfo* Int8Type;
@@ -60,7 +68,7 @@ public:
         unsigned numBits,
         bool isBool,
         bool isInt,
-        bool isSigned,
+        ESign sign,
         bool isAggregate,
         const std::string& shortName
     );
@@ -73,7 +81,7 @@ public:
 
     bool IsInt() const;
 
-    bool IsSigned() const;
+    ESign GetSign() const;
 
     bool IsAggregate() const;
 
@@ -98,7 +106,7 @@ private:
     unsigned numBits;
     bool isBool;
     bool isInt;
-    bool isSigned;
+    ESign sign;
     bool isAggregate;
     std::string shortName;
     std::map<std::string, const MemberInfo*> members;
@@ -119,11 +127,27 @@ public:
         unsigned numBits,
         bool isBool,
         bool isInt,
-        bool isSigned,
+        ESign sign,
         const std::string& shortName
     );
 
     bool IsSameAs(const TypeInfo& other) const override;
+};
+
+class ContextInt : public TypeInfo
+{
+public:
+    ContextInt(unsigned signedNumBits, unsigned unsignedNumBits);
+
+    bool IsSameAs(const TypeInfo& other) const override;
+
+    unsigned GetSignedNumBits() const;
+
+    unsigned GetUnsignedNumBits() const;
+
+private:
+    unsigned signedNumBits;
+    unsigned unsignedNumBits;
 };
 
 class StringPointerType : public TypeInfo

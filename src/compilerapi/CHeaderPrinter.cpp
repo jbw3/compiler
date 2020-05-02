@@ -167,7 +167,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
         else
         {
             stringstream ss;
-            if (!type->IsSigned())
+            if (type->GetSign() == TypeInfo::eUnsigned)
             {
                 ss << 'u';
             }

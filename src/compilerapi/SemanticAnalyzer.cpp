@@ -42,7 +42,7 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, con
     switch (op)
     {
         case UnaryExpression::eNegative:
-            ok = subExprType->IsInt() && subExprType->IsSigned();
+            ok = subExprType->IsInt() && subExprType->GetSign() == TypeInfo::eSigned;
             break;
         case UnaryExpression::eComplement:
             ok = subExprType->IsSameAs(*TypeInfo::BoolType) || subExprType->IsInt();
@@ -94,7 +94,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         left->SetAccessType(Expression::eStore);
     }
 
-    if (!CheckBinaryOperatorTypes(op, left->GetType(), right->GetType()))
+    if (!CheckBinaryOperatorTypes(op, left, right))
     {
         isError = true;
         return;
@@ -104,18 +104,89 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     binaryExpression->SetType(resultType);
 }
 
-bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType)
+unsigned SemanticAnalyzer::GetIntNumBits(const TypeInfo* type)
 {
-    bool ok = false;
-    bool bothAreInts = leftType->IsInt() & rightType->IsInt();
+    unsigned numBits = 0;
 
-    if ( !(leftType->IsSameAs(*rightType)) && !bothAreInts )
+    const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(type);
+    if (contextIntType == nullptr)
     {
-        ok = false;
+        numBits = type->GetNumBits();
     }
     else
     {
-        bool haveSameSign = leftType->IsSigned() == rightType->IsSigned();
+        numBits = type->GetNumBits();
+    }
+
+    return numBits;
+}
+
+bool SemanticAnalyzer::IsCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType)
+{
+    unsigned rightNumBits = 0;
+    const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(rightType);
+
+    if (contextIntType == nullptr)
+    {
+        rightNumBits = rightType->GetNumBits();
+    }
+    else
+    {
+        if (leftType->GetSign() == TypeInfo::eSigned)
+        {
+            rightNumBits = contextIntType->GetSignedNumBits();
+        }
+        else
+        {
+            rightNumBits = contextIntType->GetUnsignedNumBits();
+        }
+    }
+
+    return leftType->GetNumBits() >= rightNumBits;
+}
+
+bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr)
+{
+    bool ok = false;
+    const TypeInfo* leftType = leftExpr->GetType();
+    const TypeInfo* rightType = rightExpr->GetType();
+
+    if (leftType->IsBool() && rightType->IsBool())
+    {
+        switch (op)
+        {
+            case BinaryExpression::eEqual:
+            case BinaryExpression::eNotEqual:
+            case BinaryExpression::eBitwiseAnd:
+            case BinaryExpression::eBitwiseXor:
+            case BinaryExpression::eBitwiseOr:
+            case BinaryExpression::eLogicalAnd:
+            case BinaryExpression::eLogicalOr:
+            case BinaryExpression::eAssign:
+            case BinaryExpression::eBitwiseAndAssign:
+            case BinaryExpression::eBitwiseXorAssign:
+            case BinaryExpression::eBitwiseOrAssign:
+                ok = true;
+                break;
+            default:
+                ok = false;
+                break;
+        }
+    }
+    else if (leftType->IsInt() && rightType->IsInt())
+    {
+        const IntTypeInfo* leftLiteralType = dynamic_cast<const IntTypeInfo*>(leftType);
+        const IntTypeInfo* rightLiteralType = dynamic_cast<const IntTypeInfo*>(rightType);
+
+        bool haveCompatibleSigns = false;
+        if (leftLiteralType != nullptr || rightLiteralType != nullptr)
+        {
+            haveCompatibleSigns = true;
+        }
+        else
+        {
+            haveCompatibleSigns = leftType->IsSigned() == rightType->IsSigned();
+        }
 
         switch (op)
         {
@@ -124,12 +195,6 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseXor:
             case BinaryExpression::eBitwiseOr:
-                ok = (leftType->IsBool() && rightType->IsBool()) || (bothAreInts && haveSameSign);
-                break;
-            case BinaryExpression::eLogicalAnd:
-            case BinaryExpression::eLogicalOr:
-                ok = leftType->IsBool() && rightType->IsBool();
-                break;
             case BinaryExpression::eLessThan:
             case BinaryExpression::eLessThanOrEqual:
             case BinaryExpression::eGreaterThan:
@@ -139,36 +204,35 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eRemainder:
-                ok = bothAreInts && haveSameSign;
-                break;
-            case BinaryExpression::eShiftLeft:
-            case BinaryExpression::eShiftRightLogical:
-            case BinaryExpression::eShiftRightArithmetic:
-                // the return type should be the left type, so the right type has to be the
-                // same size or smaller
-                ok = bothAreInts && leftType->GetNumBits() >= rightType->GetNumBits();
+                ok = haveCompatibleSigns;
                 break;
             case BinaryExpression::eAssign:
-                ok = leftType->IsSameAs(*rightType) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
-                break;
             case BinaryExpression::eAddAssign:
             case BinaryExpression::eSubtractAssign:
             case BinaryExpression::eMultiplyAssign:
             case BinaryExpression::eDivideAssign:
             case BinaryExpression::eRemainderAssign:
-                ok = bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits();
-                break;
-            case BinaryExpression::eShiftLeftAssign:
-            case BinaryExpression::eShiftRightLogicalAssign:
-            case BinaryExpression::eShiftRightArithmeticAssign:
-                ok = bothAreInts && leftType->GetNumBits() >= rightType->GetNumBits();
-                break;
             case BinaryExpression::eBitwiseAndAssign:
             case BinaryExpression::eBitwiseXorAssign:
             case BinaryExpression::eBitwiseOrAssign:
-                ok = (leftType->IsBool() && rightType->IsBool()) || (bothAreInts && haveSameSign && leftType->GetNumBits() >= rightType->GetNumBits());
+                ok = haveCompatibleSigns && IsCompatibleAssignmentSizes(leftType, rightType);
+                break;
+            case BinaryExpression::eShiftLeft:
+            case BinaryExpression::eShiftRightLogical:
+            case BinaryExpression::eShiftRightArithmetic:
+            case BinaryExpression::eShiftLeftAssign:
+            case BinaryExpression::eShiftRightLogicalAssign:
+            case BinaryExpression::eShiftRightArithmeticAssign:
+                ok = true;
+                break;
+            default:
+                ok = false;
                 break;
         }
+    }
+    else if (leftType->IsSameAs(*rightType))
+    {
+        ok = op == BinaryExpression::eAssign;
     }
 
     if (!ok)
@@ -307,7 +371,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     const TypeInfo* expressionType = expression->GetType();
     if (!returnType->IsSameAs(*expressionType))
     {
-        if ( !(expressionType->IsInt() && returnType->IsInt() && expressionType->IsSigned() == returnType->IsSigned() && expressionType->GetNumBits() <= returnType->GetNumBits()) )
+        if ( !(expressionType->IsInt() && returnType->IsInt() && expressionType->GetSign() == returnType->GetSign() && expressionType->GetNumBits() <= returnType->GetNumBits()) )
         {
             isError = true;
             logger.LogError("Invalid function return type. Expected '{}' but got '{}'", returnType->GetShortName(), expressionType->GetShortName());
@@ -622,15 +686,18 @@ void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpressio
 
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 {
-    const TypeInfo* minSizeType = numericExpression->GetMinSizeType();
-    if (minSizeType == nullptr)
+    unsigned minSignedNumBits = numericExpression->GetMinSignedSize();
+    unsigned minUnsignedNumBits = numericExpression->GetMinUnsignedSize();
+    if (minSignedNumBits == 0 || minUnsignedNumBits == 0)
     {
         isError = true;
         cerr << "Internal error: Could not get type for numeric literal\n";
         return;
     }
 
-    numericExpression->SetType(minSizeType);
+    // TODO: fix memory leak
+    const IntTypeInfo* type = new IntTypeInfo(true, true, minSignedNumBits, minUnsignedNumBits);
+    numericExpression->SetType(type);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)

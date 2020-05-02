@@ -35,6 +35,8 @@ public:
 
     void SetType(const TypeInfo* newType);
 
+    virtual bool GetIsLiteral() const;
+
     bool GetIsAssignable() const;
 
     void SetIsAssignable(bool newIsAssignable);
@@ -59,6 +61,8 @@ public:
     virtual ~UnitTypeLiteralExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
+
+    bool GetIsLiteral() const override;
 };
 
 class NumericExpression : public Expression
@@ -70,9 +74,13 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
+    bool GetIsLiteral() const override;
+
     const std::string& GetNumber() const;
 
-    const TypeInfo* GetMinSizeType() const;
+    unsigned GetMinSignedSize() const;
+
+    unsigned GetMinUnsignedSize() const;
 
 private:
     std::string number;
@@ -91,6 +99,8 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
+    bool GetIsLiteral() const override;
+
     const std::string& GetValue() const;
 
 private:
@@ -105,6 +115,8 @@ public:
     virtual ~StringLiteralExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
+
+    bool GetIsLiteral() const override;
 
     const std::vector<char>& GetCharacters() const;
 

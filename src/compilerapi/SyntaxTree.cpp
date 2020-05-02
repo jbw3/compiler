@@ -24,6 +24,11 @@ void Expression::SetType(const TypeInfo* newType)
     type = newType;
 }
 
+bool Expression::GetIsLiteral() const
+{
+    return false;
+}
+
 bool Expression::GetIsAssignable() const
 {
     return isAssignable;
@@ -53,6 +58,11 @@ void UnitTypeLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+bool UnitTypeLiteralExpression::GetIsLiteral() const
+{
+    return true;
+}
+
 NumericExpression::NumericExpression(string number) : number(number)
 {
 }
@@ -62,37 +72,70 @@ void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+bool NumericExpression::GetIsLiteral() const
+{
+    return true;
+}
+
 const string& NumericExpression::GetNumber() const
 {
     return number;
 }
 
-const TypeInfo* NumericExpression::GetMinSizeType() const
+unsigned NumericExpression::GetMinSignedSize() const
 {
-    const TypeInfo* type = nullptr;
+    unsigned numBits = 0;
     int64_t outNum = 0;
     bool ok = stringToInteger(number, outNum);
     if (ok)
     {
         if (outNum >= numeric_limits<int8_t>::min() && outNum <= numeric_limits<int8_t>::max())
         {
-            type = TypeInfo::Int8Type;
+            numBits = 8;
         }
         else if (outNum >= numeric_limits<int16_t>::min() && outNum <= numeric_limits<int16_t>::max())
         {
-            type = TypeInfo::Int16Type;
+            numBits = 16;
         }
         else if (outNum >= numeric_limits<int32_t>::min() && outNum <= numeric_limits<int32_t>::max())
         {
-            type = TypeInfo::Int32Type;
+            numBits = 32;
         }
         else if (outNum >= numeric_limits<int64_t>::min() && outNum <= numeric_limits<int64_t>::max())
         {
-            type = TypeInfo::Int64Type;
+            numBits = 64;
         }
     }
 
-    return type;
+    return numBits;
+}
+
+unsigned NumericExpression::GetMinUnsignedSize() const
+{
+    unsigned numBits = 0;
+    int64_t outNum = 0;
+    bool ok = stringToInteger(number, outNum);
+    if (ok)
+    {
+        if (outNum <= numeric_limits<uint8_t>::max())
+        {
+            numBits = 8;
+        }
+        else if (outNum <= numeric_limits<uint16_t>::max())
+        {
+            numBits = 16;
+        }
+        else if (outNum <= numeric_limits<uint32_t>::max())
+        {
+            numBits = 32;
+        }
+        else if (outNum <= numeric_limits<uint64_t>::max())
+        {
+            numBits = 64;
+        }
+    }
+
+    return numBits;
 }
 
 BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()
@@ -119,6 +162,11 @@ void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+bool BoolLiteralExpression::GetIsLiteral() const
+{
+    return true;
+}
+
 const string& BoolLiteralExpression::GetValue() const
 {
     return value;
@@ -132,6 +180,11 @@ StringLiteralExpression::StringLiteralExpression(const vector<char> characters) 
 void StringLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
+}
+
+bool StringLiteralExpression::GetIsLiteral() const
+{
+    return true;
 }
 
 const vector<char>& StringLiteralExpression::GetCharacters() const

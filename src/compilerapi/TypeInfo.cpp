@@ -10,15 +10,15 @@ using namespace llvm;
 using namespace std;
 
 UnitTypeInfo unitType;
-PrimitiveType boolTypeInfo(1, true, false, false, BOOL_KEYWORD);
-PrimitiveType int8TypeInfo(8, false, true, true, INT8_KEYWORD);
-PrimitiveType int16TypeInfo(16, false, true, true, INT16_KEYWORD);
-PrimitiveType int32TypeInfo(32, false, true, true, INT32_KEYWORD);
-PrimitiveType int64TypeInfo(64, false, true, true, INT64_KEYWORD);
-PrimitiveType uInt8TypeInfo(8, false, true, false, UINT8_KEYWORD);
-PrimitiveType uInt16TypeInfo(16, false, true, false, UINT16_KEYWORD);
-PrimitiveType uInt32TypeInfo(32, false, true, false, UINT32_KEYWORD);
-PrimitiveType uInt64TypeInfo(64, false, true, false, UINT64_KEYWORD);
+PrimitiveType boolTypeInfo(1, true, false, TypeInfo::eNotApplicable, BOOL_KEYWORD);
+PrimitiveType int8TypeInfo(8, false, true, TypeInfo::eSigned, INT8_KEYWORD);
+PrimitiveType int16TypeInfo(16, false, true, TypeInfo::eSigned, INT16_KEYWORD);
+PrimitiveType int32TypeInfo(32, false, true, TypeInfo::eSigned, INT32_KEYWORD);
+PrimitiveType int64TypeInfo(64, false, true, TypeInfo::eSigned, INT64_KEYWORD);
+PrimitiveType uInt8TypeInfo(8, false, true, TypeInfo::eUnsigned, UINT8_KEYWORD);
+PrimitiveType uInt16TypeInfo(16, false, true, TypeInfo::eUnsigned, UINT16_KEYWORD);
+PrimitiveType uInt32TypeInfo(32, false, true, TypeInfo::eUnsigned, UINT32_KEYWORD);
+PrimitiveType uInt64TypeInfo(64, false, true, TypeInfo::eUnsigned, UINT64_KEYWORD);
 
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable) :
     name(name),
@@ -80,9 +80,9 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 {
     unsigned numBits = 8 * targetMachine->getAllocaPointerSize();
 
-    intSizeType = new PrimitiveType(numBits, false, true, true, INT_SIZE_KEYWORD);
+    intSizeType = new PrimitiveType(numBits, false, true, TypeInfo::eSigned, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
-    uintSizeType = new PrimitiveType(numBits, false, true, false, UINT_SIZE_KEYWORD);
+    uintSizeType = new PrimitiveType(numBits, false, true, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
 
     stringPointerType = new StringPointerType(numBits);
@@ -124,14 +124,14 @@ TypeInfo::TypeInfo(
     unsigned numBits,
     bool isBool,
     bool isInt,
-    bool isSigned,
+    ESign sign,
     bool isAggregate,
     const string& shortName
 ) :
     numBits(numBits),
     isBool(isBool),
     isInt(isInt),
-    isSigned(isSigned),
+    sign(sign),
     isAggregate(isAggregate),
     shortName(shortName)
 {
@@ -157,9 +157,9 @@ bool TypeInfo::IsInt() const
     return isInt;
 }
 
-bool TypeInfo::IsSigned() const
+TypeInfo::ESign TypeInfo::GetSign() const
 {
-    return isSigned;
+    return sign;
 }
 
 bool TypeInfo::IsAggregate() const
@@ -213,7 +213,7 @@ bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssign
 }
 
 UnitTypeInfo::UnitTypeInfo() :
-    TypeInfo(0, false, false, false, false, "Unit")
+    TypeInfo(0, false, false, TypeInfo::eNotApplicable, false, "Unit")
 {
 }
 
@@ -227,10 +227,10 @@ PrimitiveType::PrimitiveType(
     unsigned numBits,
     bool isBool,
     bool isInt,
-    bool isSigned,
+    ESign sign,
     const string& shortName
 ) :
-    TypeInfo(numBits, isBool, isInt, isSigned, false, shortName)
+    TypeInfo(numBits, isBool, isInt, sign, false, shortName)
 {
 }
 
@@ -245,11 +245,40 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
     return GetNumBits() == primitiveOther.GetNumBits()
         && IsBool() == primitiveOther.IsBool()
         && IsInt() == primitiveOther.IsInt()
-        && IsSigned() == primitiveOther.IsSigned();
+        && GetSign() == primitiveOther.GetSign();
+}
+
+ContextInt::ContextInt(unsigned signedNumBits, unsigned unsignedNumBits) :
+    TypeInfo(0, false, true, TypeInfo::eContextDependent, false, "{integer}"),
+    signedNumBits(signedNumBits),
+    unsignedNumBits(unsignedNumBits)
+{
+}
+
+bool ContextInt::IsSameAs(const TypeInfo& other) const
+{
+    if (typeid(other) != typeid(ContextInt))
+    {
+        return false;
+    }
+
+    const ContextInt& otherContextInt = static_cast<const ContextInt&>(other);
+    return signedNumBits == otherContextInt.signedNumBits
+        && unsignedNumBits == otherContextInt.unsignedNumBits;
+}
+
+unsigned ContextInt::GetSignedNumBits() const
+{
+    return signedNumBits;
+}
+
+unsigned ContextInt::GetUnsignedNumBits() const
+{
+    return unsignedNumBits;
 }
 
 StringPointerType::StringPointerType(unsigned numBits) :
-    TypeInfo(numBits, false, false, false, false, STR_KEYWORD)
+    TypeInfo(numBits, false, false, TypeInfo::eNotApplicable, false, STR_KEYWORD)
 {
     AddMember("Size", TypeInfo::GetUIntSizeType(), false);
 }
@@ -261,7 +290,7 @@ bool StringPointerType::IsSameAs(const TypeInfo& other) const
 }
 
 AggregateType::AggregateType(const string& name) :
-    TypeInfo(0, false, false, false, true, name)
+    TypeInfo(0, false, false, TypeInfo::eNotApplicable, true, name)
 {
 }
 

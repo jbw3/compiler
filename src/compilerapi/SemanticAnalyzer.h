@@ -69,7 +69,11 @@ private:
 
     bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);
 
-    bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
+    unsigned GetIntNumBits(const TypeInfo* type);
+
+    bool IsCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType);
+
+    bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const SyntaxTree::Expression* leftExpr, const SyntaxTree::Expression* rightExpr);
 
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 
