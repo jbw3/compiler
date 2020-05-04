@@ -175,17 +175,14 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     }
     else if (leftType->IsInt() && rightType->IsInt())
     {
-        const IntTypeInfo* leftLiteralType = dynamic_cast<const IntTypeInfo*>(leftType);
-        const IntTypeInfo* rightLiteralType = dynamic_cast<const IntTypeInfo*>(rightType);
-
         bool haveCompatibleSigns = false;
-        if (leftLiteralType != nullptr || rightLiteralType != nullptr)
+        if (leftType->GetSign() == TypeInfo::eContextDependent || rightType->GetSign() == TypeInfo::eContextDependent)
         {
             haveCompatibleSigns = true;
         }
         else
         {
-            haveCompatibleSigns = leftType->IsSigned() == rightType->IsSigned();
+            haveCompatibleSigns = leftType->GetSign() == rightType->GetSign();
         }
 
         switch (op)
@@ -474,7 +471,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (!memberType->IsSameAs(*exprType))
         {
             bool bothAreInts = memberType->IsInt() & exprType->IsInt();
-            bool haveSameSign = memberType->IsSigned() == exprType->IsSigned();
+            bool haveSameSign = memberType->GetSign() == exprType->GetSign();
             if (!bothAreInts || !haveSameSign || memberType->GetNumBits() < exprType->GetNumBits())
             {
                 isError = true;
@@ -696,7 +693,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     }
 
     // TODO: fix memory leak
-    const IntTypeInfo* type = new IntTypeInfo(true, true, minSignedNumBits, minUnsignedNumBits);
+    const ContextInt* type = new ContextInt(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
 }
 
@@ -798,7 +795,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const TypeInfo* paramType = param->GetType();
         if (!argType->IsSameAs(*paramType))
         {
-            if ( !(argType->IsInt() && paramType->IsInt() && argType->IsSigned() == paramType->IsSigned() && argType->GetNumBits() <= paramType->GetNumBits()) )
+            if ( !(argType->IsInt() && paramType->IsInt() && argType->GetSign() == paramType->GetSign() && argType->GetNumBits() <= paramType->GetNumBits()) )
             {
                 cerr << "Argument does not match parameter type\n";
                 isError = true;
@@ -874,7 +871,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     {
         resultType = ifType;
     }
-    else if (ifType->IsInt() && elseType->IsInt() && ifType->IsSigned() == elseType->IsSigned())
+    else if (ifType->IsInt() && elseType->IsInt() && ifType->GetSign() == elseType->GetSign())
     {
         if (ifType->GetNumBits() >= elseType->GetNumBits())
         {
