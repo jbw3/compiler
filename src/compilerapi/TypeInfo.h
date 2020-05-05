@@ -58,6 +58,8 @@ public:
 
     static const TypeInfo* GetUIntSizeType();
 
+    static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
+
     static const TypeInfo* GetStringPointerType();
 
     static const TypeInfo* GetType(const std::string& typeName);

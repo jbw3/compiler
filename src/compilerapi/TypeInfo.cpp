@@ -99,6 +99,30 @@ const TypeInfo* TypeInfo::GetUIntSizeType()
     return uintSizeType;
 }
 
+const TypeInfo* TypeInfo::GetMinSignedIntTypeForSize(unsigned size)
+{
+    const TypeInfo* type = nullptr;
+
+    if (size <= 8)
+    {
+        type = TypeInfo::Int8Type;
+    }
+    else if (size <= 16)
+    {
+        type = TypeInfo::Int16Type;
+    }
+    else if (size <= 32)
+    {
+        type = TypeInfo::Int32Type;
+    }
+    else if (size <= 64)
+    {
+        type = TypeInfo::Int64Type;
+    }
+
+    return type;
+}
+
 const TypeInfo* TypeInfo::GetStringPointerType()
 {
     return stringPointerType;

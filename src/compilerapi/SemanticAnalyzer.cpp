@@ -26,13 +26,54 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
         return;
     }
 
-    if (!CheckUnaryOperatorType(unaryExpression->GetOperator(), subExpr->GetType()))
+    const TypeInfo* subExprType = subExpr->GetType();
+    bool isInt = subExprType->IsInt();
+
+    bool ok = false;
+    const TypeInfo* resultType = nullptr;
+    switch (unaryExpression->GetOperator())
     {
+        case UnaryExpression::eNegative:
+        {
+            TypeInfo::ESign sign = subExprType->GetSign();
+            if (isInt)
+            {
+                if (sign == TypeInfo::eSigned)
+                {
+                    ok = true;
+                    resultType = subExpr->GetType();
+                }
+                else if (sign == TypeInfo::eContextDependent)
+                {
+                    ok = true;
+                    NumericExpression* numExpr = dynamic_cast<NumericExpression*>(subExpr);
+                    if (numExpr == nullptr)
+                    {
+                        logger.LogError("Internal error: Expression with context-dependent type is not a literal");
+                        isError = true;
+                        return;
+                    }
+
+                    unsigned minSize = numExpr->GetMinSignedSize();
+                    resultType = TypeInfo::GetMinSignedIntTypeForSize(minSize);
+                }
+            }
+            break;
+        }
+        case UnaryExpression::eComplement:
+            ok = subExprType->IsSameAs(*TypeInfo::BoolType) || isInt;
+            resultType = subExpr->GetType();
+            break;
+    }
+
+    if (!ok)
+    {
+        logger.LogError("Unary operator does not support type '{}'", subExprType->GetShortName());
         isError = true;
         return;
     }
 
-    unaryExpression->SetType(subExpr->GetType());
+    unaryExpression->SetType(resultType);
 }
 
 bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, const TypeInfo* subExprType)
@@ -42,8 +83,11 @@ bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, con
     switch (op)
     {
         case UnaryExpression::eNegative:
-            ok = subExprType->IsInt() && subExprType->GetSign() == TypeInfo::eSigned;
+        {
+            TypeInfo::ESign sign = subExprType->GetSign();
+            ok = subExprType->IsInt() && (sign == TypeInfo::eSigned || sign == TypeInfo::eContextDependent);
             break;
+        }
         case UnaryExpression::eComplement:
             ok = subExprType->IsSameAs(*TypeInfo::BoolType) || subExprType->IsInt();
             break;
