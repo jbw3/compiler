@@ -412,9 +412,30 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     const TypeInfo* expressionType = expression->GetType();
     if (!returnType->IsSameAs(*expressionType))
     {
-        if ( !(expressionType->IsInt() && returnType->IsInt() && expressionType->GetSign() == returnType->GetSign() && expressionType->GetNumBits() <= returnType->GetNumBits()) )
+        if (expressionType->IsInt() && returnType->IsInt())
+        {
+            bool haveCompatibleSigns = false;
+            if (expressionType->GetSign() == TypeInfo::eContextDependent || returnType->GetSign() == TypeInfo::eContextDependent)
+            {
+                haveCompatibleSigns = true;
+            }
+            else
+            {
+                haveCompatibleSigns = expressionType->GetSign() == returnType->GetSign();
+            }
+
+            if (!haveCompatibleSigns || !IsCompatibleAssignmentSizes(returnType, expressionType))
+            {
+                isError = true;
+            }
+        }
+        else
         {
             isError = true;
+        }
+
+        if (isError)
+        {
             logger.LogError("Invalid function return type. Expected '{}' but got '{}'", returnType->GetShortName(), expressionType->GetShortName());
         }
     }
