@@ -165,7 +165,22 @@ unsigned SemanticAnalyzer::GetIntNumBits(const TypeInfo* type)
     return numBits;
 }
 
-bool SemanticAnalyzer::IsCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType)
+bool SemanticAnalyzer::HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType)
+{
+    bool haveCompatibleSigns = false;
+    if (leftType->GetSign() == TypeInfo::eContextDependent || rightType->GetSign() == TypeInfo::eContextDependent)
+    {
+        haveCompatibleSigns = true;
+    }
+    else
+    {
+        haveCompatibleSigns = leftType->GetSign() == rightType->GetSign();
+    }
+
+    return haveCompatibleSigns;
+}
+
+bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType)
 {
     unsigned rightNumBits = 0;
     const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(rightType);
@@ -219,15 +234,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     }
     else if (leftType->IsInt() && rightType->IsInt())
     {
-        bool haveCompatibleSigns = false;
-        if (leftType->GetSign() == TypeInfo::eContextDependent || rightType->GetSign() == TypeInfo::eContextDependent)
-        {
-            haveCompatibleSigns = true;
-        }
-        else
-        {
-            haveCompatibleSigns = leftType->GetSign() == rightType->GetSign();
-        }
+        bool haveCompatibleSigns = HaveCompatibleSigns(leftType, rightType);
 
         switch (op)
         {
@@ -256,7 +263,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eBitwiseAndAssign:
             case BinaryExpression::eBitwiseXorAssign:
             case BinaryExpression::eBitwiseOrAssign:
-                ok = haveCompatibleSigns && IsCompatibleAssignmentSizes(leftType, rightType);
+                ok = haveCompatibleSigns && HaveCompatibleAssignmentSizes(leftType, rightType);
                 break;
             case BinaryExpression::eShiftLeft:
             case BinaryExpression::eShiftRightLogical:
@@ -412,30 +419,9 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     const TypeInfo* expressionType = expression->GetType();
     if (!returnType->IsSameAs(*expressionType))
     {
-        if (expressionType->IsInt() && returnType->IsInt())
-        {
-            bool haveCompatibleSigns = false;
-            if (expressionType->GetSign() == TypeInfo::eContextDependent || returnType->GetSign() == TypeInfo::eContextDependent)
-            {
-                haveCompatibleSigns = true;
-            }
-            else
-            {
-                haveCompatibleSigns = expressionType->GetSign() == returnType->GetSign();
-            }
-
-            if (!haveCompatibleSigns || !IsCompatibleAssignmentSizes(returnType, expressionType))
-            {
-                isError = true;
-            }
-        }
-        else
+        if ( !(expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType)) )
         {
             isError = true;
-        }
-
-        if (isError)
-        {
             logger.LogError("Invalid function return type. Expected '{}' but got '{}'", returnType->GetShortName(), expressionType->GetShortName());
         }
     }
@@ -860,7 +846,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const TypeInfo* paramType = param->GetType();
         if (!argType->IsSameAs(*paramType))
         {
-            if ( !(argType->IsInt() && paramType->IsInt() && argType->GetSign() == paramType->GetSign() && argType->GetNumBits() <= paramType->GetNumBits()) )
+            if ( !(argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType)) )
             {
                 cerr << "Argument does not match parameter type\n";
                 isError = true;

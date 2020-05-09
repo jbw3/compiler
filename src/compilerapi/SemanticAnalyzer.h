@@ -71,7 +71,9 @@ private:
 
     unsigned GetIntNumBits(const TypeInfo* type);
 
-    bool IsCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType);
+    bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
+
+    bool HaveCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType);
 
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const SyntaxTree::Expression* leftExpr, const SyntaxTree::Expression* rightExpr);
 
