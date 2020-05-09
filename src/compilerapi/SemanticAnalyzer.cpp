@@ -522,8 +522,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (!memberType->IsSameAs(*exprType))
         {
             bool bothAreInts = memberType->IsInt() & exprType->IsInt();
-            bool haveSameSign = memberType->GetSign() == exprType->GetSign();
-            if (!bothAreInts || !haveSameSign || memberType->GetNumBits() < exprType->GetNumBits())
+            if ( !(bothAreInts && HaveCompatibleSigns(memberType, exprType) && HaveCompatibleAssignmentSizes(memberType, exprType)) )
             {
                 isError = true;
                 logger.LogError("Cannot assign expression of type '{}' to member of type '{}'",
@@ -922,7 +921,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     {
         resultType = ifType;
     }
-    else if (ifType->IsInt() && elseType->IsInt() && ifType->GetSign() == elseType->GetSign())
+    else if (ifType->IsInt() && elseType->IsInt() && HaveCompatibleSigns(ifType, elseType))
     {
         if (ifType->GetNumBits() >= elseType->GetNumBits())
         {
