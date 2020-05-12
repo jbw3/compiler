@@ -87,7 +87,7 @@ public:
 
     bool IsAggregate() const;
 
-    unsigned GetNumBits() const;
+    virtual unsigned GetNumBits() const;
 
     const std::string& GetShortName() const;
 
@@ -142,6 +142,8 @@ public:
     ContextInt(unsigned signedNumBits, unsigned unsignedNumBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
+
+    unsigned GetNumBits() const override;
 
     unsigned GetSignedNumBits() const;
 
