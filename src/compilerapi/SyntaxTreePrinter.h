@@ -69,6 +69,10 @@ private:
     unsigned int level;
     bool firstItem;
 
+    void PrintString(const std::string& str);
+
+    void PrintValueSeparator();
+
     void PrintParameter(const SyntaxTree::Parameter* parameter);
 
     void PrintFunctionDeclaration(const SyntaxTree::FunctionDeclaration* declaration);
@@ -90,12 +94,11 @@ private:
         }
         else
         {
-            Print(",\n");
+            PrintValueSeparator();
         }
 
-        Print("\"");
-        Print(name);
-        Print("\":\n");
+        PrintString(name);
+        Print(":\n");
         printValue(value);
     }
 
@@ -108,12 +111,11 @@ private:
         }
         else
         {
-            Print(",\n");
+            PrintValueSeparator();
         }
 
-        Print("\"");
-        Print(name);
-        Print("\": ");
+        PrintString(name);
+        Print(": ");
 
         size_t numExpressions = values.size();
         if (numExpressions == 0)
@@ -127,7 +129,7 @@ private:
             printValue(values[0]);
             for (size_t i = 1; i < numExpressions; ++i)
             {
-                Print(",\n");
+                PrintValueSeparator();
                 printValue(values[i]);
             }
         }

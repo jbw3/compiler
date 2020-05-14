@@ -27,6 +27,11 @@ SyntaxTreePrinter::BracePrinter::~BracePrinter()
 {
     --printer.level;
     printer.Print(endStr);
+
+    if (printer.level == 0)
+    {
+        printer.Print("\n");
+    }
 }
 
 SyntaxTreePrinter::SyntaxTreePrinter(const string& outFilename) :
@@ -400,6 +405,18 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
     PrintProperty("assignmentExpression", variableDeclaration->GetAssignmentExpression());
 }
 
+void SyntaxTreePrinter::PrintString(const string& str)
+{
+    Print("\"");
+    Print(str);
+    Print("\"");
+}
+
+void SyntaxTreePrinter::PrintValueSeparator()
+{
+    Print(",\n");
+}
+
 void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
@@ -446,14 +463,12 @@ void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)
     }
     else
     {
-        Print(",\n");
+        PrintValueSeparator();
     }
 
-    Print("\"");
-    Print(name);
-    Print("\": \"");
-    Print(value);
-    Print("\"");
+    PrintString(name);
+    Print(": ");
+    PrintString(value);
 }
 
 void SyntaxTreePrinter::PrintProperty(const string& name, SyntaxTreeNode* value)
@@ -464,12 +479,11 @@ void SyntaxTreePrinter::PrintProperty(const string& name, SyntaxTreeNode* value)
     }
     else
     {
-        Print(",\n");
+        PrintValueSeparator();
     }
 
-    Print("\"");
-    Print(name);
-    Print("\":\n");
+    PrintString(name);
+    Print(":\n");
 
     value->Accept(this);
 }
@@ -482,12 +496,10 @@ void SyntaxTreePrinter::Print(const string& str)
 
         if (ch == '\n')
         {
-            string padding(level * 4, ' ');
-            *os << padding;
-        }
-        else if (level == 0 && (ch == '}' || ch == ']'))
-        {
-            *os << '\n';
+            for (unsigned i = 0; i < level * 4; ++i)
+            {
+                os->put(' ');
+            }
         }
     }
 }
