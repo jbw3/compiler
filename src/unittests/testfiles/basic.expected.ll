@@ -1195,9 +1195,9 @@ else:                                             ; preds = %ormerge
   br label %merge
 
 merge:                                            ; preds = %else, %if
-  %phi = phi i16 [ 100, %if ], [ 200, %else ]
-  %signext = sext i16 %phi to i32
-  ret i32 %signext
+  %phi = phi i8 [ 100, %if ], [ -56, %else ]
+  %zeroext = zext i8 %phi to i32
+  ret i32 %zeroext
 }
 
 define i32 @assign(i32 %a, i32 %b, i32 %c) {

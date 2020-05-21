@@ -281,8 +281,6 @@ ContextInt::ContextInt(unsigned signedNumBits, unsigned unsignedNumBits) :
 
 bool ContextInt::IsSameAs(const TypeInfo& other) const
 {
-    return typeid(other) == typeid(ContextInt);
-
     if (typeid(other) != typeid(ContextInt))
     {
         return false;

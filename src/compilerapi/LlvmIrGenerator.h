@@ -122,9 +122,9 @@ private:
 
     const TypeInfo* ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, llvm::Value*& leftValue, llvm::Value*& rightValue);
 
-    llvm::Value* CreateExt(llvm::Value* value, const TypeInfo* dstType);
+    llvm::Value* CreateExt(llvm::Value* value, const TypeInfo* valueType, const TypeInfo* dstType);
 
-    llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr,
+    llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr, const TypeInfo* resultType,
                               const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
 
     llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
