@@ -923,13 +923,64 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
     else if (ifType->IsInt() && elseType->IsInt() && HaveCompatibleSigns(ifType, elseType))
     {
-        if (ifType->GetNumBits() >= elseType->GetNumBits())
+        const ContextInt* contextIfType = dynamic_cast<const ContextInt*>(ifType);
+        const ContextInt* contextElseType = dynamic_cast<const ContextInt*>(elseType);
+
+        if (contextIfType != nullptr && contextElseType != nullptr)
         {
-            resultType = ifType;
+            if (contextIfType->GetSignedNumBits() >= contextElseType->GetSignedNumBits())
+            {
+                resultType = ifType;
+            }
+            else
+            {
+                resultType = elseType;
+            }
         }
-        else
+        else if (contextIfType != nullptr)
         {
-            resultType = elseType;
+            unsigned elseNumBits = elseType->GetNumBits();
+            TypeInfo::ESign elseSign = elseType->GetSign();
+            if (elseSign == TypeInfo::eSigned)
+            {
+                unsigned ifNumBits = contextIfType->GetSignedNumBits();
+                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
+                resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
+            }
+            else
+            {
+                unsigned ifNumBits = contextIfType->GetUnsignedNumBits();
+                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
+                resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
+            }
+        }
+        else if (contextElseType != nullptr)
+        {
+            unsigned ifNumBits = ifType->GetNumBits();
+            TypeInfo::ESign ifSign = ifType->GetSign();
+            if (ifSign == TypeInfo::eSigned)
+            {
+                unsigned elseNumBits = contextElseType->GetSignedNumBits();
+                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
+                resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
+            }
+            else
+            {
+                unsigned elseNumBits = contextElseType->GetUnsignedNumBits();
+                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
+                resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
+            }
+        }
+        else // neither types are ContextInt
+        {
+            if (ifType->GetNumBits() >= elseType->GetNumBits())
+            {
+                resultType = ifType;
+            }
+            else
+            {
+                resultType = elseType;
+            }
         }
     }
     else

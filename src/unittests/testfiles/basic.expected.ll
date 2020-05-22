@@ -1539,3 +1539,45 @@ entry:
   store i32 %add, i32* %mber3
   ret %UnitType zeroinitializer
 }
+
+define %UnitType @int_literal_types(i1 %b, i8 %x8, i8 %y8) {
+entry:
+  %r2 = alloca i32
+  %r1 = alloca i32
+  %y83 = alloca i8
+  %x82 = alloca i8
+  %b1 = alloca i1
+  store i1 %b, i1* %b1
+  store i8 %x8, i8* %x82
+  store i8 %y8, i8* %y83
+  %b4 = load i1, i1* %b1
+  br i1 %b4, label %if, label %else
+
+if:                                               ; preds = %entry
+  %x85 = load i8, i8* %x82
+  %signext = sext i8 %x85 to i16
+  br label %merge
+
+else:                                             ; preds = %entry
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i16 [ %signext, %if ], [ 200, %else ]
+  %signext6 = sext i16 %phi to i32
+  store i32 %signext6, i32* %r1
+  %b7 = load i1, i1* %b1
+  br i1 %b7, label %if8, label %else10
+
+if8:                                              ; preds = %merge
+  %y89 = load i8, i8* %y83
+  br label %merge11
+
+else10:                                           ; preds = %merge
+  br label %merge11
+
+merge11:                                          ; preds = %else10, %if8
+  %phi12 = phi i8 [ %y89, %if8 ], [ -56, %else10 ]
+  %zeroext = zext i8 %phi12 to i32
+  store i32 %zeroext, i32* %r2
+  ret %UnitType zeroinitializer
+}

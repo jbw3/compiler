@@ -585,3 +585,11 @@ struct Test1
     b bool,
     c str
 }
+
+# int literal types
+
+fun int_literal_types(b bool, x8 i8, y8 u8)
+{
+    var r1 i32 = if b { x8 } else { 200 };
+    var r2 u32 = if b { y8 } else { 200 };
+}
