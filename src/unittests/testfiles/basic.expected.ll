@@ -1542,6 +1542,8 @@ entry:
 
 define %UnitType @int_literal_types(i1 %b, i8 %x8, i8 %y8) {
 entry:
+  %r4 = alloca i32
+  %r3 = alloca i32
   %r2 = alloca i32
   %r1 = alloca i32
   %y83 = alloca i8
@@ -1579,5 +1581,13 @@ merge11:                                          ; preds = %else10, %if8
   %phi12 = phi i8 [ %y89, %if8 ], [ -56, %else10 ]
   %zeroext = zext i8 %phi12 to i32
   store i32 %zeroext, i32* %r2
+  %x813 = load i8, i8* %x82
+  %add = add i8 %x813, 20
+  %signext14 = sext i8 %add to i32
+  store i32 %signext14, i32* %r3
+  %y815 = load i8, i8* %y83
+  %add16 = add i8 %y815, 20
+  %zeroext17 = zext i8 %add16 to i32
+  store i32 %zeroext17, i32* %r4
   ret %UnitType zeroinitializer
 }

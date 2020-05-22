@@ -204,6 +204,72 @@ bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, c
     return leftType->GetNumBits() >= rightNumBits;
 }
 
+const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2)
+{
+    const TypeInfo* resultType = nullptr;
+    const ContextInt* contextType1 = dynamic_cast<const ContextInt*>(type1);
+    const ContextInt* contextType2 = dynamic_cast<const ContextInt*>(type2);
+
+    if (contextType1 != nullptr && contextType2 != nullptr)
+    {
+        if (contextType1->GetSignedNumBits() >= contextType2->GetSignedNumBits())
+        {
+            resultType = type1;
+        }
+        else
+        {
+            resultType = type2;
+        }
+    }
+    else if (contextType1 != nullptr)
+    {
+        unsigned type2NumBits = type2->GetNumBits();
+        TypeInfo::ESign type2Sign = type2->GetSign();
+        if (type2Sign == TypeInfo::eSigned)
+        {
+            unsigned type1NumBits = contextType1->GetSignedNumBits();
+            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
+            resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
+        }
+        else
+        {
+            unsigned type1NumBits = contextType1->GetUnsignedNumBits();
+            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
+            resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
+        }
+    }
+    else if (contextType2 != nullptr)
+    {
+        unsigned type1NumBits = type1->GetNumBits();
+        TypeInfo::ESign type1Sign = type1->GetSign();
+        if (type1Sign == TypeInfo::eSigned)
+        {
+            unsigned type2NumBits = contextType2->GetSignedNumBits();
+            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
+            resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
+        }
+        else
+        {
+            unsigned type2NumBits = contextType2->GetUnsignedNumBits();
+            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
+            resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
+        }
+    }
+    else // neither types are ContextInt
+    {
+        if (type1->GetNumBits() >= type2->GetNumBits())
+        {
+            resultType = type1;
+        }
+        else
+        {
+            resultType = type2;
+        }
+    }
+
+    return resultType;
+}
+
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr)
 {
     bool ok = false;
@@ -319,7 +385,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             }
             else if (leftType->IsInt() && rightType->IsInt())
             {
-                return (leftType->GetNumBits() > rightType->GetNumBits()) ? leftType : rightType;
+                return GetBiggestSizeType(leftType, rightType);
             }
             else
             {
@@ -923,65 +989,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
     else if (ifType->IsInt() && elseType->IsInt() && HaveCompatibleSigns(ifType, elseType))
     {
-        const ContextInt* contextIfType = dynamic_cast<const ContextInt*>(ifType);
-        const ContextInt* contextElseType = dynamic_cast<const ContextInt*>(elseType);
-
-        if (contextIfType != nullptr && contextElseType != nullptr)
-        {
-            if (contextIfType->GetSignedNumBits() >= contextElseType->GetSignedNumBits())
-            {
-                resultType = ifType;
-            }
-            else
-            {
-                resultType = elseType;
-            }
-        }
-        else if (contextIfType != nullptr)
-        {
-            unsigned elseNumBits = elseType->GetNumBits();
-            TypeInfo::ESign elseSign = elseType->GetSign();
-            if (elseSign == TypeInfo::eSigned)
-            {
-                unsigned ifNumBits = contextIfType->GetSignedNumBits();
-                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
-                resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
-            }
-            else
-            {
-                unsigned ifNumBits = contextIfType->GetUnsignedNumBits();
-                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
-                resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
-            }
-        }
-        else if (contextElseType != nullptr)
-        {
-            unsigned ifNumBits = ifType->GetNumBits();
-            TypeInfo::ESign ifSign = ifType->GetSign();
-            if (ifSign == TypeInfo::eSigned)
-            {
-                unsigned elseNumBits = contextElseType->GetSignedNumBits();
-                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
-                resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
-            }
-            else
-            {
-                unsigned elseNumBits = contextElseType->GetUnsignedNumBits();
-                unsigned numBits = (ifNumBits > elseNumBits) ? ifNumBits : elseNumBits;
-                resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
-            }
-        }
-        else // neither types are ContextInt
-        {
-            if (ifType->GetNumBits() >= elseType->GetNumBits())
-            {
-                resultType = ifType;
-            }
-            else
-            {
-                resultType = elseType;
-            }
-        }
+        resultType = GetBiggestSizeType(ifType, elseType);
     }
     else
     {
