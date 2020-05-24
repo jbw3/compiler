@@ -1540,7 +1540,7 @@ entry:
   ret %UnitType zeroinitializer
 }
 
-define %UnitType @int_literal_types(i1 %b, i8 %x8, i8 %y8) {
+define %UnitType @sign_zero_extension(i1 %b, i8 %x8, i8 %y8) {
 entry:
   %r6 = alloca i32
   %r5 = alloca i32
@@ -1600,5 +1600,25 @@ merge11:                                          ; preds = %else10, %if8
   %add23 = add i8 %y822, -56
   %zeroext24 = zext i8 %add23 to i32
   store i32 %zeroext24, i32* %r6
+  ret %UnitType zeroinitializer
+}
+
+define %UnitType @sign_operator(i8 %x8, i8 %y8) {
+entry:
+  %r2 = alloca i32
+  %r1 = alloca i32
+  %y82 = alloca i8
+  %x81 = alloca i8
+  store i8 %x8, i8* %x81
+  store i8 %y8, i8* %y82
+  %x83 = load i8, i8* %x81
+  %signext = sext i8 %x83 to i16
+  %div = sdiv i16 200, %signext
+  %signext4 = sext i16 %div to i32
+  store i32 %signext4, i32* %r1
+  %y85 = load i8, i8* %y82
+  %div6 = udiv i8 -56, %y85
+  %zeroext = zext i8 %div6 to i32
+  store i32 %zeroext, i32* %r2
   ret %UnitType zeroinitializer
 }
