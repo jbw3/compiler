@@ -1622,3 +1622,36 @@ entry:
   store i32 %zeroext, i32* %r2
   ret %UnitType zeroinitializer
 }
+
+define %UnitType @unary_operator(i1 %b, i8 %x, i8 %y) {
+entry:
+  %r2 = alloca i32
+  %r1 = alloca i32
+  %y3 = alloca i8
+  %x2 = alloca i8
+  %b1 = alloca i1
+  store i1 %b, i1* %b1
+  store i8 %x, i8* %x2
+  store i8 %y, i8* %y3
+  %b4 = load i1, i1* %b1
+  br i1 %b4, label %if, label %else
+
+if:                                               ; preds = %entry
+  %x5 = load i8, i8* %x2
+  %signext = sext i8 %x5 to i16
+  br label %merge
+
+else:                                             ; preds = %entry
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi i16 [ %signext, %if ], [ -200, %else ]
+  %signext6 = sext i16 %phi to i32
+  store i32 %signext6, i32* %r1
+  %x7 = load i8, i8* %x2
+  %signext8 = sext i8 %x7 to i16
+  %add = add i16 %signext8, -200
+  %signext9 = sext i16 %add to i32
+  store i32 %signext9, i32* %r2
+  ret %UnitType zeroinitializer
+}

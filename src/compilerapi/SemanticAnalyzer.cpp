@@ -45,17 +45,17 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                 }
                 else if (sign == TypeInfo::eContextDependent)
                 {
-                    ok = true;
-                    NumericExpression* numExpr = dynamic_cast<NumericExpression*>(subExpr);
-                    if (numExpr == nullptr)
+                    const ContextInt* subExprContextType = dynamic_cast<const ContextInt*>(subExprType);
+                    if (subExprContextType == nullptr)
                     {
-                        logger.LogError("Internal error: Expression with context-dependent type is not a literal");
+                        logger.LogError("Internal error: Type with context-dependent sign is not a literal type");
                         isError = true;
                         return;
                     }
 
-                    unsigned minSize = numExpr->GetMinSignedSize();
-                    resultType = TypeInfo::GetMinSignedIntTypeForSize(minSize);
+                    ok = true;
+                    resultType = subExprContextType->GetMinSizeType(TypeInfo::eSigned);
+                    FixContextIntType(subExpr, resultType);
                 }
             }
             break;
