@@ -124,6 +124,8 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
+    FixContextIntTypes(left, right);
+
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
 
     if (BinaryExpression::IsAssignment(op))
@@ -268,6 +270,33 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     }
 
     return resultType;
+}
+
+void SemanticAnalyzer::FixContextIntType(SyntaxTree::Expression* expr, const TypeInfo* resultType)
+{
+    const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(expr->GetType());
+    if (contextIntType != nullptr && contextIntType->GetSign() == TypeInfo::eContextDependent)
+    {
+        const TypeInfo* newType = contextIntType->GetMinSizeType(resultType->GetSign());
+        expr->SetType(newType);
+    }
+}
+
+void SemanticAnalyzer::FixContextIntTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2)
+{
+    const TypeInfo* expr1Type = expr1->GetType();
+    const TypeInfo* expr2Type = expr2->GetType();
+    const ContextInt* contextType1 = dynamic_cast<const ContextInt*>(expr1Type);
+    const ContextInt* contextType2 = dynamic_cast<const ContextInt*>(expr2Type);
+
+    if (contextType1 != nullptr && contextType2 == nullptr)
+    {
+        FixContextIntType(expr1, expr2Type);
+    }
+    else if (contextType1 == nullptr && contextType2 != nullptr)
+    {
+        FixContextIntType(expr2, expr1Type);
+    }
 }
 
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr)

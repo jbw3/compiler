@@ -296,8 +296,47 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && GetSign() == primitiveOther.GetSign();
 }
 
+const ContextInt* ContextInt::CreateSigned(unsigned numBits)
+{
+    // TODO: Fix memory leak
+    const ContextInt* type = new ContextInt(
+        numBits,
+        TypeInfo::eSigned,
+        numBits,
+        0,
+        "{signed-integer}"
+    );
+    return type;
+}
+
+const ContextInt* ContextInt::CreateUnsigned(unsigned numBits)
+{
+    // TODO: Fix memory leak
+    const ContextInt* type = new ContextInt(
+        numBits,
+        TypeInfo::eUnsigned,
+        0,
+        numBits,
+        "{unsigned-integer}"
+    );
+    return type;
+}
+
 ContextInt::ContextInt(unsigned signedNumBits, unsigned unsignedNumBits) :
     TypeInfo(0, false, true, TypeInfo::eContextDependent, false, "{integer}"),
+    signedNumBits(signedNumBits),
+    unsignedNumBits(unsignedNumBits)
+{
+}
+
+ContextInt::ContextInt(
+    unsigned numBits,
+    ESign sign,
+    unsigned signedNumBits,
+    unsigned unsignedNumBits,
+    const string& name
+) :
+    TypeInfo(numBits, false, true, sign, false, name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
@@ -317,7 +356,14 @@ bool ContextInt::IsSameAs(const TypeInfo& other) const
 
 unsigned ContextInt::GetNumBits() const
 {
-    return GetUnsignedNumBits();
+    if (GetSign() == eSigned)
+    {
+        return signedNumBits;
+    }
+    else
+    {
+        return unsignedNumBits;
+    }
 }
 
 unsigned ContextInt::GetSignedNumBits() const
@@ -328,6 +374,28 @@ unsigned ContextInt::GetSignedNumBits() const
 unsigned ContextInt::GetUnsignedNumBits() const
 {
     return unsignedNumBits;
+}
+
+const TypeInfo* ContextInt::GetMinSizeType(ESign sign) const
+{
+    const TypeInfo* type = nullptr;
+    switch (sign)
+    {
+        case TypeInfo::eNotApplicable:
+            type = nullptr;
+            break;
+        case TypeInfo::eSigned:
+            type = CreateSigned(signedNumBits);
+            break;
+        case TypeInfo::eUnsigned:
+            type = CreateUnsigned(unsignedNumBits);
+            break;
+        case TypeInfo::eContextDependent:
+            type = this;
+            break;
+    }
+
+    return type;
 }
 
 StringPointerType::StringPointerType(unsigned numBits) :

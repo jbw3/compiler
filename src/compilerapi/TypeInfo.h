@@ -141,6 +141,10 @@ public:
 class ContextInt : public TypeInfo
 {
 public:
+    static const ContextInt* CreateSigned(unsigned numBits);
+
+    static const ContextInt* CreateUnsigned(unsigned numBits);
+
     ContextInt(unsigned signedNumBits, unsigned unsignedNumBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
@@ -151,9 +155,19 @@ public:
 
     unsigned GetUnsignedNumBits() const;
 
+    const TypeInfo* GetMinSizeType(ESign sign) const;
+
 private:
     unsigned signedNumBits;
     unsigned unsignedNumBits;
+
+    ContextInt(
+        unsigned numBits,
+        ESign sign,
+        unsigned signedNumBits,
+        unsigned unsignedNumBits,
+        const std::string& name
+    );
 };
 
 class StringPointerType : public TypeInfo
