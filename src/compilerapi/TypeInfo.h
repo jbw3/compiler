@@ -2,6 +2,7 @@
 #define TYPE_INFO_H_
 
 #include <map>
+#include <unordered_map>
 
 namespace llvm
 {
@@ -141,11 +142,11 @@ public:
 class NumericLiteralType : public TypeInfo
 {
 public:
+    static const NumericLiteralType* Create(unsigned signedNumBits, unsigned unsignedNumBits);
+
     static const NumericLiteralType* CreateSigned(unsigned numBits);
 
     static const NumericLiteralType* CreateUnsigned(unsigned numBits);
-
-    NumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
 
@@ -158,17 +159,44 @@ public:
     const TypeInfo* GetMinSizeType(ESign sign) const;
 
 private:
+    static std::unordered_map
+    <
+        std::tuple<ESign, unsigned, unsigned>,
+        const NumericLiteralType*
+    > instances;
+
     unsigned signedNumBits;
     unsigned unsignedNumBits;
 
+    static const NumericLiteralType* Create(ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, const char* name);
+
     NumericLiteralType(
-        unsigned numBits,
         ESign sign,
         unsigned signedNumBits,
         unsigned unsignedNumBits,
         const std::string& name
     );
 };
+
+namespace std
+{
+    template<>
+    struct hash<tuple<TypeInfo::ESign, unsigned, unsigned>>
+    {
+        std::size_t operator()(tuple<TypeInfo::ESign, unsigned, unsigned> t) const
+        {
+            std::size_t h = 257;
+            h ^= static_cast<std::size_t>(get<0>(t));
+            h *= 31;
+            h ^= get<1>(t);
+            h *= 31;
+            h ^= get<2>(t);
+            h *= 31;
+
+            return h;
+        }
+    };
+}
 
 class StringPointerType : public TypeInfo
 {

@@ -868,8 +868,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
         return;
     }
 
-    // TODO: fix memory leak
-    const NumericLiteralType* type = new NumericLiteralType(minSignedNumBits, minUnsignedNumBits);
+    const NumericLiteralType* type = NumericLiteralType::Create(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
 }
 

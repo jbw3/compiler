@@ -296,47 +296,58 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && GetSign() == primitiveOther.GetSign();
 }
 
+unordered_map
+<
+    tuple<TypeInfo::ESign, unsigned, unsigned>,
+    const NumericLiteralType*
+> NumericLiteralType::instances;
+
+const NumericLiteralType* NumericLiteralType::Create(ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, const char* name)
+{
+    const NumericLiteralType* type = nullptr;
+    auto key = make_tuple(sign, signedNumBits, unsignedNumBits);
+
+    auto iter = instances.find(key);
+    if (iter == instances.end())
+    {
+        type = new NumericLiteralType(
+            sign,
+            signedNumBits,
+            unsignedNumBits,
+            name
+        );
+        instances.insert({key, type});
+    }
+    else
+    {
+        type = iter->second;
+    }
+
+    return type;
+}
+
+const NumericLiteralType* NumericLiteralType::Create(unsigned signedNumBits, unsigned unsignedNumBits)
+{
+    return Create(TypeInfo::eContextDependent, signedNumBits, unsignedNumBits, "{integer}");
+}
+
 const NumericLiteralType* NumericLiteralType::CreateSigned(unsigned numBits)
 {
-    // TODO: Fix memory leak
-    const NumericLiteralType* type = new NumericLiteralType(
-        numBits,
-        TypeInfo::eSigned,
-        numBits,
-        0,
-        "{signed-integer}"
-    );
-    return type;
+    return Create(TypeInfo::eSigned, numBits, 0, "{signed-integer}");
 }
 
 const NumericLiteralType* NumericLiteralType::CreateUnsigned(unsigned numBits)
 {
-    // TODO: Fix memory leak
-    const NumericLiteralType* type = new NumericLiteralType(
-        numBits,
-        TypeInfo::eUnsigned,
-        0,
-        numBits,
-        "{unsigned-integer}"
-    );
-    return type;
-}
-
-NumericLiteralType::NumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits) :
-    TypeInfo(0, false, true, TypeInfo::eContextDependent, false, "{integer}"),
-    signedNumBits(signedNumBits),
-    unsignedNumBits(unsignedNumBits)
-{
+    return Create(TypeInfo::eUnsigned, 0, numBits, "{unsigned-integer}");
 }
 
 NumericLiteralType::NumericLiteralType(
-    unsigned numBits,
     ESign sign,
     unsigned signedNumBits,
     unsigned unsignedNumBits,
     const string& name
 ) :
-    TypeInfo(numBits, false, true, sign, false, name),
+    TypeInfo(0, false, true, sign, false, name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
