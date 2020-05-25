@@ -453,8 +453,13 @@ fun createVars(num i32) i64
     rv
 }
 
-fun deduceTypes(a i32, b i32) i32
+fun inferTypes(a i32, b i32) i32
 {
+    var n8 = 0;
+    var n16 = 200;
+    var n32 = 1_000_000;
+    var n64 = 3_000_000_000;
+
     var bIsZero = b == 0;
     var quotient =
         if bIsZero

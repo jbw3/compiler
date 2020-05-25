@@ -1335,14 +1335,22 @@ merge:                                            ; preds = %else, %if
   ret i64 %rv8
 }
 
-define i32 @deduceTypes(i32 %a, i32 %b) {
+define i32 @inferTypes(i32 %a, i32 %b) {
 entry:
   %quotient = alloca i32
   %bIsZero = alloca i1
+  %n64 = alloca i64
+  %n32 = alloca i32
+  %n16 = alloca i16
+  %n8 = alloca i8
   %b2 = alloca i32
   %a1 = alloca i32
   store i32 %a, i32* %a1
   store i32 %b, i32* %b2
+  store i8 0, i8* %n8
+  store i16 200, i16* %n16
+  store i32 1000000, i32* %n32
+  store i64 3000000000, i64* %n64
   %b3 = load i32, i32* %b2
   %cmpeq = icmp eq i32 %b3, 0
   store i1 %cmpeq, i1* %bIsZero

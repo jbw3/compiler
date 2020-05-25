@@ -1080,13 +1080,27 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     const string& typeName = variableDeclaration->GetTypeName();
-    bool deduceTypeName = typeName.empty();
+    bool inferTypeName = typeName.empty();
     const TypeInfo* type = nullptr;
 
-    // if no type name was given, deduce it from the expression
-    if (deduceTypeName)
+    // if no type name was given, infer it from the expression
+    if (inferTypeName)
     {
         type = rightExpr->GetType();
+
+        // if this is an int literal, set the type to the minimum signed size
+        // that will hold the number
+        const ContextInt* contextType = dynamic_cast<const ContextInt*>(type);
+        if (contextType != nullptr)
+        {
+            type = TypeInfo::GetMinSignedIntTypeForSize(contextType->GetSignedNumBits());
+            if (type == nullptr)
+            {
+                isError = true;
+                logger.LogError("Internal error: Could not infer integer literal type");
+                return;
+            }
+        }
     }
     else // get the type from the name given
     {
