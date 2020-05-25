@@ -350,7 +350,8 @@ bool ContextInt::IsSameAs(const TypeInfo& other) const
     }
 
     const ContextInt& otherContextInt = static_cast<const ContextInt&>(other);
-    return signedNumBits == otherContextInt.signedNumBits
+    return GetSign() == other.GetSign()
+        && signedNumBits == otherContextInt.signedNumBits
         && unsignedNumBits == otherContextInt.unsignedNumBits;
 }
 
