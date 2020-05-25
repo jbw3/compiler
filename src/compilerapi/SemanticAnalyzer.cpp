@@ -53,9 +53,20 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                         return;
                     }
 
-                    ok = true;
                     resultType = subExprContextType->GetMinSizeType(TypeInfo::eSigned);
-                    FixContextIntType(subExpr, resultType);
+                    if (resultType == nullptr)
+                    {
+                        logger.LogError("Internal error: Could not determine expression result type");
+                        isError = true;
+                        return;
+                    }
+
+                    ok = FixContextIntType(subExpr, resultType);
+                    if (!ok)
+                    {
+                        isError = true;
+                        return;
+                    }
                 }
             }
             break;
@@ -124,7 +135,12 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    FixContextIntTypes(left, right);
+    bool ok = FixContextIntTypes(left, right);
+    if (!ok)
+    {
+        isError = true;
+        return;
+    }
 
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
 
@@ -272,31 +288,42 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     return resultType;
 }
 
-void SemanticAnalyzer::FixContextIntType(SyntaxTree::Expression* expr, const TypeInfo* resultType)
+bool SemanticAnalyzer::FixContextIntType(SyntaxTree::Expression* expr, const TypeInfo* resultType)
 {
     const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(expr->GetType());
     if (contextIntType != nullptr && contextIntType->GetSign() == TypeInfo::eContextDependent)
     {
         const TypeInfo* newType = contextIntType->GetMinSizeType(resultType->GetSign());
+        if (newType == nullptr)
+        {
+            logger.LogError("Internal error: Could not determine expression result type");
+            return false;
+        }
+
         expr->SetType(newType);
     }
+
+    return true;
 }
 
-void SemanticAnalyzer::FixContextIntTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2)
+bool SemanticAnalyzer::FixContextIntTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2)
 {
     const TypeInfo* expr1Type = expr1->GetType();
     const TypeInfo* expr2Type = expr2->GetType();
     const ContextInt* contextType1 = dynamic_cast<const ContextInt*>(expr1Type);
     const ContextInt* contextType2 = dynamic_cast<const ContextInt*>(expr2Type);
 
+    bool ok = true;
     if (contextType1 != nullptr && contextType2 == nullptr)
     {
-        FixContextIntType(expr1, expr2Type);
+        ok = FixContextIntType(expr1, expr2Type);
     }
     else if (contextType1 == nullptr && contextType2 != nullptr)
     {
-        FixContextIntType(expr2, expr1Type);
+        ok = FixContextIntType(expr2, expr1Type);
     }
+
+    return ok;
 }
 
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr)
