@@ -65,6 +65,7 @@ public:
     bool GetIsLiteral() const override;
 };
 
+// TODO: Rename to NumericLiteralExpression
 class NumericExpression : public Expression
 {
 public:

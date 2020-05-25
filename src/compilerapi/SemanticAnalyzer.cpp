@@ -79,6 +79,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
     if (!ok)
     {
+        // TODO: Print unary operator in error message
         logger.LogError("Unary operator does not support type '{}'", subExprType->GetShortName());
         isError = true;
         return;
@@ -393,6 +394,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eShiftLeftAssign:
             case BinaryExpression::eShiftRightLogicalAssign:
             case BinaryExpression::eShiftRightArithmeticAssign:
+                // TODO: Require right op of shift to be unsigned
                 ok = true;
                 break;
             default:
@@ -407,6 +409,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
 
     if (!ok)
     {
+        // TODO: Need better error message when integer is too big for assignment: var err u8 = 256;
+        // TODO: Print binary operator in error message
         logger.LogError("Binary operator does not support types '{}' and '{}'", leftType->GetShortName(), rightType->GetShortName());
     }
 
