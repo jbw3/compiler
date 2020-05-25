@@ -77,9 +77,9 @@ private:
 
     const TypeInfo* GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2);
 
-    bool FixContextIntType(SyntaxTree::Expression* expr, const TypeInfo* resultType);
+    bool FixNumericLiteralType(SyntaxTree::Expression* expr, const TypeInfo* resultType);
 
-    bool FixContextIntTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2);
+    bool FixNumericLiteralTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2);
 
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const SyntaxTree::Expression* leftExpr, const SyntaxTree::Expression* rightExpr);
 

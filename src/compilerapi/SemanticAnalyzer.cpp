@@ -45,15 +45,15 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                 }
                 else if (sign == TypeInfo::eContextDependent)
                 {
-                    const ContextInt* subExprContextType = dynamic_cast<const ContextInt*>(subExprType);
-                    if (subExprContextType == nullptr)
+                    const NumericLiteralType* subExprLiteralType = dynamic_cast<const NumericLiteralType*>(subExprType);
+                    if (subExprLiteralType == nullptr)
                     {
                         logger.LogError("Internal error: Type with context-dependent sign is not a literal type");
                         isError = true;
                         return;
                     }
 
-                    resultType = subExprContextType->GetMinSizeType(TypeInfo::eSigned);
+                    resultType = subExprLiteralType->GetMinSizeType(TypeInfo::eSigned);
                     if (resultType == nullptr)
                     {
                         logger.LogError("Internal error: Could not determine expression result type");
@@ -61,7 +61,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                         return;
                     }
 
-                    ok = FixContextIntType(subExpr, resultType);
+                    ok = FixNumericLiteralType(subExpr, resultType);
                     if (!ok)
                     {
                         isError = true;
@@ -135,7 +135,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    bool ok = FixContextIntTypes(left, right);
+    bool ok = FixNumericLiteralTypes(left, right);
     if (!ok)
     {
         isError = true;
@@ -170,8 +170,8 @@ unsigned SemanticAnalyzer::GetIntNumBits(const TypeInfo* type)
 {
     unsigned numBits = 0;
 
-    const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(type);
-    if (contextIntType == nullptr)
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
+    if (literalType == nullptr)
     {
         numBits = type->GetNumBits();
     }
@@ -201,9 +201,9 @@ bool SemanticAnalyzer::HaveCompatibleSigns(const TypeInfo* leftType, const TypeI
 bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType)
 {
     unsigned rightNumBits = 0;
-    const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(rightType);
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(rightType);
 
-    if (contextIntType == nullptr)
+    if (literalType == nullptr)
     {
         rightNumBits = rightType->GetNumBits();
     }
@@ -211,11 +211,11 @@ bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, c
     {
         if (leftType->GetSign() == TypeInfo::eSigned)
         {
-            rightNumBits = contextIntType->GetSignedNumBits();
+            rightNumBits = literalType->GetSignedNumBits();
         }
         else
         {
-            rightNumBits = contextIntType->GetUnsignedNumBits();
+            rightNumBits = literalType->GetUnsignedNumBits();
         }
     }
 
@@ -225,12 +225,12 @@ bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, c
 const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2)
 {
     const TypeInfo* resultType = nullptr;
-    const ContextInt* contextType1 = dynamic_cast<const ContextInt*>(type1);
-    const ContextInt* contextType2 = dynamic_cast<const ContextInt*>(type2);
+    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(type1);
+    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(type2);
 
-    if (contextType1 != nullptr && contextType2 != nullptr)
+    if (literalType1 != nullptr && literalType2 != nullptr)
     {
-        if (contextType1->GetSignedNumBits() >= contextType2->GetSignedNumBits())
+        if (literalType1->GetSignedNumBits() >= literalType2->GetSignedNumBits())
         {
             resultType = type1;
         }
@@ -239,41 +239,41 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
             resultType = type2;
         }
     }
-    else if (contextType1 != nullptr)
+    else if (literalType1 != nullptr)
     {
         unsigned type2NumBits = type2->GetNumBits();
         TypeInfo::ESign type2Sign = type2->GetSign();
         if (type2Sign == TypeInfo::eSigned)
         {
-            unsigned type1NumBits = contextType1->GetSignedNumBits();
+            unsigned type1NumBits = literalType1->GetSignedNumBits();
             unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
             resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
         }
         else
         {
-            unsigned type1NumBits = contextType1->GetUnsignedNumBits();
+            unsigned type1NumBits = literalType1->GetUnsignedNumBits();
             unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
             resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
         }
     }
-    else if (contextType2 != nullptr)
+    else if (literalType2 != nullptr)
     {
         unsigned type1NumBits = type1->GetNumBits();
         TypeInfo::ESign type1Sign = type1->GetSign();
         if (type1Sign == TypeInfo::eSigned)
         {
-            unsigned type2NumBits = contextType2->GetSignedNumBits();
+            unsigned type2NumBits = literalType2->GetSignedNumBits();
             unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
             resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
         }
         else
         {
-            unsigned type2NumBits = contextType2->GetUnsignedNumBits();
+            unsigned type2NumBits = literalType2->GetUnsignedNumBits();
             unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
             resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
         }
     }
-    else // neither types are ContextInt
+    else // neither types are NumericLiteralType
     {
         if (type1->GetNumBits() >= type2->GetNumBits())
         {
@@ -288,12 +288,12 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     return resultType;
 }
 
-bool SemanticAnalyzer::FixContextIntType(SyntaxTree::Expression* expr, const TypeInfo* resultType)
+bool SemanticAnalyzer::FixNumericLiteralType(SyntaxTree::Expression* expr, const TypeInfo* resultType)
 {
-    const ContextInt* contextIntType = dynamic_cast<const ContextInt*>(expr->GetType());
-    if (contextIntType != nullptr && contextIntType->GetSign() == TypeInfo::eContextDependent)
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(expr->GetType());
+    if (literalType != nullptr && literalType->GetSign() == TypeInfo::eContextDependent)
     {
-        const TypeInfo* newType = contextIntType->GetMinSizeType(resultType->GetSign());
+        const TypeInfo* newType = literalType->GetMinSizeType(resultType->GetSign());
         if (newType == nullptr)
         {
             logger.LogError("Internal error: Could not determine expression result type");
@@ -306,21 +306,21 @@ bool SemanticAnalyzer::FixContextIntType(SyntaxTree::Expression* expr, const Typ
     return true;
 }
 
-bool SemanticAnalyzer::FixContextIntTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2)
+bool SemanticAnalyzer::FixNumericLiteralTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2)
 {
     const TypeInfo* expr1Type = expr1->GetType();
     const TypeInfo* expr2Type = expr2->GetType();
-    const ContextInt* contextType1 = dynamic_cast<const ContextInt*>(expr1Type);
-    const ContextInt* contextType2 = dynamic_cast<const ContextInt*>(expr2Type);
+    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(expr1Type);
+    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(expr2Type);
 
     bool ok = true;
-    if (contextType1 != nullptr && contextType2 == nullptr)
+    if (literalType1 != nullptr && literalType2 == nullptr)
     {
-        ok = FixContextIntType(expr1, expr2Type);
+        ok = FixNumericLiteralType(expr1, expr2Type);
     }
-    else if (contextType1 == nullptr && contextType2 != nullptr)
+    else if (literalType1 == nullptr && literalType2 != nullptr)
     {
-        ok = FixContextIntType(expr2, expr1Type);
+        ok = FixNumericLiteralType(expr2, expr1Type);
     }
 
     return ok;
@@ -865,7 +865,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     }
 
     // TODO: fix memory leak
-    const ContextInt* type = new ContextInt(minSignedNumBits, minUnsignedNumBits);
+    const NumericLiteralType* type = new NumericLiteralType(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
 }
 
@@ -1090,10 +1090,10 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 
         // if this is an int literal, set the type to the minimum signed size
         // that will hold the number
-        const ContextInt* contextType = dynamic_cast<const ContextInt*>(type);
-        if (contextType != nullptr)
+        const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
+        if (literalType != nullptr)
         {
-            type = TypeInfo::GetMinSignedIntTypeForSize(contextType->GetSignedNumBits());
+            type = TypeInfo::GetMinSignedIntTypeForSize(literalType->GetSignedNumBits());
             if (type == nullptr)
             {
                 isError = true;

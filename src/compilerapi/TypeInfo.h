@@ -138,14 +138,14 @@ public:
     bool IsSameAs(const TypeInfo& other) const override;
 };
 
-class ContextInt : public TypeInfo
+class NumericLiteralType : public TypeInfo
 {
 public:
-    static const ContextInt* CreateSigned(unsigned numBits);
+    static const NumericLiteralType* CreateSigned(unsigned numBits);
 
-    static const ContextInt* CreateUnsigned(unsigned numBits);
+    static const NumericLiteralType* CreateUnsigned(unsigned numBits);
 
-    ContextInt(unsigned signedNumBits, unsigned unsignedNumBits);
+    NumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
 
@@ -161,7 +161,7 @@ private:
     unsigned signedNumBits;
     unsigned unsignedNumBits;
 
-    ContextInt(
+    NumericLiteralType(
         unsigned numBits,
         ESign sign,
         unsigned signedNumBits,

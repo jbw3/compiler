@@ -296,10 +296,10 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && GetSign() == primitiveOther.GetSign();
 }
 
-const ContextInt* ContextInt::CreateSigned(unsigned numBits)
+const NumericLiteralType* NumericLiteralType::CreateSigned(unsigned numBits)
 {
     // TODO: Fix memory leak
-    const ContextInt* type = new ContextInt(
+    const NumericLiteralType* type = new NumericLiteralType(
         numBits,
         TypeInfo::eSigned,
         numBits,
@@ -309,10 +309,10 @@ const ContextInt* ContextInt::CreateSigned(unsigned numBits)
     return type;
 }
 
-const ContextInt* ContextInt::CreateUnsigned(unsigned numBits)
+const NumericLiteralType* NumericLiteralType::CreateUnsigned(unsigned numBits)
 {
     // TODO: Fix memory leak
-    const ContextInt* type = new ContextInt(
+    const NumericLiteralType* type = new NumericLiteralType(
         numBits,
         TypeInfo::eUnsigned,
         0,
@@ -322,14 +322,14 @@ const ContextInt* ContextInt::CreateUnsigned(unsigned numBits)
     return type;
 }
 
-ContextInt::ContextInt(unsigned signedNumBits, unsigned unsignedNumBits) :
+NumericLiteralType::NumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits) :
     TypeInfo(0, false, true, TypeInfo::eContextDependent, false, "{integer}"),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
 }
 
-ContextInt::ContextInt(
+NumericLiteralType::NumericLiteralType(
     unsigned numBits,
     ESign sign,
     unsigned signedNumBits,
@@ -342,20 +342,20 @@ ContextInt::ContextInt(
 {
 }
 
-bool ContextInt::IsSameAs(const TypeInfo& other) const
+bool NumericLiteralType::IsSameAs(const TypeInfo& other) const
 {
-    if (typeid(other) != typeid(ContextInt))
+    if (typeid(other) != typeid(NumericLiteralType))
     {
         return false;
     }
 
-    const ContextInt& otherContextInt = static_cast<const ContextInt&>(other);
+    const NumericLiteralType& otherLiteralType = static_cast<const NumericLiteralType&>(other);
     return GetSign() == other.GetSign()
-        && signedNumBits == otherContextInt.signedNumBits
-        && unsignedNumBits == otherContextInt.unsignedNumBits;
+        && signedNumBits == otherLiteralType.signedNumBits
+        && unsignedNumBits == otherLiteralType.unsignedNumBits;
 }
 
-unsigned ContextInt::GetNumBits() const
+unsigned NumericLiteralType::GetNumBits() const
 {
     if (GetSign() == eSigned)
     {
@@ -367,17 +367,17 @@ unsigned ContextInt::GetNumBits() const
     }
 }
 
-unsigned ContextInt::GetSignedNumBits() const
+unsigned NumericLiteralType::GetSignedNumBits() const
 {
     return signedNumBits;
 }
 
-unsigned ContextInt::GetUnsignedNumBits() const
+unsigned NumericLiteralType::GetUnsignedNumBits() const
 {
     return unsignedNumBits;
 }
 
-const TypeInfo* ContextInt::GetMinSizeType(ESign sign) const
+const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
 {
     const TypeInfo* type = nullptr;
     switch (sign)
