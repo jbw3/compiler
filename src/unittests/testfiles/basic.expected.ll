@@ -1339,6 +1339,7 @@ define i32 @inferTypes(i32 %a, i32 %b) {
 entry:
   %quotient = alloca i32
   %bIsZero = alloca i1
+  %unaryOps = alloca i16
   %n64 = alloca i64
   %n32 = alloca i32
   %n16 = alloca i16
@@ -1351,6 +1352,7 @@ entry:
   store i16 200, i16* %n16
   store i32 1000000, i32* %n32
   store i64 3000000000, i64* %n64
+  store i16 200, i16* %unaryOps
   %b3 = load i32, i32* %b2
   %cmpeq = icmp eq i32 %b3, 0
   store i1 %cmpeq, i1* %bIsZero
@@ -1633,6 +1635,8 @@ entry:
 
 define %UnitType @unary_operator(i1 %b, i8 %x, i8 %y) {
 entry:
+  %r16 = alloca i32
+  %r15 = alloca i32
   %r14 = alloca i32
   %r13 = alloca i32
   %r12 = alloca i32
@@ -1685,5 +1689,14 @@ merge:                                            ; preds = %else, %if
   store i32 200, i32* %r12
   store i32 55, i32* %r13
   store i32 200, i32* %r14
+  %x10 = load i8, i8* %x2
+  %signext11 = sext i8 %x10 to i16
+  %add12 = add i16 %signext11, 200
+  %signext13 = sext i16 %add12 to i32
+  store i32 %signext13, i32* %r15
+  %y14 = load i8, i8* %y3
+  %add15 = add i8 %y14, -56
+  %zeroext = zext i8 %add15 to i32
+  store i32 %zeroext, i32* %r16
   ret %UnitType zeroinitializer
 }

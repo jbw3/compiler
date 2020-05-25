@@ -460,6 +460,8 @@ fun inferTypes(a i32, b i32) i32
     var n32 = 1_000_000;
     var n64 = 3_000_000_000;
 
+    var unaryOps = !!200;
+
     var bIsZero = b == 0;
     var quotient =
         if bIsZero
@@ -633,4 +635,7 @@ fun unary_operator(b bool, x i8, y u8)
     var r12 i32 = !!200;
     var r13 u32 = !200;
     var r14 u32 = !!200;
+
+    var r15 i32 = x + !!200;
+    var r16 u32 = y + !!200;
 }
