@@ -32,7 +32,9 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
 
 void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
 {
-    unaryExpression->GetSubExpression()->Accept(this);
+    Expression* subExpr = unaryExpression->GetSubExpression();
+
+    subExpr->Accept(this);
     if (resultValue == nullptr)
     {
         return;
@@ -48,6 +50,8 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             resultValue = builder.CreateNot(subExprValue, "not");
             break;
     }
+
+    ExtendType(subExpr->GetType(), unaryExpression->GetType(), resultValue);
 }
 
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)

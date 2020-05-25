@@ -617,4 +617,20 @@ fun unary_operator(b bool, x i8, y u8)
     var r1 i32 = if b { x } else { -200 };
 
     var r2 i32 = x + -200;
+
+    var r3 i32 = -20;
+    var r4 i32 = --20;
+
+    var r5 i32 = -200;
+    var r6 i32 = --200;
+
+    var r7 i32 = !20;
+    var r8 i32 = !!20;
+    var r9 u32 = !20;
+    var r10 u32 = !!20;
+
+    var r11 i32 = !200;
+    var r12 i32 = !!200;
+    var r13 u32 = !200;
+    var r14 u32 = !!200;
 }

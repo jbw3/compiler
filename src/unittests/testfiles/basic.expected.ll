@@ -1633,6 +1633,18 @@ entry:
 
 define %UnitType @unary_operator(i1 %b, i8 %x, i8 %y) {
 entry:
+  %r14 = alloca i32
+  %r13 = alloca i32
+  %r12 = alloca i32
+  %r11 = alloca i32
+  %r10 = alloca i32
+  %r9 = alloca i32
+  %r8 = alloca i32
+  %r7 = alloca i32
+  %r6 = alloca i32
+  %r5 = alloca i32
+  %r4 = alloca i32
+  %r3 = alloca i32
   %r2 = alloca i32
   %r1 = alloca i32
   %y3 = alloca i8
@@ -1661,5 +1673,17 @@ merge:                                            ; preds = %else, %if
   %add = add i16 %signext8, -200
   %signext9 = sext i16 %add to i32
   store i32 %signext9, i32* %r2
+  store i32 -20, i32* %r3
+  store i32 20, i32* %r4
+  store i32 -200, i32* %r5
+  store i32 200, i32* %r6
+  store i32 -21, i32* %r7
+  store i32 20, i32* %r8
+  store i32 235, i32* %r9
+  store i32 20, i32* %r10
+  store i32 55, i32* %r11
+  store i32 200, i32* %r12
+  store i32 55, i32* %r13
+  store i32 200, i32* %r14
   ret %UnitType zeroinitializer
 }
