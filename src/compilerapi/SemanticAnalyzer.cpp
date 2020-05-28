@@ -936,7 +936,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     auto iter = functions.find(funcName);
     if (iter == functions.cend())
     {
-        cerr << "Function \"" << funcName << "\" is not defined\n";
+        logger.LogError("Function '{}' is not defined", funcName);
         isError = true;
         return;
     }
@@ -948,7 +948,8 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     const Parameters& params = funcDecl->GetParameters();
     if (args.size() != params.size())
     {
-        cerr << "Function '" << funcName << "' expected " << params.size() << " arguments but got " << args.size() << "\n";
+        const char* suffix = (params.size() == 1) ? "" : "s";
+        logger.LogError("Function '{}' expected {} argument{} but got {}", funcName, params.size(), suffix, args.size());
         isError = true;
         return;
     }
@@ -972,7 +973,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         {
             if ( !(argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType)) )
             {
-                cerr << "Argument does not match parameter type\n";
+                logger.LogError("Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
                 isError = true;
                 return;
             }
