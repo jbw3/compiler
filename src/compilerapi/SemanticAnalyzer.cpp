@@ -88,31 +88,6 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     unaryExpression->SetType(resultType);
 }
 
-bool SemanticAnalyzer::CheckUnaryOperatorType(UnaryExpression::EOperator op, const TypeInfo* subExprType)
-{
-    bool ok = false;
-
-    switch (op)
-    {
-        case UnaryExpression::eNegative:
-        {
-            TypeInfo::ESign sign = subExprType->GetSign();
-            ok = subExprType->IsInt() && (sign == TypeInfo::eSigned || sign == TypeInfo::eContextDependent);
-            break;
-        }
-        case UnaryExpression::eComplement:
-            ok = subExprType->IsSameAs(*TypeInfo::BoolType) || subExprType->IsInt();
-            break;
-    }
-
-    if (!ok)
-    {
-        logger.LogError("Unary operator does not support type '{}'", subExprType->GetShortName());
-    }
-
-    return ok;
-}
-
 void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 {
     Expression* left = binaryExpression->GetLeftExpression();
@@ -199,18 +174,18 @@ bool SemanticAnalyzer::HaveCompatibleSigns(const TypeInfo* leftType, const TypeI
     return haveCompatibleSigns;
 }
 
-bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType)
+bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* assignType, const TypeInfo* exprType)
 {
     unsigned rightNumBits = 0;
-    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(rightType);
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(exprType);
 
     if (literalType == nullptr)
     {
-        rightNumBits = rightType->GetNumBits();
+        rightNumBits = exprType->GetNumBits();
     }
     else
     {
-        if (leftType->GetSign() == TypeInfo::eSigned)
+        if (assignType->GetSign() == TypeInfo::eSigned)
         {
             rightNumBits = literalType->GetSignedNumBits();
         }
@@ -220,7 +195,7 @@ bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* leftType, c
         }
     }
 
-    return leftType->GetNumBits() >= rightNumBits;
+    return assignType->GetNumBits() >= rightNumBits;
 }
 
 const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2)

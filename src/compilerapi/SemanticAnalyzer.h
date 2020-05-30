@@ -67,13 +67,11 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
-    bool CheckUnaryOperatorType(SyntaxTree::UnaryExpression::EOperator op, const TypeInfo* subExprType);
-
     unsigned GetIntNumBits(const TypeInfo* type);
 
     bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
 
-    bool HaveCompatibleAssignmentSizes(const TypeInfo* leftType, const TypeInfo* rightType);
+    bool HaveCompatibleAssignmentSizes(const TypeInfo* assignType, const TypeInfo* exprType);
 
     const TypeInfo* GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2);
 

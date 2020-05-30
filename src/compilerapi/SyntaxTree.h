@@ -35,8 +35,6 @@ public:
 
     void SetType(const TypeInfo* newType);
 
-    virtual bool GetIsLiteral() const;
-
     bool GetIsAssignable() const;
 
     void SetIsAssignable(bool newIsAssignable);
@@ -61,8 +59,6 @@ public:
     virtual ~UnitTypeLiteralExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
-
-    bool GetIsLiteral() const override;
 };
 
 // TODO: Rename to NumericLiteralExpression
@@ -74,8 +70,6 @@ public:
     virtual ~NumericExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
-
-    bool GetIsLiteral() const override;
 
     const std::string& GetNumber() const;
 
@@ -100,8 +94,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    bool GetIsLiteral() const override;
-
     const std::string& GetValue() const;
 
 private:
@@ -116,8 +108,6 @@ public:
     virtual ~StringLiteralExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
-
-    bool GetIsLiteral() const override;
 
     const std::vector<char>& GetCharacters() const;
 

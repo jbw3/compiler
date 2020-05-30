@@ -24,11 +24,6 @@ void Expression::SetType(const TypeInfo* newType)
     type = newType;
 }
 
-bool Expression::GetIsLiteral() const
-{
-    return false;
-}
-
 bool Expression::GetIsAssignable() const
 {
     return isAssignable;
@@ -58,11 +53,6 @@ void UnitTypeLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-bool UnitTypeLiteralExpression::GetIsLiteral() const
-{
-    return true;
-}
-
 NumericExpression::NumericExpression(string number) : number(number)
 {
 }
@@ -70,11 +60,6 @@ NumericExpression::NumericExpression(string number) : number(number)
 void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-bool NumericExpression::GetIsLiteral() const
-{
-    return true;
 }
 
 const string& NumericExpression::GetNumber() const
@@ -162,11 +147,6 @@ void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-bool BoolLiteralExpression::GetIsLiteral() const
-{
-    return true;
-}
-
 const string& BoolLiteralExpression::GetValue() const
 {
     return value;
@@ -180,11 +160,6 @@ StringLiteralExpression::StringLiteralExpression(const vector<char> characters) 
 void StringLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-bool StringLiteralExpression::GetIsLiteral() const
-{
-    return true;
 }
 
 const vector<char>& StringLiteralExpression::GetCharacters() const
