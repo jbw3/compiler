@@ -1552,6 +1552,8 @@ entry:
 
 define %UnitType @sign_zero_extension(i1 %b, i8 %x8, i8 %y8) {
 entry:
+  %r8 = alloca i16
+  %r7 = alloca i16
   %r6 = alloca i32
   %r5 = alloca i32
   %r4 = alloca i32
@@ -1610,6 +1612,8 @@ merge11:                                          ; preds = %else10, %if8
   %add23 = add i8 %y822, -56
   %zeroext24 = zext i8 %add23 to i32
   store i32 %zeroext24, i32* %r6
+  store i16 201, i16* %r7
+  store i16 201, i16* %r8
   ret %UnitType zeroinitializer
 }
 

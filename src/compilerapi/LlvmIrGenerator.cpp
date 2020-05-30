@@ -90,6 +90,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         const TypeInfo* leftType = leftExpr->GetType();
         const TypeInfo* rightType = rightExpr->GetType();
 
+        const TypeInfo* intermediateType = nullptr;
         Value* storeValue = nullptr;
         if (isAssignment)
         {
@@ -105,7 +106,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         }
         else
         {
-            ExtendType(leftType, rightType, leftValue, rightValue);
+            intermediateType = ExtendType(leftType, rightType, leftValue, rightValue);
         }
 
         bool isSigned = leftType->GetSign() == TypeInfo::eSigned;
@@ -190,6 +191,11 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
             // assignment expressions always evaluate to the unit type
             resultValue = ConstantStruct::get(unitType);
+        }
+        else
+        {
+            // if necessary, sign/zero extend the result to match the result type
+            ExtendType(intermediateType, binaryExpression->GetType(), resultValue);
         }
     }
 }
@@ -824,6 +830,12 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const Type
             rightValue = CreateExt(rightValue, rightType, leftType);
             resultType = leftType;
         }
+    }
+    else
+    {
+        // if the left and right types are not differnet size ints, then they
+        // should be the same, so just pick one to return
+        resultType = leftType;
     }
 
     return resultType;

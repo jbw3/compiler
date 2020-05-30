@@ -604,6 +604,9 @@ fun sign_zero_extension(b bool, x8 i8, y8 u8)
 
     var r5 i32 = x8 + 200;
     var r6 u32 = y8 + 200;
+
+    var r7 i16 = 200 + 1;
+    var r8 u16 = 200 + 1;
 }
 
 # test correct instruction is used for signed/unsigned operands
