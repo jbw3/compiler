@@ -21,12 +21,14 @@ declare %UnitType @extern1()
 
 declare i64 @extern2(i32, i1)
 
-define i32 @noArgs() {
+; Function Attrs: noinline nounwind optnone
+define i32 @noArgs() #0 {
 entry:
   ret i32 42
 }
 
-define i32 @oneArg(i32 %x) {
+; Function Attrs: noinline nounwind optnone
+define i32 @oneArg(i32 %x) #0 {
 entry:
   %x1 = alloca i32
   store i32 %x, i32* %x1
@@ -35,7 +37,8 @@ entry:
   ret i32 %add
 }
 
-define i32 @integerLiterals(i32 %x) {
+; Function Attrs: noinline nounwind optnone
+define i32 @integerLiterals(i32 %x) #0 {
 entry:
   %x1 = alloca i32
   store i32 %x, i32* %x1
@@ -51,7 +54,8 @@ entry:
   ret i32 %add9
 }
 
-define i32 @twoArgs(i32 %arg1, i32 %arg2) {
+; Function Attrs: noinline nounwind optnone
+define i32 @twoArgs(i32 %arg1, i32 %arg2) #0 {
 entry:
   %arg22 = alloca i32
   %arg11 = alloca i32
@@ -63,7 +67,8 @@ entry:
   ret i32 %sub
 }
 
-define i32 @opOrder1(i32 %a, i32 %b, i32 %c, i32 %d) {
+; Function Attrs: noinline nounwind optnone
+define i32 @opOrder1(i32 %a, i32 %b, i32 %c, i32 %d) #0 {
 entry:
   %d4 = alloca i32
   %c3 = alloca i32
@@ -83,7 +88,8 @@ entry:
   ret i32 %sub
 }
 
-define i32 @opOrder2(i32 %a, i32 %b, i32 %c, i32 %d) {
+; Function Attrs: noinline nounwind optnone
+define i32 @opOrder2(i32 %a, i32 %b, i32 %c, i32 %d) #0 {
 entry:
   %d4 = alloca i32
   %c3 = alloca i32
@@ -108,7 +114,8 @@ entry:
   ret i32 %add11
 }
 
-define i1 @opOrder3(i32 %a, i32 %b, i32 %c, i32 %d) {
+; Function Attrs: noinline nounwind optnone
+define i1 @opOrder3(i32 %a, i32 %b, i32 %c, i32 %d) #0 {
 entry:
   %d4 = alloca i32
   %c3 = alloca i32
@@ -128,7 +135,8 @@ entry:
   ret i1 %cmpeq
 }
 
-define i32 @opOrder4(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f) {
+; Function Attrs: noinline nounwind optnone
+define i32 @opOrder4(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f) #0 {
 entry:
   %f6 = alloca i32
   %e5 = alloca i32
@@ -158,7 +166,8 @@ entry:
   ret i32 %bitor
 }
 
-define i32 @opOrder5(i32 %a, i32 %b, i32 %c, i32 %d) {
+; Function Attrs: noinline nounwind optnone
+define i32 @opOrder5(i32 %a, i32 %b, i32 %c, i32 %d) #0 {
 entry:
   %d4 = alloca i32
   %c3 = alloca i32
@@ -183,7 +192,8 @@ entry:
   ret i32 %mul
 }
 
-define i32 @opOrder6(i32 %a, i32 %b, i32 %c, i32 %d) {
+; Function Attrs: noinline nounwind optnone
+define i32 @opOrder6(i32 %a, i32 %b, i32 %c, i32 %d) #0 {
 entry:
   %d4 = alloca i32
   %c3 = alloca i32
@@ -203,7 +213,8 @@ entry:
   ret i32 %bitxor
 }
 
-define i32 @negatives(i32 %a, i32 %b, i32 %c) {
+; Function Attrs: noinline nounwind optnone
+define i32 @negatives(i32 %a, i32 %b, i32 %c) #0 {
 entry:
   %c3 = alloca i32
   %b2 = alloca i32
@@ -225,7 +236,8 @@ entry:
   ret i32 %sub
 }
 
-define i32 @not(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i32 @not(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -242,7 +254,8 @@ entry:
   ret i32 %bitor
 }
 
-define i1 @equal(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @equal(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -254,7 +267,8 @@ entry:
   ret i1 %cmpeq
 }
 
-define i1 @notEqual(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @notEqual(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -266,7 +280,8 @@ entry:
   ret i1 %cmpne
 }
 
-define i1 @lessThan(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @lessThan(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -278,7 +293,8 @@ entry:
   ret i1 %cmplt
 }
 
-define i1 @lessThanOrEqual(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @lessThanOrEqual(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -290,7 +306,8 @@ entry:
   ret i1 %cmple
 }
 
-define i1 @greaterThan(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @greaterThan(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -302,7 +319,8 @@ entry:
   ret i1 %cmpgt
 }
 
-define i1 @greaterThanOrEqual(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @greaterThanOrEqual(i32 %a, i32 %b) #0 {
 entry:
   %b2 = alloca i32
   %a1 = alloca i32
@@ -314,7 +332,8 @@ entry:
   ret i1 %cmpge
 }
 
-define i1 @logicalAnd2(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i1 @logicalAnd2(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -341,7 +360,8 @@ andmerge:                                         ; preds = %andfalse, %andtrue
   ret i1 %andphi
 }
 
-define i1 @logicalAnd3(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i1 @logicalAnd3(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -378,7 +398,8 @@ andmerge11:                                       ; preds = %andfalse10, %andtru
   ret i1 %andphi12
 }
 
-define i1 @logicalOr2(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i1 @logicalOr2(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -407,7 +428,8 @@ ormerge:                                          ; preds = %orfalse, %ortrue
   ret i1 %orphi
 }
 
-define i1 @logicalOr3(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i1 @logicalOr3(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -444,7 +466,8 @@ ormerge11:                                        ; preds = %orfalse8, %ortrue7
   ret i1 %orphi12
 }
 
-define %UnitType @assignOps(i8 %a, i16 %b, i32 %c) {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @assignOps(i8 %a, i16 %b, i32 %c) #0 {
 entry:
   %c3 = alloca i32
   %b2 = alloca i16
@@ -525,7 +548,8 @@ entry:
   ret %UnitType zeroinitializer
 }
 
-define i32 @nestedCall(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @nestedCall(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -544,7 +568,8 @@ entry:
   ret i32 %add8
 }
 
-define i1 @call_function_defined_later(i1 %a, i1 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @call_function_defined_later(i1 %a, i1 %b) #0 {
 entry:
   %b2 = alloca i1
   %a1 = alloca i1
@@ -556,20 +581,23 @@ entry:
   ret i1 %call
 }
 
-define %UnitType @types_unit(i64 %number) {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @types_unit(i64 %number) #0 {
 entry:
   %number1 = alloca i64
   store i64 %number, i64* %number1
   ret %UnitType zeroinitializer
 }
 
-define %UnitType @types_unit2() {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @types_unit2() #0 {
 entry:
   %call = call %UnitType @types_unit(i64 123)
   ret %UnitType %call
 }
 
-define i1 @types_bool(i1 %a, i1 %b) {
+; Function Attrs: noinline nounwind optnone
+define i1 @types_bool(i1 %a, i1 %b) #0 {
 entry:
   %b2 = alloca i1
   %a1 = alloca i1
@@ -581,7 +609,8 @@ entry:
   ret i1 %bitor
 }
 
-define i8 @types_i8(i8 %n1, i8 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i8 @types_i8(i8 %n1, i8 %n2) #0 {
 entry:
   %n22 = alloca i8
   %n11 = alloca i8
@@ -593,7 +622,8 @@ entry:
   ret i8 %add
 }
 
-define i16 @types_i16(i16 %n1, i16 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i16 @types_i16(i16 %n1, i16 %n2) #0 {
 entry:
   %n22 = alloca i16
   %n11 = alloca i16
@@ -605,7 +635,8 @@ entry:
   ret i16 %sub
 }
 
-define i32 @types_i32(i32 %n1, i32 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i32 @types_i32(i32 %n1, i32 %n2) #0 {
 entry:
   %n22 = alloca i32
   %n11 = alloca i32
@@ -617,7 +648,8 @@ entry:
   ret i32 %mul
 }
 
-define i64 @types_i64(i64 %n1, i64 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i64 @types_i64(i64 %n1, i64 %n2) #0 {
 entry:
   %n22 = alloca i64
   %n11 = alloca i64
@@ -629,7 +661,8 @@ entry:
   ret i64 %div
 }
 
-define i64 @types_isize(i64 %n1, i64 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i64 @types_isize(i64 %n1, i64 %n2) #0 {
 entry:
   %n22 = alloca i64
   %n11 = alloca i64
@@ -641,7 +674,8 @@ entry:
   ret i64 %rem
 }
 
-define i8 @types_u8(i8 %n1, i8 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i8 @types_u8(i8 %n1, i8 %n2) #0 {
 entry:
   %n22 = alloca i8
   %n11 = alloca i8
@@ -653,7 +687,8 @@ entry:
   ret i8 %rem
 }
 
-define i16 @types_u16(i16 %n1, i16 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i16 @types_u16(i16 %n1, i16 %n2) #0 {
 entry:
   %n22 = alloca i16
   %n11 = alloca i16
@@ -665,7 +700,8 @@ entry:
   ret i16 %div
 }
 
-define i32 @types_u32(i32 %n1, i32 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i32 @types_u32(i32 %n1, i32 %n2) #0 {
 entry:
   %n22 = alloca i32
   %n11 = alloca i32
@@ -677,7 +713,8 @@ entry:
   ret i32 %mul
 }
 
-define i64 @types_u64(i64 %n1, i64 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i64 @types_u64(i64 %n1, i64 %n2) #0 {
 entry:
   %n22 = alloca i64
   %n11 = alloca i64
@@ -689,7 +726,8 @@ entry:
   ret i64 %sub
 }
 
-define i64 @types_usize(i64 %n1, i64 %n2) {
+; Function Attrs: noinline nounwind optnone
+define i64 @types_usize(i64 %n1, i64 %n2) #0 {
 entry:
   %n22 = alloca i64
   %n11 = alloca i64
@@ -701,7 +739,8 @@ entry:
   ret i64 %add
 }
 
-define %UnitType @types_str() {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @types_str() #0 {
 entry:
   %dup2 = alloca %str*
   %dup1 = alloca %str*
@@ -722,7 +761,8 @@ entry:
   ret %UnitType zeroinitializer
 }
 
-define i64 @str_member1() {
+; Function Attrs: noinline nounwind optnone
+define i64 @str_member1() #0 {
 entry:
   %size = alloca i64
   %s = alloca %str*
@@ -735,7 +775,8 @@ entry:
   ret i64 %size2
 }
 
-define i64 @str_member2(i32 %x) {
+; Function Attrs: noinline nounwind optnone
+define i64 @str_member2(i32 %x) #0 {
 entry:
   %x1 = alloca i32
   store i32 %x, i32* %x1
@@ -756,7 +797,8 @@ merge:                                            ; preds = %else, %if
   ret i64 %load
 }
 
-define i8 @types_add_literal(i8 %num) {
+; Function Attrs: noinline nounwind optnone
+define i8 @types_add_literal(i8 %num) #0 {
 entry:
   %num1 = alloca i8
   store i8 %num, i8* %num1
@@ -765,7 +807,8 @@ entry:
   ret i8 %add
 }
 
-define i64 @sign_extend_bin_op(i8 %a, i16 %b, i64 %c, i32 %d) {
+; Function Attrs: noinline nounwind optnone
+define i64 @sign_extend_bin_op(i8 %a, i16 %b, i64 %c, i32 %d) #0 {
 entry:
   %d4 = alloca i32
   %c3 = alloca i64
@@ -788,7 +831,8 @@ entry:
   ret i64 %rem
 }
 
-define i64 @sign_extend_ret(i32 %param) {
+; Function Attrs: noinline nounwind optnone
+define i64 @sign_extend_ret(i32 %param) #0 {
 entry:
   %param1 = alloca i32
   store i32 %param, i32* %param1
@@ -798,7 +842,8 @@ entry:
   ret i64 %signext
 }
 
-define i64 @sign_extend_call(i8 %param) {
+; Function Attrs: noinline nounwind optnone
+define i64 @sign_extend_call(i8 %param) #0 {
 entry:
   %param1 = alloca i8
   store i8 %param, i8* %param1
@@ -808,7 +853,8 @@ entry:
   ret i64 %call
 }
 
-define i32 @basicBranch(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @basicBranch(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -838,7 +884,8 @@ merge:                                            ; preds = %else, %if
   ret i32 %phi
 }
 
-define i64 @signExtendBranch(i1 %b, i16 %x, i16 %y) {
+; Function Attrs: noinline nounwind optnone
+define i64 @signExtendBranch(i1 %b, i16 %x, i16 %y) #0 {
 entry:
   %y3 = alloca i16
   %x2 = alloca i16
@@ -870,7 +917,8 @@ merge:                                            ; preds = %else, %if
   ret i64 %signext12
 }
 
-define i32 @nestedBranches(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @nestedBranches(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -914,7 +962,8 @@ merge15:                                          ; preds = %merge, %if
   ret i32 %phi16
 }
 
-define i32 @elseIfBranches(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @elseIfBranches(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -970,7 +1019,8 @@ merge21:                                          ; preds = %merge19, %if
   ret i32 %phi22
 }
 
-define i32 @noElseBranches(i32 %x, i32 %y) {
+; Function Attrs: noinline nounwind optnone
+define i32 @noElseBranches(i32 %x, i32 %y) #0 {
 entry:
   %z = alloca i32
   %y2 = alloca i32
@@ -1028,7 +1078,8 @@ merge15:                                          ; preds = %merge13, %if7
   ret i32 %z17
 }
 
-define i32 @elseIfBranchesNesting(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @elseIfBranchesNesting(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -1126,7 +1177,8 @@ merge43:                                          ; preds = %merge41, %if
   ret i32 %phi44
 }
 
-define i32 @branchInExpression(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @branchInExpression(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -1152,7 +1204,8 @@ merge:                                            ; preds = %else, %if
   ret i32 %add
 }
 
-define i32 @branchWithLogicalOperators(i32 %x, i32 %y, i32 %z) {
+; Function Attrs: noinline nounwind optnone
+define i32 @branchWithLogicalOperators(i32 %x, i32 %y, i32 %z) #0 {
 entry:
   %z3 = alloca i32
   %y2 = alloca i32
@@ -1200,7 +1253,8 @@ merge:                                            ; preds = %else, %if
   ret i32 %zeroext
 }
 
-define i32 @assign(i32 %a, i32 %b, i32 %c) {
+; Function Attrs: noinline nounwind optnone
+define i32 @assign(i32 %a, i32 %b, i32 %c) #0 {
 entry:
   %c3 = alloca i32
   %b2 = alloca i32
@@ -1226,7 +1280,8 @@ entry:
   ret i32 %c13
 }
 
-define i64 @assignWithBranch(i32 %a, i32 %b, i64 %c) {
+; Function Attrs: noinline nounwind optnone
+define i64 @assignWithBranch(i32 %a, i32 %b, i64 %c) #0 {
 entry:
   %c3 = alloca i64
   %b2 = alloca i32
@@ -1266,7 +1321,8 @@ merge:                                            ; preds = %else, %if
   ret i64 %c14
 }
 
-define i32 @assignInBranch(i32 %a, i32 %b, i32 %c) {
+; Function Attrs: noinline nounwind optnone
+define i32 @assignInBranch(i32 %a, i32 %b, i32 %c) #0 {
 entry:
   %c3 = alloca i32
   %b2 = alloca i32
@@ -1301,7 +1357,8 @@ merge:                                            ; preds = %else, %if
   ret i32 %c10
 }
 
-define i64 @createVars(i32 %num) {
+; Function Attrs: noinline nounwind optnone
+define i64 @createVars(i32 %num) #0 {
 entry:
   %temp2 = alloca i64
   %temp1 = alloca i32
@@ -1335,7 +1392,8 @@ merge:                                            ; preds = %else, %if
   ret i64 %rv8
 }
 
-define i32 @inferTypes(i32 %a, i32 %b) {
+; Function Attrs: noinline nounwind optnone
+define i32 @inferTypes(i32 %a, i32 %b) #0 {
 entry:
   %quotient = alloca i32
   %bIsZero = alloca i1
@@ -1375,7 +1433,8 @@ merge:                                            ; preds = %else, %if
   ret i32 %quotient7
 }
 
-define i32 @whileLoop(i32 %num) {
+; Function Attrs: noinline nounwind optnone
+define i32 @whileLoop(i32 %num) #0 {
 entry:
   %rv = alloca i32
   %i = alloca i32
@@ -1405,7 +1464,8 @@ whileExit:                                        ; preds = %whileCond
   ret i32 %rv6
 }
 
-define i32 @nestedLoop(i32 %num) {
+; Function Attrs: noinline nounwind optnone
+define i32 @nestedLoop(i32 %num) #0 {
 entry:
   %j = alloca i32
   %rv = alloca i32
@@ -1470,7 +1530,8 @@ whileExit18:                                      ; preds = %whileCond
   ret i32 %rv19
 }
 
-define i32 @blockExpression(i32 %param) {
+; Function Attrs: noinline nounwind optnone
+define i32 @blockExpression(i32 %param) #0 {
 entry:
   %x = alloca i32
   %param1 = alloca i32
@@ -1490,14 +1551,16 @@ entry:
   ret i32 %x8
 }
 
-define i64 @externTest() {
+; Function Attrs: noinline nounwind optnone
+define i64 @externTest() #0 {
 entry:
   %call = call %UnitType @extern1()
   %call1 = call i64 @extern2(i32 5, i1 true)
   ret i64 %call1
 }
 
-define i32 @scopes(i32 %x) {
+; Function Attrs: noinline nounwind optnone
+define i32 @scopes(i32 %x) #0 {
 entry:
   %y4 = alloca i16
   %y = alloca i32
@@ -1528,7 +1591,8 @@ merge:                                            ; preds = %else, %if
   ret i32 %rv6
 }
 
-define %UnitType @initTypes() {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @initTypes() #0 {
 entry:
   %test2 = alloca %Test2
   %test1 = alloca %Test1
@@ -1550,7 +1614,8 @@ entry:
   ret %UnitType zeroinitializer
 }
 
-define %UnitType @sign_zero_extension(i1 %b, i8 %x8, i8 %y8) {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @sign_zero_extension(i1 %b, i8 %x8, i8 %y8) #0 {
 entry:
   %r8 = alloca i16
   %r7 = alloca i16
@@ -1617,7 +1682,8 @@ merge11:                                          ; preds = %else10, %if8
   ret %UnitType zeroinitializer
 }
 
-define %UnitType @sign_operator(i8 %x8, i8 %y8) {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @sign_operator(i8 %x8, i8 %y8) #0 {
 entry:
   %r2 = alloca i32
   %r1 = alloca i32
@@ -1637,7 +1703,8 @@ entry:
   ret %UnitType zeroinitializer
 }
 
-define %UnitType @unary_operator(i1 %b, i8 %x, i8 %y) {
+; Function Attrs: noinline nounwind optnone
+define %UnitType @unary_operator(i1 %b, i8 %x, i8 %y) #0 {
 entry:
   %r16 = alloca i32
   %r15 = alloca i32
@@ -1704,3 +1771,5 @@ merge:                                            ; preds = %else, %if
   store i32 %zeroext, i32* %r16
   ret %UnitType zeroinitializer
 }
+
+attributes #0 = { noinline nounwind optnone }

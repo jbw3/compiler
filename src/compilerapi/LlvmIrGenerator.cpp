@@ -19,6 +19,7 @@ Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
     targetMachine(config.targetMachine),
     inFilename(config.inFilename),
+    optimizationLevel(config.optimizationLevel),
     builder(context),
     module(nullptr),
     currentFunction(nullptr),
@@ -272,6 +273,17 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         resultValue = nullptr;
         return;
     }
+
+    // if we're not optimizing, set these attributes so the assembly generator
+    // will not optimize (it also speeds up assembly generation)
+    if (optimizationLevel == 0)
+    {
+        func->addFnAttr(Attribute::NoInline);
+        func->addFnAttr(Attribute::OptimizeNone);
+    }
+
+    // this language doesn't have exceptions, so no functions need to support unwinding
+    func->addFnAttr(Attribute::NoUnwind);
 
     // create entry block
     BasicBlock* basicBlock = BasicBlock::Create(context, "entry", func);
@@ -781,7 +793,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     }
 
     FunctionType* funcType = FunctionType::get(returnType, parameters, false);
-    llvm::Function::Create(funcType, Function::ExternalLinkage, funcDecl->GetName(), module);
+    Function::Create(funcType, Function::ExternalLinkage, funcDecl->GetName(), module);
 
     return true;
 }

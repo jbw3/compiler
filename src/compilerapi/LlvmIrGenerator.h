@@ -98,6 +98,7 @@ private:
 
     llvm::TargetMachine* targetMachine;
     std::string inFilename;
+    unsigned optimizationLevel;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::Module* module;
