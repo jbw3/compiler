@@ -323,6 +323,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     builder.CreateRet(resultValue);
 
+#ifdef DEBUG
     bool error = verifyFunction(*func, &errs());
     if (error)
     {
@@ -330,6 +331,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         cerr << "Internal error verifying function\n";
         return;
     }
+#endif // DEBUG
 }
 
 void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
