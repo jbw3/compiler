@@ -92,16 +92,19 @@ public:
 
     static BoolLiteralExpression* CreateFalseExpression();
 
-    BoolLiteralExpression(const std::string& value);
+    BoolLiteralExpression(bool value, const Token* token);
 
     virtual ~BoolLiteralExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetValue() const;
+    bool GetValue() const;
+
+    const Token* GetToken() const;
 
 private:
-    std::string value;
+    const Token* token;
+    bool value;
 };
 
 class StringLiteralExpression : public Expression

@@ -1,5 +1,6 @@
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
+#include "Token.h"
 #include "utils.h"
 #include <limits>
 
@@ -122,19 +123,20 @@ unsigned NumericExpression::GetMinUnsignedSize() const
 
 BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()
 {
-    BoolLiteralExpression* expr = new BoolLiteralExpression("true");
+    BoolLiteralExpression* expr = new BoolLiteralExpression(true, Token::None);
     expr->SetType(TypeInfo::BoolType);
     return expr;
 }
 
 BoolLiteralExpression* BoolLiteralExpression::CreateFalseExpression()
 {
-    BoolLiteralExpression* expr = new BoolLiteralExpression("false");
+    BoolLiteralExpression* expr = new BoolLiteralExpression(false, Token::None);
     expr->SetType(TypeInfo::BoolType);
     return expr;
 }
 
-BoolLiteralExpression::BoolLiteralExpression(const string& value) :
+BoolLiteralExpression::BoolLiteralExpression(bool value, const Token* token) :
+    token(token),
     value(value)
 {
 }
@@ -144,9 +146,14 @@ void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const string& BoolLiteralExpression::GetValue() const
+bool BoolLiteralExpression::GetValue() const
 {
     return value;
+}
+
+const Token* BoolLiteralExpression::GetToken() const
+{
+    return token;
 }
 
 StringLiteralExpression::StringLiteralExpression(const vector<char> characters) :

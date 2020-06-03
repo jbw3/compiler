@@ -5,7 +5,6 @@
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Target/TargetMachine.h"
-#include "utils.h"
 #include <iostream>
 #include <sstream>
 #pragma clang diagnostic pop
@@ -475,17 +474,8 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    bool value = false;
-    bool ok = stringToBool(boolLiteralExpression->GetValue(), value);
-    if (ok)
-    {
-        resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
-    }
-    else
-    {
-        resultValue = nullptr;
-        cerr << "Invalid boolean literal \"" << boolLiteralExpression->GetValue() << "\"\n";
-    }
+    bool value = boolLiteralExpression->GetValue();
+    resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
 }
 
 void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)

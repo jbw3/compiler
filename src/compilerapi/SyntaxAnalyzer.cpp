@@ -759,14 +759,15 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
     const string& value = iter->GetValue();
     Expression* expr = nullptr;
     int64_t intValue = 0;
+    bool boolValue = false;
 
     if (stringToInteger(value, intValue))
     {
         expr = new NumericExpression(intValue, &*iter);
     }
-    else if (isBool(value))
+    else if (stringToBool(value, boolValue))
     {
-        expr = new BoolLiteralExpression(value);
+        expr = new BoolLiteralExpression(boolValue, &*iter);
     }
     else if (value[0] == '"')
     {

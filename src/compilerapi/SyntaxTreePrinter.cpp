@@ -260,7 +260,7 @@ void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "BoolLiteralExpression");
-    PrintProperty("value", boolLiteralExpression->GetValue());
+    PrintProperty("value", boolLiteralExpression->GetToken()->GetValue());
 }
 
 void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
