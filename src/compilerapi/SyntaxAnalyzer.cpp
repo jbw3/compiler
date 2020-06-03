@@ -756,12 +756,13 @@ Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<Unar
 
 Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextIter, TokenIterator endIter, bool& isPotentialEnd)
 {
-    string value = iter->GetValue();
+    const string& value = iter->GetValue();
     Expression* expr = nullptr;
+    int64_t intValue = 0;
 
-    if (isNumber(value))
+    if (stringToInteger(value, intValue))
     {
-        expr = new NumericExpression(value);
+        expr = new NumericExpression(intValue, &*iter);
     }
     else if (isBool(value))
     {

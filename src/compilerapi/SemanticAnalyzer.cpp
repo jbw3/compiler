@@ -839,7 +839,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     if (minSignedNumBits == 0 || minUnsignedNumBits == 0)
     {
         isError = true;
-        cerr << "Internal error: Could not get type for numeric literal\n";
+        logger.LogError("Internal error: Could not get type for numeric literal");
         return;
     }
 

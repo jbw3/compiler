@@ -447,33 +447,30 @@ void LlvmIrGenerator::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpress
 
 void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 {
-    int64_t number = 0;
-    bool ok = stringToInteger(numericExpression->GetNumber(), number);
-    if (ok)
+    unsigned numBits = 0;
+    bool isSigned = false;
+
+    const TypeInfo* type = numericExpression->GetType();
+    TypeInfo::ESign sign = type->GetSign();
+    if (sign == TypeInfo::eSigned)
     {
-        unsigned numBits = 0;
-        bool isSigned = false;
-
-        const TypeInfo* type = numericExpression->GetType();
-        TypeInfo::ESign sign = type->GetSign();
-        if (sign == TypeInfo::eSigned)
-        {
-            numBits = numericExpression->GetMinSignedSize();
-            isSigned = true;
-        }
-        else if (sign == TypeInfo::eUnsigned || sign == TypeInfo::eContextDependent)
-        {
-            numBits = numericExpression->GetMinUnsignedSize();
-            isSigned = false;
-        }
-
-        resultValue = ConstantInt::get(context, APInt(numBits, number, isSigned));
+        numBits = numericExpression->GetMinSignedSize();
+        isSigned = true;
+    }
+    else if (sign == TypeInfo::eUnsigned || sign == TypeInfo::eContextDependent)
+    {
+        numBits = numericExpression->GetMinUnsignedSize();
+        isSigned = false;
     }
     else
     {
+        cerr << "Internal error: Unexpected numeric expression sign\n";
         resultValue = nullptr;
-        cerr << "Invalid numeric literal \"" << numericExpression->GetNumber() << "\"\n";
+        return;
     }
+
+    int64_t value = numericExpression->GetValue();
+    resultValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
 }
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)

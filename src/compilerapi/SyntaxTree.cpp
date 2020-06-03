@@ -53,7 +53,9 @@ void UnitTypeLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-NumericExpression::NumericExpression(string number) : number(number)
+NumericExpression::NumericExpression(int64_t value, const Token* token) :
+    value(value),
+    token(token)
 {
 }
 
@@ -62,34 +64,34 @@ void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const string& NumericExpression::GetNumber() const
+int64_t NumericExpression::GetValue() const
 {
-    return number;
+    return value;
+}
+
+const Token* NumericExpression::GetToken() const
+{
+    return token;
 }
 
 unsigned NumericExpression::GetMinSignedSize() const
 {
     unsigned numBits = 0;
-    int64_t outNum = 0;
-    bool ok = stringToInteger(number, outNum);
-    if (ok)
+    if (value >= numeric_limits<int8_t>::min() && value <= numeric_limits<int8_t>::max())
     {
-        if (outNum >= numeric_limits<int8_t>::min() && outNum <= numeric_limits<int8_t>::max())
-        {
-            numBits = 8;
-        }
-        else if (outNum >= numeric_limits<int16_t>::min() && outNum <= numeric_limits<int16_t>::max())
-        {
-            numBits = 16;
-        }
-        else if (outNum >= numeric_limits<int32_t>::min() && outNum <= numeric_limits<int32_t>::max())
-        {
-            numBits = 32;
-        }
-        else if (outNum >= numeric_limits<int64_t>::min() && outNum <= numeric_limits<int64_t>::max())
-        {
-            numBits = 64;
-        }
+        numBits = 8;
+    }
+    else if (value >= numeric_limits<int16_t>::min() && value <= numeric_limits<int16_t>::max())
+    {
+        numBits = 16;
+    }
+    else if (value >= numeric_limits<int32_t>::min() && value <= numeric_limits<int32_t>::max())
+    {
+        numBits = 32;
+    }
+    else if (value >= numeric_limits<int64_t>::min() && value <= numeric_limits<int64_t>::max())
+    {
+        numBits = 64;
     }
 
     return numBits;
@@ -98,26 +100,21 @@ unsigned NumericExpression::GetMinSignedSize() const
 unsigned NumericExpression::GetMinUnsignedSize() const
 {
     unsigned numBits = 0;
-    int64_t outNum = 0;
-    bool ok = stringToInteger(number, outNum);
-    if (ok)
+    if (value <= numeric_limits<uint8_t>::max())
     {
-        if (outNum <= numeric_limits<uint8_t>::max())
-        {
-            numBits = 8;
-        }
-        else if (outNum <= numeric_limits<uint16_t>::max())
-        {
-            numBits = 16;
-        }
-        else if (outNum <= numeric_limits<uint32_t>::max())
-        {
-            numBits = 32;
-        }
-        else if (outNum <= numeric_limits<uint64_t>::max())
-        {
-            numBits = 64;
-        }
+        numBits = 8;
+    }
+    else if (value <= numeric_limits<uint16_t>::max())
+    {
+        numBits = 16;
+    }
+    else if (value <= numeric_limits<uint32_t>::max())
+    {
+        numBits = 32;
+    }
+    else if (value <= numeric_limits<uint64_t>::max())
+    {
+        numBits = 64;
     }
 
     return numBits;

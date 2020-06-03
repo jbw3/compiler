@@ -6,6 +6,7 @@
 #include <vector>
 #include "TypeInfo.h"
 
+class Token;
 class SyntaxTreeVisitor;
 
 namespace SyntaxTree
@@ -65,20 +66,23 @@ public:
 class NumericExpression : public Expression
 {
 public:
-    NumericExpression(std::string number);
+    NumericExpression(int64_t value, const Token* token);
 
     virtual ~NumericExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetNumber() const;
+    int64_t GetValue() const;
+
+    const Token* GetToken() const;
 
     unsigned GetMinSignedSize() const;
 
     unsigned GetMinUnsignedSize() const;
 
 private:
-    std::string number;
+    int64_t value;
+    const Token* token;
 };
 
 class BoolLiteralExpression : public Expression

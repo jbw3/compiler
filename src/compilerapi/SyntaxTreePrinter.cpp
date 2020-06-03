@@ -1,5 +1,6 @@
 #include "SyntaxTreePrinter.h"
 #include "SyntaxTree.h"
+#include "Token.h"
 #include "utils.h"
 #include <fstream>
 #include <iomanip>
@@ -251,7 +252,7 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "NumericExpression");
-    PrintProperty("value", numericExpression->GetNumber());
+    PrintProperty("value", numericExpression->GetToken()->GetValue());
 }
 
 void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
