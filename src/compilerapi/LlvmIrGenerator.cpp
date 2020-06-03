@@ -524,7 +524,7 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
     if (alloca == nullptr)
     {
         resultValue = nullptr;
-        cerr << "\"" << name << "\" has not been defined\n";
+        cerr << "Internal error: No alloca found for '" << name << "'\n";
         return;
     }
 

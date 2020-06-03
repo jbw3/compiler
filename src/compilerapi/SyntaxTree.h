@@ -224,7 +224,7 @@ private:
 class VariableExpression : public Expression
 {
 public:
-    VariableExpression(const std::string& name);
+    VariableExpression(const std::string& name, const Token* token);
 
     virtual ~VariableExpression() = default;
 
@@ -232,7 +232,10 @@ public:
 
     const std::string& GetName() const;
 
+    const Token* GetToken() const;
+
 private:
+    const Token* token;
     std::string name;
 };
 

@@ -641,7 +641,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    string varName = iter->GetValue();
+    const Token* varNameToken = &*iter;
 
     if (!IncrementIterator(iter, endIter, "Expected variable type or assignment operator"))
     {
@@ -680,7 +680,8 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName), expression);
+    const string& varName = varNameToken->GetValue();
+    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression);
     VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment);
     return varDecl;
 }
@@ -864,7 +865,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         }
         else // it's a variable
         {
-            expr = new VariableExpression(value);
+            expr = new VariableExpression(value, &*iter);
         }
     }
     else

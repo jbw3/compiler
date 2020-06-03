@@ -863,7 +863,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     const TypeInfo* varType = symbolTable.GetVariableType(varName);
     if (varType == nullptr)
     {
-        cerr << "Variable \"" << varName << "\" is not declared in the current scope\n";
+        logger.LogError(*variableExpression->GetToken(), "Variable '{}' is not declared in the current scope", varName);
         isError = true;
     }
     else

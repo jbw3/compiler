@@ -330,7 +330,9 @@ Expression* UnaryExpression::GetSubExpression() const
     return subExpression;
 }
 
-VariableExpression::VariableExpression(const string& name) : name(name)
+VariableExpression::VariableExpression(const string& name, const Token* token) :
+    token(token),
+    name(name)
 {
 }
 
@@ -342,6 +344,11 @@ void VariableExpression::Accept(SyntaxTreeVisitor* visitor)
 const string& VariableExpression::GetName() const
 {
     return name;
+}
+
+const Token* VariableExpression::GetToken() const
+{
+    return token;
 }
 
 FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments) :
