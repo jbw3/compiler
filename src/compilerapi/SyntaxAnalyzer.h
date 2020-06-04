@@ -39,6 +39,18 @@ private:
         eDelimiter,
     };
 
+    struct UnaryOpData
+    {
+        const Token* token;
+        SyntaxTree::UnaryExpression::EOperator op;
+    };
+
+    struct BinaryOpData
+    {
+        const Token* token;
+        SyntaxTree::BinaryExpression::EOperator op;
+    };
+
     bool IsValidName(const Token& name);
 
     ErrorLogger& logger;
@@ -77,7 +89,7 @@ private:
     TokenIterator FindStatementEnd(TokenIterator iter, TokenIterator endIter);
 
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
-                                                std::stack<SyntaxTree::UnaryExpression::EOperator>& unaryOperators);
+                                                std::stack<UnaryOpData>& unaryOperators);
 
     SyntaxTree::Expression* ProcessTerm(TokenIterator& iter, TokenIterator nextIter, TokenIterator endIter, bool& isPotentialEnd);
 
@@ -87,7 +99,7 @@ private:
     TokenIterator FindParenthesisEnd(TokenIterator iter, TokenIterator endIter);
 
     void ProcessExpressionOperators(std::vector<SyntaxTree::Expression*>& terms,
-                                    std::vector<SyntaxTree::BinaryExpression::EOperator>& operators,
+                                    std::vector<BinaryOpData>& operators,
                                     const std::unordered_set<SyntaxTree::BinaryExpression::EOperator>& opsToProcess);
 
     SyntaxTree::StringLiteralExpression* ProcessStringExpression(TokenIterator iter);

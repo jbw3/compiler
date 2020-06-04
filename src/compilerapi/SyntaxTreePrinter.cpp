@@ -54,16 +54,7 @@ void SyntaxTreePrinter::Visit(UnaryExpression* unaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    string op;
-    switch (unaryExpression->GetOperator())
-    {
-        case UnaryExpression::eNegative:
-            op = "-";
-            break;
-        case UnaryExpression::eComplement:
-            op = "!";
-            break;
-    }
+    string op = UnaryExpression::GetOperatorString(unaryExpression->GetOperator());
 
     PrintProperty(NODE_TYPE_PROPERTY, "UnaryExpression");
     PrintProperty("operator", op);
@@ -74,103 +65,7 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    string op;
-    switch (binaryExpression->GetOperator())
-    {
-        case BinaryExpression::eEqual:
-            op = "==";
-            break;
-        case BinaryExpression::eNotEqual:
-            op = "!=";
-            break;
-        case BinaryExpression::eLessThan:
-            op = "<";
-            break;
-        case BinaryExpression::eLessThanOrEqual:
-            op = "<=";
-            break;
-        case BinaryExpression::eGreaterThan:
-            op = ">";
-            break;
-        case BinaryExpression::eGreaterThanOrEqual:
-            op = ">=";
-            break;
-        case BinaryExpression::eAdd:
-            op = "+";
-            break;
-        case BinaryExpression::eSubtract:
-            op = "-";
-            break;
-        case BinaryExpression::eMultiply:
-            op = "*";
-            break;
-        case BinaryExpression::eDivide:
-            op = "/";
-            break;
-        case BinaryExpression::eRemainder:
-            op = "%";
-            break;
-        case BinaryExpression::eShiftLeft:
-            op = "<<";
-            break;
-        case BinaryExpression::eShiftRightLogical:
-            op = ">>";
-            break;
-        case BinaryExpression::eShiftRightArithmetic:
-            op = ">>>";
-            break;
-        case BinaryExpression::eBitwiseAnd:
-            op = "&";
-            break;
-        case BinaryExpression::eBitwiseXor:
-            op = "^";
-            break;
-        case BinaryExpression::eBitwiseOr:
-            op = "|";
-            break;
-        case BinaryExpression::eLogicalAnd:
-            op = "&&";
-            break;
-        case BinaryExpression::eLogicalOr:
-            op = "||";
-            break;
-        case BinaryExpression::eAssign:
-            op = "=";
-            break;
-        case BinaryExpression::eAddAssign:
-            op = "+=";
-            break;
-        case BinaryExpression::eSubtractAssign:
-            op = "==";
-            break;
-        case BinaryExpression::eMultiplyAssign:
-            op = "*=";
-            break;
-        case BinaryExpression::eDivideAssign:
-            op = "/=";
-            break;
-        case BinaryExpression::eRemainderAssign:
-            op = "%=";
-            break;
-        case BinaryExpression::eShiftLeftAssign:
-            op = "<<=";
-            break;
-        case BinaryExpression::eShiftRightArithmeticAssign:
-            op = ">>=";
-            break;
-        case BinaryExpression::eShiftRightLogicalAssign:
-            op = ">>>=";
-            break;
-        case BinaryExpression::eBitwiseAndAssign:
-            op = "&=";
-            break;
-        case BinaryExpression::eBitwiseXorAssign:
-            op = "^=";
-            break;
-        case BinaryExpression::eBitwiseOrAssign:
-            op = "|=";
-            break;
-    }
+    string op = BinaryExpression::GetOperatorString(binaryExpression->GetOperator());
 
     PrintProperty(NODE_TYPE_PROPERTY, "BinaryExpression");
     PrintProperty("operator", op);

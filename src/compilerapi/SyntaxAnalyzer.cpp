@@ -649,9 +649,11 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     string varTypeName;
+    const Token* opToken = nullptr;
     if (iter->GetValue() == ASSIGNMENT_OPERATOR)
     {
         varTypeName = "";
+        opToken = &*iter;
     }
     else
     {
@@ -667,6 +669,8 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
             logger.LogError(*iter, "Expected an assignment operator");
             return nullptr;
         }
+
+        opToken = &*iter;
     }
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
@@ -681,7 +685,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     const string& varName = varNameToken->GetValue();
-    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression);
+    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression, opToken);
     VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment);
     return varDecl;
 }
@@ -743,12 +747,13 @@ SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindStatementEnd(TokenIterator ite
     return iter;
 }
 
-Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<UnaryExpression::EOperator>& unaryOperators)
+Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<UnaryOpData>& unaryOperators)
 {
     Expression* result = baseExpr;
     while (!unaryOperators.empty())
     {
-        result = new UnaryExpression(unaryOperators.top(), result);
+        UnaryOpData data = unaryOperators.top();
+        result = new UnaryExpression(data.op, result, data.token);
         unaryOperators.pop();
     }
 
@@ -884,8 +889,8 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     bool isEnd = false;
     bool isPotentialEnd = false;
     vector<Expression*> terms;
-    stack<UnaryExpression::EOperator> unaryOperators;
-    vector<BinaryExpression::EOperator> binOperators;
+    stack<UnaryOpData> unaryOperators;
+    vector<BinaryOpData> binOperators;
 
     while (iter != endIter)
     {
@@ -905,7 +910,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
             if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
             {
-                unaryOperators.push(unaryOpIter->second);
+                unaryOperators.push({&*iter, unaryOpIter->second});
                 expectTerm = true;
             }
             else
@@ -943,7 +948,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             // if the token is a binary operator, add it to the list
             if (opIter != BINARY_EXPRESSION_OPERATORS.cend())
             {
-                binOperators.push_back(opIter->second);
+                binOperators.push_back({&*iter, opIter->second});
                 expectTerm = true;
             }
             // if we are at the end of an expression, we're done
@@ -1035,7 +1040,7 @@ SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindParenthesisEnd(TokenIterator i
 }
 
 void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
-                                                vector<BinaryExpression::EOperator>& operators,
+                                                vector<BinaryOpData>& operators,
                                                 const unordered_set<BinaryExpression::EOperator>& opsToProcess)
 {
     if (terms.size() != operators.size() + 1)
@@ -1048,10 +1053,10 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
     auto opIter = operators.begin();
     while (opIter != operators.end())
     {
-        if (opsToProcess.find(*opIter) != opsToProcess.cend())
+        if (opsToProcess.find(opIter->op) != opsToProcess.cend())
         {
             auto term2Iter = term1Iter + 1;
-            *term1Iter = new BinaryExpression(*opIter, *term1Iter, *term2Iter);
+            *term1Iter = new BinaryExpression(opIter->op, *term1Iter, *term2Iter, opIter->token);
 
             terms.erase(term2Iter);
             opIter = operators.erase(opIter);
@@ -1201,7 +1206,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
         return nullptr;
     }
 
-    StringLiteralExpression* expr = new StringLiteralExpression(chars);
+    StringLiteralExpression* expr = new StringLiteralExpression(chars, &*iter);
     return expr;
 }
 

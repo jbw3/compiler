@@ -79,7 +79,7 @@ private:
 
     bool FixNumericLiteralTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2);
 
-    bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const SyntaxTree::Expression* leftExpr, const SyntaxTree::Expression* rightExpr);
+    bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression::EOperator op, const SyntaxTree::Expression* leftExpr, const SyntaxTree::Expression* rightExpr, const Token* opToken);
 
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 

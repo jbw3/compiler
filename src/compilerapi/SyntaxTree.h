@@ -81,8 +81,8 @@ public:
     unsigned GetMinUnsignedSize() const;
 
 private:
-    int64_t value;
     const Token* token;
+    int64_t value;
 };
 
 class BoolLiteralExpression : public Expression
@@ -110,7 +110,7 @@ private:
 class StringLiteralExpression : public Expression
 {
 public:
-    StringLiteralExpression(const std::vector<char> characters);
+    StringLiteralExpression(const std::vector<char> characters, const Token* token);
 
     virtual ~StringLiteralExpression() = default;
 
@@ -118,7 +118,10 @@ public:
 
     const std::vector<char>& GetCharacters() const;
 
+    const Token* GetToken() const;
+
 private:
+    const Token* token;
     std::vector<char> characters;
 };
 
@@ -175,11 +178,13 @@ public:
         eBitwiseOrAssign,
     };
 
+    static std::string GetOperatorString(EOperator op);
+
     static bool IsAssignment(EOperator op);
 
     static bool IsComputationAssignment(EOperator op);
 
-    BinaryExpression(EOperator op, Expression* left, Expression* right);
+    BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken);
 
     virtual ~BinaryExpression();
 
@@ -191,10 +196,13 @@ public:
 
     Expression* GetRightExpression() const;
 
+    const Token* GetOperatorToken() const;
+
 private:
-    EOperator op;
+    const Token* opToken;
     Expression* left;
     Expression* right;
+    EOperator op;
 };
 
 class UnaryExpression : public Expression
@@ -206,7 +214,9 @@ public:
         eComplement,
     };
 
-    UnaryExpression(EOperator op, Expression* subExpr);
+    static std::string GetOperatorString(EOperator op);
+
+    UnaryExpression(EOperator op, Expression* subExpr, const Token* opToken);
 
     virtual ~UnaryExpression();
 
@@ -216,9 +226,12 @@ public:
 
     Expression* GetSubExpression() const;
 
+    const Token* GetOperatorToken() const;
+
 private:
-    EOperator op;
+    const Token* opToken;
     Expression* subExpression;
+    EOperator op;
 };
 
 class VariableExpression : public Expression

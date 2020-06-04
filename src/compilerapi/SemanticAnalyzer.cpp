@@ -29,9 +29,11 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     const TypeInfo* subExprType = subExpr->GetType();
     bool isInt = subExprType->IsInt();
 
+    UnaryExpression::EOperator op = unaryExpression->GetOperator();
+
     bool ok = false;
     const TypeInfo* resultType = nullptr;
-    switch (unaryExpression->GetOperator())
+    switch (op)
     {
         case UnaryExpression::eNegative:
         {
@@ -79,8 +81,8 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
     if (!ok)
     {
-        // TODO: Print unary operator in error message
-        logger.LogError("Unary operator does not support type '{}'", subExprType->GetShortName());
+        string opString = UnaryExpression::GetOperatorString(op);
+        logger.LogError(*unaryExpression->GetOperatorToken(), "Unary operator '{}' does not support type '{}'", opString, subExprType->GetShortName());
         isError = true;
         return;
     }
@@ -127,7 +129,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     {
         if (!left->GetIsAssignable())
         {
-            cerr << "Cannot assign to expression\n";
+            logger.LogError(*binaryExpression->GetOperatorToken(), "Cannot assign to expression");
             isError = true;
             return;
         }
@@ -135,7 +137,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         left->SetAccessType(Expression::eStore);
     }
 
-    if (!CheckBinaryOperatorTypes(op, left, right))
+    if (!CheckBinaryOperatorTypes(op, left, right, binaryExpression->GetOperatorToken()))
     {
         isError = true;
         return;
@@ -305,7 +307,7 @@ bool SemanticAnalyzer::FixNumericLiteralTypes(SyntaxTree::Expression* expr1, Syn
     return ok;
 }
 
-bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr)
+bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr, const Token* opToken)
 {
     bool ok = false;
     const TypeInfo* leftType = leftExpr->GetType();
@@ -388,8 +390,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     if (!ok)
     {
         // TODO: Need better error message when integer is too big for assignment: var err u8 = 256;
-        // TODO: Print binary operator in error message
-        logger.LogError("Binary operator does not support types '{}' and '{}'", leftType->GetShortName(), rightType->GetShortName());
+        string opString = BinaryExpression::GetOperatorString(op);
+        logger.LogError(*opToken, "Binary operator '{}' does not support types '{}' and '{}'", opString, leftType->GetShortName(), rightType->GetShortName());
     }
 
     return ok;
@@ -427,7 +429,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             }
             else
             {
-                cerr << "Internal error: Could not determine result type\n";
+                logger.LogError("Internal error: Could not determine result type");
                 return nullptr;
             }
         }

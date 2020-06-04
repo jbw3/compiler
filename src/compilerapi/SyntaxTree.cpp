@@ -55,8 +55,8 @@ void UnitTypeLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 }
 
 NumericExpression::NumericExpression(int64_t value, const Token* token) :
-    value(value),
-    token(token)
+    token(token),
+    value(value)
 {
 }
 
@@ -156,7 +156,8 @@ const Token* BoolLiteralExpression::GetToken() const
     return token;
 }
 
-StringLiteralExpression::StringLiteralExpression(const vector<char> characters) :
+StringLiteralExpression::StringLiteralExpression(const vector<char> characters, const Token* token) :
+    token(token),
     characters(characters)
 {
 }
@@ -169,6 +170,11 @@ void StringLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 const vector<char>& StringLiteralExpression::GetCharacters() const
 {
     return characters;
+}
+
+const Token* StringLiteralExpression::GetToken() const
+{
+    return token;
 }
 
 BlockExpression::BlockExpression(const Expressions& expressions) :
@@ -189,6 +195,78 @@ void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
 const Expressions& BlockExpression::GetExpressions() const
 {
     return expressions;
+}
+
+std::string BinaryExpression::GetOperatorString(EOperator op)
+{
+    switch (op)
+    {
+        case BinaryExpression::eEqual:
+            return "==";
+        case BinaryExpression::eNotEqual:
+            return "!=";
+        case BinaryExpression::eLessThan:
+            return "<";
+        case BinaryExpression::eLessThanOrEqual:
+            return "<=";
+        case BinaryExpression::eGreaterThan:
+            return ">";
+        case BinaryExpression::eGreaterThanOrEqual:
+            return ">=";
+        case BinaryExpression::eAdd:
+            return "+";
+        case BinaryExpression::eSubtract:
+            return "-";
+        case BinaryExpression::eMultiply:
+            return "*";
+        case BinaryExpression::eDivide:
+            return "/";
+        case BinaryExpression::eRemainder:
+            return "%";
+        case BinaryExpression::eShiftLeft:
+            return "<<";
+        case BinaryExpression::eShiftRightLogical:
+            return ">>";
+        case BinaryExpression::eShiftRightArithmetic:
+            return ">>>";
+        case BinaryExpression::eBitwiseAnd:
+            return "&";
+        case BinaryExpression::eBitwiseXor:
+            return "^";
+        case BinaryExpression::eBitwiseOr:
+            return "|";
+        case BinaryExpression::eLogicalAnd:
+            return "&&";
+        case BinaryExpression::eLogicalOr:
+            return "||";
+        case BinaryExpression::eAssign:
+            return "=";
+        case BinaryExpression::eAddAssign:
+            return "+=";
+        case BinaryExpression::eSubtractAssign:
+            return "==";
+        case BinaryExpression::eMultiplyAssign:
+            return "*=";
+        case BinaryExpression::eDivideAssign:
+            return "/=";
+        case BinaryExpression::eRemainderAssign:
+            return "%=";
+        case BinaryExpression::eShiftLeftAssign:
+            return "<<=";
+        case BinaryExpression::eShiftRightArithmeticAssign:
+            return ">>=";
+        case BinaryExpression::eShiftRightLogicalAssign:
+            return ">>>=";
+        case BinaryExpression::eBitwiseAndAssign:
+            return "&=";
+        case BinaryExpression::eBitwiseXorAssign:
+            return "^=";
+        case BinaryExpression::eBitwiseOrAssign:
+            return "|=";
+    }
+
+    // we should never get here
+    return "";
 }
 
 bool BinaryExpression::IsAssignment(EOperator op)
@@ -271,10 +349,11 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
     }
 }
 
-BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right) :
-    op(op),
+BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken) :
+    opToken(opToken),
     left(left),
-    right(right)
+    right(right),
+    op(op)
 {
 }
 
@@ -304,9 +383,29 @@ Expression* BinaryExpression::GetRightExpression() const
     return right;
 }
 
-UnaryExpression::UnaryExpression(EOperator op, Expression* subExpr) :
-    op(op),
-    subExpression(subExpr)
+const Token* BinaryExpression::GetOperatorToken() const
+{
+    return opToken;
+}
+
+string UnaryExpression::GetOperatorString(EOperator op)
+{
+    switch (op)
+    {
+        case UnaryExpression::eNegative:
+            return "-";
+        case UnaryExpression::eComplement:
+            return "!";
+    }
+
+    // we should never get here
+    return "";
+}
+
+UnaryExpression::UnaryExpression(EOperator op, Expression* subExpr, const Token* opToken) :
+    opToken(opToken),
+    subExpression(subExpr),
+    op(op)
 {
 }
 
@@ -328,6 +427,11 @@ UnaryExpression::EOperator UnaryExpression::GetOperator() const
 Expression* UnaryExpression::GetSubExpression() const
 {
     return subExpression;
+}
+
+const Token* UnaryExpression::GetOperatorToken() const
+{
+    return opToken;
 }
 
 VariableExpression::VariableExpression(const string& name, const Token* token) :
