@@ -111,11 +111,14 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    bool ok = FixNumericLiteralTypes(left, right);
-    if (!ok)
+    if (left->GetType()->IsInt() && right->GetType()->IsInt())
     {
-        isError = true;
-        return;
+        bool ok = FixNumericLiteralTypes(left, right);
+        if (!ok)
+        {
+            isError = true;
+            return;
+        }
     }
 
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
