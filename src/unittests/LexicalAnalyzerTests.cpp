@@ -62,6 +62,14 @@ bool LexicalAnalyzerTests::TestValidInputs()
             }
         },
         {
+            "    # comment\n    not a comment\n",
+            {
+                {"not", 2, 5},
+                {"a", 2, 9},
+                {"comment", 2, 11}
+            }
+        },
+        {
             "1 + #! comment !# 2",
             {
                 {"1", 1, 1},

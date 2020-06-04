@@ -245,6 +245,7 @@ void LexicalAnalyzer::ParseLineComment(istream& is)
     } while (!is.eof() && ch != LINE_COMMENT_END);
 
     ++line;
+    column = 1;
 }
 
 bool LexicalAnalyzer::ParseBlockComment(istream& is)
