@@ -617,7 +617,10 @@ Expression* WhileLoop::GetExpression() const
     return expression;
 }
 
-Parameter::Parameter(const string& name, const string& typeName) :
+Parameter::Parameter(const string& name, const string& typeName,
+                     const Token* nameToken, const Token* typeNameToken) :
+    nameToken(nameToken),
+    typeNameToken(typeNameToken),
     name(name),
     typeName(typeName),
     type(nullptr)
@@ -644,9 +647,23 @@ void Parameter::SetType(const TypeInfo* newType)
     type = newType;
 }
 
+const Token* Parameter::GetNameToken() const
+{
+    return nameToken;
+}
+
+const Token* Parameter::GetTypeNameToken() const
+{
+    return typeNameToken;
+}
+
 FunctionDeclaration::FunctionDeclaration(const std::string& name,
                                          const Parameters& parameters,
-                                         const std::string& returnTypeName) :
+                                         const std::string& returnTypeName,
+                                         const Token* nameToken,
+                                         const Token* returnTypeNameToken) :
+    nameToken(nameToken),
+    returnTypeNameToken(returnTypeNameToken),
     name(name),
     parameters(parameters),
     returnTypeName(returnTypeName),
@@ -682,6 +699,16 @@ const TypeInfo* FunctionDeclaration::GetReturnType() const
 void FunctionDeclaration::SetReturnType(const TypeInfo* newType)
 {
     returnType = newType;
+}
+
+const Token* FunctionDeclaration::GetNameToken() const
+{
+    return nameToken;
+}
+
+const Token* FunctionDeclaration::GetReturnTypeNameToken() const
+{
+    return returnTypeNameToken;
 }
 
 ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :

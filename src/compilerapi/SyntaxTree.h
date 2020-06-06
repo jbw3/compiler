@@ -362,7 +362,8 @@ private:
 class Parameter
 {
 public:
-    Parameter(const std::string& name, const std::string& typeName);
+    Parameter(const std::string& name, const std::string& typeName,
+              const Token* nameToken, const Token* typeNameToken);
 
     ~Parameter() = default;
 
@@ -374,7 +375,13 @@ public:
 
     void SetType(const TypeInfo* newType);
 
+    const Token* GetNameToken() const;
+
+    const Token* GetTypeNameToken() const;
+
 private:
+    const Token* nameToken;
+    const Token* typeNameToken;
     std::string name;
     std::string typeName;
     const TypeInfo* type;
@@ -387,7 +394,9 @@ class FunctionDeclaration
 public:
     FunctionDeclaration(const std::string& name,
                         const Parameters& parameters,
-                        const std::string& returnTypeName);
+                        const std::string& returnTypeName,
+                        const Token* nameToken,
+                        const Token* returnTypeNameToken);
 
     virtual ~FunctionDeclaration();
 
@@ -401,7 +410,13 @@ public:
 
     void SetReturnType(const TypeInfo* newType);
 
+    const Token* GetNameToken() const;
+
+    const Token* GetReturnTypeNameToken() const;
+
 private:
+    const Token* nameToken;
+    const Token* returnTypeNameToken;
     std::string name;
     Parameters parameters;
     std::string returnTypeName;

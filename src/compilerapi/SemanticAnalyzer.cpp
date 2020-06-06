@@ -508,7 +508,8 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         if (!ok)
         {
             isError = true;
-            logger.LogError("Variable '{}' has already been declared", paramName);
+            const Token* paramToken = param->GetNameToken();
+            logger.LogError(*paramToken, "Variable '{}' has already been declared", paramName);
             return;
         }
     }
@@ -528,7 +529,8 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         if ( !(expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType)) )
         {
             isError = true;
-            logger.LogError("Invalid function return type. Expected '{}' but got '{}'", returnType->GetShortName(), expressionType->GetShortName());
+            const Token* funNameToken = funcDecl->GetNameToken();
+            logger.LogError(*funNameToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
         }
     }
 }
@@ -1127,7 +1129,8 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         const string& paramName = param->GetName();
         if (processedParams.find(paramName) != processedParams.end())
         {
-            logger.LogError("Function '{}' has multiple parameters named '{}'", functionDeclaration->GetName(), paramName);
+            const Token* paramToken = param->GetNameToken();
+            logger.LogError(*paramToken, "Function '{}' has multiple parameters named '{}'", functionDeclaration->GetName(), paramName);
             return false;
         }
 
@@ -1135,6 +1138,8 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         const TypeInfo* paramType = TypeInfo::GetType(paramTypeName);
         if (paramType == nullptr)
         {
+            const Token* typeNameToken = param->GetTypeNameToken();
+            logger.LogError(*typeNameToken, "'{}' is not a known type", paramTypeName);
             return false;
         }
 
@@ -1154,7 +1159,8 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         returnType = TypeInfo::GetType(returnTypeName);
         if (returnType == nullptr)
         {
-            logger.LogError("'{}' is not a known type", returnTypeName);
+            const Token* typeNameToken = functionDeclaration->GetReturnTypeNameToken();
+            logger.LogError(*typeNameToken, "'{}' is not a known type", returnTypeName);
             return false;
         }
     }

@@ -286,6 +286,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     string functionName = iter->GetValue();
+    const Token* nameToken = &*iter;
 
     if (!IncrementIterator(iter, endIter, "Expected '('"))
     {
@@ -313,16 +314,19 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     string returnTypeName;
+    const Token* returnTypeNameToken = nullptr;
 
     // if no return type is specified, default to the unit type
     if (iter->GetValue() == endToken)
     {
         returnTypeName = "";
+        returnTypeNameToken = Token::None;
     }
     else // parse the return type
     {
         // get return type name
         returnTypeName = iter->GetValue();
+        returnTypeNameToken = &*iter;
 
         if (!IncrementIterator(iter, endIter, "Expected end of function"))
         {
@@ -339,7 +343,8 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
-        functionName, parameters, returnTypeName);
+        functionName, parameters, returnTypeName,
+        nameToken, returnTypeNameToken);
     return functionDeclaration;
 }
 
@@ -350,6 +355,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     parameters.clear();
 
     string paramName;
+    const Token* paramNameToken = nullptr;
     while (iter != endIter && iter->GetValue() != ")")
     {
         const string& value = iter->GetValue();
@@ -358,6 +364,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             if (IsValidName(*iter))
             {
                 paramName = value;
+                paramNameToken = &*iter;
             }
             else
             {
@@ -369,7 +376,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
         else if (state == eType)
         {
-            Parameter* param = new Parameter(paramName, value);
+            Parameter* param = new Parameter(paramName, value, paramNameToken, &*iter);
             parameters.push_back(param);
 
             state = eDelimiter;
