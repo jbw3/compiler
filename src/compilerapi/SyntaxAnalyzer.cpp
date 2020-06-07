@@ -839,6 +839,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         // check if it's a function call
         if (nextIter != endIter && nextIter->GetValue() == "(")
         {
+            const Token* nameToken = &*iter;
+
             iter += 2;
             if (iter == endIter)
             {
@@ -864,7 +866,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
                 }
             }
 
-            expr = new FunctionExpression(value, arguments);
+            expr = new FunctionExpression(value, arguments, nameToken);
         }
         // check if it's a struct initialization
         else if (IsStructInitialization(iter, endIter))

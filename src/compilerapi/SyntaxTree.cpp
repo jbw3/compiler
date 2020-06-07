@@ -455,7 +455,8 @@ const Token* VariableExpression::GetToken() const
     return token;
 }
 
-FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments) :
+FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments, const Token* nameToken) :
+    nameToken(nameToken),
     name(name),
     arguments(arguments)
 {
@@ -482,6 +483,11 @@ const string& FunctionExpression::GetName() const
 const Expressions& FunctionExpression::GetArguments() const
 {
     return arguments;
+}
+
+const Token* FunctionExpression::GetNameToken() const
+{
+    return nameToken;
 }
 
 MemberExpression::MemberExpression(Expression* subExpr, const std::string& memberName) :

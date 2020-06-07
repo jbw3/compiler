@@ -255,7 +255,7 @@ private:
 class FunctionExpression : public Expression
 {
 public:
-    FunctionExpression(const std::string& name, const Expressions& arguments);
+    FunctionExpression(const std::string& name, const Expressions& arguments, const Token* nameToken);
 
     virtual ~FunctionExpression();
 
@@ -265,7 +265,10 @@ public:
 
     const Expressions& GetArguments() const;
 
+    const Token* GetNameToken() const;
+
 private:
+    const Token* nameToken;
     std::string name;
     Expressions arguments;
 };

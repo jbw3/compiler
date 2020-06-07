@@ -918,7 +918,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     auto iter = functions.find(funcName);
     if (iter == functions.cend())
     {
-        logger.LogError("Function '{}' is not defined", funcName);
+        logger.LogError(*functionExpression->GetNameToken(), "Function '{}' is not defined", funcName);
         isError = true;
         return;
     }
@@ -931,7 +931,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     if (args.size() != params.size())
     {
         const char* suffix = (params.size() == 1) ? "" : "s";
-        logger.LogError("Function '{}' expected {} argument{} but got {}", funcName, params.size(), suffix, args.size());
+        logger.LogError(*functionExpression->GetNameToken(), "Function '{}' expected {} argument{} but got {}", funcName, params.size(), suffix, args.size());
         isError = true;
         return;
     }
@@ -955,7 +955,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         {
             if ( !(argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType)) )
             {
-                logger.LogError("Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
+                logger.LogError(*functionExpression->GetNameToken(), "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
                 isError = true;
                 return;
             }
