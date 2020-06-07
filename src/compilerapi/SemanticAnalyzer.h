@@ -1,13 +1,14 @@
 #ifndef SEMANTIC_ANALYZER_H_
 #define SEMANTIC_ANALYZER_H_
 
-#include "ErrorLogger.h"
 #include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+
+class ErrorLogger;
 
 class SemanticAnalyzer : public SyntaxTreeVisitor
 {

@@ -10,6 +10,7 @@ class ErrorLogger
 public:
     const char* const WARNING_TAG = "Warning";
     const char* const ERROR_TAG = "Error";
+    const char* const INTERNAL_ERROR_TAG = "Internal Error";
 
     ErrorLogger(std::ostream* os) :
         os(os)
@@ -50,6 +51,18 @@ public:
     void LogError(const Token& token, const char* format, Ts... args)
     {
         LogMessage(ERROR_TAG, token.GetLine(), token.GetColumn(), format, args...);
+    }
+
+    template<typename... Ts>
+    void LogInternalError(const char* format, Ts... args)
+    {
+        LogMessage(INTERNAL_ERROR_TAG, 0, 0, format, args...);
+    }
+
+    template<typename... Ts>
+    void LogInternalError(const Token& token, const char* format, Ts... args)
+    {
+        LogMessage(INTERNAL_ERROR_TAG, token.GetLine(), token.GetColumn(), format, args...);
     }
 
 private:

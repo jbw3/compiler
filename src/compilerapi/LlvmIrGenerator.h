@@ -17,6 +17,7 @@ namespace llvm
 class TargetMachine;
 }
 class Config;
+class ErrorLogger;
 
 namespace std
 {
@@ -47,7 +48,7 @@ namespace std
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator(const Config& config);
+    LlvmIrGenerator(const Config& config, ErrorLogger& logger);
 
     void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
 
@@ -99,6 +100,7 @@ private:
     llvm::TargetMachine* targetMachine;
     std::string inFilename;
     unsigned optimizationLevel;
+    ErrorLogger& logger;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::Module* module;

@@ -393,7 +393,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
         else
         {
-            logger.LogError(*iter, "Internal error: Unknown state: {}", state);
+            logger.LogInternalError(*iter, "Unknown state: {}", state);
             return false;
         }
 
@@ -1052,7 +1052,7 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
 {
     if (terms.size() != operators.size() + 1)
     {
-        logger.LogError("Internal error: Expression terms and operators do not match");
+        logger.LogInternalError("Expression terms and operators do not match");
         return;
     }
 

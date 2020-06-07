@@ -1,6 +1,6 @@
+#include "ErrorLogger.h"
 #include "SemanticAnalyzer.h"
 #include "SyntaxTree.h"
-#include <iostream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -50,7 +50,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                     const NumericLiteralType* subExprLiteralType = dynamic_cast<const NumericLiteralType*>(subExprType);
                     if (subExprLiteralType == nullptr)
                     {
-                        logger.LogError("Internal error: Type with context-dependent sign is not a literal type");
+                        logger.LogInternalError("Type with context-dependent sign is not a literal type");
                         isError = true;
                         return;
                     }
@@ -58,7 +58,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                     resultType = subExprLiteralType->GetMinSizeType(TypeInfo::eSigned);
                     if (resultType == nullptr)
                     {
-                        logger.LogError("Internal error: Could not determine expression result type");
+                        logger.LogInternalError("Could not determine expression result type");
                         isError = true;
                         return;
                     }
@@ -277,7 +277,7 @@ bool SemanticAnalyzer::FixNumericLiteralType(SyntaxTree::Expression* expr, const
         const TypeInfo* newType = literalType->GetMinSizeType(resultType->GetSign());
         if (newType == nullptr)
         {
-            logger.LogError("Internal error: Could not determine expression result type");
+            logger.LogInternalError("Could not determine expression result type");
             return false;
         }
 
@@ -429,7 +429,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             }
             else
             {
-                logger.LogError("Internal error: Could not determine result type");
+                logger.LogInternalError("Could not determine result type");
                 return nullptr;
             }
         }
@@ -466,7 +466,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     if (!condition->GetType()->IsBool())
     {
         isError = true;
-        cerr << "While loop condition must be a boolean expression\n";
+        logger.LogError("While loop condition must be a boolean expression");
         return;
     }
 
@@ -481,7 +481,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
     {
         isError = true;
-        cerr << "While loop block expression must return the unit type\n";
+        logger.LogError("While loop block expression must return the unit type");
         return;
     }
 
@@ -797,7 +797,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         if (!rv.second)
         {
             isError = true;
-            cerr << "Function \"" << name << "\" has already been defined\n";
+            logger.LogError("Function '{}' has already been defined", name);
             return;
         }
     }
@@ -818,7 +818,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         if (!rv.second)
         {
             isError = true;
-            cerr << "Function \"" << name << "\" has already been defined\n";
+            logger.LogError("Function '{}' has already been defined", name);
             return;
         }
     }
@@ -846,7 +846,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     if (minSignedNumBits == 0 || minUnsignedNumBits == 0)
     {
         isError = true;
-        logger.LogError("Internal error: Could not get type for numeric literal");
+        logger.LogInternalError("Could not get type for numeric literal");
         return;
     }
 
@@ -891,7 +891,7 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
     if (size == 0)
     {
         isError = true;
-        cerr << "Internal error: Block expression has no sub-expressions\n";
+        logger.LogInternalError("Block expression has no sub-expressions");
     }
     else
     {
@@ -1003,7 +1003,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     if (!ifCondition->GetType()->IsBool())
     {
         isError = true;
-        cerr << "If condition must be a boolean expression\n";
+        logger.LogError("If condition must be a boolean expression");
         return;
     }
 
@@ -1052,7 +1052,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     if (assignmentExpression->GetOperator() != BinaryExpression::eAssign)
     {
         isError = true;
-        logger.LogError("Internal error: Binary expression in variable declaration is not an assignment");
+        logger.LogInternalError("Binary expression in variable declaration is not an assignment");
         return;
     }
 
@@ -1083,7 +1083,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
             if (type == nullptr)
             {
                 isError = true;
-                logger.LogError("Internal error: Could not infer integer literal type");
+                logger.LogInternalError("Could not infer integer literal type");
                 return;
             }
         }

@@ -2,6 +2,7 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "LlvmIrGenerator.h"
 #include "Config.h"
+#include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Target/TargetMachine.h"
@@ -15,10 +16,11 @@ using namespace SyntaxTree;
 
 Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 
-LlvmIrGenerator::LlvmIrGenerator(const Config& config) :
+LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
     inFilename(config.inFilename),
     optimizationLevel(config.optimizationLevel),
+    logger(logger),
     builder(context),
     module(nullptr),
     currentFunction(nullptr),
@@ -177,7 +179,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 break;
             case BinaryExpression::eLogicalAnd:
             case BinaryExpression::eLogicalOr:
-                cerr << "Internal error: logical AND and logical OR operators should have been handled before here\n";
+                logger.LogInternalError("Logical AND and logical OR operators should have been handled before here");
                 resultValue = nullptr;
                 break;
             case BinaryExpression::eAssign:
@@ -261,14 +263,14 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     Function* func = module->getFunction(funcName);
     if (func == nullptr)
     {
-        cerr << "Internal error: Function '" << funcName << "' was not declared\n";
+        logger.LogInternalError("Function '{}' was not declared", funcName);
         resultValue = nullptr;
         return;
     }
 
     if (!func->empty())
     {
-        cerr << "Cannot redefine function: '" << funcName << "'\n";
+        logger.LogInternalError("Cannot redefine function '{}'", funcName);
         resultValue = nullptr;
         return;
     }
@@ -327,7 +329,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     if (error)
     {
         resultValue = nullptr;
-        cerr << "Internal error verifying function\n";
+        logger.LogInternalError("Verify function failed");
         return;
     }
 #endif // DEBUG
@@ -346,7 +348,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
         if (memberType == nullptr)
         {
             resultValue = nullptr;
-            cerr << "Internal error: Unknown member definition type\n";
+            logger.LogInternalError("Unknown member definition type");
             return;
         }
 
@@ -364,7 +366,7 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
     if (type == nullptr)
     {
         resultValue = nullptr;
-        cerr << "Internal error: Unknown member definition type\n";
+        logger.LogInternalError("Unknown member definition type");
         return;
     }
 
@@ -463,7 +465,7 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
     }
     else
     {
-        cerr << "Internal error: Unexpected numeric expression sign\n";
+        logger.LogInternalError("Unexpected numeric expression sign");
         resultValue = nullptr;
         return;
     }
@@ -524,7 +526,7 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
     if (alloca == nullptr)
     {
         resultValue = nullptr;
-        cerr << "Internal error: No alloca found for '" << name << "'\n";
+        logger.LogInternalError("No alloca found for '{}'", name);
         return;
     }
 
@@ -551,7 +553,7 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     if (size == 0)
     {
         resultValue = nullptr;
-        cerr << "Internal error: Block expression has no sub-expressions\n";
+        logger.LogInternalError("Block expression has no sub-expressions");
     }
     else
     {
@@ -575,14 +577,14 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
     if (func == nullptr)
     {
         resultValue = nullptr;
-        cerr << "Use of undeclared function \"" << funcName << "\"\n";
+        logger.LogInternalError("Use of undeclared function '{}'", funcName);
         return;
     }
 
     if (functionExpression->GetArguments().size() != func->arg_size())
     {
         resultValue = nullptr;
-        cerr << "Unexpected number of function arguments\n";
+        logger.LogInternalError("Unexpected number of function arguments");
         return;
     }
 
@@ -624,7 +626,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
     const MemberInfo* member = exprType->GetMember(memberName);
     if (member == nullptr)
     {
-        cerr << "Internal error: Member is null\n";
+        logger.LogInternalError("Member is null");
         resultValue = nullptr;
         return;
     }
@@ -679,7 +681,7 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     if (type == nullptr)
     {
         resultValue = nullptr;
-        cerr << "Internal error: Unknown variable declaration type\n";
+        logger.LogInternalError("Unknown variable declaration type");
         return;
     }
 
@@ -767,7 +769,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     Type* returnType = GetType(funcDecl->GetReturnType());
     if (returnType == nullptr)
     {
-        cerr << "Internal error: invalid function return type\n";
+        logger.LogInternalError("Invalid function return type");
         return false;
     }
 

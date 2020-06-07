@@ -1,6 +1,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "AssemblyGenerator.h"
+#include "ErrorLogger.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
@@ -8,15 +9,15 @@
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Target/TargetMachine.h"
-#include <iostream>
 #pragma clang diagnostic pop
 
 using namespace llvm;
 using namespace std;
 
-AssemblyGenerator::AssemblyGenerator(const Config& config) :
+AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
-    assemblyType(config.assemblyType)
+    assemblyType(config.assemblyType),
+    logger(logger)
 {
     if (config.outFilename.empty())
     {
@@ -50,7 +51,7 @@ bool AssemblyGenerator::Generate(Module* module)
         raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
         if (ec)
         {
-            cerr << ec.message();
+            logger.LogError("Could not open output file");
             return false;
         }
 
@@ -66,7 +67,7 @@ bool AssemblyGenerator::Generate(Module* module)
         raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
         if (ec)
         {
-            cerr << ec.message();
+            logger.LogError("Could not open output file");
             return false;
         }
 
@@ -76,7 +77,7 @@ bool AssemblyGenerator::Generate(Module* module)
                                     : CGFT_AssemblyFile;
         if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
         {
-            cerr << "Target machine cannot emit a file of this type\n";
+            logger.LogError("Target machine cannot emit a file of this type");
             return false;
         }
 
@@ -84,7 +85,7 @@ bool AssemblyGenerator::Generate(Module* module)
     }
     else
     {
-        cerr << "Internal error: Unknown assembly type\n";
+        logger.LogInternalError("Unknown assembly type");
         return false;
     }
 

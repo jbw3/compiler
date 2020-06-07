@@ -8,11 +8,12 @@ namespace llvm
 class Module;
 class TargetMachine;
 }
+class ErrorLogger;
 
 class AssemblyGenerator
 {
 public:
-    AssemblyGenerator(const Config& config);
+    AssemblyGenerator(const Config& config, ErrorLogger& logger);
 
     bool Generate(llvm::Module* module);
 
@@ -20,6 +21,7 @@ private:
     std::string outFilename;
     llvm::TargetMachine* targetMachine;
     Config::EAssemblyType assemblyType;
+    ErrorLogger& logger;
 };
 
 #endif // ASSEMBLY_GENERATOR_H_
