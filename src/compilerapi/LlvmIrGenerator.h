@@ -124,6 +124,8 @@ private:
 
     llvm::Type* GetType(const TypeInfo* type);
 
+    llvm::DIType* GetDebugType(const TypeInfo* type);
+
     bool CreateFunctionDeclaration(const SyntaxTree::FunctionDeclaration* funcDecl);
 
     llvm::AllocaInst* CreateVariableAlloc(llvm::Function* function, llvm::Type* type, const std::string& paramName);

@@ -318,9 +318,19 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     if (dbgInfo)
     {
         DIFile* file = diCompileUnit->getFile();
+
         SmallVector<Metadata*, 1> funTypes;
-        funTypes.push_back(diBuilder->createBasicType("i32", 0, dwarf::DW_ATE_signed));
+        DIType* retDebugType = GetDebugType(declaration->GetReturnType());
+        if (retDebugType == nullptr)
+        {
+            logger.LogInternalError("Could not determine function's debug return type");
+            resultValue = nullptr;
+            return;
+        }
+        funTypes.push_back(retDebugType);
+
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
+
         unsigned line = declaration->GetNameToken()->GetLine();
         diSubprogram = diBuilder->createFunction(file, funcName, "", file, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
@@ -822,6 +832,20 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
 
     return llvmType;
+}
+
+DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
+{
+    DIType* diType = nullptr;
+    if (type->IsInt())
+    {
+        const string& name = type->GetShortName();
+        unsigned numBits = type->GetNumBits();
+        unsigned encoding = (type->GetSign() == TypeInfo::eSigned) ? dwarf::DW_ATE_signed : dwarf::DW_ATE_unsigned;
+        diType = diBuilder->createBasicType(name, numBits, encoding);
+    }
+
+    return diType;
 }
 
 bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcDecl)
