@@ -103,11 +103,13 @@ private:
     llvm::TargetMachine* targetMachine;
     std::string inFilename;
     unsigned optimizationLevel;
+    bool dbgInfo;
     ErrorLogger& logger;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::DIBuilder* diBuilder;
     llvm::DICompileUnit* diCompileUnit;
+    llvm::DISubprogram* diSubprogram;
     llvm::Module* module;
     SymbolTable symbolTable;
     llvm::Function* currentFunction;

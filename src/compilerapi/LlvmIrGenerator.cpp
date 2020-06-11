@@ -20,10 +20,12 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
     inFilename(config.inFilename),
     optimizationLevel(config.optimizationLevel),
+    dbgInfo(true), // TODO: read from config
     logger(logger),
     builder(context),
     diBuilder(nullptr),
     diCompileUnit(nullptr),
+    diSubprogram(nullptr),
     module(nullptr),
     currentFunction(nullptr),
     resultValue(nullptr),
@@ -313,14 +315,16 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         ++idx;
     }
 
-    DIFile* file = diCompileUnit->getFile();
-    SmallVector<Metadata*, 1> funTypes;
-    funTypes.push_back(diBuilder->createBasicType("i32", 0, dwarf::DW_ATE_signed));
-    DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
-    DISubprogram* subprogram =
-        diBuilder->createFunction(file, funcName, "", file, 28, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
-    func->setSubprogram(subprogram);
-    builder.SetCurrentDebugLocation(DebugLoc::get(30, 5, subprogram));
+    if (dbgInfo)
+    {
+        DIFile* file = diCompileUnit->getFile();
+        SmallVector<Metadata*, 1> funTypes;
+        funTypes.push_back(diBuilder->createBasicType("i32", 0, dwarf::DW_ATE_signed));
+        DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
+        unsigned line = declaration->GetNameToken()->GetLine();
+        diSubprogram = diBuilder->createFunction(file, funcName, "", file, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
+        func->setSubprogram(diSubprogram);
+    }
 
     // process function body expression
     currentFunction = func;
@@ -340,8 +344,11 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     builder.CreateRet(resultValue);
 
-    // have to finalize subprogram before verifyFunction() is called
-    diBuilder->finalizeSubprogram(subprogram);
+    if (dbgInfo)
+    {
+        // have to finalize subprogram before verifyFunction() is called
+        diBuilder->finalizeSubprogram(diSubprogram);
+    }
 
 #ifdef DEBUG
     bool error = verifyFunction(*func, &errs());
@@ -487,6 +494,14 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
         logger.LogInternalError("Unexpected numeric expression sign");
         resultValue = nullptr;
         return;
+    }
+
+    if (dbgInfo)
+    {
+        const Token* token = numericExpression->GetToken();
+        unsigned line = token->GetLine();
+        unsigned column = token->GetColumn();
+        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diSubprogram));
     }
 
     int64_t value = numericExpression->GetValue();
@@ -739,26 +754,29 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     types.insert({TypeInfo::BoolType->GetShortName(), Type::getInt1Ty(context)});
     types.insert({TypeInfo::GetStringPointerType()->GetShortName(), strPointerType});
 
-    // initialize debug info builder
-    diBuilder = new DIBuilder(*module);
-
-    string dirName;
-    string filename;
-    size_t splitIdx = inFilename.find_last_of("/\\");
-    if (splitIdx == string::npos)
+    if (dbgInfo)
     {
-        dirName = ".";
-        filename = inFilename;
-    }
-    else
-    {
-        dirName = inFilename.substr(0, splitIdx);
-        filename = inFilename.substr(splitIdx + 1);
-    }
+        // initialize debug info builder
+        diBuilder = new DIBuilder(*module);
 
-    bool isOptimized = optimizationLevel > 0;
-    DIFile* diFile = diBuilder->createFile(filename, dirName);
-    diCompileUnit = diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
+        string dirName;
+        string filename;
+        size_t splitIdx = inFilename.find_last_of("/\\");
+        if (splitIdx == string::npos)
+        {
+            dirName = ".";
+            filename = inFilename;
+        }
+        else
+        {
+            dirName = inFilename.substr(0, splitIdx);
+            filename = inFilename.substr(splitIdx + 1);
+        }
+
+        bool isOptimized = optimizationLevel > 0;
+        DIFile* diFile = diBuilder->createFile(filename, dirName);
+        diCompileUnit = diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
+    }
 
     // generate LLVM IR from syntax tree
     this->module = module;
@@ -771,7 +789,10 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
         return false;
     }
 
-    diBuilder->finalize();
+    if (dbgInfo)
+    {
+        diBuilder->finalize();
+    }
 
     return true;
 }
