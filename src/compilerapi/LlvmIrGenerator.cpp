@@ -520,6 +520,14 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
+    if (dbgInfo)
+    {
+        const Token* token = boolLiteralExpression->GetToken();
+        unsigned line = token->GetLine();
+        unsigned column = token->GetColumn();
+        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diSubprogram));
+    }
+
     bool value = boolLiteralExpression->GetValue();
     resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
 }
@@ -843,6 +851,12 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         unsigned numBits = type->GetNumBits();
         unsigned encoding = (type->GetSign() == TypeInfo::eSigned) ? dwarf::DW_ATE_signed : dwarf::DW_ATE_unsigned;
         diType = diBuilder->createBasicType(name, numBits, encoding);
+    }
+    else if (type->IsBool())
+    {
+        const string& name = type->GetShortName();
+        unsigned numBits = type->GetNumBits();
+        diType = diBuilder->createBasicType(name, numBits, dwarf::DW_ATE_boolean);
     }
 
     return diType;
