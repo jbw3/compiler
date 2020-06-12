@@ -301,20 +301,6 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     Scope scope(symbolTable);
 
-    size_t idx = 0;
-    const Parameters& params = declaration->GetParameters();
-    for (Argument& arg : func->args())
-    {
-        const Parameter* param = params[idx];
-        const string& paramName = param->GetName();
-        arg.setName(paramName);
-        AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
-        builder.CreateStore(&arg, alloca);
-        symbolTable.AddVariable(paramName, param->GetType(), alloca);
-
-        ++idx;
-    }
-
     if (dbgInfo)
     {
         DIFile* file = diCompileUnit->getFile();
@@ -334,6 +320,30 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         unsigned line = declaration->GetNameToken()->GetLine();
         diSubprogram = diBuilder->createFunction(file, funcName, "", file, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
+    }
+
+    size_t idx = 0;
+    const Parameters& params = declaration->GetParameters();
+    for (Argument& arg : func->args())
+    {
+        const Parameter* param = params[idx];
+        const string& paramName = param->GetName();
+        arg.setName(paramName);
+        AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
+        builder.CreateStore(&arg, alloca);
+        const TypeInfo* paramType = param->GetType();
+        symbolTable.AddVariable(paramName, paramType, alloca);
+
+        if (dbgInfo)
+        {
+            const Token* token = param->GetNameToken();
+            unsigned line = token->GetLine();
+            DIType* paramDebugType = GetDebugType(paramType);
+            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx, diCompileUnit->getFile(), line, paramDebugType, true);
+            diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, 0, diSubprogram), builder.GetInsertBlock());
+        }
+
+        ++idx;
     }
 
     // process function body expression
