@@ -320,6 +320,9 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         unsigned line = declaration->GetNameToken()->GetLine();
         diSubprogram = diBuilder->createFunction(file, funcName, "", file, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
+
+        // unset debug location for function prolog
+        builder.SetCurrentDebugLocation(DebugLoc());
     }
 
     size_t idx = 0;
