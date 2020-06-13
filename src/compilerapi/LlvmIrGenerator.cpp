@@ -303,19 +303,31 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     Scope scope(symbolTable);
 
+    const Parameters& params = declaration->GetParameters();
+
     if (dbgInfo)
     {
         DIFile* file = diCompileUnit->getFile();
 
-        SmallVector<Metadata*, 1> funTypes;
+        SmallVector<Metadata*, 8> funTypes;
         DIType* retDebugType = GetDebugType(declaration->GetReturnType());
         if (retDebugType == nullptr)
         {
-            logger.LogInternalError("Could not determine function's debug return type");
             resultValue = nullptr;
             return;
         }
         funTypes.push_back(retDebugType);
+
+        for (const Parameter* param : params)
+        {
+            DIType* paramDebugType = GetDebugType(param->GetType());
+            if (paramDebugType == nullptr)
+            {
+                resultValue = nullptr;
+                return;
+            }
+            funTypes.push_back(paramDebugType);
+        }
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
 
@@ -328,7 +340,6 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 
     size_t idx = 0;
-    const Parameters& params = declaration->GetParameters();
     for (Argument& arg : func->args())
     {
         const Parameter* param = params[idx];
@@ -344,6 +355,11 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
             const Token* token = param->GetNameToken();
             unsigned line = token->GetLine();
             DIType* paramDebugType = GetDebugType(paramType);
+            if (paramDebugType == nullptr)
+            {
+                resultValue = nullptr;
+                return;
+            }
             DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx, diCompileUnit->getFile(), line, paramDebugType, true);
             diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, 0, diSubprogram), builder.GetInsertBlock());
         }
@@ -864,6 +880,10 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         const string& name = type->GetShortName();
         unsigned numBits = type->GetNumBits();
         diType = diBuilder->createBasicType(name, numBits, dwarf::DW_ATE_boolean);
+    }
+    else
+    {
+        logger.LogInternalError("Could not determine function's debug return type");
     }
 
     return diType;
