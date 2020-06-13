@@ -20,7 +20,7 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
     inFilename(config.inFilename),
     optimizationLevel(config.optimizationLevel),
-    dbgInfo(true), // TODO: read from config
+    dbgInfo(config.debugInfo),
     logger(logger),
     builder(context),
     diBuilder(nullptr),

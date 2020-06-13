@@ -32,6 +32,7 @@ public:
     std::string outFilename;
     unsigned optimizationLevel;
     llvm::TargetMachine* targetMachine;
+    bool debugInfo;
 
     Config();
 

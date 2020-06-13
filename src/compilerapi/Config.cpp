@@ -19,6 +19,7 @@ Config::Config()
     outFilename = "";
     optimizationLevel = 0;
     targetMachine = CreateTargetMachine("");
+    debugInfo = false;
 }
 
 bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
@@ -174,6 +175,10 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
     {
         assemblyType = eLlvmIr;
     }
+    else if (strcmp(arg, "-d") == 0 || strcmp(arg, "--debug-info") == 0)
+    {
+        debugInfo = true;
+    }
     else if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0)
     {
         help = true;
@@ -202,6 +207,7 @@ void Config::PrintHelp() const
 Options:
   -h, --help             Print help message
   --arch <value>         Assembly architecture
+  -d, --debug-info       Generate debug info
   --llvm                 Output LLVM IR
   --out-type <value>     Type of output: assembly, c-header, tokens, tree
   -O <value>             Optimization level: 0, 1, 2
