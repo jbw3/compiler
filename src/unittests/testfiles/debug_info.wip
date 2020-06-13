@@ -1,4 +1,14 @@
-fun noArgs() i32
+fun noParams() i32
 {
     0
+}
+
+fun param(param1 u8) u16
+{
+    param1
+}
+
+fun operators(x i32, y i64, z i8) i64
+{
+    -x + y / (x * z)
 }
