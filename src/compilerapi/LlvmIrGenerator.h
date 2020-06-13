@@ -142,6 +142,8 @@ private:
     llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
 
     llvm::Value* CreateLogicalOr(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
+
+    void SetDebugLocation(const Token* token);
 };
 
 #endif // LLVM_IR_GENERATOR_H_

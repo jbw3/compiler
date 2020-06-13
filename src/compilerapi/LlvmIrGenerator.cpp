@@ -52,6 +52,8 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
     }
     Value* subExprValue = resultValue;
 
+    SetDebugLocation(unaryExpression->GetOperatorToken());
+
     switch (unaryExpression->GetOperator())
     {
         case UnaryExpression::eNegative:
@@ -519,13 +521,7 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
         return;
     }
 
-    if (dbgInfo)
-    {
-        const Token* token = numericExpression->GetToken();
-        unsigned line = token->GetLine();
-        unsigned column = token->GetColumn();
-        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diSubprogram));
-    }
+    SetDebugLocation(numericExpression->GetToken());
 
     int64_t value = numericExpression->GetValue();
     resultValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
@@ -533,13 +529,7 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    if (dbgInfo)
-    {
-        const Token* token = boolLiteralExpression->GetToken();
-        unsigned line = token->GetLine();
-        unsigned column = token->GetColumn();
-        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diSubprogram));
-    }
+    SetDebugLocation(boolLiteralExpression->GetToken());
 
     bool value = boolLiteralExpression->GetValue();
     resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
@@ -594,6 +584,8 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
         logger.LogInternalError("No alloca found for '{}'", name);
         return;
     }
+
+    SetDebugLocation(variableExpression->GetToken());
 
     Expression::EAccessType accessType = variableExpression->GetAccessType();
     switch (accessType)
@@ -673,6 +665,8 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
         args.push_back(resultValue);
     }
+
+    SetDebugLocation(functionExpression->GetNameToken());
 
     resultValue = builder.CreateCall(func, args, "call");
 }
@@ -1063,4 +1057,14 @@ Value* LlvmIrGenerator::CreateLogicalOr(Expression* leftExpr, Expression* rightE
     delete trueExpr;
 
     return value;
+}
+
+void LlvmIrGenerator::SetDebugLocation(const Token* token)
+{
+    if (dbgInfo)
+    {
+        unsigned line = token->GetLine();
+        unsigned column = token->GetColumn();
+        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diSubprogram));
+    }
 }
