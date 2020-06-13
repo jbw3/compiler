@@ -7,10 +7,11 @@ using namespace std;
 
 CompilerTests::CompilerTests()
 {
-    AddTest([](){ return RunTest("basic"); });
+    AddTest([](){ return RunTest("basic", false); });
+    AddTest([](){ return RunTest("debug_info", true); });
 }
 
-bool CompilerTests::RunTest(const string& baseFilename)
+bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
 {
     string testFilesDir = "src/unittests/testfiles/";
     string inFilename = testFilesDir + baseFilename + ".wip";
@@ -21,6 +22,7 @@ bool CompilerTests::RunTest(const string& baseFilename)
     config.assemblyType = Config::eLlvmIr;
     config.inFilename = inFilename;
     config.outFilename = outFilename;
+    config.debugInfo = debugInfo;
 
     Compiler compiler(config);
     bool ok = compiler.Compile();

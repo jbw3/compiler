@@ -10,7 +10,7 @@ public:
     CompilerTests();
 
 private:
-    static bool RunTest(const std::string& baseFilename);
+    static bool RunTest(const std::string& baseFilename, bool debugInfo);
 };
 
 #endif // COMPILER_TESTS_H_
