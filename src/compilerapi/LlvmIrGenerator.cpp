@@ -878,8 +878,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     else if (type->IsBool())
     {
         const string& name = type->GetShortName();
-        unsigned numBits = type->GetNumBits();
-        diType = diBuilder->createBasicType(name, numBits, dwarf::DW_ATE_boolean);
+        diType = diBuilder->createBasicType(name, 8, dwarf::DW_ATE_boolean);
     }
     else
     {
