@@ -75,10 +75,12 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
     if (op == BinaryExpression::eLogicalAnd)
     {
+        SetDebugLocation(binaryExpression->GetOperatorToken());
         resultValue = CreateLogicalAnd(leftExpr, rightExpr);
     }
     else if (op == BinaryExpression::eLogicalOr)
     {
+        SetDebugLocation(binaryExpression->GetOperatorToken());
         resultValue = CreateLogicalOr(leftExpr, rightExpr);
     }
     else
@@ -96,6 +98,8 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             return;
         }
         Value* rightValue = resultValue;
+
+        SetDebugLocation(binaryExpression->GetOperatorToken());
 
         bool isAssignment = BinaryExpression::IsAssignment(op);
 
