@@ -343,7 +343,7 @@ entry:
   store i32 %z, i32* %z3
   %x4 = load i32, i32* %x1
   %cmpne = icmp ne i32 %x4, 0
-  br i1 %cmpne, label %andtrue, label %andfalse
+  br i1 %cmpne, label %andtrue, label %andmerge
 
 andtrue:                                          ; preds = %entry
   %y5 = load i32, i32* %y2
@@ -352,11 +352,8 @@ andtrue:                                          ; preds = %entry
   %cmplt = icmp slt i32 %y5, %add
   br label %andmerge
 
-andfalse:                                         ; preds = %entry
-  br label %andmerge
-
-andmerge:                                         ; preds = %andfalse, %andtrue
-  %andphi = phi i1 [ %cmplt, %andtrue ], [ false, %andfalse ]
+andmerge:                                         ; preds = %andtrue, %entry
+  %andphi = phi i1 [ %cmplt, %andtrue ], [ false, %entry ]
   ret i1 %andphi
 }
 
@@ -371,31 +368,25 @@ entry:
   store i32 %z, i32* %z3
   %x4 = load i32, i32* %x1
   %cmpeq = icmp eq i32 %x4, 0
-  br i1 %cmpeq, label %andtrue, label %andfalse
+  br i1 %cmpeq, label %andtrue, label %andmerge
 
 andtrue:                                          ; preds = %entry
   %y5 = load i32, i32* %y2
   %cmpeq6 = icmp eq i32 %y5, 1
   br label %andmerge
 
-andfalse:                                         ; preds = %entry
-  br label %andmerge
-
-andmerge:                                         ; preds = %andfalse, %andtrue
-  %andphi = phi i1 [ %cmpeq6, %andtrue ], [ false, %andfalse ]
-  br i1 %andphi, label %andtrue7, label %andfalse10
+andmerge:                                         ; preds = %andtrue, %entry
+  %andphi = phi i1 [ %cmpeq6, %andtrue ], [ false, %entry ]
+  br i1 %andphi, label %andtrue7, label %andmerge10
 
 andtrue7:                                         ; preds = %andmerge
   %z8 = load i32, i32* %z3
   %cmpeq9 = icmp eq i32 %z8, 2
-  br label %andmerge11
+  br label %andmerge10
 
-andfalse10:                                       ; preds = %andmerge
-  br label %andmerge11
-
-andmerge11:                                       ; preds = %andfalse10, %andtrue7
-  %andphi12 = phi i1 [ %cmpeq9, %andtrue7 ], [ false, %andfalse10 ]
-  ret i1 %andphi12
+andmerge10:                                       ; preds = %andtrue7, %andmerge
+  %andphi11 = phi i1 [ %cmpeq9, %andtrue7 ], [ false, %andmerge ]
+  ret i1 %andphi11
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -409,10 +400,7 @@ entry:
   store i32 %z, i32* %z3
   %z4 = load i32, i32* %z3
   %cmpeq = icmp eq i32 %z4, 0
-  br i1 %cmpeq, label %ortrue, label %orfalse
-
-ortrue:                                           ; preds = %entry
-  br label %ormerge
+  br i1 %cmpeq, label %ormerge, label %orfalse
 
 orfalse:                                          ; preds = %entry
   %x5 = load i32, i32* %x1
@@ -423,8 +411,8 @@ orfalse:                                          ; preds = %entry
   %cmplt = icmp slt i32 %add, 100
   br label %ormerge
 
-ormerge:                                          ; preds = %orfalse, %ortrue
-  %orphi = phi i1 [ true, %ortrue ], [ %cmplt, %orfalse ]
+ormerge:                                          ; preds = %orfalse, %entry
+  %orphi = phi i1 [ %cmplt, %orfalse ], [ true, %entry ]
   ret i1 %orphi
 }
 
@@ -439,31 +427,25 @@ entry:
   store i32 %z, i32* %z3
   %x4 = load i32, i32* %x1
   %cmpeq = icmp eq i32 %x4, 0
-  br i1 %cmpeq, label %ortrue, label %orfalse
-
-ortrue:                                           ; preds = %entry
-  br label %ormerge
+  br i1 %cmpeq, label %ormerge, label %orfalse
 
 orfalse:                                          ; preds = %entry
   %y5 = load i32, i32* %y2
   %cmpeq6 = icmp eq i32 %y5, 1
   br label %ormerge
 
-ormerge:                                          ; preds = %orfalse, %ortrue
-  %orphi = phi i1 [ true, %ortrue ], [ %cmpeq6, %orfalse ]
-  br i1 %orphi, label %ortrue7, label %orfalse8
+ormerge:                                          ; preds = %orfalse, %entry
+  %orphi = phi i1 [ %cmpeq6, %orfalse ], [ true, %entry ]
+  br i1 %orphi, label %ormerge10, label %orfalse7
 
-ortrue7:                                          ; preds = %ormerge
-  br label %ormerge11
+orfalse7:                                         ; preds = %ormerge
+  %z8 = load i32, i32* %z3
+  %cmpeq9 = icmp eq i32 %z8, 2
+  br label %ormerge10
 
-orfalse8:                                         ; preds = %ormerge
-  %z9 = load i32, i32* %z3
-  %cmpeq10 = icmp eq i32 %z9, 2
-  br label %ormerge11
-
-ormerge11:                                        ; preds = %orfalse8, %ortrue7
-  %orphi12 = phi i1 [ true, %ortrue7 ], [ %cmpeq10, %orfalse8 ]
-  ret i1 %orphi12
+ormerge10:                                        ; preds = %orfalse7, %ormerge
+  %orphi11 = phi i1 [ %cmpeq9, %orfalse7 ], [ true, %ormerge ]
+  ret i1 %orphi11
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -1215,30 +1197,24 @@ entry:
   store i32 %z, i32* %z3
   %x4 = load i32, i32* %x1
   %cmpeq = icmp eq i32 %x4, 0
-  br i1 %cmpeq, label %andtrue, label %andfalse
+  br i1 %cmpeq, label %andtrue, label %andmerge
 
 andtrue:                                          ; preds = %entry
   %y5 = load i32, i32* %y2
   %cmpeq6 = icmp eq i32 %y5, 1
   br label %andmerge
 
-andfalse:                                         ; preds = %entry
-  br label %andmerge
-
-andmerge:                                         ; preds = %andfalse, %andtrue
-  %andphi = phi i1 [ %cmpeq6, %andtrue ], [ false, %andfalse ]
-  br i1 %andphi, label %ortrue, label %orfalse
-
-ortrue:                                           ; preds = %andmerge
-  br label %ormerge
+andmerge:                                         ; preds = %andtrue, %entry
+  %andphi = phi i1 [ %cmpeq6, %andtrue ], [ false, %entry ]
+  br i1 %andphi, label %ormerge, label %orfalse
 
 orfalse:                                          ; preds = %andmerge
   %z7 = load i32, i32* %z3
   %cmpeq8 = icmp eq i32 %z7, 1
   br label %ormerge
 
-ormerge:                                          ; preds = %orfalse, %ortrue
-  %orphi = phi i1 [ true, %ortrue ], [ %cmpeq8, %orfalse ]
+ormerge:                                          ; preds = %orfalse, %andmerge
+  %orphi = phi i1 [ %cmpeq8, %orfalse ], [ true, %andmerge ]
   br i1 %orphi, label %if, label %else
 
 if:                                               ; preds = %ormerge

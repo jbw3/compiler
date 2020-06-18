@@ -32,7 +32,8 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     unitType(nullptr),
     strStructType(nullptr),
     strPointerType(nullptr),
-    globalStringCounter(0)
+    globalStringCounter(0),
+    boolType(Type::getInt1Ty(context))
 {
 }
 
@@ -796,7 +797,7 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     strPointerType = strStructType->getPointerTo(addressSpace);
 
     // register types
-    types.insert({TypeInfo::BoolType->GetShortName(), Type::getInt1Ty(context)});
+    types.insert({TypeInfo::BoolType->GetShortName(), boolType});
     types.insert({TypeInfo::GetStringPointerType()->GetShortName(), strPointerType});
 
     if (dbgInfo)
@@ -1066,20 +1067,70 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
 
 Value* LlvmIrGenerator::CreateLogicalAnd(Expression* leftExpr, Expression* rightExpr)
 {
-    BoolLiteralExpression* falseExpr = BoolLiteralExpression::CreateFalseExpression();
-    Value* value = CreateBranch(leftExpr, rightExpr, falseExpr, TypeInfo::BoolType, "andtrue", "andfalse", "andmerge", "andphi");
-    delete falseExpr;
-
+    Value* value = CreateLogicalBranch(leftExpr, rightExpr, true);
     return value;
 }
 
 Value* LlvmIrGenerator::CreateLogicalOr(Expression* leftExpr, Expression* rightExpr)
 {
-    BoolLiteralExpression* trueExpr = BoolLiteralExpression::CreateTrueExpression();
-    Value* value = CreateBranch(leftExpr, trueExpr, rightExpr, TypeInfo::BoolType, "ortrue", "orfalse", "ormerge", "orphi");
-    delete trueExpr;
-
+    Value* value = CreateLogicalBranch(leftExpr, rightExpr, false);
     return value;
+}
+
+Value* LlvmIrGenerator::CreateLogicalBranch(Expression* conditionExpr, Expression* branchExpr, bool isAnd)
+{
+    const char* branchName = isAnd ? "andtrue" : "orfalse";
+    const char* mergeName = isAnd ? "andmerge" : "ormerge";
+    const char* phiName = isAnd ? "andphi" : "orphi";
+
+    // generate the condition IR
+    conditionExpr->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return nullptr;
+    }
+    Value* conditionValue = resultValue;
+
+    BasicBlock* startBlock = builder.GetInsertBlock();
+
+    // create the branch basic blocks
+    Function* function = startBlock->getParent();
+    BasicBlock* branchBlock = BasicBlock::Create(context, branchName, function);
+    BasicBlock* mergeBlock = BasicBlock::Create(context, mergeName);
+
+    if (isAnd)
+    {
+        builder.CreateCondBr(conditionValue, branchBlock, mergeBlock);
+    }
+    else
+    {
+        builder.CreateCondBr(conditionValue, mergeBlock, branchBlock);
+    }
+
+    // generate branch block IR
+    builder.SetInsertPoint(branchBlock);
+
+    branchExpr->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return nullptr;
+    }
+
+    Value* branchExprValue = resultValue;
+    builder.CreateBr(mergeBlock);
+
+    // update block in case new blocks were added when generating the branch block
+    branchBlock = builder.GetInsertBlock();
+
+    // generate merge block IR
+    function->getBasicBlockList().push_back(mergeBlock);
+    builder.SetInsertPoint(mergeBlock);
+
+    PHINode* phiNode = builder.CreatePHI(boolType, 2, phiName);
+    phiNode->addIncoming(branchExprValue, branchBlock);
+    phiNode->addIncoming(isAnd ? ConstantInt::getFalse(context) : ConstantInt::getTrue(context), startBlock);
+
+    return phiNode;
 }
 
 void LlvmIrGenerator::SetDebugLocation(const Token* token)

@@ -120,6 +120,7 @@ private:
     unsigned int globalStringCounter;
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
+    llvm::Type* boolType;
     std::unordered_map<std::string, llvm::Type*> types;
 
     llvm::Type* GetType(const TypeInfo* type);
@@ -142,6 +143,8 @@ private:
     llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
 
     llvm::Value* CreateLogicalOr(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
+
+    llvm::Value* CreateLogicalBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* branchExpr, bool isTrueBranch);
 
     void SetDebugLocation(const Token* token);
 };
