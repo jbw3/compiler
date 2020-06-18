@@ -88,10 +88,6 @@ private:
 class BoolLiteralExpression : public Expression
 {
 public:
-    static BoolLiteralExpression* CreateTrueExpression();
-
-    static BoolLiteralExpression* CreateFalseExpression();
-
     BoolLiteralExpression(bool value, const Token* token);
 
     virtual ~BoolLiteralExpression() = default;

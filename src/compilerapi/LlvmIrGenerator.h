@@ -140,10 +140,6 @@ private:
     llvm::Value* CreateBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* trueExpr, SyntaxTree::Expression* falseExpr, const TypeInfo* resultType,
                               const char* trueName, const char* falseName, const char* mergeName, const char* phiName);
 
-    llvm::Value* CreateLogicalAnd(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
-
-    llvm::Value* CreateLogicalOr(SyntaxTree::Expression* leftExpr, SyntaxTree::Expression* rightExpr);
-
     llvm::Value* CreateLogicalBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* branchExpr, bool isTrueBranch);
 
     void SetDebugLocation(const Token* token);

@@ -77,12 +77,12 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
     if (op == BinaryExpression::eLogicalAnd)
     {
         SetDebugLocation(binaryExpression->GetOperatorToken());
-        resultValue = CreateLogicalAnd(leftExpr, rightExpr);
+        resultValue = CreateLogicalBranch(leftExpr, rightExpr, true);
     }
     else if (op == BinaryExpression::eLogicalOr)
     {
         SetDebugLocation(binaryExpression->GetOperatorToken());
-        resultValue = CreateLogicalOr(leftExpr, rightExpr);
+        resultValue = CreateLogicalBranch(leftExpr, rightExpr, false);
     }
     else
     {
@@ -1063,18 +1063,6 @@ Value* LlvmIrGenerator::CreateBranch(Expression* conditionExpr, Expression* true
     phiNode->addIncoming(elseExprValue, falseBlock);
 
     return phiNode;
-}
-
-Value* LlvmIrGenerator::CreateLogicalAnd(Expression* leftExpr, Expression* rightExpr)
-{
-    Value* value = CreateLogicalBranch(leftExpr, rightExpr, true);
-    return value;
-}
-
-Value* LlvmIrGenerator::CreateLogicalOr(Expression* leftExpr, Expression* rightExpr)
-{
-    Value* value = CreateLogicalBranch(leftExpr, rightExpr, false);
-    return value;
 }
 
 Value* LlvmIrGenerator::CreateLogicalBranch(Expression* conditionExpr, Expression* branchExpr, bool isAnd)

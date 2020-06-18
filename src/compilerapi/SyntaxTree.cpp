@@ -121,20 +121,6 @@ unsigned NumericExpression::GetMinUnsignedSize() const
     return numBits;
 }
 
-BoolLiteralExpression* BoolLiteralExpression::CreateTrueExpression()
-{
-    BoolLiteralExpression* expr = new BoolLiteralExpression(true, Token::None);
-    expr->SetType(TypeInfo::BoolType);
-    return expr;
-}
-
-BoolLiteralExpression* BoolLiteralExpression::CreateFalseExpression()
-{
-    BoolLiteralExpression* expr = new BoolLiteralExpression(false, Token::None);
-    expr->SetType(TypeInfo::BoolType);
-    return expr;
-}
-
 BoolLiteralExpression::BoolLiteralExpression(bool value, const Token* token) :
     token(token),
     value(value)
