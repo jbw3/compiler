@@ -962,6 +962,10 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         const string& name = type->GetShortName();
         diType = diBuilder->createBasicType(name, 8, dwarf::DW_ATE_boolean);
     }
+    else if (type->IsSameAs(*TypeInfo::UnitType))
+    {
+        diType = diBuilder->createUnspecifiedType(TypeInfo::UnitType->GetShortName());
+    }
     else
     {
         logger.LogInternalError("Could not determine function's debug return type");
