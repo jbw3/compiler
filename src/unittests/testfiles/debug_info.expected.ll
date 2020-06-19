@@ -46,6 +46,36 @@ entry:
   ret i64 %add, !dbg !34
 }
 
+; Function Attrs: noinline nounwind optnone
+define i32 @whileLoop(i32 %a, i32 %b) #0 !dbg !35 {
+entry:
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  call void @llvm.dbg.declare(metadata i32* %a1, metadata !39, metadata !DIExpression()), !dbg !41
+  store i32 %b, i32* %b2
+  call void @llvm.dbg.declare(metadata i32* %b2, metadata !40, metadata !DIExpression()), !dbg !41
+  br label %whileCond
+
+whileCond:                                        ; preds = %whileBody, %entry
+  %a3 = load i32, i32* %a1, !dbg !42
+  %cmpgt = icmp sgt i32 %a3, 0, !dbg !43
+  br i1 %cmpgt, label %whileBody, label %whileExit, !dbg !43
+
+whileBody:                                        ; preds = %whileCond
+  %load = load i32, i32* %b2, !dbg !44
+  %mul = mul i32 %load, 3, !dbg !44
+  store i32 %mul, i32* %b2, !dbg !44
+  %load4 = load i32, i32* %a1, !dbg !45
+  %sub = sub i32 %load4, 1, !dbg !45
+  store i32 %sub, i32* %a1, !dbg !45
+  br label %whileCond, !dbg !45
+
+whileExit:                                        ; preds = %whileCond
+  %b5 = load i32, i32* %b2, !dbg !46
+  ret i32 %b5, !dbg !46
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -89,3 +119,15 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !32 = !DILocation(line: 13, column: 17, scope: !17)
 !33 = !DILocation(line: 13, column: 12, scope: !17)
 !34 = !DILocation(line: 13, column: 8, scope: !17)
+!35 = distinct !DISubprogram(name: "whileLoop", scope: !1, file: !1, line: 16, type: !36, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !38)
+!36 = !DISubroutineType(flags: DIFlagPrototyped, types: !37)
+!37 = !{!6, !6, !6}
+!38 = !{!39, !40}
+!39 = !DILocalVariable(name: "a", scope: !35, file: !1, line: 16, type: !6)
+!40 = !DILocalVariable(name: "b", arg: 1, scope: !35, file: !1, line: 16, type: !6)
+!41 = !DILocation(line: 16, scope: !35)
+!42 = !DILocation(line: 18, column: 11, scope: !35)
+!43 = !DILocation(line: 18, column: 13, scope: !35)
+!44 = !DILocation(line: 20, column: 11, scope: !35)
+!45 = !DILocation(line: 21, column: 11, scope: !35)
+!46 = !DILocation(line: 24, column: 5, scope: !35)

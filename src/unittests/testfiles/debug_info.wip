@@ -12,3 +12,14 @@ fun operators(x i32, y i64, z i8) i64
 {
     -x + y / (x * z)
 }
+
+fun whileLoop(a i32, b i32) i32
+{
+    while a > 0
+    {
+        b *= 3;
+        a -= 1;
+    }
+
+    b
+}
