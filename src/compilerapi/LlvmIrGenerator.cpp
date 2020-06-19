@@ -830,6 +830,21 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, varType, alloca);
 
+    if (dbgInfo)
+    {
+        const Token* token = variableDeclaration->GetNameToken();
+        unsigned line = token->GetLine();
+        unsigned column = token->GetColumn();
+        DIType* varDebugType = GetDebugType(varType);
+        if (varDebugType == nullptr)
+        {
+            resultValue = nullptr;
+            return;
+        }
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diSubprogram, varName, diCompileUnit->getFile(), line, varDebugType, true);
+        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diSubprogram), builder.GetInsertBlock());
+    }
+
     variableDeclaration->GetAssignmentExpression()->Accept(this);
     if (resultValue == nullptr)
     {
