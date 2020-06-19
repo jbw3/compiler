@@ -544,7 +544,10 @@ Expression* BranchExpression::GetElseExpression() const
     return elseExpression;
 }
 
-VariableDeclaration::VariableDeclaration(const string& name, const string& typeName, BinaryExpression* assignmentExpression) :
+VariableDeclaration::VariableDeclaration(const string& name, const string& typeName, BinaryExpression* assignmentExpression,
+                                         const Token* nameToken, const Token* typeNameToken) :
+    nameToken(nameToken),
+    typeNameToken(typeNameToken),
     name(name),
     typeName(typeName),
     variableType(nullptr),
@@ -580,6 +583,16 @@ void VariableDeclaration::SetVariableType(const TypeInfo* newType)
 BinaryExpression* VariableDeclaration::GetAssignmentExpression() const
 {
     return assignmentExpression;
+}
+
+const Token* VariableDeclaration::GetNameToken() const
+{
+    return nameToken;
+}
+
+const Token* VariableDeclaration::GetTypeNameToken() const
+{
+    return typeNameToken;
 }
 
 WhileLoop::WhileLoop(Expression* condition, Expression* expression) :

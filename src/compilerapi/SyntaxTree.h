@@ -315,7 +315,8 @@ private:
 class VariableDeclaration : public Expression
 {
 public:
-    VariableDeclaration(const std::string& name, const std::string& typeName, BinaryExpression* assignmentExpression);
+    VariableDeclaration(const std::string& name, const std::string& typeName, BinaryExpression* assignmentExpression,
+                        const Token* nameToken, const Token* typeNameToken);
 
     virtual ~VariableDeclaration() = default;
 
@@ -331,7 +332,13 @@ public:
 
     BinaryExpression* GetAssignmentExpression() const;
 
+    const Token* GetNameToken() const;
+
+    const Token* GetTypeNameToken() const;
+
 private:
+    const Token* nameToken;
+    const Token* typeNameToken;
     std::string name;
     std::string typeName;
     const TypeInfo* variableType;

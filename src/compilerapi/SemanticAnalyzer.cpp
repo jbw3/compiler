@@ -1094,7 +1094,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
         if (type == nullptr)
         {
             isError = true;
-            logger.LogError("'{}' is not a known type", typeName);
+            logger.LogError(*variableDeclaration->GetTypeNameToken(), "'{}' is not a known type", typeName);
             return;
         }
     }
@@ -1106,7 +1106,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     if (!ok)
     {
         isError = true;
-        logger.LogError("Variable '{}' has already been declared", varName);
+        logger.LogError(*variableDeclaration->GetNameToken(), "Variable '{}' has already been declared", varName);
         return;
     }
 

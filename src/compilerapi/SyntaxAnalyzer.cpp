@@ -655,16 +655,19 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
+    const Token* varTypeNameToken = nullptr;
     string varTypeName;
     const Token* opToken = nullptr;
     if (iter->GetValue() == ASSIGNMENT_OPERATOR)
     {
+        varTypeNameToken = Token::None;
         varTypeName = "";
         opToken = &*iter;
     }
     else
     {
-        varTypeName = iter->GetValue();
+        varTypeNameToken = &*iter;
+        varTypeName = varTypeNameToken->GetValue();
 
         if (!IncrementIterator(iter, endIter, "Expected an assignment operator"))
         {
@@ -693,7 +696,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     const string& varName = varNameToken->GetValue();
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression, opToken);
-    VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment);
+    VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment, varNameToken, varTypeNameToken);
     return varDecl;
 }
 
