@@ -764,7 +764,10 @@ Expression* FunctionDefinition::GetExpression() const
     return expression;
 }
 
-MemberDefinition::MemberDefinition(const std::string& name, const std::string& typeName) :
+MemberDefinition::MemberDefinition(const std::string& name, const std::string& typeName,
+                                   const Token* nameToken, const Token* typeNameToken) :
+    nameToken(nameToken),
+    typeNameToken(typeNameToken),
     name(name),
     typeName(typeName)
 {
@@ -780,7 +783,19 @@ const std::string& MemberDefinition::GetTypeName() const
     return typeName;
 }
 
-StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members) :
+const Token* MemberDefinition::GetNameToken() const
+{
+    return nameToken;
+}
+
+const Token* MemberDefinition::GetTypeNameToken() const
+{
+    return typeNameToken;
+}
+
+StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members,
+                                   const Token* nameToken) :
+    nameToken(nameToken),
     name(name),
     members(members),
     type(nullptr)
@@ -815,6 +830,11 @@ const TypeInfo* StructDefinition::GetType() const
 void StructDefinition::SetType(const TypeInfo* newType)
 {
     type = newType;
+}
+
+const Token* StructDefinition::GetNameToken() const
+{
+    return nameToken;
 }
 
 MemberInitialization::MemberInitialization(const string& name, Expression* expression) :

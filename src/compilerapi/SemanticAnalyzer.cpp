@@ -549,7 +549,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
         {
             delete newType;
             isError = true;
-            logger.LogError("'{}' is not a known type", memberTypeName);
+            logger.LogError(*member->GetTypeNameToken(), "'{}' is not a known type", memberTypeName);
             return;
         }
 
@@ -559,7 +559,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
         {
             delete newType;
             isError = true;
-            logger.LogError("Duplicate member '{}' in struct '{}'", memberName, structName);
+            logger.LogError(*member->GetNameToken(), "Duplicate member '{}' in struct '{}'", memberName, structName);
             return;
         }
     }
@@ -569,7 +569,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
     {
         delete newType;
         isError = true;
-        logger.LogError("Type '{}' has already been defined", structName);
+        logger.LogError(*structDefinition->GetNameToken(), "Struct '{}' has already been defined", structName);
         return;
     }
 
@@ -672,7 +672,7 @@ bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
         auto rv = nameMap.insert({structName, structDef});
         if (!rv.second)
         {
-            logger.LogError("Struct '{}' has already been defined", structName);
+            logger.LogError(*structDef->GetNameToken(), "Struct '{}' has already been defined", structName);
             return false;
         }
     }
@@ -727,7 +727,7 @@ bool SemanticAnalyzer::ResolveDependencies(
             if (dependentsIter != dependents.end())
             {
                 const string& memberName = member->GetName();
-                logger.LogError("In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
+                logger.LogError(*member->GetNameToken(), "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
                 return false;
             }
 
@@ -736,7 +736,7 @@ bool SemanticAnalyzer::ResolveDependencies(
             auto nameMapIter = nameMap.find(memberTypeName);
             if (nameMapIter == nameMap.end())
             {
-                logger.LogError("'{}' is not a known type", memberTypeName);
+                logger.LogError(*member->GetTypeNameToken(), "'{}' is not a known type", memberTypeName);
                 return false;
             }
 

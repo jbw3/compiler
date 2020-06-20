@@ -437,6 +437,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
         return nullptr;
     }
 
+    const Token* structNameToken = &*iter;
     string structName = iter->GetValue();
 
     if (!IncrementIterator(iter, endIter, "Expected '{'"))
@@ -463,6 +464,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             logger.LogError(*iter, "Invalid member name: '{}'", iter->GetValue());
             return nullptr;
         }
+        const Token* memberNameToken = &*iter;
         const string& memberName = iter->GetValue();
 
         // get member type
@@ -471,9 +473,10 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             deletePointerContainer(members);
             return nullptr;
         }
+        const Token* memberTypeToken = &*iter;
         const string& memberType = iter->GetValue();
 
-        MemberDefinition* member = new MemberDefinition(memberName, memberType);
+        MemberDefinition* member = new MemberDefinition(memberName, memberType, memberNameToken, memberTypeToken);
         members.push_back(member);
 
         if (!IncrementIterator(iter, endIter, "Expected ',' or '}'"))
@@ -513,7 +516,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     // increment past "}"
     ++iter;
 
-    StructDefinition* structDef = new StructDefinition(structName, members);
+    StructDefinition* structDef = new StructDefinition(structName, members, structNameToken);
     return structDef;
 }
 

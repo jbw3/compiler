@@ -466,13 +466,20 @@ private:
 class MemberDefinition
 {
 public:
-    MemberDefinition(const std::string& name, const std::string& typeName);
+    MemberDefinition(const std::string& name, const std::string& typeName,
+                     const Token* nameToken, const Token* typeNameToken);
 
     const std::string& GetName() const;
 
     const std::string& GetTypeName() const;
 
+    const Token* GetNameToken() const;
+
+    const Token* GetTypeNameToken() const;
+
 private:
+    const Token* nameToken;
+    const Token* typeNameToken;
     std::string name;
     std::string typeName;
 };
@@ -480,7 +487,8 @@ private:
 class StructDefinition : public SyntaxTreeNode
 {
 public:
-    StructDefinition(const std::string& name, const std::vector<MemberDefinition*>& members);
+    StructDefinition(const std::string& name, const std::vector<MemberDefinition*>& members,
+                     const Token* nameToken);
 
     virtual ~StructDefinition();
 
@@ -494,7 +502,10 @@ public:
 
     void SetType(const TypeInfo* newType);
 
+    const Token* GetNameToken() const;
+
 private:
+    const Token* nameToken;
     std::string name;
     std::vector<MemberDefinition*> members;
     const TypeInfo* type;
