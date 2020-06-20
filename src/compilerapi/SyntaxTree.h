@@ -521,7 +521,8 @@ private:
 class MemberInitialization
 {
 public:
-    MemberInitialization(const std::string& name, Expression* expression);
+    MemberInitialization(const std::string& name, Expression* expression,
+                         const Token* nameToken);
 
     virtual ~MemberInitialization();
 
@@ -529,15 +530,19 @@ public:
 
     Expression* GetExpression() const;
 
+    const Token* GetNameToken() const;
+
 private:
     std::string name;
     Expression* expression;
+    const Token* nameToken;
 };
 
 class StructInitializationExpression : public Expression
 {
 public:
-    StructInitializationExpression(const std::string& structName, const std::vector<MemberInitialization*>& memberInitializations);
+    StructInitializationExpression(const std::string& structName, const std::vector<MemberInitialization*>& memberInitializations,
+                                   const Token* structNameToken);
 
     virtual ~StructInitializationExpression();
 
@@ -547,9 +552,12 @@ public:
 
     const std::vector<MemberInitialization*>& GetMemberInitializations() const;
 
+    const Token* GetStructNameToken() const;
+
 private:
     std::string structName;
     std::vector<MemberInitialization*> memberInitializations;
+    const Token* structNameToken;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

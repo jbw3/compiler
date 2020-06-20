@@ -583,7 +583,8 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     if (type == nullptr)
     {
         isError = true;
-        logger.LogError("'{}' is not a known type", structName);
+        const Token* token = structInitializationExpression->GetStructNameToken();
+        logger.LogError(*token, "'{}' is not a known type", structName);
         return;
     }
 
@@ -604,7 +605,8 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (memberInfo == nullptr)
         {
             isError = true;
-            logger.LogError("Struct '{}' does not have a member named '{}'", structName, memberName);
+            const Token* token = member->GetNameToken();
+            logger.LogError(*token, "Struct '{}' does not have a member named '{}'", structName, memberName);
             return;
         }
 
@@ -612,7 +614,8 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (num == 0)
         {
             isError = true;
-            logger.LogError("Member '{}' has already been initialized", memberName);
+            const Token* token = member->GetNameToken();
+            logger.LogError(*token, "Member '{}' has already been initialized", memberName);
             return;
         }
 
@@ -633,26 +636,38 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
             if ( !(bothAreInts && HaveCompatibleSigns(memberType, exprType) && HaveCompatibleAssignmentSizes(memberType, exprType)) )
             {
                 isError = true;
-                logger.LogError("Cannot assign expression of type '{}' to member of type '{}'",
-                                exprType->GetShortName(), memberType->GetShortName());
+                const Token* token = member->GetNameToken();
+                logger.LogError(*token, "Cannot assign expression of type '{}' to member '{}' of type '{}'",
+                                exprType->GetShortName(), memberName, memberType->GetShortName());
                 return;
             }
         }
     }
 
-    if (membersToInit.size() > 0)
+    // error if not all members were initialized
+    size_t membersNotInit = membersToInit.size();
+    if (membersNotInit > 0)
     {
-        auto iter = membersToInit.cbegin();
-        string errorMsg = "The following members were not initialized: " + *iter;
-        ++iter;
-        for (; iter != membersToInit.cend(); ++iter)
+        string errorMsg;
+        if (membersNotInit == 1)
         {
-            errorMsg += ", ";
-            errorMsg += *iter;
+            errorMsg = "Struct member '" + *membersToInit.cbegin() + "' was not initialized";
+        }
+        else
+        {
+            auto iter = membersToInit.cbegin();
+            errorMsg = "The following struct members were not initialized: " + *iter;
+            ++iter;
+            for (; iter != membersToInit.cend(); ++iter)
+            {
+                errorMsg += ", ";
+                errorMsg += *iter;
+            }
         }
 
         isError = true;
-        logger.LogError(errorMsg.c_str());
+        const Token* token = structInitializationExpression->GetStructNameToken();
+        logger.LogError(*token, errorMsg.c_str());
         return;
     }
 }

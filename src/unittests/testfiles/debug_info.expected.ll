@@ -133,10 +133,10 @@ entry:
   call void @llvm.dbg.declare(metadata i64* %n1, metadata !102, metadata !DIExpression()), !dbg !109
   call void @llvm.dbg.declare(metadata %TestStruct* %t, metadata !103, metadata !DIExpression()), !dbg !110
   %n2 = load i64, i64* %n1, !dbg !111
-  %agg = insertvalue %TestStruct { i32 12, i64 undef, i1 undef }, i64 %n2, 1, !dbg !111
-  %agg3 = insertvalue %TestStruct %agg, i1 true, 2, !dbg !112
-  store %TestStruct %agg3, %TestStruct* %t, !dbg !113
-  ret %UnitType zeroinitializer, !dbg !113
+  %agg = insertvalue %TestStruct { i32 12, i64 undef, i1 undef }, i64 %n2, 1, !dbg !112
+  %agg3 = insertvalue %TestStruct %agg, i1 true, 2, !dbg !113
+  store %TestStruct %agg3, %TestStruct* %t, !dbg !114
+  ret %UnitType zeroinitializer, !dbg !114
 }
 
 ; Function Attrs: nounwind readnone speculatable willreturn
@@ -259,5 +259,6 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !109 = !DILocation(line: 43, scope: !98)
 !110 = !DILocation(line: 45, column: 9, scope: !98)
 !111 = !DILocation(line: 48, column: 15, scope: !98)
-!112 = !DILocation(line: 49, column: 15, scope: !98)
-!113 = !DILocation(line: 45, column: 11, scope: !98)
+!112 = !DILocation(line: 48, column: 9, scope: !98)
+!113 = !DILocation(line: 49, column: 9, scope: !98)
+!114 = !DILocation(line: 45, column: 11, scope: !98)

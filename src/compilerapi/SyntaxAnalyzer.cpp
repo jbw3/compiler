@@ -558,6 +558,7 @@ bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator en
 
 StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(TokenIterator& iter, TokenIterator endIter)
 {
+    const Token* structNameToken = &*iter;
     const string& structName = iter->GetValue();
 
     // skip struct name and '{'
@@ -579,6 +580,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
             logger.LogError(*iter, "Invalid member name: '{}'", iter->GetValue());
             return nullptr;
         }
+        const Token* memberNameToken = &*iter;
         const string& memberName = iter->GetValue();
 
         // make sure member name is followed by ':'
@@ -597,7 +599,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
             return nullptr;
         }
 
-        MemberInitialization* member = new MemberInitialization(memberName, memberExpr);
+        MemberInitialization* member = new MemberInitialization(memberName, memberExpr, memberNameToken);
         members.push_back(member);
 
         const string& delimiter = iter->GetValue();
@@ -628,7 +630,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
         return nullptr;
     }
 
-    StructInitializationExpression* structInit = new StructInitializationExpression(structName, members);
+    StructInitializationExpression* structInit = new StructInitializationExpression(structName, members, structNameToken);
     return structInit;
 }
 

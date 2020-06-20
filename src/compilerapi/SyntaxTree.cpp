@@ -850,9 +850,11 @@ const Token* StructDefinition::GetNameToken() const
     return nameToken;
 }
 
-MemberInitialization::MemberInitialization(const string& name, Expression* expression) :
+MemberInitialization::MemberInitialization(const string& name, Expression* expression,
+                                           const Token* nameToken) :
     name(name),
-    expression(expression)
+    expression(expression),
+    nameToken(nameToken)
 {
 }
 
@@ -871,9 +873,16 @@ Expression* MemberInitialization::GetExpression() const
     return expression;
 }
 
-StructInitializationExpression::StructInitializationExpression(const string& structName, const vector<MemberInitialization*>& memberInitializations) :
+const Token* MemberInitialization::GetNameToken() const
+{
+    return nameToken;
+}
+
+StructInitializationExpression::StructInitializationExpression(const string& structName, const vector<MemberInitialization*>& memberInitializations,
+                                                               const Token* structNameToken) :
     structName(structName),
-    memberInitializations(memberInitializations)
+    memberInitializations(memberInitializations),
+    structNameToken(structNameToken)
 {
 }
 
@@ -895,6 +904,11 @@ const string& StructInitializationExpression::GetStructName() const
 const vector<MemberInitialization*>& StructInitializationExpression::GetMemberInitializations() const
 {
     return memberInitializations;
+}
+
+const Token* StructInitializationExpression::GetStructNameToken() const
+{
+    return structNameToken;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<StructDefinition*>& structDefinitions,

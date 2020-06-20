@@ -28,7 +28,7 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     bool ok = compiler.Compile();
     if (!ok)
     {
-        cerr << "Error: Failed to compile\n";
+        cerr << "Error: " << inFilename << ": Failed to compile\n";
         return false;
     }
 
@@ -45,7 +45,7 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
 
         if (expectedLine != outLine)
         {
-            cerr << "Error: Line " << lineNum << " is not correct\n";
+            cerr << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n";
             return false;
         }
 
@@ -54,7 +54,7 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
 
     if (expectedFile.eof() != outFile.eof())
     {
-        cerr << "Error: Unexpected number of lines\n";
+        cerr << "Error: " << outFilename << ": Unexpected number of lines\n";
         return false;
     }
 

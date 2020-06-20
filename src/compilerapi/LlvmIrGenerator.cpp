@@ -455,6 +455,8 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
             return;
         }
 
+        SetDebugLocation(member->GetNameToken());
+
         const MemberInfo* memberInfo = typeInfo->GetMember(member->GetName());
 
         ExtendType(expr->GetType(), memberInfo->GetType(), resultValue);
