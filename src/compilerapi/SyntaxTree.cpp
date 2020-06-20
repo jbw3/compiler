@@ -476,7 +476,10 @@ const Token* FunctionExpression::GetNameToken() const
     return nameToken;
 }
 
-MemberExpression::MemberExpression(Expression* subExpr, const std::string& memberName) :
+MemberExpression::MemberExpression(Expression* subExpr, const std::string& memberName,
+                                   const Token* opToken, const Token* memberNameToken) :
+    opToken(opToken),
+    memberNameToken(memberNameToken),
     subExpression(subExpr),
     memberName(memberName)
 {
@@ -506,6 +509,16 @@ Expression* MemberExpression::GetSubExpression() const
 const string& MemberExpression::GetMemberName() const
 {
     return memberName;
+}
+
+const Token* MemberExpression::GetOperatorToken() const
+{
+    return opToken;
+}
+
+const Token* MemberExpression::GetMemberNameToken() const
+{
+    return memberNameToken;
 }
 
 BranchExpression::BranchExpression(Expression* ifCondition,

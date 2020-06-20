@@ -1550,6 +1550,8 @@ Expression* SyntaxAnalyzer::ProcessMemberExpression(Expression* expr, TokenItera
 
     while (nextIter != endIter && nextIter->GetValue() == ".")
     {
+        const Token* opToken = &*nextIter;
+
         // skip to token after "."
         iter += 2;
 
@@ -1566,7 +1568,7 @@ Expression* SyntaxAnalyzer::ProcessMemberExpression(Expression* expr, TokenItera
             return nullptr;
         }
 
-        expr = new MemberExpression(expr, iter->GetValue());
+        expr = new MemberExpression(expr, iter->GetValue(), opToken, &*iter);
 
         nextIter = iter + 1;
     }

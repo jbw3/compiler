@@ -981,7 +981,8 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
     const MemberInfo* member = exprType->GetMember(memberName);
     if (member == nullptr)
     {
-        logger.LogError("Type '{}' has no member named '{}'", exprType->GetShortName(), memberName);
+        const Token* memberToken = memberExpression->GetMemberNameToken();
+        logger.LogError(*memberToken, "Type '{}' has no member named '{}'", exprType->GetShortName(), memberName);
         isError = true;
         return;
     }

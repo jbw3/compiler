@@ -272,7 +272,8 @@ private:
 class MemberExpression : public Expression
 {
 public:
-    MemberExpression(Expression* subExpr, const std::string& memberName);
+    MemberExpression(Expression* subExpr, const std::string& memberName,
+                     const Token* opToken, const Token* memberNameToken);
 
     virtual ~MemberExpression();
 
@@ -284,7 +285,13 @@ public:
 
     const std::string& GetMemberName() const;
 
+    const Token* GetOperatorToken() const;
+
+    const Token* GetMemberNameToken() const;
+
 private:
+    const Token* opToken;
+    const Token* memberNameToken;
     Expression* subExpression;
     std::string memberName;
 };

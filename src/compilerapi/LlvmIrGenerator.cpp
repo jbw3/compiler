@@ -703,6 +703,8 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         return;
     }
 
+    SetDebugLocation(memberExpression->GetMemberNameToken());
+
     const TypeInfo* exprType = expr->GetType();
     const string& memberName = memberExpression->GetMemberName();
     const MemberInfo* member = exprType->GetMember(memberName);
