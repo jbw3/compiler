@@ -3,6 +3,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 namespace llvm
 {
@@ -98,7 +99,7 @@ public:
 
     const MemberInfo* GetMember(const std::string& memberName) const;
 
-    const std::map<std::string, const MemberInfo*>& GetMembers() const;
+    const std::vector<const MemberInfo*>& GetMembers() const;
 
     size_t GetMemberCount() const;
 
@@ -117,7 +118,8 @@ private:
     ESign sign;
     bool isAggregate;
     std::string shortName;
-    std::map<std::string, const MemberInfo*> members;
+    std::map<std::string, const MemberInfo*> memberMap;
+    std::vector<const MemberInfo*> members;
 };
 
 class UnitTypeInfo : public TypeInfo

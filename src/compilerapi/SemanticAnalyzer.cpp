@@ -590,9 +590,9 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     structInitializationExpression->SetType(type);
 
     unordered_set<string> membersToInit;
-    for (auto pair : type->GetMembers())
+    for (const MemberInfo* member : type->GetMembers())
     {
-        membersToInit.insert(pair.first);
+        membersToInit.insert(member->GetName());
     }
 
     for (MemberInitialization* member : structInitializationExpression->GetMemberInitializations())

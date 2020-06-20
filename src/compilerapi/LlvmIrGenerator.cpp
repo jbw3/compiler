@@ -977,9 +977,8 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         SmallVector<Metadata*, 2> elements;
 
         uint64_t offset = 0;
-        for (auto pair : strType->GetMembers())
+        for (const MemberInfo* member : strType->GetMembers())
         {
-            const MemberInfo* member = pair.second;
             const TypeInfo* memberType = member->GetType();
             DIType* memberDiType = GetDebugType(memberType);
             if (memberDiType == nullptr)
@@ -989,9 +988,10 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
 
             const string& memberName = member->GetName();
             unsigned size = memberType->GetNumBits();
+            // TODO: don't hard-code alignment
             elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
 
-            offset += numBits;
+            offset += size;
         }
 
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);

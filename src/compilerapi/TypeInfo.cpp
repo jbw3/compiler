@@ -195,9 +195,10 @@ TypeInfo::~TypeInfo()
 {
     for (auto iter = members.begin(); iter != members.end(); ++iter)
     {
-        delete iter->second;
+        delete *iter;
     }
 
+    memberMap.clear();
     members.clear();
 }
 
@@ -233,8 +234,8 @@ const string& TypeInfo::GetShortName() const
 
 const MemberInfo* TypeInfo::GetMember(const string& memberName) const
 {
-    auto iter = members.find(memberName);
-    if (iter == members.cend())
+    auto iter = memberMap.find(memberName);
+    if (iter == memberMap.cend())
     {
         return nullptr;
     }
@@ -242,7 +243,7 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     return iter->second;
 }
 
-const map<string, const MemberInfo*>& TypeInfo::GetMembers() const
+const vector<const MemberInfo*>& TypeInfo::GetMembers() const
 {
     return members;
 }
@@ -255,10 +256,14 @@ size_t TypeInfo::GetMemberCount() const
 bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable)
 {
     MemberInfo* member = new MemberInfo(name, members.size(), type, isAssignable);
-    auto rv = members.insert({name, member});
+    auto rv = memberMap.insert({name, member});
 
     bool inserted = rv.second;
-    if (!inserted)
+    if (inserted)
+    {
+        members.push_back(member);
+    }
+    else
     {
         delete member;
     }
