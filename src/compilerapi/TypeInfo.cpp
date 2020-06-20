@@ -1,5 +1,6 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+#include "Token.h"
 #include "TypeInfo.h"
 #include "keywords.h"
 #include "llvm/Target/TargetMachine.h"
@@ -20,10 +21,11 @@ PrimitiveType uInt16TypeInfo(16, false, true, TypeInfo::eUnsigned, UINT16_KEYWOR
 PrimitiveType uInt32TypeInfo(32, false, true, TypeInfo::eUnsigned, UINT32_KEYWORD);
 PrimitiveType uInt64TypeInfo(64, false, true, TypeInfo::eUnsigned, UINT64_KEYWORD);
 
-MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable) :
+MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable, const Token* token) :
     name(name),
     index(index),
     type(type),
+    token(token),
     isAssignable(isAssignable)
 {
 }
@@ -46,6 +48,11 @@ const TypeInfo* MemberInfo::GetType() const
 bool MemberInfo::GetIsAssignable() const
 {
     return isAssignable;
+}
+
+const Token* MemberInfo::GetToken() const
+{
+    return token;
 }
 
 const UnitTypeInfo* TypeInfo::UnitType = &unitType;
@@ -253,9 +260,9 @@ size_t TypeInfo::GetMemberCount() const
     return members.size();
 }
 
-bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable)
+bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable, const Token* token)
 {
-    MemberInfo* member = new MemberInfo(name, members.size(), type, isAssignable);
+    MemberInfo* member = new MemberInfo(name, members.size(), type, isAssignable, token);
     auto rv = memberMap.insert({name, member});
 
     bool inserted = rv.second;
@@ -424,7 +431,7 @@ const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
 StringPointerType::StringPointerType(unsigned numBits) :
     TypeInfo(numBits, false, false, TypeInfo::eNotApplicable, false, STR_KEYWORD)
 {
-    AddMember("Size", TypeInfo::GetUIntSizeType(), false);
+    AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
 }
 
 bool StringPointerType::IsSameAs(const TypeInfo& other) const
@@ -433,8 +440,9 @@ bool StringPointerType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-AggregateType::AggregateType(const string& name) :
-    TypeInfo(0, false, false, TypeInfo::eNotApplicable, true, name)
+AggregateType::AggregateType(const string& name, const Token* token) :
+    TypeInfo(0, false, false, TypeInfo::eNotApplicable, true, name),
+    token(token)
 {
 }
 
@@ -448,4 +456,9 @@ bool AggregateType::IsSameAs(const TypeInfo& other) const
 
     bool isSame = GetShortName() == otherAggType->GetShortName();
     return isSame;
+}
+
+const Token* AggregateType::GetToken() const
+{
+    return token;
 }

@@ -539,7 +539,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 {
     const string& structName = structDefinition->GetName();
 
-    AggregateType* newType = new AggregateType(structName);
+    AggregateType* newType = new AggregateType(structName, structDefinition->GetNameToken());
 
     for (const MemberDefinition* member : structDefinition->GetMembers())
     {
@@ -554,7 +554,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
         }
 
         const string& memberName = member->GetName();
-        bool added = newType->AddMember(memberName, memberType, true);
+        bool added = newType->AddMember(memberName, memberType, true, member->GetNameToken());
         if (!added)
         {
             delete newType;

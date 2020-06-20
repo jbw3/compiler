@@ -39,3 +39,20 @@ fun types()
     var x9 usize = 9;
     var s str    = "abc";
 }
+
+fun structType(n i64)
+{
+    var t = TestStruct
+    {
+        num1: 12,
+        num2: n,
+        flag: true,
+    };
+}
+
+struct TestStruct
+{
+    num1 i32,
+    num2 i64,
+    flag bool,
+}

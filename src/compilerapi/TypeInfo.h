@@ -9,13 +9,14 @@ namespace llvm
 {
 class TargetMachine;
 }
+class Token;
 class TypeInfo;
 class UnitTypeInfo;
 
 class MemberInfo
 {
 public:
-    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isAssignable);
+    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isAssignable, const Token* token);
 
     const std::string& GetName() const;
 
@@ -25,10 +26,13 @@ public:
 
     bool GetIsAssignable() const;
 
+    const Token* GetToken() const;
+
 private:
     std::string name;
     unsigned index;
     const TypeInfo* type;
+    const Token* token;
     bool isAssignable;
 };
 
@@ -103,7 +107,7 @@ public:
 
     size_t GetMemberCount() const;
 
-    bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable);
+    bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable, const Token* token);
 
 private:
     static unsigned pointerSize;
@@ -214,9 +218,14 @@ public:
 class AggregateType : public TypeInfo
 {
 public:
-    AggregateType(const std::string& name);
+    AggregateType(const std::string& name, const Token* token);
 
     bool IsSameAs(const TypeInfo& other) const override;
+
+    const Token* GetToken() const;
+
+private:
+    const Token* token;
 };
 
 #endif // TYPE_INFO_H_

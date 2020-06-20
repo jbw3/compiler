@@ -1000,7 +1000,46 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     }
     else
     {
-        logger.LogInternalError("Could not determine debug type");
+        const AggregateType* aggType = dynamic_cast<const AggregateType*>(type);
+
+        if (aggType != nullptr)
+        {
+            DIFile* file = diCompileUnit->getFile();
+            const string& name = aggType->GetShortName();
+            unsigned numBits = aggType->GetNumBits();
+
+            SmallVector<Metadata*, 8> elements;
+
+            uint64_t offset = 0;
+            for (const MemberInfo* member : aggType->GetMembers())
+            {
+                const TypeInfo* memberType = member->GetType();
+                DIType* memberDiType = GetDebugType(memberType);
+                if (memberDiType == nullptr)
+                {
+                    return nullptr;
+                }
+
+                const string& memberName = member->GetName();
+                uint64_t memberSize = memberDiType->getSizeInBits();
+                // TODO: better way to get alignment?
+                uint64_t alignment = (memberSize > 32) ? 32 : memberSize;
+                unsigned memberLine = member->GetToken()->GetLine();
+                elements.push_back(diBuilder->createMemberType(file, memberName, file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
+
+                offset += memberSize;
+            }
+
+            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+
+            unsigned line = aggType->GetToken()->GetLine();
+            // TODO: set alignment
+            diType = diBuilder->createStructType(file, name, file, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+        }
+        else
+        {
+            logger.LogInternalError("Could not determine debug type");
+        }
     }
 
     return diType;

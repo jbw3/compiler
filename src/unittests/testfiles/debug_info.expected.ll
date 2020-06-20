@@ -5,6 +5,7 @@ target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
 %str = type { i64, [0 x i8] }
+%TestStruct = type { i32, i64, i1 }
 
 @strStruct0 = constant { i64, [3 x i8] } { i64 3, [3 x i8] c"abc" }
 
@@ -123,6 +124,21 @@ entry:
   ret %UnitType zeroinitializer, !dbg !97
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @structType(i64 %n) #0 !dbg !98 {
+entry:
+  %t = alloca %TestStruct
+  %n1 = alloca i64
+  store i64 %n, i64* %n1
+  call void @llvm.dbg.declare(metadata i64* %n1, metadata !102, metadata !DIExpression()), !dbg !109
+  call void @llvm.dbg.declare(metadata %TestStruct* %t, metadata !103, metadata !DIExpression()), !dbg !110
+  %n2 = load i64, i64* %n1, !dbg !111
+  %agg = insertvalue %TestStruct { i32 12, i64 undef, i1 undef }, i64 %n2, 1, !dbg !111
+  %agg3 = insertvalue %TestStruct %agg, i1 true, 2, !dbg !112
+  store %TestStruct %agg3, %TestStruct* %t, !dbg !113
+  ret %UnitType zeroinitializer, !dbg !113
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -229,3 +245,19 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !95 = !DILocation(line: 39, column: 18, scope: !47)
 !96 = !DILocation(line: 40, column: 9, scope: !47)
 !97 = !DILocation(line: 40, column: 18, scope: !47)
+!98 = distinct !DISubprogram(name: "structType", scope: !1, file: !1, line: 43, type: !99, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !101)
+!99 = !DISubroutineType(flags: DIFlagPrototyped, types: !100)
+!100 = !{!50, !20}
+!101 = !{!102, !103}
+!102 = !DILocalVariable(name: "n", scope: !98, file: !1, line: 43, type: !20)
+!103 = !DILocalVariable(name: "t", scope: !98, file: !1, line: 45, type: !104)
+!104 = !DICompositeType(tag: DW_TAG_structure_type, name: "TestStruct", scope: !1, file: !1, line: 53, elements: !105)
+!105 = !{!106, !107, !108}
+!106 = !DIDerivedType(tag: DW_TAG_member, name: "num1", scope: !1, file: !1, line: 55, baseType: !6, size: 32, align: 32)
+!107 = !DIDerivedType(tag: DW_TAG_member, name: "num2", scope: !1, file: !1, line: 56, baseType: !20, size: 64, align: 32, offset: 32)
+!108 = !DIDerivedType(tag: DW_TAG_member, name: "flag", scope: !1, file: !1, line: 57, baseType: !53, size: 8, align: 8, offset: 96)
+!109 = !DILocation(line: 43, scope: !98)
+!110 = !DILocation(line: 45, column: 9, scope: !98)
+!111 = !DILocation(line: 48, column: 15, scope: !98)
+!112 = !DILocation(line: 49, column: 15, scope: !98)
+!113 = !DILocation(line: 45, column: 11, scope: !98)
