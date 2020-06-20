@@ -23,3 +23,19 @@ fun whileLoop(a i32, b i32) i32
 
     b
 }
+
+fun types()
+{
+    var b bool   = true;
+    var x0 i8    = 0;
+    var x1 i16   = 1;
+    var x2 i32   = 2;
+    var x3 i64   = 3;
+    var x4 isize = 4;
+    var x5 u8    = 5;
+    var x6 u16   = 6;
+    var x7 u32   = 7;
+    var x8 u64   = 8;
+    var x9 usize = 9;
+    var s str    = "abc";
+}

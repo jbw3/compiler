@@ -966,6 +966,38 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     {
         diType = diBuilder->createBasicType(TypeInfo::UnitType->GetShortName(), 0, dwarf::DW_ATE_unsigned);
     }
+    else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
+    {
+        // TODO: add debug info for data member
+
+        const TypeInfo* strType = TypeInfo::GetStringPointerType();
+        const string& name = strType->GetShortName();
+        unsigned numBits = strType->GetNumBits();
+
+        SmallVector<Metadata*, 2> elements;
+
+        uint64_t offset = 0;
+        for (auto pair : strType->GetMembers())
+        {
+            const MemberInfo* member = pair.second;
+            const TypeInfo* memberType = member->GetType();
+            DIType* memberDiType = GetDebugType(memberType);
+            if (memberDiType == nullptr)
+            {
+                return nullptr;
+            }
+
+            const string& memberName = member->GetName();
+            unsigned size = memberType->GetNumBits();
+            elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
+
+            offset += numBits;
+        }
+
+        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+        DIType* structType = diBuilder->createStructType(nullptr, name + "_data", nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+        diType = diBuilder->createPointerType(structType, TypeInfo::GetPointerSize(), 0, llvm::None, name);
+    }
     else
     {
         logger.LogInternalError("Could not determine debug type");

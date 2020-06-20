@@ -55,6 +55,8 @@ public:
 
     static void InitTypes(const llvm::TargetMachine* targetMachine);
 
+    static unsigned GetPointerSize();
+
     static const TypeInfo* GetIntSizeType();
 
     static const TypeInfo* GetUIntSizeType();
@@ -103,6 +105,7 @@ public:
     bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable);
 
 private:
+    static unsigned pointerSize;
     static TypeInfo* intSizeType;
     static TypeInfo* uintSizeType;
     static TypeInfo* stringPointerType;

@@ -3,6 +3,11 @@ source_filename = "src/unittests/testfiles/debug_info.wip"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
+%UnitType = type {}
+%str = type { i64, [0 x i8] }
+
+@strStruct0 = constant { i64, [3 x i8] } { i64 3, [3 x i8] c"abc" }
+
 ; Function Attrs: noinline nounwind optnone
 define i32 @noParams() #0 !dbg !3 {
 entry:
@@ -76,6 +81,48 @@ whileExit:                                        ; preds = %whileCond
   ret i32 %b5, !dbg !46
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @types() #0 !dbg !47 {
+entry:
+  %s = alloca %str*
+  %x9 = alloca i64
+  %x8 = alloca i64
+  %x7 = alloca i32
+  %x6 = alloca i16
+  %x5 = alloca i8
+  %x4 = alloca i64
+  %x3 = alloca i64
+  %x2 = alloca i32
+  %x1 = alloca i16
+  %x0 = alloca i8
+  %b = alloca i1
+  call void @llvm.dbg.declare(metadata i1* %b, metadata !52, metadata !DIExpression()), !dbg !74
+  store i1 true, i1* %b, !dbg !75
+  call void @llvm.dbg.declare(metadata i8* %x0, metadata !54, metadata !DIExpression()), !dbg !76
+  store i8 0, i8* %x0, !dbg !77
+  call void @llvm.dbg.declare(metadata i16* %x1, metadata !55, metadata !DIExpression()), !dbg !78
+  store i16 1, i16* %x1, !dbg !79
+  call void @llvm.dbg.declare(metadata i32* %x2, metadata !57, metadata !DIExpression()), !dbg !80
+  store i32 2, i32* %x2, !dbg !81
+  call void @llvm.dbg.declare(metadata i64* %x3, metadata !58, metadata !DIExpression()), !dbg !82
+  store i64 3, i64* %x3, !dbg !83
+  call void @llvm.dbg.declare(metadata i64* %x4, metadata !59, metadata !DIExpression()), !dbg !84
+  store i64 4, i64* %x4, !dbg !85
+  call void @llvm.dbg.declare(metadata i8* %x5, metadata !61, metadata !DIExpression()), !dbg !86
+  store i8 5, i8* %x5, !dbg !87
+  call void @llvm.dbg.declare(metadata i16* %x6, metadata !62, metadata !DIExpression()), !dbg !88
+  store i16 6, i16* %x6, !dbg !89
+  call void @llvm.dbg.declare(metadata i32* %x7, metadata !63, metadata !DIExpression()), !dbg !90
+  store i32 7, i32* %x7, !dbg !91
+  call void @llvm.dbg.declare(metadata i64* %x8, metadata !65, metadata !DIExpression()), !dbg !92
+  store i64 8, i64* %x8, !dbg !93
+  call void @llvm.dbg.declare(metadata i64* %x9, metadata !67, metadata !DIExpression()), !dbg !94
+  store i64 9, i64* %x9, !dbg !95
+  call void @llvm.dbg.declare(metadata %str** %s, metadata !69, metadata !DIExpression()), !dbg !96
+  store %str* bitcast ({ i64, [3 x i8] }* @strStruct0 to %str*), %str** %s, !dbg !97
+  ret %UnitType zeroinitializer, !dbg !97
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -131,3 +178,54 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !44 = !DILocation(line: 20, column: 11, scope: !35)
 !45 = !DILocation(line: 21, column: 11, scope: !35)
 !46 = !DILocation(line: 24, column: 5, scope: !35)
+!47 = distinct !DISubprogram(name: "types", scope: !1, file: !1, line: 27, type: !48, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !51)
+!48 = !DISubroutineType(flags: DIFlagPrototyped, types: !49)
+!49 = !{!50}
+!50 = !DIBasicType(name: "Unit", encoding: DW_ATE_unsigned)
+!51 = !{!52, !54, !55, !57, !58, !59, !61, !62, !63, !65, !67, !69}
+!52 = !DILocalVariable(name: "b", scope: !47, file: !1, line: 29, type: !53)
+!53 = !DIBasicType(name: "bool", size: 8, encoding: DW_ATE_boolean)
+!54 = !DILocalVariable(name: "x0", scope: !47, file: !1, line: 30, type: !21)
+!55 = !DILocalVariable(name: "x1", scope: !47, file: !1, line: 31, type: !56)
+!56 = !DIBasicType(name: "i16", size: 16, encoding: DW_ATE_signed)
+!57 = !DILocalVariable(name: "x2", scope: !47, file: !1, line: 32, type: !6)
+!58 = !DILocalVariable(name: "x3", scope: !47, file: !1, line: 33, type: !20)
+!59 = !DILocalVariable(name: "x4", scope: !47, file: !1, line: 34, type: !60)
+!60 = !DIBasicType(name: "isize", size: 64, encoding: DW_ATE_signed)
+!61 = !DILocalVariable(name: "x5", scope: !47, file: !1, line: 35, type: !12)
+!62 = !DILocalVariable(name: "x6", scope: !47, file: !1, line: 36, type: !11)
+!63 = !DILocalVariable(name: "x7", scope: !47, file: !1, line: 37, type: !64)
+!64 = !DIBasicType(name: "u32", size: 32, encoding: DW_ATE_unsigned)
+!65 = !DILocalVariable(name: "x8", scope: !47, file: !1, line: 38, type: !66)
+!66 = !DIBasicType(name: "u64", size: 64, encoding: DW_ATE_unsigned)
+!67 = !DILocalVariable(name: "x9", scope: !47, file: !1, line: 39, type: !68)
+!68 = !DIBasicType(name: "usize", size: 64, encoding: DW_ATE_unsigned)
+!69 = !DILocalVariable(name: "s", scope: !47, file: !1, line: 40, type: !70)
+!70 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "str", baseType: !71, size: 64)
+!71 = !DICompositeType(tag: DW_TAG_structure_type, name: "str_data", size: 64, elements: !72)
+!72 = !{!73}
+!73 = !DIDerivedType(tag: DW_TAG_member, name: "Size", baseType: !68, size: 64, align: 4)
+!74 = !DILocation(line: 29, column: 9, scope: !47)
+!75 = !DILocation(line: 29, column: 18, scope: !47)
+!76 = !DILocation(line: 30, column: 9, scope: !47)
+!77 = !DILocation(line: 30, column: 18, scope: !47)
+!78 = !DILocation(line: 31, column: 9, scope: !47)
+!79 = !DILocation(line: 31, column: 18, scope: !47)
+!80 = !DILocation(line: 32, column: 9, scope: !47)
+!81 = !DILocation(line: 32, column: 18, scope: !47)
+!82 = !DILocation(line: 33, column: 9, scope: !47)
+!83 = !DILocation(line: 33, column: 18, scope: !47)
+!84 = !DILocation(line: 34, column: 9, scope: !47)
+!85 = !DILocation(line: 34, column: 18, scope: !47)
+!86 = !DILocation(line: 35, column: 9, scope: !47)
+!87 = !DILocation(line: 35, column: 18, scope: !47)
+!88 = !DILocation(line: 36, column: 9, scope: !47)
+!89 = !DILocation(line: 36, column: 18, scope: !47)
+!90 = !DILocation(line: 37, column: 9, scope: !47)
+!91 = !DILocation(line: 37, column: 18, scope: !47)
+!92 = !DILocation(line: 38, column: 9, scope: !47)
+!93 = !DILocation(line: 38, column: 18, scope: !47)
+!94 = !DILocation(line: 39, column: 9, scope: !47)
+!95 = !DILocation(line: 39, column: 18, scope: !47)
+!96 = !DILocation(line: 40, column: 9, scope: !47)
+!97 = !DILocation(line: 40, column: 18, scope: !47)

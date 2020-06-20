@@ -59,6 +59,7 @@ const TypeInfo* TypeInfo::UInt16Type = &uInt16TypeInfo;
 const TypeInfo* TypeInfo::UInt32Type = &uInt32TypeInfo;
 const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
 
+unsigned TypeInfo::pointerSize = 0;
 TypeInfo* TypeInfo::intSizeType = nullptr;
 TypeInfo* TypeInfo::uintSizeType = nullptr;
 TypeInfo* TypeInfo::stringPointerType = nullptr;
@@ -78,15 +79,20 @@ map<string, const TypeInfo*> TypeInfo::types =
 
 void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 {
-    unsigned numBits = 8 * targetMachine->getAllocaPointerSize();
+    pointerSize = 8 * targetMachine->getAllocaPointerSize();
 
-    intSizeType = new PrimitiveType(numBits, false, true, TypeInfo::eSigned, INT_SIZE_KEYWORD);
+    intSizeType = new PrimitiveType(pointerSize, false, true, TypeInfo::eSigned, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
-    uintSizeType = new PrimitiveType(numBits, false, true, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
+    uintSizeType = new PrimitiveType(pointerSize, false, true, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
 
-    stringPointerType = new StringPointerType(numBits);
+    stringPointerType = new StringPointerType(pointerSize);
     RegisterType(stringPointerType);
+}
+
+unsigned TypeInfo::GetPointerSize()
+{
+    return pointerSize;
 }
 
 const TypeInfo* TypeInfo::GetIntSizeType()
