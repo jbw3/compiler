@@ -124,7 +124,8 @@ private:
 class BlockExpression : public Expression
 {
 public:
-    BlockExpression(const Expressions& expressions);
+    BlockExpression(const Expressions& expressions,
+                    const Token* startToken, const Token* endToken);
 
     virtual ~BlockExpression();
 
@@ -132,7 +133,13 @@ public:
 
     const Expressions& GetExpressions() const;
 
+    const Token* GetStartToken() const;
+
+    const Token* GetEndToken() const;
+
 private:
+    const Token* startToken;
+    const Token* endToken;
     Expressions expressions;
 };
 

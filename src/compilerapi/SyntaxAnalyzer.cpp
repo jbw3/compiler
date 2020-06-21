@@ -1401,6 +1401,8 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
     bool needsUnitType = true;
     Expressions expressions;
 
+    const Token* startToken = &*iter;
+
     // increment iter past "{"
     ++iter;
 
@@ -1452,13 +1454,14 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         deletePointerContainer(expressions);
         return nullptr;
     }
+    const Token* endToken = &*iter;
 
     if (needsUnitType)
     {
         expressions.push_back(new UnitTypeLiteralExpression());
     }
 
-    BlockExpression* blockExpression = new BlockExpression(expressions);
+    BlockExpression* blockExpression = new BlockExpression(expressions, startToken, endToken);
     return blockExpression;
 }
 

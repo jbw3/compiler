@@ -10,6 +10,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include <algorithm>
+#include <stack>
 #include <unordered_map>
 #pragma clang diagnostic pop
 
@@ -100,6 +101,22 @@ private:
     // better way to do this.
     static llvm::Type* strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 
+    class DebugScope
+    {
+    public:
+        DebugScope(
+            bool dbgInfoEnabled,
+            std::stack<llvm::DIScope*>& scopes,
+            llvm::DIScope* diScope
+        );
+
+        ~DebugScope();
+
+    private:
+        std::stack<llvm::DIScope*>& diScopes;
+        bool dbgInfo;
+    };
+
     llvm::TargetMachine* targetMachine;
     std::string inFilename;
     unsigned optimizationLevel;
@@ -108,8 +125,8 @@ private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::DIBuilder* diBuilder;
-    llvm::DICompileUnit* diCompileUnit;
-    llvm::DISubprogram* diSubprogram;
+    llvm::DIFile* diFile;
+    std::stack<llvm::DIScope*> diScopes;
     llvm::Module* module;
     SymbolTable symbolTable;
     llvm::Function* currentFunction;

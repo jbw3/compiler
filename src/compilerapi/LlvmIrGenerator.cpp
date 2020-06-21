@@ -14,6 +14,28 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
+LlvmIrGenerator::DebugScope::DebugScope(
+    bool dbgInfoEnabled,
+    stack<DIScope*>& scopes,
+    DIScope* diScope
+) :
+    diScopes(scopes),
+    dbgInfo(dbgInfoEnabled)
+{
+    if (dbgInfo)
+    {
+        diScopes.push(diScope);
+    }
+}
+
+LlvmIrGenerator::DebugScope::~DebugScope()
+{
+    if (dbgInfo)
+    {
+        diScopes.pop();
+    }
+}
+
 Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 
 LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
@@ -24,8 +46,6 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     logger(logger),
     builder(context),
     diBuilder(nullptr),
-    diCompileUnit(nullptr),
-    diSubprogram(nullptr),
     module(nullptr),
     currentFunction(nullptr),
     resultValue(nullptr),
@@ -312,10 +332,9 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     const Parameters& params = declaration->GetParameters();
 
+    DISubprogram* diSubprogram = nullptr;
     if (dbgInfo)
     {
-        DIFile* file = diCompileUnit->getFile();
-
         SmallVector<Metadata*, 8> funTypes;
         DIType* retDebugType = GetDebugType(declaration->GetReturnType());
         if (retDebugType == nullptr)
@@ -339,12 +358,14 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
 
         unsigned line = declaration->GetNameToken()->GetLine();
-        diSubprogram = diBuilder->createFunction(file, funcName, "", file, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
+        diSubprogram = diBuilder->createFunction(diFile, funcName, "", diFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
 
         // unset debug location for function prolog
         builder.SetCurrentDebugLocation(DebugLoc());
     }
+
+    DebugScope dbgScope(dbgInfo, diScopes, diSubprogram);
 
     size_t idx = 0;
     for (Argument& arg : func->args())
@@ -367,7 +388,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
                 resultValue = nullptr;
                 return;
             }
-            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx, diCompileUnit->getFile(), line, paramDebugType, true);
+            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx, diFile, line, paramDebugType, true);
             diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, 0, diSubprogram), builder.GetInsertBlock());
         }
 
@@ -629,6 +650,17 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     // create new scope for block
     Scope scope(symbolTable);
 
+    DILexicalBlock* diBlock = nullptr;
+    if (dbgInfo)
+    {
+        DIScope* currentScope = diScopes.top();
+        const Token* startToken = blockExpression->GetStartToken();
+        unsigned line = startToken->GetLine();
+        unsigned column = startToken->GetColumn();
+        diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
+    }
+    DebugScope dbgScope(dbgInfo, diScopes, diBlock);
+
     const Expressions& expressions = blockExpression->GetExpressions();
     size_t size = expressions.size();
 
@@ -845,8 +877,9 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
             resultValue = nullptr;
             return;
         }
-        DILocalVariable* diVar = diBuilder->createAutoVariable(diSubprogram, varName, diCompileUnit->getFile(), line, varDebugType, true);
-        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diSubprogram), builder.GetInsertBlock());
+        DIScope* diScope = diScopes.top();
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, varName, diFile, line, varDebugType, true);
+        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diScope), builder.GetInsertBlock());
     }
 
     variableDeclaration->GetAssignmentExpression()->Accept(this);
@@ -901,8 +934,10 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
         }
 
         bool isOptimized = optimizationLevel > 0;
-        DIFile* diFile = diBuilder->createFile(filename, dirName);
-        diCompileUnit = diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
+        diFile = diBuilder->createFile(filename, dirName);
+        diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
+
+        diScopes.push(diFile);
     }
 
     // generate LLVM IR from syntax tree
@@ -1008,7 +1043,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
 
         if (aggType != nullptr)
         {
-            DIFile* file = diCompileUnit->getFile();
+            DIFile* file = diFile;
             const string& name = aggType->GetShortName();
             unsigned numBits = aggType->GetNumBits();
 
@@ -1215,6 +1250,6 @@ void LlvmIrGenerator::SetDebugLocation(const Token* token)
     {
         unsigned line = token->GetLine();
         unsigned column = token->GetColumn();
-        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diSubprogram));
+        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diScopes.top()));
     }
 }

@@ -163,7 +163,10 @@ const Token* StringLiteralExpression::GetToken() const
     return token;
 }
 
-BlockExpression::BlockExpression(const Expressions& expressions) :
+BlockExpression::BlockExpression(const Expressions& expressions,
+                                 const Token* startToken, const Token* endToken) :
+    startToken(startToken),
+    endToken(endToken),
     expressions(expressions)
 {
 }
@@ -181,6 +184,16 @@ void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
 const Expressions& BlockExpression::GetExpressions() const
 {
     return expressions;
+}
+
+const Token* BlockExpression::GetStartToken() const
+{
+    return startToken;
+}
+
+const Token* BlockExpression::GetEndToken() const
+{
+    return endToken;
 }
 
 std::string BinaryExpression::GetOperatorString(EOperator op)
