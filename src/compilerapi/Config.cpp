@@ -18,7 +18,8 @@ Config::Config()
     assemblyType = eMachineBinary;
     outFilename = "";
     optimizationLevel = 0;
-    targetMachine = CreateTargetMachine("");
+    architecture = "";
+    targetMachine = CreateTargetMachine(architecture, optimizationLevel);
     debugInfo = false;
 }
 
@@ -35,10 +36,20 @@ bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
         }
     }
 
+    if (ok)
+    {
+        targetMachine = CreateTargetMachine(architecture, optimizationLevel);
+        if (targetMachine == nullptr)
+        {
+            cerr << "Error: Unknown architecture '" << architecture << "'\n";
+            ok = false;
+        }
+    }
+
     return ok;
 }
 
-TargetMachine* Config::CreateTargetMachine(const string& architecture)
+TargetMachine* Config::CreateTargetMachine(const std::string& architecture, unsigned optimization)
 {
     // default target triple to the current machine
     Triple targetTripple(sys::getDefaultTargetTriple());
@@ -64,7 +75,22 @@ TargetMachine* Config::CreateTargetMachine(const string& architecture)
 
     TargetOptions options;
     auto relocModel = Optional<Reloc::Model>();
-    TargetMachine* targetMachine = target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel);
+    CodeGenOpt::Level codeGenOptLevel = CodeGenOpt::Default;
+    switch (optimization)
+    {
+        case 0:
+            codeGenOptLevel = CodeGenOpt::None;
+            break;
+        case 1:
+            codeGenOptLevel = CodeGenOpt::Less;
+            break;
+        case 2:
+        default:
+            codeGenOptLevel = CodeGenOpt::Default;
+            break;
+    }
+
+    TargetMachine* targetMachine = target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel, llvm::None, codeGenOptLevel);
 
     return targetMachine;
 }
@@ -163,8 +189,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
         else
         {
             ++idx;
-            targetMachine = CreateTargetMachine(argv[idx]);
-            ok = targetMachine != nullptr;
+            architecture = argv[idx];
         }
     }
     else if (strcmp(arg, "-S") == 0)

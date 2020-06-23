@@ -31,6 +31,7 @@ public:
     std::string inFilename;
     std::string outFilename;
     unsigned optimizationLevel;
+    std::string architecture;
     llvm::TargetMachine* targetMachine;
     bool debugInfo;
 
@@ -39,7 +40,7 @@ public:
     bool ParseArgs(int argc, const char* const argv[], bool& help);
 
 private:
-    static llvm::TargetMachine* CreateTargetMachine(const std::string& architecture);
+    static llvm::TargetMachine* CreateTargetMachine(const std::string& architecture, unsigned optimization);
 
     bool ParseNextArgs(int argc, const char* const argv[], int& idx, bool& help);
 
