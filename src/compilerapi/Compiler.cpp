@@ -8,6 +8,7 @@
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreePrinter.h"
+#include "timing.h"
 #include <fstream>
 #include <iostream>
 
@@ -35,8 +36,12 @@ bool Compiler::Compile()
     vector<Token> tokens;
     if (ok)
     {
+        START_TIMER(Lexing);
+
         LexicalAnalyzer lexicalAnalyzer(logger);
         ok = lexicalAnalyzer.Process(config.inFilename, tokens);
+
+        END_TIMER(Lexing);
     }
 
     // check tokens are the output
@@ -50,15 +55,23 @@ bool Compiler::Compile()
     ModuleDefinition* syntaxTree = nullptr;
     if (ok)
     {
+        START_TIMER(Syntax);
+
         SyntaxAnalyzer syntaxAnalyzer(logger);
         ok = syntaxAnalyzer.Process(tokens, syntaxTree);
+
+        END_TIMER(Syntax);
     }
 
     // semantic analysis
     if (ok)
     {
+        START_TIMER(Semantic);
+
         SemanticAnalyzer semanticAnalyzer(logger);
         ok = semanticAnalyzer.Process(syntaxTree);
+
+        END_TIMER(Semantic);
     }
 
     // check if syntax tree is the output
@@ -83,19 +96,31 @@ bool Compiler::Compile()
     {
         llvm::Module* module = nullptr;
 
+        START_TIMER(IrGen);
+
         LlvmIrGenerator irGenerator(config, logger);
         ok = irGenerator.Generate(syntaxTree, module);
 
+        END_TIMER(IrGen);
+
         if (ok)
         {
+            START_TIMER(IrOpt);
+
             LlvmOptimizer optimizer(config);
             ok = optimizer.Optimize(module);
+
+            END_TIMER(IrOpt);
         }
 
         if (ok)
         {
+            START_TIMER(AsmGen);
+
             AssemblyGenerator asmGenerator(config, logger);
             ok = asmGenerator.Generate(module);
+
+            END_TIMER(AsmGen);
         }
 
         delete module;
