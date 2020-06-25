@@ -5,10 +5,10 @@
 #include "LlvmIrGenerator.h"
 #include "LlvmIrOptimizer.h"
 #include "SemanticAnalyzer.h"
+#include "Stopwatch.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreePrinter.h"
-#include "timing.h"
 #include <fstream>
 #include <iostream>
 
@@ -30,18 +30,26 @@ Compiler::Compiler(const Config& config) :
 
 bool Compiler::Compile()
 {
+    SW_CREATE(Lexing);
+    SW_CREATE(Syntax);
+    SW_CREATE(Semantic);
+    SW_CREATE(IrGen);
+    SW_CREATE(IrOpt);
+    SW_CREATE(AsmGen);
+
     bool ok = true;
 
     // lexical analysis
     vector<Token> tokens;
     if (ok)
     {
-        START_TIMER(Lexing);
+        SW_START(Lexing);
 
         LexicalAnalyzer lexicalAnalyzer(logger);
         ok = lexicalAnalyzer.Process(config.inFilename, tokens);
 
-        END_TIMER(Lexing);
+        SW_STOP(Lexing);
+        SW_PRINT(Lexing);
     }
 
     // check tokens are the output
@@ -55,23 +63,25 @@ bool Compiler::Compile()
     ModuleDefinition* syntaxTree = nullptr;
     if (ok)
     {
-        START_TIMER(Syntax);
+        SW_START(Syntax);
 
         SyntaxAnalyzer syntaxAnalyzer(logger);
         ok = syntaxAnalyzer.Process(tokens, syntaxTree);
 
-        END_TIMER(Syntax);
+        SW_STOP(Syntax);
+        SW_PRINT(Syntax);
     }
 
     // semantic analysis
     if (ok)
     {
-        START_TIMER(Semantic);
+        SW_START(Semantic);
 
         SemanticAnalyzer semanticAnalyzer(logger);
         ok = semanticAnalyzer.Process(syntaxTree);
 
-        END_TIMER(Semantic);
+        SW_STOP(Semantic);
+        SW_PRINT(Semantic);
     }
 
     // check if syntax tree is the output
@@ -96,31 +106,34 @@ bool Compiler::Compile()
     {
         llvm::Module* module = nullptr;
 
-        START_TIMER(IrGen);
+        SW_START(IrGen);
 
         LlvmIrGenerator irGenerator(config, logger);
         ok = irGenerator.Generate(syntaxTree, module);
 
-        END_TIMER(IrGen);
+        SW_STOP(IrGen);
+        SW_PRINT(IrGen);
 
         if (ok)
         {
-            START_TIMER(IrOpt);
+            SW_START(IrOpt);
 
             LlvmOptimizer optimizer(config);
             ok = optimizer.Optimize(module);
 
-            END_TIMER(IrOpt);
+            SW_STOP(IrOpt);
+            SW_PRINT(IrOpt);
         }
 
         if (ok)
         {
-            START_TIMER(AsmGen);
+            SW_START(AsmGen);
 
             AssemblyGenerator asmGenerator(config, logger);
             ok = asmGenerator.Generate(module);
 
-            END_TIMER(AsmGen);
+            SW_STOP(AsmGen);
+            SW_PRINT(AsmGen);
         }
 
         delete module;
