@@ -794,9 +794,13 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
     // build a look-up table for all functions
 
-    functions.clear();
+    const vector<ExternFunctionDeclaration*>& externFuncDecls = moduleDefinition->GetExternFunctionDeclarations();
+    const vector<FunctionDefinition*>& funcDefs = moduleDefinition->GetFunctionDefinitions();
 
-    for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
+    functions.clear();
+    functions.reserve(externFuncDecls.size() + funcDefs.size());
+
+    for (ExternFunctionDeclaration* externFunc : externFuncDecls)
     {
         FunctionDeclaration* decl = externFunc->GetDeclaration();
 
@@ -817,7 +821,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         }
     }
 
-    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    for (FunctionDefinition* funcDef : funcDefs)
     {
         FunctionDeclaration* decl = funcDef->GetDeclaration();
 

@@ -4,7 +4,6 @@
 #include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
-#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -56,7 +55,7 @@ public:
 private:
     ErrorLogger& logger;
     bool isError;
-    std::map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
+    std::unordered_map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
 
     bool SortTypeDefinitions(SyntaxTree::ModuleDefinition* moduleDefinition);
