@@ -977,6 +977,9 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         }
     }
 
+    // set the expression's function declaration
+    functionExpression->SetFunctionDeclaration(funcDecl);
+
     // set expression's type to the function's return type
     functionExpression->SetType(funcDecl->GetReturnType());
 }

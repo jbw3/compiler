@@ -11,6 +11,9 @@ class SyntaxTreeVisitor;
 
 namespace SyntaxTree
 {
+
+class FunctionDeclaration;
+
 class SyntaxTreeNode
 {
 public:
@@ -270,8 +273,13 @@ public:
 
     const Token* GetNameToken() const;
 
+    const FunctionDeclaration* GetFunctionDeclaration() const;
+
+    void SetFunctionDeclaration(const FunctionDeclaration* decl);
+
 private:
     const Token* nameToken;
+    const FunctionDeclaration* functionDeclaration;
     std::string name;
     Expressions arguments;
 };

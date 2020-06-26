@@ -497,15 +497,11 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
         structDef->Accept(this);
     }
 
-    // create function declarations and build function look-up table
-
-    functions.clear();
+    // create function declarations
 
     for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
     {
         const FunctionDeclaration* decl = externFunc->GetDeclaration();
-        functions.insert({decl->GetName(), decl});
-
         bool ok = CreateFunctionDeclaration(decl);
         if (!ok)
         {
@@ -517,8 +513,6 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
     {
         const FunctionDeclaration* decl = funcDef->GetDeclaration();
-        functions.insert({decl->GetName(), decl});
-
         bool ok = CreateFunctionDeclaration(decl);
         if (!ok)
         {
@@ -702,7 +696,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         return;
     }
 
-    const FunctionDeclaration* funcDecl = functions.find(funcName)->second;
+    const FunctionDeclaration* funcDecl = functionExpression->GetFunctionDeclaration();
     const Parameters& declParams = funcDecl->GetParameters();
     vector<Expression*> argExpressions = functionExpression->GetArguments();
     vector<Value*> args;
