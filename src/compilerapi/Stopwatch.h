@@ -18,6 +18,9 @@
 #define SW_PRINT(name)
 #endif
 
+#define SW_BEGIN(name) SW_CREATE(name) SW_START(name)
+#define SW_END(name) SW_STOP(name) SW_PRINT(name)
+
 class Stopwatch
 {
 public:
