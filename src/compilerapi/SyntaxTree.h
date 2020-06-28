@@ -182,6 +182,8 @@ public:
         eBitwiseAndAssign,
         eBitwiseXorAssign,
         eBitwiseOrAssign,
+        eInclusiveRange,
+        eExclusiveRange,
     };
 
     static std::string GetOperatorString(EOperator op);

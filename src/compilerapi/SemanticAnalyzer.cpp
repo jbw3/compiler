@@ -355,6 +355,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eRemainder:
+            case BinaryExpression::eInclusiveRange:
+            case BinaryExpression::eExclusiveRange:
                 ok = haveCompatibleSigns;
                 break;
             case BinaryExpression::eAssign:
@@ -450,6 +452,13 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eBitwiseXorAssign:
         case BinaryExpression::eBitwiseOrAssign:
             return TypeInfo::UnitType;
+        case BinaryExpression::eInclusiveRange:
+        case BinaryExpression::eExclusiveRange:
+        {
+            // TODO: handle inclusive and exclusive ranges differently
+            const TypeInfo* memberType = GetBiggestSizeType(leftType, rightType);
+            return TypeInfo::GetRangeType(memberType);
+        }
     }
 }
 

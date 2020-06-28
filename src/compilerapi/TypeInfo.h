@@ -9,6 +9,7 @@ namespace llvm
 {
 class TargetMachine;
 }
+class RangeType;
 class Token;
 class TypeInfo;
 class UnitTypeInfo;
@@ -71,6 +72,8 @@ public:
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
 
     static const TypeInfo* GetStringPointerType();
+
+    static const TypeInfo* GetRangeType(const TypeInfo* memberType);
 
     static const TypeInfo* GetType(const std::string& typeName);
 
@@ -213,6 +216,17 @@ public:
     StringPointerType(unsigned numBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
+};
+
+class RangeType : public TypeInfo
+{
+public:
+    RangeType(const TypeInfo* memberType);
+
+    bool IsSameAs(const TypeInfo& other) const override;
+
+private:
+    static std::string CreateRangeName(const TypeInfo* memberType);
 };
 
 class AggregateType : public TypeInfo

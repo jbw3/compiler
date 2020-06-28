@@ -165,6 +165,13 @@ const TypeInfo* TypeInfo::GetStringPointerType()
     return stringPointerType;
 }
 
+const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType)
+{
+    // TODO: create a registry for range types instead of creating a new one each time
+    const TypeInfo* rangeType = new RangeType(memberType);
+    return rangeType;
+}
+
 const TypeInfo* TypeInfo::GetType(const string& typeName)
 {
     auto iter = types.find(typeName);
@@ -438,6 +445,32 @@ bool StringPointerType::IsSameAs(const TypeInfo& other) const
 {
     bool isSame = typeid(other) == typeid(StringPointerType);
     return isSame;
+}
+
+RangeType::RangeType(const TypeInfo* memberType) :
+    TypeInfo(memberType->GetNumBits() * 2, false, false, TypeInfo::eNotApplicable, false, CreateRangeName(memberType))
+{
+    AddMember("Start", memberType, false, Token::None);
+    AddMember("End", memberType, false, Token::None);
+}
+
+bool RangeType::IsSameAs(const TypeInfo& other) const
+{
+    const RangeType* otherRangeType = dynamic_cast<const RangeType*>(&other);
+    if (otherRangeType == nullptr)
+    {
+        return false;
+    }
+
+    bool isSame = GetMembers()[0]->GetType()->IsSameAs(*otherRangeType->GetMembers()[0]->GetType());
+    return isSame;
+}
+
+string RangeType::CreateRangeName(const TypeInfo* memberType)
+{
+    string memberName = memberType->GetShortName();
+    string name = "Range'" + memberName + ", " + memberName + "'";
+    return name;
 }
 
 AggregateType::AggregateType(const string& name, const Token* token) :

@@ -262,6 +262,10 @@ std::string BinaryExpression::GetOperatorString(EOperator op)
             return "^=";
         case BinaryExpression::eBitwiseOrAssign:
             return "|=";
+        case BinaryExpression::eInclusiveRange:
+            return "..";
+        case BinaryExpression::eExclusiveRange:
+            return "..<";
     }
 
     // we should never get here
@@ -291,6 +295,8 @@ bool BinaryExpression::IsAssignment(EOperator op)
         case BinaryExpression::eBitwiseOr:
         case BinaryExpression::eLogicalAnd:
         case BinaryExpression::eLogicalOr:
+        case BinaryExpression::eInclusiveRange:
+        case BinaryExpression::eExclusiveRange:
             return false;
         case BinaryExpression::eAssign:
         case BinaryExpression::eAddAssign:
@@ -332,6 +338,8 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eLogicalAnd:
         case BinaryExpression::eLogicalOr:
         case BinaryExpression::eAssign:
+        case BinaryExpression::eInclusiveRange:
+        case BinaryExpression::eExclusiveRange:
             return false;
         case BinaryExpression::eAddAssign:
         case BinaryExpression::eSubtractAssign:

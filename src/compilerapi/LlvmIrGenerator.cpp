@@ -221,6 +221,31 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             case BinaryExpression::eAssign:
                 resultValue = rightValue;
                 break;
+            case BinaryExpression::eInclusiveRange:
+            case BinaryExpression::eExclusiveRange:
+            {
+                Type* rangeType = GetType(binaryExpression->GetType());
+                if (rangeType == nullptr)
+                {
+                    resultValue = nullptr;
+                    logger.LogInternalError("Unknown range type");
+                    return;
+                }
+
+                vector<unsigned> index(1);
+                Value* initValue = UndefValue::get(rangeType);
+
+                // set start
+                index[0] = 0;
+                initValue = builder.CreateInsertValue(initValue, leftValue, index, "rng");
+
+                // set end
+                index[0] = 1;
+                initValue = builder.CreateInsertValue(initValue, rightValue, index, "rng");
+
+                resultValue = initValue;
+                break;
+            }
         }
 
         if (isAssignment)
@@ -973,7 +998,31 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
         }
         else
         {
-            llvmType = nullptr;
+            const RangeType* rangeType = dynamic_cast<const RangeType*>(type);
+            if (rangeType != nullptr)
+            {
+                vector<Type*> members;
+                for (const MemberInfo* memberInfo : rangeType->GetMembers())
+                {
+                    Type* memberType = GetType(memberInfo->GetType());
+                    if (memberType == nullptr)
+                    {
+                        return nullptr;
+                    }
+
+                    members.push_back(memberType);
+                }
+
+                const string& name = rangeType->GetShortName();
+                llvmType = StructType::create(context, members, name);
+
+                // register type so we don't have to
+                types.insert({name, llvmType});
+            }
+            else
+            {
+                llvmType = nullptr;
+            }
         }
     }
 

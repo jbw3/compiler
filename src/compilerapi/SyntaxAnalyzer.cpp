@@ -53,6 +53,8 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"&=", BinaryExpression::eBitwiseAndAssign},
     {"^=", BinaryExpression::eBitwiseXorAssign},
     {"|=", BinaryExpression::eBitwiseOrAssign},
+    {"..", BinaryExpression::eInclusiveRange},
+    {"..<", BinaryExpression::eExclusiveRange},
 };
 
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
@@ -1010,6 +1012,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseAnd});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseXor});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eInclusiveRange, BinaryExpression::eExclusiveRange});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eLogicalAnd, BinaryExpression::eLogicalOr});
     ProcessExpressionOperators(terms, binOperators, {
