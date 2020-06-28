@@ -166,11 +166,10 @@ const TypeInfo* TypeInfo::GetStringPointerType()
     return stringPointerType;
 }
 
-const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType)
+const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isExclusive)
 {
-    // TODO: pass isExclusive flag through
     // TODO: create a registry for range types instead of creating a new one each time
-    const TypeInfo* rangeType = new RangeType(memberType, false);
+    const TypeInfo* rangeType = new RangeType(memberType, isExclusive);
     return rangeType;
 }
 
@@ -464,7 +463,8 @@ bool RangeType::IsSameAs(const TypeInfo& other) const
         return false;
     }
 
-    bool isSame = GetMembers()[0]->GetType()->IsSameAs(*otherRangeType->GetMembers()[0]->GetType());
+    bool isSame = GetMembers()[0]->GetType()->IsSameAs(*otherRangeType->GetMembers()[0]->GetType())
+               && GetFlags() == other.GetFlags();
     return isSame;
 }
 

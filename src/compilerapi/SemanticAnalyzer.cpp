@@ -455,9 +455,8 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eInclusiveRange:
         case BinaryExpression::eExclusiveRange:
         {
-            // TODO: handle inclusive and exclusive ranges differently
             const TypeInfo* memberType = GetBiggestSizeType(leftType, rightType);
-            return TypeInfo::GetRangeType(memberType);
+            return TypeInfo::GetRangeType(memberType, op == BinaryExpression::eExclusiveRange);
         }
     }
 }

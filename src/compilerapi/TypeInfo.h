@@ -85,7 +85,7 @@ public:
 
     static const TypeInfo* GetStringPointerType();
 
-    static const TypeInfo* GetRangeType(const TypeInfo* memberType);
+    static const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isExclusive);
 
     static const TypeInfo* GetType(const std::string& typeName);
 
