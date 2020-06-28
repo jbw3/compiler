@@ -40,6 +40,18 @@ private:
 class TypeInfo
 {
 public:
+    static constexpr uint16_t F_NONE = 0;
+
+    // main types
+    static constexpr uint16_t F_UNIT  = 1 << 0;
+    static constexpr uint16_t F_BOOL  = 1 << 1;
+    static constexpr uint16_t F_INT   = 1 << 2;
+    static constexpr uint16_t F_RANGE = 1 << 3;
+
+    // attributes
+    static constexpr uint16_t F_AGGREGATE = 1 << 8;
+    static constexpr uint16_t F_EXCLUSIVE = 1 << 9;
+
     enum ESign
     {
         eNotApplicable,
@@ -81,16 +93,16 @@ public:
 
     TypeInfo(
         unsigned numBits,
-        bool isBool,
-        bool isInt,
+        uint16_t flags,
         ESign sign,
-        bool isAggregate,
         const std::string& shortName
     );
 
     virtual ~TypeInfo();
 
     virtual bool IsSameAs(const TypeInfo& other) const = 0;
+
+    uint16_t GetFlags() const;
 
     bool IsBool() const;
 
@@ -120,10 +132,8 @@ private:
     static std::map<std::string, const TypeInfo*> types;
 
     unsigned numBits;
-    bool isBool;
-    bool isInt;
+    uint16_t flags;
     ESign sign;
-    bool isAggregate;
     std::string shortName;
     std::map<std::string, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
@@ -142,8 +152,7 @@ class PrimitiveType : public TypeInfo
 public:
     PrimitiveType(
         unsigned numBits,
-        bool isBool,
-        bool isInt,
+        uint16_t flags,
         ESign sign,
         const std::string& shortName
     );
@@ -221,12 +230,14 @@ public:
 class RangeType : public TypeInfo
 {
 public:
-    RangeType(const TypeInfo* memberType);
+    RangeType(const TypeInfo* memberType, bool isExclusive);
 
     bool IsSameAs(const TypeInfo& other) const override;
 
+    bool IsExclusive() const;
+
 private:
-    static std::string CreateRangeName(const TypeInfo* memberType);
+    static std::string CreateRangeName(const TypeInfo* memberType, bool isExclusive);
 };
 
 class AggregateType : public TypeInfo

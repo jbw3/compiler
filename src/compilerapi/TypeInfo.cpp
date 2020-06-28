@@ -3,6 +3,7 @@
 #include "Token.h"
 #include "TypeInfo.h"
 #include "keywords.h"
+#include "utils.h"
 #include "llvm/Target/TargetMachine.h"
 #include <typeinfo>
 #pragma clang diagnostic pop
@@ -11,15 +12,15 @@ using namespace llvm;
 using namespace std;
 
 UnitTypeInfo unitType;
-PrimitiveType boolTypeInfo(1, true, false, TypeInfo::eNotApplicable, BOOL_KEYWORD);
-PrimitiveType int8TypeInfo(8, false, true, TypeInfo::eSigned, INT8_KEYWORD);
-PrimitiveType int16TypeInfo(16, false, true, TypeInfo::eSigned, INT16_KEYWORD);
-PrimitiveType int32TypeInfo(32, false, true, TypeInfo::eSigned, INT32_KEYWORD);
-PrimitiveType int64TypeInfo(64, false, true, TypeInfo::eSigned, INT64_KEYWORD);
-PrimitiveType uInt8TypeInfo(8, false, true, TypeInfo::eUnsigned, UINT8_KEYWORD);
-PrimitiveType uInt16TypeInfo(16, false, true, TypeInfo::eUnsigned, UINT16_KEYWORD);
-PrimitiveType uInt32TypeInfo(32, false, true, TypeInfo::eUnsigned, UINT32_KEYWORD);
-PrimitiveType uInt64TypeInfo(64, false, true, TypeInfo::eUnsigned, UINT64_KEYWORD);
+PrimitiveType boolTypeInfo(1, TypeInfo::F_BOOL, TypeInfo::eNotApplicable, BOOL_KEYWORD);
+PrimitiveType int8TypeInfo(8, TypeInfo::F_INT, TypeInfo::eSigned, INT8_KEYWORD);
+PrimitiveType int16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eSigned, INT16_KEYWORD);
+PrimitiveType int32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eSigned, INT32_KEYWORD);
+PrimitiveType int64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eSigned, INT64_KEYWORD);
+PrimitiveType uInt8TypeInfo(8, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT8_KEYWORD);
+PrimitiveType uInt16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KEYWORD);
+PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD);
+PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD);
 
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable, const Token* token) :
     name(name),
@@ -88,9 +89,9 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 {
     pointerSize = 8 * targetMachine->getAllocaPointerSize();
 
-    intSizeType = new PrimitiveType(pointerSize, false, true, TypeInfo::eSigned, INT_SIZE_KEYWORD);
+    intSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
-    uintSizeType = new PrimitiveType(pointerSize, false, true, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
+    uintSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
 
     stringPointerType = new StringPointerType(pointerSize);
@@ -167,8 +168,9 @@ const TypeInfo* TypeInfo::GetStringPointerType()
 
 const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType)
 {
+    // TODO: pass isExclusive flag through
     // TODO: create a registry for range types instead of creating a new one each time
-    const TypeInfo* rangeType = new RangeType(memberType);
+    const TypeInfo* rangeType = new RangeType(memberType, false);
     return rangeType;
 }
 
@@ -190,40 +192,36 @@ bool TypeInfo::RegisterType(const TypeInfo* typeInfo)
 
 TypeInfo::TypeInfo(
     unsigned numBits,
-    bool isBool,
-    bool isInt,
+    uint16_t flags,
     ESign sign,
-    bool isAggregate,
     const string& shortName
 ) :
     numBits(numBits),
-    isBool(isBool),
-    isInt(isInt),
+    flags(flags),
     sign(sign),
-    isAggregate(isAggregate),
     shortName(shortName)
 {
 }
 
 TypeInfo::~TypeInfo()
 {
-    for (auto iter = members.begin(); iter != members.end(); ++iter)
-    {
-        delete *iter;
-    }
-
+    deletePointerContainer(members);
     memberMap.clear();
-    members.clear();
+}
+
+uint16_t TypeInfo::GetFlags() const
+{
+    return flags;
 }
 
 bool TypeInfo::IsBool() const
 {
-    return isBool;
+    return (flags & F_BOOL) != 0;
 }
 
 bool TypeInfo::IsInt() const
 {
-    return isInt;
+    return (flags & F_INT) != 0;
 }
 
 TypeInfo::ESign TypeInfo::GetSign() const
@@ -233,7 +231,7 @@ TypeInfo::ESign TypeInfo::GetSign() const
 
 bool TypeInfo::IsAggregate() const
 {
-    return isAggregate;
+    return (flags & F_AGGREGATE) != 0;
 }
 
 unsigned TypeInfo::GetNumBits() const
@@ -286,7 +284,7 @@ bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssign
 }
 
 UnitTypeInfo::UnitTypeInfo() :
-    TypeInfo(0, false, false, TypeInfo::eNotApplicable, false, "Unit")
+    TypeInfo(0, F_UNIT, TypeInfo::eNotApplicable, "Unit")
 {
 }
 
@@ -298,12 +296,11 @@ bool UnitTypeInfo::IsSameAs(const TypeInfo& other) const
 
 PrimitiveType::PrimitiveType(
     unsigned numBits,
-    bool isBool,
-    bool isInt,
+    uint16_t flags,
     ESign sign,
     const string& shortName
 ) :
-    TypeInfo(numBits, isBool, isInt, sign, false, shortName)
+    TypeInfo(numBits, flags, sign, shortName)
 {
 }
 
@@ -372,7 +369,7 @@ NumericLiteralType::NumericLiteralType(
     unsigned unsignedNumBits,
     const string& name
 ) :
-    TypeInfo(0, false, true, sign, false, name),
+    TypeInfo(0, F_INT, sign, name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
@@ -436,7 +433,7 @@ const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
 }
 
 StringPointerType::StringPointerType(unsigned numBits) :
-    TypeInfo(numBits, false, false, TypeInfo::eNotApplicable, false, STR_KEYWORD)
+    TypeInfo(numBits, F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD)
 {
     AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
 }
@@ -447,8 +444,13 @@ bool StringPointerType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-RangeType::RangeType(const TypeInfo* memberType) :
-    TypeInfo(memberType->GetNumBits() * 2, false, false, TypeInfo::eNotApplicable, false, CreateRangeName(memberType))
+RangeType::RangeType(const TypeInfo* memberType, bool isExclusive) :
+    TypeInfo(
+        memberType->GetNumBits() * 2,
+        F_RANGE | F_AGGREGATE | (isExclusive ? F_EXCLUSIVE : F_NONE),
+        TypeInfo::eNotApplicable,
+        CreateRangeName(memberType, isExclusive)
+    )
 {
     AddMember("Start", memberType, false, Token::None);
     AddMember("End", memberType, false, Token::None);
@@ -466,15 +468,22 @@ bool RangeType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-string RangeType::CreateRangeName(const TypeInfo* memberType)
+bool RangeType::IsExclusive() const
+{
+    return (GetFlags() & F_EXCLUSIVE) != 0;
+}
+
+string RangeType::CreateRangeName(const TypeInfo* memberType, bool isExclusive)
 {
     string memberName = memberType->GetShortName();
-    string name = "Range'" + memberName + ", " + memberName + "'";
+    string name = "Range";
+    name += (isExclusive ? "Exclusive" : "Inclusive");
+    name += "'" + memberName + ", " + memberName + "'";
     return name;
 }
 
 AggregateType::AggregateType(const string& name, const Token* token) :
-    TypeInfo(0, false, false, TypeInfo::eNotApplicable, true, name),
+    TypeInfo(0, F_AGGREGATE, TypeInfo::eNotApplicable, name),
     token(token)
 {
 }
