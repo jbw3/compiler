@@ -104,13 +104,19 @@ public:
 
     uint16_t GetFlags() const;
 
+    bool IsUnit() const;
+
     bool IsBool() const;
 
     bool IsInt() const;
 
+    bool IsRange() const;
+
     ESign GetSign() const;
 
     bool IsAggregate() const;
+
+    bool IsExclusive() const;
 
     virtual unsigned GetNumBits() const;
 
@@ -233,8 +239,6 @@ public:
     RangeType(const TypeInfo* memberType, bool isExclusive);
 
     bool IsSameAs(const TypeInfo& other) const override;
-
-    bool IsExclusive() const;
 
 private:
     static std::string CreateRangeName(const TypeInfo* memberType, bool isExclusive);

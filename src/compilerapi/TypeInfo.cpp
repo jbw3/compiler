@@ -213,6 +213,11 @@ uint16_t TypeInfo::GetFlags() const
     return flags;
 }
 
+bool TypeInfo::IsUnit() const
+{
+    return (flags & F_UNIT) != 0;
+}
+
 bool TypeInfo::IsBool() const
 {
     return (flags & F_BOOL) != 0;
@@ -223,6 +228,11 @@ bool TypeInfo::IsInt() const
     return (flags & F_INT) != 0;
 }
 
+bool TypeInfo::IsRange() const
+{
+    return (flags & F_RANGE) != 0;
+}
+
 TypeInfo::ESign TypeInfo::GetSign() const
 {
     return sign;
@@ -231,6 +241,11 @@ TypeInfo::ESign TypeInfo::GetSign() const
 bool TypeInfo::IsAggregate() const
 {
     return (flags & F_AGGREGATE) != 0;
+}
+
+bool TypeInfo::IsExclusive() const
+{
+    return (GetFlags() & F_EXCLUSIVE) != 0;
 }
 
 unsigned TypeInfo::GetNumBits() const
@@ -468,17 +483,12 @@ bool RangeType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-bool RangeType::IsExclusive() const
-{
-    return (GetFlags() & F_EXCLUSIVE) != 0;
-}
-
 string RangeType::CreateRangeName(const TypeInfo* memberType, bool isExclusive)
 {
     string memberName = memberType->GetShortName();
     string name = "Range";
     name += (isExclusive ? "Exclusive" : "Inclusive");
-    name += "'" + memberName + ", " + memberName + "'";
+    name += "'" + memberName + "'";
     return name;
 }
 
