@@ -5,6 +5,8 @@ target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
 %str = type { i64, [0 x i8] }
+%Range32 = type { i32, i32 }
+%Range8 = type { i8, i8 }
 %Test2 = type { %Test1, i32 }
 %Test1 = type { i32, i1, %str* }
 %EmptyType = type {}
@@ -740,6 +742,53 @@ entry:
   store %str* bitcast ({ i64, [11 x i8] }* @strStruct5 to %str*), %str** %s6
   store %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), %str** %dup1
   store %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), %str** %dup2
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @types_range() #0 {
+entry:
+  %ir4 = alloca %Range32
+  %ir3 = alloca %Range32
+  %ir2 = alloca %Range32
+  %ir1 = alloca %Range8
+  %er3 = alloca %Range32
+  %er2 = alloca %Range32
+  %er1 = alloca %Range8
+  %y2 = alloca i32
+  %y1 = alloca i32
+  %x2 = alloca i32
+  %x1 = alloca i32
+  store i32 10, i32* %x1
+  store i32 13, i32* %x2
+  store i32 25, i32* %y1
+  store i32 39, i32* %y2
+  store %Range8 { i8 39, i8 124 }, %Range8* %er1
+  %x11 = load i32, i32* %x1
+  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %x11, 1
+  store %Range32 %rng, %Range32* %er2
+  %x12 = load i32, i32* %x1
+  %x23 = load i32, i32* %x2
+  %rng4 = insertvalue %Range32 undef, i32 %x12, 0
+  %rng5 = insertvalue %Range32 %rng4, i32 %x23, 1
+  store %Range32 %rng5, %Range32* %er3
+  store %Range8 { i8 1, i8 10 }, %Range8* %ir1
+  %y16 = load i32, i32* %y1
+  %rng7 = insertvalue %Range32 { i32 0, i32 undef }, i32 %y16, 1
+  store %Range32 %rng7, %Range32* %ir2
+  %y18 = load i32, i32* %y1
+  %y29 = load i32, i32* %y2
+  %rng10 = insertvalue %Range32 undef, i32 %y18, 0
+  %rng11 = insertvalue %Range32 %rng10, i32 %y29, 1
+  store %Range32 %rng11, %Range32* %ir3
+  %x212 = load i32, i32* %x2
+  %neg = sub i32 0, %x212
+  %x113 = load i32, i32* %x1
+  %x214 = load i32, i32* %x2
+  %add = add i32 %x113, %x214
+  %rng15 = insertvalue %Range32 undef, i32 %neg, 0
+  %rng16 = insertvalue %Range32 %rng15, i32 %add, 1
+  store %Range32 %rng16, %Range32* %ir4
   ret %UnitType zeroinitializer
 }
 

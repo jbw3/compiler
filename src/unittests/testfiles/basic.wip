@@ -212,6 +212,25 @@ fun types_str()
     var dup2 str = "abc";
 }
 
+fun types_range()
+{
+    var x1 i32 = 10;
+    var x2 i32 = 13;
+    var y1 u32 = 25;
+    var y2 u32 = 39;
+
+    # exclusive ranges
+    var er1 = 39..124; # with int literals
+    var er2 = 0..x1;   # one int literal and one variable
+    var er3 = x1..x2;  # two int literals
+
+    # inclusive ranges
+    var ir1 = 1..<10;  # with int literals
+    var ir2 = 0..<y1;  # one int literal and one variable
+    var ir3 = y1..<y2; # two int literals
+    var ir4 = -x2..x1 + x2; # expressions
+}
+
 fun str_member1() usize
 {
     var s str = "abc";
