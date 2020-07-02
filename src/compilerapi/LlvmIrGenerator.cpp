@@ -978,6 +978,13 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     return true;
 }
 
+string createRangeName(const TypeInfo* rangeType)
+{
+    unsigned memberNumBits = rangeType->GetMembers()[0]->GetType()->GetNumBits();
+    string name = "Range" + to_string(memberNumBits);
+    return name;
+}
+
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     Type* llvmType = nullptr;
@@ -991,38 +998,48 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
     else
     {
-        auto iter = types.find(type->GetShortName());
+        // get the LLVM type name
+        string llvmName;
+        bool isRange = type->IsRange();
+        if (isRange)
+        {
+            llvmName = createRangeName(type);
+        }
+        else
+        {
+            llvmName = type->GetShortName();
+        }
+
+        // try to lookup this type to see if it's already been created
+        auto iter = types.find(llvmName);
         if (iter != types.end())
         {
             llvmType = iter->second;
         }
-        else
+        // if this is a range type, create the LLVM type
+        else if (isRange)
         {
-            const RangeType* rangeType = dynamic_cast<const RangeType*>(type);
-            if (rangeType != nullptr)
+            vector<Type*> members;
+            for (const MemberInfo* memberInfo : type->GetMembers())
             {
-                vector<Type*> members;
-                for (const MemberInfo* memberInfo : rangeType->GetMembers())
+                Type* memberType = GetType(memberInfo->GetType());
+                if (memberType == nullptr)
                 {
-                    Type* memberType = GetType(memberInfo->GetType());
-                    if (memberType == nullptr)
-                    {
-                        return nullptr;
-                    }
-
-                    members.push_back(memberType);
+                    return nullptr;
                 }
 
-                const string& name = rangeType->GetShortName();
-                llvmType = StructType::create(context, members, name);
+                members.push_back(memberType);
+            }
 
-                // register type so we don't have to
-                types.insert({name, llvmType});
-            }
-            else
-            {
-                llvmType = nullptr;
-            }
+            llvmType = StructType::create(context, members, llvmName);
+
+            // register type so we don't have to create it again
+            types.insert({llvmName, llvmType});
+            cout << type->GetShortName() << " -> " << llvmName << "\n";
+        }
+        else // could not determine the type
+        {
+            llvmType = nullptr;
         }
     }
 
@@ -1167,11 +1184,50 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeI
 {
     const TypeInfo* resultType = nullptr;
 
-    // sign extend value if needed
+    // sign extend int value if needed
     if (srcType->IsInt() && dstType->IsInt() && srcType->GetNumBits() < dstType->GetNumBits())
     {
         value = CreateExt(value, srcType, dstType);
         resultType = dstType;
+    }
+    // sign extend range value if needed
+    else if (srcType->IsRange() && dstType->IsRange())
+    {
+        const vector<const MemberInfo*>& srcMembers = srcType->GetMembers();
+        const NumericLiteralType* srcLeftIntLit = dynamic_cast<const NumericLiteralType*>(srcMembers[0]->GetType());
+        const NumericLiteralType* srcRightIntLit = dynamic_cast<const NumericLiteralType*>(srcMembers[1]->GetType());
+        if (srcLeftIntLit != nullptr && srcRightIntLit != nullptr)
+        {
+            Type* dstRangeType = GetType(dstType);
+            if (dstRangeType == nullptr)
+            {
+                logger.LogInternalError("Unknown range type");
+                return nullptr;
+            }
+            const vector<const MemberInfo*> dstMembers = dstType->GetMembers();
+
+            vector<unsigned> index(1);
+            Value* initValue = UndefValue::get(dstRangeType);
+
+            // extend start
+            index[0] = 0;
+            Value* leftValue = builder.CreateExtractValue(value, index);
+            leftValue = CreateExt(leftValue, srcLeftIntLit, dstMembers[0]->GetType());
+            initValue = builder.CreateInsertValue(initValue, leftValue, index);
+
+            // extend end
+            index[0] = 1;
+            Value* rightValue = builder.CreateExtractValue(value, index);
+            rightValue = CreateExt(rightValue, srcRightIntLit, dstMembers[1]->GetType());
+            initValue = builder.CreateInsertValue(initValue, rightValue, index);
+
+            value = initValue;
+            resultType = dstType;
+        }
+        else
+        {
+            resultType = srcType;
+        }
     }
     else
     {

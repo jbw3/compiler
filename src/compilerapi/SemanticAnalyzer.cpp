@@ -384,6 +384,43 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 break;
         }
     }
+    else if (leftType->IsRange() && rightType->IsRange())
+    {
+        // assignment is the only valid operator for ranges
+        if (op != BinaryExpression::eAssign)
+        {
+            ok = false;
+        }
+        // make sure the ranges' exclusive/inclusive flag matches
+        else if (leftType->IsExclusive() != rightType->IsExclusive())
+        {
+            ok = false;
+        }
+        else
+        {
+            const TypeInfo* leftIntType = leftType->GetMembers()[0]->GetType();
+            const TypeInfo* rightIntType = rightType->GetMembers()[0]->GetType();
+
+            // if sizes and signs are the same, we're good
+            if (leftType->GetNumBits() == rightType->GetNumBits() && leftIntType->GetSign() == rightIntType->GetSign())
+            {
+                ok = true;
+            }
+            else
+            {
+                // if the right type is a literal, and it's the same size or smaller, then we're good
+                const NumericLiteralType* rightIntLitType = dynamic_cast<const NumericLiteralType*>(rightIntType);
+                if (rightIntLitType != nullptr && leftIntType->GetNumBits() >= rightIntLitType->GetNumBits())
+                {
+                    ok = true;
+                }
+                else
+                {
+                    ok = false;
+                }
+            }
+        }
+    }
     else if (leftType->IsSameAs(*rightType))
     {
         ok = op == BinaryExpression::eAssign;
@@ -1116,6 +1153,25 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
                 isError = true;
                 logger.LogInternalError("Could not infer integer literal type");
                 return;
+            }
+        }
+        else if (type->IsRange())
+        {
+            // if this is a range type and the members are int literals, set the members' type
+            // to the minimum signed size that will hold the number
+            const TypeInfo* memberType = type->GetMembers()[0]->GetType();
+            const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
+            if (memberLiteralType != nullptr)
+            {
+                const TypeInfo* newMemberType = TypeInfo::GetMinSignedIntTypeForSize(memberLiteralType->GetSignedNumBits());
+                if (newMemberType == nullptr)
+                {
+                    isError = true;
+                    logger.LogInternalError("Could not infer Range integer literal type");
+                    return;
+                }
+
+                type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
             }
         }
     }
