@@ -1035,7 +1035,6 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 
             // register type so we don't have to create it again
             types.insert({llvmName, llvmType});
-            cout << type->GetShortName() << " -> " << llvmName << "\n";
         }
         else // could not determine the type
         {
