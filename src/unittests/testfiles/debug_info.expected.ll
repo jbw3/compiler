@@ -6,6 +6,7 @@ target triple = "x86_64-pc-linux-gnu"
 %UnitType = type {}
 %str = type { i64, [0 x i8] }
 %TestStruct = type { i32, i64, i1 }
+%Range32 = type { i32, i32 }
 
 @strStruct0 = constant { i64, [3 x i8] } { i64 3, [3 x i8] c"abc" }
 
@@ -139,6 +140,29 @@ entry:
   ret %UnitType zeroinitializer, !dbg !121
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @ranges(i32 %n) #0 !dbg !122 {
+entry:
+  %r2 = alloca %Range32
+  %r1 = alloca %Range32
+  %n1 = alloca i32
+  store i32 %n, i32* %n1
+  call void @llvm.dbg.declare(metadata i32* %n1, metadata !126, metadata !DIExpression()), !dbg !135
+  call void @llvm.dbg.declare(metadata %Range32* %r1, metadata !127, metadata !DIExpression()), !dbg !136
+  %n2 = load i32, i32* %n1, !dbg !137
+  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !138
+  store %Range32 %rng, %Range32* %r1, !dbg !139
+  call void @llvm.dbg.declare(metadata %Range32* %r2, metadata !133, metadata !DIExpression()), !dbg !140
+  %n3 = load i32, i32* %n1, !dbg !141
+  %neg = sub i32 0, %n3, !dbg !142
+  %n4 = load i32, i32* %n1, !dbg !143
+  %mul = mul i32 %n4, 3, !dbg !144
+  %rng5 = insertvalue %Range32 undef, i32 %neg, 0, !dbg !145
+  %rng6 = insertvalue %Range32 %rng5, i32 %mul, 1, !dbg !145
+  store %Range32 %rng6, %Range32* %r2, !dbg !146
+  ret %UnitType zeroinitializer, !dbg !146
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -269,3 +293,28 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !119 = !DILocation(line: 48, column: 9, scope: !110)
 !120 = !DILocation(line: 49, column: 9, scope: !110)
 !121 = !DILocation(line: 45, column: 11, scope: !110)
+!122 = distinct !DISubprogram(name: "ranges", scope: !1, file: !1, line: 60, type: !123, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !125)
+!123 = !DISubroutineType(flags: DIFlagPrototyped, types: !124)
+!124 = !{!55, !6}
+!125 = !{!126, !127, !133}
+!126 = !DILocalVariable(name: "n", scope: !122, file: !1, line: 60, type: !6)
+!127 = !DILocalVariable(name: "r1", scope: !128, file: !1, line: 62, type: !129)
+!128 = distinct !DILexicalBlock(scope: !122, file: !1, line: 61, column: 1)
+!129 = !DICompositeType(tag: DW_TAG_structure_type, name: "RangeInclusive'i32'", size: 64, elements: !130)
+!130 = !{!131, !132}
+!131 = !DIDerivedType(tag: DW_TAG_member, name: "Start", baseType: !6, size: 32, align: 32)
+!132 = !DIDerivedType(tag: DW_TAG_member, name: "End", baseType: !6, size: 32, align: 32, offset: 32)
+!133 = !DILocalVariable(name: "r2", scope: !128, file: !1, line: 63, type: !134)
+!134 = !DICompositeType(tag: DW_TAG_structure_type, name: "RangeExclusive'i32'", size: 64, elements: !130)
+!135 = !DILocation(line: 60, scope: !122)
+!136 = !DILocation(line: 62, column: 9, scope: !128)
+!137 = !DILocation(line: 62, column: 17, scope: !128)
+!138 = !DILocation(line: 62, column: 15, scope: !128)
+!139 = !DILocation(line: 62, column: 12, scope: !128)
+!140 = !DILocation(line: 63, column: 9, scope: !128)
+!141 = !DILocation(line: 63, column: 15, scope: !128)
+!142 = !DILocation(line: 63, column: 14, scope: !128)
+!143 = !DILocation(line: 63, column: 19, scope: !128)
+!144 = !DILocation(line: 63, column: 21, scope: !128)
+!145 = !DILocation(line: 63, column: 16, scope: !128)
+!146 = !DILocation(line: 63, column: 12, scope: !128)
