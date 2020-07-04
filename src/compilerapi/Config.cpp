@@ -196,7 +196,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             architecture = argv[idx];
         }
     }
-    else if (strcmp(arg, "-S") == 0)
+    else if (strcmp(arg, "-t") == 0 || strcmp(arg, "--text") == 0)
     {
         assemblyType = eText;
     }
@@ -236,7 +236,7 @@ Options:
   --emit <value>         Output type: asm, c-header, llvm, tokens, tree
   -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
-  -S                     Output assembly as text
+  -t, --text             Output assembly as text
 
 Examples:
 
@@ -246,8 +246,8 @@ Compile test.wip to an object file:
 Compile test.wip to an object file with optimization enabled:
   wip test.wip -O 2
 
-Output LLVM IR:
-  wip test.wip --emit llvm -S
+Output LLVM IR as text:
+  wip test.wip --emit llvm -t
 
 Output a C/C++ header file:
   wip test.wip --emit c-header -o test.h
