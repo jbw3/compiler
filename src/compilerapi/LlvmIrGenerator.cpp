@@ -444,7 +444,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         diBuilder->finalizeSubprogram(diSubprogram);
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     bool error = verifyFunction(*func, &errs());
     if (error)
     {
@@ -452,7 +452,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         logger.LogInternalError("Verify function failed");
         return;
     }
-#endif // DEBUG
+#endif // NDEBUG
 }
 
 void LlvmIrGenerator::Visit(StructDefinition* structDefinition)

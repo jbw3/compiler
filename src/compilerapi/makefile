@@ -17,8 +17,8 @@ LDFLAGS = -rcs
 
 POSTCOMPILE = @mv -f $(DEPDIR)/$<.Td $(DEPDIR)/$<.d && touch $@
 
-release: CXXFLAGS += -O2
-debug: CXXFLAGS += -O0 -g -DDEBUG
+release: CXXFLAGS += -O2 -DNDEBUG
+debug: CXXFLAGS += -O0 -g
 
 SRC = $(notdir $(wildcard $(SRCDIR)/*.cpp))
 OBJ = $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRC))
