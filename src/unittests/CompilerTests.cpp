@@ -19,7 +19,8 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     string expectedFilename = testFilesDir + baseFilename + ".expected.ll";
 
     Config config;
-    config.assemblyType = Config::eLlvmIr;
+    config.emitType = Config::eLlvmIr;
+    config.assemblyType = Config::eText;
     config.inFilename = inFilename;
     config.outFilename = outFilename;
     config.debugInfo = debugInfo;

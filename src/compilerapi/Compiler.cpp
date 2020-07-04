@@ -53,7 +53,7 @@ bool Compiler::Compile()
     }
 
     // check tokens are the output
-    if (ok && config.outputType == Config::eTokens)
+    if (ok && config.emitType == Config::eTokens)
     {
         PrintTokens(tokens);
         return ok;
@@ -85,7 +85,7 @@ bool Compiler::Compile()
     }
 
     // check if syntax tree is the output
-    if (ok && config.outputType == Config::eSyntaxTree)
+    if (ok && config.emitType == Config::eSyntaxTree)
     {
         SyntaxTreePrinter printer(config.outFilename);
         syntaxTree->Accept(&printer);
@@ -94,7 +94,7 @@ bool Compiler::Compile()
     }
 
     // check if C header is the output
-    if (ok && config.outputType == Config::eCHeader)
+    if (ok && config.emitType == Config::eCHeader)
     {
         CHeaderPrinter printer;
         ok = printer.Print(config, syntaxTree);
@@ -102,7 +102,7 @@ bool Compiler::Compile()
         return ok;
     }
 
-    if (ok && config.outputType == Config::eAssembly)
+    if ( ok && (config.emitType == Config::eAssembly || config.emitType == Config::eLlvmIr) )
     {
         llvm::Module* module = nullptr;
 

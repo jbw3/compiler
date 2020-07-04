@@ -2,6 +2,7 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #include "AssemblyGenerator.h"
 #include "ErrorLogger.h"
+#include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
@@ -16,6 +17,7 @@ using namespace std;
 
 AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
+    emitType(config.emitType),
     assemblyType(config.assemblyType),
     logger(logger)
 {
@@ -24,17 +26,33 @@ AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) 
         size_t idx = config.inFilename.rfind('.');
         string baseName = config.inFilename.substr(0, idx);
 
-        switch (config.assemblyType)
+        if (emitType == Config::eLlvmIr)
         {
-            case Config::eLlvmIr:
-                outFilename = baseName + ".ll";
-                break;
-            case Config::eMachineText:
-                outFilename = baseName + ".s";
-                break;
-            case Config::eMachineBinary:
-                outFilename = baseName + ".o";
-                break;
+            switch (assemblyType)
+            {
+                case Config::eBinary:
+                    outFilename = baseName + ".bc";
+                    break;
+                case Config::eText:
+                    outFilename = baseName + ".ll";
+                    break;
+            }
+        }
+        else if (emitType == Config::eAssembly)
+        {
+            switch (assemblyType)
+            {
+                case Config::eBinary:
+                    outFilename = baseName + ".o";
+                    break;
+                case Config::eText:
+                    outFilename = baseName + ".s";
+                    break;
+            }
+        }
+        else
+        {
+            assert(false && "Unknown emit type");
         }
     }
     else
@@ -45,34 +63,34 @@ AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) 
 
 bool AssemblyGenerator::Generate(Module* module)
 {
-    if (assemblyType == Config::eLlvmIr)
+    error_code ec;
+    raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
+    if (ec)
     {
-        error_code ec;
-        raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
-        if (ec)
-        {
-            logger.LogError("Could not open output file");
-            return false;
-        }
-
-        // print LLVM IR
-        module->print(outFile, nullptr);
+        logger.LogError("Could not open output file");
+        return false;
     }
-    else if (assemblyType == Config::eMachineText || assemblyType == Config::eMachineBinary)
+
+    if (emitType == Config::eLlvmIr)
+    {
+        if (assemblyType == Config::eBinary)
+        {
+            // write LLVM bytecode
+            WriteBitcodeToFile(*module, outFile);
+        }
+        else if (assemblyType == Config::eText)
+        {
+            // print LLVM IR
+            module->print(outFile, nullptr);
+        }
+    }
+    else if (emitType == Config::eAssembly)
     {
         InitializeAllAsmParsers();
         InitializeAllAsmPrinters();
 
-        error_code ec;
-        raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
-        if (ec)
-        {
-            logger.LogError("Could not open output file");
-            return false;
-        }
-
         legacy::PassManager passManager;
-        CodeGenFileType fileType = (assemblyType == Config::eMachineBinary)
+        CodeGenFileType fileType = (assemblyType == Config::eBinary)
                                     ? CGFT_ObjectFile
                                     : CGFT_AssemblyFile;
         if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
@@ -85,7 +103,7 @@ bool AssemblyGenerator::Generate(Module* module)
     }
     else
     {
-        logger.LogInternalError("Unknown assembly type");
+        logger.LogInternalError("Unknown emit type");
         return false;
     }
 

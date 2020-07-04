@@ -11,22 +11,22 @@ class TargetMachine;
 class Config
 {
 public:
-    enum EOutputType
+    enum EEmitType
     {
         eTokens,
         eSyntaxTree,
         eCHeader,
+        eLlvmIr,
         eAssembly,
     };
 
     enum EAssemblyType
     {
-        eLlvmIr,
-        eMachineText,
-        eMachineBinary,
+        eBinary,
+        eText,
     };
 
-    EOutputType outputType;
+    EEmitType emitType;
     EAssemblyType assemblyType;
     std::string inFilename;
     std::string outFilename;

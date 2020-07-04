@@ -20,6 +20,7 @@ public:
 private:
     std::string outFilename;
     llvm::TargetMachine* targetMachine;
+    Config::EEmitType emitType;
     Config::EAssemblyType assemblyType;
     ErrorLogger& logger;
 };

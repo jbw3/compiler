@@ -14,8 +14,8 @@ using namespace std;
 
 Config::Config()
 {
-    outputType = eAssembly;
-    assemblyType = eMachineBinary;
+    emitType = eAssembly;
+    assemblyType = eBinary;
     outFilename = "";
     optimizationLevel = 0;
     architecture = "";
@@ -144,7 +144,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
-    else if (strcmp(arg, "--out-type") == 0)
+    else if (strcmp(arg, "--emit") == 0)
     {
         if (idx + 1 >= argc)
         {
@@ -153,28 +153,32 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
         }
         else
         {
-            const char* const outType = argv[idx + 1];
+            const char* const emit = argv[idx + 1];
             ++idx;
 
-            if (strcmp(outType, "tokens") == 0)
+            if (strcmp(emit, "tokens") == 0)
             {
-                outputType = eTokens;
+                emitType = eTokens;
             }
-            else if (strcmp(outType, "tree") == 0)
+            else if (strcmp(emit, "tree") == 0)
             {
-                outputType = eSyntaxTree;
+                emitType = eSyntaxTree;
             }
-            else if (strcmp(outType, "c-header") == 0)
+            else if (strcmp(emit, "c-header") == 0)
             {
-                outputType = eCHeader;
+                emitType = eCHeader;
             }
-            else if (strcmp(outType, "assembly") == 0)
+            else if (strcmp(emit, "llvm") == 0)
             {
-                outputType = eAssembly;
+                emitType = eLlvmIr;
+            }
+            else if (strcmp(emit, "asm") == 0)
+            {
+                emitType = eAssembly;
             }
             else
             {
-                cerr << "Error: Unknown argument :" << outType << "\n";
+                cerr << "Error: Unknown argument :" << emit << "\n";
                 ok = false;
             }
         }
@@ -194,11 +198,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
     }
     else if (strcmp(arg, "-S") == 0)
     {
-        assemblyType = eMachineText;
-    }
-    else if (strcmp(arg, "--llvm") == 0)
-    {
-        assemblyType = eLlvmIr;
+        assemblyType = eText;
     }
     else if (strcmp(arg, "-d") == 0 || strcmp(arg, "--debug-info") == 0)
     {
@@ -233,8 +233,7 @@ Options:
   -h, --help             Print help message
   --arch <value>         Assembly architecture
   -d, --debug-info       Generate debug info
-  --llvm                 Output LLVM IR
-  --out-type <value>     Type of output: assembly, c-header, tokens, tree
+  --emit <value>         Output type: asm, c-header, llvm, tokens, tree
   -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
   -S                     Output assembly as text
@@ -248,9 +247,9 @@ Compile test.wip to an object file with optimization enabled:
   wip test.wip -O 2
 
 Output LLVM IR:
-  wip test.wip --llvm
+  wip test.wip --emit llvm -S
 
 Output a C/C++ header file:
-  wip test.wip --out-type c-header -o test.h
+  wip test.wip --emit c-header -o test.h
 )";
 }
