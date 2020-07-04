@@ -73,6 +73,8 @@ private:
 
     bool HaveCompatibleAssignmentSizes(const TypeInfo* assignType, const TypeInfo* exprType);
 
+    bool AreCompatibleRanges(const TypeInfo* type1, const TypeInfo* type2, const TypeInfo*& outType);
+
     const TypeInfo* GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2);
 
     bool FixNumericLiteralType(SyntaxTree::Expression* expr, const TypeInfo* resultType);

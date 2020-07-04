@@ -113,7 +113,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    if (left->GetType()->IsInt() && right->GetType()->IsInt())
+    if ( (left->GetType()->IsInt() && right->GetType()->IsInt()) || (left->GetType()->IsRange() && right->GetType()->IsRange()) )
     {
         bool ok = FixNumericLiteralTypes(left, right);
         if (!ok)
@@ -203,6 +203,46 @@ bool SemanticAnalyzer::HaveCompatibleAssignmentSizes(const TypeInfo* assignType,
     return assignType->GetNumBits() >= rightNumBits;
 }
 
+bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo* type2, const TypeInfo*& outType)
+{
+    outType = nullptr;
+
+    // make sure both types are ranges and both are inclusive or both are exclusive
+    if (type1->IsRange() && type2->IsRange() && type1->IsExclusive() == type2->IsExclusive())
+    {
+        const NumericLiteralType* intLit1 = dynamic_cast<const NumericLiteralType*>(type1->GetMembers()[0]->GetType());
+        const NumericLiteralType* intLit2 = dynamic_cast<const NumericLiteralType*>(type2->GetMembers()[0]->GetType());
+        if (intLit1 != nullptr && intLit2 != nullptr)
+        {
+            if (intLit1->GetSignedNumBits() >= intLit2->GetSignedNumBits())
+            {
+                outType = type1;
+            }
+            else
+            {
+                outType = type2;
+            }
+        }
+        else if (intLit1 != nullptr)
+        {
+            // TODO: get number of bits based on sign
+        }
+        else if (intLit2 != nullptr)
+        {
+            // TODO: get number of bits based on sign
+        }
+        else
+        {
+            if (type1->GetNumBits() == type2->GetNumBits())
+            {
+                outType = type1;
+            }
+        }
+    }
+
+    return outType != nullptr;
+}
+
 const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2)
 {
     const TypeInfo* resultType = nullptr;
@@ -269,16 +309,34 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     return resultType;
 }
 
-bool SemanticAnalyzer::FixNumericLiteralType(SyntaxTree::Expression* expr, const TypeInfo* resultType)
+bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* resultType)
 {
-    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(expr->GetType());
+    const NumericLiteralType* literalType = nullptr;
+    TypeInfo::ESign resultSign = TypeInfo::eNotApplicable;
+    const TypeInfo* exprType = expr->GetType();
+    if (exprType->IsRange())
+    {
+        literalType = dynamic_cast<const NumericLiteralType*>(exprType->GetMembers()[0]->GetType());
+        resultSign = resultType->GetMembers()[0]->GetType()->GetSign();
+    }
+    else
+    {
+        literalType = dynamic_cast<const NumericLiteralType*>(exprType);
+        resultSign = resultType->GetSign();
+    }
+
     if (literalType != nullptr && literalType->GetSign() == TypeInfo::eContextDependent)
     {
-        const TypeInfo* newType = literalType->GetMinSizeType(resultType->GetSign());
+        const TypeInfo* newType = literalType->GetMinSizeType(resultSign);
         if (newType == nullptr)
         {
             logger.LogInternalError("Could not determine expression result type");
             return false;
+        }
+
+        if (exprType->IsRange())
+        {
+            newType = TypeInfo::GetRangeType(newType, exprType->IsExclusive());
         }
 
         expr->SetType(newType);
@@ -287,12 +345,14 @@ bool SemanticAnalyzer::FixNumericLiteralType(SyntaxTree::Expression* expr, const
     return true;
 }
 
-bool SemanticAnalyzer::FixNumericLiteralTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2)
+bool SemanticAnalyzer::FixNumericLiteralTypes(Expression* expr1, Expression* expr2)
 {
     const TypeInfo* expr1Type = expr1->GetType();
     const TypeInfo* expr2Type = expr2->GetType();
-    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(expr1Type);
-    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(expr2Type);
+    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(
+        expr1Type->IsRange() ? expr1Type->GetMembers()[0]->GetType() : expr1Type);
+    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(
+        expr2Type->IsRange() ? expr2Type->GetMembers()[0]->GetType() : expr2Type);
 
     bool ok = true;
     if (literalType1 != nullptr && literalType2 == nullptr)
@@ -1100,6 +1160,10 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     else if (ifType->IsInt() && elseType->IsInt() && HaveCompatibleSigns(ifType, elseType))
     {
         resultType = GetBiggestSizeType(ifType, elseType);
+    }
+    else if (AreCompatibleRanges(ifType, elseType, resultType))
+    {
+        // resultType is assigned in else if function call
     }
     else
     {

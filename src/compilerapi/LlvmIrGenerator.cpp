@@ -994,7 +994,8 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
     else if (type->IsInt())
     {
-        llvmType = Type::getIntNTy(context, type->GetNumBits());
+        unsigned numBits = type->GetNumBits();
+        llvmType = Type::getIntNTy(context, numBits);
     }
     else
     {
@@ -1221,7 +1222,7 @@ const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeI
         resultType = dstType;
     }
     // sign extend range value if needed
-    else if (srcType->IsRange() && dstType->IsRange())
+    else if (srcType->IsRange() && dstType->IsRange() && srcType->GetNumBits() < dstType->GetNumBits())
     {
         const vector<const MemberInfo*>& srcMembers = srcType->GetMembers();
         const NumericLiteralType* srcLeftIntLit = dynamic_cast<const NumericLiteralType*>(srcMembers[0]->GetType());
