@@ -210,8 +210,10 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
     // make sure both types are ranges and both are inclusive or both are exclusive
     if (type1->IsRange() && type2->IsRange() && type1->IsExclusive() == type2->IsExclusive())
     {
-        const NumericLiteralType* intLit1 = dynamic_cast<const NumericLiteralType*>(type1->GetMembers()[0]->GetType());
-        const NumericLiteralType* intLit2 = dynamic_cast<const NumericLiteralType*>(type2->GetMembers()[0]->GetType());
+        const TypeInfo* memberType1 = type1->GetMembers()[0]->GetType();
+        const TypeInfo* memberType2 = type2->GetMembers()[0]->GetType();
+        const NumericLiteralType* intLit1 = dynamic_cast<const NumericLiteralType*>(memberType1);
+        const NumericLiteralType* intLit2 = dynamic_cast<const NumericLiteralType*>(memberType2);
         if (intLit1 != nullptr && intLit2 != nullptr)
         {
             if (intLit1->GetSignedNumBits() >= intLit2->GetSignedNumBits())
@@ -225,11 +227,37 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
         }
         else if (intLit1 != nullptr)
         {
-            // TODO: get number of bits based on sign
+            unsigned litNumBits = 0;
+            if (memberType2->GetSign() == TypeInfo::eSigned)
+            {
+                litNumBits = intLit1->GetSignedNumBits();
+            }
+            else
+            {
+                litNumBits = intLit1->GetUnsignedNumBits();
+            }
+
+            if (memberType2->GetNumBits() >= litNumBits)
+            {
+                outType = type2;
+            }
         }
         else if (intLit2 != nullptr)
         {
-            // TODO: get number of bits based on sign
+            unsigned litNumBits = 0;
+            if (memberType1->GetSign() == TypeInfo::eSigned)
+            {
+                litNumBits = intLit2->GetSignedNumBits();
+            }
+            else
+            {
+                litNumBits = intLit2->GetUnsignedNumBits();
+            }
+
+            if (memberType1->GetNumBits() >= litNumBits)
+            {
+                outType = type1;
+            }
         }
         else
         {

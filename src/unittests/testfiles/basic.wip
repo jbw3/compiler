@@ -212,7 +212,7 @@ fun types_str()
     var dup2 str = "abc";
 }
 
-fun types_range()
+fun types_range(b bool)
 {
     var x1 i32 = 10;
     var x2 i32 = 13;
@@ -229,6 +229,9 @@ fun types_range()
     var ir2 = 0..<y1;  # one int literal and one variable
     var ir3 = y1..<y2; # two int literals
     var ir4 = -x2..x1 + x2; # expressions
+
+    # test sign extension
+    var r1 = if b { 0..3 } else { 100..200 };
 }
 
 fun str_member1() usize

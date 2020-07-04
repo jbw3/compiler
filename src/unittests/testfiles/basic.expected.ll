@@ -5,6 +5,7 @@ target triple = "x86_64-pc-linux-gnu"
 
 %UnitType = type {}
 %str = type { i64, [0 x i8] }
+%Range16 = type { i16, i16 }
 %Range32 = type { i32, i32 }
 %Range8 = type { i8, i8 }
 %Test2 = type { %Test1, i32 }
@@ -746,8 +747,9 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @types_range() #0 {
+define %UnitType @types_range(i1 %b) #0 {
 entry:
+  %r1 = alloca %Range16
   %ir4 = alloca %Range32
   %ir3 = alloca %Range32
   %ir2 = alloca %Range32
@@ -759,36 +761,50 @@ entry:
   %y1 = alloca i32
   %x2 = alloca i32
   %x1 = alloca i32
+  %b1 = alloca i1
+  store i1 %b, i1* %b1
   store i32 10, i32* %x1
   store i32 13, i32* %x2
   store i32 25, i32* %y1
   store i32 39, i32* %y2
   store %Range8 { i8 39, i8 124 }, %Range8* %er1
-  %x11 = load i32, i32* %x1
-  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %x11, 1
-  store %Range32 %rng, %Range32* %er2
   %x12 = load i32, i32* %x1
-  %x23 = load i32, i32* %x2
-  %rng4 = insertvalue %Range32 undef, i32 %x12, 0
-  %rng5 = insertvalue %Range32 %rng4, i32 %x23, 1
-  store %Range32 %rng5, %Range32* %er3
+  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %x12, 1
+  store %Range32 %rng, %Range32* %er2
+  %x13 = load i32, i32* %x1
+  %x24 = load i32, i32* %x2
+  %rng5 = insertvalue %Range32 undef, i32 %x13, 0
+  %rng6 = insertvalue %Range32 %rng5, i32 %x24, 1
+  store %Range32 %rng6, %Range32* %er3
   store %Range8 { i8 1, i8 10 }, %Range8* %ir1
-  %y16 = load i32, i32* %y1
-  %rng7 = insertvalue %Range32 { i32 0, i32 undef }, i32 %y16, 1
-  store %Range32 %rng7, %Range32* %ir2
-  %y18 = load i32, i32* %y1
-  %y29 = load i32, i32* %y2
-  %rng10 = insertvalue %Range32 undef, i32 %y18, 0
-  %rng11 = insertvalue %Range32 %rng10, i32 %y29, 1
-  store %Range32 %rng11, %Range32* %ir3
-  %x212 = load i32, i32* %x2
-  %neg = sub i32 0, %x212
-  %x113 = load i32, i32* %x1
-  %x214 = load i32, i32* %x2
-  %add = add i32 %x113, %x214
-  %rng15 = insertvalue %Range32 undef, i32 %neg, 0
-  %rng16 = insertvalue %Range32 %rng15, i32 %add, 1
-  store %Range32 %rng16, %Range32* %ir4
+  %y17 = load i32, i32* %y1
+  %rng8 = insertvalue %Range32 { i32 0, i32 undef }, i32 %y17, 1
+  store %Range32 %rng8, %Range32* %ir2
+  %y19 = load i32, i32* %y1
+  %y210 = load i32, i32* %y2
+  %rng11 = insertvalue %Range32 undef, i32 %y19, 0
+  %rng12 = insertvalue %Range32 %rng11, i32 %y210, 1
+  store %Range32 %rng12, %Range32* %ir3
+  %x213 = load i32, i32* %x2
+  %neg = sub i32 0, %x213
+  %x114 = load i32, i32* %x1
+  %x215 = load i32, i32* %x2
+  %add = add i32 %x114, %x215
+  %rng16 = insertvalue %Range32 undef, i32 %neg, 0
+  %rng17 = insertvalue %Range32 %rng16, i32 %add, 1
+  store %Range32 %rng17, %Range32* %ir4
+  %b18 = load i1, i1* %b1
+  br i1 %b18, label %if, label %else
+
+if:                                               ; preds = %entry
+  br label %merge
+
+else:                                             ; preds = %entry
+  br label %merge
+
+merge:                                            ; preds = %else, %if
+  %phi = phi %Range16 [ { i16 0, i16 3 }, %if ], [ { i16 100, i16 200 }, %else ]
+  store %Range16 %phi, %Range16* %r1
   ret %UnitType zeroinitializer
 }
 
