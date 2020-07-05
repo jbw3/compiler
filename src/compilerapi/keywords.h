@@ -12,6 +12,8 @@ const std::string ELSE_KEYWORD = "else";
 
 const std::string EXTERN_KEYWORD = "extern";
 
+const std::string FOR_KEYWORD = "for";
+
 const std::string FUNCTION_KEYWORD = "fun";
 
 const std::string IF_KEYWORD = "if";
@@ -23,6 +25,8 @@ const std::string INT16_KEYWORD = "i16";
 const std::string INT32_KEYWORD = "i32";
 
 const std::string INT64_KEYWORD = "i64";
+
+const std::string IN_KEYWORD = "in";
 
 const std::string INT_SIZE_KEYWORD = "isize";
 
@@ -50,12 +54,14 @@ const std::unordered_set<std::string> KEYWORDS =
     ELIF_KEYWORD,
     ELSE_KEYWORD,
     EXTERN_KEYWORD,
+    FOR_KEYWORD,
     FUNCTION_KEYWORD,
     IF_KEYWORD,
     INT8_KEYWORD,
     INT16_KEYWORD,
     INT32_KEYWORD,
     INT64_KEYWORD,
+    IN_KEYWORD,
     INT_SIZE_KEYWORD,
     STR_KEYWORD,
     STRUCT_KEYWORD,
@@ -80,9 +86,7 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "enum",
     "f32",
     "f64",
-    "for",
     "import",
-    "in",
     "interface",
     "let",
     "match",
