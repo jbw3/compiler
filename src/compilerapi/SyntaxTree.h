@@ -389,6 +389,43 @@ private:
     Expression* expression;
 };
 
+class ForLoop : public Expression
+{
+public:
+    ForLoop(const std::string& variableName, const std::string& variableTypeName,
+            Expression* iterExpression, Expression* expression,
+            const Token* variableNameToken, const Token* variableTypeNameToken);
+
+    virtual ~ForLoop();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const std::string& GetVariableName() const;
+
+    const std::string& GetVariableTypeName() const;
+
+    const TypeInfo* GetVariableType() const;
+
+    void SetVariableType(const TypeInfo* newType);
+
+    Expression* GetIterExpression();
+
+    Expression* GetExpression();
+
+    const Token* GetVariableNameToken() const;
+
+    const Token* GetVariableTypeNameToken() const;
+
+private:
+    std::string variableName;
+    std::string variableTypeName;
+    const TypeInfo* variableType;
+    Expression* iterExpression;
+    Expression* expression;
+    const Token* variableNameToken;
+    const Token* variableTypeNameToken;
+};
+
 class Parameter
 {
 public:

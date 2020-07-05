@@ -667,6 +667,69 @@ Expression* WhileLoop::GetExpression() const
     return expression;
 }
 
+ForLoop::ForLoop(const string& variableName, const string& variableTypeName,
+                 Expression* iterExpression, Expression* expression,
+                 const Token* variableNameToken, const Token* variableTypeNameToken) :
+    variableName(variableName),
+    variableTypeName(variableTypeName),
+    iterExpression(iterExpression),
+    expression(expression),
+    variableNameToken(variableNameToken),
+    variableTypeNameToken(variableTypeNameToken)
+{
+}
+
+ForLoop::~ForLoop()
+{
+    delete expression;
+    delete iterExpression;
+}
+
+void ForLoop::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO: call visitor->Accept(this);
+}
+
+const string& ForLoop::GetVariableName() const
+{
+    return variableName;
+}
+
+const string& ForLoop::GetVariableTypeName() const
+{
+    return variableTypeName;
+}
+
+const TypeInfo* ForLoop::GetVariableType() const
+{
+    return variableType;
+}
+
+void ForLoop::SetVariableType(const TypeInfo* newType)
+{
+    variableType = newType;
+}
+
+Expression* ForLoop::GetIterExpression()
+{
+    return iterExpression;
+}
+
+Expression* ForLoop::GetExpression()
+{
+    return expression;
+}
+
+const Token* ForLoop::GetVariableNameToken() const
+{
+    return variableNameToken;
+}
+
+const Token* ForLoop::GetVariableTypeNameToken() const
+{
+    return variableTypeNameToken;
+}
+
 Parameter::Parameter(const string& name, const string& typeName,
                      const Token* nameToken, const Token* typeNameToken) :
     nameToken(nameToken),
