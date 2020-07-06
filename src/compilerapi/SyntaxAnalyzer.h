@@ -86,6 +86,8 @@ private:
 
     SyntaxTree::WhileLoop* ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter);
 
+    SyntaxTree::ForLoop* ProcessForLoop(TokenIterator& iter, TokenIterator endIter);
+
     TokenIterator FindStatementEnd(TokenIterator iter, TokenIterator endIter);
 
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,

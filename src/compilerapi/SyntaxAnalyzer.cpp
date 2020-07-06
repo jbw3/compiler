@@ -1,6 +1,7 @@
 #include "SyntaxAnalyzer.h"
 #include "keywords.h"
 #include "utils.h"
+#include <cassert>
 #include <memory>
 
 using namespace std;
@@ -735,6 +736,86 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
     return whileLoop;
 }
 
+ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIter)
+{
+    assert(iter->GetValue() == FOR_KEYWORD);
+
+    // increment iter past "for" keyword
+    ++iter;
+
+    // read variable name
+    if (!EndIteratorCheck(iter, endIter, "Expected a vairable name"))
+    {
+        return nullptr;
+    }
+
+    if (!IsValidName(*iter))
+    {
+        logger.LogError(*iter, "Invalid variable name");
+        return nullptr;
+    }
+
+    const Token* varNameToken = &*iter;
+
+    if (!IncrementIterator(iter, endIter, "Expected variable type or 'in' keyword"))
+    {
+        return nullptr;
+    }
+
+    const Token* varTypeNameToken = nullptr;
+    string varTypeName;
+    if (iter->GetValue() == IN_KEYWORD)
+    {
+        varTypeNameToken = Token::None;
+        varTypeName = "";
+    }
+    else
+    {
+        varTypeNameToken = &*iter;
+        varTypeName = varTypeNameToken->GetValue();
+
+        if (!IncrementIterator(iter, endIter, "Expected 'in' keyword"))
+        {
+            return nullptr;
+        }
+
+        if (iter->GetValue() != IN_KEYWORD)
+        {
+            logger.LogError(*iter, "Expected 'in' keyword");
+            return nullptr;
+        }
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected expression"))
+    {
+        return nullptr;
+    }
+
+    // read "for" iterable expression
+    unique_ptr<Expression> iterExpression(ProcessExpression(iter, endIter, {BLOCK_START}));
+    if (iterExpression == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (iter == endIter || iter->GetValue() != BLOCK_START)
+    {
+        logger.LogError(*iter, "Expected '{'");
+        return nullptr;
+    }
+
+    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
+    if (expression == nullptr)
+    {
+        return nullptr;
+    }
+
+    ForLoop* forLoop = new ForLoop(varNameToken->GetValue(), varTypeName,
+                                   iterExpression.release(), expression.release(),
+                                   varNameToken, varTypeNameToken);
+    return forLoop;
+}
+
 SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindStatementEnd(TokenIterator iter, TokenIterator endIter)
 {
     unsigned int balance = 0;
@@ -837,6 +918,16 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
     else if (iter->GetValue() == WHILE_KEYWORD)
     {
         expr = ProcessWhileLoop(iter, endIter);
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
+
+        isPotentialEnd = true;
+    }
+    else if (iter->GetValue() == FOR_KEYWORD)
+    {
+        expr = ProcessForLoop(iter, endIter);
         if (expr == nullptr)
         {
             return nullptr;
