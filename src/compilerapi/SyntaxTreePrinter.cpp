@@ -82,6 +82,17 @@ void SyntaxTreePrinter::Visit(WhileLoop* whileLoop)
     PrintProperty("expression", whileLoop->GetExpression());
 }
 
+void SyntaxTreePrinter::Visit(ForLoop* forLoop)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
+    PrintProperty("variableName", forLoop->GetVariableName());
+    PrintProperty("variableTypeName", forLoop->GetVariableTypeName());
+    PrintProperty("iterExpression", forLoop->GetIterExpression());
+    PrintProperty("expression", forLoop->GetExpression());
+}
+
 void SyntaxTreePrinter::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
     BracePrinter printer(*this, "{", "}");

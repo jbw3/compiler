@@ -1,6 +1,7 @@
 #include "ErrorLogger.h"
 #include "SemanticAnalyzer.h"
 #include "SyntaxTree.h"
+#include <cassert>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -145,23 +146,6 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
     const TypeInfo* resultType = GetBinaryOperatorResultType(op, left->GetType(), right->GetType());
     binaryExpression->SetType(resultType);
-}
-
-unsigned SemanticAnalyzer::GetIntNumBits(const TypeInfo* type)
-{
-    unsigned numBits = 0;
-
-    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
-    if (literalType == nullptr)
-    {
-        numBits = type->GetNumBits();
-    }
-    else
-    {
-        numBits = type->GetNumBits();
-    }
-
-    return numBits;
 }
 
 bool SemanticAnalyzer::HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType)
@@ -620,6 +604,66 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 
     // while loop expressions always evaluate to the unit type
     whileLoop->SetType(TypeInfo::UnitType);
+}
+
+void SemanticAnalyzer::Visit(ForLoop* forLoop)
+{
+    // process iterable expression
+    Expression* iterExpression = forLoop->GetIterExpression();
+    iterExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // ensure iterable expression is a range
+    const TypeInfo* iterExprType = iterExpression->GetType();
+    if (!iterExprType->IsRange())
+    {
+        isError = true;
+        logger.LogError("For loop expression is not iterable");
+        return;
+    }
+
+    // set variable type
+    const TypeInfo* inferType = iterExprType->GetMembers()[0]->GetType();
+    const TypeInfo* varType = GetVariableType(forLoop->GetVariableTypeNameToken(), inferType);
+    if (isError)
+    {
+        return;
+    }
+    forLoop->SetVariableType(varType);
+
+    // create new scope for variable
+    Scope scope(symbolTable);
+
+    // add the variable name to the symbol table
+    const string& varName = forLoop->GetVariableName();
+    bool ok = symbolTable.AddVariable(varName, forLoop->GetVariableType());
+    if (!ok)
+    {
+        isError = true;
+        logger.LogError(*forLoop->GetVariableNameToken(), "Variable '{}' has already been declared", varName);
+        return;
+    }
+
+    // process body expression
+    Expression* expression = forLoop->GetExpression();
+    expression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
+    {
+        isError = true;
+        logger.LogError("For loop block expression must return the unit type");
+        return;
+    }
+
+    // for loop expressions always evaluate to the unit type
+    forLoop->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
@@ -1225,61 +1269,15 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
         return;
     }
 
-    const string& typeName = variableDeclaration->GetTypeName();
-    bool inferTypeName = typeName.empty();
-    const TypeInfo* type = nullptr;
-
-    // if no type name was given, infer it from the expression
-    if (inferTypeName)
+    // set the variable type
+    const TypeInfo* type = GetVariableType(variableDeclaration->GetTypeNameToken(), rightExpr->GetType());
+    if (isError)
     {
-        type = rightExpr->GetType();
-
-        // if this is an int literal, set the type to the minimum signed size
-        // that will hold the number
-        const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
-        if (literalType != nullptr)
-        {
-            type = TypeInfo::GetMinSignedIntTypeForSize(literalType->GetSignedNumBits());
-            if (type == nullptr)
-            {
-                isError = true;
-                logger.LogInternalError("Could not infer integer literal type");
-                return;
-            }
-        }
-        else if (type->IsRange())
-        {
-            // if this is a range type and the members are int literals, set the members' type
-            // to the minimum signed size that will hold the number
-            const TypeInfo* memberType = type->GetMembers()[0]->GetType();
-            const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
-            if (memberLiteralType != nullptr)
-            {
-                const TypeInfo* newMemberType = TypeInfo::GetMinSignedIntTypeForSize(memberLiteralType->GetSignedNumBits());
-                if (newMemberType == nullptr)
-                {
-                    isError = true;
-                    logger.LogInternalError("Could not infer Range integer literal type");
-                    return;
-                }
-
-                type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
-            }
-        }
+        return;
     }
-    else // get the type from the name given
-    {
-        type = TypeInfo::GetType(typeName);
-        if (type == nullptr)
-        {
-            isError = true;
-            logger.LogError(*variableDeclaration->GetTypeNameToken(), "'{}' is not a known type", typeName);
-            return;
-        }
-    }
-
     variableDeclaration->SetVariableType(type);
 
+    // add the variable name to the symbol table
     const string& varName = variableDeclaration->GetName();
     bool ok = symbolTable.AddVariable(varName, variableDeclaration->GetVariableType());
     if (!ok)
@@ -1347,4 +1345,62 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     functionDeclaration->SetReturnType(returnType);
 
     return true;
+}
+
+const TypeInfo* SemanticAnalyzer::GetVariableType(const Token* typeNameToken, const TypeInfo* inferType)
+{
+    const string& typeName = typeNameToken->GetValue();
+    bool inferTypeName = typeName.empty();
+    const TypeInfo* type = nullptr;
+
+    // if no type name was given, infer it from the expression
+    if (inferTypeName)
+    {
+        type = inferType;
+
+        // if this is an int literal, set the type to the minimum signed size
+        // that will hold the number
+        const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
+        if (literalType != nullptr)
+        {
+            type = TypeInfo::GetMinSignedIntTypeForSize(literalType->GetSignedNumBits());
+            if (type == nullptr)
+            {
+                isError = true;
+                logger.LogInternalError("Could not infer integer literal type");
+                return nullptr;
+            }
+        }
+        else if (type->IsRange())
+        {
+            // if this is a range type and the members are int literals, set the members' type
+            // to the minimum signed size that will hold the number
+            const TypeInfo* memberType = type->GetMembers()[0]->GetType();
+            const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
+            if (memberLiteralType != nullptr)
+            {
+                const TypeInfo* newMemberType = TypeInfo::GetMinSignedIntTypeForSize(memberLiteralType->GetSignedNumBits());
+                if (newMemberType == nullptr)
+                {
+                    isError = true;
+                    logger.LogInternalError("Could not infer Range integer literal type");
+                    return nullptr;
+                }
+
+                type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
+            }
+        }
+    }
+    else // get the type from the name given
+    {
+        type = TypeInfo::GetType(typeName);
+        if (type == nullptr)
+        {
+            isError = true;
+            logger.LogError(*typeNameToken, "'{}' is not a known type", typeName);
+            return nullptr;
+        }
+    }
+
+    return type;
 }

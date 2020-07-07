@@ -22,6 +22,8 @@ public:
 
     void Visit(SyntaxTree::WhileLoop* whileLoop) override;
 
+    void Visit(SyntaxTree::ForLoop* forLoop) override;
+
     void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
@@ -67,8 +69,6 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
-    unsigned GetIntNumBits(const TypeInfo* type);
-
     bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
 
     bool HaveCompatibleAssignmentSizes(const TypeInfo* assignType, const TypeInfo* exprType);
@@ -86,6 +86,8 @@ private:
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);
 
     bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
+
+    const TypeInfo* GetVariableType(const Token* typeNameToken, const TypeInfo* inferType);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

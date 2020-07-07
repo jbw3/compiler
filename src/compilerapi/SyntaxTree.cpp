@@ -687,7 +687,7 @@ ForLoop::~ForLoop()
 
 void ForLoop::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO: call visitor->Accept(this);
+    visitor->Visit(this);
 }
 
 const string& ForLoop::GetVariableName() const

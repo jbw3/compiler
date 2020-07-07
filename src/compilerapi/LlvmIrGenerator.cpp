@@ -314,6 +314,11 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     resultValue = ConstantStruct::get(unitType);
 }
 
+void LlvmIrGenerator::Visit(ForLoop* forLoop)
+{
+    assert(false);
+}
+
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
 {
     // nothing to do here
