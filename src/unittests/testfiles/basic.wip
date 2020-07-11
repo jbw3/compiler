@@ -532,6 +532,31 @@ fun nestedLoop(num i32) i32
     rv
 }
 
+fun forLoop(start i32, end i32) i32
+{
+    var num i32 = 1;
+    for i in start..end
+    {
+        num *= i;
+    }
+
+    num
+}
+
+fun nestedForLoop() u32
+{
+    var x u32 = 0;
+    for i u32 in 0..<5
+    {
+        for j u32 in 1..10
+        {
+            x += i * j;
+        }
+    }
+
+    x
+}
+
 fun blockExpression(param i32) i32
 {
     var x i32 = {

@@ -1572,6 +1572,92 @@ whileExit18:                                      ; preds = %whileCond
 }
 
 ; Function Attrs: noinline nounwind optnone
+define i32 @forLoop(i32 %start, i32 %end) #0 {
+entry:
+  %i = alloca i32
+  %num = alloca i32
+  %end2 = alloca i32
+  %start1 = alloca i32
+  store i32 %start, i32* %start1
+  store i32 %end, i32* %end2
+  store i32 1, i32* %num
+  %start3 = load i32, i32* %start1
+  %end4 = load i32, i32* %end2
+  %rng = insertvalue %Range32 undef, i32 %start3, 0
+  %rng5 = insertvalue %Range32 %rng, i32 %end4, 1
+  %start6 = extractvalue %Range32 %rng5, 0
+  store i32 %start6, i32* %i
+  %end7 = extractvalue %Range32 %rng5, 1
+  br label %forCond
+
+forCond:                                          ; preds = %forBody, %entry
+  %iter = load i32, i32* %i
+  %cmp = icmp sle i32 %iter, %end7
+  br i1 %cmp, label %forBody, label %forExit
+
+forBody:                                          ; preds = %forCond
+  %i8 = load i32, i32* %i
+  %load = load i32, i32* %num
+  %mul = mul i32 %load, %i8
+  store i32 %mul, i32* %num
+  %iter9 = load i32, i32* %i
+  %inc = add i32 %iter9, 1
+  store i32 %inc, i32* %i
+  br label %forCond
+
+forExit:                                          ; preds = %forCond
+  %num10 = load i32, i32* %num
+  ret i32 %num10
+}
+
+; Function Attrs: noinline nounwind optnone
+define i32 @nestedForLoop() #0 {
+entry:
+  %j = alloca i32
+  %i = alloca i32
+  %x = alloca i32
+  store i32 0, i32* %x
+  store i32 0, i32* %i
+  br label %forCond
+
+forCond:                                          ; preds = %forExit, %entry
+  %iter = load i32, i32* %i
+  %cmp = icmp ult i32 %iter, 5
+  br i1 %cmp, label %forBody, label %forExit10
+
+forBody:                                          ; preds = %forCond
+  store i32 1, i32* %j
+  br label %forCond1
+
+forCond1:                                         ; preds = %forBody4, %forBody
+  %iter2 = load i32, i32* %j
+  %cmp3 = icmp ule i32 %iter2, 10
+  br i1 %cmp3, label %forBody4, label %forExit
+
+forBody4:                                         ; preds = %forCond1
+  %i5 = load i32, i32* %i
+  %j6 = load i32, i32* %j
+  %mul = mul i32 %i5, %j6
+  %load = load i32, i32* %x
+  %add = add i32 %load, %mul
+  store i32 %add, i32* %x
+  %iter7 = load i32, i32* %j
+  %inc = add i32 %iter7, 1
+  store i32 %inc, i32* %j
+  br label %forCond1
+
+forExit:                                          ; preds = %forCond1
+  %iter8 = load i32, i32* %i
+  %inc9 = add i32 %iter8, 1
+  store i32 %inc9, i32* %i
+  br label %forCond
+
+forExit10:                                        ; preds = %forCond
+  %x11 = load i32, i32* %x
+  ret i32 %x11
+}
+
+; Function Attrs: noinline nounwind optnone
 define i32 @blockExpression(i32 %param) #0 {
 entry:
   %x = alloca i32
