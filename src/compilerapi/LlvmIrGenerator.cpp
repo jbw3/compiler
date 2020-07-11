@@ -316,7 +316,92 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
 void LlvmIrGenerator::Visit(ForLoop* forLoop)
 {
-    assert(false);
+    forLoop->GetIterExpression()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* rangeValue = resultValue;
+
+    // create iterator
+    const string& varName = forLoop->GetVariableName();
+    const TypeInfo* varType = forLoop->GetVariableType();
+    bool isSigned = varType->GetSign() == TypeInfo::eSigned;
+    Type* type = GetType(varType);
+    if (type == nullptr)
+    {
+        resultValue = nullptr;
+        logger.LogInternalError("Unknown variable declaration type");
+        return;
+    }
+    AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
+    symbolTable.AddVariable(varName, varType, alloca);
+
+    vector<unsigned> index(1);
+
+    // set iterator to range start
+    // TODO: sign/zero extend if necessary
+    index[0] = 0;
+    Value* startValue = builder.CreateExtractValue(rangeValue, index, "start");
+    builder.CreateStore(startValue, alloca);
+
+    // get range end
+    // TODO: sign/zero extend if necessary
+    index[0] = 0;
+    index[0] = 1;
+    Value* endValue = builder.CreateExtractValue(rangeValue, index, "end");
+
+    Function* function = builder.GetInsertBlock()->getParent();
+
+    BasicBlock* loopCondBlock = BasicBlock::Create(context, "forCond", function);
+
+    // create unconditional branch from current block to loop condition block
+    builder.CreateBr(loopCondBlock);
+
+    // set insert point to the loop condition block
+    builder.SetInsertPoint(loopCondBlock);
+
+    // generate the condition IR
+    // TODO: handle unsigned ints
+    // TODO: handle exclusive ranges
+    Value* iter = builder.CreateLoad(alloca, "iter");
+    Value* conditionResult = builder.CreateICmpSLE(iter, endValue, "cmp");
+
+    BasicBlock* loopBodyBlock = BasicBlock::Create(context, "forBody", function);
+    BasicBlock* loopExitBlock = BasicBlock::Create(context, "forExit");
+
+    // create conditional branch from condition block to either the loop body
+    // or the loop exit
+    builder.SetInsertPoint(loopCondBlock);
+    builder.CreateCondBr(conditionResult, loopBodyBlock, loopExitBlock);
+
+    // set insert point to the loop body block
+    builder.SetInsertPoint(loopBodyBlock);
+
+    // generate loop body IR
+    forLoop->GetExpression()->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    // increment iterator
+    iter = builder.CreateLoad(alloca, "iter");
+    Value* one = ConstantInt::get(type, 1, isSigned);
+    iter = builder.CreateAdd(iter, one, "inc");
+    builder.CreateStore(iter, alloca);
+
+    // create unconditional branch to loop condition block
+    builder.CreateBr(loopCondBlock);
+
+    // add exit block to function
+    loopExitBlock->insertInto(function);
+
+    // set insert point to the loop exit block
+    builder.SetInsertPoint(loopExitBlock);
+
+    // for loop expressions always evaluate to the unit type
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
