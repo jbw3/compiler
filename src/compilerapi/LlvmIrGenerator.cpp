@@ -350,7 +350,6 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     builder.CreateStore(startValue, alloca);
 
     // get range end
-    index[0] = 0;
     index[0] = 1;
     Value* endValue = builder.CreateExtractValue(rangeValue, index, "end");
     endValue = CreateExt(endValue, rangeMemberType, varType);
