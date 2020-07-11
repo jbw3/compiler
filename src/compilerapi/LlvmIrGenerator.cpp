@@ -366,29 +366,16 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
     // generate the condition IR
     Value* iter = builder.CreateLoad(alloca, "iter");
-    Value* conditionResult = nullptr;
+    CmpInst::Predicate predicate = CmpInst::BAD_ICMP_PREDICATE;
     if (rangeType->IsExclusive())
     {
-        if (isSigned)
-        {
-            conditionResult = builder.CreateICmpSLT(iter, endValue, "cmp");
-        }
-        else
-        {
-            conditionResult = builder.CreateICmpULT(iter, endValue, "cmp");
-        }
+        predicate = isSigned ? CmpInst::ICMP_SLT : CmpInst::ICMP_ULT;
     }
     else
     {
-        if (isSigned)
-        {
-            conditionResult = builder.CreateICmpSLE(iter, endValue, "cmp");
-        }
-        else
-        {
-            conditionResult = builder.CreateICmpULE(iter, endValue, "cmp");
-        }
+        predicate = isSigned ? CmpInst::ICMP_SLE : CmpInst::ICMP_ULE;
     }
+    Value* conditionResult = builder.CreateICmp(predicate, iter, endValue, "cmp");
 
     BasicBlock* loopBodyBlock = BasicBlock::Create(context, "forBody", function);
     BasicBlock* loopExitBlock = BasicBlock::Create(context, "forExit");
