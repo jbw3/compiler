@@ -647,6 +647,20 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         return;
     }
 
+    // check variable type and range member type
+    if (!varType->IsSameAs(*inferType) && (!HaveCompatibleSigns(varType, inferType) || !HaveCompatibleAssignmentSizes(varType, inferType)))
+    {
+        isError = true;
+        logger.LogError(
+            *forLoop->GetVariableNameToken(),
+            "Cannot assign value of type '{}' to variable '{}' of type '{}'",
+            inferType->GetShortName(),
+            varName,
+            varType->GetShortName()
+        );
+        return;
+    }
+
     // process body expression
     Expression* expression = forLoop->GetExpression();
     expression->Accept(this);
