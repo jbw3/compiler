@@ -327,6 +327,9 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     assert(rangeType->GetMemberCount() > 0 && "For loop iterator expression type does not have members");
     const TypeInfo* rangeMemberType = rangeType->GetMembers()[0]->GetType();
 
+    // create new scope for iterator
+    Scope scope(symbolTable);
+
     // create iterator
     const string& varName = forLoop->GetVariableName();
     const TypeInfo* varType = forLoop->GetVariableType();
