@@ -316,12 +316,16 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
 void LlvmIrGenerator::Visit(ForLoop* forLoop)
 {
-    forLoop->GetIterExpression()->Accept(this);
+    Expression* iterExpr = forLoop->GetIterExpression();
+    iterExpr->Accept(this);
     if (resultValue == nullptr)
     {
         return;
     }
     Value* rangeValue = resultValue;
+    const TypeInfo* rangeType = iterExpr->GetType();
+    assert(rangeType->GetMemberCount() > 0 && "For loop iterator expression type does not have members");
+    const TypeInfo* rangeMemberType = rangeType->GetMembers()[0]->GetType();
 
     // create iterator
     const string& varName = forLoop->GetVariableName();
@@ -340,16 +344,16 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     vector<unsigned> index(1);
 
     // set iterator to range start
-    // TODO: sign/zero extend if necessary
     index[0] = 0;
     Value* startValue = builder.CreateExtractValue(rangeValue, index, "start");
+    startValue = CreateExt(startValue, rangeMemberType, varType);
     builder.CreateStore(startValue, alloca);
 
     // get range end
-    // TODO: sign/zero extend if necessary
     index[0] = 0;
     index[0] = 1;
     Value* endValue = builder.CreateExtractValue(rangeValue, index, "end");
+    endValue = CreateExt(endValue, rangeMemberType, varType);
 
     Function* function = builder.GetInsertBlock()->getParent();
 
@@ -362,10 +366,30 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     builder.SetInsertPoint(loopCondBlock);
 
     // generate the condition IR
-    // TODO: handle unsigned ints
-    // TODO: handle exclusive ranges
     Value* iter = builder.CreateLoad(alloca, "iter");
-    Value* conditionResult = builder.CreateICmpSLE(iter, endValue, "cmp");
+    Value* conditionResult = nullptr;
+    if (rangeType->IsExclusive())
+    {
+        if (isSigned)
+        {
+            conditionResult = builder.CreateICmpSLT(iter, endValue, "cmp");
+        }
+        else
+        {
+            conditionResult = builder.CreateICmpULT(iter, endValue, "cmp");
+        }
+    }
+    else
+    {
+        if (isSigned)
+        {
+            conditionResult = builder.CreateICmpSLE(iter, endValue, "cmp");
+        }
+        else
+        {
+            conditionResult = builder.CreateICmpULE(iter, endValue, "cmp");
+        }
+    }
 
     BasicBlock* loopBodyBlock = BasicBlock::Create(context, "forBody", function);
     BasicBlock* loopExitBlock = BasicBlock::Create(context, "forExit");
