@@ -22,6 +22,16 @@ PrimitiveType uInt16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KE
 PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD);
 PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD);
 
+PrimitiveType immutBoolTypeInfo(1, TypeInfo::F_BOOL | TypeInfo::F_IMMUTABLE, TypeInfo::eNotApplicable, BOOL_KEYWORD);
+PrimitiveType immutInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT8_KEYWORD);
+PrimitiveType immutInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT16_KEYWORD);
+PrimitiveType immutInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT32_KEYWORD);
+PrimitiveType immutInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT64_KEYWORD);
+PrimitiveType immutUInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT8_KEYWORD);
+PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT16_KEYWORD);
+PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT32_KEYWORD);
+PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT64_KEYWORD);
+
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable, const Token* token) :
     name(name),
     index(index),
@@ -66,6 +76,15 @@ const TypeInfo* TypeInfo::UInt8Type = &uInt8TypeInfo;
 const TypeInfo* TypeInfo::UInt16Type = &uInt16TypeInfo;
 const TypeInfo* TypeInfo::UInt32Type = &uInt32TypeInfo;
 const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
+const TypeInfo* TypeInfo::ImmutBoolType = &immutBoolTypeInfo;
+const TypeInfo* TypeInfo::ImmutInt8Type = &immutInt8TypeInfo;
+const TypeInfo* TypeInfo::ImmutInt16Type = &immutInt16TypeInfo;
+const TypeInfo* TypeInfo::ImmutInt32Type = &immutInt32TypeInfo;
+const TypeInfo* TypeInfo::ImmutInt64Type = &immutInt64TypeInfo;
+const TypeInfo* TypeInfo::ImmutUInt8Type = &immutUInt8TypeInfo;
+const TypeInfo* TypeInfo::ImmutUInt16Type = &immutUInt16TypeInfo;
+const TypeInfo* TypeInfo::ImmutUInt32Type = &immutUInt32TypeInfo;
+const TypeInfo* TypeInfo::ImmutUInt64Type = &immutUInt64TypeInfo;
 
 unsigned TypeInfo::pointerSize = 0;
 TypeInfo* TypeInfo::intSizeType = nullptr;
@@ -83,6 +102,19 @@ map<string, const TypeInfo*> TypeInfo::types =
     {UINT16_KEYWORD, UInt16Type},
     {UINT32_KEYWORD, UInt32Type},
     {UINT64_KEYWORD, UInt64Type},
+};
+
+unordered_map<string, const TypeInfo*> TypeInfo::immutableTypes =
+{
+    {BOOL_KEYWORD, ImmutBoolType},
+    {INT8_KEYWORD, ImmutInt8Type},
+    {INT16_KEYWORD, ImmutInt16Type},
+    {INT32_KEYWORD, ImmutInt32Type},
+    {INT64_KEYWORD, ImmutInt64Type},
+    {UINT8_KEYWORD, ImmutUInt8Type},
+    {UINT16_KEYWORD, ImmutUInt16Type},
+    {UINT32_KEYWORD, ImmutUInt32Type},
+    {UINT64_KEYWORD, ImmutUInt64Type},
 };
 
 void TypeInfo::InitTypes(const TargetMachine* targetMachine)
@@ -245,7 +277,12 @@ bool TypeInfo::IsAggregate() const
 
 bool TypeInfo::IsExclusive() const
 {
-    return (GetFlags() & F_EXCLUSIVE) != 0;
+    return (flags & F_EXCLUSIVE) != 0;
+}
+
+bool TypeInfo::IsImmutable() const
+{
+    return (flags & F_IMMUTABLE) != 0;
 }
 
 unsigned TypeInfo::GetNumBits() const
@@ -256,6 +293,18 @@ unsigned TypeInfo::GetNumBits() const
 const string& TypeInfo::GetShortName() const
 {
     return shortName;
+}
+
+const TypeInfo* TypeInfo::GetImmutableType() const
+{
+    // TODO: immutableTypes does not have all types. Need a better way to do this
+    auto iter = immutableTypes.find(shortName);
+    if (iter == immutableTypes.cend())
+    {
+        return nullptr;
+    }
+
+    return iter->second;
 }
 
 const MemberInfo* TypeInfo::GetMember(const string& memberName) const

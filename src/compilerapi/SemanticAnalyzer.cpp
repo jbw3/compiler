@@ -632,6 +632,8 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     {
         return;
     }
+    // for loop variable is immutable
+    varType = varType->GetImmutableType();
     forLoop->SetVariableType(varType);
 
     // create new scope for variable
@@ -1086,7 +1088,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     else
     {
         variableExpression->SetType(varType);
-        variableExpression->SetIsAssignable(true);
+        variableExpression->SetIsAssignable(!varType->IsImmutable());
     }
 }
 

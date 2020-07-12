@@ -49,8 +49,9 @@ public:
     static constexpr uint16_t F_RANGE = 1 << 3;
 
     // attributes
-    static constexpr uint16_t F_AGGREGATE = 1 << 8;
-    static constexpr uint16_t F_EXCLUSIVE = 1 << 9;
+    static constexpr uint16_t F_AGGREGATE = 1 <<  8;
+    static constexpr uint16_t F_EXCLUSIVE = 1 <<  9;
+    static constexpr uint16_t F_IMMUTABLE = 1 << 10;
 
     enum ESign
     {
@@ -70,6 +71,15 @@ public:
     static const TypeInfo* UInt16Type;
     static const TypeInfo* UInt32Type;
     static const TypeInfo* UInt64Type;
+    static const TypeInfo* ImmutBoolType;
+    static const TypeInfo* ImmutInt8Type;
+    static const TypeInfo* ImmutInt16Type;
+    static const TypeInfo* ImmutInt32Type;
+    static const TypeInfo* ImmutInt64Type;
+    static const TypeInfo* ImmutUInt8Type;
+    static const TypeInfo* ImmutUInt16Type;
+    static const TypeInfo* ImmutUInt32Type;
+    static const TypeInfo* ImmutUInt64Type;
 
     static void InitTypes(const llvm::TargetMachine* targetMachine);
 
@@ -118,9 +128,13 @@ public:
 
     bool IsExclusive() const;
 
+    bool IsImmutable() const;
+
     virtual unsigned GetNumBits() const;
 
     const std::string& GetShortName() const;
+
+    const TypeInfo* GetImmutableType() const;
 
     const MemberInfo* GetMember(const std::string& memberName) const;
 
@@ -136,6 +150,7 @@ private:
     static TypeInfo* uintSizeType;
     static TypeInfo* stringPointerType;
     static std::map<std::string, const TypeInfo*> types;
+    static std::unordered_map<std::string, const TypeInfo*> immutableTypes;
 
     unsigned numBits;
     uint16_t flags;
