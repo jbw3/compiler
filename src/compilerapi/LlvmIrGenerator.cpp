@@ -330,6 +330,18 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     // create new scope for iterator
     Scope scope(symbolTable);
 
+    const Token* varNameToken = forLoop->GetVariableNameToken();
+    DILexicalBlock* diBlock = nullptr;
+    if (dbgInfo)
+    {
+        // TODO: it would probably be better to use the 'for' token as the scope start
+        DIScope* currentScope = diScopes.top();
+        unsigned line = varNameToken->GetLine();
+        unsigned column = varNameToken->GetColumn();
+        diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
+    }
+    DebugScope dbgScope(dbgInfo, diScopes, diBlock);
+
     // create iterator
     const string& varName = forLoop->GetVariableName();
     const TypeInfo* varType = forLoop->GetVariableType();
@@ -343,6 +355,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     }
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, varType, alloca);
+    CreateDebugVariable(varNameToken, varType, alloca);
 
     vector<unsigned> index(1);
 
@@ -366,6 +379,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
     // set insert point to the loop condition block
     builder.SetInsertPoint(loopCondBlock);
+
+    SetDebugLocation(varNameToken);
 
     // generate the condition IR
     Value* iter = builder.CreateLoad(alloca, "iter");
@@ -987,22 +1002,7 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, varType, alloca);
-
-    if (dbgInfo)
-    {
-        const Token* token = variableDeclaration->GetNameToken();
-        unsigned line = token->GetLine();
-        unsigned column = token->GetColumn();
-        DIType* varDebugType = GetDebugType(varType);
-        if (varDebugType == nullptr)
-        {
-            resultValue = nullptr;
-            return;
-        }
-        DIScope* diScope = diScopes.top();
-        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, varName, diFile, line, varDebugType, true);
-        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diScope), builder.GetInsertBlock());
-    }
+    CreateDebugVariable(variableDeclaration->GetNameToken(), varType, alloca);
 
     variableDeclaration->GetAssignmentExpression()->Accept(this);
     if (resultValue == nullptr)
@@ -1484,5 +1484,24 @@ void LlvmIrGenerator::SetDebugLocation(const Token* token)
         unsigned line = token->GetLine();
         unsigned column = token->GetColumn();
         builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diScopes.top()));
+    }
+}
+
+void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* type, AllocaInst* alloca)
+{
+    if (dbgInfo)
+    {
+        const string& varName = token->GetValue();
+        unsigned line = token->GetLine();
+        unsigned column = token->GetColumn();
+        DIType* varDebugType = GetDebugType(type);
+        if (varDebugType == nullptr)
+        {
+            resultValue = nullptr;
+            return;
+        }
+        DIScope* diScope = diScopes.top();
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, varName, diFile, line, varDebugType, true);
+        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diScope), builder.GetInsertBlock());
     }
 }

@@ -158,6 +158,8 @@ private:
     llvm::Value* CreateLogicalBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* branchExpr, bool isTrueBranch);
 
     void SetDebugLocation(const Token* token);
+
+    void CreateDebugVariable(const Token* token, const TypeInfo* type, llvm::AllocaInst* alloca);
 };
 
 #endif // LLVM_IR_GENERATOR_H_
