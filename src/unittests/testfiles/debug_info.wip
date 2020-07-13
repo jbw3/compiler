@@ -62,3 +62,17 @@ fun ranges(n i32)
     var r1 = 0..n;
     var r2 = -n..<n * 3;
 }
+
+fun forLoop(n i32) i32
+{
+    var a i32 = 0;
+    for i in 0..n
+    {
+        for j in n..10
+        {
+            a += i * j;
+        }
+    }
+
+    a
+}

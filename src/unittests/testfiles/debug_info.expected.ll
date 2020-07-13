@@ -163,6 +163,68 @@ entry:
   ret %UnitType zeroinitializer, !dbg !146
 }
 
+; Function Attrs: noinline nounwind optnone
+define i32 @forLoop(i32 %n) #0 !dbg !147 {
+entry:
+  %j = alloca i32
+  %i = alloca i32
+  %a = alloca i32
+  %n1 = alloca i32
+  store i32 %n, i32* %n1
+  call void @llvm.dbg.declare(metadata i32* %n1, metadata !151, metadata !DIExpression()), !dbg !159
+  call void @llvm.dbg.declare(metadata i32* %a, metadata !152, metadata !DIExpression()), !dbg !160
+  store i32 0, i32* %a, !dbg !161
+  %n2 = load i32, i32* %n1, !dbg !162
+  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !163
+  call void @llvm.dbg.declare(metadata i32* %i, metadata !154, metadata !DIExpression()), !dbg !164
+  %start = extractvalue %Range32 %rng, 0, !dbg !163
+  store i32 %start, i32* %i, !dbg !163
+  %end = extractvalue %Range32 %rng, 1, !dbg !163
+  br label %forCond, !dbg !163
+
+forCond:                                          ; preds = %forExit, %entry
+  %iter = load i32, i32* %i, !dbg !164
+  %cmp = icmp sle i32 %iter, %end, !dbg !164
+  br i1 %cmp, label %forBody, label %forExit17, !dbg !164
+
+forBody:                                          ; preds = %forCond
+  %n3 = load i32, i32* %n1, !dbg !165
+  %rng4 = insertvalue %Range32 undef, i32 %n3, 0, !dbg !166
+  %rng5 = insertvalue %Range32 %rng4, i32 10, 1, !dbg !166
+  call void @llvm.dbg.declare(metadata i32* %j, metadata !156, metadata !DIExpression()), !dbg !167
+  %start6 = extractvalue %Range32 %rng5, 0, !dbg !166
+  store i32 %start6, i32* %j, !dbg !166
+  %end7 = extractvalue %Range32 %rng5, 1, !dbg !166
+  br label %forCond8, !dbg !166
+
+forCond8:                                         ; preds = %forBody11, %forBody
+  %iter9 = load i32, i32* %j, !dbg !167
+  %cmp10 = icmp sle i32 %iter9, %end7, !dbg !167
+  br i1 %cmp10, label %forBody11, label %forExit, !dbg !167
+
+forBody11:                                        ; preds = %forCond8
+  %i12 = load i32, i32* %i, !dbg !168
+  %j13 = load i32, i32* %j, !dbg !170
+  %mul = mul i32 %i12, %j13, !dbg !171
+  %load = load i32, i32* %a, !dbg !172
+  %add = add i32 %load, %mul, !dbg !172
+  store i32 %add, i32* %a, !dbg !172
+  %iter14 = load i32, i32* %j, !dbg !172
+  %inc = add i32 %iter14, 1, !dbg !172
+  store i32 %inc, i32* %j, !dbg !172
+  br label %forCond8, !dbg !172
+
+forExit:                                          ; preds = %forCond8
+  %iter15 = load i32, i32* %i, !dbg !172
+  %inc16 = add i32 %iter15, 1, !dbg !172
+  store i32 %inc16, i32* %i, !dbg !172
+  br label %forCond, !dbg !172
+
+forExit17:                                        ; preds = %forCond
+  %a18 = load i32, i32* %a, !dbg !173
+  ret i32 %a18, !dbg !173
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -318,3 +380,30 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !144 = !DILocation(line: 63, column: 21, scope: !128)
 !145 = !DILocation(line: 63, column: 16, scope: !128)
 !146 = !DILocation(line: 63, column: 12, scope: !128)
+!147 = distinct !DISubprogram(name: "forLoop", scope: !1, file: !1, line: 66, type: !148, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !150)
+!148 = !DISubroutineType(flags: DIFlagPrototyped, types: !149)
+!149 = !{!6, !6}
+!150 = !{!151, !152, !154, !156}
+!151 = !DILocalVariable(name: "n", scope: !147, file: !1, line: 66, type: !6)
+!152 = !DILocalVariable(name: "a", scope: !153, file: !1, line: 68, type: !6)
+!153 = distinct !DILexicalBlock(scope: !147, file: !1, line: 67, column: 1)
+!154 = !DILocalVariable(name: "i", scope: !155, file: !1, line: 69, type: !6)
+!155 = distinct !DILexicalBlock(scope: !153, file: !1, line: 69, column: 9)
+!156 = !DILocalVariable(name: "j", scope: !157, file: !1, line: 71, type: !6)
+!157 = distinct !DILexicalBlock(scope: !158, file: !1, line: 71, column: 13)
+!158 = distinct !DILexicalBlock(scope: !155, file: !1, line: 70, column: 5)
+!159 = !DILocation(line: 66, scope: !147)
+!160 = !DILocation(line: 68, column: 9, scope: !153)
+!161 = !DILocation(line: 68, column: 15, scope: !153)
+!162 = !DILocation(line: 69, column: 17, scope: !153)
+!163 = !DILocation(line: 69, column: 15, scope: !153)
+!164 = !DILocation(line: 69, column: 9, scope: !155)
+!165 = !DILocation(line: 71, column: 18, scope: !158)
+!166 = !DILocation(line: 71, column: 19, scope: !158)
+!167 = !DILocation(line: 71, column: 13, scope: !157)
+!168 = !DILocation(line: 73, column: 18, scope: !169)
+!169 = distinct !DILexicalBlock(scope: !157, file: !1, line: 72, column: 9)
+!170 = !DILocation(line: 73, column: 22, scope: !169)
+!171 = !DILocation(line: 73, column: 20, scope: !169)
+!172 = !DILocation(line: 73, column: 15, scope: !169)
+!173 = !DILocation(line: 77, column: 5, scope: !153)
