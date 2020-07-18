@@ -640,7 +640,7 @@ const Token* VariableDeclaration::GetTypeNameToken() const
     return typeNameToken;
 }
 
-WhileLoop::WhileLoop(Expression* condition, Expression* expression, const Token* whileToken) :
+WhileLoop::WhileLoop(Expression* condition, BlockExpression* expression, const Token* whileToken) :
     condition(condition),
     expression(expression),
     whileToken(whileToken)
@@ -663,7 +663,7 @@ Expression* WhileLoop::GetCondition() const
     return condition;
 }
 
-Expression* WhileLoop::GetExpression() const
+BlockExpression* WhileLoop::GetExpression() const
 {
     return expression;
 }
@@ -674,7 +674,7 @@ const Token* WhileLoop::GetWhileToken() const
 }
 
 ForLoop::ForLoop(const string& variableName, const string& variableTypeName,
-                 Expression* iterExpression, Expression* expression,
+                 Expression* iterExpression, BlockExpression* expression,
                  const Token* forToken, const Token* inToken,
                  const Token* variableNameToken, const Token* variableTypeNameToken) :
     variableName(variableName),
@@ -724,7 +724,7 @@ Expression* ForLoop::GetIterExpression()
     return iterExpression;
 }
 
-Expression* ForLoop::GetExpression()
+BlockExpression* ForLoop::GetExpression()
 {
     return expression;
 }

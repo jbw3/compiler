@@ -374,7 +374,7 @@ typedef std::vector<VariableDeclaration*> VariableDeclarations;
 class WhileLoop : public Expression
 {
 public:
-    WhileLoop(Expression* condition, Expression* expression, const Token* whileToken);
+    WhileLoop(Expression* condition, BlockExpression* expression, const Token* whileToken);
 
     virtual ~WhileLoop();
 
@@ -382,13 +382,13 @@ public:
 
     Expression* GetCondition() const;
 
-    Expression* GetExpression() const;
+    BlockExpression* GetExpression() const;
 
     const Token* GetWhileToken() const;
 
 private:
     Expression* condition;
-    Expression* expression;
+    BlockExpression* expression;
     const Token* whileToken;
 };
 
@@ -396,7 +396,7 @@ class ForLoop : public Expression
 {
 public:
     ForLoop(const std::string& variableName, const std::string& variableTypeName,
-            Expression* iterExpression, Expression* expression,
+            Expression* iterExpression, BlockExpression* expression,
             const Token* forToken, const Token* inToken,
             const Token* variableNameToken, const Token* variableTypeNameToken);
 
@@ -414,7 +414,7 @@ public:
 
     Expression* GetIterExpression();
 
-    Expression* GetExpression();
+    BlockExpression* GetExpression();
 
     const Token* GetForToken() const;
 
@@ -429,7 +429,7 @@ private:
     std::string variableTypeName;
     const TypeInfo* variableType;
     Expression* iterExpression;
-    Expression* expression;
+    BlockExpression* expression;
     const Token* forToken;
     const Token* inToken;
     const Token* variableNameToken;

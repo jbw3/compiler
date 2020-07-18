@@ -588,7 +588,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     }
 
     // check statements
-    Expression* expression = whileLoop->GetExpression();
+    BlockExpression* expression = whileLoop->GetExpression();
     expression->Accept(this);
     if (isError)
     {
@@ -598,7 +598,8 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
     {
         isError = true;
-        logger.LogError("While loop block expression must return the unit type");
+        const Token* endBlockToken = expression->GetEndToken();
+        logger.LogError(*endBlockToken, "While loop block expression must return the unit type");
         return;
     }
 
@@ -664,7 +665,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
 
     // process body expression
-    Expression* expression = forLoop->GetExpression();
+    BlockExpression* expression = forLoop->GetExpression();
     expression->Accept(this);
     if (isError)
     {
@@ -674,7 +675,8 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
     {
         isError = true;
-        logger.LogError("For loop block expression must return the unit type");
+        const Token* endBlockToken = expression->GetEndToken();
+        logger.LogError(*endBlockToken, "For loop block expression must return the unit type");
         return;
     }
 

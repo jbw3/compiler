@@ -730,7 +730,7 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
         return nullptr;
     }
 
-    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
+    unique_ptr<BlockExpression> expression(ProcessBlockExpression(iter, endIter));
     if (expression == nullptr)
     {
         return nullptr;
@@ -814,7 +814,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    unique_ptr<Expression> expression(ProcessBlockExpression(iter, endIter));
+    unique_ptr<BlockExpression> expression(ProcessBlockExpression(iter, endIter));
     if (expression == nullptr)
     {
         return nullptr;
