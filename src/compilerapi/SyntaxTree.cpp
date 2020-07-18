@@ -669,11 +669,14 @@ Expression* WhileLoop::GetExpression() const
 
 ForLoop::ForLoop(const string& variableName, const string& variableTypeName,
                  Expression* iterExpression, Expression* expression,
+                 const Token* forToken, const Token* inToken,
                  const Token* variableNameToken, const Token* variableTypeNameToken) :
     variableName(variableName),
     variableTypeName(variableTypeName),
     iterExpression(iterExpression),
     expression(expression),
+    forToken(forToken),
+    inToken(inToken),
     variableNameToken(variableNameToken),
     variableTypeNameToken(variableTypeNameToken)
 {
@@ -718,6 +721,16 @@ Expression* ForLoop::GetIterExpression()
 Expression* ForLoop::GetExpression()
 {
     return expression;
+}
+
+const Token* ForLoop::GetForToken() const
+{
+    return forToken;
+}
+
+const Token* ForLoop::GetInToken() const
+{
+    return inToken;
 }
 
 const Token* ForLoop::GetVariableNameToken() const

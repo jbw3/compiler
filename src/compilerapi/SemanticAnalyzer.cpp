@@ -621,7 +621,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     if (!iterExprType->IsRange())
     {
         isError = true;
-        logger.LogError("For loop expression is not iterable");
+        logger.LogError(*forLoop->GetForToken(), "For loop expression is not iterable");
         return;
     }
 

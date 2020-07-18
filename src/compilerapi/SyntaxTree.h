@@ -394,6 +394,7 @@ class ForLoop : public Expression
 public:
     ForLoop(const std::string& variableName, const std::string& variableTypeName,
             Expression* iterExpression, Expression* expression,
+            const Token* forToken, const Token* inToken,
             const Token* variableNameToken, const Token* variableTypeNameToken);
 
     virtual ~ForLoop();
@@ -412,6 +413,10 @@ public:
 
     Expression* GetExpression();
 
+    const Token* GetForToken() const;
+
+    const Token* GetInToken() const;
+
     const Token* GetVariableNameToken() const;
 
     const Token* GetVariableTypeNameToken() const;
@@ -422,6 +427,8 @@ private:
     const TypeInfo* variableType;
     Expression* iterExpression;
     Expression* expression;
+    const Token* forToken;
+    const Token* inToken;
     const Token* variableNameToken;
     const Token* variableTypeNameToken;
 };

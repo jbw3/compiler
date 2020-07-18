@@ -740,6 +740,8 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 {
     assert(iter->GetValue() == FOR_KEYWORD);
 
+    const Token* forToken = &*iter;
+
     // increment iter past "for" keyword
     ++iter;
 
@@ -764,10 +766,12 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 
     const Token* varTypeNameToken = nullptr;
     string varTypeName;
+    const Token* inToken = nullptr;
     if (iter->GetValue() == IN_KEYWORD)
     {
         varTypeNameToken = Token::None;
         varTypeName = "";
+        inToken = &*iter;
     }
     else
     {
@@ -784,6 +788,8 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
             logger.LogError(*iter, "Expected 'in' keyword");
             return nullptr;
         }
+
+        inToken = &*iter;
     }
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
@@ -812,6 +818,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 
     ForLoop* forLoop = new ForLoop(varNameToken->GetValue(), varTypeName,
                                    iterExpression.release(), expression.release(),
+                                   forToken, inToken,
                                    varNameToken, varTypeNameToken);
     return forLoop;
 }
