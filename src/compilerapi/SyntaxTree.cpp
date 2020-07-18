@@ -640,9 +640,10 @@ const Token* VariableDeclaration::GetTypeNameToken() const
     return typeNameToken;
 }
 
-WhileLoop::WhileLoop(Expression* condition, Expression* expression) :
+WhileLoop::WhileLoop(Expression* condition, Expression* expression, const Token* whileToken) :
     condition(condition),
-    expression(expression)
+    expression(expression),
+    whileToken(whileToken)
 {
 }
 
@@ -665,6 +666,11 @@ Expression* WhileLoop::GetCondition() const
 Expression* WhileLoop::GetExpression() const
 {
     return expression;
+}
+
+const Token* WhileLoop::GetWhileToken() const
+{
+    return whileToken;
 }
 
 ForLoop::ForLoop(const string& variableName, const string& variableTypeName,

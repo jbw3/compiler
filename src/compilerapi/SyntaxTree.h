@@ -374,7 +374,7 @@ typedef std::vector<VariableDeclaration*> VariableDeclarations;
 class WhileLoop : public Expression
 {
 public:
-    WhileLoop(Expression* condition, Expression* expression);
+    WhileLoop(Expression* condition, Expression* expression, const Token* whileToken);
 
     virtual ~WhileLoop();
 
@@ -384,9 +384,12 @@ public:
 
     Expression* GetExpression() const;
 
+    const Token* GetWhileToken() const;
+
 private:
     Expression* condition;
     Expression* expression;
+    const Token* whileToken;
 };
 
 class ForLoop : public Expression

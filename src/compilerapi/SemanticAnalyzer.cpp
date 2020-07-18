@@ -583,7 +583,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     if (!condition->GetType()->IsBool())
     {
         isError = true;
-        logger.LogError("While loop condition must be a boolean expression");
+        logger.LogError(*whileLoop->GetWhileToken(), "While loop condition must be a boolean expression");
         return;
     }
 

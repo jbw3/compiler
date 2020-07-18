@@ -710,6 +710,10 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
 WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter)
 {
+    assert(iter->GetValue() == WHILE_KEYWORD);
+
+    const Token* whileToken = &*iter;
+
     // increment iter past "while" keyword
     ++iter;
 
@@ -732,7 +736,7 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
         return nullptr;
     }
 
-    WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), expression.release());
+    WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), expression.release(), whileToken);
     return whileLoop;
 }
 
