@@ -4,3 +4,4 @@ project(wip)
 
 add_subdirectory(compilerapi)
 add_subdirectory(compiler)
+add_subdirectory(unittests)
