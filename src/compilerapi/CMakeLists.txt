@@ -7,5 +7,22 @@ find_package(LLVM REQUIRED CONFIG)
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITION})
 
-file(GLOB src "*.cpp")
-add_library(compilerapi ${src})
+add_library(compilerapi
+    AssemblyGenerator.cpp
+    CHeaderPrinter.cpp
+    Compiler.cpp
+    Config.cpp
+    ErrorLogger.cpp
+    LexicalAnalyzer.cpp
+    LlvmIrGenerator.cpp
+    LlvmIrOptimizer.cpp
+    SemanticAnalyzer.cpp
+    Stopwatch.cpp
+    SymbolTable.cpp
+    SyntaxAnalyzer.cpp
+    SyntaxTree.cpp
+    SyntaxTreePrinter.cpp
+    Token.cpp
+    TypeInfo.cpp
+    utils.cpp
+)
