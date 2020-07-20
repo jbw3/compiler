@@ -20,11 +20,28 @@ sudo apt-get install -y clang-10
 
 ### Building
 
-Clone the repo and run `make` in the root directory to build the compiler.
+Clone the repo and go to the root directory.
 
 ```
 git clone git@github.com:jbw3/compiler.git
 cd compiler
+```
+
+Build with `cmake`.
+
+Debug:
+```
+mkdir debug
+cd debug
+cmake ../src -DCMAKE_CXX_COMPILER=clang++-10 -DLLVM_DIR=/usr/lib/llvm-10/cmake -DCMAKE_BUILD_TYPE=Debug
+make
+```
+
+Release:
+```
+mkdir release
+cd release
+cmake ../src -DCMAKE_CXX_COMPILER=clang++-10 -DLLVM_DIR=/usr/lib/llvm-10/cmake -DCMAKE_BUILD_TYPE=Release
 make
 ```
 
