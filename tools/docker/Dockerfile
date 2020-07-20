@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 # install dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    cmake \
     git \
     make \
     software-properties-common \
