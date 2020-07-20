@@ -8,5 +8,8 @@ jobs:
 
     steps:
       - checkout
+      - run: mkdir release
+      - run: cd release
+      - run: cmake ../src -DLLVM_DIR=/usr/lib/llvm-10/cmake -DCMAKE_BUILD_TYPE=Release
       - run: make
       - run: make test
