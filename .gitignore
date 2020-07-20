@@ -1,7 +1,5 @@
-.dep
 .vscode/ipch
-bin
-lib
-obj
+debug
+release
 *.out.ll
 *.swp
