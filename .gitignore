@@ -1,4 +1,5 @@
 .vscode/ipch
+build
 debug
 release
 *.out.ll
