@@ -1,8 +1,14 @@
 # Compiler
 
+## Wiki
+
+Check the [Wiki](https://github.com/jbw3/compiler/wiki) for more information on the compiler and the WIP language.
+
 ## Getting Started
 
-### Dependencies
+### Linux
+
+#### Dependencies
 
 LLVM 10 is required to build the compiler.
 LLVM's website has [instructions](https://apt.llvm.org) for installing on several popular Linux distributions.
@@ -18,7 +24,7 @@ sudo apt-get update
 sudo apt-get install -y clang-10
 ```
 
-### Building
+#### Building
 
 Clone the repo and go to the root directory.
 
@@ -45,6 +51,30 @@ cmake ../src -DCMAKE_CXX_COMPILER=clang++-10 -DLLVM_DIR=/usr/lib/llvm-10/cmake -
 make
 ```
 
-## Wiki
+### Windows
 
-Check the [Wiki](https://github.com/jbw3/compiler/wiki) for more information on the compiler and the WIP language.
+#### Dependencies
+
+```
+mkdir llvm-build
+cd llvm-build
+cmake ..\llvm-10.0.0.src -DCMAKE_BUILD_TYPE=Release -Thost=x64
+cmake --build . --config Release --target INSTALL
+```
+
+#### Building
+
+Clone the repo and go to the root directory.
+
+```
+git clone git@github.com:jbw3/compiler.git
+cd compiler
+```
+
+Build with `cmake`.
+```
+mkdir build
+cd build
+cmake ..\src -DLLVM_DIR="C:\Program Files (x86)\LLVM\lib\cmake"
+cmake --build .
+```
