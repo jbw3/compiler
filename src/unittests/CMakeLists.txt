@@ -7,10 +7,14 @@ include_directories(${LLVM_INCLUDE_DIRS})
 
 add_executable(unittests
     CompilerTests.cpp
+    CompilerTests.h
     LexicalAnalyzerTests.cpp
+    LexicalAnalyzerTests.h
     main.cpp
     TestClass.cpp
+    TestClass.h
     UtilsTests.cpp
+    UtilsTests.h
 )
 
 target_link_libraries(unittests compilerapi ${llvm_libs})
