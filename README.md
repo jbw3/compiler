@@ -58,6 +58,7 @@ make
 LLVM 10 is required to build the compiler.
 The standard LLVM Windows install is not sufficient to be able to build against LLVM.
 Instead, the LLVM [source](https://releases.llvm.org/download.html) must be downloaded and built from scratch.
+CMake version 3.8.0 or higher is needed.
 The following assumes the LLVM source has been extracted into a directory named `llvm-10.0.0.src`.
 
 Configure the LLVM project.
