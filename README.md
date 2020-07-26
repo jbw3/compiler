@@ -55,11 +55,21 @@ make
 
 #### Dependencies
 
+LLVM 10 is required to build the compiler.
+The standard LLVM Windows install is not sufficient to be able to build against LLVM.
+Instead, the LLVM [source](https://releases.llvm.org/download.html) must be downloaded and built from scratch.
+The following assumes the LLVM source has been extracted into a directory named `llvm-10.0.0.src`.
+
+Configure the LLVM project.
 ```
 mkdir llvm-build
 cd llvm-build
-cmake ..\llvm-10.0.0.src -DCMAKE_BUILD_TYPE=Release -Thost=x64
-cmake --build . --config Release --target INSTALL
+cmake ..\llvm-10.0.0.src -Thost=x64
+```
+
+Build and install debug:
+```
+cmake --build . --config Debug --target INSTALL
 ```
 
 #### Building
