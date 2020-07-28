@@ -1,8 +1,13 @@
 #ifndef LLVM_IR_GENERATOR_H_
 #define LLVM_IR_GENERATOR_H_
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4141 4146 4244 4267 4624 6001 6011 6297 26439 26450 26451 26495 26812)
+#else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
 #include "SymbolTable.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
@@ -12,7 +17,11 @@
 #include <algorithm>
 #include <stack>
 #include <unordered_map>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#else
 #pragma clang diagnostic pop
+#endif
 
 namespace llvm
 {
