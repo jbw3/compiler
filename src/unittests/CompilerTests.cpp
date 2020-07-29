@@ -2,8 +2,15 @@
 #include "Compiler.h"
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
+
+const unordered_map<string, string> lineMap =
+{
+    { "target_datalayout", "target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
+    { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
+};
 
 CompilerTests::CompilerTests()
 {
@@ -42,6 +49,16 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     while (!expectedFile.eof() && !outFile.eof())
     {
         getline(expectedFile, expectedLine);
+        if (expectedLine.size() > 0 && expectedLine[0] == '$')
+        {
+            string key = expectedLine.substr(1);
+            auto iter = lineMap.find(key);
+            if (iter != lineMap.end())
+            {
+                expectedLine = iter->second;
+            }
+        }
+
         getline(outFile, outLine);
 
         if (expectedLine != outLine)
