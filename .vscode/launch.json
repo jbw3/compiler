@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "compiler",
-            "program": "${workspaceFolder}/bin/wip",
+            "program": "${workspaceFolder}/debug/compiler/wip",
             "args": [],
             "cwd": "${workspaceFolder}"
         },
@@ -16,7 +16,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "unit tests",
-            "program": "${workspaceFolder}/bin/unittests",
+            "program": "${workspaceFolder}/debug/unittests/unittests",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
