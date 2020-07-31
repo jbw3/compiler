@@ -540,7 +540,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
                 resultValue = nullptr;
                 return;
             }
-            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx, diFile, line, paramDebugType, true);
+            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx + 1, diFile, line, paramDebugType, true);
             diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, 0, diSubprogram), builder.GetInsertBlock());
         }
 
