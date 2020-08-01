@@ -52,7 +52,11 @@ AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) 
             switch (assemblyType)
             {
                 case Config::eBinary:
+#ifdef _WIN32
+                    outFilename = baseName + ".obj";
+#else
                     outFilename = baseName + ".o";
+#endif
                     break;
                 case Config::eText:
                     outFilename = baseName + ".s";
