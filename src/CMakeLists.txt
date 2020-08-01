@@ -9,65 +9,31 @@ add_definitions(${LLVM_DEFINITION})
 
 if(WIN32)
     set(llvm_libs
-        ${LLVM_LIBRARY_DIRS}/LLVMXRay.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMWindowsManifest.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMTableGen.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMSymbolize.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoPDB.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMOrcJIT.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMOrcError.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMJITLink.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMObjectYAML.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMMCA.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMLTO.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMPasses.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMObjCARCOpts.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMLineEditor.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMLibDriver.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMInterpreter.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMFuzzMutate.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMFrontendOpenMP.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMMCJIT.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMExecutionEngine.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMRuntimeDyld.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMDWARFLinker.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMDlltoolDriver.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMOption.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoGSYM.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMCoverage.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMCoroutines.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMXCoreDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMX86Disassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86AsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86CodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86Desc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86Utils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86Info.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMSystemZDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMSparcDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMRISCVDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVUtils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMPowerPCDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMPowerPCCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMPowerPCAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMPowerPCDesc.lib
@@ -75,51 +41,41 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMNVPTXCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMNVPTXDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMNVPTXInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMMSP430Disassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMSP430CodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMSP430AsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMSP430Desc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMSP430Info.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMMipsDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMipsCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMipsAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMipsDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMipsInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMLanaiDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMHexagonDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMBPFDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMBPFCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMBPFAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMBPFDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMBPFInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMARMDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMARMCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMARMAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMARMDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMARMUtils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMARMInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMIRParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMipo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMInstrumentation.lib
         ${LLVM_LIBRARY_DIRS}/LLVMVectorize.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMLinker.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMIRReader.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUUtils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUInfo.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMAArch64Disassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMCDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAArch64CodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCFGuard.lib
@@ -147,7 +103,6 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMAArch64Desc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMC.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoCodeView.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoMSF.lib
         ${LLVM_LIBRARY_DIRS}/LLVMBinaryFormat.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAArch64Utils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAArch64Info.lib
