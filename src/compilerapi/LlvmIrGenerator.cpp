@@ -11,6 +11,7 @@
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Target/TargetMachine.h"
+#include <experimental/filesystem>
 #include <iostream>
 #include <sstream>
 #ifdef _MSC_VER
@@ -19,6 +20,7 @@
 #pragma clang diagnostic pop
 #endif
 
+namespace fs = std::experimental::filesystem;
 using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
@@ -1050,19 +1052,13 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
         // initialize debug info builder
         diBuilder = new DIBuilder(*module);
 
-        string dirName;
-        string filename;
-        size_t splitIdx = inFilename.find_last_of("/\\");
-        if (splitIdx == string::npos)
+        fs::path path = inFilename;
+        string dirName = path.parent_path();
+        if (dirName.empty())
         {
-            dirName = ".";
-            filename = inFilename;
+            dirName = fs::current_path();
         }
-        else
-        {
-            dirName = inFilename.substr(0, splitIdx);
-            filename = inFilename.substr(splitIdx + 1);
-        }
+        string filename = path.filename();
 
         bool isOptimized = optimizationLevel > 0;
         diFile = diBuilder->createFile(filename, dirName);
