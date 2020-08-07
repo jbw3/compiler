@@ -4,7 +4,9 @@ project(compilerapi)
 
 include_directories(${LLVM_INCLUDE_DIRS})
 
-link_libraries(stdc++fs)
+if(UNIX)
+    link_libraries(stdc++fs)
+endif()
 
 add_library(compilerapi
     AssemblyGenerator.cpp
