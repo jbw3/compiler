@@ -1,5 +1,5 @@
-; ModuleID = 'src/unittests/testfiles/basic.wip'
-source_filename = "src/unittests/testfiles/basic.wip"
+$module_id
+$source_filename
 $target_datalayout
 $target_triple
 

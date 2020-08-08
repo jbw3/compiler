@@ -20,23 +20,34 @@ CompilerTests::CompilerTests()
 
 bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
 {
-    string testFilesDir = "src/unittests/testfiles/";
-    string inFilename = testFilesDir + baseFilename + ".wip";
-    string outFilename = testFilesDir + baseFilename + ".out.ll";
-    string expectedFilename = testFilesDir + baseFilename + ".expected.ll";
+    fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
+    string inFilename = (testFilesDir / (baseFilename + ".wip")).string();
+    string outFilename = (testFilesDir / (baseFilename + ".out.ll")).string();
+    string expectedFilename = (testFilesDir / (baseFilename + ".expected.ll")).string();
 
     string directory = fs::current_path().string();
 #ifdef _WIN32
-    // TODO: escape backslashes
+    // escape backslashes
+    size_t idx = directory.find('\\');
+    while (idx != string::npos)
+    {
+        directory.insert(idx, 1, '\\');
+
+        idx = directory.find('\\', idx + 2);
+    }
 #endif
 
     unordered_map<string, string> lineMap =
     {
 #ifdef _WIN32
+        { "module_id", "; ModuleID = 'src\\unittests\\testfiles\\" + baseFilename + ".wip'" },
+        { "source_filename", "source_filename = \"src\\\\unittests\\\\testfiles\\\\" + baseFilename + ".wip\"" },
         { "target_datalayout", "target datalayout = \"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
         { "target_triple", "target triple = \"x86_64-pc-windows-msvc\"" },
         { "filename", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\debug_info.wip\", directory: \"" + directory + "\")" },
 #else
+        { "module_id", "; ModuleID = 'src/unittests/testfiles/" + baseFilename + ".wip'" },
+        { "source_filename", "source_filename = \"src/unittests/testfiles/" + baseFilename + ".wip\"" },
         { "target_datalayout", "target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
         { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
         { "filename", "!1 = !DIFile(filename: \"src/unittests/testfiles/debug_info.wip\", directory: \"" + directory + "\")" },
@@ -81,7 +92,9 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
 
         if (expectedLine != outLine)
         {
-            cerr << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n";
+            cerr << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n"
+                 << expectedLine << '\n'
+                 << outLine << '\n';
             return false;
         }
 
