@@ -28,6 +28,7 @@ private:
     std::string tokenStr;
     bool isValid;
     bool isString;
+    std::string filename;
     unsigned long line;
     unsigned long column;
 

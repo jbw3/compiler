@@ -5,9 +5,12 @@ void ErrorLogger::Write(const char* format)
     *os << format;
 }
 
-void ErrorLogger::WriteHeader(const char* tag, unsigned long line, unsigned long column)
+void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsigned long line, unsigned long column)
 {
-    *os << tag << ":";
+    if (!filename.empty())
+    {
+        *os << filename << ":";
+    }
 
     if (line > 0)
     {
@@ -21,5 +24,5 @@ void ErrorLogger::WriteHeader(const char* tag, unsigned long line, unsigned long
         *os << ":";
     }
 
-    *os << " ";
+    *os << " " << tag << ": ";
 }

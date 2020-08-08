@@ -8,9 +8,9 @@
 class ErrorLogger
 {
 public:
-    const char* const WARNING_TAG = "Warning";
-    const char* const ERROR_TAG = "Error";
-    const char* const INTERNAL_ERROR_TAG = "Internal Error";
+    const char* const WARNING_TAG = "warning";
+    const char* const ERROR_TAG = "error";
+    const char* const INTERNAL_ERROR_TAG = "internal error";
 
     ErrorLogger(std::ostream* os) :
         os(os)
@@ -18,51 +18,51 @@ public:
     }
 
     template<typename... Ts>
-    void LogWarning(unsigned long line, unsigned long column, const char* format, Ts... args)
+    void LogWarning(const char* format, Ts... args)
     {
-        LogMessage(WARNING_TAG, line, column, format, args...);
+        LogMessage(WARNING_TAG, format, args...);
     }
 
     template<typename... Ts>
-    void LogWarning(const char* format, Ts... args)
+    void LogWarning(const std::string& filename, unsigned long line, unsigned long column, const char* format, Ts... args)
     {
-        LogMessage(WARNING_TAG, 0, 0, format, args...);
+        LogSourceMessage(WARNING_TAG, filename, line, column, format, args...);
     }
 
     template<typename... Ts>
     void LogWarning(const Token& token, const char* format, Ts... args)
     {
-        LogMessage(WARNING_TAG, token.GetLine(), token.GetColumn(), format, args...);
-    }
-
-    template<typename... Ts>
-    void LogError(unsigned long line, unsigned long column, const char* format, Ts... args)
-    {
-        LogMessage(ERROR_TAG, line, column, format, args...);
+        LogSourceMessage(WARNING_TAG, token.GetFilename(), token.GetLine(), token.GetColumn(), format, args...);
     }
 
     template<typename... Ts>
     void LogError(const char* format, Ts... args)
     {
-        LogMessage(ERROR_TAG, 0, 0, format, args...);
+        LogMessage(ERROR_TAG, format, args...);
+    }
+
+    template<typename... Ts>
+    void LogError(const std::string& filename, unsigned long line, unsigned long column, const char* format, Ts... args)
+    {
+        LogSourceMessage(ERROR_TAG, filename, line, column, format, args...);
     }
 
     template<typename... Ts>
     void LogError(const Token& token, const char* format, Ts... args)
     {
-        LogMessage(ERROR_TAG, token.GetLine(), token.GetColumn(), format, args...);
+        LogSourceMessage(ERROR_TAG, token.GetFilename(), token.GetLine(), token.GetColumn(), format, args...);
     }
 
     template<typename... Ts>
     void LogInternalError(const char* format, Ts... args)
     {
-        LogMessage(INTERNAL_ERROR_TAG, 0, 0, format, args...);
+        LogMessage(INTERNAL_ERROR_TAG, format, args...);
     }
 
     template<typename... Ts>
     void LogInternalError(const Token& token, const char* format, Ts... args)
     {
-        LogMessage(INTERNAL_ERROR_TAG, token.GetLine(), token.GetColumn(), format, args...);
+        LogSourceMessage(INTERNAL_ERROR_TAG, token.GetFilename(), token.GetLine(), token.GetColumn(), format, args...);
     }
 
 private:
@@ -70,7 +70,7 @@ private:
 
     void Write(const char* format);
 
-    void WriteHeader(const char* tag, unsigned long line, unsigned long column);
+    void WriteHeader(const char* tag, const std::string& filename, unsigned long line, unsigned long column);
 
     template<typename T, typename... Ts>
     void Write(const char* format, T arg, Ts... args)
@@ -92,9 +92,17 @@ private:
     }
 
     template<typename... Ts>
-    void LogMessage(const char* tag, unsigned long line, unsigned long column, const char* format, Ts... args)
+    void LogMessage(const char* tag, const char* format, Ts... args)
     {
-        WriteHeader(tag, line, column);
+        *os << tag << ": ";
+        Write(format, args...);
+        *os << '\n';
+    }
+
+    template<typename... Ts>
+    void LogSourceMessage(const char* tag, const std::string& filename, unsigned long line, unsigned long column, const char* format, Ts... args)
+    {
+        WriteHeader(tag, filename, line, column);
         Write(format, args...);
         *os << '\n';
     }

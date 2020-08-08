@@ -29,10 +29,12 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
     istream* is = nullptr;
     if (inFile.empty() || inFile == "-")
     {
+        filename = "<stdin>";
         is = &cin;
     }
     else
     {
+        filename = inFile;
         is = new fstream(inFile, ios_base::in);
         if (is->fail())
         {
@@ -132,7 +134,7 @@ Token LexicalAnalyzer::CreateToken(unsigned long columnNum)
         columnNum = GetTokenStrStartColumn();
     }
 
-    return Token(tokenStr, line, columnNum);
+    return Token(tokenStr, filename, line, columnNum);
 }
 
 bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
@@ -149,7 +151,7 @@ bool LexicalAnalyzer::ParseChar(char ch, vector<Token>& tokens)
         }
         else if (ch == '\n')
         {
-            logger.LogError(line, column, "Unexpected string end");
+            logger.LogError(filename, line, column, "Unexpected string end");
             return false;
         }
         else
@@ -299,5 +301,5 @@ bool LexicalAnalyzer::ParseBlockComment(istream& is)
 
 void LexicalAnalyzer::PrintError()
 {
-    logger.LogError(line, GetTokenStrStartColumn(), "Invalid syntax: '{}'", tokenStr);
+    logger.LogError(filename, line, GetTokenStrStartColumn(), "Invalid syntax: '{}'", tokenStr);
 }
