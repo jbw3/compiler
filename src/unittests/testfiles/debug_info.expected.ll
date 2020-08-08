@@ -234,7 +234,7 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !llvm.dbg.cu = !{!0}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C, file: !1, producer: "WIP Compiler", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2)
-!1 = !DIFile(filename: "debug_info.wip", directory: "src/unittests/testfiles")
+$filename
 !2 = !{}
 !3 = distinct !DISubprogram(name: "noParams", scope: !1, file: !1, line: 1, type: !4, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !2)
 !4 = !DISubroutineType(flags: DIFlagPrototyped, types: !5)
