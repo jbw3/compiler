@@ -1,23 +1,16 @@
+#ifdef _MSC_VER
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#endif
+
 #include "CompilerTests.h"
 #include "Compiler.h"
+#include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
 
+namespace fs = std::experimental::filesystem;
 using namespace std;
-
-const unordered_map<string, string> lineMap =
-{
-#ifdef _WIN32
-    { "target_datalayout", "target datalayout = \"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
-    { "target_triple", "target triple = \"x86_64-pc-windows-msvc\"" },
-    { "filename", "!1 = !DIFile(filename: \"debug_info.wip\", directory: \"src\\\\unittests\\\\testfiles\")" },
-#else
-    { "target_datalayout", "target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
-    { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
-    { "filename", "!1 = !DIFile(filename: \"debug_info.wip\", directory: \"src/unittests/testfiles\")" },
-#endif
-};
 
 CompilerTests::CompilerTests()
 {
@@ -31,6 +24,24 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     string inFilename = testFilesDir + baseFilename + ".wip";
     string outFilename = testFilesDir + baseFilename + ".out.ll";
     string expectedFilename = testFilesDir + baseFilename + ".expected.ll";
+
+    string directory = fs::current_path().string();
+#ifdef _WIN32
+    // TODO: escape backslashes
+#endif
+
+    unordered_map<string, string> lineMap =
+    {
+#ifdef _WIN32
+        { "target_datalayout", "target datalayout = \"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
+        { "target_triple", "target triple = \"x86_64-pc-windows-msvc\"" },
+        { "filename", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\debug_info.wip\", directory: \"" + directory + "\")" },
+#else
+        { "target_datalayout", "target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
+        { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
+        { "filename", "!1 = !DIFile(filename: \"src/unittests/testfiles/debug_info.wip\", directory: \"" + directory + "\")" },
+#endif
+    };
 
     Config config;
     config.emitType = Config::eLlvmIr;

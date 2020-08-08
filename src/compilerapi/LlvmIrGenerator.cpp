@@ -1053,16 +1053,8 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
         // initialize debug info builder
         diBuilder = new DIBuilder(*module);
 
-        fs::path path = inFilename;
-        string dirName = path.parent_path().string();
-        if (dirName.empty())
-        {
-            dirName = fs::current_path().string();
-        }
-        string filename = path.filename().string();
-
         bool isOptimized = optimizationLevel > 0;
-        diFile = diBuilder->createFile(filename, dirName);
+        diFile = diBuilder->createFile(inFilename, fs::current_path().string());
         diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
 
         diScopes.push(diFile);
