@@ -12,10 +12,7 @@ public:
     const char* const ERROR_TAG = "error";
     const char* const INTERNAL_ERROR_TAG = "internal error";
 
-    ErrorLogger(std::ostream* os) :
-        os(os)
-    {
-    }
+    ErrorLogger(std::ostream* os);
 
     template<typename... Ts>
     void LogWarning(const char* format, Ts... args)
@@ -67,6 +64,7 @@ public:
 
 private:
     std::ostream* os;
+    bool printColors;
 
     void Write(const char* format);
 
