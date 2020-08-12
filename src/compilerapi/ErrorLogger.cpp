@@ -3,16 +3,19 @@
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
+
+using namespace std;
 
 ErrorLogger::ErrorLogger(std::ostream* os) :
     os(os)
 {
-    printColors = false;
-
 #ifdef _WIN32
     // TODO: check os and get corresponding handle
     // TODO: call _isatty()
+    printColors = false;
     HANDLE handle = GetStdHandle(STD_ERROR_HANDLE);
     if (handle != INVALID_HANDLE_VALUE)
     {
@@ -27,7 +30,18 @@ ErrorLogger::ErrorLogger(std::ostream* os) :
         }
     }
 #else
-    // TODO: call isatty on *nix
+    if (os == &cerr)
+    {
+        printColors = isatty(STDERR_FILENO);
+    }
+    else if (os == &cout)
+    {
+        printColors = isatty(STDOUT_FILENO);
+    }
+    else
+    {
+        printColors = false;
+    }
 #endif
 }
 
