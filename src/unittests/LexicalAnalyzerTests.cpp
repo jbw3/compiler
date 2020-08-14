@@ -114,7 +114,7 @@ bool LexicalAnalyzerTests::TestValidInputs()
     };
 
     stringstream errStream;
-    ErrorLogger logger(&errStream);
+    ErrorLogger logger(&errStream, Config::eFalse);
     LexicalAnalyzer analyzer(logger);
 
     stringstream ss;

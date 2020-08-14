@@ -30,6 +30,7 @@ Config::Config()
     architecture = "";
     targetMachine = CreateTargetMachine(architecture, optimizationLevel);
     debugInfo = false;
+    color = eAuto;
 }
 
 bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
@@ -187,7 +188,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
             else
             {
-                cerr << "Error: Unknown argument :" << emit << "\n";
+                cerr << "Error: Unknown argument '" << emit << "'\n";
                 ok = false;
             }
         }
@@ -218,6 +219,37 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
         help = true;
         PrintHelp();
     }
+    else if (strcmp(arg, "--color") == 0)
+    {
+        if (idx + 1 >= argc)
+        {
+            cerr << "Error: Expected an argument after " << arg << "\n";
+            ok = false;
+        }
+        else
+        {
+            const char* const colorArg = argv[idx + 1];
+            ++idx;
+
+            if (strcmp(colorArg, "false") == 0)
+            {
+                color = eFalse;
+            }
+            else if (strcmp(colorArg, "true") == 0)
+            {
+                color = eTrue;
+            }
+            else if (strcmp(colorArg, "auto") == 0)
+            {
+                color = eAuto;
+            }
+            else
+            {
+                cerr << "Error: Unknown argument '" << colorArg << "'\n";
+                ok = false;
+            }
+        }
+    }
     else
     {
         if (inFilename.empty())
@@ -241,6 +273,7 @@ void Config::PrintHelp() const
 Options:
   -h, --help             Print help message
   --arch <value>         Assembly architecture
+  --color <value>        Whether to color output messages: auto, true, false
   -d, --debug-info       Generate debug info
   --emit <value>         Output type: asm, c-header, llvm, tokens, tree
   -O <value>             Optimization level: 0, 1, 2

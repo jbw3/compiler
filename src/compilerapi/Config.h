@@ -26,6 +26,13 @@ public:
         eText,
     };
 
+    enum EColor
+    {
+        eFalse,
+        eTrue,
+        eAuto,
+    };
+
     EEmitType emitType;
     EAssemblyType assemblyType;
     std::string inFilename;
@@ -34,6 +41,7 @@ public:
     std::string architecture;
     llvm::TargetMachine* targetMachine;
     bool debugInfo;
+    EColor color;
 
     Config();
 

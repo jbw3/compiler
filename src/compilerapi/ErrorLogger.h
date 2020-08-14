@@ -1,6 +1,7 @@
 #ifndef ERROR_LOGGER_H_
 #define ERROR_LOGGER_H_
 
+#include "Config.h"
 #include "Token.h"
 #include <cstring>
 #include <ostream>
@@ -12,7 +13,7 @@ public:
     const char* const ERROR_TAG = "error";
     const char* const INTERNAL_ERROR_TAG = "internal error";
 
-    ErrorLogger(std::ostream* os);
+    ErrorLogger(std::ostream* os, Config::EColor color);
 
     template<typename... Ts>
     void LogWarning(const char* format, Ts... args)

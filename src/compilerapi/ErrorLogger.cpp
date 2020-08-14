@@ -10,25 +10,49 @@
 
 using namespace std;
 
-ErrorLogger::ErrorLogger(std::ostream* os) :
-    os(os)
+bool isConsole(ostream* os)
+{
+    bool value = false;
+
+#ifdef _WIN32
+    if (os == &cerr)
+    {
+        value = _isatty(_fileno(stderr));
+    }
+    else if (os == &cout)
+    {
+        value = _isatty(_fileno(stdout));
+    }
+#else
+    if (os == &cerr)
+    {
+        value = isatty(STDERR_FILENO);
+    }
+    else if (os == &cout)
+    {
+        value = isatty(STDOUT_FILENO);
+    }
+#endif
+
+    return value;
+}
+
+bool configureConsole(ostream* os)
 {
 #ifdef _WIN32
-    printColors = false;
-    bool isConsole = false;
+    bool ok = false;
+
     HANDLE handle = INVALID_HANDLE_VALUE;
     if (os == &cerr)
     {
-        isConsole = _isatty(_fileno(stderr));
         handle = GetStdHandle(STD_ERROR_HANDLE);
     }
     else if (os == &cout)
     {
-        isConsole = _isatty(_fileno(stdout));
         handle = GetStdHandle(STD_OUTPUT_HANDLE);
     }
 
-    if (isConsole && handle != INVALID_HANDLE_VALUE)
+    if (handle != INVALID_HANDLE_VALUE)
     {
         DWORD originalMode = 0;
         if (GetConsoleMode(handle, &originalMode))
@@ -36,24 +60,34 @@ ErrorLogger::ErrorLogger(std::ostream* os) :
             DWORD newErrMode = originalMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
             if (SetConsoleMode(handle, newErrMode))
             {
-                printColors = true;
+                ok = true;
             }
         }
     }
+
+    return ok;
 #else
-    if (os == &cerr)
+    // nothing to do on Linux
+    return true;
+#endif
+}
+
+ErrorLogger::ErrorLogger(ostream* os, Config::EColor color) :
+    os(os)
+{
+    if (color == Config::eAuto)
     {
-        printColors = isatty(STDERR_FILENO);
+        printColors = isConsole(os) && configureConsole(os);
     }
-    else if (os == &cout)
+    else if (color == Config::eTrue)
     {
-        printColors = isatty(STDOUT_FILENO);
+        configureConsole(os);
+        printColors = true;
     }
-    else
+    else // if (color == Config::eFalse)
     {
         printColors = false;
     }
-#endif
 }
 
 void ErrorLogger::Write(const char* format)
