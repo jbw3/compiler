@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 #ifdef _WIN32
+#include <io.h>
 #include <windows.h>
 #else
 #include <unistd.h>
@@ -13,11 +14,21 @@ ErrorLogger::ErrorLogger(std::ostream* os) :
     os(os)
 {
 #ifdef _WIN32
-    // TODO: check os and get corresponding handle
-    // TODO: call _isatty()
     printColors = false;
-    HANDLE handle = GetStdHandle(STD_ERROR_HANDLE);
-    if (handle != INVALID_HANDLE_VALUE)
+    bool isConsole = false;
+    HANDLE handle = INVALID_HANDLE_VALUE;
+    if (os == &cerr)
+    {
+        isConsole = _isatty(_fileno(stderr));
+        handle = GetStdHandle(STD_ERROR_HANDLE);
+    }
+    else if (os == &cout)
+    {
+        isConsole = _isatty(_fileno(stdout));
+        handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    }
+
+    if (isConsole && handle != INVALID_HANDLE_VALUE)
     {
         DWORD originalMode = 0;
         if (GetConsoleMode(handle, &originalMode))
