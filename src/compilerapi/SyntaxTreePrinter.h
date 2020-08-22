@@ -134,6 +134,8 @@ private:
                 PrintValueSeparator();
                 printValue(values[i]);
             }
+
+            firstItem = false;
         }
     }
 
