@@ -178,6 +178,16 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
 
         return true;
     }
+    else if (type->IsPointer())
+    {
+        if (!GetCType(type->GetInnerType(), cType))
+        {
+            return false;
+        }
+
+        cType += "*";
+        return true;
+    }
     else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
     {
         cType = "str";
@@ -190,6 +200,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     }
     else
     {
+        // TODO: use error logger
         cerr << "Unsupported type\n";
         cType = "";
         return false;
