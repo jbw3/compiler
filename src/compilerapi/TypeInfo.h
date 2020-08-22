@@ -14,6 +14,8 @@ class Token;
 class TypeInfo;
 class UnitTypeInfo;
 
+const char* const POINTER_TYPE_TOKEN = "&";
+
 class MemberInfo
 {
 public:
@@ -43,10 +45,11 @@ public:
     static constexpr uint16_t F_NONE = 0;
 
     // main types
-    static constexpr uint16_t F_UNIT  = 1 << 0;
-    static constexpr uint16_t F_BOOL  = 1 << 1;
-    static constexpr uint16_t F_INT   = 1 << 2;
-    static constexpr uint16_t F_RANGE = 1 << 3;
+    static constexpr uint16_t F_UNIT    = 1 << 0;
+    static constexpr uint16_t F_BOOL    = 1 << 1;
+    static constexpr uint16_t F_INT     = 1 << 2;
+    static constexpr uint16_t F_RANGE   = 1 << 3;
+    static constexpr uint16_t F_POINTER = 1 << 4;
 
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 <<  8;
@@ -101,6 +104,8 @@ public:
 
     static bool RegisterType(const TypeInfo* typeInfo);
 
+    static const TypeInfo* GetPointerToType(const TypeInfo* type);
+
     TypeInfo(
         unsigned numBits,
         uint16_t flags,
@@ -121,6 +126,8 @@ public:
     bool IsInt() const;
 
     bool IsRange() const;
+
+    bool IsPointer() const;
 
     ESign GetSign() const;
 
@@ -144,6 +151,8 @@ public:
 
     bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable, const Token* token);
 
+    const TypeInfo* GetInnerType() const;
+
 private:
     static unsigned pointerSize;
     static TypeInfo* intSizeType;
@@ -158,6 +167,7 @@ private:
     std::string shortName;
     std::map<std::string, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
+    const TypeInfo* innerType;
 };
 
 class UnitTypeInfo : public TypeInfo

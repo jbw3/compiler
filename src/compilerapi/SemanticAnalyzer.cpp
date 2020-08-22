@@ -1344,19 +1344,40 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
 
     // set return type
     const TypeInfo* returnType = nullptr;
-    const string& returnTypeName = functionDeclaration->GetReturnTypeName();
-    if (returnTypeName.empty())
+    const vector<string>& returnTypeName = functionDeclaration->GetReturnTypeName();
+    size_t returnTypeNameSize = returnTypeName.size();
+    if (returnTypeNameSize == 0)
     {
         returnType = TypeInfo::UnitType;
     }
     else
     {
-        returnType = TypeInfo::GetType(returnTypeName);
+        size_t idx = returnTypeNameSize - 1;
+        const string& name = returnTypeName[idx];
+        returnType = TypeInfo::GetType(name);
         if (returnType == nullptr)
         {
-            const Token* typeNameToken = functionDeclaration->GetReturnTypeNameToken();
-            logger.LogError(*typeNameToken, "'{}' is not a known type", returnTypeName);
+            const Token* typeNameToken = functionDeclaration->GetReturnTypeNameTokens()[idx];
+            logger.LogError(*typeNameToken, "'{}' is not a known type", name);
             return false;
+        }
+
+        string str;
+        while (idx > 0)
+        {
+            --idx;
+
+            str = returnTypeName[idx];
+            if (str == POINTER_TYPE_TOKEN)
+            {
+                returnType = TypeInfo::GetPointerToType(returnType);
+            }
+            else
+            {
+                const Token* token = functionDeclaration->GetReturnTypeNameTokens()[idx];
+                logger.LogError(*token, "Unexpected token '{}'", str);
+                return false;
+            }
         }
     }
 

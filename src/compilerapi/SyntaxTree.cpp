@@ -789,13 +789,13 @@ const Token* Parameter::GetTypeNameToken() const
     return typeNameToken;
 }
 
-FunctionDeclaration::FunctionDeclaration(const std::string& name,
+FunctionDeclaration::FunctionDeclaration(const string& name,
                                          const Parameters& parameters,
-                                         const std::string& returnTypeName,
+                                         const vector<string>& returnTypeName,
                                          const Token* nameToken,
-                                         const Token* returnTypeNameToken) :
+                                         const vector<const Token*>& returnTypeNameTokens) :
     nameToken(nameToken),
-    returnTypeNameToken(returnTypeNameToken),
+    returnTypeNameTokens(returnTypeNameTokens),
     name(name),
     parameters(parameters),
     returnTypeName(returnTypeName),
@@ -818,7 +818,7 @@ const Parameters& FunctionDeclaration::GetParameters() const
     return parameters;
 }
 
-const string& FunctionDeclaration::GetReturnTypeName() const
+const vector<string>& FunctionDeclaration::GetReturnTypeName() const
 {
     return returnTypeName;
 }
@@ -838,9 +838,9 @@ const Token* FunctionDeclaration::GetNameToken() const
     return nameToken;
 }
 
-const Token* FunctionDeclaration::GetReturnTypeNameToken() const
+const vector<const Token*>& FunctionDeclaration::GetReturnTypeNameTokens() const
 {
-    return returnTypeNameToken;
+    return returnTypeNameTokens;
 }
 
 ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :

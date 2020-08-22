@@ -471,9 +471,9 @@ class FunctionDeclaration
 public:
     FunctionDeclaration(const std::string& name,
                         const Parameters& parameters,
-                        const std::string& returnTypeName,
+                        const std::vector<std::string>& returnTypeName,
                         const Token* nameToken,
-                        const Token* returnTypeNameToken);
+                        const std::vector<const Token*>& returnTypeNameTokens);
 
     virtual ~FunctionDeclaration();
 
@@ -481,7 +481,7 @@ public:
 
     const Parameters& GetParameters() const;
 
-    const std::string& GetReturnTypeName() const;
+    const std::vector<std::string>& GetReturnTypeName() const;
 
     const TypeInfo* GetReturnType() const;
 
@@ -489,14 +489,14 @@ public:
 
     const Token* GetNameToken() const;
 
-    const Token* GetReturnTypeNameToken() const;
+    const std::vector<const Token*>& GetReturnTypeNameTokens() const;
 
 private:
     const Token* nameToken;
-    const Token* returnTypeNameToken;
+    std::vector<const Token*> returnTypeNameTokens;
     std::string name;
     Parameters parameters;
-    std::string returnTypeName;
+    std::vector<std::string> returnTypeName;
     const TypeInfo* returnType;
 };
 

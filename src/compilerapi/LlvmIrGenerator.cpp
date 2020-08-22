@@ -1098,6 +1098,14 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
         unsigned numBits = type->GetNumBits();
         llvmType = Type::getIntNTy(context, numBits);
     }
+    else if (type->IsPointer())
+    {
+        Type* innerType = GetType(type->GetInnerType());
+        if (innerType != nullptr)
+        {
+            llvmType = innerType->getPointerTo();
+        }
+    }
     else
     {
         // get the LLVM type name

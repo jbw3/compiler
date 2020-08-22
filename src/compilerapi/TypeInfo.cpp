@@ -230,6 +230,22 @@ bool TypeInfo::RegisterType(const TypeInfo* typeInfo)
     return pair.second;
 }
 
+const TypeInfo* TypeInfo::GetPointerToType(const TypeInfo* type)
+{
+    string name = POINTER_TYPE_TOKEN + type->GetShortName();
+    const TypeInfo* ptrType = GetType(name);
+    if (ptrType == nullptr)
+    {
+        TypeInfo* newPtrType = new PrimitiveType(pointerSize, F_POINTER, eNotApplicable, name);
+        newPtrType->innerType = type;
+        RegisterType(newPtrType);
+
+        ptrType = newPtrType;
+    }
+
+    return ptrType;
+}
+
 TypeInfo::TypeInfo(
     unsigned numBits,
     uint16_t flags,
@@ -239,7 +255,8 @@ TypeInfo::TypeInfo(
     numBits(numBits),
     flags(flags),
     sign(sign),
-    shortName(shortName)
+    shortName(shortName),
+    innerType(nullptr)
 {
 }
 
@@ -272,6 +289,11 @@ bool TypeInfo::IsInt() const
 bool TypeInfo::IsRange() const
 {
     return (flags & F_RANGE) != 0;
+}
+
+bool TypeInfo::IsPointer() const
+{
+    return (flags & F_POINTER) != 0;
 }
 
 TypeInfo::ESign TypeInfo::GetSign() const
@@ -353,6 +375,11 @@ bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssign
     }
 
     return inserted;
+}
+
+const TypeInfo* TypeInfo::GetInnerType() const
+{
+    return innerType;
 }
 
 UnitTypeInfo::UnitTypeInfo() :
