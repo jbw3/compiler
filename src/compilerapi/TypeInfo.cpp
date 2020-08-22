@@ -411,10 +411,31 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
     }
 
     const PrimitiveType& primitiveOther = static_cast<const PrimitiveType&>(other);
-    return GetNumBits() == primitiveOther.GetNumBits()
+    bool isSame =
+        GetNumBits() == primitiveOther.GetNumBits()
         && IsBool() == primitiveOther.IsBool()
         && IsInt() == primitiveOther.IsInt()
+        && IsPointer() == primitiveOther.IsPointer()
         && GetSign() == primitiveOther.GetSign();
+
+    if (isSame)
+    {
+        const TypeInfo* inner = GetInnerType();
+        const TypeInfo* otherInner = primitiveOther.GetInnerType();
+        if (inner != otherInner)
+        {
+            if (inner == nullptr || otherInner == nullptr)
+            {
+                isSame = false;
+            }
+            else
+            {
+                isSame = inner->IsSameAs(*otherInner);
+            }
+        }
+    }
+
+    return isSame;
 }
 
 unordered_map
