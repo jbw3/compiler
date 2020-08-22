@@ -342,63 +342,57 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
 bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                                        Parameters& parameters)
 {
-    EParameterState state = eName;
     parameters.clear();
 
     string paramName;
     const Token* paramNameToken = nullptr;
     while (iter != endIter && iter->GetValue() != ")")
     {
-        const string& value = iter->GetValue();
-        if (state == eName)
+        paramName = iter->GetValue();
+        paramNameToken = &*iter;
+        if (!IsValidName(*paramNameToken))
         {
-            if (IsValidName(*iter))
-            {
-                paramName = value;
-                paramNameToken = &*iter;
-            }
-            else
-            {
-                logger.LogError(*iter, "Invalid parameter name: '{}'", value);
-                return false;
-            }
-
-            state = eType;
-        }
-        else if (state == eType)
-        {
-            Parameter* param = new Parameter(paramName, value, paramNameToken, &*iter);
-            parameters.push_back(param);
-
-            state = eDelimiter;
-        }
-        else if (state == eDelimiter)
-        {
-            if (value != ",")
-            {
-                logger.LogError(*iter, "Expected ',' not '{}'", value);
-                return false;
-            }
-
-            state = eName;
-        }
-        else
-        {
-            logger.LogInternalError(*iter, "Unknown state: {}", state);
+            logger.LogError(*iter, "Invalid parameter name: '{}'", paramName);
             return false;
         }
 
-        ++iter;
+        if (!IncrementIterator(iter, endIter, "Expected a type"))
+        {
+            return false;
+        }
+
+        vector<string> paramTypeName;
+        vector<const Token*> paramTypeNameTokens;
+        while (iter->GetValue() != "," && iter->GetValue() != ")")
+        {
+            paramTypeName.push_back(iter->GetValue());
+            paramTypeNameTokens.push_back(&*iter);
+
+            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+            {
+                return false;
+            }
+        }
+
+        // make sure there was a type
+        if (paramTypeName.size() == 0)
+        {
+            logger.LogError(*iter, "Expected a parameter type");
+            return false;
+        }
+
+        Parameter* param = new Parameter(paramName, paramTypeName, paramNameToken, paramTypeNameTokens);
+        parameters.push_back(param);
+
+        if (iter->GetValue() != ")")
+        {
+            ++iter;
+        }
     }
 
     if (iter == endIter)
     {
         logger.LogError("Expected ')'");
-        return false;
-    }
-    else if (state == eType)
-    {
-        logger.LogError(*iter, "Expected a parameter type");
         return false;
     }
 

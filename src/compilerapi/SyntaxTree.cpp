@@ -749,10 +749,10 @@ const Token* ForLoop::GetVariableTypeNameToken() const
     return variableTypeNameToken;
 }
 
-Parameter::Parameter(const string& name, const string& typeName,
-                     const Token* nameToken, const Token* typeNameToken) :
+Parameter::Parameter(const string& name, const vector<string>& typeName,
+                     const Token* nameToken, const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),
-    typeNameToken(typeNameToken),
+    typeNameTokens(typeNameTokens),
     name(name),
     typeName(typeName),
     type(nullptr)
@@ -764,7 +764,7 @@ const string& Parameter::GetName() const
     return name;
 }
 
-const string& Parameter::GetTypeName() const
+const vector<string>& Parameter::GetTypeName() const
 {
     return typeName;
 }
@@ -784,9 +784,9 @@ const Token* Parameter::GetNameToken() const
     return nameToken;
 }
 
-const Token* Parameter::GetTypeNameToken() const
+const vector<const Token*>& Parameter::GetTypeNameTokens() const
 {
-    return typeNameToken;
+    return typeNameTokens;
 }
 
 FunctionDeclaration::FunctionDeclaration(const string& name,

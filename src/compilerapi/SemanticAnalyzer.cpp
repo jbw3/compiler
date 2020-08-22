@@ -967,6 +967,46 @@ bool SemanticAnalyzer::ResolveDependencies(
     return true;
 }
 
+const TypeInfo* SemanticAnalyzer::NameToType(const vector<string>& typeName, const vector<const Token*>& typeNameTokens)
+{
+    size_t typeNameSize = typeName.size();
+    if (typeNameSize == 0)
+    {
+        logger.LogInternalError("Empty type name");
+        return nullptr;
+    }
+
+    size_t idx = typeNameSize - 1;
+    const string& name = typeName[idx];
+    const TypeInfo* type = TypeInfo::GetType(name);
+    if (type == nullptr)
+    {
+        const Token* typeNameToken = typeNameTokens[idx];
+        logger.LogError(*typeNameToken, "'{}' is not a known type", name);
+        return nullptr;
+    }
+
+    string str;
+    while (idx > 0)
+    {
+        --idx;
+
+        str = typeName[idx];
+        if (str == POINTER_TYPE_TOKEN)
+        {
+            type = TypeInfo::GetPointerToType(type);
+        }
+        else
+        {
+            const Token* token = typeNameTokens[idx];
+            logger.LogError(*token, "Unexpected token '{}'", str);
+            return nullptr;
+        }
+    }
+
+    return type;
+}
+
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
     // sort struct definitions so each comes after any struct definitions it depends on
@@ -1329,12 +1369,9 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
-        const string& paramTypeName = param->GetTypeName();
-        const TypeInfo* paramType = TypeInfo::GetType(paramTypeName);
+        const TypeInfo* paramType = NameToType(param->GetTypeName(), param->GetTypeNameTokens());
         if (paramType == nullptr)
         {
-            const Token* typeNameToken = param->GetTypeNameToken();
-            logger.LogError(*typeNameToken, "'{}' is not a known type", paramTypeName);
             return false;
         }
 
@@ -1352,32 +1389,10 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     }
     else
     {
-        size_t idx = returnTypeNameSize - 1;
-        const string& name = returnTypeName[idx];
-        returnType = TypeInfo::GetType(name);
+        returnType = NameToType(functionDeclaration->GetReturnTypeName(), functionDeclaration->GetReturnTypeNameTokens());
         if (returnType == nullptr)
         {
-            const Token* typeNameToken = functionDeclaration->GetReturnTypeNameTokens()[idx];
-            logger.LogError(*typeNameToken, "'{}' is not a known type", name);
             return false;
-        }
-
-        string str;
-        while (idx > 0)
-        {
-            --idx;
-
-            str = returnTypeName[idx];
-            if (str == POINTER_TYPE_TOKEN)
-            {
-                returnType = TypeInfo::GetPointerToType(returnType);
-            }
-            else
-            {
-                const Token* token = functionDeclaration->GetReturnTypeNameTokens()[idx];
-                logger.LogError(*token, "Unexpected token '{}'", str);
-                return false;
-            }
         }
     }
 

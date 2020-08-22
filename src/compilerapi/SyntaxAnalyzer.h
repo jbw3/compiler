@@ -32,13 +32,6 @@ public:
     bool Process(const TokenSequence& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
 private:
-    enum EParameterState
-    {
-        eName,
-        eType,
-        eDelimiter,
-    };
-
     struct UnaryOpData
     {
         const Token* token;

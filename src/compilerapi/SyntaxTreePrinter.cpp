@@ -328,9 +328,11 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
 
+    function<void (string)> printStr = [this](string str){ PrintString(str); };
+
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->GetName());
-    PrintProperty("typeName", parameter->GetTypeName());
+    PrintProperty("typeName", parameter->GetTypeName(), printStr);
 }
 
 void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* declaration)

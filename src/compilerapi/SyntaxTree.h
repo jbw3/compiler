@@ -439,14 +439,14 @@ private:
 class Parameter
 {
 public:
-    Parameter(const std::string& name, const std::string& typeName,
-              const Token* nameToken, const Token* typeNameToken);
+    Parameter(const std::string& name, const std::vector<std::string>& typeName,
+              const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
 
     ~Parameter() = default;
 
     const std::string& GetName() const;
 
-    const std::string& GetTypeName() const;
+    const std::vector<std::string>& GetTypeName() const;
 
     const TypeInfo* GetType() const;
 
@@ -454,13 +454,13 @@ public:
 
     const Token* GetNameToken() const;
 
-    const Token* GetTypeNameToken() const;
+    const std::vector<const Token*>& GetTypeNameTokens() const;
 
 private:
     const Token* nameToken;
-    const Token* typeNameToken;
+    const std::vector<const Token*> typeNameTokens;
     std::string name;
-    std::string typeName;
+    const std::vector<std::string> typeName;
     const TypeInfo* type;
 };
 

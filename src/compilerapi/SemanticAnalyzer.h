@@ -69,6 +69,8 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
+    const TypeInfo* NameToType(const std::vector<std::string>& typeName, const std::vector<const Token*>& typeNameTokens);
+
     bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
 
     bool HaveCompatibleAssignmentSizes(const TypeInfo* assignType, const TypeInfo* exprType);
