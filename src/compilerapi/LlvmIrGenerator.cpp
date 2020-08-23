@@ -1170,6 +1170,15 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         const string& name = type->GetShortName();
         diType = diBuilder->createBasicType(name, 8, dwarf::DW_ATE_boolean);
     }
+    else if (type->IsPointer())
+    {
+        DIType* innerDiType = GetDebugType(type->GetInnerType());
+        if (innerDiType == nullptr)
+        {
+            return nullptr;
+        }
+        diType = diBuilder->createPointerType(innerDiType, TypeInfo::GetPointerSize(), 0, llvm::None, type->GetShortName());
+    }
     else if (type->IsSameAs(*TypeInfo::UnitType))
     {
         diType = diBuilder->createBasicType(TypeInfo::UnitType->GetShortName(), 0, dwarf::DW_ATE_unsigned);
