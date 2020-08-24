@@ -54,6 +54,9 @@ private:
 
     bool IncrementIteratorCheckValue(TokenIterator& iter, const TokenIterator& endIter, const std::string& expectedValue, const char* errorMsg = nullptr);
 
+    bool ProcessType(TokenIterator& iter, const TokenIterator& endIter, std::vector<std::string>& typeName, std::vector<const Token*>& typeNameTokens,
+                     const std::unordered_set<std::string>& endTokens);
+
     SyntaxTree::ExternFunctionDeclaration* ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter);
 

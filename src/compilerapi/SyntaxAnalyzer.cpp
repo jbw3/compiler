@@ -195,6 +195,52 @@ bool SyntaxAnalyzer::IncrementIteratorCheckValue(TokenIterator& iter, const Toke
     return ok;
 }
 
+bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter, vector<string>& typeName, vector<const Token*>& typeNameTokens,
+                                 const unordered_set<string>& endTokens)
+{
+    while (endTokens.find(iter->GetValue()) == endTokens.cend())
+    {
+        const string& value = iter->GetValue();
+
+        // the lexer will give us two characters together as one token
+        if (value == DOUBLE_POINTER_TYPE_TOKEN)
+        {
+            typeName.push_back(POINTER_TYPE_TOKEN);
+            typeName.push_back(POINTER_TYPE_TOKEN);
+
+            // create two tokens from one
+            const Token* originalToken = &*iter;
+
+            // TODO: Memory leak. Someday, I should fix this...
+            Token* token1 =
+                new Token(POINTER_TYPE_TOKEN,
+                          originalToken->GetFilename(),
+                          originalToken->GetLine(),
+                          originalToken->GetColumn());
+            Token* token2 =
+                new Token(POINTER_TYPE_TOKEN,
+                          originalToken->GetFilename(),
+                          originalToken->GetLine(),
+                          originalToken->GetColumn() + 1);
+
+            typeNameTokens.push_back(token1);
+            typeNameTokens.push_back(token2);
+        }
+        else
+        {
+            typeName.push_back(value);
+            typeNameTokens.push_back(&*iter);
+        }
+
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter)
 {
@@ -316,21 +362,14 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
+    // if a return type is specified, parse it
     vector<string> returnTypeName;
     vector<const Token*> returnTypeNameTokens;
-
-    // if a return type is specified, parse it
-    while (iter->GetValue() != endToken)
+    ok = ProcessType(iter, endIter, returnTypeName, returnTypeNameTokens, {endToken});
+    if (!ok)
     {
-        // get return type name
-        returnTypeName.push_back(iter->GetValue());
-        returnTypeNameTokens.push_back(&*iter);
-
-        if (!IncrementIterator(iter, endIter, "Expected end of function"))
-        {
-            deletePointerContainer(parameters);
-            return nullptr;
-        }
+        deletePointerContainer(parameters);
+        return nullptr;
     }
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
@@ -363,15 +402,10 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 
         vector<string> paramTypeName;
         vector<const Token*> paramTypeNameTokens;
-        while (iter->GetValue() != "," && iter->GetValue() != ")")
+        bool ok = ProcessType(iter, endIter, paramTypeName, paramTypeNameTokens, {",", ")"});
+        if (!ok)
         {
-            paramTypeName.push_back(iter->GetValue());
-            paramTypeNameTokens.push_back(&*iter);
-
-            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
-            {
-                return false;
-            }
+            return false;
         }
 
         // make sure there was a type

@@ -15,6 +15,7 @@ class TypeInfo;
 class UnitTypeInfo;
 
 const char* const POINTER_TYPE_TOKEN = "&";
+const char* const DOUBLE_POINTER_TYPE_TOKEN = "&&";
 
 class MemberInfo
 {
