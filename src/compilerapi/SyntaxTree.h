@@ -339,8 +339,8 @@ private:
 class VariableDeclaration : public Expression
 {
 public:
-    VariableDeclaration(const std::string& name, const std::string& typeName, BinaryExpression* assignmentExpression,
-                        const Token* nameToken, const Token* typeNameToken);
+    VariableDeclaration(const std::string& name, const std::vector<std::string>& typeName, BinaryExpression* assignmentExpression,
+                        const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
 
     virtual ~VariableDeclaration() = default;
 
@@ -348,7 +348,7 @@ public:
 
     const std::string& GetName() const;
 
-    const std::string& GetTypeName() const;
+    const std::vector<std::string>& GetTypeName() const;
 
     const TypeInfo* GetVariableType() const;
 
@@ -358,13 +358,13 @@ public:
 
     const Token* GetNameToken() const;
 
-    const Token* GetTypeNameToken() const;
+    const std::vector<const Token*>& GetTypeNameTokens() const;
 
 private:
     const Token* nameToken;
-    const Token* typeNameToken;
+    std::vector<const Token*> typeNameTokens;
     std::string name;
-    std::string typeName;
+    std::vector<std::string> typeName;
     const TypeInfo* variableType;
     BinaryExpression* assignmentExpression;
 };
@@ -395,18 +395,16 @@ private:
 class ForLoop : public Expression
 {
 public:
-    ForLoop(const std::string& variableName, const std::string& variableTypeName,
-            Expression* iterExpression, BlockExpression* expression,
-            const Token* forToken, const Token* inToken,
-            const Token* variableNameToken, const Token* variableTypeNameToken);
+    ForLoop(const std::string& variableName, Expression* iterExpression,
+            BlockExpression* expression, const Token* forToken,
+            const Token* inToken, const Token* variableNameToken,
+            const std::vector<const Token*>& variableTypeNameTokens);
 
     virtual ~ForLoop();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetVariableName() const;
-
-    const std::string& GetVariableTypeName() const;
 
     const TypeInfo* GetVariableType() const;
 
@@ -422,18 +420,17 @@ public:
 
     const Token* GetVariableNameToken() const;
 
-    const Token* GetVariableTypeNameToken() const;
+    const std::vector<const Token*>& GetVariableTypeNameTokens() const;
 
 private:
     std::string variableName;
-    std::string variableTypeName;
     const TypeInfo* variableType;
     Expression* iterExpression;
     BlockExpression* expression;
     const Token* forToken;
     const Token* inToken;
     const Token* variableNameToken;
-    const Token* variableTypeNameToken;
+    std::vector<const Token*> variableTypeNameTokens;
 };
 
 class Parameter

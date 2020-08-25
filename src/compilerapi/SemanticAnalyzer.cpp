@@ -628,7 +628,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
     // set variable type
     const TypeInfo* inferType = iterExprType->GetMembers()[0]->GetType();
-    const TypeInfo* varType = GetVariableType(forLoop->GetVariableTypeNameToken(), inferType);
+    const TypeInfo* varType = GetVariableType(forLoop->GetVariableTypeNameTokens(), inferType);
     if (isError)
     {
         return;
@@ -967,9 +967,9 @@ bool SemanticAnalyzer::ResolveDependencies(
     return true;
 }
 
-const TypeInfo* SemanticAnalyzer::NameToType(const vector<string>& typeName, const vector<const Token*>& typeNameTokens)
+const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNameTokens)
 {
-    size_t typeNameSize = typeName.size();
+    size_t typeNameSize = typeNameTokens.size();
     if (typeNameSize == 0)
     {
         logger.LogInternalError("Empty type name");
@@ -977,11 +977,11 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<string>& typeName, con
     }
 
     size_t idx = typeNameSize - 1;
-    const string& name = typeName[idx];
+    const Token* typeNameToken = typeNameTokens[idx];
+    const string& name = typeNameToken->GetValue();
     const TypeInfo* type = TypeInfo::GetType(name);
     if (type == nullptr)
     {
-        const Token* typeNameToken = typeNameTokens[idx];
         logger.LogError(*typeNameToken, "'{}' is not a known type", name);
         return nullptr;
     }
@@ -991,14 +991,14 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<string>& typeName, con
     {
         --idx;
 
-        str = typeName[idx];
+        const Token* token = typeNameTokens[idx];
+        str = token->GetValue();
         if (str == POINTER_TYPE_TOKEN)
         {
             type = TypeInfo::GetPointerToType(type);
         }
         else
         {
-            const Token* token = typeNameTokens[idx];
             logger.LogError(*token, "Unexpected token '{}'", str);
             return nullptr;
         }
@@ -1328,7 +1328,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     // set the variable type
-    const TypeInfo* type = GetVariableType(variableDeclaration->GetTypeNameToken(), rightExpr->GetType());
+    const TypeInfo* type = GetVariableType(variableDeclaration->GetTypeNameTokens(), rightExpr->GetType());
     if (isError)
     {
         return;
@@ -1369,7 +1369,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
-        const TypeInfo* paramType = NameToType(param->GetTypeName(), param->GetTypeNameTokens());
+        const TypeInfo* paramType = NameToType(param->GetTypeNameTokens());
         if (paramType == nullptr)
         {
             return false;
@@ -1389,7 +1389,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     }
     else
     {
-        returnType = NameToType(functionDeclaration->GetReturnTypeName(), functionDeclaration->GetReturnTypeNameTokens());
+        returnType = NameToType(functionDeclaration->GetReturnTypeNameTokens());
         if (returnType == nullptr)
         {
             return false;
@@ -1401,10 +1401,9 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     return true;
 }
 
-const TypeInfo* SemanticAnalyzer::GetVariableType(const Token* typeNameToken, const TypeInfo* inferType)
+const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& typeNameTokens, const TypeInfo* inferType)
 {
-    const string& typeName = typeNameToken->GetValue();
-    bool inferTypeName = typeName.empty();
+    bool inferTypeName = typeNameTokens.empty();
     const TypeInfo* type = nullptr;
 
     // if no type name was given, infer it from the expression
@@ -1447,11 +1446,10 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(const Token* typeNameToken, co
     }
     else // get the type from the name given
     {
-        type = TypeInfo::GetType(typeName);
+        type = NameToType(typeNameTokens);
         if (type == nullptr)
         {
             isError = true;
-            logger.LogError(*typeNameToken, "'{}' is not a known type", typeName);
             return nullptr;
         }
     }

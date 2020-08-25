@@ -679,33 +679,15 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    const Token* varTypeNameToken = nullptr;
-    string varTypeName;
-    const Token* opToken = nullptr;
-    if (iter->GetValue() == ASSIGNMENT_OPERATOR)
+    vector<const Token*> varTypeNameTokens;
+    vector<string> varTypeName;
+    bool ok = ProcessType(iter, endIter, varTypeName, varTypeNameTokens, {ASSIGNMENT_OPERATOR});
+    if (!ok)
     {
-        varTypeNameToken = Token::None;
-        varTypeName = "";
-        opToken = &*iter;
+        return nullptr;
     }
-    else
-    {
-        varTypeNameToken = &*iter;
-        varTypeName = varTypeNameToken->GetValue();
 
-        if (!IncrementIterator(iter, endIter, "Expected an assignment operator"))
-        {
-            return nullptr;
-        }
-
-        if (iter->GetValue() != ASSIGNMENT_OPERATOR)
-        {
-            logger.LogError(*iter, "Expected an assignment operator");
-            return nullptr;
-        }
-
-        opToken = &*iter;
-    }
+    const Token* opToken = &*iter;
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
     {
@@ -720,7 +702,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     const string& varName = varNameToken->GetValue();
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression, opToken);
-    VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment, varNameToken, varTypeNameToken);
+    VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment, varNameToken, varTypeNameTokens);
     return varDecl;
 }
 
@@ -784,33 +766,15 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    const Token* varTypeNameToken = nullptr;
-    string varTypeName;
-    const Token* inToken = nullptr;
-    if (iter->GetValue() == IN_KEYWORD)
+    vector<const Token*> varTypeNameTokens;
+    vector<string> varTypeName;
+    bool ok = ProcessType(iter, endIter, varTypeName, varTypeNameTokens, {IN_KEYWORD});
+    if (!ok)
     {
-        varTypeNameToken = Token::None;
-        varTypeName = "";
-        inToken = &*iter;
+        return nullptr;
     }
-    else
-    {
-        varTypeNameToken = &*iter;
-        varTypeName = varTypeNameToken->GetValue();
 
-        if (!IncrementIterator(iter, endIter, "Expected 'in' keyword"))
-        {
-            return nullptr;
-        }
-
-        if (iter->GetValue() != IN_KEYWORD)
-        {
-            logger.LogError(*iter, "Expected 'in' keyword");
-            return nullptr;
-        }
-
-        inToken = &*iter;
-    }
+    const Token* inToken = &*iter;
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
     {
@@ -836,10 +800,10 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    ForLoop* forLoop = new ForLoop(varNameToken->GetValue(), varTypeName,
+    ForLoop* forLoop = new ForLoop(varNameToken->GetValue(),
                                    iterExpression.release(), expression.release(),
                                    forToken, inToken,
-                                   varNameToken, varTypeNameToken);
+                                   varNameToken, varTypeNameTokens);
     return forLoop;
 }
 

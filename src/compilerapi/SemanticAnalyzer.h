@@ -69,7 +69,7 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
-    const TypeInfo* NameToType(const std::vector<std::string>& typeName, const std::vector<const Token*>& typeNameTokens);
+    const TypeInfo* NameToType(const std::vector<const Token*>& typeNameTokens);
 
     bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
 
@@ -89,7 +89,7 @@ private:
 
     bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
 
-    const TypeInfo* GetVariableType(const Token* typeNameToken, const TypeInfo* inferType);
+    const TypeInfo* GetVariableType(const std::vector<const Token*>& typeNameTokens, const TypeInfo* inferType);
 };
 
 #endif // SEMANTIC_ANALYZER_H_
