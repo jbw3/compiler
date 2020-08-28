@@ -1899,4 +1899,13 @@ merge:                                            ; preds = %else, %if
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define i32* @pointers(i32* %p1) #0 {
+entry:
+  %p11 = alloca i32*
+  store i32* %p1, i32** %p11
+  %p12 = load i32*, i32** %p11
+  ret i32* %p12
+}
+
 attributes #0 = { noinline nounwind optnone }
