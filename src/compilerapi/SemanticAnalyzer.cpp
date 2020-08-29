@@ -1240,14 +1240,21 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
         return;
     }
 
+    const TypeInfo* type = expr->GetType();
+
+    // if type is a pointer, get the type it points to
+    if (type->IsPointer())
+    {
+        type = type->GetInnerType();
+    }
+
     // check if member is available for this type
-    const TypeInfo* exprType = expr->GetType();
     const string& memberName = memberExpression->GetMemberName();
-    const MemberInfo* member = exprType->GetMember(memberName);
+    const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
         const Token* memberToken = memberExpression->GetMemberNameToken();
-        logger.LogError(*memberToken, "Type '{}' has no member named '{}'", exprType->GetShortName(), memberName);
+        logger.LogError(*memberToken, "Type '{}' has no member named '{}'", type->GetShortName(), memberName);
         isError = true;
         return;
     }

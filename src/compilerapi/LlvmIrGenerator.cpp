@@ -888,9 +888,18 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     SetDebugLocation(memberExpression->GetMemberNameToken());
 
-    const TypeInfo* exprType = expr->GetType();
+    const TypeInfo* type = expr->GetType();
+    bool isPointer = type->IsPointer();
+    if (isPointer)
+    {
+        type = type->GetInnerType();
+    }
+
+    // TODO: temporary workaround for strings
+    bool isString = type->IsSameAs(*TypeInfo::GetStringPointerType());
+
     const string& memberName = memberExpression->GetMemberName();
-    const MemberInfo* member = exprType->GetMember(memberName);
+    const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
         logger.LogInternalError("Member is null");
@@ -901,8 +910,13 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     Expression::EAccessType accessType = memberExpression->GetAccessType();
 
-    if (accessType == Expression::eStore || resultValue->getType()->isPointerTy())
+    if (accessType == Expression::eStore || isPointer || isString)
     {
+        if (accessType == Expression::eStore && isPointer)
+        {
+            resultValue = builder.CreateLoad(resultValue, "load");
+        }
+
         vector<Value*> indices;
         indices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
         indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
