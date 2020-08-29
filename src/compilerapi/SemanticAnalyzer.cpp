@@ -738,13 +738,11 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
     for (const MemberDefinition* member : structDefinition->GetMembers())
     {
-        const string& memberTypeName = member->GetTypeName();
-        const TypeInfo* memberType = TypeInfo::GetType(memberTypeName);
+        const TypeInfo* memberType = NameToType(member->GetTypeNameTokens());
         if (memberType == nullptr)
         {
             delete newType;
             isError = true;
-            logger.LogError(*member->GetTypeNameToken(), "'{}' is not a known type", memberTypeName);
             return;
         }
 
@@ -927,37 +925,47 @@ bool SemanticAnalyzer::ResolveDependencies(
 
     for (const MemberDefinition* member : structDef->GetMembers())
     {
-        const string& memberTypeName = member->GetTypeName();
+        const vector<const Token*>& typeNameTokens = member->GetTypeNameTokens();
 
-        // if we have not seen this member's type yet, resolve its dependencies
-        if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
+        size_t size = typeNameTokens.size();
+
+        // we only need to check types that might be structs
+        // (which will only have 1 token as a type name)
+        if (size == 1)
         {
-            // check for a recursive dependency
-            auto dependentsIter = dependents.find(memberTypeName);
-            if (dependentsIter != dependents.end())
+            const Token* token = typeNameTokens[size - 1];
+            const string& memberTypeName = token->GetValue();
+
+            // if we have not seen this member's type yet, resolve its dependencies
+            if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
             {
-                const string& memberName = member->GetName();
-                logger.LogError(*member->GetNameToken(), "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
-                return false;
+                // check for a recursive dependency
+                auto dependentsIter = dependents.find(memberTypeName);
+                if (dependentsIter != dependents.end())
+                {
+                    const string& memberName = member->GetName();
+                    logger.LogError(*member->GetNameToken(), "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
+                    return false;
+                }
+
+                dependents.insert(structName);
+
+                auto nameMapIter = nameMap.find(memberTypeName);
+                if (nameMapIter == nameMap.end())
+                {
+                    logger.LogError(*token, "'{}' is not a known type", memberTypeName);
+                    return false;
+                }
+
+                StructDefinition* memberStruct = nameMapIter->second;
+                bool ok = ResolveDependencies(memberStruct, nameMap, ordered, resolved, dependents);
+                if (!ok)
+                {
+                    return false;
+                }
+
+                dependents.erase(structName);
             }
-
-            dependents.insert(structName);
-
-            auto nameMapIter = nameMap.find(memberTypeName);
-            if (nameMapIter == nameMap.end())
-            {
-                logger.LogError(*member->GetTypeNameToken(), "'{}' is not a known type", memberTypeName);
-                return false;
-            }
-
-            StructDefinition* memberStruct = nameMapIter->second;
-            bool ok = ResolveDependencies(memberStruct, nameMap, ordered, resolved, dependents);
-            if (!ok)
-            {
-                return false;
-            }
-
-            dependents.erase(structName);
         }
     }
 

@@ -492,17 +492,18 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             deletePointerContainer(members);
             return nullptr;
         }
-        const Token* memberTypeToken = &*iter;
-        const string& memberType = iter->GetValue();
 
-        MemberDefinition* member = new MemberDefinition(memberName, memberType, memberNameToken, memberTypeToken);
-        members.push_back(member);
-
-        if (!IncrementIterator(iter, endIter, "Expected ',' or '}'"))
+        vector<string> temp; // TODO: remove this
+        vector<const Token*> memberTypeTokens;
+        bool ok = ProcessType(iter, endIter, temp, memberTypeTokens, {",", "}"});
+        if (!ok)
         {
             deletePointerContainer(members);
             return nullptr;
         }
+
+        MemberDefinition* member = new MemberDefinition(memberName, memberNameToken, memberTypeTokens);
+        members.push_back(member);
 
         const string& delimiter = iter->GetValue();
         if (delimiter == "}")

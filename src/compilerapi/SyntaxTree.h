@@ -534,22 +534,19 @@ private:
 class MemberDefinition
 {
 public:
-    MemberDefinition(const std::string& name, const std::string& typeName,
-                     const Token* nameToken, const Token* typeNameToken);
+    MemberDefinition(const std::string& name, const Token* nameToken,
+                     const std::vector<const Token*>& typeNameTokens);
 
     const std::string& GetName() const;
 
-    const std::string& GetTypeName() const;
-
     const Token* GetNameToken() const;
 
-    const Token* GetTypeNameToken() const;
+    const std::vector<const Token*>& GetTypeNameTokens() const;
 
 private:
     const Token* nameToken;
-    const Token* typeNameToken;
+    std::vector<const Token*> typeNameTokens;
     std::string name;
-    std::string typeName;
 };
 
 class StructDefinition : public SyntaxTreeNode

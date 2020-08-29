@@ -354,9 +354,11 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
 {
     BracePrinter printer(*this, "{", "}");
 
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
+
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->GetName());
-    PrintProperty("typeName", member->GetTypeName());
+    PrintProperty("typeName", member->GetTypeNameTokens(), printTypeName);
 }
 
 void SyntaxTreePrinter::PrintMemberInitialization(const MemberInitialization* memberInitialization)
