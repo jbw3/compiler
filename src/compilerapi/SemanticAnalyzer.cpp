@@ -456,6 +456,12 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 break;
         }
     }
+    else if (leftType->IsPointer() && rightType->IsPointer())
+    {
+        ok =
+            (op == BinaryExpression::eAssign || op == BinaryExpression::eEqual || op == BinaryExpression::eNotEqual)
+            && leftType->IsSameAs(*rightType);
+    }
     else if (leftType->IsRange() && rightType->IsRange())
     {
         // assignment is the only valid operator for ranges
