@@ -1902,10 +1902,18 @@ merge:                                            ; preds = %else, %if
 ; Function Attrs: noinline nounwind optnone
 define i32* @pointers(i32* %p1) #0 {
 entry:
+  %equal = alloca i1
+  %p2 = alloca i32*
   %p11 = alloca i32*
   store i32* %p1, i32** %p11
   %p12 = load i32*, i32** %p11
-  ret i32* %p12
+  store i32* %p12, i32** %p2
+  %p13 = load i32*, i32** %p11
+  %p24 = load i32*, i32** %p2
+  %cmpeq = icmp eq i32* %p13, %p24
+  store i1 %cmpeq, i1* %equal
+  %p15 = load i32*, i32** %p11
+  ret i32* %p15
 }
 
 attributes #0 = { noinline nounwind optnone }
