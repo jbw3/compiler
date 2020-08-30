@@ -933,7 +933,7 @@ bool SemanticAnalyzer::ResolveDependencies(
         // (which will only have 1 token as a type name)
         if (size == 1)
         {
-            const Token* token = typeNameTokens[size - 1];
+            const Token* token = typeNameTokens[0];
             const string& memberTypeName = token->GetValue();
 
             // if we have not seen this member's type yet, resolve its dependencies
