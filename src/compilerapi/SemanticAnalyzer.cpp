@@ -734,7 +734,9 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 {
     const string& structName = structDefinition->GetName();
 
-    AggregateType* newType = new AggregateType(structName, structDefinition->GetNameToken());
+    auto iter = partialStructTypes.find(structName);
+    assert(iter != partialStructTypes.cend());
+    AggregateType* newType = iter->second;
 
     for (const MemberDefinition* member : structDefinition->GetMembers())
     {
@@ -755,15 +757,6 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
             logger.LogError(*member->GetNameToken(), "Duplicate member '{}' in struct '{}'", memberName, structName);
             return;
         }
-    }
-
-    bool added = TypeInfo::RegisterType(newType);
-    if (!added)
-    {
-        delete newType;
-        isError = true;
-        logger.LogError(*structDefinition->GetNameToken(), "Struct '{}' has already been defined", structName);
-        return;
     }
 
     structDefinition->SetType(newType);
@@ -971,6 +964,17 @@ bool SemanticAnalyzer::ResolveDependencies(
 
     ordered.push_back(structDef);
     resolved.insert(structName);
+
+    // register the type name. we'll add its members later
+    AggregateType* newType = new AggregateType(structName, structDef->GetNameToken());
+    partialStructTypes.insert({structName, newType});
+    bool added = TypeInfo::RegisterType(newType);
+    if (!added)
+    {
+        delete newType;
+        logger.LogError(*structDef->GetNameToken(), "Struct '{}' has already been defined", structName);
+        return false;
+    }
 
     return true;
 }

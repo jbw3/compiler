@@ -605,8 +605,10 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
         members.push_back(memberType);
     }
 
-    StructType* structType = StructType::create(context, members, structName);
-    types.insert({structName, structType});
+    auto iter = types.find(structName);
+    assert(iter != types.end());
+    StructType* structType = static_cast<StructType*>(iter->second);
+    structType->setBody(members);
 }
 
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
@@ -646,6 +648,14 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
+    // add all struct names to types map
+    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
+    {
+        const string& structName = structDef->GetName();
+        StructType* structType = StructType::create(context, structName);
+        types.insert({structName, structType});
+    }
+
     // generate struct declarations
     for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
     {
