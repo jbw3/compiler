@@ -589,12 +589,11 @@ Expression* BranchExpression::GetElseExpression() const
     return elseExpression;
 }
 
-VariableDeclaration::VariableDeclaration(const string& name, const vector<string>& typeName, BinaryExpression* assignmentExpression,
+VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* assignmentExpression,
                                          const Token* nameToken, const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),
     typeNameTokens(typeNameTokens),
     name(name),
-    typeName(typeName),
     variableType(nullptr),
     assignmentExpression(assignmentExpression)
 {
@@ -608,11 +607,6 @@ void VariableDeclaration::Accept(SyntaxTreeVisitor* visitor)
 const string& VariableDeclaration::GetName() const
 {
     return name;
-}
-
-const vector<string>& VariableDeclaration::GetTypeName() const
-{
-    return typeName;
 }
 
 const TypeInfo* VariableDeclaration::GetVariableType() const
@@ -743,12 +737,11 @@ const vector<const Token*>& ForLoop::GetVariableTypeNameTokens() const
     return variableTypeNameTokens;
 }
 
-Parameter::Parameter(const string& name, const vector<string>& typeName,
-                     const Token* nameToken, const vector<const Token*>& typeNameTokens) :
+Parameter::Parameter(const string& name, const Token* nameToken,
+                     const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),
     typeNameTokens(typeNameTokens),
     name(name),
-    typeName(typeName),
     type(nullptr)
 {
 }
@@ -756,11 +749,6 @@ Parameter::Parameter(const string& name, const vector<string>& typeName,
 const string& Parameter::GetName() const
 {
     return name;
-}
-
-const vector<string>& Parameter::GetTypeName() const
-{
-    return typeName;
 }
 
 const TypeInfo* Parameter::GetType() const
@@ -785,14 +773,12 @@ const vector<const Token*>& Parameter::GetTypeNameTokens() const
 
 FunctionDeclaration::FunctionDeclaration(const string& name,
                                          const Parameters& parameters,
-                                         const vector<string>& returnTypeName,
                                          const Token* nameToken,
                                          const vector<const Token*>& returnTypeNameTokens) :
     nameToken(nameToken),
     returnTypeNameTokens(returnTypeNameTokens),
     name(name),
     parameters(parameters),
-    returnTypeName(returnTypeName),
     returnType(nullptr)
 {
 }
@@ -810,11 +796,6 @@ const string& FunctionDeclaration::GetName() const
 const Parameters& FunctionDeclaration::GetParameters() const
 {
     return parameters;
-}
-
-const vector<string>& FunctionDeclaration::GetReturnTypeName() const
-{
-    return returnTypeName;
 }
 
 const TypeInfo* FunctionDeclaration::GetReturnType() const

@@ -1406,7 +1406,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
 
     // set return type
     const TypeInfo* returnType = nullptr;
-    const vector<string>& returnTypeName = functionDeclaration->GetReturnTypeName();
+    const vector<const Token*>& returnTypeName = functionDeclaration->GetReturnTypeNameTokens();
     size_t returnTypeNameSize = returnTypeName.size();
     if (returnTypeNameSize == 0)
     {

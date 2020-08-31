@@ -339,7 +339,7 @@ private:
 class VariableDeclaration : public Expression
 {
 public:
-    VariableDeclaration(const std::string& name, const std::vector<std::string>& typeName, BinaryExpression* assignmentExpression,
+    VariableDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
                         const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
 
     virtual ~VariableDeclaration() = default;
@@ -347,8 +347,6 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const std::string& GetName() const;
-
-    const std::vector<std::string>& GetTypeName() const;
 
     const TypeInfo* GetVariableType() const;
 
@@ -364,7 +362,6 @@ private:
     const Token* nameToken;
     std::vector<const Token*> typeNameTokens;
     std::string name;
-    std::vector<std::string> typeName;
     const TypeInfo* variableType;
     BinaryExpression* assignmentExpression;
 };
@@ -436,14 +433,12 @@ private:
 class Parameter
 {
 public:
-    Parameter(const std::string& name, const std::vector<std::string>& typeName,
-              const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
+    Parameter(const std::string& name, const Token* nameToken,
+              const std::vector<const Token*>& typeNameTokens);
 
     ~Parameter() = default;
 
     const std::string& GetName() const;
-
-    const std::vector<std::string>& GetTypeName() const;
 
     const TypeInfo* GetType() const;
 
@@ -457,7 +452,6 @@ private:
     const Token* nameToken;
     const std::vector<const Token*> typeNameTokens;
     std::string name;
-    const std::vector<std::string> typeName;
     const TypeInfo* type;
 };
 
@@ -468,7 +462,6 @@ class FunctionDeclaration
 public:
     FunctionDeclaration(const std::string& name,
                         const Parameters& parameters,
-                        const std::vector<std::string>& returnTypeName,
                         const Token* nameToken,
                         const std::vector<const Token*>& returnTypeNameTokens);
 
@@ -477,8 +470,6 @@ public:
     const std::string& GetName() const;
 
     const Parameters& GetParameters() const;
-
-    const std::vector<std::string>& GetReturnTypeName() const;
 
     const TypeInfo* GetReturnType() const;
 
@@ -493,7 +484,6 @@ private:
     std::vector<const Token*> returnTypeNameTokens;
     std::string name;
     Parameters parameters;
-    std::vector<std::string> returnTypeName;
     const TypeInfo* returnType;
 };
 

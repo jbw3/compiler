@@ -308,11 +308,11 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (string)> printStr = [this](string str){ PrintString(str); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->GetName());
-    PrintProperty("typeName", variableDeclaration->GetTypeName(), printStr);
+    PrintProperty("typeName", variableDeclaration->GetTypeNameTokens(), printTypeName);
     PrintProperty("assignmentExpression", variableDeclaration->GetAssignmentExpression());
 }
 
@@ -332,11 +332,11 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (string)> printStr = [this](string str){ PrintString(str); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->GetName());
-    PrintProperty("typeName", parameter->GetTypeName(), printStr);
+    PrintProperty("typeName", parameter->GetTypeNameTokens(), printTypeName);
 }
 
 void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* declaration)

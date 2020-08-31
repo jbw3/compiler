@@ -195,7 +195,7 @@ bool SyntaxAnalyzer::IncrementIteratorCheckValue(TokenIterator& iter, const Toke
     return ok;
 }
 
-bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter, vector<string>& typeName, vector<const Token*>& typeNameTokens,
+bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter, vector<const Token*>& typeNameTokens,
                                  const unordered_set<string>& endTokens)
 {
     while (endTokens.find(iter->GetValue()) == endTokens.cend())
@@ -205,9 +205,6 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
         // the lexer will give us two characters together as one token
         if (value == DOUBLE_POINTER_TYPE_TOKEN)
         {
-            typeName.push_back(POINTER_TYPE_TOKEN);
-            typeName.push_back(POINTER_TYPE_TOKEN);
-
             // create two tokens from one
             const Token* originalToken = &*iter;
 
@@ -228,7 +225,6 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
         }
         else
         {
-            typeName.push_back(value);
             typeNameTokens.push_back(&*iter);
         }
 
@@ -363,9 +359,8 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     // if a return type is specified, parse it
-    vector<string> returnTypeName;
     vector<const Token*> returnTypeNameTokens;
-    ok = ProcessType(iter, endIter, returnTypeName, returnTypeNameTokens, {endToken});
+    ok = ProcessType(iter, endIter, returnTypeNameTokens, {endToken});
     if (!ok)
     {
         deletePointerContainer(parameters);
@@ -373,7 +368,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
-        functionName, parameters, returnTypeName,
+        functionName, parameters,
         nameToken, returnTypeNameTokens);
     return functionDeclaration;
 }
@@ -400,22 +395,21 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        vector<string> paramTypeName;
         vector<const Token*> paramTypeNameTokens;
-        bool ok = ProcessType(iter, endIter, paramTypeName, paramTypeNameTokens, {",", ")"});
+        bool ok = ProcessType(iter, endIter, paramTypeNameTokens, {",", ")"});
         if (!ok)
         {
             return false;
         }
 
         // make sure there was a type
-        if (paramTypeName.size() == 0)
+        if (paramTypeNameTokens.size() == 0)
         {
             logger.LogError(*iter, "Expected a parameter type");
             return false;
         }
 
-        Parameter* param = new Parameter(paramName, paramTypeName, paramNameToken, paramTypeNameTokens);
+        Parameter* param = new Parameter(paramName, paramNameToken, paramTypeNameTokens);
         parameters.push_back(param);
 
         if (iter->GetValue() != ")")
@@ -493,9 +487,8 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             return nullptr;
         }
 
-        vector<string> temp; // TODO: remove this
         vector<const Token*> memberTypeTokens;
-        bool ok = ProcessType(iter, endIter, temp, memberTypeTokens, {",", "}"});
+        bool ok = ProcessType(iter, endIter, memberTypeTokens, {",", "}"});
         if (!ok)
         {
             deletePointerContainer(members);
@@ -681,8 +674,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     vector<const Token*> varTypeNameTokens;
-    vector<string> varTypeName;
-    bool ok = ProcessType(iter, endIter, varTypeName, varTypeNameTokens, {ASSIGNMENT_OPERATOR});
+    bool ok = ProcessType(iter, endIter, varTypeNameTokens, {ASSIGNMENT_OPERATOR});
     if (!ok)
     {
         return nullptr;
@@ -703,7 +695,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     const string& varName = varNameToken->GetValue();
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression, opToken);
-    VariableDeclaration* varDecl = new VariableDeclaration(varName, varTypeName, assignment, varNameToken, varTypeNameTokens);
+    VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, varNameToken, varTypeNameTokens);
     return varDecl;
 }
 
@@ -768,8 +760,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     }
 
     vector<const Token*> varTypeNameTokens;
-    vector<string> varTypeName;
-    bool ok = ProcessType(iter, endIter, varTypeName, varTypeNameTokens, {IN_KEYWORD});
+    bool ok = ProcessType(iter, endIter, varTypeNameTokens, {IN_KEYWORD});
     if (!ok)
     {
         return nullptr;
