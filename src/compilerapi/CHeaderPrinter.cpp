@@ -197,7 +197,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     }
     else if (type->IsAggregate())
     {
-        cType = type->GetShortName();
+        cType = "struct " + type->GetShortName();
         return true;
     }
     else
