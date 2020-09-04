@@ -609,6 +609,42 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
     assert(iter != types.end());
     StructType* structType = static_cast<StructType*>(iter->second);
     structType->setBody(members);
+
+    if (dbgInfo)
+    {
+        const AggregateType* aggType = dynamic_cast<const AggregateType*>(typeInfo);
+
+        DIFile* file = diFile;
+
+        SmallVector<Metadata*, 8> elements;
+
+        uint64_t offset = 0;
+        for (const MemberInfo* member : aggType->GetMembers())
+        {
+            const TypeInfo* memberType = member->GetType();
+            DIType* memberDiType = GetDebugType(memberType);
+            if (memberDiType == nullptr)
+            {
+                resultValue = nullptr;
+                return;
+            }
+
+            const string& memberName = member->GetName();
+            uint64_t memberSize = memberDiType->getSizeInBits();
+            // TODO: better way to get alignment?
+            uint64_t alignment = (memberSize > 32) ? 32 : memberSize;
+            unsigned memberLine = member->GetToken()->GetLine();
+            elements.push_back(diBuilder->createMemberType(file, memberName, file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
+
+            offset += memberSize;
+        }
+
+        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+        auto iter = diStructTypes.find(structName);
+        assert(iter != diStructTypes.end());
+        DICompositeType* diType = iter->second;
+        diType->replaceElements(elementsArray);
+    }
 }
 
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
@@ -654,6 +690,22 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
         const string& structName = structDef->GetName();
         StructType* structType = StructType::create(context, structName);
         types.insert({structName, structType});
+
+        if (dbgInfo)
+        {
+            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->GetType());
+
+            DIFile* file = diFile;
+            const string& name = aggType->GetShortName();
+            unsigned numBits = aggType->GetNumBits();
+
+            unsigned line = aggType->GetToken()->GetLine();
+            // TODO: set alignment
+            SmallVector<Metadata*, 0> elements;
+            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+            DICompositeType* diType = diBuilder->createStructType(file, name, file, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+            diStructTypes.insert({structName, diType});
+        }
     }
 
     // generate struct declarations
@@ -1272,41 +1324,11 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     }
     else
     {
-        const AggregateType* aggType = dynamic_cast<const AggregateType*>(type);
-
-        if (aggType != nullptr)
+        const string& name = type->GetShortName();
+        auto iter = diStructTypes.find(name);
+        if (iter != diStructTypes.end())
         {
-            DIFile* file = diFile;
-            const string& name = aggType->GetShortName();
-            unsigned numBits = aggType->GetNumBits();
-
-            SmallVector<Metadata*, 8> elements;
-
-            uint64_t offset = 0;
-            for (const MemberInfo* member : aggType->GetMembers())
-            {
-                const TypeInfo* memberType = member->GetType();
-                DIType* memberDiType = GetDebugType(memberType);
-                if (memberDiType == nullptr)
-                {
-                    return nullptr;
-                }
-
-                const string& memberName = member->GetName();
-                uint64_t memberSize = memberDiType->getSizeInBits();
-                // TODO: better way to get alignment?
-                uint64_t alignment = (memberSize > 32) ? 32 : memberSize;
-                unsigned memberLine = member->GetToken()->GetLine();
-                elements.push_back(diBuilder->createMemberType(file, memberName, file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
-
-                offset += memberSize;
-            }
-
-            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-
-            unsigned line = aggType->GetToken()->GetLine();
-            // TODO: set alignment
-            diType = diBuilder->createStructType(file, name, file, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+            diType = iter->second;
         }
         else
         {

@@ -149,6 +149,7 @@ private:
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     llvm::Type* boolType;
     std::unordered_map<std::string, llvm::Type*> types;
+    std::unordered_map<std::string, llvm::DICompositeType*> diStructTypes;
 
     llvm::Type* GetType(const TypeInfo* type);
 

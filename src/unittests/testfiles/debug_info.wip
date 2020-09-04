@@ -76,3 +76,12 @@ fun forLoop(n i32) i32
 
     a
 }
+
+# test struct dependencies with pointers
+struct A { n i32, b B }
+struct B { n i32, c C }
+struct C { n i32, a &A }
+
+fun pointerStructTest(a A)
+{
+}

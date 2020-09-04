@@ -7,6 +7,9 @@ $target_triple
 %str = type { i64, [0 x i8] }
 %TestStruct = type { i32, i64, i1 }
 %Range32 = type { i32, i32 }
+%A = type { i32, %B }
+%B = type { i32, %C }
+%C = type { i32, %A* }
 
 @strStruct0 = constant { i64, [3 x i8] } { i64 3, [3 x i8] c"abc" }
 
@@ -225,6 +228,15 @@ forExit17:                                        ; preds = %forCond
   ret i32 %a18, !dbg !173
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @pointerStructTest(%A %a) #0 !dbg !174 {
+entry:
+  %a1 = alloca %A
+  store %A %a, %A* %a1
+  call void @llvm.dbg.declare(metadata %A* %a1, metadata !191, metadata !DIExpression()), !dbg !192
+  ret %UnitType zeroinitializer
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -407,3 +419,22 @@ $filename
 !171 = !DILocation(line: 73, column: 20, scope: !169)
 !172 = !DILocation(line: 73, column: 15, scope: !169)
 !173 = !DILocation(line: 77, column: 5, scope: !153)
+!174 = distinct !DISubprogram(name: "pointerStructTest", scope: !1, file: !1, line: 85, type: !175, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !190)
+!175 = !DISubroutineType(flags: DIFlagPrototyped, types: !176)
+!176 = !{!55, !177}
+!177 = !DICompositeType(tag: DW_TAG_structure_type, name: "A", scope: !1, file: !1, line: 81, elements: !178)
+!178 = !{!179, !180}
+!179 = !DIDerivedType(tag: DW_TAG_member, name: "n", scope: !1, file: !1, line: 81, baseType: !6, size: 32, align: 32)
+!180 = !DIDerivedType(tag: DW_TAG_member, name: "b", scope: !1, file: !1, line: 81, baseType: !181, offset: 32)
+!181 = !DICompositeType(tag: DW_TAG_structure_type, name: "B", scope: !1, file: !1, line: 82, elements: !182)
+!182 = !{!183, !184}
+!183 = !DIDerivedType(tag: DW_TAG_member, name: "n", scope: !1, file: !1, line: 82, baseType: !6, size: 32, align: 32)
+!184 = !DIDerivedType(tag: DW_TAG_member, name: "c", scope: !1, file: !1, line: 82, baseType: !185, offset: 32)
+!185 = !DICompositeType(tag: DW_TAG_structure_type, name: "C", scope: !1, file: !1, line: 83, elements: !186)
+!186 = !{!187, !188}
+!187 = !DIDerivedType(tag: DW_TAG_member, name: "n", scope: !1, file: !1, line: 83, baseType: !6, size: 32, align: 32)
+!188 = !DIDerivedType(tag: DW_TAG_member, name: "a", scope: !1, file: !1, line: 83, baseType: !189, size: 64, align: 32, offset: 32)
+!189 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "&A", baseType: !177, size: 64)
+!190 = !{!191}
+!191 = !DILocalVariable(name: "a", arg: 1, scope: !174, file: !1, line: 85, type: !177)
+!192 = !DILocation(line: 85, scope: !174)
