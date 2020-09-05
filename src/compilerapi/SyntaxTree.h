@@ -220,6 +220,8 @@ public:
     {
         eNegative,
         eComplement,
+        eAddressOf,
+        eDereference,
     };
 
     static std::string GetOperatorString(EOperator op);

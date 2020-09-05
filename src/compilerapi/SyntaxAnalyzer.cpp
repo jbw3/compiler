@@ -19,6 +19,8 @@ const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_O
 {
     {"-", UnaryExpression::eNegative},
     {"!", UnaryExpression::eComplement},
+    {"&", UnaryExpression::eAddressOf},
+    {"*", UnaryExpression::eDereference},
 };
 
 const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS =

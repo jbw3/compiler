@@ -95,6 +95,12 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
         case UnaryExpression::eComplement:
             resultValue = builder.CreateNot(subExprValue, "not");
             break;
+        case UnaryExpression::eAddressOf:
+            resultValue = subExprValue;
+            break;
+        case UnaryExpression::eDereference:
+            resultValue = builder.CreateLoad(subExprValue, "load");
+            break;
     }
 
     ExtendType(subExpr->GetType(), unaryExpression->GetType(), resultValue);

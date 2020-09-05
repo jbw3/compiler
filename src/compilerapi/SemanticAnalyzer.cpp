@@ -74,9 +74,21 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
             }
             break;
         }
+
         case UnaryExpression::eComplement:
             ok = subExprType->IsSameAs(*TypeInfo::BoolType) || isInt;
             resultType = subExpr->GetType();
+            break;
+
+        case UnaryExpression::eAddressOf:
+            ok = subExpr->GetIsAssignable();
+            subExpr->SetAccessType(Expression::eStore);
+            resultType = TypeInfo::GetPointerToType(subExprType);
+            break;
+
+        case UnaryExpression::eDereference:
+            ok = subExprType->IsPointer();
+            resultType = subExprType->GetInnerType();
             break;
     }
 

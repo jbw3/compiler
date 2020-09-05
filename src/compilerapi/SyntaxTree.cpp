@@ -403,6 +403,10 @@ string UnaryExpression::GetOperatorString(EOperator op)
             return "-";
         case UnaryExpression::eComplement:
             return "!";
+        case UnaryExpression::eAddressOf:
+            return "&";
+        case UnaryExpression::eDereference:
+            return "*";
     }
 
     // we should never get here
