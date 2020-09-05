@@ -89,6 +89,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
         case UnaryExpression::eDereference:
             ok = subExprType->IsPointer();
             resultType = subExprType->GetInnerType();
+            unaryExpression->SetIsStorage(subExpr->GetIsStorage());
             break;
     }
 

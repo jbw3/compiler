@@ -99,8 +99,17 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             resultValue = subExprValue;
             break;
         case UnaryExpression::eDereference:
-            resultValue = builder.CreateLoad(subExprValue, "load");
+        {
+            if (unaryExpression->GetAccessType() == Expression::eAddress)
+            {
+                resultValue = subExprValue;
+            }
+            else
+            {
+                resultValue = builder.CreateLoad(subExprValue, "load");
+            }
             break;
+        }
     }
 
     ExtendType(subExpr->GetType(), unaryExpression->GetType(), resultValue);
