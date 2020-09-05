@@ -243,7 +243,7 @@ std::string BinaryExpression::GetOperatorString(EOperator op)
         case BinaryExpression::eAddAssign:
             return "+=";
         case BinaryExpression::eSubtractAssign:
-            return "==";
+            return "-=";
         case BinaryExpression::eMultiplyAssign:
             return "*=";
         case BinaryExpression::eDivideAssign:
