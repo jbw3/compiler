@@ -27,8 +27,8 @@ class Expression : public SyntaxTreeNode
 public:
     enum EAccessType
     {
-        eLoad,
-        eStore,
+        eValue,
+        eAddress,
     };
 
     Expression();
@@ -39,9 +39,9 @@ public:
 
     void SetType(const TypeInfo* newType);
 
-    bool GetIsAssignable() const;
+    bool GetIsStorage() const;
 
-    void SetIsAssignable(bool newIsAssignable);
+    void SetIsStorage(bool newIsStorage);
 
     EAccessType GetAccessType() const;
 
@@ -49,7 +49,7 @@ public:
 
 private:
     const TypeInfo* type;
-    bool isAssignable;
+    bool isStorage;
     EAccessType accessType;
 };
 

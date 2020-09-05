@@ -853,10 +853,10 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
     Expression::EAccessType accessType = variableExpression->GetAccessType();
     switch (accessType)
     {
-        case Expression::eLoad:
+        case Expression::eValue:
             resultValue = builder.CreateLoad(alloca, name);
             break;
-        case Expression::eStore:
+        case Expression::eAddress:
             resultValue = alloca;
             break;
     }
@@ -978,9 +978,9 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     Expression::EAccessType accessType = memberExpression->GetAccessType();
 
-    if (accessType == Expression::eStore || isPointer || isString)
+    if (accessType == Expression::eAddress || isPointer || isString)
     {
-        if (accessType == Expression::eStore && isPointer)
+        if (accessType == Expression::eAddress && isPointer)
         {
             resultValue = builder.CreateLoad(resultValue, "load");
         }
@@ -992,7 +992,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         // calculate member address
         Value* memberPointer = builder.CreateInBoundsGEP(resultValue, indices, "mber");
 
-        if (accessType == Expression::eLoad)
+        if (accessType == Expression::eValue)
         {
             // load member
             resultValue = builder.CreateLoad(memberPointer, "load");

@@ -41,12 +41,12 @@ PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, T
 PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT32_KEYWORD);
 PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT64_KEYWORD);
 
-MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isAssignable, const Token* token) :
+MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
     index(index),
     type(type),
     token(token),
-    isAssignable(isAssignable)
+    isStorage(isStorage)
 {
 }
 
@@ -65,9 +65,9 @@ const TypeInfo* MemberInfo::GetType() const
     return type;
 }
 
-bool MemberInfo::GetIsAssignable() const
+bool MemberInfo::GetIsStorage() const
 {
-    return isAssignable;
+    return isStorage;
 }
 
 const Token* MemberInfo::GetToken() const

@@ -81,8 +81,8 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
             break;
 
         case UnaryExpression::eAddressOf:
-            ok = subExpr->GetIsAssignable();
-            subExpr->SetAccessType(Expression::eStore);
+            ok = subExpr->GetIsStorage();
+            subExpr->SetAccessType(Expression::eAddress);
             resultType = TypeInfo::GetPointerToType(subExprType);
             break;
 
@@ -140,14 +140,14 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
     if (BinaryExpression::IsAssignment(op))
     {
-        if (!left->GetIsAssignable())
+        if (!left->GetIsStorage())
         {
             logger.LogError(*binaryExpression->GetOperatorToken(), "Cannot assign to expression");
             isError = true;
             return;
         }
 
-        left->SetAccessType(Expression::eStore);
+        left->SetAccessType(Expression::eAddress);
     }
 
     if (!CheckBinaryOperatorTypes(op, left, right, binaryExpression->GetOperatorToken()))
@@ -1160,7 +1160,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     else
     {
         variableExpression->SetType(varType);
-        variableExpression->SetIsAssignable(!varType->IsImmutable());
+        variableExpression->SetIsStorage(!varType->IsImmutable());
     }
 }
 
@@ -1282,7 +1282,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
     }
 
     memberExpression->SetType(member->GetType());
-    memberExpression->SetIsAssignable(expr->GetIsAssignable() && member->GetIsAssignable());
+    memberExpression->SetIsStorage(expr->GetIsStorage() && member->GetIsStorage());
 }
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)

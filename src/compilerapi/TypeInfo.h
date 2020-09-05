@@ -20,7 +20,7 @@ const char* const DOUBLE_POINTER_TYPE_TOKEN = "&&";
 class MemberInfo
 {
 public:
-    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isAssignable, const Token* token);
+    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token);
 
     const std::string& GetName() const;
 
@@ -28,7 +28,7 @@ public:
 
     const TypeInfo* GetType() const;
 
-    bool GetIsAssignable() const;
+    bool GetIsStorage() const;
 
     const Token* GetToken() const;
 
@@ -37,7 +37,7 @@ private:
     unsigned index;
     const TypeInfo* type;
     const Token* token;
-    bool isAssignable;
+    bool isStorage;
 };
 
 class TypeInfo

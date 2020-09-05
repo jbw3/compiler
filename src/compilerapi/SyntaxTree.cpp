@@ -10,8 +10,8 @@ namespace SyntaxTree
 {
 Expression::Expression() :
     type(nullptr),
-    isAssignable(false),
-    accessType(eLoad)
+    isStorage(false),
+    accessType(eValue)
 {
 }
 
@@ -25,14 +25,14 @@ void Expression::SetType(const TypeInfo* newType)
     type = newType;
 }
 
-bool Expression::GetIsAssignable() const
+bool Expression::GetIsStorage() const
 {
-    return isAssignable;
+    return isStorage;
 }
 
-void Expression::SetIsAssignable(bool newIsAssignable)
+void Expression::SetIsStorage(bool newIsStorage)
 {
-    isAssignable = newIsAssignable;
+    isStorage = newIsStorage;
 }
 
 Expression::EAccessType Expression::GetAccessType() const
