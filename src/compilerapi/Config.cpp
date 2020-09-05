@@ -154,7 +154,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
-    else if (strcmp(arg, "--emit") == 0)
+    else if (strcmp(arg, "-e") == 0 || strcmp(arg, "--emit") == 0)
     {
         if (idx + 1 >= argc)
         {
@@ -275,7 +275,7 @@ Options:
   --arch <value>         Assembly architecture
   --color <value>        Whether to color output messages: auto, true, false
   -d, --debug-info       Generate debug info
-  --emit <value>         Output type: asm, c-header, llvm, tokens, tree
+  -e, --emit <value>     Output type: asm, c-header, llvm, tokens, tree
   -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
   -t, --text             Output assembly as text
