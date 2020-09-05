@@ -697,6 +697,7 @@ fun pointers(p1 &i32) &i32
 
     var x = 2;
     var xPtr = &x;
+    *xPtr += 5;
 
     var test = Test1
     {

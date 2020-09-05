@@ -1922,20 +1922,24 @@ entry:
   store i8* %x, i8** %xPtr
   %xPtr5 = load i8*, i8** %xPtr
   %load = load i8, i8* %xPtr5
-  %signext = sext i8 %load to i32
+  %add = add i8 %load, 5
+  store i8 %add, i8* %xPtr5
+  %xPtr6 = load i8*, i8** %xPtr
+  %load7 = load i8, i8* %xPtr6
+  %signext = sext i8 %load7 to i32
   %agg = insertvalue %Test1 undef, i32 %signext, 0
-  %agg6 = insertvalue %Test1 %agg, i1 true, 1
-  %agg7 = insertvalue %Test1 %agg6, %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), 2
-  store %Test1 %agg7, %Test1* %test
+  %agg8 = insertvalue %Test1 %agg, i1 true, 1
+  %agg9 = insertvalue %Test1 %agg8, %str* bitcast ({ i64, [3 x i8] }* @strStruct6 to %str*), 2
+  store %Test1 %agg9, %Test1* %test
   %mber = getelementptr inbounds %Test1, %Test1* %test, i64 0, i32 1
   store i1* %mber, i1** %bPtr1
   store i1** %bPtr1, i1*** %bPtr2
-  %bPtr28 = load i1**, i1*** %bPtr2
-  %load9 = load i1*, i1** %bPtr28
-  %load10 = load i1, i1* %load9
-  store i1 %load10, i1* %b
-  %p111 = load i32*, i32** %p11
-  ret i32* %p111
+  %bPtr210 = load i1**, i1*** %bPtr2
+  %load11 = load i1*, i1** %bPtr210
+  %load12 = load i1, i1* %load11
+  store i1 %load12, i1* %b
+  %p113 = load i32*, i32** %p11
+  ret i32* %p113
 }
 
 attributes #0 = { noinline nounwind optnone }

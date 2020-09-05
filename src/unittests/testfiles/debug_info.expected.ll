@@ -237,6 +237,20 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @pointers(i32 %x) #0 !dbg !193 {
+entry:
+  %ptr = alloca i32*
+  %x1 = alloca i32
+  store i32 %x, i32* %x1
+  call void @llvm.dbg.declare(metadata i32* %x1, metadata !195, metadata !DIExpression()), !dbg !199
+  call void @llvm.dbg.declare(metadata i32** %ptr, metadata !196, metadata !DIExpression()), !dbg !200
+  store i32* %x1, i32** %ptr, !dbg !201
+  %ptr2 = load i32*, i32** %ptr, !dbg !202
+  store i32 17, i32* %ptr2, !dbg !203
+  ret %UnitType zeroinitializer, !dbg !203
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -438,3 +452,14 @@ $filename
 !190 = !{!191}
 !191 = !DILocalVariable(name: "a", arg: 1, scope: !174, file: !1, line: 85, type: !177)
 !192 = !DILocation(line: 85, scope: !174)
+!193 = distinct !DISubprogram(name: "pointers", scope: !1, file: !1, line: 89, type: !123, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !194)
+!194 = !{!195, !196}
+!195 = !DILocalVariable(name: "x", arg: 1, scope: !193, file: !1, line: 89, type: !6)
+!196 = !DILocalVariable(name: "ptr", scope: !197, file: !1, line: 91, type: !198)
+!197 = distinct !DILexicalBlock(scope: !193, file: !1, line: 90, column: 1)
+!198 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "&i32", baseType: !6, size: 64)
+!199 = !DILocation(line: 89, scope: !193)
+!200 = !DILocation(line: 91, column: 9, scope: !197)
+!201 = !DILocation(line: 91, column: 13, scope: !197)
+!202 = !DILocation(line: 92, column: 6, scope: !197)
+!203 = !DILocation(line: 92, column: 10, scope: !197)

@@ -85,3 +85,9 @@ struct C { n i32, a &A }
 fun pointerStructTest(a A)
 {
 }
+
+fun pointers(x i32)
+{
+    var ptr = &x;
+    *ptr = 17;
+}
