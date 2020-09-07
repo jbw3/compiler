@@ -250,6 +250,13 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
+    // check for unknown options (but don't catch '-' because
+    // that is used to denote reading from stdin)
+    else if (arg[0] == '-' && arg[1] != '\0')
+    {
+        cerr << "Error: Unknown option '" << arg << "'\n";
+        ok = false;
+    }
     else
     {
         if (inFilename.empty())
