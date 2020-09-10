@@ -27,7 +27,7 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                "struct StrData\n"
                "{\n"
                "    size_t Size;\n"
-               "    char Data[0];\n"
+               "    char* Data;\n"
                "};\n\n"
                "typedef const struct StrData* str;\n\n";
 
