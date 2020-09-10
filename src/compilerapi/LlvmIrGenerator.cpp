@@ -821,28 +821,36 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
     {
         const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
 
-        vector<Constant*> initValues =
-        {
-            ConstantInt::get(context, APInt(sizeType->GetNumBits(), chars.size(), false)),
-            ConstantDataArray::getString(context, StringRef(chars.data(), chars.size()), false),
-        };
-        Constant* initializer = ConstantStruct::getAnon(context, initValues);
+        size_t numChars = chars.size();
+        Constant* charsArray = ConstantDataArray::getString(context, StringRef(chars.data(), numChars), false);
 
-        // create name
+        // create names
+        stringstream dataName;
+        dataName << "strData" << globalStringCounter;
         stringstream structName;
         structName << "strStruct" << globalStringCounter;
         ++globalStringCounter;
+
+        module->getOrInsertGlobal(dataName.str(), charsArray->getType());
+        GlobalVariable* strData = module->getNamedGlobal(dataName.str());
+        strData->setConstant(true);
+        strData->setInitializer(charsArray);
+
+        vector<Constant*> initValues =
+        {
+            ConstantInt::get(context, APInt(sizeType->GetNumBits(), numChars, false)),
+            strData,
+        };
+        Constant* initializer = ConstantStruct::get(strStructType, initValues);
 
         module->getOrInsertGlobal(structName.str(), initializer->getType());
         GlobalVariable* globalStruct = module->getNamedGlobal(structName.str());
         globalStruct->setConstant(true);
         globalStruct->setInitializer(initializer);
 
-        Constant* constant = ConstantExpr::getBitCast(globalStruct, strPointerType);
+        strings[chars] = globalStruct;
 
-        strings[chars] = constant;
-
-        resultValue = constant;
+        resultValue = globalStruct;
     }
 }
 
@@ -1129,7 +1137,7 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     unsigned int addressSpace = module->getDataLayout().getProgramAddressSpace();
 
     strStructElements[0] = GetType(TypeInfo::GetUIntSizeType());
-    strStructElements[1] = ArrayType::get(Type::getInt8Ty(context), 0);
+    strStructElements[1] = PointerType::get(Type::getInt8Ty(context), 0);
 
     ArrayRef<Type*> strArrayRef(strStructElements, STR_STRUCT_ELEMENTS_SIZE);
     strStructType = StructType::create(context, strArrayRef, "str");
@@ -1276,8 +1284,6 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     }
     else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
     {
-        // TODO: add debug info for data member
-
         const TypeInfo* strType = TypeInfo::GetStringPointerType();
         const string& name = strType->GetShortName();
         unsigned numBits = strType->GetNumBits();

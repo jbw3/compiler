@@ -556,6 +556,7 @@ StringPointerType::StringPointerType(unsigned numBits) :
     TypeInfo(numBits, F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD)
 {
     AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
+    AddMember("Data", TypeInfo::GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
 }
 
 bool StringPointerType::IsSameAs(const TypeInfo& other) const
