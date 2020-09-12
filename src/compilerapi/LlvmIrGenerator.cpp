@@ -273,6 +273,20 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 resultValue = initValue;
                 break;
             }
+            case BinaryExpression::eSubscript:
+            {
+                vector<Value*> dataIndices;
+                dataIndices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
+                dataIndices.push_back(ConstantInt::get(context, APInt(32, 1)));
+                Value* strDataPtr = builder.CreateInBoundsGEP(leftValue, dataIndices, "data");
+                Value* strData = builder.CreateLoad(strDataPtr, "load");
+
+                vector<Value*> valueIndices;
+                valueIndices.push_back(rightValue);
+                Value* valuePtr = builder.CreateInBoundsGEP(strData, valueIndices, "value");
+                resultValue = builder.CreateLoad(valuePtr, "load");
+                break;
+            }
         }
 
         if (isAssignment)
