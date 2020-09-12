@@ -10,6 +10,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils.h"
 #ifdef _MSC_VER
@@ -29,31 +30,29 @@ bool LlvmOptimizer::Optimize(Module* module)
 {
     if (optimizationLevel >= 1)
     {
-        legacy::FunctionPassManager funPassMgr(module);
+        legacy::PassManager passMgr;
 
-        funPassMgr.add(createPromoteMemoryToRegisterPass());
-        funPassMgr.add(createInstructionCombiningPass());
+        passMgr.add(createPromoteMemoryToRegisterPass());
+        passMgr.add(createInstructionCombiningPass());
 
         if (optimizationLevel >= 2)
         {
-            funPassMgr.add(createTailCallEliminationPass());
+            passMgr.add(createTailCallEliminationPass());
 
             // loop optimization
-            funPassMgr.add(createIndVarSimplifyPass());
-            funPassMgr.add(createLoopRotatePass());
-            funPassMgr.add(createLoopUnrollPass());
-            funPassMgr.add(createLoopDeletionPass());
+            passMgr.add(createIndVarSimplifyPass());
+            passMgr.add(createLoopRotatePass());
+            passMgr.add(createLoopUnrollPass());
+            passMgr.add(createLoopDeletionPass());
 
-            funPassMgr.add(createCFGSimplificationPass());
-            funPassMgr.add(createInstructionCombiningPass());
+            passMgr.add(createCFGSimplificationPass());
+            passMgr.add(createInstructionCombiningPass());
+
+            passMgr.add(createFunctionInliningPass());
+            passMgr.add(createInstructionCombiningPass());
         }
 
-        funPassMgr.doInitialization();
-        for (Function& fun : module->functions())
-        {
-            funPassMgr.run(fun);
-        }
-        funPassMgr.doFinalization();
+        passMgr.run(*module);
     }
 
     return true;
