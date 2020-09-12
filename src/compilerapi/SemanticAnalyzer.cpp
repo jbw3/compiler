@@ -475,6 +475,12 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             (op == BinaryExpression::eAssign || op == BinaryExpression::eEqual || op == BinaryExpression::eNotEqual)
             && leftType->IsSameAs(*rightType);
     }
+    else if (leftType->IsSameAs(*TypeInfo::GetStringPointerType()))
+    {
+        ok =
+            (op == BinaryExpression::eAssign)
+         || (op == BinaryExpression::eSubscript && rightType->IsInt() && rightType->GetSign() == TypeInfo::eUnsigned);
+    }
     else if (leftType->IsRange() && rightType->IsRange())
     {
         // assignment is the only valid operator for ranges
@@ -586,6 +592,8 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             const TypeInfo* memberType = GetBiggestSizeType(leftType, rightType);
             return TypeInfo::GetRangeType(memberType, op == BinaryExpression::eExclusiveRange);
         }
+        case BinaryExpression::eSubscript:
+            return TypeInfo::UInt8Type;
     }
 }
 

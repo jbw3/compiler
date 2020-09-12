@@ -184,6 +184,7 @@ public:
         eBitwiseOrAssign,
         eInclusiveRange,
         eExclusiveRange,
+        eSubscript,
     };
 
     static std::string GetOperatorString(EOperator op);

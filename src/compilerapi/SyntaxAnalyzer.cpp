@@ -58,6 +58,7 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"|=", BinaryExpression::eBitwiseOrAssign},
     {"..", BinaryExpression::eInclusiveRange},
     {"..<", BinaryExpression::eExclusiveRange},
+    {"[", BinaryExpression::eSubscript},
 };
 
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
@@ -1002,38 +1003,55 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         {
             isPotentialEnd = false;
 
-            auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
-            if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
+            if (binOperators.size() > 0 && binOperators.back().op == BinaryExpression::eSubscript)
             {
-                unaryOperators.push({&*iter, unaryOpIter->second});
-                expectTerm = true;
-            }
-            else
-            {
-                Expression* expr = ProcessTerm(iter, nextIter, endIter, isPotentialEnd);
+                Expression* expr = ProcessExpression(iter, endIter, {"]"});
                 if (expr == nullptr)
                 {
                     deletePointerContainer(terms);
                     return nullptr;
                 }
 
-                // update nextIter since iter may have changed in ProcessTerm()
-                nextIter = (iter == endIter) ? endIter : iter + 1;
+                expr = AddUnaryExpressions(expr, unaryOperators);
+                terms.push_back(expr);
 
-                if (nextIter != endIter && nextIter->GetValue() == ".")
+                expectTerm = false;
+            }
+            else
+            {
+                auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
+                if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
                 {
-                    expr = ProcessMemberExpression(expr, iter, endIter);
+                    unaryOperators.push({&*iter, unaryOpIter->second});
+                    expectTerm = true;
+                }
+                else
+                {
+                    Expression* expr = ProcessTerm(iter, nextIter, endIter, isPotentialEnd);
                     if (expr == nullptr)
                     {
                         deletePointerContainer(terms);
                         return nullptr;
                     }
+
+                    // update nextIter since iter may have changed in ProcessTerm()
+                    nextIter = (iter == endIter) ? endIter : iter + 1;
+
+                    if (nextIter != endIter && nextIter->GetValue() == ".")
+                    {
+                        expr = ProcessMemberExpression(expr, iter, endIter);
+                        if (expr == nullptr)
+                        {
+                            deletePointerContainer(terms);
+                            return nullptr;
+                        }
+                    }
+
+                    expr = AddUnaryExpressions(expr, unaryOperators);
+                    terms.push_back(expr);
+
+                    expectTerm = false;
                 }
-
-                expr = AddUnaryExpressions(expr, unaryOperators);
-                terms.push_back(expr);
-
-                expectTerm = false;
             }
         }
         else
@@ -1082,6 +1100,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
+    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eSubscript});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eRemainder});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightLogical, BinaryExpression::eShiftRightArithmetic});

@@ -266,6 +266,8 @@ std::string BinaryExpression::GetOperatorString(EOperator op)
             return "..";
         case BinaryExpression::eExclusiveRange:
             return "..<";
+        case BinaryExpression::eSubscript:
+            return "[]";
     }
 
     // we should never get here
@@ -297,6 +299,7 @@ bool BinaryExpression::IsAssignment(EOperator op)
         case BinaryExpression::eLogicalOr:
         case BinaryExpression::eInclusiveRange:
         case BinaryExpression::eExclusiveRange:
+        case BinaryExpression::eSubscript:
             return false;
         case BinaryExpression::eAssign:
         case BinaryExpression::eAddAssign:
@@ -340,6 +343,7 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eAssign:
         case BinaryExpression::eInclusiveRange:
         case BinaryExpression::eExclusiveRange:
+        case BinaryExpression::eSubscript:
             return false;
         case BinaryExpression::eAddAssign:
         case BinaryExpression::eSubtractAssign:
