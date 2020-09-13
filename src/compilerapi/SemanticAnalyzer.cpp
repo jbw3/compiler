@@ -392,7 +392,7 @@ bool SemanticAnalyzer::FixNumericLiteralTypes(Expression* expr1, Expression* exp
     return ok;
 }
 
-bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, const Expression* leftExpr, const Expression* rightExpr, const Token* opToken)
+bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, Expression* leftExpr, Expression* rightExpr, const Token* opToken)
 {
     bool ok = false;
     const TypeInfo* leftType = leftExpr->GetType();
@@ -477,9 +477,33 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     }
     else if (leftType->IsSameAs(*TypeInfo::GetStringPointerType()))
     {
-        ok =
-            (op == BinaryExpression::eAssign)
-         || (op == BinaryExpression::eSubscript && rightType->IsInt() && rightType->GetSign() == TypeInfo::eUnsigned);
+        if (op == BinaryExpression::eAssign)
+        {
+            ok = leftType->IsSameAs(*rightType);
+        }
+        else if (op == BinaryExpression::eSubscript && rightType->IsInt())
+        {
+            TypeInfo::ESign rightSign = rightType->GetSign();
+            if (rightSign == TypeInfo::eUnsigned)
+            {
+                ok = true;
+            }
+            else if (rightSign == TypeInfo::eContextDependent)
+            {
+                const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(rightType->GetNumBits());
+                rightExpr->SetType(newType);
+
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+            }
+        }
+        else
+        {
+            ok = false;
+        }
     }
     else if (leftType->IsRange() && rightType->IsRange())
     {
