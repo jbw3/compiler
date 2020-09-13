@@ -329,7 +329,6 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
     // create conditional branch from condition block to either the loop body
     // or the loop exit
-    builder.SetInsertPoint(loopCondBlock);
     builder.CreateCondBr(conditionResult, loopBodyBlock, loopExitBlock);
 
     // set insert point to the loop body block

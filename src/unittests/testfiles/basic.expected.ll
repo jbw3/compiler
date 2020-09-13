@@ -1579,6 +1579,51 @@ whileExit18:                                      ; preds = %whileCond
 }
 
 ; Function Attrs: noinline nounwind optnone
+define i64 @whileComplexCondition(%str* %s, i8 %c) #0 {
+entry:
+  %idx = alloca i64
+  %c2 = alloca i8
+  %s1 = alloca %str*
+  store %str* %s, %str** %s1
+  store i8 %c, i8* %c2
+  store i64 0, i64* %idx
+  br label %whileCond
+
+whileCond:                                        ; preds = %whileBody, %entry
+  %idx3 = load i64, i64* %idx
+  %s4 = load %str*, %str** %s1
+  %mber = getelementptr inbounds %str, %str* %s4, i64 0, i32 0
+  %load = load i64, i64* %mber
+  %cmplt = icmp ult i64 %idx3, %load
+  br i1 %cmplt, label %andtrue, label %andmerge
+
+andtrue:                                          ; preds = %whileCond
+  %s5 = load %str*, %str** %s1
+  %idx6 = load i64, i64* %idx
+  %data = getelementptr inbounds %str, %str* %s5, i64 0, i32 1
+  %load7 = load i8*, i8** %data
+  %value = getelementptr inbounds i8, i8* %load7, i64 %idx6
+  %load8 = load i8, i8* %value
+  %c9 = load i8, i8* %c2
+  %cmpne = icmp ne i8 %load8, %c9
+  br label %andmerge
+
+andmerge:                                         ; preds = %andtrue, %whileCond
+  %andphi = phi i1 [ %cmpne, %andtrue ], [ false, %whileCond ]
+  br i1 %andphi, label %whileBody, label %whileExit
+
+whileBody:                                        ; preds = %andmerge
+  %load10 = load i64, i64* %idx
+  %add = add i64 %load10, 1
+  store i64 %add, i64* %idx
+  br label %whileCond
+
+whileExit:                                        ; preds = %andmerge
+  %idx11 = load i64, i64* %idx
+  ret i64 %idx11
+}
+
+; Function Attrs: noinline nounwind optnone
 define i32 @forLoop(i32 %start, i32 %end) #0 {
 entry:
   %i = alloca i32

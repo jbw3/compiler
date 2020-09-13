@@ -532,6 +532,17 @@ fun nestedLoop(num i32) i32
     rv
 }
 
+fun whileComplexCondition(s str, c u8) usize
+{
+    var idx usize = 0;
+    while idx < s.Size && s[idx] != c
+    {
+        idx += 1;
+    }
+
+    idx
+}
+
 fun forLoop(start i32, end i32) i32
 {
     var num i32 = 1;
