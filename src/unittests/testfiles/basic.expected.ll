@@ -1600,27 +1600,37 @@ whileCond:                                        ; preds = %whileBody, %entry
 andtrue:                                          ; preds = %whileCond
   %s5 = load %str*, %str** %s1
   %idx6 = load i64, i64* %idx
+  %size = getelementptr inbounds %str, %str* %s5, i64 0, i32 0
+  %load7 = load i64, i64* %size
+  %check = icmp uge i64 %idx6, %load7
+  br i1 %check, label %failed, label %passed
+
+failed:                                           ; preds = %andtrue
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %andtrue
   %data = getelementptr inbounds %str, %str* %s5, i64 0, i32 1
-  %load7 = load i8*, i8** %data
-  %value = getelementptr inbounds i8, i8* %load7, i64 %idx6
-  %load8 = load i8, i8* %value
-  %c9 = load i8, i8* %c2
-  %cmpne = icmp ne i8 %load8, %c9
+  %load8 = load i8*, i8** %data
+  %value = getelementptr inbounds i8, i8* %load8, i64 %idx6
+  %load9 = load i8, i8* %value
+  %c10 = load i8, i8* %c2
+  %cmpne = icmp ne i8 %load9, %c10
   br label %andmerge
 
-andmerge:                                         ; preds = %andtrue, %whileCond
-  %andphi = phi i1 [ %cmpne, %andtrue ], [ false, %whileCond ]
+andmerge:                                         ; preds = %passed, %whileCond
+  %andphi = phi i1 [ %cmpne, %passed ], [ false, %whileCond ]
   br i1 %andphi, label %whileBody, label %whileExit
 
 whileBody:                                        ; preds = %andmerge
-  %load10 = load i64, i64* %idx
-  %add = add i64 %load10, 1
+  %load11 = load i64, i64* %idx
+  %add = add i64 %load11, 1
   store i64 %add, i64* %idx
   br label %whileCond
 
 whileExit:                                        ; preds = %andmerge
-  %idx11 = load i64, i64* %idx
-  ret i64 %idx11
+  %idx12 = load i64, i64* %idx
+  ret i64 %idx12
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -1993,5 +2003,7 @@ entry:
   %p113 = load i32*, i32** %p11
   ret i32* %p113
 }
+
+declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
