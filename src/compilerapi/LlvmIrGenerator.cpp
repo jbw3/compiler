@@ -315,10 +315,6 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                     FunctionType* funcType = FunctionType::get(Type::getVoidTy(context), parameters, false);
                     exitFunc = Function::Create(funcType, Function::ExternalLinkage, "exit", module);
                 }
-                else
-                {
-                    // TODO: check exitFunc signature
-                }
 
                 vector<Value*> exitArgs;
                 exitArgs.push_back(ConstantInt::get(context, APInt(32, 1)));

@@ -1468,6 +1468,18 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
 
     functionDeclaration->SetReturnType(returnType);
 
+    // the subscript operator uses exit() if a bounds check fails,
+    // so we need to make sure it has the right signature
+    if (functionDeclaration->GetName() == "exit")
+    {
+        const vector<Parameter*>& params = functionDeclaration->GetParameters();
+        if (params.size() != 1 || !params[0]->GetType()->IsSameAs(*TypeInfo::Int32Type))
+        {
+            logger.LogError(*functionDeclaration->GetNameToken(), "Function 'exit' must have exactly one parameter with type 'i32'");
+            return false;
+        }
+    }
+
     return true;
 }
 
