@@ -305,6 +305,22 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 // generate "failed" block IR
                 builder.SetInsertPoint(failedBlock);
 
+                Function* logErrorFunc = module->getFunction("logError");
+                if (logErrorFunc != nullptr)
+                {
+                    const Token* opToken = binaryExpression->GetOperatorToken();
+
+                    Constant* fileStr = CreateConstantString(opToken->GetFilename());
+                    Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
+                    Constant* msgStr = CreateConstantString("Index is out of bounds");
+
+                    vector<Value*> logErrorArgs;
+                    logErrorArgs.push_back(fileStr);
+                    logErrorArgs.push_back(lineNum);
+                    logErrorArgs.push_back(msgStr);
+                    builder.CreateCall(logErrorFunc, logErrorArgs);
+                }
+
                 Function* exitFunc = module->getFunction("exit");
 
                 // declare the function if it does not exist
@@ -872,12 +888,29 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     const vector<char>& chars = stringLiteralExpression->GetCharacters();
+    resultValue = CreateConstantString(chars);
+}
+
+Constant* LlvmIrGenerator::CreateConstantString(const string& str)
+{
+    vector<char> chars;
+    for (char ch : str)
+    {
+        chars.push_back(ch);
+    }
+
+    return CreateConstantString(chars);
+}
+
+Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
+{
+    Constant* globalString = nullptr;
 
     // if we already have a constant for this string, then reuse it
     auto iter = strings.find(chars);
     if (iter != strings.end())
     {
-        resultValue = iter->second;
+        globalString = iter->second;
     }
     else // create a new string constant
     {
@@ -912,8 +945,10 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 
         strings[chars] = globalStruct;
 
-        resultValue = globalStruct;
+        globalString = globalStruct;
     }
+
+    return globalString;
 }
 
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)

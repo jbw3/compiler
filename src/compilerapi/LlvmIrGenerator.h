@@ -151,6 +151,10 @@ private:
     std::unordered_map<std::string, llvm::Type*> types;
     std::unordered_map<std::string, llvm::DICompositeType*> diStructTypes;
 
+    llvm::Constant* CreateConstantString(const std::string& str);
+
+    llvm::Constant* CreateConstantString(const std::vector<char>& chars);
+
     llvm::Type* GetType(const TypeInfo* type);
 
     llvm::DIType* GetDebugType(const TypeInfo* type);

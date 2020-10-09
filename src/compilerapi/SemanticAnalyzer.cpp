@@ -1479,6 +1479,20 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
     }
+    // the subscript operator optionally uses logError() if a bounds check fails,
+    // so we need to make sure it has the right signature
+    else if (functionDeclaration->GetName() == "logError")
+    {
+        const vector<Parameter*>& params = functionDeclaration->GetParameters();
+        if (params.size() != 3
+        || !params[0]->GetType()->IsSameAs(*TypeInfo::GetStringPointerType())
+        || !params[1]->GetType()->IsSameAs(*TypeInfo::UInt32Type)
+        || !params[2]->GetType()->IsSameAs(*TypeInfo::GetStringPointerType()))
+        {
+            logger.LogError(*functionDeclaration->GetNameToken(), "Function 'logError' must have the following parameter types: 'str', 'u32', 'str'");
+            return false;
+        }
+    }
 
     return true;
 }
