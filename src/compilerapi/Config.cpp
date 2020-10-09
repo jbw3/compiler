@@ -30,6 +30,7 @@ Config::Config()
     architecture = "";
     targetMachine = CreateTargetMachine(architecture, optimizationLevel);
     debugInfo = false;
+    boundsCheck = true;
     color = eAuto;
 }
 
@@ -250,6 +251,10 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
+    else if (strcmp(arg, "--no-bounds-check") == 0)
+    {
+        boundsCheck = false;
+    }
     // check for unknown options (but don't catch '-' because
     // that is used to denote reading from stdin)
     else if (arg[0] == '-' && arg[1] != '\0')
@@ -283,6 +288,7 @@ Options:
   --color <value>        Whether to color output messages: auto, true, false
   -d, --debug-info       Generate debug info
   -e, --emit <value>     Output type: asm, c-header, llvm, tokens, tree
+  --no-bounds-check      Disable array index bounds checking
   -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
   -t, --text             Output assembly as text

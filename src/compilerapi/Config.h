@@ -41,6 +41,7 @@ public:
     std::string architecture;
     llvm::TargetMachine* targetMachine;
     bool debugInfo;
+    bool boundsCheck;
     EColor color;
 
     Config();

@@ -55,6 +55,7 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     inFilename(config.inFilename),
     optimizationLevel(config.optimizationLevel),
     dbgInfo(config.debugInfo),
+    boundsCheck(config.boundsCheck),
     logger(logger),
     builder(context),
     diBuilder(nullptr),
@@ -277,68 +278,71 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             {
                 unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
 
-                vector<Value*> sizeIndices;
-                sizeIndices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
-                sizeIndices.push_back(ConstantInt::get(context, APInt(32, 0)));
-                Value* sizePtr = builder.CreateInBoundsGEP(leftValue, sizeIndices, "size");
-                Value* size = builder.CreateLoad(sizePtr, "load");
-
-                Value* indexValue = nullptr;
-                if (rightType->GetNumBits() < uIntSizeNumBits)
+                if (boundsCheck)
                 {
-                    Type* extType = GetType(TypeInfo::GetUIntSizeType());
-                    indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
+                    vector<Value*> sizeIndices;
+                    sizeIndices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
+                    sizeIndices.push_back(ConstantInt::get(context, APInt(32, 0)));
+                    Value* sizePtr = builder.CreateInBoundsGEP(leftValue, sizeIndices, "size");
+                    Value* size = builder.CreateLoad(sizePtr, "load");
+
+                    Value* indexValue = nullptr;
+                    if (rightType->GetNumBits() < uIntSizeNumBits)
+                    {
+                        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+                        indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
+                    }
+                    else
+                    {
+                        indexValue = rightValue;
+                    }
+
+                    Value* boundsCheck = builder.CreateICmpUGE(indexValue, size, "check");
+
+                    Function* function = builder.GetInsertBlock()->getParent();
+                    BasicBlock* failedBlock = BasicBlock::Create(context, "failed", function);
+                    BasicBlock* passedBlock = BasicBlock::Create(context, "passed", function);
+
+                    builder.CreateCondBr(boundsCheck, failedBlock, passedBlock);
+
+                    // generate "failed" block IR
+                    builder.SetInsertPoint(failedBlock);
+
+                    Function* logErrorFunc = module->getFunction("logError");
+                    if (logErrorFunc != nullptr)
+                    {
+                        const Token* opToken = binaryExpression->GetOperatorToken();
+
+                        Constant* fileStr = CreateConstantString(opToken->GetFilename());
+                        Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
+                        Constant* msgStr = CreateConstantString("Index is out of bounds");
+
+                        vector<Value*> logErrorArgs;
+                        logErrorArgs.push_back(fileStr);
+                        logErrorArgs.push_back(lineNum);
+                        logErrorArgs.push_back(msgStr);
+                        builder.CreateCall(logErrorFunc, logErrorArgs);
+                    }
+
+                    Function* exitFunc = module->getFunction("exit");
+
+                    // declare the function if it does not exist
+                    if (exitFunc == nullptr)
+                    {
+                        vector<Type*> parameters;
+                        parameters.push_back(Type::getInt32Ty(context));
+                        FunctionType* funcType = FunctionType::get(Type::getVoidTy(context), parameters, false);
+                        exitFunc = Function::Create(funcType, Function::ExternalLinkage, "exit", module);
+                    }
+
+                    vector<Value*> exitArgs;
+                    exitArgs.push_back(ConstantInt::get(context, APInt(32, 1)));
+                    builder.CreateCall(exitFunc, exitArgs);
+                    builder.CreateUnreachable();
+
+                    // generate "passed" block IR
+                    builder.SetInsertPoint(passedBlock);
                 }
-                else
-                {
-                    indexValue = rightValue;
-                }
-
-                Value* boundsCheck = builder.CreateICmpUGE(indexValue, size, "check");
-
-                Function* function = builder.GetInsertBlock()->getParent();
-                BasicBlock* failedBlock = BasicBlock::Create(context, "failed", function);
-                BasicBlock* passedBlock = BasicBlock::Create(context, "passed", function);
-
-                builder.CreateCondBr(boundsCheck, failedBlock, passedBlock);
-
-                // generate "failed" block IR
-                builder.SetInsertPoint(failedBlock);
-
-                Function* logErrorFunc = module->getFunction("logError");
-                if (logErrorFunc != nullptr)
-                {
-                    const Token* opToken = binaryExpression->GetOperatorToken();
-
-                    Constant* fileStr = CreateConstantString(opToken->GetFilename());
-                    Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
-                    Constant* msgStr = CreateConstantString("Index is out of bounds");
-
-                    vector<Value*> logErrorArgs;
-                    logErrorArgs.push_back(fileStr);
-                    logErrorArgs.push_back(lineNum);
-                    logErrorArgs.push_back(msgStr);
-                    builder.CreateCall(logErrorFunc, logErrorArgs);
-                }
-
-                Function* exitFunc = module->getFunction("exit");
-
-                // declare the function if it does not exist
-                if (exitFunc == nullptr)
-                {
-                    vector<Type*> parameters;
-                    parameters.push_back(Type::getInt32Ty(context));
-                    FunctionType* funcType = FunctionType::get(Type::getVoidTy(context), parameters, false);
-                    exitFunc = Function::Create(funcType, Function::ExternalLinkage, "exit", module);
-                }
-
-                vector<Value*> exitArgs;
-                exitArgs.push_back(ConstantInt::get(context, APInt(32, 1)));
-                builder.CreateCall(exitFunc, exitArgs);
-                builder.CreateUnreachable();
-
-                // generate "passed" block IR
-                builder.SetInsertPoint(passedBlock);
 
                 vector<Value*> dataIndices;
                 dataIndices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));

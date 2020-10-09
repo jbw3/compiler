@@ -132,6 +132,7 @@ private:
     std::string inFilename;
     unsigned optimizationLevel;
     bool dbgInfo;
+    bool boundsCheck;
     ErrorLogger& logger;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
