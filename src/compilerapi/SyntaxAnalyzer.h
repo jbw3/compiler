@@ -110,7 +110,7 @@ private:
 
     SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
 
-    SyntaxTree::Expression* ProcessMemberExpression(SyntaxTree::Expression* expr, TokenIterator& iter, TokenIterator endIter);
+    SyntaxTree::Expression* ProcessPostTerm(SyntaxTree::Expression* expr, TokenIterator& iter, TokenIterator endIter);
 };
 
 #endif // SYNTAX_ANALYZER_H_

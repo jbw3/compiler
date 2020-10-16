@@ -11,6 +11,8 @@ $target_triple
 %Test2 = type { %Test1, i32 }
 %Test1 = type { i32, i1, %str* }
 %EmptyType = type {}
+%SubscriptTest1 = type { %SubscriptTest2 }
+%SubscriptTest2 = type { %str* }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, [0 x i8]* @strData0 }
@@ -2002,6 +2004,52 @@ entry:
   store i1 %load12, i1* %b
   %p113 = load i32*, i32** %p11
   ret i32* %p113
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @subscript(%str* %s, %SubscriptTest1 %t) #0 {
+entry:
+  %y = alloca i8
+  %x = alloca i8
+  %t2 = alloca %SubscriptTest1
+  %s1 = alloca %str*
+  store %str* %s, %str** %s1
+  store %SubscriptTest1 %t, %SubscriptTest1* %t2
+  %s3 = load %str*, %str** %s1
+  %size = getelementptr inbounds %str, %str* %s3, i64 0, i32 0
+  %load = load i64, i64* %size
+  %check = icmp uge i64 0, %load
+  br i1 %check, label %failed, label %passed
+
+failed:                                           ; preds = %entry
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %entry
+  %data = getelementptr inbounds %str, %str* %s3, i64 0, i32 1
+  %load4 = load i8*, i8** %data
+  %value = getelementptr inbounds i8, i8* %load4, i8 0
+  %load5 = load i8, i8* %value
+  store i8 %load5, i8* %x
+  %t6 = load %SubscriptTest1, %SubscriptTest1* %t2
+  %mber = extractvalue %SubscriptTest1 %t6, 0
+  %mber7 = extractvalue %SubscriptTest2 %mber, 0
+  %size8 = getelementptr inbounds %str, %str* %mber7, i64 0, i32 0
+  %load9 = load i64, i64* %size8
+  %check10 = icmp uge i64 5, %load9
+  br i1 %check10, label %failed11, label %passed12
+
+failed11:                                         ; preds = %passed
+  call void @exit(i32 1)
+  unreachable
+
+passed12:                                         ; preds = %passed
+  %data13 = getelementptr inbounds %str, %str* %mber7, i64 0, i32 1
+  %load14 = load i8*, i8** %data13
+  %value15 = getelementptr inbounds i8, i8* %load14, i8 5
+  %load16 = load i8, i8* %value15
+  store i8 %load16, i8* %y
+  ret %UnitType zeroinitializer
 }
 
 declare void @exit(i32)

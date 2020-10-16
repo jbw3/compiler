@@ -723,3 +723,12 @@ fun pointers(p1 &i32) &i32
 
     p1
 }
+
+fun subscript(s str, t SubscriptTest1)
+{
+    var x u8 = s[0];
+    var y u8 = t.s.s[5];
+}
+
+struct SubscriptTest1 { s SubscriptTest2, }
+struct SubscriptTest2 { s str, }

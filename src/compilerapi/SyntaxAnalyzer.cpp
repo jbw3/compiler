@@ -58,7 +58,6 @@ const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION
     {"|=", BinaryExpression::eBitwiseOrAssign},
     {"..", BinaryExpression::eInclusiveRange},
     {"..<", BinaryExpression::eExclusiveRange},
-    {"[", BinaryExpression::eSubscript},
 };
 
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
@@ -1003,55 +1002,38 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         {
             isPotentialEnd = false;
 
-            if (binOperators.size() > 0 && binOperators.back().op == BinaryExpression::eSubscript)
+            auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
+            if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
             {
-                Expression* expr = ProcessExpression(iter, endIter, {"]"});
+                unaryOperators.push({&*iter, unaryOpIter->second});
+                expectTerm = true;
+            }
+            else
+            {
+                Expression* expr = ProcessTerm(iter, nextIter, endIter, isPotentialEnd);
                 if (expr == nullptr)
                 {
                     deletePointerContainer(terms);
                     return nullptr;
                 }
 
-                expr = AddUnaryExpressions(expr, unaryOperators);
-                terms.push_back(expr);
+                // update nextIter since iter may have changed in ProcessTerm()
+                nextIter = (iter == endIter) ? endIter : iter + 1;
 
-                expectTerm = false;
-            }
-            else
-            {
-                auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
-                if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
+                if ( nextIter != endIter && (nextIter->GetValue() == "." || nextIter->GetValue() == "[") )
                 {
-                    unaryOperators.push({&*iter, unaryOpIter->second});
-                    expectTerm = true;
-                }
-                else
-                {
-                    Expression* expr = ProcessTerm(iter, nextIter, endIter, isPotentialEnd);
+                    expr = ProcessPostTerm(expr, iter, endIter);
                     if (expr == nullptr)
                     {
                         deletePointerContainer(terms);
                         return nullptr;
                     }
-
-                    // update nextIter since iter may have changed in ProcessTerm()
-                    nextIter = (iter == endIter) ? endIter : iter + 1;
-
-                    if (nextIter != endIter && nextIter->GetValue() == ".")
-                    {
-                        expr = ProcessMemberExpression(expr, iter, endIter);
-                        if (expr == nullptr)
-                        {
-                            deletePointerContainer(terms);
-                            return nullptr;
-                        }
-                    }
-
-                    expr = AddUnaryExpressions(expr, unaryOperators);
-                    terms.push_back(expr);
-
-                    expectTerm = false;
                 }
+
+                expr = AddUnaryExpressions(expr, unaryOperators);
+                terms.push_back(expr);
+
+                expectTerm = false;
             }
         }
         else
@@ -1100,7 +1082,6 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eSubscript});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eRemainder});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
     ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightLogical, BinaryExpression::eShiftRightArithmetic});
@@ -1647,33 +1628,56 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     return expr;
 }
 
-Expression* SyntaxAnalyzer::ProcessMemberExpression(Expression* expr, TokenIterator& iter, TokenIterator endIter)
+Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& iter, TokenIterator endIter)
 {
     TokenIterator nextIter = iter + 1;
 
-    while (nextIter != endIter && nextIter->GetValue() == ".")
+    while ( nextIter != endIter && (nextIter->GetValue() == "." || nextIter->GetValue() == "[") )
     {
-        const Token* opToken = &*nextIter;
-
-        // skip to token after "."
-        iter += 2;
-
-        if (iter == endIter)
+        // process member expressions
+        while (nextIter != endIter && nextIter->GetValue() == ".")
         {
-            logger.LogError(*iter, "No member name after member operator");
-            delete expr;
-            return nullptr;
+            const Token* opToken = &*nextIter;
+
+            // skip to token after "."
+            iter += 2;
+
+            if (iter == endIter)
+            {
+                logger.LogError(*iter, "No member name after member operator");
+                delete expr;
+                return nullptr;
+            }
+            else if (!IsValidName(*iter))
+            {
+                logger.LogError(*iter, "Invalid member name");
+                delete expr;
+                return nullptr;
+            }
+
+            expr = new MemberExpression(expr, iter->GetValue(), opToken, &*iter);
+
+            nextIter = iter + 1;
         }
-        else if (!IsValidName(*iter))
+
+        // process subscript expressions
+        while (nextIter != endIter && nextIter->GetValue() == "[")
         {
-            logger.LogError(*iter, "Invalid member name");
-            delete expr;
-            return nullptr;
+            const Token* opToken = &*nextIter;
+
+            // skip to token after "["
+            iter += 2;
+
+            Expression* subscriptExpr = ProcessExpression(iter, endIter, {"]"});
+            if (subscriptExpr == nullptr)
+            {
+                return nullptr;
+            }
+
+            expr = new BinaryExpression(BinaryExpression::eSubscript, expr, subscriptExpr, opToken);
+
+            nextIter = iter + 1;
         }
-
-        expr = new MemberExpression(expr, iter->GetValue(), opToken, &*iter);
-
-        nextIter = iter + 1;
     }
 
     return expr;
