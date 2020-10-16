@@ -935,10 +935,12 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
         strData->setConstant(true);
         strData->setInitializer(charsArray);
 
+        Constant* strDataPointer = ConstantExpr::getBitCast(strData, strStructType->getElementType(1));
+
         vector<Constant*> initValues =
         {
             ConstantInt::get(context, APInt(sizeType->GetNumBits(), numChars, false)),
-            strData,
+            strDataPointer,
         };
         Constant* initializer = ConstantStruct::get(strStructType, initValues);
 

@@ -12,7 +12,7 @@ $target_triple
 %C = type { i32, %A* }
 
 @strData0 = constant [3 x i8] c"abc"
-@strStruct0 = constant %str { i64 3, [3 x i8]* @strData0 }
+@strStruct0 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData0, i32 0, i32 0) }
 
 ; Function Attrs: noinline nounwind optnone
 define i32 @noParams() #0 !dbg !3 {

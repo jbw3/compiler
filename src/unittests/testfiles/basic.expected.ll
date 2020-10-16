@@ -15,19 +15,19 @@ $target_triple
 %SubscriptTest2 = type { %str* }
 
 @strData0 = constant [0 x i8] zeroinitializer
-@strStruct0 = constant %str { i64 0, [0 x i8]* @strData0 }
+@strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
 @strData1 = constant [15 x i8] c"Is this a test?"
-@strStruct1 = constant %str { i64 15, [15 x i8]* @strData1 }
+@strStruct1 = constant %str { i64 15, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @strData1, i32 0, i32 0) }
 @strData2 = constant [6 x i8] c"\09\0D\0A\\\22'"
-@strStruct2 = constant %str { i64 6, [6 x i8]* @strData2 }
+@strStruct2 = constant %str { i64 6, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @strData2, i32 0, i32 0) }
 @strData3 = constant [5 x i8] c"caf\C3\A9"
-@strStruct3 = constant %str { i64 5, [5 x i8]* @strData3 }
+@strStruct3 = constant %str { i64 5, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strData3, i32 0, i32 0) }
 @strData4 = constant [3 x i8] c"JBW"
-@strStruct4 = constant %str { i64 3, [3 x i8]* @strData4 }
+@strStruct4 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData4, i32 0, i32 0) }
 @strData5 = constant [11 x i8] c"\0A0\CF\80\E2\82\BF\F0\9F\98\80"
-@strStruct5 = constant %str { i64 11, [11 x i8]* @strData5 }
+@strStruct5 = constant %str { i64 11, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @strData5, i32 0, i32 0) }
 @strData6 = constant [3 x i8] c"abc"
-@strStruct6 = constant %str { i64 3, [3 x i8]* @strData6 }
+@strStruct6 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }
 
 declare %UnitType @extern1()
 
