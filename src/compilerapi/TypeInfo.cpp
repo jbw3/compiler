@@ -132,8 +132,13 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 
     intSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
+    PrimitiveType* immutIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eSigned, INT_SIZE_KEYWORD);
+    immutableTypes.insert({INT_SIZE_KEYWORD, immutIntSizeType});
+
     uintSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
+    PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
+    immutableTypes.insert({UINT_SIZE_KEYWORD, immutUIntSizeType});
 
     stringPointerType = new StringPointerType(pointerSize);
     RegisterType(stringPointerType);
