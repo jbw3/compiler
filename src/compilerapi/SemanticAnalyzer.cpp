@@ -624,8 +624,6 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
 
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 {
-    ++loopLevel;
-
     Expression* condition = whileLoop->GetCondition();
     condition->Accept(this);
     if (isError)
@@ -643,7 +641,9 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 
     // check statements
     BlockExpression* expression = whileLoop->GetExpression();
+    ++loopLevel;
     expression->Accept(this);
+    --loopLevel;
     if (isError)
     {
         return;
@@ -659,14 +659,10 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 
     // while loop expressions always evaluate to the unit type
     whileLoop->SetType(TypeInfo::UnitType);
-
-    --loopLevel;
 }
 
 void SemanticAnalyzer::Visit(ForLoop* forLoop)
 {
-    ++loopLevel;
-
     // process iterable expression
     Expression* iterExpression = forLoop->GetIterExpression();
     iterExpression->Accept(this);
@@ -725,7 +721,9 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
     // process body expression
     BlockExpression* expression = forLoop->GetExpression();
+    ++loopLevel;
     expression->Accept(this);
+    --loopLevel;
     if (isError)
     {
         return;
@@ -741,8 +739,6 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
     // for loop expressions always evaluate to the unit type
     forLoop->SetType(TypeInfo::UnitType);
-
-    --loopLevel;
 }
 
 void SemanticAnalyzer::Visit(LoopControl* loopControl)
