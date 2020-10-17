@@ -900,7 +900,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
         isPotentialEnd = true;
     }
-    else if (iter->GetValue() == WHILE_KEYWORD)
+    else if (value == WHILE_KEYWORD)
     {
         expr = ProcessWhileLoop(iter, endIter);
         if (expr == nullptr)
@@ -910,7 +910,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
         isPotentialEnd = true;
     }
-    else if (iter->GetValue() == FOR_KEYWORD)
+    else if (value == FOR_KEYWORD)
     {
         expr = ProcessForLoop(iter, endIter);
         if (expr == nullptr)
@@ -1489,9 +1489,24 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
     {
         Expression* expr = nullptr;
 
-        if (iter->GetValue() == VARIABLE_KEYWORD)
+        const string& value = iter->GetValue();
+        if (value == VARIABLE_KEYWORD)
         {
             expr = ProcessVariableDeclaration(iter, endIter);
+        }
+        else if (value == BREAK_KEYWORD && value == CONTINUE_KEYWORD)
+        {
+            ++iter;
+
+            if (value != STATEMENT_END)
+            {
+                logger.LogError(*iter, "Expected '{}' after '{}'", STATEMENT_END, value);
+                expr = nullptr;
+            }
+            else
+            {
+                expr = new LoopControl(&*iter);
+            }
         }
         else
         {

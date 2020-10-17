@@ -6,6 +6,10 @@
 
 const std::string BOOL_KEYWORD = "bool";
 
+const std::string BREAK_KEYWORD = "break";
+
+const std::string CONTINUE_KEYWORD = "continue";
+
 const std::string ELIF_KEYWORD = "elif";
 
 const std::string ELSE_KEYWORD = "else";
@@ -51,6 +55,8 @@ const std::string WHILE_KEYWORD = "while";
 const std::unordered_set<std::string> KEYWORDS =
 {
     BOOL_KEYWORD,
+    BREAK_KEYWORD,
+    CONTINUE_KEYWORD,
     ELIF_KEYWORD,
     ELSE_KEYWORD,
     EXTERN_KEYWORD,
@@ -79,9 +85,7 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "as",
     "async",
     "await",
-    "break",
     "const",
-    "continue",
     "default",
     "enum",
     "f32",

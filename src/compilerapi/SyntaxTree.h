@@ -433,6 +433,30 @@ private:
     std::vector<const Token*> variableTypeNameTokens;
 };
 
+class LoopControl : public Expression
+{
+public:
+    enum EControlType
+    {
+        eBreak,
+        eContinue,
+    };
+
+    LoopControl(const Token* token);
+
+    virtual ~LoopControl() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* GetToken() const;
+
+    EControlType GetControlType() const;
+
+private:
+    const Token* token;
+    EControlType controlType;
+};
+
 class Parameter
 {
 public:

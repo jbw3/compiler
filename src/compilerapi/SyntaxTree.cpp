@@ -1,6 +1,7 @@
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
 #include "Token.h"
+#include "keywords.h"
 #include "utils.h"
 #include <limits>
 
@@ -743,6 +744,27 @@ const Token* ForLoop::GetVariableNameToken() const
 const vector<const Token*>& ForLoop::GetVariableTypeNameTokens() const
 {
     return variableTypeNameTokens;
+}
+
+LoopControl::LoopControl(const Token* token) :
+    token(token)
+{
+    controlType = (token->GetValue() == BREAK_KEYWORD) ? eBreak : eContinue;
+}
+
+void LoopControl::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO
+}
+
+const Token* LoopControl::GetToken() const
+{
+    return token;
+}
+
+LoopControl::EControlType LoopControl::GetControlType() const
+{
+    return controlType;
 }
 
 Parameter::Parameter(const string& name, const Token* nameToken,
