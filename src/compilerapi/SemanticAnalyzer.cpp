@@ -8,7 +8,8 @@ using namespace SyntaxTree;
 
 SemanticAnalyzer::SemanticAnalyzer(ErrorLogger& logger) :
     logger(logger),
-    isError(false)
+    isError(false),
+    loopLevel(0)
 {
 }
 
@@ -623,6 +624,8 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
 
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 {
+    ++loopLevel;
+
     Expression* condition = whileLoop->GetCondition();
     condition->Accept(this);
     if (isError)
@@ -656,10 +659,14 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 
     // while loop expressions always evaluate to the unit type
     whileLoop->SetType(TypeInfo::UnitType);
+
+    --loopLevel;
 }
 
 void SemanticAnalyzer::Visit(ForLoop* forLoop)
 {
+    ++loopLevel;
+
     // process iterable expression
     Expression* iterExpression = forLoop->GetIterExpression();
     iterExpression->Accept(this);
@@ -734,6 +741,23 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
     // for loop expressions always evaluate to the unit type
     forLoop->SetType(TypeInfo::UnitType);
+
+    --loopLevel;
+}
+
+void SemanticAnalyzer::Visit(LoopControl* loopControl)
+{
+    // make sure we're in a loop
+    if (loopLevel == 0)
+    {
+        isError = true;
+        const Token* token = loopControl->GetToken();
+        logger.LogError(*token, "'{}' can only be used in a loop", token->GetValue());
+        return;
+    }
+
+    // loop control expressions always evaluate to the unit type
+    loopControl->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)

@@ -95,6 +95,14 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
     PrintProperty("expression", forLoop->GetExpression());
 }
 
+void SyntaxTreePrinter::Visit(LoopControl* loopControl)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "LoopControl");
+    PrintProperty("value", loopControl->GetToken()->GetValue());
+}
+
 void SyntaxTreePrinter::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
     BracePrinter printer(*this, "{", "}");

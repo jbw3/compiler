@@ -541,6 +541,12 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     resultValue = ConstantStruct::get(unitType);
 }
 
+void LlvmIrGenerator::Visit(LoopControl* loopControl)
+{
+    logger.LogError("Not implemented");
+    resultValue = nullptr;
+}
+
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
 {
     // nothing to do here

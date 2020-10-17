@@ -24,6 +24,8 @@ public:
 
     void Visit(SyntaxTree::ForLoop* forLoop) override;
 
+    void Visit(SyntaxTree::LoopControl* loopControl) override;
+
     void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
@@ -60,6 +62,7 @@ private:
     std::unordered_map<std::string, AggregateType*> partialStructTypes;
     std::unordered_map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
+    unsigned loopLevel;
 
     bool SortTypeDefinitions(SyntaxTree::ModuleDefinition* moduleDefinition);
 

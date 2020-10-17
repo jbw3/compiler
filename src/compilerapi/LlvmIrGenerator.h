@@ -71,6 +71,8 @@ public:
 
     void Visit(SyntaxTree::ForLoop* forLoop) override;
 
+    void Visit(SyntaxTree::LoopControl* loopControl) override;
+
     void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;

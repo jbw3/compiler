@@ -11,6 +11,7 @@ class ExternFunctionDeclaration;
 class ForLoop;
 class FunctionDefinition;
 class FunctionExpression;
+class LoopControl;
 class MemberExpression;
 class ModuleDefinition;
 class NumericExpression;
@@ -34,6 +35,8 @@ public:
     virtual void Visit(SyntaxTree::WhileLoop* whileLoop) = 0;
 
     virtual void Visit(SyntaxTree::ForLoop* forLoop) = 0;
+
+    virtual void Visit(SyntaxTree::LoopControl* loopControl) = 0;
 
     virtual void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) = 0;
 

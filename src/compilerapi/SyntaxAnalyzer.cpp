@@ -1494,11 +1494,11 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         {
             expr = ProcessVariableDeclaration(iter, endIter);
         }
-        else if (value == BREAK_KEYWORD && value == CONTINUE_KEYWORD)
+        else if (value == BREAK_KEYWORD || value == CONTINUE_KEYWORD)
         {
-            ++iter;
+            TokenIterator nextIter = iter + 1;
 
-            if (value != STATEMENT_END)
+            if (nextIter->GetValue() != STATEMENT_END)
             {
                 logger.LogError(*iter, "Expected '{}' after '{}'", STATEMENT_END, value);
                 expr = nullptr;
@@ -1507,6 +1507,8 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             {
                 expr = new LoopControl(&*iter);
             }
+
+            ++iter;
         }
         else
         {
