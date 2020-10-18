@@ -2061,6 +2061,128 @@ passed12:                                         ; preds = %passed
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @break_and_continue() #0 {
+entry:
+  %k = alloca i32
+  %j = alloca i8
+  %i = alloca i8
+  store i8 0, i8* %i
+  br label %forCond
+
+forCond:                                          ; preds = %forIter13, %entry
+  %iter = load i8, i8* %i
+  %cmp = icmp sle i8 %iter, 10
+  br i1 %cmp, label %forBody, label %forExit16
+
+forBody:                                          ; preds = %forCond
+  store i8 0, i8* %j
+  br label %forCond1
+
+forCond1:                                         ; preds = %forIter, %forBody
+  %iter2 = load i8, i8* %j
+  %cmp3 = icmp sle i8 %iter2, 7
+  br i1 %cmp3, label %forBody4, label %forExit
+
+forBody4:                                         ; preds = %forCond1
+  %j5 = load i8, i8* %j
+  %cmpeq = icmp eq i8 %j5, 4
+  br i1 %cmpeq, label %if, label %else
+
+if:                                               ; preds = %forBody4
+  br label %forIter
+
+aftercontinue:                                    ; No predecessors!
+  br label %merge
+
+else:                                             ; preds = %forBody4
+  br label %merge
+
+merge:                                            ; preds = %else, %aftercontinue
+  %phi = phi %UnitType [ zeroinitializer, %aftercontinue ], [ zeroinitializer, %else ]
+  %call = call i32 @noArgs()
+  br label %forIter
+
+forIter:                                          ; preds = %merge, %if
+  %iter6 = load i8, i8* %j
+  %inc = add i8 %iter6, 1
+  store i8 %inc, i8* %j
+  br label %forCond1
+
+forExit:                                          ; preds = %forCond1
+  %i7 = load i8, i8* %i
+  %cmpeq8 = icmp eq i8 %i7, 8
+  br i1 %cmpeq8, label %if9, label %else10
+
+if9:                                              ; preds = %forExit
+  br label %forExit16
+
+afterbreak:                                       ; No predecessors!
+  br label %merge11
+
+else10:                                           ; preds = %forExit
+  br label %merge11
+
+merge11:                                          ; preds = %else10, %afterbreak
+  %phi12 = phi %UnitType [ zeroinitializer, %afterbreak ], [ zeroinitializer, %else10 ]
+  br label %forIter13
+
+forIter13:                                        ; preds = %merge11
+  %iter14 = load i8, i8* %i
+  %inc15 = add i8 %iter14, 1
+  store i8 %inc15, i8* %i
+  br label %forCond
+
+forExit16:                                        ; preds = %if9, %forCond
+  store i32 0, i32* %k
+  br label %whileCond
+
+whileCond:                                        ; preds = %merge30, %if20, %forExit16
+  %k17 = load i32, i32* %k
+  %cmplt = icmp slt i32 %k17, 17
+  br i1 %cmplt, label %whileBody, label %whileExit
+
+whileBody:                                        ; preds = %whileCond
+  %k18 = load i32, i32* %k
+  %cmpeq19 = icmp eq i32 %k18, 3
+  br i1 %cmpeq19, label %if20, label %else22
+
+if20:                                             ; preds = %whileBody
+  br label %whileCond
+
+aftercontinue21:                                  ; No predecessors!
+  br label %merge30
+
+else22:                                           ; preds = %whileBody
+  %k23 = load i32, i32* %k
+  %cmpeq24 = icmp eq i32 %k23, 10
+  br i1 %cmpeq24, label %if25, label %else27
+
+if25:                                             ; preds = %else22
+  br label %whileExit
+
+afterbreak26:                                     ; No predecessors!
+  br label %merge28
+
+else27:                                           ; preds = %else22
+  br label %merge28
+
+merge28:                                          ; preds = %else27, %afterbreak26
+  %phi29 = phi %UnitType [ zeroinitializer, %afterbreak26 ], [ zeroinitializer, %else27 ]
+  br label %merge30
+
+merge30:                                          ; preds = %merge28, %aftercontinue21
+  %phi31 = phi %UnitType [ zeroinitializer, %aftercontinue21 ], [ %phi29, %merge28 ]
+  %call32 = call i32 @noArgs()
+  %load = load i32, i32* %k
+  %add = add i32 %load, 1
+  store i32 %add, i32* %k
+  br label %whileCond
+
+whileExit:                                        ; preds = %if25, %whileCond
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }

@@ -258,6 +258,112 @@ entry:
   ret %UnitType zeroinitializer, !dbg !205
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @break_and_continue() #0 !dbg !206 {
+entry:
+  %j = alloca i8
+  %i = alloca i8
+  call void @llvm.dbg.declare(metadata i8* %i, metadata !208, metadata !DIExpression()), !dbg !212
+  store i8 0, i8* %i, !dbg !213
+  br label %forCond, !dbg !213
+
+forCond:                                          ; preds = %forIter, %entry
+  %iter = load i8, i8* %i, !dbg !212
+  %cmp = icmp sle i8 %iter, 7, !dbg !212
+  br i1 %cmp, label %forBody, label %forExit, !dbg !212
+
+forBody:                                          ; preds = %forCond
+  %i1 = load i8, i8* %i, !dbg !214
+  %cmpeq = icmp eq i8 %i1, 5, !dbg !216
+  br i1 %cmpeq, label %if, label %else, !dbg !216
+
+if:                                               ; preds = %forBody
+  br label %forExit, !dbg !217
+
+afterbreak:                                       ; No predecessors!
+  br label %merge6, !dbg !217
+
+else:                                             ; preds = %forBody
+  %i2 = load i8, i8* %i, !dbg !219
+  %cmpeq3 = icmp eq i8 %i2, 2, !dbg !220
+  br i1 %cmpeq3, label %if4, label %else5, !dbg !220
+
+if4:                                              ; preds = %else
+  br label %forIter, !dbg !221
+
+aftercontinue:                                    ; No predecessors!
+  br label %merge, !dbg !221
+
+else5:                                            ; preds = %else
+  br label %merge, !dbg !221
+
+merge:                                            ; preds = %else5, %aftercontinue
+  %phi = phi %UnitType [ zeroinitializer, %aftercontinue ], [ zeroinitializer, %else5 ], !dbg !221
+  br label %merge6, !dbg !221
+
+merge6:                                           ; preds = %merge, %afterbreak
+  %phi7 = phi %UnitType [ zeroinitializer, %afterbreak ], [ %phi, %merge ], !dbg !221
+  %call = call i32 @noParams(), !dbg !223
+  br label %forIter, !dbg !223
+
+forIter:                                          ; preds = %merge6, %if4
+  %iter8 = load i8, i8* %i, !dbg !223
+  %inc = add i8 %iter8, 1, !dbg !223
+  store i8 %inc, i8* %i, !dbg !223
+  br label %forCond, !dbg !223
+
+forExit:                                          ; preds = %if, %forCond
+  call void @llvm.dbg.declare(metadata i8* %j, metadata !211, metadata !DIExpression()), !dbg !224
+  store i8 1, i8* %j, !dbg !225
+  br label %whileCond, !dbg !225
+
+whileCond:                                        ; preds = %merge21, %if12, %forExit
+  %j9 = load i8, i8* %j, !dbg !226
+  %cmplt = icmp slt i8 %j9, 100, !dbg !227
+  br i1 %cmplt, label %whileBody, label %whileExit, !dbg !227
+
+whileBody:                                        ; preds = %whileCond
+  %j10 = load i8, i8* %j, !dbg !228
+  %rem = srem i8 %j10, 7, !dbg !230
+  %cmpeq11 = icmp eq i8 %rem, 0, !dbg !231
+  br i1 %cmpeq11, label %if12, label %else14, !dbg !231
+
+if12:                                             ; preds = %whileBody
+  br label %whileCond, !dbg !232
+
+aftercontinue13:                                  ; No predecessors!
+  br label %merge15, !dbg !232
+
+else14:                                           ; preds = %whileBody
+  br label %merge15, !dbg !232
+
+merge15:                                          ; preds = %else14, %aftercontinue13
+  %phi16 = phi %UnitType [ zeroinitializer, %aftercontinue13 ], [ zeroinitializer, %else14 ], !dbg !232
+  %j17 = load i8, i8* %j, !dbg !234
+  %cmpgt = icmp sgt i8 %j17, 89, !dbg !235
+  br i1 %cmpgt, label %if18, label %else20, !dbg !235
+
+if18:                                             ; preds = %merge15
+  br label %whileExit, !dbg !236
+
+afterbreak19:                                     ; No predecessors!
+  br label %merge21, !dbg !236
+
+else20:                                           ; preds = %merge15
+  br label %merge21, !dbg !236
+
+merge21:                                          ; preds = %else20, %afterbreak19
+  %phi22 = phi %UnitType [ zeroinitializer, %afterbreak19 ], [ zeroinitializer, %else20 ], !dbg !236
+  %call23 = call i32 @noParams(), !dbg !238
+  %load = load i8, i8* %j, !dbg !239
+  %add = add i8 %load, 1, !dbg !239
+  store i8 %add, i8* %j, !dbg !239
+  br label %whileCond, !dbg !239
+
+whileExit:                                        ; preds = %if18, %whileCond
+  ret %UnitType zeroinitializer, !dbg !239
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -472,3 +578,37 @@ $filename
 !203 = !DILocation(line: 91, column: 13, scope: !199)
 !204 = !DILocation(line: 92, column: 6, scope: !199)
 !205 = !DILocation(line: 92, column: 10, scope: !199)
+!206 = distinct !DISubprogram(name: "break_and_continue", scope: !1, file: !1, line: 95, type: !53, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !207)
+!207 = !{!208, !211}
+!208 = !DILocalVariable(name: "i", scope: !209, file: !1, line: 97, type: !23)
+!209 = distinct !DILexicalBlock(scope: !210, file: !1, line: 97, column: 9)
+!210 = distinct !DILexicalBlock(scope: !206, file: !1, line: 96, column: 1)
+!211 = !DILocalVariable(name: "j", scope: !210, file: !1, line: 111, type: !23)
+!212 = !DILocation(line: 97, column: 9, scope: !209)
+!213 = !DILocation(line: 97, column: 15, scope: !210)
+!214 = !DILocation(line: 99, column: 12, scope: !215)
+!215 = distinct !DILexicalBlock(scope: !209, file: !1, line: 98, column: 5)
+!216 = !DILocation(line: 99, column: 14, scope: !215)
+!217 = !DILocation(line: 101, column: 13, scope: !218)
+!218 = distinct !DILexicalBlock(scope: !215, file: !1, line: 100, column: 9)
+!219 = !DILocation(line: 103, column: 14, scope: !215)
+!220 = !DILocation(line: 103, column: 16, scope: !215)
+!221 = !DILocation(line: 105, column: 13, scope: !222)
+!222 = distinct !DILexicalBlock(scope: !215, file: !1, line: 104, column: 9)
+!223 = !DILocation(line: 108, column: 9, scope: !215)
+!224 = !DILocation(line: 111, column: 9, scope: !210)
+!225 = !DILocation(line: 111, column: 11, scope: !210)
+!226 = !DILocation(line: 112, column: 11, scope: !210)
+!227 = !DILocation(line: 112, column: 13, scope: !210)
+!228 = !DILocation(line: 114, column: 12, scope: !229)
+!229 = distinct !DILexicalBlock(scope: !210, file: !1, line: 113, column: 5)
+!230 = !DILocation(line: 114, column: 14, scope: !229)
+!231 = !DILocation(line: 114, column: 18, scope: !229)
+!232 = !DILocation(line: 116, column: 13, scope: !233)
+!233 = distinct !DILexicalBlock(scope: !229, file: !1, line: 115, column: 9)
+!234 = !DILocation(line: 119, column: 12, scope: !229)
+!235 = !DILocation(line: 119, column: 14, scope: !229)
+!236 = !DILocation(line: 121, column: 13, scope: !237)
+!237 = distinct !DILexicalBlock(scope: !229, file: !1, line: 120, column: 9)
+!238 = !DILocation(line: 124, column: 9, scope: !229)
+!239 = !DILocation(line: 126, column: 11, scope: !229)

@@ -732,3 +732,41 @@ fun subscript(s str, t SubscriptTest1)
 
 struct SubscriptTest1 { s SubscriptTest2, }
 struct SubscriptTest2 { s str, }
+
+fun break_and_continue()
+{
+    for i in 0..10
+    {
+        for j in 0..7
+        {
+            if j == 4
+            {
+                continue;
+            }
+
+            noArgs();
+        }
+
+        if i == 8
+        {
+            break;
+        }
+    }
+
+    var k i32 = 0;
+    while k < 17
+    {
+        if k == 3
+        {
+            continue;
+        }
+        elif k == 10
+        {
+            break;
+        }
+
+        noArgs();
+
+        k += 1;
+    }
+}

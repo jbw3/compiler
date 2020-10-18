@@ -91,3 +91,38 @@ fun pointers(x i32)
     var ptr = &x;
     *ptr = 17;
 }
+
+fun break_and_continue()
+{
+    for i in 0..7
+    {
+        if i == 5
+        {
+            break;
+        }
+        elif i == 2
+        {
+            continue;
+        }
+
+        noParams();
+    }
+
+    var j = 1;
+    while j < 100
+    {
+        if j % 7 == 0
+        {
+            continue;
+        }
+
+        if j > 89
+        {
+            break;
+        }
+
+        noParams();
+
+        j += 1;
+    }
+}
