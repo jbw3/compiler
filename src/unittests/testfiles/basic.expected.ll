@@ -1654,7 +1654,7 @@ entry:
   %end7 = extractvalue %Range32 %rng5, 1
   br label %forCond
 
-forCond:                                          ; preds = %forBody, %entry
+forCond:                                          ; preds = %forIter, %entry
   %iter = load i32, i32* %i
   %cmp = icmp sle i32 %iter, %end7
   br i1 %cmp, label %forBody, label %forExit
@@ -1664,6 +1664,9 @@ forBody:                                          ; preds = %forCond
   %load = load i32, i32* %num
   %mul = mul i32 %load, %i8
   store i32 %mul, i32* %num
+  br label %forIter
+
+forIter:                                          ; preds = %forBody
   %iter9 = load i32, i32* %i
   %inc = add i32 %iter9, 1
   store i32 %inc, i32* %i
@@ -1684,16 +1687,16 @@ entry:
   store i32 0, i32* %i
   br label %forCond
 
-forCond:                                          ; preds = %forExit, %entry
+forCond:                                          ; preds = %forIter8, %entry
   %iter = load i32, i32* %i
   %cmp = icmp ult i32 %iter, 5
-  br i1 %cmp, label %forBody, label %forExit10
+  br i1 %cmp, label %forBody, label %forExit11
 
 forBody:                                          ; preds = %forCond
   store i32 1, i32* %j
   br label %forCond1
 
-forCond1:                                         ; preds = %forBody4, %forBody
+forCond1:                                         ; preds = %forIter, %forBody
   %iter2 = load i32, i32* %j
   %cmp3 = icmp ule i32 %iter2, 10
   br i1 %cmp3, label %forBody4, label %forExit
@@ -1705,20 +1708,26 @@ forBody4:                                         ; preds = %forCond1
   %load = load i32, i32* %x
   %add = add i32 %load, %mul
   store i32 %add, i32* %x
+  br label %forIter
+
+forIter:                                          ; preds = %forBody4
   %iter7 = load i32, i32* %j
   %inc = add i32 %iter7, 1
   store i32 %inc, i32* %j
   br label %forCond1
 
 forExit:                                          ; preds = %forCond1
-  %iter8 = load i32, i32* %i
-  %inc9 = add i32 %iter8, 1
-  store i32 %inc9, i32* %i
+  br label %forIter8
+
+forIter8:                                         ; preds = %forExit
+  %iter9 = load i32, i32* %i
+  %inc10 = add i32 %iter9, 1
+  store i32 %inc10, i32* %i
   br label %forCond
 
-forExit10:                                        ; preds = %forCond
-  %x11 = load i32, i32* %x
-  ret i32 %x11
+forExit11:                                        ; preds = %forCond
+  %x12 = load i32, i32* %x
+  ret i32 %x12
 }
 
 ; Function Attrs: noinline nounwind optnone

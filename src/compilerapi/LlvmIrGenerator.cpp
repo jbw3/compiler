@@ -405,8 +405,8 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
     // generate loop body IR
     LoopInfo loopInfo;
-    loopInfo.condition = loopCondBlock;
-    loopInfo.exit = loopExitBlock;
+    loopInfo.breakBlock = loopExitBlock;
+    loopInfo.continueBlock = loopCondBlock;
     loops.push(loopInfo);
     whileLoop->GetExpression()->Accept(this);
     loops.pop();
@@ -511,6 +511,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
     BasicBlock* loopBodyBlock = BasicBlock::Create(context, "forBody", function);
     BasicBlock* loopExitBlock = BasicBlock::Create(context, "forExit");
+    BasicBlock* loopIterBlock = BasicBlock::Create(context, "forIter");
 
     // create conditional branch from condition block to either the loop body
     // or the loop exit
@@ -522,8 +523,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
     // generate loop body IR
     LoopInfo loopInfo;
-    loopInfo.condition = loopCondBlock;
-    loopInfo.exit = loopExitBlock;
+    loopInfo.breakBlock = loopExitBlock;
+    loopInfo.continueBlock = loopIterBlock;
     loops.push(loopInfo);
     forLoop->GetExpression()->Accept(this);
     loops.pop();
@@ -531,6 +532,15 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     {
         return;
     }
+
+    // jump to the iterator update block
+    builder.CreateBr(loopIterBlock);
+
+    // add iterator update block to function
+    loopIterBlock->insertInto(function);
+
+    // set insert point to the iterator update block
+    builder.SetInsertPoint(loopIterBlock);
 
     // increment iterator
     iter = builder.CreateLoad(alloca, "iter");
@@ -558,11 +568,11 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
 
     if (controlType == LoopControl::eBreak)
     {
-        builder.CreateBr(loopInfo.exit);
+        builder.CreateBr(loopInfo.breakBlock);
     }
     else if (controlType == LoopControl::eContinue)
     {
-        builder.CreateBr(loopInfo.condition);
+        builder.CreateBr(loopInfo.continueBlock);
     }
     else
     {

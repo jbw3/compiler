@@ -132,8 +132,8 @@ private:
 
     struct LoopInfo
     {
-        llvm::BasicBlock* condition;
-        llvm::BasicBlock* exit;
+        llvm::BasicBlock* breakBlock;
+        llvm::BasicBlock* continueBlock;
     };
 
     llvm::TargetMachine* targetMachine;

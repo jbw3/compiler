@@ -186,10 +186,10 @@ entry:
   %end = extractvalue %Range32 %rng, 1, !dbg !165
   br label %forCond, !dbg !165
 
-forCond:                                          ; preds = %forExit, %entry
+forCond:                                          ; preds = %forIter15, %entry
   %iter = load i32, i32* %i, !dbg !166
   %cmp = icmp sle i32 %iter, %end, !dbg !166
-  br i1 %cmp, label %forBody, label %forExit17, !dbg !166
+  br i1 %cmp, label %forBody, label %forExit18, !dbg !166
 
 forBody:                                          ; preds = %forCond
   %n3 = load i32, i32* %n1, !dbg !167
@@ -201,7 +201,7 @@ forBody:                                          ; preds = %forCond
   %end7 = extractvalue %Range32 %rng5, 1, !dbg !168
   br label %forCond8, !dbg !168
 
-forCond8:                                         ; preds = %forBody11, %forBody
+forCond8:                                         ; preds = %forIter, %forBody
   %iter9 = load i32, i32* %j, !dbg !169
   %cmp10 = icmp sle i32 %iter9, %end7, !dbg !169
   br i1 %cmp10, label %forBody11, label %forExit, !dbg !169
@@ -213,20 +213,26 @@ forBody11:                                        ; preds = %forCond8
   %load = load i32, i32* %a, !dbg !174
   %add = add i32 %load, %mul, !dbg !174
   store i32 %add, i32* %a, !dbg !174
+  br label %forIter, !dbg !174
+
+forIter:                                          ; preds = %forBody11
   %iter14 = load i32, i32* %j, !dbg !174
   %inc = add i32 %iter14, 1, !dbg !174
   store i32 %inc, i32* %j, !dbg !174
   br label %forCond8, !dbg !174
 
 forExit:                                          ; preds = %forCond8
-  %iter15 = load i32, i32* %i, !dbg !174
-  %inc16 = add i32 %iter15, 1, !dbg !174
-  store i32 %inc16, i32* %i, !dbg !174
+  br label %forIter15, !dbg !174
+
+forIter15:                                        ; preds = %forExit
+  %iter16 = load i32, i32* %i, !dbg !174
+  %inc17 = add i32 %iter16, 1, !dbg !174
+  store i32 %inc17, i32* %i, !dbg !174
   br label %forCond, !dbg !174
 
-forExit17:                                        ; preds = %forCond
-  %a18 = load i32, i32* %a, !dbg !175
-  ret i32 %a18, !dbg !175
+forExit18:                                        ; preds = %forCond
+  %a19 = load i32, i32* %a, !dbg !175
+  ret i32 %a19, !dbg !175
 }
 
 ; Function Attrs: noinline nounwind optnone
