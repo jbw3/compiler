@@ -130,6 +130,12 @@ private:
         bool dbgInfo;
     };
 
+    struct LoopInfo
+    {
+        llvm::BasicBlock* condition;
+        llvm::BasicBlock* exit;
+    };
+
     llvm::TargetMachine* targetMachine;
     std::string inFilename;
     unsigned optimizationLevel;
@@ -153,6 +159,7 @@ private:
     llvm::Type* boolType;
     std::unordered_map<std::string, llvm::Type*> types;
     std::unordered_map<std::string, llvm::DICompositeType*> diStructTypes;
+    std::stack<LoopInfo> loops;
 
     llvm::Constant* CreateConstantString(const std::string& str);
 

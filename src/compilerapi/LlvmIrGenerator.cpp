@@ -404,7 +404,12 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     builder.SetInsertPoint(loopBodyBlock);
 
     // generate loop body IR
+    LoopInfo loopInfo;
+    loopInfo.condition = loopCondBlock;
+    loopInfo.exit = loopExitBlock;
+    loops.push(loopInfo);
     whileLoop->GetExpression()->Accept(this);
+    loops.pop();
     if (resultValue == nullptr)
     {
         return;
@@ -516,7 +521,12 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     builder.SetInsertPoint(loopBodyBlock);
 
     // generate loop body IR
+    LoopInfo loopInfo;
+    loopInfo.condition = loopCondBlock;
+    loopInfo.exit = loopExitBlock;
+    loops.push(loopInfo);
     forLoop->GetExpression()->Accept(this);
+    loops.pop();
     if (resultValue == nullptr)
     {
         return;
@@ -543,8 +553,29 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
 void LlvmIrGenerator::Visit(LoopControl* loopControl)
 {
-    logger.LogError("Not implemented");
-    resultValue = nullptr;
+    LoopControl::EControlType controlType = loopControl->GetControlType();
+    LoopInfo loopInfo = loops.top();
+
+    if (controlType == LoopControl::eBreak)
+    {
+        builder.CreateBr(loopInfo.exit);
+    }
+    else if (controlType == LoopControl::eContinue)
+    {
+        builder.CreateBr(loopInfo.condition);
+    }
+    else
+    {
+        assert(false && "Unknown control type");
+    }
+
+    // need to create a new basic block for any following instructions
+    // because we just terminated the current one with a branch
+    stringstream ss;
+    ss << "after" << loopControl->GetToken()->GetValue();
+    Function* function = builder.GetInsertBlock()->getParent();
+    BasicBlock* newBlock = BasicBlock::Create(context, ss.str(), function);
+    builder.SetInsertPoint(newBlock);
 }
 
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
