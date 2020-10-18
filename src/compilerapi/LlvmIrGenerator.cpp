@@ -566,6 +566,8 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
     LoopControl::EControlType controlType = loopControl->GetControlType();
     LoopInfo loopInfo = loops.top();
 
+    SetDebugLocation(loopControl->GetToken());
+
     if (controlType == LoopControl::eBreak)
     {
         builder.CreateBr(loopInfo.breakBlock);
