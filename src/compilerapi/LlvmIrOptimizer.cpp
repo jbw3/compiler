@@ -38,6 +38,7 @@ bool LlvmOptimizer::Optimize(Module* module)
         if (optimizationLevel >= 2)
         {
             passMgr.add(createTailCallEliminationPass());
+            passMgr.add(createFunctionInliningPass());
 
             // loop optimization
             passMgr.add(createIndVarSimplifyPass());
@@ -45,11 +46,9 @@ bool LlvmOptimizer::Optimize(Module* module)
             passMgr.add(createLoopUnrollPass());
             passMgr.add(createLoopDeletionPass());
 
+            passMgr.add(createPromoteMemoryToRegisterPass());
+            passMgr.add(createInstructionCombiningPass());
             passMgr.add(createCFGSimplificationPass());
-            passMgr.add(createInstructionCombiningPass());
-
-            passMgr.add(createFunctionInliningPass());
-            passMgr.add(createInstructionCombiningPass());
         }
 
         passMgr.run(*module);
