@@ -457,6 +457,19 @@ private:
     EControlType controlType;
 };
 
+class Return : public Expression
+{
+public:
+    Return(const Token* token, Expression* expression);
+
+    virtual ~Return();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* token;
+    Expression* expression;
+};
+
 class Parameter
 {
 public:

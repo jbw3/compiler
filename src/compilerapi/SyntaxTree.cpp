@@ -770,6 +770,21 @@ LoopControl::EControlType LoopControl::GetControlType() const
     return controlType;
 }
 
+Return::Return(const Token* token, Expression* expression) :
+    token(token),
+    expression(expression)
+{
+}
+
+Return::~Return()
+{
+    delete expression;
+}
+
+void Return::Accept(SyntaxTreeVisitor* visitor)
+{
+}
+
 Parameter::Parameter(const string& name, const Token* nameToken,
                      const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),

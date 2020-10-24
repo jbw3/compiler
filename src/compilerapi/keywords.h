@@ -34,6 +34,8 @@ const std::string IN_KEYWORD = "in";
 
 const std::string INT_SIZE_KEYWORD = "isize";
 
+const std::string RETURN_KEYWORD = "return";
+
 const std::string STR_KEYWORD = "str";
 
 const std::string STRUCT_KEYWORD = "struct";
@@ -69,6 +71,7 @@ const std::unordered_set<std::string> KEYWORDS =
     INT64_KEYWORD,
     IN_KEYWORD,
     INT_SIZE_KEYWORD,
+    RETURN_KEYWORD,
     STR_KEYWORD,
     STRUCT_KEYWORD,
     UINT8_KEYWORD,
@@ -97,7 +100,6 @@ const std::unordered_set<std::string> RESERVED_KEYWORDS =
     "namespace",
     "private",
     "public",
-    "return",
     "trusted",
     "typedef",
     "using",

@@ -1498,6 +1498,8 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         {
             TokenIterator nextIter = iter + 1;
 
+            // TODO: check if nextIter equals endIter
+
             if (nextIter->GetValue() != STATEMENT_END)
             {
                 logger.LogError(*iter, "Expected '{}' after '{}'", STATEMENT_END, value);
@@ -1509,6 +1511,29 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             }
 
             ++iter;
+        }
+        else if (value == RETURN_KEYWORD)
+        {
+            const Token* token = &*iter;
+            if (IncrementIterator(iter, endIter))
+            {
+                Expression* returnExpression = nullptr;
+                if (iter->GetValue() == STATEMENT_END)
+                {
+                    returnExpression = new UnitTypeLiteralExpression();
+                }
+                else
+                {
+                    returnExpression = ProcessExpression(iter, endIter, {STATEMENT_END});
+                }
+
+                expr = new Return(token, returnExpression);
+                ++iter;
+            }
+            else
+            {
+                expr = nullptr;
+            }
         }
         else
         {
