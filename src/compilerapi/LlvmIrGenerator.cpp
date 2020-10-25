@@ -601,6 +601,15 @@ void LlvmIrGenerator::Visit(Return* ret)
     }
 
     builder.CreateRet(resultValue);
+
+    // need to create a new basic block for any following instructions
+    // because we just terminated the current one with a return
+    Function* function = builder.GetInsertBlock()->getParent();
+    BasicBlock* newBlock = BasicBlock::Create(context, "afterreturn", function);
+    builder.SetInsertPoint(newBlock);
+
+    // return expressions always evaluate to the unit type
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
