@@ -65,6 +65,7 @@ private:
     std::unordered_map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     SymbolTable symbolTable;
     unsigned loopLevel;
+    const SyntaxTree::FunctionDefinition* currentFunction;
 
     bool SortTypeDefinitions(SyntaxTree::ModuleDefinition* moduleDefinition);
 
@@ -96,6 +97,8 @@ private:
     bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
 
     const TypeInfo* GetVariableType(const std::vector<const Token*>& typeNameTokens, const TypeInfo* inferType);
+
+    bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, const SyntaxTree::Expression* expression);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

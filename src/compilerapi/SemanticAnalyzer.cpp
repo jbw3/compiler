@@ -9,7 +9,8 @@ using namespace SyntaxTree;
 SemanticAnalyzer::SemanticAnalyzer(ErrorLogger& logger) :
     logger(logger),
     isError(false),
-    loopLevel(0)
+    loopLevel(0),
+    currentFunction(nullptr)
 {
 }
 
@@ -762,7 +763,23 @@ void SemanticAnalyzer::Visit(Return* ret)
     Expression* expression = ret->expression;
     expression->Accept(this);
 
-    // TODO: check if expression type matchine function return type
+    if (currentFunction == nullptr)
+    {
+        isError = true;
+        logger.LogError(*ret->token, "'return' can only be used in a function");
+        return;
+    }
+
+    // check if expression type matchine function return type
+    bool ok = CheckReturnType(currentFunction->GetDeclaration(), expression);
+    if (!ok)
+    {
+        isError = true;
+        return;
+    }
+
+    // return expressions always evaluate to the unit type
+    ret->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
@@ -790,24 +807,21 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         }
     }
 
-    // check return expression
     Expression* expression = functionDefinition->GetExpression();
+    currentFunction = functionDefinition;
     expression->Accept(this);
+    currentFunction = nullptr;
     if (isError)
     {
         return;
     }
 
-    const TypeInfo* returnType = funcDecl->GetReturnType();
-    const TypeInfo* expressionType = expression->GetType();
-    if (!returnType->IsSameAs(*expressionType))
+    // check return expression
+    bool ok = CheckReturnType(funcDecl, expression);
+    if (!ok)
     {
-        if ( !(expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType)) )
-        {
-            isError = true;
-            const Token* funNameToken = funcDecl->GetNameToken();
-            logger.LogError(*funNameToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
-        }
+        isError = true;
+        return;
     }
 }
 
@@ -1581,4 +1595,21 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& ty
     }
 
     return type;
+}
+
+bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, const Expression* expression)
+{
+    const TypeInfo* returnType = funcDecl->GetReturnType();
+    const TypeInfo* expressionType = expression->GetType();
+    if (!returnType->IsSameAs(*expressionType))
+    {
+        if ( !(expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType)) )
+        {
+            const Token* funNameToken = funcDecl->GetNameToken();
+            logger.LogError(*funNameToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
+            return false;
+        }
+    }
+
+    return true;
 }
