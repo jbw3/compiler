@@ -592,8 +592,15 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
 
 void LlvmIrGenerator::Visit(Return* ret)
 {
-    // TODO: implement
-    assert(false && "Not implemented");
+    SetDebugLocation(ret->token);
+
+    ret->expression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    builder.CreateRet(resultValue);
 }
 
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)

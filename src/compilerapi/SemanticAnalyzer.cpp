@@ -762,6 +762,10 @@ void SemanticAnalyzer::Visit(Return* ret)
     // process expression
     Expression* expression = ret->expression;
     expression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
 
     if (currentFunction == nullptr)
     {
