@@ -590,6 +590,12 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
     builder.SetInsertPoint(newBlock);
 }
 
+void LlvmIrGenerator::Visit(Return* ret)
+{
+    // TODO: implement
+    assert(false && "Not implemented");
+}
+
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
 {
     // nothing to do here

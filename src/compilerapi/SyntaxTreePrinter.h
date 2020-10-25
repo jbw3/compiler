@@ -25,6 +25,8 @@ public:
 
     void Visit(SyntaxTree::LoopControl* loopControl) override;
 
+    void Visit(SyntaxTree::Return* ret) override;
+
     void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;

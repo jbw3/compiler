@@ -783,6 +783,7 @@ Return::~Return()
 
 void Return::Accept(SyntaxTreeVisitor* visitor)
 {
+    visitor->Visit(this);
 }
 
 Parameter::Parameter(const string& name, const Token* nameToken,

@@ -15,6 +15,7 @@ class LoopControl;
 class MemberExpression;
 class ModuleDefinition;
 class NumericExpression;
+class Return;
 class StringLiteralExpression;
 class StructDefinition;
 class StructInitializationExpression;
@@ -37,6 +38,8 @@ public:
     virtual void Visit(SyntaxTree::ForLoop* forLoop) = 0;
 
     virtual void Visit(SyntaxTree::LoopControl* loopControl) = 0;
+
+    virtual void Visit(SyntaxTree::Return* ret) = 0;
 
     virtual void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) = 0;
 

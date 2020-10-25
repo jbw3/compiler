@@ -756,6 +756,15 @@ void SemanticAnalyzer::Visit(LoopControl* loopControl)
     loopControl->SetType(TypeInfo::UnitType);
 }
 
+void SemanticAnalyzer::Visit(Return* ret)
+{
+    // process expression
+    Expression* expression = ret->expression;
+    expression->Accept(this);
+
+    // TODO: check if expression type matchine function return type
+}
+
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
 {
     // nothing to do here
