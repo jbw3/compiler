@@ -588,6 +588,9 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
     Function* function = builder.GetInsertBlock()->getParent();
     BasicBlock* newBlock = BasicBlock::Create(context, ss.str(), function);
     builder.SetInsertPoint(newBlock);
+
+    // return expressions always evaluate to the unit type
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(Return* ret)
