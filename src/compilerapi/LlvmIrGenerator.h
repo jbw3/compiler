@@ -152,6 +152,7 @@ private:
     llvm::Module* module;
     SymbolTable symbolTable;
     llvm::Function* currentFunction;
+    SyntaxTree::FunctionDefinition* currentFunctionDefinition;
     llvm::Value* resultValue;
     llvm::StructType* unitType;
     llvm::StructType* strStructType;

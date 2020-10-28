@@ -603,6 +603,11 @@ void LlvmIrGenerator::Visit(Return* ret)
         return;
     }
 
+    // sign extend return value if needed
+    const TypeInfo* expressionType = ret->expression->GetType();
+    const TypeInfo* returnType = currentFunctionDefinition->GetDeclaration()->GetReturnType();
+    ExtendType(expressionType, returnType, resultValue);
+
     builder.CreateRet(resultValue);
 
     // need to create a new basic block for any following instructions
@@ -722,10 +727,12 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
 
     // process function body expression
+    currentFunctionDefinition = functionDefinition;
     currentFunction = func;
     Expression* expression = functionDefinition->GetExpression();
     expression->Accept(this);
     currentFunction = nullptr;
+    currentFunctionDefinition = nullptr;
 
     if (resultValue == nullptr)
     {
