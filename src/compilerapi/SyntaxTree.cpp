@@ -889,6 +889,7 @@ FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
 
 FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
                                        Expression* expression) :
+    endsWithReturnStatement(false),
     declaration(declaration),
     expression(expression)
 {

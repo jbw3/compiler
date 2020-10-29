@@ -739,12 +739,23 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         return;
     }
 
-    // sign extend return value if needed
-    const TypeInfo* expressionType = expression->GetType();
-    const TypeInfo* returnType = declaration->GetReturnType();
-    ExtendType(expressionType, returnType, resultValue);
+    // if the function ends with a return statement, there will be an empty
+    // block at the end that we need to remove
+    if (functionDefinition->endsWithReturnStatement)
+    {
+        BasicBlock& lastBlock = func->back();
+        assert(lastBlock.empty() && "Expected function's last basic block to be empty");
+        lastBlock.eraseFromParent();
+    }
+    else // the function does not end with a return statement, so return the last expression
+    {
+        // sign extend return value if needed
+        const TypeInfo* expressionType = expression->GetType();
+        const TypeInfo* returnType = declaration->GetReturnType();
+        ExtendType(expressionType, returnType, resultValue);
 
-    builder.CreateRet(resultValue);
+        builder.CreateRet(resultValue);
+    }
 
     if (dbgInfo)
     {

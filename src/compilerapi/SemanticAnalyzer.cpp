@@ -820,12 +820,31 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         return;
     }
 
-    // check return expression
-    bool ok = CheckReturnType(funcDecl, expression);
-    if (!ok)
+    // check if the function ends with a return statement
+    bool endsWithReturn = false;
+    BlockExpression* blockExpr = dynamic_cast<BlockExpression*>(expression);
+    if (blockExpr != nullptr)
     {
-        isError = true;
-        return;
+        Expression* lastExpr = blockExpr->GetExpressions().back();
+        Return* ret = dynamic_cast<Return*>(lastExpr);
+        if (ret != nullptr)
+        {
+            endsWithReturn = true;
+        }
+    }
+    functionDefinition->endsWithReturnStatement = endsWithReturn;
+
+    // if the function does not end with a return statement, then the last
+    // expression will be the return value, and we need to check its type
+    if (!endsWithReturn)
+    {
+        // check last expression
+        bool ok = CheckReturnType(funcDecl, expression);
+        if (!ok)
+        {
+            isError = true;
+            return;
+        }
     }
 }
 

@@ -556,6 +556,8 @@ public:
 
     Expression* GetExpression() const;
 
+    bool endsWithReturnStatement;
+
 private:
     FunctionDeclaration* declaration;
     Expression* expression;
