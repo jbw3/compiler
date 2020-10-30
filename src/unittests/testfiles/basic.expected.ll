@@ -2183,6 +2183,90 @@ whileExit:                                        ; preds = %if25, %whileCond
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define i32 @ret1(i32 %a, i32 %b) #0 {
+entry:
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  store i32 %b, i32* %b2
+  %a3 = load i32, i32* %a1
+  %b4 = load i32, i32* %b2
+  %cmplt = icmp slt i32 %a3, %b4
+  br i1 %cmplt, label %if, label %else
+
+if:                                               ; preds = %entry
+  ret i32 -1
+
+afterreturn:                                      ; No predecessors!
+  br label %merge10
+
+else:                                             ; preds = %entry
+  %a5 = load i32, i32* %a1
+  %b6 = load i32, i32* %b2
+  %cmpgt = icmp sgt i32 %a5, %b6
+  br i1 %cmpgt, label %if7, label %else9
+
+if7:                                              ; preds = %else
+  ret i32 1
+
+afterreturn8:                                     ; No predecessors!
+  br label %merge
+
+else9:                                            ; preds = %else
+  br label %merge
+
+merge:                                            ; preds = %else9, %afterreturn8
+  %phi = phi %UnitType [ zeroinitializer, %afterreturn8 ], [ zeroinitializer, %else9 ]
+  br label %merge10
+
+merge10:                                          ; preds = %merge, %afterreturn
+  %phi11 = phi %UnitType [ zeroinitializer, %afterreturn ], [ %phi, %merge ]
+  ret i32 0
+}
+
+; Function Attrs: noinline nounwind optnone
+define i32 @ret2(i32 %a, i32 %b) #0 {
+entry:
+  %b2 = alloca i32
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  store i32 %b, i32* %b2
+  %a3 = load i32, i32* %a1
+  %b4 = load i32, i32* %b2
+  %cmplt = icmp slt i32 %a3, %b4
+  br i1 %cmplt, label %if, label %else
+
+if:                                               ; preds = %entry
+  ret i32 -1
+
+afterreturn:                                      ; No predecessors!
+  br label %merge10
+
+else:                                             ; preds = %entry
+  %a5 = load i32, i32* %a1
+  %b6 = load i32, i32* %b2
+  %cmpgt = icmp sgt i32 %a5, %b6
+  br i1 %cmpgt, label %if7, label %else9
+
+if7:                                              ; preds = %else
+  ret i32 1
+
+afterreturn8:                                     ; No predecessors!
+  br label %merge
+
+else9:                                            ; preds = %else
+  br label %merge
+
+merge:                                            ; preds = %else9, %afterreturn8
+  %phi = phi %UnitType [ zeroinitializer, %afterreturn8 ], [ zeroinitializer, %else9 ]
+  br label %merge10
+
+merge10:                                          ; preds = %merge, %afterreturn
+  %phi11 = phi %UnitType [ zeroinitializer, %afterreturn ], [ %phi, %merge ]
+  ret i32 0
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }

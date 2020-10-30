@@ -126,3 +126,19 @@ fun break_and_continue()
         j += 1;
     }
 }
+
+fun ret1(a i16, b i16) i32
+{
+    var rv = a + b;
+    return rv;
+}
+
+fun ret2(a i32, p &i32)
+{
+    if a < 0
+    {
+        return;
+    }
+
+    (*p) = a;
+}

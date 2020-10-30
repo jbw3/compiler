@@ -770,3 +770,31 @@ fun break_and_continue()
         k += 1;
     }
 }
+
+fun ret1(a i32, b i32) i32
+{
+    if a < b
+    {
+        return -1;
+    }
+    elif a > b
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+fun ret2(a i32, b i32) i32
+{
+    if a < b
+    {
+        return -1;
+    }
+    elif a > b
+    {
+        return 1;
+    }
+
+    0
+}
