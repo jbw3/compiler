@@ -775,7 +775,7 @@ void SemanticAnalyzer::Visit(Return* ret)
     }
 
     // check if expression type matchine function return type
-    bool ok = CheckReturnType(currentFunction->GetDeclaration(), expression);
+    bool ok = CheckReturnType(currentFunction->GetDeclaration(), expression, ret->token);
     if (!ok)
     {
         isError = true;
@@ -823,14 +823,12 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     // check if the function ends with a return statement
     bool endsWithReturn = false;
     BlockExpression* blockExpr = dynamic_cast<BlockExpression*>(expression);
-    if (blockExpr != nullptr)
+    assert(blockExpr != nullptr && "Expected function body to be a BlockExpression");
+    Expression* lastExpr = blockExpr->GetExpressions().back();
+    Return* ret = dynamic_cast<Return*>(lastExpr);
+    if (ret != nullptr)
     {
-        Expression* lastExpr = blockExpr->GetExpressions().back();
-        Return* ret = dynamic_cast<Return*>(lastExpr);
-        if (ret != nullptr)
-        {
-            endsWithReturn = true;
-        }
+        endsWithReturn = true;
     }
     functionDefinition->endsWithReturnStatement = endsWithReturn;
 
@@ -839,7 +837,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     if (!endsWithReturn)
     {
         // check last expression
-        bool ok = CheckReturnType(funcDecl, expression);
+        bool ok = CheckReturnType(funcDecl, expression, blockExpr->GetEndToken());
         if (!ok)
         {
             isError = true;
@@ -1620,7 +1618,7 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& ty
     return type;
 }
 
-bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, const Expression* expression)
+bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, const Expression* expression, const Token* errorToken)
 {
     const TypeInfo* returnType = funcDecl->GetReturnType();
     const TypeInfo* expressionType = expression->GetType();
@@ -1628,8 +1626,7 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, cons
     {
         if ( !(expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType)) )
         {
-            const Token* funNameToken = funcDecl->GetNameToken();
-            logger.LogError(*funNameToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
+            logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
             return false;
         }
     }
