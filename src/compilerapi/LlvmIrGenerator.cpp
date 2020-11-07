@@ -279,11 +279,9 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
                 if (boundsCheck)
                 {
-                    vector<Value*> sizeIndices;
-                    sizeIndices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
-                    sizeIndices.push_back(ConstantInt::get(context, APInt(32, 0)));
-                    Value* sizePtr = builder.CreateInBoundsGEP(leftValue, sizeIndices, "size");
-                    Value* size = builder.CreateLoad(sizePtr, "load");
+                    vector<uint32_t> sizeIndex;
+                    sizeIndex.push_back(0);
+                    Value* size = builder.CreateExtractValue(leftValue, sizeIndex, "size");
 
                     Value* indexValue = nullptr;
                     if (rightType->GetNumBits() < uIntSizeNumBits)
@@ -312,9 +310,11 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                     {
                         const Token* opToken = binaryExpression->GetOperatorToken();
 
-                        Constant* fileStr = CreateConstantString(opToken->GetFilename());
+                        Constant* fileStrPtr = CreateConstantString(opToken->GetFilename());
+                        Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
                         Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
-                        Constant* msgStr = CreateConstantString("Index is out of bounds");
+                        Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
+                        Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
 
                         vector<Value*> logErrorArgs;
                         logErrorArgs.push_back(fileStr);
@@ -343,11 +343,9 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                     builder.SetInsertPoint(passedBlock);
                 }
 
-                vector<Value*> dataIndices;
-                dataIndices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
-                dataIndices.push_back(ConstantInt::get(context, APInt(32, 1)));
-                Value* strDataPtr = builder.CreateInBoundsGEP(leftValue, dataIndices, "data");
-                Value* strData = builder.CreateLoad(strDataPtr, "load");
+                vector<uint32_t> dataIndex;
+                dataIndex.push_back(1);
+                Value* strData = builder.CreateExtractValue(leftValue, dataIndex, "data");
 
                 vector<Value*> valueIndices;
                 valueIndices.push_back(rightValue);
