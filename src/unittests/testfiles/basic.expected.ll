@@ -9,10 +9,10 @@ $target_triple
 %Range32 = type { i32, i32 }
 %Range8 = type { i8, i8 }
 %Test2 = type { %Test1, i32 }
-%Test1 = type { i32, i1, %str* }
+%Test1 = type { i32, i1, %str }
 %EmptyType = type {}
 %SubscriptTest1 = type { %SubscriptTest2 }
-%SubscriptTest2 = type { %str* }
+%SubscriptTest2 = type { %str }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -736,22 +736,30 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @types_str() #0 {
 entry:
-  %dup2 = alloca %str*
-  %dup1 = alloca %str*
-  %s6 = alloca %str*
-  %s5 = alloca %str*
-  %s4 = alloca %str*
-  %s3 = alloca %str*
-  %s2 = alloca %str*
-  %s1 = alloca %str*
-  store %str* @strStruct0, %str** %s1
-  store %str* @strStruct1, %str** %s2
-  store %str* @strStruct2, %str** %s3
-  store %str* @strStruct3, %str** %s4
-  store %str* @strStruct4, %str** %s5
-  store %str* @strStruct5, %str** %s6
-  store %str* @strStruct6, %str** %dup1
-  store %str* @strStruct6, %str** %dup2
+  %dup2 = alloca %str
+  %dup1 = alloca %str
+  %s6 = alloca %str
+  %s5 = alloca %str
+  %s4 = alloca %str
+  %s3 = alloca %str
+  %s2 = alloca %str
+  %s1 = alloca %str
+  %load = load %str, %str* @strStruct0
+  store %str %load, %str* %s1
+  %load1 = load %str, %str* @strStruct1
+  store %str %load1, %str* %s2
+  %load2 = load %str, %str* @strStruct2
+  store %str %load2, %str* %s3
+  %load3 = load %str, %str* @strStruct3
+  store %str %load3, %str* %s4
+  %load4 = load %str, %str* @strStruct4
+  store %str %load4, %str* %s5
+  %load5 = load %str, %str* @strStruct5
+  store %str %load5, %str* %s6
+  %load6 = load %str, %str* @strStruct6
+  store %str %load6, %str* %dup1
+  %load7 = load %str, %str* @strStruct6
+  store %str %load7, %str* %dup2
   ret %UnitType zeroinitializer
 }
 
@@ -821,12 +829,12 @@ merge:                                            ; preds = %else, %if
 define i64 @str_member1() #0 {
 entry:
   %size = alloca i64
-  %s = alloca %str*
-  store %str* @strStruct6, %str** %s
-  %s1 = load %str*, %str** %s
-  %mber = getelementptr inbounds %str, %str* %s1, i64 0, i32 0
-  %load = load i64, i64* %mber
-  store i64 %load, i64* %size
+  %s = alloca %str
+  %load = load %str, %str* @strStruct6
+  store %str %load, %str* %s
+  %s1 = load %str, %str* %s
+  %mber = extractvalue %str %s1, 0
+  store i64 %mber, i64* %size
   %size2 = load i64, i64* %size
   ret i64 %size2
 }
@@ -841,16 +849,17 @@ entry:
   br i1 %cmpeq, label %if, label %else
 
 if:                                               ; preds = %entry
+  %load = load %str, %str* @strStruct6
   br label %merge
 
 else:                                             ; preds = %entry
+  %load3 = load %str, %str* @strStruct3
   br label %merge
 
 merge:                                            ; preds = %else, %if
-  %phi = phi %str* [ @strStruct6, %if ], [ @strStruct3, %else ]
-  %mber = getelementptr inbounds %str, %str* %phi, i64 0, i32 0
-  %load = load i64, i64* %mber
-  ret i64 %load
+  %phi = phi %str [ %load, %if ], [ %load3, %else ]
+  %mber = extractvalue %str %phi, 0
+  ret i64 %mber
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -1581,30 +1590,28 @@ whileExit18:                                      ; preds = %whileCond
 }
 
 ; Function Attrs: noinline nounwind optnone
-define i64 @whileComplexCondition(%str* %s, i8 %c) #0 {
+define i64 @whileComplexCondition(%str %s, i8 %c) #0 {
 entry:
   %idx = alloca i64
   %c2 = alloca i8
-  %s1 = alloca %str*
-  store %str* %s, %str** %s1
+  %s1 = alloca %str
+  store %str %s, %str* %s1
   store i8 %c, i8* %c2
   store i64 0, i64* %idx
   br label %whileCond
 
 whileCond:                                        ; preds = %whileBody, %entry
   %idx3 = load i64, i64* %idx
-  %s4 = load %str*, %str** %s1
-  %mber = getelementptr inbounds %str, %str* %s4, i64 0, i32 0
-  %load = load i64, i64* %mber
-  %cmplt = icmp ult i64 %idx3, %load
+  %s4 = load %str, %str* %s1
+  %mber = extractvalue %str %s4, 0
+  %cmplt = icmp ult i64 %idx3, %mber
   br i1 %cmplt, label %andtrue, label %andmerge
 
 andtrue:                                          ; preds = %whileCond
-  %s5 = load %str*, %str** %s1
+  %s5 = load %str, %str* %s1
   %idx6 = load i64, i64* %idx
-  %size = getelementptr inbounds %str, %str* %s5, i64 0, i32 0
-  %load7 = load i64, i64* %size
-  %check = icmp uge i64 %idx6, %load7
+  %size = extractvalue %str %s5, 0
+  %check = icmp uge i64 %idx6, %size
   br i1 %check, label %failed, label %passed
 
 failed:                                           ; preds = %andtrue
@@ -1612,12 +1619,11 @@ failed:                                           ; preds = %andtrue
   unreachable
 
 passed:                                           ; preds = %andtrue
-  %data = getelementptr inbounds %str, %str* %s5, i64 0, i32 1
-  %load8 = load i8*, i8** %data
-  %value = getelementptr inbounds i8, i8* %load8, i64 %idx6
-  %load9 = load i8, i8* %value
-  %c10 = load i8, i8* %c2
-  %cmpne = icmp ne i8 %load9, %c10
+  %data = extractvalue %str %s5, 1
+  %value = getelementptr inbounds i8, i8* %data, i64 %idx6
+  %load = load i8, i8* %value
+  %c7 = load i8, i8* %c2
+  %cmpne = icmp ne i8 %load, %c7
   br label %andmerge
 
 andmerge:                                         ; preds = %passed, %whileCond
@@ -1625,14 +1631,14 @@ andmerge:                                         ; preds = %passed, %whileCond
   br i1 %andphi, label %whileBody, label %whileExit
 
 whileBody:                                        ; preds = %andmerge
-  %load11 = load i64, i64* %idx
-  %add = add i64 %load11, 1
+  %load8 = load i64, i64* %idx
+  %add = add i64 %load8, 1
   store i64 %add, i64* %idx
   br label %whileCond
 
 whileExit:                                        ; preds = %andmerge
-  %idx12 = load i64, i64* %idx
-  ret i64 %idx12
+  %idx9 = load i64, i64* %idx
+  ret i64 %idx9
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -1798,19 +1804,25 @@ entry:
   %test1 = alloca %Test1
   %empty = alloca %EmptyType
   store %EmptyType undef, %EmptyType* %empty
+  %load = load %str, %str* @strStruct3
+  %agg = insertvalue %Test1 undef, %str %load, 2
   %call = call i16 @types_i16(i16 1, i16 2)
   %signext = sext i16 %call to i32
-  %agg = insertvalue %Test1 { i32 undef, i1 undef, %str* @strStruct3 }, i32 %signext, 0
-  %agg1 = insertvalue %Test1 %agg, i1 true, 1
-  store %Test1 %agg1, %Test1* %test1
-  store %Test2 { %Test1 { i32 1, i1 false, %str* @strStruct6 }, i32 12 }, %Test2* %test2
+  %agg1 = insertvalue %Test1 %agg, i32 %signext, 0
+  %agg2 = insertvalue %Test1 %agg1, i1 true, 1
+  store %Test1 %agg2, %Test1* %test1
+  %load3 = load %str, %str* @strStruct6
+  %agg4 = insertvalue %Test1 { i32 1, i1 false, %str undef }, %str %load3, 2
+  %agg5 = insertvalue %Test2 undef, %Test1 %agg4, 0
+  %agg6 = insertvalue %Test2 %agg5, i32 12, 1
+  store %Test2 %agg6, %Test2* %test2
   %mber = getelementptr inbounds %Test1, %Test1* %test1, i64 0, i32 1
   store i1 false, i1* %mber
-  %mber2 = getelementptr inbounds %Test2, %Test2* %test2, i64 0, i32 0
-  %mber3 = getelementptr inbounds %Test1, %Test1* %mber2, i64 0, i32 0
-  %load = load i32, i32* %mber3
-  %add = add i32 %load, 7
-  store i32 %add, i32* %mber3
+  %mber7 = getelementptr inbounds %Test2, %Test2* %test2, i64 0, i32 0
+  %mber8 = getelementptr inbounds %Test1, %Test1* %mber7, i64 0, i32 0
+  %load9 = load i32, i32* %mber8
+  %add = add i32 %load9, 7
+  store i32 %add, i32* %mber8
   ret %UnitType zeroinitializer
 }
 
@@ -2002,32 +2014,32 @@ entry:
   %signext = sext i8 %load7 to i32
   %agg = insertvalue %Test1 undef, i32 %signext, 0
   %agg8 = insertvalue %Test1 %agg, i1 true, 1
-  %agg9 = insertvalue %Test1 %agg8, %str* @strStruct6, 2
-  store %Test1 %agg9, %Test1* %test
+  %load9 = load %str, %str* @strStruct6
+  %agg10 = insertvalue %Test1 %agg8, %str %load9, 2
+  store %Test1 %agg10, %Test1* %test
   %mber = getelementptr inbounds %Test1, %Test1* %test, i64 0, i32 1
   store i1* %mber, i1** %bPtr1
   store i1** %bPtr1, i1*** %bPtr2
-  %bPtr210 = load i1**, i1*** %bPtr2
-  %load11 = load i1*, i1** %bPtr210
-  %load12 = load i1, i1* %load11
-  store i1 %load12, i1* %b
-  %p113 = load i32*, i32** %p11
-  ret i32* %p113
+  %bPtr211 = load i1**, i1*** %bPtr2
+  %load12 = load i1*, i1** %bPtr211
+  %load13 = load i1, i1* %load12
+  store i1 %load13, i1* %b
+  %p114 = load i32*, i32** %p11
+  ret i32* %p114
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @subscript(%str* %s, %SubscriptTest1 %t) #0 {
+define %UnitType @subscript(%str %s, %SubscriptTest1 %t) #0 {
 entry:
   %y = alloca i8
   %x = alloca i8
   %t2 = alloca %SubscriptTest1
-  %s1 = alloca %str*
-  store %str* %s, %str** %s1
+  %s1 = alloca %str
+  store %str %s, %str* %s1
   store %SubscriptTest1 %t, %SubscriptTest1* %t2
-  %s3 = load %str*, %str** %s1
-  %size = getelementptr inbounds %str, %str* %s3, i64 0, i32 0
-  %load = load i64, i64* %size
-  %check = icmp uge i64 0, %load
+  %s3 = load %str, %str* %s1
+  %size = extractvalue %str %s3, 0
+  %check = icmp uge i64 0, %size
   br i1 %check, label %failed, label %passed
 
 failed:                                           ; preds = %entry
@@ -2035,29 +2047,26 @@ failed:                                           ; preds = %entry
   unreachable
 
 passed:                                           ; preds = %entry
-  %data = getelementptr inbounds %str, %str* %s3, i64 0, i32 1
-  %load4 = load i8*, i8** %data
-  %value = getelementptr inbounds i8, i8* %load4, i8 0
-  %load5 = load i8, i8* %value
-  store i8 %load5, i8* %x
-  %t6 = load %SubscriptTest1, %SubscriptTest1* %t2
-  %mber = extractvalue %SubscriptTest1 %t6, 0
-  %mber7 = extractvalue %SubscriptTest2 %mber, 0
-  %size8 = getelementptr inbounds %str, %str* %mber7, i64 0, i32 0
-  %load9 = load i64, i64* %size8
-  %check10 = icmp uge i64 5, %load9
-  br i1 %check10, label %failed11, label %passed12
+  %data = extractvalue %str %s3, 1
+  %value = getelementptr inbounds i8, i8* %data, i8 0
+  %load = load i8, i8* %value
+  store i8 %load, i8* %x
+  %t4 = load %SubscriptTest1, %SubscriptTest1* %t2
+  %mber = extractvalue %SubscriptTest1 %t4, 0
+  %mber5 = extractvalue %SubscriptTest2 %mber, 0
+  %size6 = extractvalue %str %mber5, 0
+  %check7 = icmp uge i64 5, %size6
+  br i1 %check7, label %failed8, label %passed9
 
-failed11:                                         ; preds = %passed
+failed8:                                          ; preds = %passed
   call void @exit(i32 1)
   unreachable
 
-passed12:                                         ; preds = %passed
-  %data13 = getelementptr inbounds %str, %str* %mber7, i64 0, i32 1
-  %load14 = load i8*, i8** %data13
-  %value15 = getelementptr inbounds i8, i8* %load14, i8 5
-  %load16 = load i8, i8* %value15
-  store i8 %load16, i8* %y
+passed9:                                          ; preds = %passed
+  %data10 = extractvalue %str %mber5, 1
+  %value11 = getelementptr inbounds i8, i8* %data10, i8 5
+  %load12 = load i8, i8* %value11
+  store i8 %load12, i8* %y
   ret %UnitType zeroinitializer
 }
 
