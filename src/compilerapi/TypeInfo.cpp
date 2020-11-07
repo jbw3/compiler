@@ -98,7 +98,7 @@ const TypeInfo* TypeInfo::ImmutUInt64Type = &immutUInt64TypeInfo;
 unsigned TypeInfo::pointerSize = 0;
 TypeInfo* TypeInfo::intSizeType = nullptr;
 TypeInfo* TypeInfo::uintSizeType = nullptr;
-TypeInfo* TypeInfo::stringPointerType = nullptr;
+TypeInfo* TypeInfo::stringType = nullptr;
 
 map<string, const TypeInfo*> TypeInfo::types =
 {
@@ -140,8 +140,8 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
     PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
     immutableTypes.insert({UINT_SIZE_KEYWORD, immutUIntSizeType});
 
-    stringPointerType = new StringPointerType(pointerSize);
-    RegisterType(stringPointerType);
+    stringType = new StringType(pointerSize * 2);
+    RegisterType(stringType);
 }
 
 unsigned TypeInfo::GetPointerSize()
@@ -207,9 +207,9 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     return type;
 }
 
-const TypeInfo* TypeInfo::GetStringPointerType()
+const TypeInfo* TypeInfo::GetStringType()
 {
-    return stringPointerType;
+    return stringType;
 }
 
 const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isExclusive)
@@ -557,16 +557,16 @@ const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
     return type;
 }
 
-StringPointerType::StringPointerType(unsigned numBits) :
+StringType::StringType(unsigned numBits) :
     TypeInfo(numBits, F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD)
 {
     AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
     AddMember("Data", TypeInfo::GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
 }
 
-bool StringPointerType::IsSameAs(const TypeInfo& other) const
+bool StringType::IsSameAs(const TypeInfo& other) const
 {
-    bool isSame = typeid(other) == typeid(StringPointerType);
+    bool isSame = typeid(other) == typeid(StringType);
     return isSame;
 }
 

@@ -64,7 +64,6 @@ LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
     resultValue(nullptr),
     unitType(nullptr),
     strStructType(nullptr),
-    strPointerType(nullptr),
     globalStringCounter(0),
     boolType(Type::getInt1Ty(context))
 {
@@ -984,7 +983,8 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     const vector<char>& chars = stringLiteralExpression->GetCharacters();
-    resultValue = CreateConstantString(chars);
+    Constant* strPtr = CreateConstantString(chars);
+    resultValue = builder.CreateLoad(strPtr, "load");
 }
 
 Constant* LlvmIrGenerator::CreateConstantString(const string& str)
@@ -1175,9 +1175,6 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         type = type->GetInnerType();
     }
 
-    // TODO: temporary workaround for strings
-    bool isString = type->IsSameAs(*TypeInfo::GetStringPointerType());
-
     const string& memberName = memberExpression->GetMemberName();
     const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
@@ -1190,7 +1187,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     Expression::EAccessType accessType = memberExpression->GetAccessType();
 
-    if (accessType == Expression::eAddress || isPointer || isString)
+    if (accessType == Expression::eAddress || isPointer)
     {
         if (accessType == Expression::eAddress && isPointer)
         {
@@ -1336,11 +1333,10 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
 
     ArrayRef<Type*> strArrayRef(strStructElements, STR_STRUCT_ELEMENTS_SIZE);
     strStructType = StructType::create(context, strArrayRef, "str");
-    strPointerType = strStructType->getPointerTo(addressSpace);
 
     // register types
     types.insert({TypeInfo::BoolType->GetShortName(), boolType});
-    types.insert({TypeInfo::GetStringPointerType()->GetShortName(), strPointerType});
+    types.insert({TypeInfo::GetStringType()->GetShortName(), strStructType});
 
     if (dbgInfo)
     {
@@ -1477,9 +1473,9 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     {
         diType = diBuilder->createBasicType(TypeInfo::UnitType->GetShortName(), 0, dwarf::DW_ATE_unsigned);
     }
-    else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
+    else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
-        const TypeInfo* strType = TypeInfo::GetStringPointerType();
+        const TypeInfo* strType = TypeInfo::GetStringType();
         const string& name = strType->GetShortName();
         unsigned numBits = strType->GetNumBits();
 
@@ -1504,8 +1500,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         }
 
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-        DIType* structType = diBuilder->createStructType(nullptr, name + "_data", nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-        diType = diBuilder->createPointerType(structType, TypeInfo::GetPointerSize(), 0, llvm::None, name);
+        diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
     else if (type->IsRange())
     {

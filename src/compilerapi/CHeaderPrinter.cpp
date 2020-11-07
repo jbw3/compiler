@@ -24,12 +24,11 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                "extern \"C\"\n"
                "{\n"
                "#endif\n\n"
-               "struct StrData\n"
+               "struct str\n"
                "{\n"
                "    size_t Size;\n"
                "    char* Data;\n"
-               "};\n\n"
-               "typedef const struct StrData* str;\n\n";
+               "};\n\n";
 
     string cType;
 
@@ -190,7 +189,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
         cType += "*";
         return true;
     }
-    else if (type->IsSameAs(*TypeInfo::GetStringPointerType()))
+    else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
         cType = "str";
         return true;

@@ -97,7 +97,7 @@ public:
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
 
-    static const TypeInfo* GetStringPointerType();
+    static const TypeInfo* GetStringType();
 
     static const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isExclusive);
 
@@ -158,7 +158,7 @@ private:
     static unsigned pointerSize;
     static TypeInfo* intSizeType;
     static TypeInfo* uintSizeType;
-    static TypeInfo* stringPointerType;
+    static TypeInfo* stringType;
     static std::map<std::string, const TypeInfo*> types;
     static std::unordered_map<std::string, const TypeInfo*> immutableTypes;
 
@@ -251,10 +251,10 @@ namespace std
     };
 }
 
-class StringPointerType : public TypeInfo
+class StringType : public TypeInfo
 {
 public:
-    StringPointerType(unsigned numBits);
+    StringType(unsigned numBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
 };

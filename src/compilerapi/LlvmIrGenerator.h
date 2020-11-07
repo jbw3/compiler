@@ -156,7 +156,6 @@ private:
     llvm::Value* resultValue;
     llvm::StructType* unitType;
     llvm::StructType* strStructType;
-    llvm::PointerType* strPointerType;
     unsigned int globalStringCounter;
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     llvm::Type* boolType;

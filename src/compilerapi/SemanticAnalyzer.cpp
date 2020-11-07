@@ -477,7 +477,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             (op == BinaryExpression::eAssign || op == BinaryExpression::eEqual || op == BinaryExpression::eNotEqual)
             && leftType->IsSameAs(*rightType);
     }
-    else if (leftType->IsSameAs(*TypeInfo::GetStringPointerType()))
+    else if (leftType->IsSameAs(*TypeInfo::GetStringType()))
     {
         if (op == BinaryExpression::eAssign)
         {
@@ -1243,7 +1243,7 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    stringLiteralExpression->SetType(TypeInfo::GetStringPointerType());
+    stringLiteralExpression->SetType(TypeInfo::GetStringType());
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
@@ -1396,6 +1396,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     if (!ifCondition->GetType()->IsBool())
     {
         isError = true;
+        // TODO: log 'if' token info
         logger.LogError("If condition must be a boolean expression");
         return;
     }
@@ -1550,9 +1551,9 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     {
         const vector<Parameter*>& params = functionDeclaration->GetParameters();
         if (params.size() != 3
-        || !params[0]->GetType()->IsSameAs(*TypeInfo::GetStringPointerType())
+        || !params[0]->GetType()->IsSameAs(*TypeInfo::GetStringType())
         || !params[1]->GetType()->IsSameAs(*TypeInfo::UInt32Type)
-        || !params[2]->GetType()->IsSameAs(*TypeInfo::GetStringPointerType()))
+        || !params[2]->GetType()->IsSameAs(*TypeInfo::GetStringType()))
         {
             logger.LogError(*functionDeclaration->GetNameToken(), "Function 'logError' must have the following parameter types: 'str', 'u32', 'str'");
             return false;
