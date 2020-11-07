@@ -565,7 +565,11 @@ const Token* MemberExpression::GetMemberNameToken() const
 
 BranchExpression::BranchExpression(Expression* ifCondition,
                                    Expression* ifExpression,
-                                   Expression* elseExpression) :
+                                   Expression* elseExpression,
+                                   const Token* ifToken,
+                                   const Token* elseToken) :
+    ifToken(ifToken),
+    elseToken(elseToken),
     ifCondition(ifCondition),
     ifExpression(ifExpression),
     elseExpression(elseExpression)

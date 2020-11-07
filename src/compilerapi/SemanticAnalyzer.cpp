@@ -1179,7 +1179,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         if (!rv.second)
         {
             isError = true;
-            logger.LogError("Function '{}' has already been defined", name);
+            logger.LogError(*decl->GetNameToken(), "Function '{}' has already been defined", name);
             return;
         }
     }
@@ -1200,7 +1200,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
         if (!rv.second)
         {
             isError = true;
-            logger.LogError("Function '{}' has already been defined", name);
+            logger.LogError(*decl->GetNameToken(), "Function '{}' has already been defined", name);
             return;
         }
     }
@@ -1396,8 +1396,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     if (!ifCondition->GetType()->IsBool())
     {
         isError = true;
-        // TODO: log 'if' token info
-        logger.LogError("If condition must be a boolean expression");
+        logger.LogError(*branchExpression->ifToken, "If condition must be a boolean expression");
         return;
     }
 
@@ -1434,7 +1433,7 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     else
     {
         isError = true;
-        logger.LogError("'if' and 'else' expressions have mismatching types ('{}' and '{}')",
+        logger.LogError(*branchExpression->ifToken, "'if' and 'else' expressions have mismatching types ('{}' and '{}')",
             ifType->GetShortName(),
             elseType->GetShortName());
         return;

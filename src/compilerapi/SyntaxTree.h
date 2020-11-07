@@ -321,7 +321,9 @@ class BranchExpression : public Expression
 public:
     BranchExpression(Expression* ifCondition,
                      Expression* ifExpression,
-                     Expression* elseExpression);
+                     Expression* elseExpression,
+                     const Token* ifToken,
+                     const Token* elseToken);
 
     virtual ~BranchExpression();
 
@@ -332,6 +334,9 @@ public:
     Expression* GetIfExpression() const;
 
     Expression* GetElseExpression() const;
+
+    const Token* ifToken;
+    const Token* elseToken;
 
 private:
     Expression* ifCondition;

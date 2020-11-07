@@ -1588,6 +1588,8 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
 
 Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter)
 {
+    const Token* ifToken = &*iter;
+
     // increment iter past "if" or "elif" keyword
     ++iter;
 
@@ -1621,11 +1623,14 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
         }
     }
 
+    const Token* elseToken = nullptr;
     unique_ptr<Expression> elseExpression;
     if (nextValue == ELIF_KEYWORD)
     {
         // move to 'elif' keyword
         ++iter;
+
+        elseToken = &*iter;
 
         // parse "elif"
         elseExpression.reset(ProcessBranchExpression(iter, endIter));
@@ -1638,6 +1643,8 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     {
         // move to 'else' keyword
         ++iter;
+
+        elseToken = &*iter;
 
         if (!IncrementIterator(iter, endIter, "Expected '{'"))
         {
@@ -1659,6 +1666,8 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     }
     else
     {
+        elseToken = Token::None;
+
         // if there is no 'elif' or 'else' clause, set the else expression
         // to a unit type literal
         elseExpression.reset(new UnitTypeLiteralExpression());
@@ -1666,7 +1675,8 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
 
     BranchExpression* expr = new BranchExpression(ifCondition.release(),
                                                   ifExpression.release(),
-                                                  elseExpression.release());
+                                                  elseExpression.release(),
+                                                  ifToken, elseToken);
     return expr;
 }
 
