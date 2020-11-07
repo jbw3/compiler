@@ -191,7 +191,7 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
     }
     else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
-        cType = "str";
+        cType = "struct str";
         return true;
     }
     else if (type->IsAggregate())
