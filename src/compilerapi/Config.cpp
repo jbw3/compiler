@@ -251,9 +251,32 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
-    else if (strcmp(arg, "--no-bounds-check") == 0)
+    else if (strcmp(arg, "--bounds-check") == 0)
     {
-        boundsCheck = false;
+        if (idx + 1 >= argc)
+        {
+            cerr << "Error: Expected an argument after " << arg << "\n";
+            ok = false;
+        }
+        else
+        {
+            const char* const boundsCheckArg = argv[idx + 1];
+            ++idx;
+
+            if (strcmp(boundsCheckArg, "false") == 0)
+            {
+                boundsCheck = false;
+            }
+            else if (strcmp(boundsCheckArg, "true") == 0)
+            {
+                boundsCheck = true;
+            }
+            else
+            {
+                cerr << "Error: Unknown argument '" << boundsCheckArg << "'\n";
+                ok = false;
+            }
+        }
     }
     // check for unknown options (but don't catch '-' because
     // that is used to denote reading from stdin)
@@ -285,10 +308,10 @@ void Config::PrintHelp() const
 Options:
   -h, --help             Print help message
   --arch <value>         Assembly architecture
+  --bounds-check <value> Whether to perform array bounds checking: true, false
   --color <value>        Whether to color output messages: auto, true, false
   -d, --debug-info       Generate debug info
   -e, --emit <value>     Output type: asm, c-header, llvm, tokens, tree
-  --no-bounds-check      Disable array index bounds checking
   -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
   -t, --text             Output assembly as text
