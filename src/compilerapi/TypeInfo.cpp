@@ -251,6 +251,25 @@ const TypeInfo* TypeInfo::GetPointerToType(const TypeInfo* type)
     return ptrType;
 }
 
+const TypeInfo* TypeInfo::GetArrayOfType(const TypeInfo* type)
+{
+    string name;
+    name += ARRAY_TYPE_START_TOKEN;
+    name += ARRAY_TYPE_END_TOKEN;
+    name += type->GetShortName();
+    const TypeInfo* arrayType = GetType(name);
+    if (arrayType == nullptr)
+    {
+        TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, F_ARRAY, eNotApplicable, name);
+        newArrayType->innerType = type;
+        RegisterType(newArrayType);
+
+        arrayType = newArrayType;
+    }
+
+    return arrayType;
+}
+
 TypeInfo::TypeInfo(
     unsigned numBits,
     uint16_t flags,
@@ -299,6 +318,11 @@ bool TypeInfo::IsRange() const
 bool TypeInfo::IsPointer() const
 {
     return (flags & F_POINTER) != 0;
+}
+
+bool TypeInfo::IsArray() const
+{
+    return (flags & F_ARRAY) != 0;
 }
 
 TypeInfo::ESign TypeInfo::GetSign() const

@@ -1434,6 +1434,22 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             // register type so we don't have to create it again
             types.insert({llvmName, llvmType});
         }
+        else if (type->IsArray())
+        {
+            Type* innerType = GetType(type->GetInnerType());
+            if (innerType != nullptr)
+            {
+                Type* arrayStructElements[2];
+                arrayStructElements[0] = GetType(TypeInfo::GetUIntSizeType());
+                arrayStructElements[1] = PointerType::get(innerType, 0);
+
+                ArrayRef<Type*> arrayRef(arrayStructElements, 2);
+                llvmType = StructType::create(context, arrayRef, llvmName);
+
+                // register type so we don't have to create it again
+                types.insert({llvmName, llvmType});
+            }
+        }
         else // could not determine the type
         {
             llvmType = nullptr;

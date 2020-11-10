@@ -1125,8 +1125,32 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         {
             type = TypeInfo::GetPointerToType(type);
         }
+        else if (str == ARRAY_TYPE_END_TOKEN)
+        {
+            if (idx == 0)
+            {
+                // TODO: better error message?
+                logger.LogError(*token, "Unexpected token '{}'", str);
+                return nullptr;
+            }
+
+            --idx;
+            const Token* token2 = typeNameTokens[idx];
+            string str2 = token2->GetValue();
+            if (str2 == ARRAY_TYPE_START_TOKEN)
+            {
+                type = TypeInfo::GetArrayOfType(type);
+            }
+            else
+            {
+                // TODO: better error message?
+                logger.LogError(*token, "Unexpected token '{}'", str);
+                return nullptr;
+            }
+        }
         else
         {
+            // TODO: better error message?
             logger.LogError(*token, "Unexpected token '{}'", str);
             return nullptr;
         }

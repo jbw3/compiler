@@ -16,6 +16,8 @@ class UnitTypeInfo;
 
 const char* const POINTER_TYPE_TOKEN = "&";
 const char* const DOUBLE_POINTER_TYPE_TOKEN = "&&";
+const char* const ARRAY_TYPE_START_TOKEN = "[";
+const char* const ARRAY_TYPE_END_TOKEN = "]";
 
 class MemberInfo
 {
@@ -51,6 +53,7 @@ public:
     static constexpr uint16_t F_INT     = 1 << 2;
     static constexpr uint16_t F_RANGE   = 1 << 3;
     static constexpr uint16_t F_POINTER = 1 << 4;
+    static constexpr uint16_t F_ARRAY   = 1 << 5;
 
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 <<  8;
@@ -107,6 +110,8 @@ public:
 
     static const TypeInfo* GetPointerToType(const TypeInfo* type);
 
+    static const TypeInfo* GetArrayOfType(const TypeInfo* type);
+
     TypeInfo(
         unsigned numBits,
         uint16_t flags,
@@ -129,6 +134,8 @@ public:
     bool IsRange() const;
 
     bool IsPointer() const;
+
+    bool IsArray() const;
 
     ESign GetSign() const;
 
