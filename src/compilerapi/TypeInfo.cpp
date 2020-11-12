@@ -262,6 +262,8 @@ const TypeInfo* TypeInfo::GetArrayOfType(const TypeInfo* type)
     {
         TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, F_ARRAY, eNotApplicable, name);
         newArrayType->innerType = type;
+        newArrayType->AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
+        newArrayType->AddMember("Data", TypeInfo::GetPointerToType(type), false, Token::None);
         RegisterType(newArrayType);
 
         arrayType = newArrayType;
