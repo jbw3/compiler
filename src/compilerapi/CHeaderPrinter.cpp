@@ -2,7 +2,6 @@
 #include "keywords.h"
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -30,8 +29,6 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                "    char* Data;\n"
                "};\n\n";
 
-    string cType;
-
     // print structs
     for (const StructDefinition* structDef : module->GetStructDefinitions())
     {
@@ -42,12 +39,14 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
         {
             const MemberInfo* memberInfo = structType->GetMember(member->GetName());
             const TypeInfo* memberType = memberInfo->GetType();
-            if (!GetCType(memberType, cType))
+
+            outFile << "    ";
+            if (!PrintCType(outFile, memberType))
             {
                 return false;
             }
 
-            outFile << "    " << cType << " " << member->GetName() << ";\n";
+            outFile << " " << member->GetName() << ";\n";
         }
 
         outFile << "};\n\n";
@@ -58,12 +57,12 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
     {
         const FunctionDeclaration* declaration = function->GetDeclaration();
 
-        if (!GetCType(declaration->GetReturnType(), cType))
+        if (!PrintCType(outFile, declaration->GetReturnType()))
         {
             return false;
         }
 
-        outFile << cType << " " << declaration->GetName() << "(";
+        outFile << " " << declaration->GetName() << "(";
 
         // print function parameters
         const Parameters& params = declaration->GetParameters();
@@ -71,12 +70,12 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
         for (size_t i = 0; i < numParams; ++i)
         {
             const Parameter* param = params[i];
-            if (!GetCType(param->GetType(), cType))
+            if (!PrintCType(outFile, param->GetType()))
             {
                 return false;
             }
 
-            outFile << cType << " " << param->GetName();
+            outFile << " " << param->GetName();
             if (i < numParams - 1)
             {
                 outFile << ", ";
@@ -141,16 +140,16 @@ string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
     return macro;
 }
 
-bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
+bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
 {
     if (type->IsSameAs(*TypeInfo::UnitType))
     {
-        cType = "void";
+        os << "void";
         return true;
     }
     else if (type->IsBool())
     {
-        cType = "bool";
+        os << "bool";
         return true;
     }
     else if (type->IsInt())
@@ -159,51 +158,47 @@ bool CHeaderPrinter::GetCType(const TypeInfo* type, string& cType)
 
         if (shortName == INT_SIZE_KEYWORD)
         {
-            cType = "intptr_t";
+            os << "intptr_t";
         }
         else if (shortName == UINT_SIZE_KEYWORD)
         {
-            cType = "uintptr_t";
+            os << "uintptr_t";
         }
         else
         {
-            stringstream ss;
             if (type->GetSign() == TypeInfo::eUnsigned)
             {
-                ss << 'u';
+                os << 'u';
             }
-            ss << "int" << type->GetNumBits() << "_t";
-
-            cType = ss.str();
+            os << "int" << type->GetNumBits() << "_t";
         }
 
         return true;
     }
     else if (type->IsPointer())
     {
-        if (!GetCType(type->GetInnerType(), cType))
+        if (!PrintCType(os, type->GetInnerType()))
         {
             return false;
         }
 
-        cType += "*";
+        os << "*";
         return true;
     }
     else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
-        cType = "struct str";
+        os << "struct str";
         return true;
     }
     else if (type->IsAggregate())
     {
-        cType = "struct " + type->GetShortName();
+        os << "struct " << type->GetShortName();
         return true;
     }
     else
     {
         // TODO: use error logger
         cerr << "Unsupported type\n";
-        cType = "";
         return false;
     }
 }

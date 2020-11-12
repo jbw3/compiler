@@ -14,7 +14,7 @@ private:
 
     std::string GetFilenameMacro(const std::string& outFilename);
 
-    bool GetCType(const TypeInfo* type, std::string& cType);
+    bool PrintCType(std::ostream& os, const TypeInfo* type);
 };
 
 #endif // C_HEADER_PRINTER_H_
