@@ -1523,6 +1523,34 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
         diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
+    else if (type->IsArray())
+    {
+        const string& name = type->GetShortName();
+        unsigned numBits = type->GetNumBits();
+
+        SmallVector<Metadata*, 2> elements;
+
+        uint64_t offset = 0;
+        for (const MemberInfo* member : type->GetMembers())
+        {
+            const TypeInfo* memberType = member->GetType();
+            DIType* memberDiType = GetDebugType(memberType);
+            if (memberDiType == nullptr)
+            {
+                return nullptr;
+            }
+
+            const string& memberName = member->GetName();
+            unsigned size = memberType->GetNumBits();
+            // TODO: don't hard-code alignment
+            elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
+
+            offset += size;
+        }
+
+        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+        diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+    }
     else if (type->IsRange())
     {
         const string& name = type->GetShortName();
