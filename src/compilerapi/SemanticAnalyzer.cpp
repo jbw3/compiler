@@ -507,6 +507,36 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             ok = false;
         }
     }
+    else if (leftType->IsArray())
+    {
+        if (op == BinaryExpression::eAssign)
+        {
+            ok = leftType->IsSameAs(*rightType);
+        }
+        else if (op == BinaryExpression::eSubscript && rightType->IsInt())
+        {
+            TypeInfo::ESign rightSign = rightType->GetSign();
+            if (rightSign == TypeInfo::eUnsigned)
+            {
+                ok = true;
+            }
+            else if (rightSign == TypeInfo::eContextDependent)
+            {
+                const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(rightType->GetNumBits());
+                rightExpr->SetType(newType);
+
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+            }
+        }
+        else
+        {
+            ok = false;
+        }
+    }
     else if (leftType->IsRange() && rightType->IsRange())
     {
         // assignment is the only valid operator for ranges
@@ -619,7 +649,21 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             return TypeInfo::GetRangeType(memberType, op == BinaryExpression::eExclusiveRange);
         }
         case BinaryExpression::eSubscript:
-            return TypeInfo::UInt8Type;
+        {
+            if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+            {
+                return TypeInfo::UInt8Type;
+            }
+            else if (leftType->IsArray())
+            {
+                return leftType->GetInnerType();
+            }
+            else
+            {
+                logger.LogInternalError("Could not determine result type");
+                return nullptr;
+            }
+        }
     }
 }
 

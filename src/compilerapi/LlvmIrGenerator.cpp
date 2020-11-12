@@ -345,11 +345,11 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
                 vector<uint32_t> dataIndex;
                 dataIndex.push_back(1);
-                Value* strData = builder.CreateExtractValue(leftValue, dataIndex, "data");
+                Value* data = builder.CreateExtractValue(leftValue, dataIndex, "data");
 
                 vector<Value*> valueIndices;
                 valueIndices.push_back(rightValue);
-                Value* valuePtr = builder.CreateInBoundsGEP(strData, valueIndices, "value");
+                Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
                 resultValue = builder.CreateLoad(valuePtr, "load");
                 break;
             }
