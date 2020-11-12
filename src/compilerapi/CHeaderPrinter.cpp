@@ -2,6 +2,7 @@
 #include "keywords.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -32,9 +33,25 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
     // print structs
     for (const StructDefinition* structDef : module->GetStructDefinitions())
     {
+        const TypeInfo* structType = structDef->GetType();
+
+        // print array structs
+        for (const MemberDefinition* member : structDef->GetMembers())
+        {
+            const string& memberName = member->GetName();
+            const MemberInfo* memberInfo = structType->GetMember(memberName);
+            const TypeInfo* memberType = memberInfo->GetType();
+            if (memberType->IsArray())
+            {
+                if (!PrintArrayStruct(outFile, memberType))
+                {
+                    return false;
+                }
+            }
+        }
+
         outFile << "struct " << structDef->GetName() << "\n{\n";
 
-        const TypeInfo* structType = structDef->GetType();
         for (const MemberDefinition* member : structDef->GetMembers())
         {
             const MemberInfo* memberInfo = structType->GetMember(member->GetName());
@@ -56,8 +73,30 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
     for (const FunctionDefinition* function : module->GetFunctionDefinitions())
     {
         const FunctionDeclaration* declaration = function->GetDeclaration();
+        const Parameters& params = declaration->GetParameters();
+        const TypeInfo* returnType = declaration->GetReturnType();
 
-        if (!PrintCType(outFile, declaration->GetReturnType()))
+        // print array structs
+        if (returnType->IsArray())
+        {
+            if (!PrintArrayStruct(outFile, returnType))
+            {
+                return false;
+            }
+        }
+        for (const Parameter* param : params)
+        {
+            const TypeInfo* paramType = param->GetType();
+            if (paramType->IsArray())
+            {
+                if (!PrintArrayStruct(outFile, paramType))
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (!PrintCType(outFile, returnType))
         {
             return false;
         }
@@ -65,7 +104,6 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
         outFile << " " << declaration->GetName() << "(";
 
         // print function parameters
-        const Parameters& params = declaration->GetParameters();
         size_t numParams = params.size();
         for (size_t i = 0; i < numParams; ++i)
         {
@@ -190,6 +228,12 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
         os << "struct str";
         return true;
     }
+    else if (type->IsArray())
+    {
+        // TODO: this doesn't work for nested arrays
+        os << "struct array_";
+        return PrintCType(os, type->GetInnerType());
+    }
     else if (type->IsAggregate())
     {
         os << "struct " << type->GetShortName();
@@ -201,4 +245,31 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
         cerr << "Unsupported type\n";
         return false;
     }
+}
+
+bool CHeaderPrinter::PrintArrayStruct(std::ostream& os, const TypeInfo* arrayType)
+{
+    // TODO: this doesn't work for nested arrays
+    const string& typeName = arrayType->GetShortName();
+    if (arrayTypeNames.find(typeName) == arrayTypeNames.end())
+    {
+        const TypeInfo* innerType = arrayType->GetInnerType();
+
+        stringstream ss;
+        if (!PrintCType(ss, innerType))
+        {
+            return false;
+        }
+        string innerTypeCName = ss.str();
+
+        os << "struct array_" << innerTypeCName << "\n"
+              "{\n"
+              "    size_t Size;\n"
+              "    " << innerTypeCName << "* Data;\n"
+              "};\n\n";
+
+        arrayTypeNames.insert(typeName);
+    }
+
+    return true;
 }
