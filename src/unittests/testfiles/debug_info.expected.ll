@@ -10,6 +10,7 @@ $target_triple
 %A = type { i32, %B }
 %B = type { i32, %C }
 %C = type { i32, %A* }
+%"[]u16" = type { i64, i16* }
 
 @strData0 = constant [3 x i8] c"abc"
 @strStruct0 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData0, i32 0, i32 0) }
@@ -415,8 +416,50 @@ merge:                                            ; preds = %else, %afterreturn
   ret %UnitType zeroinitializer, !dbg !268
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @arrays(%"[]u16" %a) #0 !dbg !269 {
+entry:
+  %n = alloca i16
+  %a1 = alloca %"[]u16"
+  store %"[]u16" %a, %"[]u16"* %a1
+  call void @llvm.dbg.declare(metadata %"[]u16"* %a1, metadata !277, metadata !DIExpression()), !dbg !280
+  call void @llvm.dbg.declare(metadata i16* %n, metadata !278, metadata !DIExpression()), !dbg !281
+  %a2 = load %"[]u16", %"[]u16"* %a1, !dbg !282
+  %size = extractvalue %"[]u16" %a2, 0, !dbg !283
+  %check = icmp uge i64 0, %size, !dbg !283
+  br i1 %check, label %failed, label %passed, !dbg !283
+
+failed:                                           ; preds = %entry
+  call void @exit(i32 1), !dbg !283
+  unreachable, !dbg !283
+
+passed:                                           ; preds = %entry
+  %data = extractvalue %"[]u16" %a2, 1, !dbg !283
+  %value = getelementptr inbounds i16, i16* %data, i8 0, !dbg !283
+  %load = load i16, i16* %value, !dbg !283
+  store i16 %load, i16* %n, !dbg !284
+  %a3 = load %"[]u16", %"[]u16"* %a1, !dbg !285
+  %size4 = extractvalue %"[]u16" %a3, 0, !dbg !286
+  %check5 = icmp uge i64 1, %size4, !dbg !286
+  br i1 %check5, label %failed6, label %passed7, !dbg !286
+
+failed6:                                          ; preds = %passed
+  call void @exit(i32 1), !dbg !286
+  unreachable, !dbg !286
+
+passed7:                                          ; preds = %passed
+  %data8 = extractvalue %"[]u16" %a3, 1, !dbg !286
+  %value9 = getelementptr inbounds i16, i16* %data8, i8 1, !dbg !286
+  %n10 = load i16, i16* %n, !dbg !287
+  %mul = mul i16 %n10, 2, !dbg !288
+  store i16 %mul, i16* %value9, !dbg !289
+  ret %UnitType zeroinitializer, !dbg !289
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
+
+declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
 attributes #1 = { nounwind readnone speculatable willreturn }
@@ -692,3 +735,24 @@ $filename
 !266 = !DILocation(line: 143, column: 7, scope: !262)
 !267 = !DILocation(line: 143, column: 12, scope: !262)
 !268 = !DILocation(line: 143, column: 10, scope: !262)
+!269 = distinct !DISubprogram(name: "arrays", scope: !1, file: !1, line: 146, type: !270, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !276)
+!270 = !DISubroutineType(flags: DIFlagPrototyped, types: !271)
+!271 = !{!55, !272}
+!272 = !DICompositeType(tag: DW_TAG_structure_type, name: "[]u16", size: 128, elements: !273)
+!273 = !{!78, !274}
+!274 = !DIDerivedType(tag: DW_TAG_member, name: "Data", baseType: !275, size: 64, align: 4, offset: 64)
+!275 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "&u16", baseType: !12, size: 64)
+!276 = !{!277, !278}
+!277 = !DILocalVariable(name: "a", arg: 1, scope: !269, file: !1, line: 146, type: !272)
+!278 = !DILocalVariable(name: "n", scope: !279, file: !1, line: 148, type: !12)
+!279 = distinct !DILexicalBlock(scope: !269, file: !1, line: 147, column: 1)
+!280 = !DILocation(line: 146, scope: !269)
+!281 = !DILocation(line: 148, column: 9, scope: !279)
+!282 = !DILocation(line: 148, column: 13, scope: !279)
+!283 = !DILocation(line: 148, column: 14, scope: !279)
+!284 = !DILocation(line: 148, column: 11, scope: !279)
+!285 = !DILocation(line: 149, column: 5, scope: !279)
+!286 = !DILocation(line: 149, column: 6, scope: !279)
+!287 = !DILocation(line: 149, column: 12, scope: !279)
+!288 = !DILocation(line: 149, column: 14, scope: !279)
+!289 = !DILocation(line: 149, column: 10, scope: !279)

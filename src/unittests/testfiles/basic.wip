@@ -798,3 +798,9 @@ fun ret2(a i32, b i32) i32
 
     0
 }
+
+fun arrays(a1 []i32)
+{
+    var n = a1[0];
+    a1[1] = 17;
+}

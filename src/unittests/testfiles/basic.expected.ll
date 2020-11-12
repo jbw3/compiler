@@ -13,6 +13,7 @@ $target_triple
 %EmptyType = type {}
 %SubscriptTest1 = type { %SubscriptTest2 }
 %SubscriptTest2 = type { %str }
+%"[]i32" = type { i64, i32* }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -2274,6 +2275,42 @@ merge:                                            ; preds = %else9, %afterreturn
 merge10:                                          ; preds = %merge, %afterreturn
   %phi11 = phi %UnitType [ zeroinitializer, %afterreturn ], [ %phi, %merge ]
   ret i32 0
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @arrays(%"[]i32" %a1) #0 {
+entry:
+  %n = alloca i32
+  %a11 = alloca %"[]i32"
+  store %"[]i32" %a1, %"[]i32"* %a11
+  %a12 = load %"[]i32", %"[]i32"* %a11
+  %size = extractvalue %"[]i32" %a12, 0
+  %check = icmp uge i64 0, %size
+  br i1 %check, label %failed, label %passed
+
+failed:                                           ; preds = %entry
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %entry
+  %data = extractvalue %"[]i32" %a12, 1
+  %value = getelementptr inbounds i32, i32* %data, i8 0
+  %load = load i32, i32* %value
+  store i32 %load, i32* %n
+  %a13 = load %"[]i32", %"[]i32"* %a11
+  %size4 = extractvalue %"[]i32" %a13, 0
+  %check5 = icmp uge i64 1, %size4
+  br i1 %check5, label %failed6, label %passed7
+
+failed6:                                          ; preds = %passed
+  call void @exit(i32 1)
+  unreachable
+
+passed7:                                          ; preds = %passed
+  %data8 = extractvalue %"[]i32" %a13, 1
+  %value9 = getelementptr inbounds i32, i32* %data8, i8 1
+  store i32 17, i32* %value9
+  ret %UnitType zeroinitializer
 }
 
 declare void @exit(i32)
