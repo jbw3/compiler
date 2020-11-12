@@ -161,6 +161,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
     const TypeInfo* resultType = GetBinaryOperatorResultType(op, left->GetType(), right->GetType());
     binaryExpression->SetType(resultType);
+
+    if (op == BinaryExpression::eSubscript && left->GetType()->IsArray() && right->GetType()->IsInt())
+    {
+        binaryExpression->SetIsStorage(left->GetIsStorage());
+    }
 }
 
 bool SemanticAnalyzer::HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType)

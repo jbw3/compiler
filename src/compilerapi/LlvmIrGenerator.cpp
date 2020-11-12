@@ -350,7 +350,14 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 vector<Value*> valueIndices;
                 valueIndices.push_back(rightValue);
                 Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
-                resultValue = builder.CreateLoad(valuePtr, "load");
+                if (binaryExpression->GetAccessType() == Expression::eAddress)
+                {
+                    resultValue = valuePtr;
+                }
+                else
+                {
+                    resultValue = builder.CreateLoad(valuePtr, "load");
+                }
                 break;
             }
         }
