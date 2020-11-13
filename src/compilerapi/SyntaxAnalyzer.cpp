@@ -968,6 +968,47 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             expr = new VariableExpression(value, &*iter);
         }
     }
+    else if (value == ARRAY_TYPE_START_TOKEN)
+    {
+        const Token* startToken = &*iter;
+
+        if (!IncrementIterator(iter, endIter, "Expected expression"))
+        {
+            return nullptr;
+        }
+
+        Expression* expr1 = ProcessExpression(iter, endIter, {";", ","});
+        if (expr1 == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (iter->GetValue() == ";")
+        {
+            if (!IncrementIterator(iter, endIter, "Expected expression"))
+            {
+                return nullptr;
+            }
+
+            Expression* expr2 = ProcessExpression(iter, endIter, {ARRAY_TYPE_END_TOKEN});
+            if (expr2 == nullptr)
+            {
+                return nullptr;
+            }
+
+            expr = new ArraySizeValueExpression(expr1, expr2, startToken, &*iter);
+        }
+        else if (iter->GetValue() == ",")
+        {
+            logger.LogError(*iter, "TODO");
+            return nullptr;
+        }
+        else
+        {
+            logger.LogInternalError("Unexpected separating character after first array element");
+            return nullptr;
+        }
+    }
     else
     {
         logger.LogError(*iter, "Unexpected term '{}'", value);

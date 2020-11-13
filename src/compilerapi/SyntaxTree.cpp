@@ -165,6 +165,44 @@ const Token* StringLiteralExpression::GetToken() const
     return token;
 }
 
+ArraySizeValueExpression::ArraySizeValueExpression(
+    Expression* sizeExpression, Expression* valueExpression,
+    const Token* startToken, const Token* endToken) :
+    startToken(startToken),
+    endToken(endToken),
+    sizeExpression(sizeExpression),
+    valueExpression(valueExpression)
+{
+}
+
+ArraySizeValueExpression::~ArraySizeValueExpression()
+{
+    delete sizeExpression;
+    delete valueExpression;
+}
+
+void ArraySizeValueExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+}
+
+ArrayMultiValueExpression::ArrayMultiValueExpression(
+    const Expressions& expressions,
+    const Token* startToken, const Token* endToken) :
+    startToken(startToken),
+    endToken(endToken),
+    expressions(expressions)
+{
+}
+
+ArrayMultiValueExpression::~ArrayMultiValueExpression()
+{
+    deletePointerContainer(expressions);
+}
+
+void ArrayMultiValueExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+}
+
 BlockExpression::BlockExpression(const Expressions& expressions,
                                  const Token* startToken, const Token* endToken) :
     startToken(startToken),

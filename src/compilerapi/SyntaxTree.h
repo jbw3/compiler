@@ -124,6 +124,37 @@ private:
     std::vector<char> characters;
 };
 
+class ArraySizeValueExpression : public Expression
+{
+public:
+    ArraySizeValueExpression(Expression* sizeExpression, Expression* valueExpression,
+                             const Token* startToken, const Token* endToken);
+
+    virtual ~ArraySizeValueExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* startToken;
+    const Token* endToken;
+    Expression* sizeExpression;
+    Expression* valueExpression;
+};
+
+class ArrayMultiValueExpression : public Expression
+{
+public:
+    ArrayMultiValueExpression(const Expressions& expressions,
+                              const Token* startToken, const Token* endToken);
+
+    virtual ~ArrayMultiValueExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* startToken;
+    const Token* endToken;
+    Expressions expressions;
+};
+
 class BlockExpression : public Expression
 {
 public:
