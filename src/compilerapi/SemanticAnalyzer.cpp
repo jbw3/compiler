@@ -1335,6 +1335,43 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     }
 }
 
+void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
+{
+    Expression* sizeExpression = arrayExpression->sizeExpression;
+    sizeExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    const TypeInfo* sizeType = sizeExpression->GetType();
+    TypeInfo::ESign sign = sizeType->GetSign();
+
+    NumericExpression* numExpression = dynamic_cast<NumericExpression*>(sizeExpression);
+    if ( numExpression == nullptr || (sign != TypeInfo::eUnsigned && sign != TypeInfo::eContextDependent) )
+    {
+        isError = true;
+        logger.LogError(*arrayExpression->startToken, "Invalid array size. Array sizes must be unsigned numeric literals");
+        return;
+    }
+
+    Expression* valueExpression = arrayExpression->valueExpression;
+    valueExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // TODO: what about numeric literals?
+    const TypeInfo* arrayType = TypeInfo::GetArrayOfType(valueExpression->GetType());
+    arrayExpression->SetType(arrayType);
+}
+
+void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
+{
+    assert(false && "Not implemented");
+}
+
 void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
 {
     // create new scope for block

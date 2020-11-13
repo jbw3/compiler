@@ -284,6 +284,23 @@ void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
     PrintProperty("name", variableExpression->GetName());
 }
 
+void SyntaxTreePrinter::Visit(ArraySizeValueExpression* arrayExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "ArraySizeValueExpression");
+    PrintProperty("sizeExpressions", arrayExpression->sizeExpression);
+    PrintProperty("valueExpression", arrayExpression->valueExpression);
+}
+
+void SyntaxTreePrinter::Visit(ArrayMultiValueExpression* arrayExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "ArrayMultiValueExpression");
+    PrintProperty("expressions", arrayExpression->expressions);
+}
+
 void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
 {
     BracePrinter printer(*this, "{", "}");

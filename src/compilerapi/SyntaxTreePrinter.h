@@ -47,6 +47,10 @@ public:
 
     void Visit(SyntaxTree::VariableExpression* variableExpression) override;
 
+    void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) override;
+
+    void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) override;
+
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;
 
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;

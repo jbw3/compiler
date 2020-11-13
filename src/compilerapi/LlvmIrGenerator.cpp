@@ -1079,6 +1079,16 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
+{
+    assert(false && "Not implemented");
+}
+
+void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
+{
+    assert(false && "Not implemented");
+}
+
 void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
 {
     // create new scope for block

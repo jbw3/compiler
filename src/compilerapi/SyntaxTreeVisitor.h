@@ -3,6 +3,8 @@
 
 namespace SyntaxTree
 {
+class ArrayMultiValueExpression;
+class ArraySizeValueExpression;
 class BinaryExpression;
 class BoolLiteralExpression;
 class BlockExpression;
@@ -60,6 +62,10 @@ public:
     virtual void Visit(SyntaxTree::StringLiteralExpression* stringLiteralExpression) = 0;
 
     virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
+
+    virtual void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) = 0;
+
+    virtual void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) = 0;
 
     virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
 

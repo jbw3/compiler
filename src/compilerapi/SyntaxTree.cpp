@@ -183,6 +183,7 @@ ArraySizeValueExpression::~ArraySizeValueExpression()
 
 void ArraySizeValueExpression::Accept(SyntaxTreeVisitor* visitor)
 {
+    visitor->Visit(this);
 }
 
 ArrayMultiValueExpression::ArrayMultiValueExpression(
@@ -201,6 +202,7 @@ ArrayMultiValueExpression::~ArrayMultiValueExpression()
 
 void ArrayMultiValueExpression::Accept(SyntaxTreeVisitor* visitor)
 {
+    visitor->Visit(this);
 }
 
 BlockExpression::BlockExpression(const Expressions& expressions,
