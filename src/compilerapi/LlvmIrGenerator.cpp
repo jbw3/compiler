@@ -1100,17 +1100,20 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
     uint64_t arraySize = (uint64_t)sizeExpression->GetValue();
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
+    const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();
     Type* arrayType = GetType(typeInfo);
-    Type* innerType = GetType(typeInfo->GetInnerType());
+    Type* innerType = GetType(innerTypeInfo);
     Type* llvmArrayType = ArrayType::get(innerType, arraySize);
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
-    arrayExpression->valueExpression->Accept(this);
+    Expression* valueExpression = arrayExpression->valueExpression;
+    valueExpression->Accept(this);
     if (resultValue == nullptr)
     {
         return;
     }
     Value* valueValue = resultValue;
+    ExtendType(valueExpression->GetType(), innerTypeInfo, valueValue);
 
     // insert all values
     // TODO: don't hardcode the loop

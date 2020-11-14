@@ -1362,8 +1362,9 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
         return;
     }
 
-    // TODO: what about numeric literals?
-    const TypeInfo* arrayType = TypeInfo::GetArrayOfType(valueExpression->GetType());
+    const TypeInfo* type = InferType(valueExpression->GetType());
+
+    const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
     arrayExpression->SetType(arrayType);
 }
 
@@ -1704,6 +1705,46 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     return true;
 }
 
+const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType)
+{
+    const TypeInfo* type = inferType;
+
+    // if this is an int literal, set the type to the minimum signed size
+    // that will hold the number
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
+    if (literalType != nullptr)
+    {
+        type = TypeInfo::GetMinSignedIntTypeForSize(literalType->GetSignedNumBits());
+        if (type == nullptr)
+        {
+            isError = true;
+            logger.LogInternalError("Could not infer integer literal type");
+            return nullptr;
+        }
+    }
+    else if (type->IsRange())
+    {
+        // if this is a range type and the members are int literals, set the members' type
+        // to the minimum signed size that will hold the number
+        const TypeInfo* memberType = type->GetMembers()[0]->GetType();
+        const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
+        if (memberLiteralType != nullptr)
+        {
+            const TypeInfo* newMemberType = TypeInfo::GetMinSignedIntTypeForSize(memberLiteralType->GetSignedNumBits());
+            if (newMemberType == nullptr)
+            {
+                isError = true;
+                logger.LogInternalError("Could not infer Range integer literal type");
+                return nullptr;
+            }
+
+            type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
+        }
+    }
+
+    return type;
+}
+
 const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& typeNameTokens, const TypeInfo* inferType)
 {
     bool inferTypeName = typeNameTokens.empty();
@@ -1712,40 +1753,7 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& ty
     // if no type name was given, infer it from the expression
     if (inferTypeName)
     {
-        type = inferType;
-
-        // if this is an int literal, set the type to the minimum signed size
-        // that will hold the number
-        const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
-        if (literalType != nullptr)
-        {
-            type = TypeInfo::GetMinSignedIntTypeForSize(literalType->GetSignedNumBits());
-            if (type == nullptr)
-            {
-                isError = true;
-                logger.LogInternalError("Could not infer integer literal type");
-                return nullptr;
-            }
-        }
-        else if (type->IsRange())
-        {
-            // if this is a range type and the members are int literals, set the members' type
-            // to the minimum signed size that will hold the number
-            const TypeInfo* memberType = type->GetMembers()[0]->GetType();
-            const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
-            if (memberLiteralType != nullptr)
-            {
-                const TypeInfo* newMemberType = TypeInfo::GetMinSignedIntTypeForSize(memberLiteralType->GetSignedNumBits());
-                if (newMemberType == nullptr)
-                {
-                    isError = true;
-                    logger.LogInternalError("Could not infer Range integer literal type");
-                    return nullptr;
-                }
-
-                type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
-            }
-        }
+        type = InferType(inferType);
     }
     else // get the type from the name given
     {

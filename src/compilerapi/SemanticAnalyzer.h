@@ -100,6 +100,8 @@ private:
 
     bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
 
+    const TypeInfo* InferType(const TypeInfo* inferType);
+
     const TypeInfo* GetVariableType(const std::vector<const Token*>& typeNameTokens, const TypeInfo* inferType);
 
     bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, const SyntaxTree::Expression* expression, const Token* errorToken);
