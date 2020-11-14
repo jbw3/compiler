@@ -1115,16 +1115,52 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
     Value* valueValue = resultValue;
     ExtendType(valueExpression->GetType(), innerTypeInfo, valueValue);
 
-    // insert all values
-    // TODO: don't hardcode the loop
-    for (uint64_t i = 0; i < arraySize; ++i)
+    // create loop to insert values
+    if (arraySize > 0)
     {
-        vector<Value*> indices;
-        indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
-        indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
+        Value* zero = ConstantInt::get(context, APInt(uIntSizeNumBits, 0));
+        Value* one = ConstantInt::get(context, APInt(uIntSizeNumBits, 1));
 
-        Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
-        builder.CreateStore(valueValue, ptr);
+        BasicBlock* preLoopBlock = builder.GetInsertBlock();
+        BasicBlock* loopBodyBlock = BasicBlock::Create(context, "fillBody", currentFunction);
+        BasicBlock* loopExitBlock = BasicBlock::Create(context, "fillExit");
+
+        vector<Value*> indices(2);
+        indices[0] = zero;
+
+        // get address of first element
+        indices[1] = zero;
+        Value* startPtr = builder.CreateInBoundsGEP(alloca, indices, "startPtr");
+
+        // get address of end (1 past the last element)
+        indices[1] = sizeValue;
+        Value* endPtr = builder.CreateInBoundsGEP(alloca, indices, "endPtr");
+
+        // branch to loop body block
+        builder.CreateBr(loopBodyBlock);
+
+        // set insert point to the loop body block
+        builder.SetInsertPoint(loopBodyBlock);
+
+        PHINode* phi = builder.CreatePHI(startPtr->getType(), 2, "phi");
+        phi->addIncoming(startPtr, preLoopBlock);
+
+        // store the value
+        builder.CreateStore(valueValue, phi);
+
+        // increment the address
+        Value* nextPtr = builder.CreateInBoundsGEP(phi, one, "nextPtr");
+        phi->addIncoming(nextPtr, loopBodyBlock);
+
+        // check if we've reached the end
+        Value* atEnd = builder.CreateICmpEQ(nextPtr, endPtr, "atEnd");
+        builder.CreateCondBr(atEnd, loopExitBlock, loopBodyBlock);
+
+        // add exit block to function
+        loopExitBlock->insertInto(currentFunction);
+
+        // set insert point to the loop exit block
+        builder.SetInsertPoint(loopExitBlock);
     }
 
     // create array struct
