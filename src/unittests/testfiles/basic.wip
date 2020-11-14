@@ -799,8 +799,18 @@ fun ret2(a i32, b i32) i32
     0
 }
 
-fun arrays(a1 []i32)
+fun arrays1(a1 []i32)
 {
     var n = a1[0];
     a1[1] = 17;
+}
+
+fun arrays2()
+{
+    var x i32 = 12;
+
+    var a1 []i32 = [10; x];
+    var a2 []i32 = [0; x];
+    var a3 []i16 = [3; 1 + 200];
+    var a4 []i32 = [3; 1 + x * 2];
 }
