@@ -1081,7 +1081,60 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 
 void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 {
-    assert(false && "Not implemented");
+    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+
+    NumericExpression* sizeExpression = dynamic_cast<NumericExpression*>(arrayExpression->sizeExpression);
+    assert(sizeExpression != nullptr);
+
+    sizeExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* sizeValue = resultValue;
+    if (sizeExpression->GetType()->GetNumBits() < uIntSizeNumBits)
+    {
+        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        sizeValue = builder.CreateZExt(sizeValue, extType, "zeroext");
+    }
+    uint64_t arraySize = (uint64_t)sizeExpression->GetValue();
+
+    // create builder to insert alloca at beginning of function
+    BasicBlock& entryBlock = currentFunction->getEntryBlock();
+    IRBuilder<> tempBuilder(&entryBlock, entryBlock.begin());
+
+    const TypeInfo* typeInfo = arrayExpression->GetType();
+    Type* arrayType = GetType(typeInfo);
+    Type* innerType = GetType(typeInfo->GetInnerType());
+    Type* llvmArrayType = ArrayType::get(innerType, arraySize);
+    AllocaInst* alloca = tempBuilder.CreateAlloca(llvmArrayType, nullptr, "array");
+
+    arrayExpression->valueExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+    Value* valueValue = resultValue;
+
+    // insert all values
+    // TODO: don't hardcode the loop
+    for (uint64_t i = 0; i < arraySize; ++i)
+    {
+        vector<Value*> indices;
+        indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
+        indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
+
+        Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
+        builder.CreateStore(valueValue, ptr);
+    }
+
+    // create array struct
+    Value* ptrValue = builder.CreateBitCast(alloca, arrayType->getStructElementType(1), "arrptr");
+    Value* structValue = UndefValue::get(arrayType);
+    structValue = builder.CreateInsertValue(structValue, sizeValue, 0, "agg");
+    structValue = builder.CreateInsertValue(structValue, ptrValue, 1, "agg");
+
+    resultValue = structValue;
 }
 
 void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
