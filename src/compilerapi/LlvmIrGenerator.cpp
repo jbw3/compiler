@@ -1142,6 +1142,7 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
     uint64_t arraySize = expressions.size();
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
+    const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();
     Type* arrayType = GetType(typeInfo);
     Type* innerType = GetType(typeInfo->GetInnerType());
     Type* llvmArrayType = ArrayType::get(innerType, arraySize);
@@ -1150,11 +1151,13 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
     unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
     for (uint64_t i = 0; i < arraySize; ++i)
     {
-        expressions[i]->Accept(this);
+        Expression* expr = expressions[i];
+        expr->Accept(this);
         if (resultValue == nullptr)
         {
             return;
         }
+        ExtendType(expr->GetType(), innerTypeInfo, resultValue);
 
         vector<Value*> indices;
         indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));

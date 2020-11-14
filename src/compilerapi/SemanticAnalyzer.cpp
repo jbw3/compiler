@@ -1391,13 +1391,28 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
         }
 
         // make sure all the types match
-        // TODO: support numeric types of different sizes
-        if (!expr->GetType()->IsSameAs(*type))
+        const TypeInfo* exprType = expr->GetType();
+        if (!exprType->IsSameAs(*type))
         {
-            isError = true;
-            // TODO: better error message
-            logger.LogError(*arrayExpression->startToken, "Array item types do not match");
-            return;
+            // TODO: support int literals
+            if (exprType->IsInt() && type->IsInt() && exprType->GetSign() == type->GetSign())
+            {
+                if (exprType->GetNumBits() > type->GetNumBits())
+                {
+                    type = exprType;
+                }
+            }
+            else
+            {
+                isError = true;
+                logger.LogError(*arrayExpression->startToken,
+                    "Array item at index {} with type '{}' does not match previous item type '{}'",
+                    i,
+                    exprType->GetShortName(),
+                    type->GetShortName()
+                );
+                return;
+            }
         }
     }
 
