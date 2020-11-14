@@ -972,12 +972,18 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
     {
         const Token* startToken = &*iter;
 
-        if (!IncrementIterator(iter, endIter, "Expected expression"))
+        if (!IncrementIterator(iter, endIter))
         {
             return nullptr;
         }
 
-        Expression* expr1 = ProcessExpression(iter, endIter, {";", ","});
+        if (iter->GetValue() == ARRAY_TYPE_END_TOKEN)
+        {
+            logger.LogError(*iter, "Array expressions cannot be empty");
+            return nullptr;
+        }
+
+        Expression* expr1 = ProcessExpression(iter, endIter, {";", ",", ARRAY_TYPE_END_TOKEN});
         if (expr1 == nullptr)
         {
             return nullptr;
@@ -998,10 +1004,36 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
             expr = new ArraySizeValueExpression(expr1, expr2, startToken, &*iter);
         }
-        else if (iter->GetValue() == ",")
+        else if (iter->GetValue() == "," || iter->GetValue() == ARRAY_TYPE_END_TOKEN)
         {
-            logger.LogError(*iter, "TODO");
-            return nullptr;
+            vector<Expression*> expressions;
+            expressions.push_back(expr1);
+
+            while (iter->GetValue() == ",")
+            {
+                if (!IncrementIterator(iter, endIter))
+                {
+                    deletePointerContainer(expressions);
+                    return nullptr;
+                }
+
+                // if there is a ']' immediately after the ',' then we are done
+                if (iter->GetValue() == ARRAY_TYPE_END_TOKEN)
+                {
+                    break;
+                }
+
+                Expression* expr2 = ProcessExpression(iter, endIter, {",", ARRAY_TYPE_END_TOKEN});
+                if (expr2 == nullptr)
+                {
+                    deletePointerContainer(expressions);
+                    return nullptr;
+                }
+
+                expressions.push_back(expr2);
+            }
+
+            expr = new ArrayMultiValueExpression(expressions, startToken, &*iter);
         }
         else
         {

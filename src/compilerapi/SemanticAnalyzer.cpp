@@ -1369,7 +1369,39 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
 
 void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
 {
-    assert(false && "Not implemented");
+    const Expressions& expressions = arrayExpression->expressions;
+    assert(expressions.size() > 0);
+
+    Expression* expr = expressions[0];
+    expr->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    const TypeInfo* type = expr->GetType();
+
+    for (size_t i = 1; i < expressions.size(); ++i)
+    {
+        expr = expressions[i];
+        expr->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        // make sure all the types match
+        // TODO: support numeric types of different sizes
+        if (!expr->GetType()->IsSameAs(*type))
+        {
+            isError = true;
+            // TODO: better error message
+            logger.LogError(*arrayExpression->startToken, "Array item types do not match");
+            return;
+        }
+    }
+
+    const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
+    arrayExpression->SetType(arrayType);
 }
 
 void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
