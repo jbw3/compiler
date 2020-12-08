@@ -129,7 +129,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    if ( (left->GetType()->IsInt() && right->GetType()->IsInt()) || (left->GetType()->IsRange() && right->GetType()->IsRange()) )
+    if (
+         (left->GetType()->IsInt() && right->GetType()->IsInt())
+      || (left->GetType()->IsRange() && right->GetType()->IsRange())
+      || (left->GetType()->IsArray() && right->GetType()->IsArray())
+    )
     {
         bool ok = FixNumericLiteralTypes(left, right);
         if (!ok)
@@ -341,34 +345,103 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     return resultType;
 }
 
+const TypeInfo* GetLowestType(const TypeInfo* type, unsigned& arrayLevel, bool& hasRange, bool& hasExclusiveRange)
+{
+    arrayLevel = 0;
+    while (type->IsArray())
+    {
+        type = type->GetInnerType();
+        ++arrayLevel;
+    }
+
+    hasExclusiveRange = false;
+    hasRange = type->IsRange();
+    if (hasRange)
+    {
+        hasExclusiveRange = type->IsExclusive();
+        type = type->GetMembers()[0]->GetType();
+    }
+
+    return type;
+}
+
+const TypeInfo* GetLowestType(const TypeInfo* type)
+{
+    unsigned arrayLevel = 0;
+    bool hasRange = false;
+    bool hasExclusiveRange = false;
+    return GetLowestType(type, arrayLevel, hasRange, hasExclusiveRange);
+}
+
 bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* resultType)
 {
-    const NumericLiteralType* literalType = nullptr;
-    TypeInfo::ESign resultSign = TypeInfo::eNotApplicable;
     const TypeInfo* exprType = expr->GetType();
-    if (exprType->IsRange())
-    {
-        literalType = dynamic_cast<const NumericLiteralType*>(exprType->GetMembers()[0]->GetType());
-        resultSign = resultType->GetMembers()[0]->GetType()->GetSign();
-    }
-    else
-    {
-        literalType = dynamic_cast<const NumericLiteralType*>(exprType);
-        resultSign = resultType->GetSign();
-    }
+    unsigned arrayLevel = 0;
+    bool hasRange = false;
+    bool hasExclusiveRange = false;
+    const TypeInfo* lowestType = GetLowestType(exprType, arrayLevel, hasRange, hasExclusiveRange);
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(lowestType);
+    TypeInfo::ESign literalTypeSign = literalType->GetSign();
 
-    if (literalType != nullptr && literalType->GetSign() == TypeInfo::eContextDependent)
+    if ( literalType != nullptr && (literalTypeSign == TypeInfo::eContextDependent || arrayLevel > 0) )
     {
-        const TypeInfo* newType = literalType->GetMinSizeType(resultSign);
-        if (newType == nullptr)
+        const TypeInfo* lowestResultType = GetLowestType(resultType);
+        TypeInfo::ESign resultSign = lowestResultType->GetSign();
+
+        const TypeInfo* newType = nullptr;
+        if (arrayLevel > 0)
         {
-            logger.LogInternalError("Could not determine expression result type");
-            return false;
+            // TODO: Handle ranges
+
+            TypeInfo::ESign sign = TypeInfo::eNotApplicable;
+            if (literalTypeSign == TypeInfo::eContextDependent)
+            {
+                sign = resultSign;
+            }
+            else
+            {
+                sign = literalTypeSign;
+            }
+
+            bool isSigned = sign == TypeInfo::eSigned;
+            unsigned literalNumBits = 0;
+            if (isSigned)
+            {
+                literalNumBits = literalType->GetSignedNumBits();
+            }
+            else
+            {
+                literalNumBits = literalType->GetUnsignedNumBits();
+            }
+
+            unsigned resultNumBits = lowestResultType->GetNumBits();
+            unsigned size = (resultNumBits > literalNumBits) ? resultNumBits : literalNumBits;
+            if (isSigned)
+            {
+                newType = TypeInfo::GetMinSignedIntTypeForSize(size);
+            }
+            else
+            {
+                newType = TypeInfo::GetMinUnsignedIntTypeForSize(size);
+            }
+        }
+        else
+        {
+            newType = literalType->GetMinSizeType(resultSign);
+            if (newType == nullptr)
+            {
+                logger.LogInternalError("Could not determine expression result type");
+                return false;
+            }
         }
 
-        if (exprType->IsRange())
+        if (hasRange)
         {
-            newType = TypeInfo::GetRangeType(newType, exprType->IsExclusive());
+            newType = TypeInfo::GetRangeType(newType, hasExclusiveRange);
+        }
+        for (unsigned i = 0; i < arrayLevel; ++i)
+        {
+            newType = TypeInfo::GetArrayOfType(newType);
         }
 
         expr->SetType(newType);
@@ -381,10 +454,8 @@ bool SemanticAnalyzer::FixNumericLiteralTypes(Expression* expr1, Expression* exp
 {
     const TypeInfo* expr1Type = expr1->GetType();
     const TypeInfo* expr2Type = expr2->GetType();
-    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(
-        expr1Type->IsRange() ? expr1Type->GetMembers()[0]->GetType() : expr1Type);
-    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(
-        expr2Type->IsRange() ? expr2Type->GetMembers()[0]->GetType() : expr2Type);
+    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(GetLowestType(expr1Type));
+    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(GetLowestType(expr2Type));
 
     bool ok = true;
     if (literalType1 != nullptr && literalType2 == nullptr)
@@ -514,9 +585,27 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
     }
     else if (leftType->IsArray())
     {
-        if (op == BinaryExpression::eAssign)
+        if (op == BinaryExpression::eAssign && rightType->IsArray())
         {
-            ok = leftType->IsSameAs(*rightType);
+            if (leftType->IsSameAs(*rightType))
+            {
+                ok = true;
+            }
+            else
+            {
+                const TypeInfo* leftInnerType = leftType->GetInnerType();
+                const TypeInfo* rightInnerType = rightType->GetInnerType();
+                if (leftInnerType->IsInt() && rightInnerType->IsInt()
+                 && HaveCompatibleSigns(leftInnerType, rightInnerType)
+                 && leftInnerType->GetNumBits() == rightInnerType->GetNumBits())
+                {
+                    ok = true;
+                }
+                else
+                {
+                    ok = false;
+                }
+            }
         }
         else if (op == BinaryExpression::eSubscript && rightType->IsInt())
         {
@@ -1362,6 +1451,7 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
         return;
     }
 
+    // TODO: Don't infer type here?
     const TypeInfo* type = InferType(valueExpression->GetType());
 
     const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
@@ -1394,13 +1484,9 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
         const TypeInfo* exprType = expr->GetType();
         if (!exprType->IsSameAs(*type))
         {
-            // TODO: support int literals
-            if (exprType->IsInt() && type->IsInt() && exprType->GetSign() == type->GetSign())
+            if (exprType->IsInt() && type->IsInt() && HaveCompatibleSigns(exprType, type))
             {
-                if (exprType->GetNumBits() > type->GetNumBits())
-                {
-                    type = exprType;
-                }
+                type = GetBiggestSizeType(exprType, type);
             }
             else
             {
@@ -1755,6 +1841,15 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType)
 
             type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
         }
+    }
+    else if (type->IsArray())
+    {
+        // if this is an array type and the items are int literals, set the inner type
+        // to the minimum signed size that will hold the numbers
+        const TypeInfo* innerType = type->GetInnerType();
+        const TypeInfo* newInnerType = InferType(innerType);
+
+        type = TypeInfo::GetArrayOfType(newInnerType);
     }
 
     return type;

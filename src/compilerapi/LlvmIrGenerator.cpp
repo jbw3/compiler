@@ -1508,10 +1508,38 @@ bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
     return true;
 }
 
-string createRangeName(const TypeInfo* rangeType)
+string createTypeName(const TypeInfo* type)
 {
-    unsigned memberNumBits = rangeType->GetMembers()[0]->GetType()->GetNumBits();
-    string name = "Range" + to_string(memberNumBits);
+    string name;
+
+    while (type->IsArray())
+    {
+        type = type->GetInnerType();
+        name += "[]";
+    }
+
+    if (type->IsRange())
+    {
+        unsigned memberNumBits = type->GetMembers()[0]->GetType()->GetNumBits();
+        name += "Range" + to_string(memberNumBits);
+    }
+    else if (type->IsInt())
+    {
+        if (type->GetSign() == TypeInfo::eSigned)
+        {
+            name += "i";
+        }
+        else
+        {
+            name += "u";
+        }
+        name += to_string(type->GetNumBits());
+    }
+    else
+    {
+        name += type->GetShortName();
+    }
+
     return name;
 }
 
@@ -1538,16 +1566,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     else
     {
         // get the LLVM type name
-        string llvmName;
-        bool isRange = type->IsRange();
-        if (isRange)
-        {
-            llvmName = createRangeName(type);
-        }
-        else
-        {
-            llvmName = type->GetShortName();
-        }
+        string llvmName = createTypeName(type);
 
         // try to lookup this type to see if it's already been created
         auto iter = types.find(llvmName);
@@ -1556,7 +1575,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             llvmType = iter->second;
         }
         // if this is a range type, create the LLVM type
-        else if (isRange)
+        else if (type->IsRange())
         {
             vector<Type*> members;
             for (const MemberInfo* memberInfo : type->GetMembers())
