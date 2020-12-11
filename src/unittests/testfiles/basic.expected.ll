@@ -15,6 +15,8 @@ $target_triple
 %SubscriptTest2 = type { %str }
 %"[]i32" = type { i64, i32* }
 %"[]i16" = type { i64, i16* }
+%"[]u8" = type { i64, i8* }
+%"[]i8" = type { i64, i8* }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -2380,6 +2382,57 @@ fillExit24:                                       ; preds = %fillBody18
   %arrptr25 = bitcast [3 x i32]* %array16 to i32*
   %agg26 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr25, 1
   store %"[]i32" %agg26, %"[]i32"* %a4
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @arrays3() #0 {
+entry:
+  %array13 = alloca [2 x i32]
+  %a4 = alloca %"[]i32"
+  %array7 = alloca [2 x i16]
+  %a3 = alloca %"[]i16"
+  %array2 = alloca [2 x i8]
+  %a2 = alloca %"[]u8"
+  %array = alloca [2 x i8]
+  %a1 = alloca %"[]i8"
+  %y = alloca i32
+  %x = alloca i16
+  store i16 12, i16* %x
+  store i32 123, i32* %y
+  %ptr = getelementptr inbounds [2 x i8], [2 x i8]* %array, i64 0, i64 0
+  store i8 1, i8* %ptr
+  %ptr1 = getelementptr inbounds [2 x i8], [2 x i8]* %array, i64 0, i64 1
+  store i8 -2, i8* %ptr1
+  %arrptr = bitcast [2 x i8]* %array to i8*
+  %agg = insertvalue %"[]i8" { i64 2, i8* undef }, i8* %arrptr, 1
+  store %"[]i8" %agg, %"[]i8"* %a1
+  %ptr3 = getelementptr inbounds [2 x i8], [2 x i8]* %array2, i64 0, i64 0
+  store i8 1, i8* %ptr3
+  %ptr4 = getelementptr inbounds [2 x i8], [2 x i8]* %array2, i64 0, i64 1
+  store i8 2, i8* %ptr4
+  %arrptr5 = bitcast [2 x i8]* %array2 to i8*
+  %agg6 = insertvalue %"[]u8" { i64 2, i8* undef }, i8* %arrptr5, 1
+  store %"[]u8" %agg6, %"[]u8"* %a2
+  %ptr8 = getelementptr inbounds [2 x i16], [2 x i16]* %array7, i64 0, i64 0
+  store i16 20, i16* %ptr8
+  %x9 = load i16, i16* %x
+  %add = add i16 %x9, 1
+  %ptr10 = getelementptr inbounds [2 x i16], [2 x i16]* %array7, i64 0, i64 1
+  store i16 %add, i16* %ptr10
+  %arrptr11 = bitcast [2 x i16]* %array7 to i16*
+  %agg12 = insertvalue %"[]i16" { i64 2, i16* undef }, i16* %arrptr11, 1
+  store %"[]i16" %agg12, %"[]i16"* %a3
+  %ptr14 = getelementptr inbounds [2 x i32], [2 x i32]* %array13, i64 0, i64 0
+  store i32 3, i32* %ptr14
+  %y15 = load i32, i32* %y
+  %mul = mul i32 %y15, 2
+  %add16 = add i32 1, %mul
+  %ptr17 = getelementptr inbounds [2 x i32], [2 x i32]* %array13, i64 0, i64 1
+  store i32 %add16, i32* %ptr17
+  %arrptr18 = bitcast [2 x i32]* %array13 to i32*
+  %agg19 = insertvalue %"[]i32" { i64 2, i32* undef }, i32* %arrptr18, 1
+  store %"[]i32" %agg19, %"[]i32"* %a4
   ret %UnitType zeroinitializer
 }
 
