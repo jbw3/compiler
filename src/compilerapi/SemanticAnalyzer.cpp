@@ -1451,9 +1451,7 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
         return;
     }
 
-    // TODO: Don't infer type here?
-    const TypeInfo* type = InferType(valueExpression->GetType());
-
+    const TypeInfo* type = valueExpression->GetType();
     const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
     arrayExpression->SetType(arrayType);
 }

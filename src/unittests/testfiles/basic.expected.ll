@@ -2319,6 +2319,8 @@ passed7:                                          ; preds = %passed
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays2() #0 {
 entry:
+  %array27 = alloca [4 x i32]
+  %a5 = alloca %"[]i32"
   %array16 = alloca [3 x i32]
   %a4 = alloca %"[]i32"
   %array6 = alloca [3 x i16]
@@ -2382,6 +2384,21 @@ fillExit24:                                       ; preds = %fillBody18
   %arrptr25 = bitcast [3 x i32]* %array16 to i32*
   %agg26 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr25, 1
   store %"[]i32" %agg26, %"[]i32"* %a4
+  %startPtr29 = getelementptr inbounds [4 x i32], [4 x i32]* %array27, i64 0, i64 0
+  %endPtr30 = getelementptr inbounds [4 x i32], [4 x i32]* %array27, i64 0, i64 4
+  br label %fillBody28
+
+fillBody28:                                       ; preds = %fillBody28, %fillExit24
+  %phi31 = phi i32* [ %startPtr29, %fillExit24 ], [ %nextPtr32, %fillBody28 ]
+  store i32 0, i32* %phi31
+  %nextPtr32 = getelementptr inbounds i32, i32* %phi31, i64 1
+  %atEnd33 = icmp eq i32* %nextPtr32, %endPtr30
+  br i1 %atEnd33, label %fillExit34, label %fillBody28
+
+fillExit34:                                       ; preds = %fillBody28
+  %arrptr35 = bitcast [4 x i32]* %array27 to i32*
+  %agg36 = insertvalue %"[]i32" { i64 4, i32* undef }, i32* %arrptr35, 1
+  store %"[]i32" %agg36, %"[]i32"* %a5
   ret %UnitType zeroinitializer
 }
 
