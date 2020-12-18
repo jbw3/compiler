@@ -21,25 +21,25 @@ using namespace llvm;
 using namespace std;
 
 UnitTypeInfo unitType;
-PrimitiveType boolTypeInfo(1, TypeInfo::F_BOOL, TypeInfo::eNotApplicable, BOOL_KEYWORD);
-PrimitiveType int8TypeInfo(8, TypeInfo::F_INT, TypeInfo::eSigned, INT8_KEYWORD);
-PrimitiveType int16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eSigned, INT16_KEYWORD);
-PrimitiveType int32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eSigned, INT32_KEYWORD);
-PrimitiveType int64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eSigned, INT64_KEYWORD);
-PrimitiveType uInt8TypeInfo(8, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT8_KEYWORD);
-PrimitiveType uInt16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KEYWORD);
-PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD);
-PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD);
+PrimitiveType boolTypeInfo(1, TypeInfo::F_BOOL, TypeInfo::eNotApplicable, BOOL_KEYWORD, BOOL_KEYWORD);
+PrimitiveType int8TypeInfo(8, TypeInfo::F_INT, TypeInfo::eSigned, INT8_KEYWORD, INT8_KEYWORD);
+PrimitiveType int16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eSigned, INT16_KEYWORD, INT16_KEYWORD);
+PrimitiveType int32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eSigned, INT32_KEYWORD, INT32_KEYWORD);
+PrimitiveType int64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eSigned, INT64_KEYWORD, INT64_KEYWORD);
+PrimitiveType uInt8TypeInfo(8, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT8_KEYWORD, UINT8_KEYWORD);
+PrimitiveType uInt16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KEYWORD, UINT16_KEYWORD);
+PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD, UINT32_KEYWORD);
+PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD, UINT64_KEYWORD);
 
-PrimitiveType immutBoolTypeInfo(1, TypeInfo::F_BOOL | TypeInfo::F_IMMUTABLE, TypeInfo::eNotApplicable, BOOL_KEYWORD);
-PrimitiveType immutInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT8_KEYWORD);
-PrimitiveType immutInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT16_KEYWORD);
-PrimitiveType immutInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT32_KEYWORD);
-PrimitiveType immutInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, INT64_KEYWORD);
-PrimitiveType immutUInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT8_KEYWORD);
-PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT16_KEYWORD);
-PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT32_KEYWORD);
-PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, UINT64_KEYWORD);
+PrimitiveType immutBoolTypeInfo(1, TypeInfo::F_BOOL | TypeInfo::F_IMMUTABLE, TypeInfo::eNotApplicable, "immutable_" + BOOL_KEYWORD, BOOL_KEYWORD);
+PrimitiveType immutInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT8_KEYWORD, INT8_KEYWORD);
+PrimitiveType immutInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT16_KEYWORD, INT16_KEYWORD);
+PrimitiveType immutInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT32_KEYWORD, INT32_KEYWORD);
+PrimitiveType immutInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT64_KEYWORD, INT64_KEYWORD);
+PrimitiveType immutUInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT8_KEYWORD, UINT8_KEYWORD);
+PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT16_KEYWORD, UINT16_KEYWORD);
+PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT32_KEYWORD, UINT32_KEYWORD);
+PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT64_KEYWORD, UINT64_KEYWORD);
 
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
@@ -130,14 +130,14 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 {
     pointerSize = 8 * targetMachine->getAllocaPointerSize();
 
-    intSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD);
+    intSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
-    PrimitiveType* immutIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eSigned, INT_SIZE_KEYWORD);
+    PrimitiveType* immutIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     immutableTypes.insert({INT_SIZE_KEYWORD, immutIntSizeType});
 
-    uintSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
+    uintSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
-    PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD);
+    PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
     immutableTypes.insert({UINT_SIZE_KEYWORD, immutUIntSizeType});
 
     stringType = new StringType(pointerSize * 2);
@@ -231,17 +231,18 @@ const TypeInfo* TypeInfo::GetType(const string& typeName)
 
 bool TypeInfo::RegisterType(const TypeInfo* typeInfo)
 {
-    auto pair = types.insert({ typeInfo->GetShortName(), typeInfo });
+    auto pair = types.insert({ typeInfo->GetUniqueName(), typeInfo });
     return pair.second;
 }
 
 const TypeInfo* TypeInfo::GetPointerToType(const TypeInfo* type)
 {
-    string name = POINTER_TYPE_TOKEN + type->GetShortName();
-    const TypeInfo* ptrType = GetType(name);
+    string uniqueName = POINTER_TYPE_TOKEN + type->GetUniqueName();
+    const TypeInfo* ptrType = GetType(uniqueName);
     if (ptrType == nullptr)
     {
-        TypeInfo* newPtrType = new PrimitiveType(pointerSize, F_POINTER, eNotApplicable, name);
+        string name = POINTER_TYPE_TOKEN + type->GetShortName();
+        TypeInfo* newPtrType = new PrimitiveType(pointerSize, F_POINTER, eNotApplicable, uniqueName, name);
         newPtrType->innerType = type;
         RegisterType(newPtrType);
 
@@ -253,14 +254,19 @@ const TypeInfo* TypeInfo::GetPointerToType(const TypeInfo* type)
 
 const TypeInfo* TypeInfo::GetArrayOfType(const TypeInfo* type)
 {
-    string name;
-    name += ARRAY_TYPE_START_TOKEN;
-    name += ARRAY_TYPE_END_TOKEN;
-    name += type->GetShortName();
-    const TypeInfo* arrayType = GetType(name);
+    string uniqueName;
+    uniqueName += ARRAY_TYPE_START_TOKEN;
+    uniqueName += ARRAY_TYPE_END_TOKEN;
+    uniqueName += type->GetUniqueName();
+    const TypeInfo* arrayType = GetType(uniqueName);
     if (arrayType == nullptr)
     {
-        TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, F_ARRAY, eNotApplicable, name);
+        string name;
+        name += ARRAY_TYPE_START_TOKEN;
+        name += ARRAY_TYPE_END_TOKEN;
+        name += type->GetShortName();
+
+        TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, F_ARRAY, eNotApplicable, uniqueName, name);
         newArrayType->innerType = type;
         newArrayType->AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
         newArrayType->AddMember("Data", TypeInfo::GetPointerToType(type), false, Token::None);
@@ -276,11 +282,13 @@ TypeInfo::TypeInfo(
     unsigned numBits,
     uint16_t flags,
     ESign sign,
+    const string& uniqueName,
     const string& shortName
 ) :
     numBits(numBits),
     flags(flags),
     sign(sign),
+    uniqueName(uniqueName),
     shortName(shortName),
     innerType(nullptr)
 {
@@ -352,6 +360,11 @@ unsigned TypeInfo::GetNumBits() const
     return numBits;
 }
 
+const string& TypeInfo::GetUniqueName() const
+{
+    return uniqueName;
+}
+
 const string& TypeInfo::GetShortName() const
 {
     return shortName;
@@ -414,7 +427,7 @@ const TypeInfo* TypeInfo::GetInnerType() const
 }
 
 UnitTypeInfo::UnitTypeInfo() :
-    TypeInfo(0, F_UNIT, TypeInfo::eNotApplicable, "Unit")
+    TypeInfo(0, F_UNIT, TypeInfo::eNotApplicable, "Unit", "Unit")
 {
 }
 
@@ -428,9 +441,10 @@ PrimitiveType::PrimitiveType(
     unsigned numBits,
     uint16_t flags,
     ESign sign,
+    const string& uniqueName,
     const string& shortName
 ) :
-    TypeInfo(numBits, flags, sign, shortName)
+    TypeInfo(numBits, flags, sign, uniqueName, shortName)
 {
 }
 
@@ -514,13 +528,25 @@ const NumericLiteralType* NumericLiteralType::CreateUnsigned(unsigned numBits)
     return Create(TypeInfo::eUnsigned, 0, numBits, "{unsigned-integer}");
 }
 
+string GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits)
+{
+    string name;
+    name += "{integer-";
+    name += to_string(signedNumBits);
+    name += "-";
+    name += to_string(unsignedNumBits);
+    name += "}";
+
+    return name;
+}
+
 NumericLiteralType::NumericLiteralType(
     ESign sign,
     unsigned signedNumBits,
     unsigned unsignedNumBits,
     const string& name
 ) :
-    TypeInfo(0, F_INT, sign, name),
+    TypeInfo(0, F_INT, sign, GetNumericLiteralTypeUniqueName(signedNumBits, unsignedNumBits), name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
@@ -584,7 +610,7 @@ const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
 }
 
 StringType::StringType(unsigned numBits) :
-    TypeInfo(numBits, F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD)
+    TypeInfo(numBits, F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD)
 {
     AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
     AddMember("Data", TypeInfo::GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
@@ -596,11 +622,30 @@ bool StringType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
+string CreateUniqueRangeName(const TypeInfo* memberType, bool isExclusive)
+{
+    string memberUniqueName = memberType->GetUniqueName();
+    string name = "Range";
+    name += (isExclusive ? "Exclusive" : "Inclusive");
+    name += "'" + memberUniqueName + "'";
+    return name;
+}
+
+string CreateRangeName(const TypeInfo* memberType, bool isExclusive)
+{
+    string memberName = memberType->GetShortName();
+    string name = "Range";
+    name += (isExclusive ? "Exclusive" : "Inclusive");
+    name += "'" + memberName + "'";
+    return name;
+}
+
 RangeType::RangeType(const TypeInfo* memberType, bool isExclusive) :
     TypeInfo(
         memberType->GetNumBits() * 2,
         F_RANGE | F_AGGREGATE | (isExclusive ? F_EXCLUSIVE : F_NONE),
         TypeInfo::eNotApplicable,
+        CreateUniqueRangeName(memberType, isExclusive),
         CreateRangeName(memberType, isExclusive)
     )
 {
@@ -621,17 +666,8 @@ bool RangeType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-string RangeType::CreateRangeName(const TypeInfo* memberType, bool isExclusive)
-{
-    string memberName = memberType->GetShortName();
-    string name = "Range";
-    name += (isExclusive ? "Exclusive" : "Inclusive");
-    name += "'" + memberName + "'";
-    return name;
-}
-
 AggregateType::AggregateType(const string& name, const Token* token) :
-    TypeInfo(0, F_AGGREGATE, TypeInfo::eNotApplicable, name),
+    TypeInfo(0, F_AGGREGATE, TypeInfo::eNotApplicable, name, name),
     token(token)
 {
 }

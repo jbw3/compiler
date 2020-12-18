@@ -116,6 +116,7 @@ public:
         unsigned numBits,
         uint16_t flags,
         ESign sign,
+        const std::string& uniqueName,
         const std::string& shortName
     );
 
@@ -147,6 +148,9 @@ public:
 
     virtual unsigned GetNumBits() const;
 
+    const std::string& GetUniqueName() const;
+
+    // TODO: rename (GetFriendlyName?)
     const std::string& GetShortName() const;
 
     const TypeInfo* GetImmutableType() const;
@@ -172,6 +176,7 @@ private:
     unsigned numBits;
     uint16_t flags;
     ESign sign;
+    std::string uniqueName;
     std::string shortName;
     std::map<std::string, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
@@ -193,6 +198,7 @@ public:
         unsigned numBits,
         uint16_t flags,
         ESign sign,
+        const std::string& uniqueName,
         const std::string& shortName
     );
 
@@ -272,9 +278,6 @@ public:
     RangeType(const TypeInfo* memberType, bool isExclusive);
 
     bool IsSameAs(const TypeInfo& other) const override;
-
-private:
-    static std::string CreateRangeName(const TypeInfo* memberType, bool isExclusive);
 };
 
 class AggregateType : public TypeInfo
