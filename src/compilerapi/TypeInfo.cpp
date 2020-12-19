@@ -256,15 +256,15 @@ const TypeInfo* TypeInfo::GetArrayOfType(const TypeInfo* type)
 {
     string uniqueName;
     uniqueName += ARRAY_TYPE_START_TOKEN;
-    uniqueName += ARRAY_TYPE_END_TOKEN;
     uniqueName += type->GetUniqueName();
+    uniqueName += ARRAY_TYPE_END_TOKEN;
     const TypeInfo* arrayType = GetType(uniqueName);
     if (arrayType == nullptr)
     {
         string name;
         name += ARRAY_TYPE_START_TOKEN;
-        name += ARRAY_TYPE_END_TOKEN;
         name += type->GetShortName();
+        name += ARRAY_TYPE_END_TOKEN;
 
         TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, F_ARRAY, eNotApplicable, uniqueName, name);
         newArrayType->innerType = type;

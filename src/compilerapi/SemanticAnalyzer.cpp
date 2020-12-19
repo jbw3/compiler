@@ -1242,7 +1242,32 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         return nullptr;
     }
 
-    size_t idx = typeNameSize - 1;
+    size_t idx = typeNameSize;
+
+    const Token* token = nullptr;
+    size_t arrayLevel = 0;
+    while (idx > 0)
+    {
+        --idx;
+
+        token = typeNameTokens[idx];
+        if (token->GetValue() == ARRAY_TYPE_END_TOKEN)
+        {
+            ++arrayLevel;
+
+            if (idx == 0)
+            {
+                // TODO: better error message?
+                logger.LogError(*token, "Invalid type");
+                return nullptr;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
     const Token* typeNameToken = typeNameTokens[idx];
     const string& name = typeNameToken->GetValue();
     const TypeInfo* type = TypeInfo::GetType(name);
@@ -1257,34 +1282,22 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
     {
         --idx;
 
-        const Token* token = typeNameTokens[idx];
+        token = typeNameTokens[idx];
         str = token->GetValue();
         if (str == POINTER_TYPE_TOKEN)
         {
             type = TypeInfo::GetPointerToType(type);
         }
-        else if (str == ARRAY_TYPE_END_TOKEN)
+        else if (str == ARRAY_TYPE_START_TOKEN)
         {
-            if (idx == 0)
+            if (arrayLevel == 0)
             {
-                // TODO: better error message?
-                logger.LogError(*token, "Unexpected token '{}'", str);
+                logger.LogError(*token, "'[' does not have closing ']'");
                 return nullptr;
             }
 
-            --idx;
-            const Token* token2 = typeNameTokens[idx];
-            string str2 = token2->GetValue();
-            if (str2 == ARRAY_TYPE_START_TOKEN)
-            {
-                type = TypeInfo::GetArrayOfType(type);
-            }
-            else
-            {
-                // TODO: better error message?
-                logger.LogError(*token, "Unexpected token '{}'", str);
-                return nullptr;
-            }
+            --arrayLevel;
+            type = TypeInfo::GetArrayOfType(type);
         }
         else
         {
@@ -1292,6 +1305,37 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
             logger.LogError(*token, "Unexpected token '{}'", str);
             return nullptr;
         }
+    }
+
+    // check if there is an extra closing brace
+    if (arrayLevel > 0)
+    {
+        // find the extra brace
+        size_t level = 0;
+        const Token* braceToken = nullptr;
+        for (size_t i = 0; i < typeNameSize; ++i)
+        {
+            const Token* t = typeNameTokens[i];
+            const string& v = t->GetValue();
+            if (v == ARRAY_TYPE_START_TOKEN)
+            {
+                ++level;
+            }
+            else if (v == ARRAY_TYPE_END_TOKEN)
+            {
+                if (level == 0)
+                {
+                    braceToken = t;
+                    break;
+                }
+
+                --level;
+            }
+        }
+
+        assert(braceToken != nullptr);
+        logger.LogError(*braceToken, "Extra closing ']'");
+        return nullptr;
     }
 
     return type;
