@@ -2,7 +2,6 @@
 #include "keywords.h"
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -230,9 +229,14 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
     }
     else if (type->IsArray())
     {
-        // TODO: this doesn't work for nested arrays
-        os << "struct array_";
-        return PrintCType(os, type->GetInnerType());
+        os << "struct ";
+        const TypeInfo* tempType = type;
+        while (tempType->IsArray())
+        {
+            os << "array_";
+            tempType = tempType->GetInnerType();
+        }
+        return PrintCType(os, tempType);
     }
     else if (type->IsAggregate())
     {
@@ -247,26 +251,44 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
     }
 }
 
-bool CHeaderPrinter::PrintArrayStruct(std::ostream& os, const TypeInfo* arrayType)
+bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
 {
-    // TODO: this doesn't work for nested arrays
     const string& typeName = arrayType->GetShortName();
     if (arrayTypeNames.find(typeName) == arrayTypeNames.end())
     {
         const TypeInfo* innerType = arrayType->GetInnerType();
 
-        stringstream ss;
-        if (!PrintCType(ss, innerType))
+        if (innerType->IsArray())
+        {
+            if (!PrintArrayStruct(os, innerType))
+            {
+                return false;
+            }
+        }
+
+        os << "struct array_";
+
+        const TypeInfo* tempType = innerType;
+        while (tempType->IsArray())
+        {
+            os << "array_";
+            tempType = tempType->GetInnerType();
+        }
+
+        if (!PrintCType(os, tempType))
         {
             return false;
         }
-        string innerTypeCName = ss.str();
 
-        os << "struct array_" << innerTypeCName << "\n"
+        os << "\n"
               "{\n"
               "    size_t Size;\n"
-              "    " << innerTypeCName << "* Data;\n"
-              "};\n\n";
+              "    ";
+        if (!PrintCType(os, innerType))
+        {
+            return false;
+        }
+        os << "* Data;\n};\n\n";
 
         arrayTypeNames.insert(typeName);
     }
