@@ -461,6 +461,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && IsBool() == primitiveOther.IsBool()
         && IsInt() == primitiveOther.IsInt()
         && IsPointer() == primitiveOther.IsPointer()
+        && IsArray() == primitiveOther.IsArray()
         && GetSign() == primitiveOther.GetSign();
 
     if (isSame)
