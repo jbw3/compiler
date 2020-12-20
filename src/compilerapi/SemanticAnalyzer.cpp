@@ -391,8 +391,6 @@ bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* r
         const TypeInfo* newType = nullptr;
         if (arrayLevel > 0)
         {
-            // TODO: Handle ranges
-
             TypeInfo::ESign sign = TypeInfo::eNotApplicable;
             if (literalTypeSign == TypeInfo::eContextDependent)
             {
