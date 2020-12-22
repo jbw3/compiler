@@ -381,10 +381,10 @@ bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* r
     bool hasExclusiveRange = false;
     const TypeInfo* lowestType = GetLowestType(exprType, arrayLevel, hasRange, hasExclusiveRange);
     const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(lowestType);
-    TypeInfo::ESign literalTypeSign = literalType->GetSign();
 
-    if ( literalType != nullptr && (literalTypeSign == TypeInfo::eContextDependent || arrayLevel > 0) )
+    if ( literalType != nullptr && (literalType->GetSign() == TypeInfo::eContextDependent || arrayLevel > 0) )
     {
+        TypeInfo::ESign literalTypeSign = literalType->GetSign();
         const TypeInfo* lowestResultType = GetLowestType(resultType);
         TypeInfo::ESign resultSign = lowestResultType->GetSign();
 
@@ -1617,6 +1617,21 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const Parameter* param = params[i];
         const TypeInfo* argType = arg->GetType();
         const TypeInfo* paramType = param->GetType();
+
+        // check if we need to fix array literal type
+        if (argType->IsArray() && paramType->IsArray())
+        {
+            bool ok = FixNumericLiteralType(arg, paramType);
+            if (!ok)
+            {
+                isError = true;
+                return;
+            }
+
+            // update argType in case it changed
+            argType = arg->GetType();
+        }
+
         if (!argType->IsSameAs(*paramType))
         {
             if ( !(argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType)) )
