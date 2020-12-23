@@ -287,13 +287,22 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
 
     if (literalType1 != nullptr && literalType2 != nullptr)
     {
-        if (literalType1->GetSignedNumBits() >= literalType2->GetSignedNumBits())
+        unsigned signedNumBits = max(literalType1->GetSignedNumBits(), literalType2->GetSignedNumBits());
+
+        if (literalType1->GetSign() == TypeInfo::eSigned || literalType2->GetSign() == TypeInfo::eSigned)
         {
-            resultType = type1;
+            resultType = NumericLiteralType::CreateSigned(signedNumBits);
         }
         else
         {
-            resultType = type2;
+            if (literalType1->GetSignedNumBits() >= literalType2->GetSignedNumBits())
+            {
+                resultType = type1;
+            }
+            else
+            {
+                resultType = type2;
+            }
         }
     }
     else if (literalType1 != nullptr)
