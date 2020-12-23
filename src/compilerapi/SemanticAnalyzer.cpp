@@ -810,9 +810,18 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         return;
     }
 
-    // ensure iterable expression is a range
+    // ensure iterable expression is a range or an array and get the iterator type
     const TypeInfo* iterExprType = iterExpression->GetType();
-    if (!iterExprType->IsRange())
+    const TypeInfo* inferType = nullptr;
+    if (iterExprType->IsRange())
+    {
+        inferType = iterExprType->GetMembers()[0]->GetType();
+    }
+    else if (iterExprType->IsArray())
+    {
+        inferType = iterExprType->GetInnerType();
+    }
+    else
     {
         isError = true;
         logger.LogError(*forLoop->GetForToken(), "For loop expression is not iterable");
@@ -820,7 +829,6 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
 
     // set variable type
-    const TypeInfo* inferType = iterExprType->GetMembers()[0]->GetType();
     const TypeInfo* varType = GetVariableType(forLoop->GetVariableTypeNameTokens(), inferType);
     if (isError)
     {
@@ -841,7 +849,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         return;
     }
 
-    // check variable type and range member type
+    // check variable type and iterable type
     if (!varType->IsSameAs(*inferType) && (!HaveCompatibleSigns(varType, inferType) || !HaveCompatibleAssignmentSizes(varType, inferType)))
     {
         isError = true;
