@@ -836,6 +836,33 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
     forLoop->SetVariableType(varType);
 
+    // update array type if needed
+    if (iterExprType->IsArray())
+    {
+        const TypeInfo* arrayInnerType = iterExprType->GetInnerType();
+        if (arrayInnerType->GetSign() == TypeInfo::eContextDependent)
+        {
+            const NumericLiteralType* arrayInnerLiteralType = dynamic_cast<const NumericLiteralType*>(arrayInnerType);
+            if (arrayInnerLiteralType == nullptr)
+            {
+                logger.LogInternalError("Type with context-dependent sign is not a literal type");
+                isError = true;
+                return;
+            }
+
+            inferType = arrayInnerLiteralType->GetMinSizeType(varType->GetSign());
+            if (inferType == nullptr)
+            {
+                logger.LogInternalError("Could not determine expression result type");
+                isError = true;
+                return;
+            }
+
+            const TypeInfo* newType = TypeInfo::GetArrayOfType(inferType);
+            iterExpression->SetType(newType);
+        }
+    }
+
     // create new scope for variable
     Scope scope(symbolTable);
 
