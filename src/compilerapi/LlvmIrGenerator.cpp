@@ -440,10 +440,25 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     {
         return;
     }
-    Value* rangeValue = resultValue;
-    const TypeInfo* rangeType = iterExpr->GetType();
-    assert(rangeType->GetMemberCount() > 0 && "For loop iterator expression type does not have members");
-    const TypeInfo* rangeMemberType = rangeType->GetMembers()[0]->GetType();
+    Value* iterableValue = resultValue;
+
+    const TypeInfo* iterableType = iterExpr->GetType();
+    bool isRangeLoop = iterableType->IsRange();
+    bool isArrayLoop = iterableType->IsArray();
+    const TypeInfo* iterableInnerType = nullptr;
+    if (isRangeLoop)
+    {
+        assert(iterableType->GetMemberCount() > 0 && "For loop iterator expression type does not have members");
+        iterableInnerType = iterableType->GetMembers()[0]->GetType();
+    }
+    else if (isArrayLoop)
+    {
+        iterableInnerType = iterableType->GetInnerType();
+    }
+    else
+    {
+        assert(false && "Invalid for loop iterable type");
+    }
 
     // create new scope for iterator
     Scope scope(symbolTable);
@@ -475,17 +490,44 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     symbolTable.AddVariable(varName, varType, alloca);
     CreateDebugVariable(varNameToken, varType, alloca);
 
-    vector<unsigned> index(1);
+    Type* iterType = nullptr;
+    Value* startValue = nullptr;
+    Value* endValue = nullptr;
+    Value* data = nullptr;
+    if (isRangeLoop)
+    {
+        iterType = type;
 
-    // set iterator to range start
-    index[0] = 0;
-    Value* startValue = builder.CreateExtractValue(rangeValue, index, "start");
-    startValue = CreateExt(startValue, rangeMemberType, varType);
+        vector<unsigned> index(1);
 
-    // get range end
-    index[0] = 1;
-    Value* endValue = builder.CreateExtractValue(rangeValue, index, "end");
-    endValue = CreateExt(endValue, rangeMemberType, varType);
+        // set iterator to range start
+        index[0] = 0;
+        startValue = builder.CreateExtractValue(iterableValue, index, "start");
+        startValue = CreateExt(startValue, iterableInnerType, varType);
+
+        // get range end
+        index[0] = 1;
+        endValue = builder.CreateExtractValue(iterableValue, index, "end");
+        endValue = CreateExt(endValue, iterableInnerType, varType);
+    }
+    else if (isArrayLoop)
+    {
+        iterType = GetType(TypeInfo::GetUIntSizeType());
+
+        vector<unsigned> index(1);
+        unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+
+        // start index is 0
+        startValue = ConstantInt::get(context, APInt(uIntSizeNumBits, 0));
+
+        // end index is array size
+        index[0] = 0;
+        endValue = builder.CreateExtractValue(iterableValue, index, "size");
+
+        // get the array data pointer
+        index[0] = 1;
+        data = builder.CreateExtractValue(iterableValue, index, "data");
+    }
 
     BasicBlock* incomingBlock = builder.GetInsertBlock();
     Function* function = incomingBlock->getParent();
@@ -501,16 +543,23 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     SetDebugLocation(varNameToken);
 
     // generate the condition IR
-    PHINode* iter = builder.CreatePHI(type, 2, "iter");
+    PHINode* iter = builder.CreatePHI(iterType, 2, "iter");
     iter->addIncoming(startValue, incomingBlock);
     CmpInst::Predicate predicate = CmpInst::BAD_ICMP_PREDICATE;
-    if (rangeType->IsExclusive())
+    if (isRangeLoop)
     {
-        predicate = isSigned ? CmpInst::ICMP_SLT : CmpInst::ICMP_ULT;
+        if (iterableType->IsExclusive())
+        {
+            predicate = isSigned ? CmpInst::ICMP_SLT : CmpInst::ICMP_ULT;
+        }
+        else
+        {
+            predicate = isSigned ? CmpInst::ICMP_SLE : CmpInst::ICMP_ULE;
+        }
     }
-    else
+    else if (isArrayLoop)
     {
-        predicate = isSigned ? CmpInst::ICMP_SLE : CmpInst::ICMP_ULE;
+        predicate = CmpInst::ICMP_ULT;
     }
     Value* conditionResult = builder.CreateICmp(predicate, iter, endValue, "cmp");
 
@@ -526,8 +575,21 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     // set insert point to the loop body block
     builder.SetInsertPoint(loopBodyBlock);
 
-    // store the iter value in the iterator variable
-    builder.CreateStore(iter, alloca);
+    if (isRangeLoop)
+    {
+        // store the iter value in the iterator variable
+        builder.CreateStore(iter, alloca);
+    }
+    else if (isArrayLoop)
+    {
+        // get the array value and store it in the iterator variable
+        vector<Value*> valueIndices;
+        valueIndices.push_back(iter);
+        Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
+        Value* value = builder.CreateLoad(valuePtr, "load");
+        value = CreateExt(value, iterableInnerType, varType);
+        builder.CreateStore(value, alloca);
+    }
 
     // generate loop body IR
     LoopInfo loopInfo;
@@ -551,7 +613,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     builder.SetInsertPoint(loopIterBlock);
 
     // increment iterator
-    Value* one = ConstantInt::get(type, 1, isSigned);
+    bool oneIsSigned = isRangeLoop ? isSigned : false;
+    Value* one = ConstantInt::get(iterType, 1, oneIsSigned);
     Value* inc = builder.CreateAdd(iter, one, "inc");
     iter->addIncoming(inc, loopIterBlock);
 
