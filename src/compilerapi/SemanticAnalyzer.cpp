@@ -437,6 +437,8 @@ bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* r
         {
             newType = TypeInfo::GetRangeType(newType, hasExclusiveRange);
         }
+        // TODO: This does not work with nested arrays of integer literals.
+        // Need to set the expression type at each level
         for (unsigned i = 0; i < arrayLevel; ++i)
         {
             newType = TypeInfo::GetArrayOfType(newType);
