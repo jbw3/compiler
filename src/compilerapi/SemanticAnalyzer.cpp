@@ -826,9 +826,6 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     {
         return;
     }
-    // for loop variable is immutable
-    varType = varType->GetImmutableType();
-    assert(varType != nullptr);
     forLoop->SetVariableType(varType);
 
     // create new scope for variable
