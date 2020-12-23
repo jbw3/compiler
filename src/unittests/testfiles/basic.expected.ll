@@ -1660,16 +1660,16 @@ entry:
   %rng = insertvalue %Range32 undef, i32 %start3, 0
   %rng5 = insertvalue %Range32 %rng, i32 %end4, 1
   %start6 = extractvalue %Range32 %rng5, 0
-  store i32 %start6, i32* %i
   %end7 = extractvalue %Range32 %rng5, 1
   br label %forCond
 
 forCond:                                          ; preds = %forIter, %entry
-  %iter = load i32, i32* %i
+  %iter = phi i32 [ %start6, %entry ], [ %inc, %forIter ]
   %cmp = icmp sle i32 %iter, %end7
   br i1 %cmp, label %forBody, label %forExit
 
 forBody:                                          ; preds = %forCond
+  store i32 %iter, i32* %i
   %i8 = load i32, i32* %i
   %load = load i32, i32* %num
   %mul = mul i32 %load, %i8
@@ -1677,14 +1677,12 @@ forBody:                                          ; preds = %forCond
   br label %forIter
 
 forIter:                                          ; preds = %forBody
-  %iter9 = load i32, i32* %i
-  %inc = add i32 %iter9, 1
-  store i32 %inc, i32* %i
+  %inc = add i32 %iter, 1
   br label %forCond
 
 forExit:                                          ; preds = %forCond
-  %num10 = load i32, i32* %num
-  ret i32 %num10
+  %num9 = load i32, i32* %num
+  ret i32 %num9
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -1694,24 +1692,24 @@ entry:
   %i = alloca i32
   %x = alloca i32
   store i32 0, i32* %x
-  store i32 0, i32* %i
   br label %forCond
 
-forCond:                                          ; preds = %forIter8, %entry
-  %iter = load i32, i32* %i
+forCond:                                          ; preds = %forIter7, %entry
+  %iter = phi i32 [ 0, %entry ], [ %inc8, %forIter7 ]
   %cmp = icmp ult i32 %iter, 5
-  br i1 %cmp, label %forBody, label %forExit11
+  br i1 %cmp, label %forBody, label %forExit9
 
 forBody:                                          ; preds = %forCond
-  store i32 1, i32* %j
+  store i32 %iter, i32* %i
   br label %forCond1
 
 forCond1:                                         ; preds = %forIter, %forBody
-  %iter2 = load i32, i32* %j
+  %iter2 = phi i32 [ 1, %forBody ], [ %inc, %forIter ]
   %cmp3 = icmp ule i32 %iter2, 10
   br i1 %cmp3, label %forBody4, label %forExit
 
 forBody4:                                         ; preds = %forCond1
+  store i32 %iter2, i32* %j
   %i5 = load i32, i32* %i
   %j6 = load i32, i32* %j
   %mul = mul i32 %i5, %j6
@@ -1721,23 +1719,19 @@ forBody4:                                         ; preds = %forCond1
   br label %forIter
 
 forIter:                                          ; preds = %forBody4
-  %iter7 = load i32, i32* %j
-  %inc = add i32 %iter7, 1
-  store i32 %inc, i32* %j
+  %inc = add i32 %iter2, 1
   br label %forCond1
 
 forExit:                                          ; preds = %forCond1
-  br label %forIter8
+  br label %forIter7
 
-forIter8:                                         ; preds = %forExit
-  %iter9 = load i32, i32* %i
-  %inc10 = add i32 %iter9, 1
-  store i32 %inc10, i32* %i
+forIter7:                                         ; preds = %forExit
+  %inc8 = add i32 %iter, 1
   br label %forCond
 
-forExit11:                                        ; preds = %forCond
-  %x12 = load i32, i32* %x
-  ret i32 %x12
+forExit9:                                         ; preds = %forCond
+  %x10 = load i32, i32* %x
+  ret i32 %x10
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -2080,24 +2074,24 @@ entry:
   %k = alloca i32
   %j = alloca i8
   %i = alloca i8
-  store i8 0, i8* %i
   br label %forCond
 
-forCond:                                          ; preds = %forIter13, %entry
-  %iter = load i8, i8* %i
+forCond:                                          ; preds = %forIter12, %entry
+  %iter = phi i8 [ 0, %entry ], [ %inc13, %forIter12 ]
   %cmp = icmp sle i8 %iter, 10
-  br i1 %cmp, label %forBody, label %forExit16
+  br i1 %cmp, label %forBody, label %forExit14
 
 forBody:                                          ; preds = %forCond
-  store i8 0, i8* %j
+  store i8 %iter, i8* %i
   br label %forCond1
 
 forCond1:                                         ; preds = %forIter, %forBody
-  %iter2 = load i8, i8* %j
+  %iter2 = phi i8 [ 0, %forBody ], [ %inc, %forIter ]
   %cmp3 = icmp sle i8 %iter2, 7
   br i1 %cmp3, label %forBody4, label %forExit
 
 forBody4:                                         ; preds = %forCond1
+  store i8 %iter2, i8* %j
   %j5 = load i8, i8* %j
   %cmpeq = icmp eq i8 %j5, 4
   br i1 %cmpeq, label %if, label %else
@@ -2117,82 +2111,78 @@ merge:                                            ; preds = %else, %aftercontinu
   br label %forIter
 
 forIter:                                          ; preds = %merge, %if
-  %iter6 = load i8, i8* %j
-  %inc = add i8 %iter6, 1
-  store i8 %inc, i8* %j
+  %inc = add i8 %iter2, 1
   br label %forCond1
 
 forExit:                                          ; preds = %forCond1
-  %i7 = load i8, i8* %i
-  %cmpeq8 = icmp eq i8 %i7, 8
-  br i1 %cmpeq8, label %if9, label %else10
+  %i6 = load i8, i8* %i
+  %cmpeq7 = icmp eq i8 %i6, 8
+  br i1 %cmpeq7, label %if8, label %else9
 
-if9:                                              ; preds = %forExit
-  br label %forExit16
+if8:                                              ; preds = %forExit
+  br label %forExit14
 
 afterbreak:                                       ; No predecessors!
-  br label %merge11
+  br label %merge10
 
-else10:                                           ; preds = %forExit
-  br label %merge11
+else9:                                            ; preds = %forExit
+  br label %merge10
 
-merge11:                                          ; preds = %else10, %afterbreak
-  %phi12 = phi %UnitType [ zeroinitializer, %afterbreak ], [ zeroinitializer, %else10 ]
-  br label %forIter13
+merge10:                                          ; preds = %else9, %afterbreak
+  %phi11 = phi %UnitType [ zeroinitializer, %afterbreak ], [ zeroinitializer, %else9 ]
+  br label %forIter12
 
-forIter13:                                        ; preds = %merge11
-  %iter14 = load i8, i8* %i
-  %inc15 = add i8 %iter14, 1
-  store i8 %inc15, i8* %i
+forIter12:                                        ; preds = %merge10
+  %inc13 = add i8 %iter, 1
   br label %forCond
 
-forExit16:                                        ; preds = %if9, %forCond
+forExit14:                                        ; preds = %if8, %forCond
   store i32 0, i32* %k
   br label %whileCond
 
-whileCond:                                        ; preds = %merge30, %if20, %forExit16
-  %k17 = load i32, i32* %k
-  %cmplt = icmp slt i32 %k17, 17
+whileCond:                                        ; preds = %merge28, %if18, %forExit14
+  %k15 = load i32, i32* %k
+  %cmplt = icmp slt i32 %k15, 17
   br i1 %cmplt, label %whileBody, label %whileExit
 
 whileBody:                                        ; preds = %whileCond
-  %k18 = load i32, i32* %k
-  %cmpeq19 = icmp eq i32 %k18, 3
-  br i1 %cmpeq19, label %if20, label %else22
+  %k16 = load i32, i32* %k
+  %cmpeq17 = icmp eq i32 %k16, 3
+  br i1 %cmpeq17, label %if18, label %else20
 
-if20:                                             ; preds = %whileBody
+if18:                                             ; preds = %whileBody
   br label %whileCond
 
-aftercontinue21:                                  ; No predecessors!
-  br label %merge30
+aftercontinue19:                                  ; No predecessors!
+  br label %merge28
 
-else22:                                           ; preds = %whileBody
-  %k23 = load i32, i32* %k
-  %cmpeq24 = icmp eq i32 %k23, 10
-  br i1 %cmpeq24, label %if25, label %else27
+else20:                                           ; preds = %whileBody
+  %k21 = load i32, i32* %k
+  %cmpeq22 = icmp eq i32 %k21, 10
+  br i1 %cmpeq22, label %if23, label %else25
 
-if25:                                             ; preds = %else22
+if23:                                             ; preds = %else20
   br label %whileExit
 
-afterbreak26:                                     ; No predecessors!
+afterbreak24:                                     ; No predecessors!
+  br label %merge26
+
+else25:                                           ; preds = %else20
+  br label %merge26
+
+merge26:                                          ; preds = %else25, %afterbreak24
+  %phi27 = phi %UnitType [ zeroinitializer, %afterbreak24 ], [ zeroinitializer, %else25 ]
   br label %merge28
 
-else27:                                           ; preds = %else22
-  br label %merge28
-
-merge28:                                          ; preds = %else27, %afterbreak26
-  %phi29 = phi %UnitType [ zeroinitializer, %afterbreak26 ], [ zeroinitializer, %else27 ]
-  br label %merge30
-
-merge30:                                          ; preds = %merge28, %aftercontinue21
-  %phi31 = phi %UnitType [ zeroinitializer, %aftercontinue21 ], [ %phi29, %merge28 ]
-  %call32 = call i32 @noArgs()
+merge28:                                          ; preds = %merge26, %aftercontinue19
+  %phi29 = phi %UnitType [ zeroinitializer, %aftercontinue19 ], [ %phi27, %merge26 ]
+  %call30 = call i32 @noArgs()
   %load = load i32, i32* %k
   %add = add i32 %load, 1
   store i32 %add, i32* %k
   br label %whileCond
 
-whileExit:                                        ; preds = %if25, %whileCond
+whileExit:                                        ; preds = %if23, %whileCond
   ret %UnitType zeroinitializer
 }
 

@@ -481,14 +481,14 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     index[0] = 0;
     Value* startValue = builder.CreateExtractValue(rangeValue, index, "start");
     startValue = CreateExt(startValue, rangeMemberType, varType);
-    builder.CreateStore(startValue, alloca);
 
     // get range end
     index[0] = 1;
     Value* endValue = builder.CreateExtractValue(rangeValue, index, "end");
     endValue = CreateExt(endValue, rangeMemberType, varType);
 
-    Function* function = builder.GetInsertBlock()->getParent();
+    BasicBlock* incomingBlock = builder.GetInsertBlock();
+    Function* function = incomingBlock->getParent();
 
     BasicBlock* loopCondBlock = BasicBlock::Create(context, "forCond", function);
 
@@ -501,7 +501,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     SetDebugLocation(varNameToken);
 
     // generate the condition IR
-    Value* iter = builder.CreateLoad(alloca, "iter");
+    PHINode* iter = builder.CreatePHI(type, 2, "iter");
+    iter->addIncoming(startValue, incomingBlock);
     CmpInst::Predicate predicate = CmpInst::BAD_ICMP_PREDICATE;
     if (rangeType->IsExclusive())
     {
@@ -525,6 +526,9 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     // set insert point to the loop body block
     builder.SetInsertPoint(loopBodyBlock);
 
+    // store the iter value in the iterator variable
+    builder.CreateStore(iter, alloca);
+
     // generate loop body IR
     LoopInfo loopInfo;
     loopInfo.breakBlock = loopExitBlock;
@@ -547,10 +551,9 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     builder.SetInsertPoint(loopIterBlock);
 
     // increment iterator
-    iter = builder.CreateLoad(alloca, "iter");
     Value* one = ConstantInt::get(type, 1, isSigned);
-    iter = builder.CreateAdd(iter, one, "inc");
-    builder.CreateStore(iter, alloca);
+    Value* inc = builder.CreateAdd(iter, one, "inc");
+    iter->addIncoming(inc, loopIterBlock);
 
     // create unconditional branch to loop condition block
     builder.CreateBr(loopCondBlock);

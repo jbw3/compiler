@@ -184,31 +184,31 @@ entry:
   %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !164
   call void @llvm.dbg.declare(metadata i32* %i, metadata !155, metadata !DIExpression()), !dbg !165
   %start = extractvalue %Range32 %rng, 0, !dbg !164
-  store i32 %start, i32* %i, !dbg !164
   %end = extractvalue %Range32 %rng, 1, !dbg !164
   br label %forCond, !dbg !164
 
-forCond:                                          ; preds = %forIter15, %entry
-  %iter = load i32, i32* %i, !dbg !165
+forCond:                                          ; preds = %forIter14, %entry
+  %iter = phi i32 [ %start, %entry ], [ %inc15, %forIter14 ], !dbg !165
   %cmp = icmp sle i32 %iter, %end, !dbg !165
-  br i1 %cmp, label %forBody, label %forExit18, !dbg !165
+  br i1 %cmp, label %forBody, label %forExit16, !dbg !165
 
 forBody:                                          ; preds = %forCond
+  store i32 %iter, i32* %i, !dbg !165
   %n3 = load i32, i32* %n1, !dbg !166
   %rng4 = insertvalue %Range32 undef, i32 %n3, 0, !dbg !167
   %rng5 = insertvalue %Range32 %rng4, i32 10, 1, !dbg !167
   call void @llvm.dbg.declare(metadata i32* %j, metadata !157, metadata !DIExpression()), !dbg !168
   %start6 = extractvalue %Range32 %rng5, 0, !dbg !167
-  store i32 %start6, i32* %j, !dbg !167
   %end7 = extractvalue %Range32 %rng5, 1, !dbg !167
   br label %forCond8, !dbg !167
 
 forCond8:                                         ; preds = %forIter, %forBody
-  %iter9 = load i32, i32* %j, !dbg !168
+  %iter9 = phi i32 [ %start6, %forBody ], [ %inc, %forIter ], !dbg !168
   %cmp10 = icmp sle i32 %iter9, %end7, !dbg !168
   br i1 %cmp10, label %forBody11, label %forExit, !dbg !168
 
 forBody11:                                        ; preds = %forCond8
+  store i32 %iter9, i32* %j, !dbg !168
   %i12 = load i32, i32* %i, !dbg !169
   %j13 = load i32, i32* %j, !dbg !171
   %mul = mul i32 %i12, %j13, !dbg !172
@@ -218,23 +218,19 @@ forBody11:                                        ; preds = %forCond8
   br label %forIter, !dbg !173
 
 forIter:                                          ; preds = %forBody11
-  %iter14 = load i32, i32* %j, !dbg !173
-  %inc = add i32 %iter14, 1, !dbg !173
-  store i32 %inc, i32* %j, !dbg !173
+  %inc = add i32 %iter9, 1, !dbg !173
   br label %forCond8, !dbg !173
 
 forExit:                                          ; preds = %forCond8
-  br label %forIter15, !dbg !173
+  br label %forIter14, !dbg !173
 
-forIter15:                                        ; preds = %forExit
-  %iter16 = load i32, i32* %i, !dbg !173
-  %inc17 = add i32 %iter16, 1, !dbg !173
-  store i32 %inc17, i32* %i, !dbg !173
+forIter14:                                        ; preds = %forExit
+  %inc15 = add i32 %iter, 1, !dbg !173
   br label %forCond, !dbg !173
 
-forExit18:                                        ; preds = %forCond
-  %a19 = load i32, i32* %a, !dbg !174
-  ret i32 %a19, !dbg !174
+forExit16:                                        ; preds = %forCond
+  %a17 = load i32, i32* %a, !dbg !174
+  ret i32 %a17, !dbg !174
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -266,15 +262,15 @@ entry:
   %j = alloca i8
   %i = alloca i8
   call void @llvm.dbg.declare(metadata i8* %i, metadata !207, metadata !DIExpression()), !dbg !211
-  store i8 0, i8* %i, !dbg !212
   br label %forCond, !dbg !212
 
 forCond:                                          ; preds = %forIter, %entry
-  %iter = load i8, i8* %i, !dbg !211
+  %iter = phi i8 [ 0, %entry ], [ %inc, %forIter ], !dbg !211
   %cmp = icmp sle i8 %iter, 7, !dbg !211
   br i1 %cmp, label %forBody, label %forExit, !dbg !211
 
 forBody:                                          ; preds = %forCond
+  store i8 %iter, i8* %i, !dbg !211
   %i1 = load i8, i8* %i, !dbg !213
   %cmpeq = icmp eq i8 %i1, 5, !dbg !215
   br i1 %cmpeq, label %if, label %else, !dbg !215
@@ -309,9 +305,7 @@ merge6:                                           ; preds = %merge, %afterbreak
   br label %forIter, !dbg !222
 
 forIter:                                          ; preds = %merge6, %if4
-  %iter8 = load i8, i8* %i, !dbg !222
-  %inc = add i8 %iter8, 1, !dbg !222
-  store i8 %inc, i8* %i, !dbg !222
+  %inc = add i8 %iter, 1, !dbg !222
   br label %forCond, !dbg !222
 
 forExit:                                          ; preds = %if, %forCond
@@ -319,50 +313,50 @@ forExit:                                          ; preds = %if, %forCond
   store i8 1, i8* %j, !dbg !224
   br label %whileCond, !dbg !224
 
-whileCond:                                        ; preds = %merge21, %if12, %forExit
-  %j9 = load i8, i8* %j, !dbg !225
-  %cmplt = icmp slt i8 %j9, 100, !dbg !226
+whileCond:                                        ; preds = %merge20, %if11, %forExit
+  %j8 = load i8, i8* %j, !dbg !225
+  %cmplt = icmp slt i8 %j8, 100, !dbg !226
   br i1 %cmplt, label %whileBody, label %whileExit, !dbg !226
 
 whileBody:                                        ; preds = %whileCond
-  %j10 = load i8, i8* %j, !dbg !227
-  %rem = srem i8 %j10, 7, !dbg !229
-  %cmpeq11 = icmp eq i8 %rem, 0, !dbg !230
-  br i1 %cmpeq11, label %if12, label %else14, !dbg !230
+  %j9 = load i8, i8* %j, !dbg !227
+  %rem = srem i8 %j9, 7, !dbg !229
+  %cmpeq10 = icmp eq i8 %rem, 0, !dbg !230
+  br i1 %cmpeq10, label %if11, label %else13, !dbg !230
 
-if12:                                             ; preds = %whileBody
+if11:                                             ; preds = %whileBody
   br label %whileCond, !dbg !231
 
-aftercontinue13:                                  ; No predecessors!
-  br label %merge15, !dbg !231
+aftercontinue12:                                  ; No predecessors!
+  br label %merge14, !dbg !231
 
-else14:                                           ; preds = %whileBody
-  br label %merge15, !dbg !231
+else13:                                           ; preds = %whileBody
+  br label %merge14, !dbg !231
 
-merge15:                                          ; preds = %else14, %aftercontinue13
-  %phi16 = phi %UnitType [ zeroinitializer, %aftercontinue13 ], [ zeroinitializer, %else14 ], !dbg !231
-  %j17 = load i8, i8* %j, !dbg !233
-  %cmpgt = icmp sgt i8 %j17, 89, !dbg !234
-  br i1 %cmpgt, label %if18, label %else20, !dbg !234
+merge14:                                          ; preds = %else13, %aftercontinue12
+  %phi15 = phi %UnitType [ zeroinitializer, %aftercontinue12 ], [ zeroinitializer, %else13 ], !dbg !231
+  %j16 = load i8, i8* %j, !dbg !233
+  %cmpgt = icmp sgt i8 %j16, 89, !dbg !234
+  br i1 %cmpgt, label %if17, label %else19, !dbg !234
 
-if18:                                             ; preds = %merge15
+if17:                                             ; preds = %merge14
   br label %whileExit, !dbg !235
 
-afterbreak19:                                     ; No predecessors!
-  br label %merge21, !dbg !235
+afterbreak18:                                     ; No predecessors!
+  br label %merge20, !dbg !235
 
-else20:                                           ; preds = %merge15
-  br label %merge21, !dbg !235
+else19:                                           ; preds = %merge14
+  br label %merge20, !dbg !235
 
-merge21:                                          ; preds = %else20, %afterbreak19
-  %phi22 = phi %UnitType [ zeroinitializer, %afterbreak19 ], [ zeroinitializer, %else20 ], !dbg !235
-  %call23 = call i32 @noParams(), !dbg !237
+merge20:                                          ; preds = %else19, %afterbreak18
+  %phi21 = phi %UnitType [ zeroinitializer, %afterbreak18 ], [ zeroinitializer, %else19 ], !dbg !235
+  %call22 = call i32 @noParams(), !dbg !237
   %load = load i8, i8* %j, !dbg !238
   %add = add i8 %load, 1, !dbg !238
   store i8 %add, i8* %j, !dbg !238
   br label %whileCond, !dbg !238
 
-whileExit:                                        ; preds = %if18, %whileCond
+whileExit:                                        ; preds = %if17, %whileCond
   ret %UnitType zeroinitializer, !dbg !238
 }
 
