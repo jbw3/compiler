@@ -8,15 +8,15 @@ $target_triple
 %Range16 = type { i16, i16 }
 %Range32 = type { i32, i32 }
 %Range8 = type { i8, i8 }
+%"[i32]" = type { i64, i32* }
+%"[i8]" = type { i64, i8* }
 %Test2 = type { %Test1, i32 }
 %Test1 = type { i32, i1, %str }
 %EmptyType = type {}
 %SubscriptTest1 = type { %SubscriptTest2 }
 %SubscriptTest2 = type { %str }
-%"[i32]" = type { i64, i32* }
 %"[i16]" = type { i64, i16* }
 %"[u8]" = type { i64, i8* }
-%"[i8]" = type { i64, i8* }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -1683,6 +1683,114 @@ forIter:                                          ; preds = %forBody
 forExit:                                          ; preds = %forCond
   %num9 = load i32, i32* %num
   ret i32 %num9
+}
+
+; Function Attrs: noinline nounwind optnone
+define i32 @forLoopArray(%"[i32]" %a) #0 {
+entry:
+  %x30 = alloca i32
+  %x12 = alloca i16
+  %array6 = alloca [3 x i8]
+  %x = alloca i8
+  %array = alloca [3 x i8]
+  %sum = alloca i32
+  %a1 = alloca %"[i32]"
+  store %"[i32]" %a, %"[i32]"* %a1
+  store i32 0, i32* %sum
+  %ptr = getelementptr inbounds [3 x i8], [3 x i8]* %array, i64 0, i64 0
+  store i8 1, i8* %ptr
+  %ptr2 = getelementptr inbounds [3 x i8], [3 x i8]* %array, i64 0, i64 1
+  store i8 2, i8* %ptr2
+  %ptr3 = getelementptr inbounds [3 x i8], [3 x i8]* %array, i64 0, i64 2
+  store i8 3, i8* %ptr3
+  %arrptr = bitcast [3 x i8]* %array to i8*
+  %agg = insertvalue %"[i8]" { i64 3, i8* undef }, i8* %arrptr, 1
+  %size = extractvalue %"[i8]" %agg, 0
+  %data = extractvalue %"[i8]" %agg, 1
+  br label %forCond
+
+forCond:                                          ; preds = %forIter, %entry
+  %iter = phi i64 [ 0, %entry ], [ %inc, %forIter ]
+  %cmp = icmp ult i64 %iter, %size
+  br i1 %cmp, label %forBody, label %forExit
+
+forBody:                                          ; preds = %forCond
+  %value = getelementptr inbounds i8, i8* %data, i64 %iter
+  %load = load i8, i8* %value
+  store i8 %load, i8* %x
+  %x4 = load i8, i8* %x
+  %signext = sext i8 %x4 to i32
+  %load5 = load i32, i32* %sum
+  %add = add i32 %load5, %signext
+  store i32 %add, i32* %sum
+  br label %forIter
+
+forIter:                                          ; preds = %forBody
+  %inc = add i64 %iter, 1
+  br label %forCond
+
+forExit:                                          ; preds = %forCond
+  %ptr7 = getelementptr inbounds [3 x i8], [3 x i8]* %array6, i64 0, i64 0
+  store i8 10, i8* %ptr7
+  %ptr8 = getelementptr inbounds [3 x i8], [3 x i8]* %array6, i64 0, i64 1
+  store i8 20, i8* %ptr8
+  %ptr9 = getelementptr inbounds [3 x i8], [3 x i8]* %array6, i64 0, i64 2
+  store i8 30, i8* %ptr9
+  %arrptr10 = bitcast [3 x i8]* %array6 to i8*
+  %agg11 = insertvalue %"[i8]" { i64 3, i8* undef }, i8* %arrptr10, 1
+  %size13 = extractvalue %"[i8]" %agg11, 0
+  %data14 = extractvalue %"[i8]" %agg11, 1
+  br label %forCond15
+
+forCond15:                                        ; preds = %forIter26, %forExit
+  %iter16 = phi i64 [ 0, %forExit ], [ %inc27, %forIter26 ]
+  %cmp17 = icmp ult i64 %iter16, %size13
+  br i1 %cmp17, label %forBody18, label %forExit28
+
+forBody18:                                        ; preds = %forCond15
+  %value19 = getelementptr inbounds i8, i8* %data14, i64 %iter16
+  %load20 = load i8, i8* %value19
+  %signext21 = sext i8 %load20 to i16
+  store i16 %signext21, i16* %x12
+  %x22 = load i16, i16* %x12
+  %signext23 = sext i16 %x22 to i32
+  %load24 = load i32, i32* %sum
+  %add25 = add i32 %load24, %signext23
+  store i32 %add25, i32* %sum
+  br label %forIter26
+
+forIter26:                                        ; preds = %forBody18
+  %inc27 = add i64 %iter16, 1
+  br label %forCond15
+
+forExit28:                                        ; preds = %forCond15
+  %a29 = load %"[i32]", %"[i32]"* %a1
+  %size31 = extractvalue %"[i32]" %a29, 0
+  %data32 = extractvalue %"[i32]" %a29, 1
+  br label %forCond33
+
+forCond33:                                        ; preds = %forIter42, %forExit28
+  %iter34 = phi i64 [ 0, %forExit28 ], [ %inc43, %forIter42 ]
+  %cmp35 = icmp ult i64 %iter34, %size31
+  br i1 %cmp35, label %forBody36, label %forExit44
+
+forBody36:                                        ; preds = %forCond33
+  %value37 = getelementptr inbounds i32, i32* %data32, i64 %iter34
+  %load38 = load i32, i32* %value37
+  store i32 %load38, i32* %x30
+  %x39 = load i32, i32* %x30
+  %load40 = load i32, i32* %sum
+  %add41 = add i32 %load40, %x39
+  store i32 %add41, i32* %sum
+  br label %forIter42
+
+forIter42:                                        ; preds = %forBody36
+  %inc43 = add i64 %iter34, 1
+  br label %forCond33
+
+forExit44:                                        ; preds = %forCond33
+  %sum45 = load i32, i32* %sum
+  ret i32 %sum45
 }
 
 ; Function Attrs: noinline nounwind optnone

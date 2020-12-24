@@ -554,6 +554,28 @@ fun forLoop(start i32, end i32) i32
     num
 }
 
+fun forLoopArray(a [i32]) i32
+{
+    var sum i32 = 0;
+
+    for x in [1, 2, 3]
+    {
+        sum += x;
+    }
+
+    for x i16 in [10, 20, 30]
+    {
+        sum += x;
+    }
+
+    for x in a
+    {
+        sum += x;
+    }
+
+    return sum;
+}
+
 fun nestedForLoop() u32
 {
     var x u32 = 0;
