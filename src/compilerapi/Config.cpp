@@ -329,5 +329,7 @@ Output LLVM IR as text:
 
 Output a C/C++ header file:
   wip test.wip --emit c-header -o test.h
+
+More info: https://github.com/jbw3/compiler/wiki/Compiler
 )";
 }
