@@ -406,6 +406,12 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     const TypeInfo* startType = rightType->GetMembers()[0]->GetType();
     const TypeInfo* endType = rightType->GetMembers()[1]->GetType();
 
+    // get array size
+    Value* size = builder.CreateExtractValue(leftValue, 0, "size");
+
+    // get array data pointer
+    Value* data = builder.CreateExtractValue(leftValue, 1, "data");
+
     // get range start
     Value* start = builder.CreateExtractValue(rightValue, 0, "start");
     if (startType->GetNumBits() < uIntSizeNumBits)
@@ -422,18 +428,19 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
         end = builder.CreateZExt(end, extType, "zeroext");
     }
 
-    // get array size
-    Value* size = builder.CreateExtractValue(leftValue, 0, "size");
-
-    // calculate new size
-    Value* newSize = builder.CreateSub(end, start, "sub");
+    // if this range is inclusive, add 1 to the end
     if (!rightType->IsExclusive())
     {
         Value* one = ConstantInt::get(context, APInt(uIntSizeNumBits, 1, false));
-        newSize = builder.CreateAdd(newSize, one, "add");
+        end = builder.CreateAdd(end, one, "add");
     }
 
-    Value* data = builder.CreateExtractValue(leftValue, 1, "data");
+    // check end
+    Value* endOk = builder.CreateICmpULT(end, size, "endok");
+    Value* checkEnd = builder.CreateSelect(endOk, end, size, "checkend");
+
+    // calculate new size
+    Value* newSize = builder.CreateSub(checkEnd, start, "sub");
 
     vector<Value*> indices;
     indices.push_back(start);
