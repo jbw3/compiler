@@ -635,6 +635,27 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 ok = false;
             }
         }
+        else if (op == BinaryExpression::eSubscript && rightType->IsRange())
+        {
+            const TypeInfo* innerType = rightType->GetMembers()[0]->GetType();
+            TypeInfo::ESign rightSign = innerType->GetSign();
+            if (rightSign == TypeInfo::eUnsigned)
+            {
+                ok = true;
+            }
+            else if (rightSign == TypeInfo::eContextDependent)
+            {
+                const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
+                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsExclusive());
+                rightExpr->SetType(newType);
+
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+            }
+        }
         else
         {
             ok = false;
@@ -753,13 +774,26 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         }
         case BinaryExpression::eSubscript:
         {
-            if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+            if (rightType->IsInt())
             {
-                return TypeInfo::UInt8Type;
+                if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+                {
+                    return TypeInfo::UInt8Type;
+                }
+                else if (leftType->IsArray())
+                {
+                    return leftType->GetInnerType();
+                }
+                else
+                {
+                    logger.LogInternalError("Could not determine result type");
+                    return nullptr;
+                }
             }
-            else if (leftType->IsArray())
+            else if (rightType->IsRange())
             {
-                return leftType->GetInnerType();
+                // this is a slice, so the result type will be the same as what we are slicing
+                return leftType;
             }
             else
             {
