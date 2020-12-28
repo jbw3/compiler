@@ -275,88 +275,17 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             }
             case BinaryExpression::eSubscript:
             {
-                unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
-
-                if (boundsCheck)
+                if (rightType->IsInt())
                 {
-                    vector<uint32_t> sizeIndex;
-                    sizeIndex.push_back(0);
-                    Value* size = builder.CreateExtractValue(leftValue, sizeIndex, "size");
-
-                    Value* indexValue = nullptr;
-                    if (rightType->GetNumBits() < uIntSizeNumBits)
-                    {
-                        Type* extType = GetType(TypeInfo::GetUIntSizeType());
-                        indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
-                    }
-                    else
-                    {
-                        indexValue = rightValue;
-                    }
-
-                    Value* boundsCheck = builder.CreateICmpUGE(indexValue, size, "check");
-
-                    Function* function = builder.GetInsertBlock()->getParent();
-                    BasicBlock* failedBlock = BasicBlock::Create(context, "failed", function);
-                    BasicBlock* passedBlock = BasicBlock::Create(context, "passed", function);
-
-                    builder.CreateCondBr(boundsCheck, failedBlock, passedBlock);
-
-                    // generate "failed" block IR
-                    builder.SetInsertPoint(failedBlock);
-
-                    Function* logErrorFunc = module->getFunction("logError");
-                    if (logErrorFunc != nullptr)
-                    {
-                        const Token* opToken = binaryExpression->GetOperatorToken();
-
-                        Constant* fileStrPtr = CreateConstantString(opToken->GetFilename());
-                        Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
-                        Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
-                        Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
-                        Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
-
-                        vector<Value*> logErrorArgs;
-                        logErrorArgs.push_back(fileStr);
-                        logErrorArgs.push_back(lineNum);
-                        logErrorArgs.push_back(msgStr);
-                        builder.CreateCall(logErrorFunc, logErrorArgs);
-                    }
-
-                    Function* exitFunc = module->getFunction("exit");
-
-                    // declare the function if it does not exist
-                    if (exitFunc == nullptr)
-                    {
-                        vector<Type*> parameters;
-                        parameters.push_back(Type::getInt32Ty(context));
-                        FunctionType* funcType = FunctionType::get(Type::getVoidTy(context), parameters, false);
-                        exitFunc = Function::Create(funcType, Function::ExternalLinkage, "exit", module);
-                    }
-
-                    vector<Value*> exitArgs;
-                    exitArgs.push_back(ConstantInt::get(context, APInt(32, 1)));
-                    builder.CreateCall(exitFunc, exitArgs);
-                    builder.CreateUnreachable();
-
-                    // generate "passed" block IR
-                    builder.SetInsertPoint(passedBlock);
+                    resultValue = GenerateIntSubscriptIr(binaryExpression, leftValue, rightValue);
                 }
-
-                vector<uint32_t> dataIndex;
-                dataIndex.push_back(1);
-                Value* data = builder.CreateExtractValue(leftValue, dataIndex, "data");
-
-                vector<Value*> valueIndices;
-                valueIndices.push_back(rightValue);
-                Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
-                if (binaryExpression->GetAccessType() == Expression::eAddress)
+                else if (rightType->IsRange())
                 {
-                    resultValue = valuePtr;
+                    resultValue = GenerateRangeSubscriptIr(binaryExpression, leftValue, rightValue);
                 }
                 else
                 {
-                    resultValue = builder.CreateLoad(valuePtr, "load");
+                    assert(false && "Unexpected subscript type");
                 }
                 break;
             }
@@ -375,6 +304,154 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             ExtendType(intermediateType, binaryExpression->GetType(), resultValue);
         }
     }
+}
+
+Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExpression, Value* leftValue, Value* rightValue)
+{
+    const TypeInfo* rightType = binaryExpression->GetRightExpression()->GetType();
+
+    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+
+    if (boundsCheck)
+    {
+        vector<uint32_t> sizeIndex;
+        sizeIndex.push_back(0);
+        Value* size = builder.CreateExtractValue(leftValue, sizeIndex, "size");
+
+        Value* indexValue = nullptr;
+        if (rightType->GetNumBits() < uIntSizeNumBits)
+        {
+            Type* extType = GetType(TypeInfo::GetUIntSizeType());
+            indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
+        }
+        else
+        {
+            indexValue = rightValue;
+        }
+
+        Value* boundsCheck = builder.CreateICmpUGE(indexValue, size, "check");
+
+        Function* function = builder.GetInsertBlock()->getParent();
+        BasicBlock* failedBlock = BasicBlock::Create(context, "failed", function);
+        BasicBlock* passedBlock = BasicBlock::Create(context, "passed", function);
+
+        builder.CreateCondBr(boundsCheck, failedBlock, passedBlock);
+
+        // generate "failed" block IR
+        builder.SetInsertPoint(failedBlock);
+
+        Function* logErrorFunc = module->getFunction("logError");
+        if (logErrorFunc != nullptr)
+        {
+            const Token* opToken = binaryExpression->GetOperatorToken();
+
+            Constant* fileStrPtr = CreateConstantString(opToken->GetFilename());
+            Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
+            Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
+            Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
+            Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
+
+            vector<Value*> logErrorArgs;
+            logErrorArgs.push_back(fileStr);
+            logErrorArgs.push_back(lineNum);
+            logErrorArgs.push_back(msgStr);
+            builder.CreateCall(logErrorFunc, logErrorArgs);
+        }
+
+        Function* exitFunc = module->getFunction("exit");
+
+        // declare the function if it does not exist
+        if (exitFunc == nullptr)
+        {
+            vector<Type*> parameters;
+            parameters.push_back(Type::getInt32Ty(context));
+            FunctionType* funcType = FunctionType::get(Type::getVoidTy(context), parameters, false);
+            exitFunc = Function::Create(funcType, Function::ExternalLinkage, "exit", module);
+        }
+
+        vector<Value*> exitArgs;
+        exitArgs.push_back(ConstantInt::get(context, APInt(32, 1)));
+        builder.CreateCall(exitFunc, exitArgs);
+        builder.CreateUnreachable();
+
+        // generate "passed" block IR
+        builder.SetInsertPoint(passedBlock);
+    }
+
+    vector<uint32_t> dataIndex;
+    dataIndex.push_back(1);
+    Value* data = builder.CreateExtractValue(leftValue, dataIndex, "data");
+
+    vector<Value*> valueIndices;
+    valueIndices.push_back(rightValue);
+    Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
+    Value* result = nullptr;
+    if (binaryExpression->GetAccessType() == Expression::eAddress)
+    {
+        result = valuePtr;
+    }
+    else
+    {
+        result = builder.CreateLoad(valuePtr, "load");
+    }
+
+    return result;
+}
+
+Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryExpression, Value* leftValue, Value* rightValue)
+{
+    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+    Expression* rightExpr = binaryExpression->GetRightExpression();
+    const TypeInfo* rightType = rightExpr->GetType();
+    const TypeInfo* startType = rightType->GetMembers()[0]->GetType();
+    const TypeInfo* endType = rightType->GetMembers()[1]->GetType();
+
+    vector<unsigned> index(1);
+
+    // get range start
+    index[0] = 0;
+    Value* start = builder.CreateExtractValue(rightValue, index, "start");
+    if (startType->GetNumBits() < uIntSizeNumBits)
+    {
+        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        start = builder.CreateZExt(start, extType, "zeroext");
+    }
+
+    // get range end
+    index[0] = 1;
+    Value* end = builder.CreateExtractValue(rightValue, index, "end");
+    if (endType->GetNumBits() < uIntSizeNumBits)
+    {
+        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        end = builder.CreateZExt(end, extType, "zeroext");
+    }
+
+    // calculate new size
+    Value* newSize = builder.CreateSub(end, start, "sub");
+    if (!rightType->IsExclusive())
+    {
+        Value* one = ConstantInt::get(context, APInt(uIntSizeNumBits, 1, false));
+        newSize = builder.CreateAdd(newSize, one, "add");
+    }
+
+    vector<uint32_t> sizeIndex;
+    sizeIndex.push_back(0);
+    Value* size = builder.CreateExtractValue(leftValue, sizeIndex, "size");
+
+    vector<uint32_t> dataIndex;
+    dataIndex.push_back(1);
+    Value* data = builder.CreateExtractValue(leftValue, dataIndex, "data");
+
+    vector<Value*> indices;
+    indices.push_back(start);
+    Value* newData = builder.CreateInBoundsGEP(data, indices, "ptr");
+
+    // create array struct
+    Value* structValue = UndefValue::get(leftValue->getType());
+    structValue = builder.CreateInsertValue(structValue, newSize, 0, "agg");
+    structValue = builder.CreateInsertValue(structValue, newData, 1, "agg");
+
+    return structValue;
 }
 
 void LlvmIrGenerator::Visit(WhileLoop* whileLoop)

@@ -167,6 +167,10 @@ private:
     std::unordered_map<std::string, llvm::DICompositeType*> diStructTypes;
     std::stack<LoopInfo> loops;
 
+    llvm::Value* GenerateIntSubscriptIr(const SyntaxTree::BinaryExpression* binaryExpression, llvm::Value* leftValue, llvm::Value* rightValue);
+
+    llvm::Value* GenerateRangeSubscriptIr(const SyntaxTree::BinaryExpression* binaryExpression, llvm::Value* leftValue, llvm::Value* rightValue);
+
     llvm::Constant* CreateConstantString(const std::string& str);
 
     llvm::Constant* CreateConstantString(const std::vector<char>& chars);
