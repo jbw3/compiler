@@ -439,11 +439,15 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     Value* endOk = builder.CreateICmpULT(end, size, "endok");
     Value* checkEnd = builder.CreateSelect(endOk, end, size, "checkend");
 
+    // check start
+    Value* startOk = builder.CreateICmpULE(start, checkEnd, "startok");
+    Value* checkStart = builder.CreateSelect(startOk, start, checkEnd, "checkstart");
+
     // calculate new size
-    Value* newSize = builder.CreateSub(checkEnd, start, "sub");
+    Value* newSize = builder.CreateSub(checkEnd, checkStart, "sub");
 
     vector<Value*> indices;
-    indices.push_back(start);
+    indices.push_back(checkStart);
     Value* newData = builder.CreateInBoundsGEP(data, indices, "ptr");
 
     // create array struct
