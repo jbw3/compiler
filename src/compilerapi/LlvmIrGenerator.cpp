@@ -406,11 +406,8 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     const TypeInfo* startType = rightType->GetMembers()[0]->GetType();
     const TypeInfo* endType = rightType->GetMembers()[1]->GetType();
 
-    vector<unsigned> index(1);
-
     // get range start
-    index[0] = 0;
-    Value* start = builder.CreateExtractValue(rightValue, index, "start");
+    Value* start = builder.CreateExtractValue(rightValue, 0, "start");
     if (startType->GetNumBits() < uIntSizeNumBits)
     {
         Type* extType = GetType(TypeInfo::GetUIntSizeType());
@@ -418,13 +415,15 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     }
 
     // get range end
-    index[0] = 1;
-    Value* end = builder.CreateExtractValue(rightValue, index, "end");
+    Value* end = builder.CreateExtractValue(rightValue, 1, "end");
     if (endType->GetNumBits() < uIntSizeNumBits)
     {
         Type* extType = GetType(TypeInfo::GetUIntSizeType());
         end = builder.CreateZExt(end, extType, "zeroext");
     }
+
+    // get array size
+    Value* size = builder.CreateExtractValue(leftValue, 0, "size");
 
     // calculate new size
     Value* newSize = builder.CreateSub(end, start, "sub");
@@ -434,13 +433,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
         newSize = builder.CreateAdd(newSize, one, "add");
     }
 
-    vector<uint32_t> sizeIndex;
-    sizeIndex.push_back(0);
-    Value* size = builder.CreateExtractValue(leftValue, sizeIndex, "size");
-
-    vector<uint32_t> dataIndex;
-    dataIndex.push_back(1);
-    Value* data = builder.CreateExtractValue(leftValue, dataIndex, "data");
+    Value* data = builder.CreateExtractValue(leftValue, 1, "data");
 
     vector<Value*> indices;
     indices.push_back(start);
