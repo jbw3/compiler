@@ -852,3 +852,10 @@ fun arrays3()
 
     arrays1([10, 20, 30]);
 }
+
+fun array_slices(array [i32], start u32, end u32)
+{
+    var a1 = array[start..end];
+    var a2 [i32] = array[start..<end];
+    var a3 = a2[start+1..end-1];
+}
