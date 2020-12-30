@@ -2578,29 +2578,32 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @array_slices(%"[i32]" %array, i32 %start, i32 %end) #0 {
+define %UnitType @slices(%"[i32]" %array, %str %s, i32 %start, i32 %end) #0 {
 entry:
+  %s1 = alloca %str
   %a3 = alloca %"[i32]"
   %a2 = alloca %"[i32]"
   %a1 = alloca %"[i32]"
-  %end3 = alloca i32
-  %start2 = alloca i32
+  %end4 = alloca i32
+  %start3 = alloca i32
+  %s2 = alloca %str
   %array1 = alloca %"[i32]"
   store %"[i32]" %array, %"[i32]"* %array1
-  store i32 %start, i32* %start2
-  store i32 %end, i32* %end3
-  %array4 = load %"[i32]", %"[i32]"* %array1
-  %start5 = load i32, i32* %start2
-  %end6 = load i32, i32* %end3
-  %rng = insertvalue %Range32 undef, i32 %start5, 0
-  %rng7 = insertvalue %Range32 %rng, i32 %end6, 1
-  %size = extractvalue %"[i32]" %array4, 0
-  %data = extractvalue %"[i32]" %array4, 1
-  %start8 = extractvalue %Range32 %rng7, 0
-  %zeroext = zext i32 %start8 to i64
-  %end9 = extractvalue %Range32 %rng7, 1
-  %zeroext10 = zext i32 %end9 to i64
-  %add = add i64 %zeroext10, 1
+  store %str %s, %str* %s2
+  store i32 %start, i32* %start3
+  store i32 %end, i32* %end4
+  %array5 = load %"[i32]", %"[i32]"* %array1
+  %start6 = load i32, i32* %start3
+  %end7 = load i32, i32* %end4
+  %rng = insertvalue %Range32 undef, i32 %start6, 0
+  %rng8 = insertvalue %Range32 %rng, i32 %end7, 1
+  %size = extractvalue %"[i32]" %array5, 0
+  %data = extractvalue %"[i32]" %array5, 1
+  %start9 = extractvalue %Range32 %rng8, 0
+  %zeroext = zext i32 %start9 to i64
+  %end10 = extractvalue %Range32 %rng8, 1
+  %zeroext11 = zext i32 %end10 to i64
+  %add = add i64 %zeroext11, 1
   %endok = icmp ult i64 %add, %size
   %checkend = select i1 %endok, i64 %add, i64 %size
   %startok = icmp ule i64 %zeroext, %checkend
@@ -2608,51 +2611,72 @@ entry:
   %sub = sub i64 %checkend, %checkstart
   %ptr = getelementptr inbounds i32, i32* %data, i64 %checkstart
   %agg = insertvalue %"[i32]" undef, i64 %sub, 0
-  %agg11 = insertvalue %"[i32]" %agg, i32* %ptr, 1
-  store %"[i32]" %agg11, %"[i32]"* %a1
-  %array12 = load %"[i32]", %"[i32]"* %array1
-  %start13 = load i32, i32* %start2
-  %end14 = load i32, i32* %end3
-  %rng15 = insertvalue %Range32 undef, i32 %start13, 0
-  %rng16 = insertvalue %Range32 %rng15, i32 %end14, 1
-  %size17 = extractvalue %"[i32]" %array12, 0
-  %data18 = extractvalue %"[i32]" %array12, 1
-  %start19 = extractvalue %Range32 %rng16, 0
-  %zeroext20 = zext i32 %start19 to i64
-  %end21 = extractvalue %Range32 %rng16, 1
-  %zeroext22 = zext i32 %end21 to i64
-  %endok23 = icmp ult i64 %zeroext22, %size17
-  %checkend24 = select i1 %endok23, i64 %zeroext22, i64 %size17
-  %startok25 = icmp ule i64 %zeroext20, %checkend24
-  %checkstart26 = select i1 %startok25, i64 %zeroext20, i64 %checkend24
-  %sub27 = sub i64 %checkend24, %checkstart26
-  %ptr28 = getelementptr inbounds i32, i32* %data18, i64 %checkstart26
-  %agg29 = insertvalue %"[i32]" undef, i64 %sub27, 0
-  %agg30 = insertvalue %"[i32]" %agg29, i32* %ptr28, 1
-  store %"[i32]" %agg30, %"[i32]"* %a2
-  %a231 = load %"[i32]", %"[i32]"* %a2
-  %start32 = load i32, i32* %start2
-  %add33 = add i32 %start32, 1
-  %end34 = load i32, i32* %end3
-  %sub35 = sub i32 %end34, 1
-  %rng36 = insertvalue %Range32 undef, i32 %add33, 0
-  %rng37 = insertvalue %Range32 %rng36, i32 %sub35, 1
-  %size38 = extractvalue %"[i32]" %a231, 0
-  %data39 = extractvalue %"[i32]" %a231, 1
-  %start40 = extractvalue %Range32 %rng37, 0
-  %zeroext41 = zext i32 %start40 to i64
-  %end42 = extractvalue %Range32 %rng37, 1
-  %zeroext43 = zext i32 %end42 to i64
-  %add44 = add i64 %zeroext43, 1
-  %endok45 = icmp ult i64 %add44, %size38
-  %checkend46 = select i1 %endok45, i64 %add44, i64 %size38
-  %startok47 = icmp ule i64 %zeroext41, %checkend46
-  %checkstart48 = select i1 %startok47, i64 %zeroext41, i64 %checkend46
-  %sub49 = sub i64 %checkend46, %checkstart48
-  %ptr50 = getelementptr inbounds i32, i32* %data39, i64 %checkstart48
-  %agg51 = insertvalue %"[i32]" undef, i64 %sub49, 0
-  %agg52 = insertvalue %"[i32]" %agg51, i32* %ptr50, 1
-  store %"[i32]" %agg52, %"[i32]"* %a3
+  %agg12 = insertvalue %"[i32]" %agg, i32* %ptr, 1
+  store %"[i32]" %agg12, %"[i32]"* %a1
+  %array13 = load %"[i32]", %"[i32]"* %array1
+  %start14 = load i32, i32* %start3
+  %end15 = load i32, i32* %end4
+  %rng16 = insertvalue %Range32 undef, i32 %start14, 0
+  %rng17 = insertvalue %Range32 %rng16, i32 %end15, 1
+  %size18 = extractvalue %"[i32]" %array13, 0
+  %data19 = extractvalue %"[i32]" %array13, 1
+  %start20 = extractvalue %Range32 %rng17, 0
+  %zeroext21 = zext i32 %start20 to i64
+  %end22 = extractvalue %Range32 %rng17, 1
+  %zeroext23 = zext i32 %end22 to i64
+  %endok24 = icmp ult i64 %zeroext23, %size18
+  %checkend25 = select i1 %endok24, i64 %zeroext23, i64 %size18
+  %startok26 = icmp ule i64 %zeroext21, %checkend25
+  %checkstart27 = select i1 %startok26, i64 %zeroext21, i64 %checkend25
+  %sub28 = sub i64 %checkend25, %checkstart27
+  %ptr29 = getelementptr inbounds i32, i32* %data19, i64 %checkstart27
+  %agg30 = insertvalue %"[i32]" undef, i64 %sub28, 0
+  %agg31 = insertvalue %"[i32]" %agg30, i32* %ptr29, 1
+  store %"[i32]" %agg31, %"[i32]"* %a2
+  %a232 = load %"[i32]", %"[i32]"* %a2
+  %start33 = load i32, i32* %start3
+  %add34 = add i32 %start33, 1
+  %end35 = load i32, i32* %end4
+  %sub36 = sub i32 %end35, 1
+  %rng37 = insertvalue %Range32 undef, i32 %add34, 0
+  %rng38 = insertvalue %Range32 %rng37, i32 %sub36, 1
+  %size39 = extractvalue %"[i32]" %a232, 0
+  %data40 = extractvalue %"[i32]" %a232, 1
+  %start41 = extractvalue %Range32 %rng38, 0
+  %zeroext42 = zext i32 %start41 to i64
+  %end43 = extractvalue %Range32 %rng38, 1
+  %zeroext44 = zext i32 %end43 to i64
+  %add45 = add i64 %zeroext44, 1
+  %endok46 = icmp ult i64 %add45, %size39
+  %checkend47 = select i1 %endok46, i64 %add45, i64 %size39
+  %startok48 = icmp ule i64 %zeroext42, %checkend47
+  %checkstart49 = select i1 %startok48, i64 %zeroext42, i64 %checkend47
+  %sub50 = sub i64 %checkend47, %checkstart49
+  %ptr51 = getelementptr inbounds i32, i32* %data40, i64 %checkstart49
+  %agg52 = insertvalue %"[i32]" undef, i64 %sub50, 0
+  %agg53 = insertvalue %"[i32]" %agg52, i32* %ptr51, 1
+  store %"[i32]" %agg53, %"[i32]"* %a3
+  %s54 = load %str, %str* %s2
+  %start55 = load i32, i32* %start3
+  %end56 = load i32, i32* %end4
+  %rng57 = insertvalue %Range32 undef, i32 %start55, 0
+  %rng58 = insertvalue %Range32 %rng57, i32 %end56, 1
+  %size59 = extractvalue %str %s54, 0
+  %data60 = extractvalue %str %s54, 1
+  %start61 = extractvalue %Range32 %rng58, 0
+  %zeroext62 = zext i32 %start61 to i64
+  %end63 = extractvalue %Range32 %rng58, 1
+  %zeroext64 = zext i32 %end63 to i64
+  %add65 = add i64 %zeroext64, 1
+  %endok66 = icmp ult i64 %add65, %size59
+  %checkend67 = select i1 %endok66, i64 %add65, i64 %size59
+  %startok68 = icmp ule i64 %zeroext62, %checkend67
+  %checkstart69 = select i1 %startok68, i64 %zeroext62, i64 %checkend67
+  %sub70 = sub i64 %checkend67, %checkstart69
+  %ptr71 = getelementptr inbounds i8, i8* %data60, i64 %checkstart69
+  %agg72 = insertvalue %str undef, i64 %sub70, 0
+  %agg73 = insertvalue %str %agg72, i8* %ptr71, 1
+  store %str %agg73, %str* %s1
   ret %UnitType zeroinitializer
 }
 

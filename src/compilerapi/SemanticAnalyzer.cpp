@@ -587,6 +587,27 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 ok = false;
             }
         }
+        else if (op == BinaryExpression::eSubscript && rightType->IsRange())
+        {
+            const TypeInfo* innerType = rightType->GetMembers()[0]->GetType();
+            TypeInfo::ESign rightSign = innerType->GetSign();
+            if (rightSign == TypeInfo::eUnsigned)
+            {
+                ok = true;
+            }
+            else if (rightSign == TypeInfo::eContextDependent)
+            {
+                const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
+                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsExclusive());
+                rightExpr->SetType(newType);
+
+                ok = true;
+            }
+            else
+            {
+                ok = false;
+            }
+        }
         else
         {
             ok = false;
