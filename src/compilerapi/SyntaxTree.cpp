@@ -721,17 +721,23 @@ const Token* WhileLoop::GetWhileToken() const
     return whileToken;
 }
 
-ForLoop::ForLoop(const string& variableName, Expression* iterExpression,
+ForLoop::ForLoop(const string& variableName, const string& indexName,
+                 Expression* iterExpression,
                  BlockExpression* expression, const Token* forToken,
                  const Token* inToken, const Token* variableNameToken,
-                 const vector<const Token*>& variableTypeNameTokens) :
+                 const vector<const Token*>& variableTypeNameTokens,
+                 const Token* indexNameToken,
+                 const vector<const Token*>& indexTypeNameTokens) :
     variableName(variableName),
+    indexName(indexName),
     iterExpression(iterExpression),
     expression(expression),
     forToken(forToken),
     inToken(inToken),
     variableNameToken(variableNameToken),
-    variableTypeNameTokens(variableTypeNameTokens)
+    variableTypeNameTokens(variableTypeNameTokens),
+    indexNameToken(indexNameToken),
+    indexTypeNameTokens(indexTypeNameTokens)
 {
 }
 

@@ -750,22 +750,53 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 
     if (!IsValidName(*iter))
     {
-        logger.LogError(*iter, "Invalid variable name");
+        logger.LogError(*iter, "Invalid iterator variable name");
         return nullptr;
     }
 
     const Token* varNameToken = &*iter;
 
-    if (!IncrementIterator(iter, endIter, "Expected variable type or 'in' keyword"))
+    if (!IncrementIterator(iter, endIter, "Expected variable type, ',', or 'in' keyword"))
     {
         return nullptr;
     }
 
     vector<const Token*> varTypeNameTokens;
-    bool ok = ProcessType(iter, endIter, varTypeNameTokens, {IN_KEYWORD});
+    bool ok = ProcessType(iter, endIter, varTypeNameTokens, {",", IN_KEYWORD});
     if (!ok)
     {
         return nullptr;
+    }
+
+    // check if there's an index variable
+    const Token* indexVarNameToken = Token::None;
+    vector<const Token*> indexVarTypeNameTokens;
+    if (iter->GetValue() == ",")
+    {
+        // read variable name
+        if (!IncrementIterator(iter, endIter, "Expected variable name"))
+        {
+            return nullptr;
+        }
+
+        if (!IsValidName(*iter))
+        {
+            logger.LogError(*iter, "Invalid index variable name");
+            return nullptr;
+        }
+
+        indexVarNameToken = &*iter;
+
+        if (!IncrementIterator(iter, endIter, "Expected variable type or 'in' keyword"))
+        {
+            return nullptr;
+        }
+
+        bool ok = ProcessType(iter, endIter, indexVarTypeNameTokens, {IN_KEYWORD});
+        if (!ok)
+        {
+            return nullptr;
+        }
     }
 
     const Token* inToken = &*iter;
@@ -794,10 +825,11 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    ForLoop* forLoop = new ForLoop(varNameToken->GetValue(),
+    ForLoop* forLoop = new ForLoop(varNameToken->GetValue(), indexVarNameToken->GetValue(),
                                    iterExpression.release(), expression.release(),
                                    forToken, inToken,
-                                   varNameToken, varTypeNameTokens);
+                                   varNameToken, varTypeNameTokens,
+                                   indexVarNameToken, indexVarTypeNameTokens);
     return forLoop;
 }
 

@@ -431,10 +431,13 @@ private:
 class ForLoop : public Expression
 {
 public:
-    ForLoop(const std::string& variableName, Expression* iterExpression,
+    ForLoop(const std::string& variableName, const std::string& indexName,
+            Expression* iterExpression,
             BlockExpression* expression, const Token* forToken,
             const Token* inToken, const Token* variableNameToken,
-            const std::vector<const Token*>& variableTypeNameTokens);
+            const std::vector<const Token*>& variableTypeNameTokens,
+            const Token* indexNameToken,
+            const std::vector<const Token*>& indexTypeNameTokens);
 
     virtual ~ForLoop();
 
@@ -458,15 +461,18 @@ public:
 
     const std::vector<const Token*>& GetVariableTypeNameTokens() const;
 
-private:
     std::string variableName;
     const TypeInfo* variableType;
+    std::string indexName;
+    const TypeInfo* indexType;
     Expression* iterExpression;
     BlockExpression* expression;
     const Token* forToken;
     const Token* inToken;
     const Token* variableNameToken;
     std::vector<const Token*> variableTypeNameTokens;
+    const Token* indexNameToken;
+    std::vector<const Token*> indexTypeNameTokens;
 };
 
 class LoopControl : public Expression
