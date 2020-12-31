@@ -91,6 +91,8 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
     PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
     PrintProperty("variableName", forLoop->GetVariableName());
     PrintProperty("variableTypeName", forLoop->GetVariableTypeNameTokens(), printTypeName);
+    PrintProperty("indexName", forLoop->indexName);
+    PrintProperty("indexTypeName", forLoop->indexTypeNameTokens, printTypeName);
     PrintProperty("iterExpression", forLoop->GetIterExpression());
     PrintProperty("expression", forLoop->GetExpression());
 }
