@@ -900,6 +900,20 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
     forLoop->SetVariableType(varType);
 
+    // set index type if there is an index variable
+    const TypeInfo* indexVarType = GetVariableType(forLoop->indexTypeNameTokens, TypeInfo::GetUIntSizeType());
+    if (isError)
+    {
+        return;
+    }
+    else if (!indexVarType->IsInt() || indexVarType->GetSign() != TypeInfo::eUnsigned || indexVarType->GetNumBits() < TypeInfo::GetUIntSizeType()->GetNumBits())
+    {
+        isError = true;
+        logger.LogError(*forLoop->indexNameToken, "Index variable must be an unsigned integer at least as big as 'usize'");
+        return;
+    }
+    forLoop->indexType = indexVarType;
+
     // update array type if needed
     if (iterExprType->IsArray())
     {
