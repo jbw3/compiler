@@ -55,7 +55,7 @@ bool isNumber(const string& tokenStr, bool isPotential)
                 idx += 2;
                 break;
 
-            case 'h':
+            case 'x':
                 base = 16;
                 idx += 2;
                 break;
@@ -342,7 +342,7 @@ bool stringToInteger(const string& str, int64_t& num)
                     base = 8;
                     break;
 
-                case 'h':
+                case 'x':
                     base = 16;
                     break;
 
