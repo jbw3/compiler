@@ -11,6 +11,7 @@ $target_triple
 %B = type { i32, %C }
 %C = type { i32, %A* }
 %"[u16]" = type { i64, i16* }
+%"[u32]" = type { i64, i32* }
 
 @strData0 = constant [3 x i8] c"abc"
 @strStruct0 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData0, i32 0, i32 0) }
@@ -450,6 +451,52 @@ passed7:                                          ; preds = %passed
   ret %UnitType zeroinitializer, !dbg !289
 }
 
+; Function Attrs: noinline nounwind optnone
+define i64 @forIndex(%"[u32]" %a) #0 !dbg !290 {
+entry:
+  %i = alloca i64
+  %x = alloca i32
+  %num = alloca i64
+  %a1 = alloca %"[u32]"
+  store %"[u32]" %a, %"[u32]"* %a1
+  call void @llvm.dbg.declare(metadata %"[u32]"* %a1, metadata !298, metadata !DIExpression()), !dbg !304
+  call void @llvm.dbg.declare(metadata i64* %num, metadata !299, metadata !DIExpression()), !dbg !305
+  store i64 0, i64* %num, !dbg !306
+  %a2 = load %"[u32]", %"[u32]"* %a1, !dbg !307
+  call void @llvm.dbg.declare(metadata i32* %x, metadata !301, metadata !DIExpression()), !dbg !308
+  call void @llvm.dbg.declare(metadata i64* %i, metadata !303, metadata !DIExpression()), !dbg !309
+  %size = extractvalue %"[u32]" %a2, 0, !dbg !307
+  %data = extractvalue %"[u32]" %a2, 1, !dbg !307
+  br label %forCond, !dbg !307
+
+forCond:                                          ; preds = %forIter, %entry
+  %iter = phi i64 [ 0, %entry ], [ %inc, %forIter ], !dbg !308
+  %cmp = icmp ult i64 %iter, %size, !dbg !308
+  br i1 %cmp, label %forBody, label %forExit, !dbg !308
+
+forBody:                                          ; preds = %forCond
+  %value = getelementptr inbounds i32, i32* %data, i64 %iter, !dbg !308
+  %load = load i32, i32* %value, !dbg !308
+  store i32 %load, i32* %x, !dbg !308
+  store i64 %iter, i64* %i, !dbg !308
+  %x3 = load i32, i32* %x, !dbg !310
+  %i4 = load i64, i64* %i, !dbg !312
+  %zeroext = zext i32 %x3 to i64, !dbg !313
+  %mul = mul i64 %zeroext, %i4, !dbg !313
+  %load5 = load i64, i64* %num, !dbg !314
+  %add = add i64 %load5, %mul, !dbg !314
+  store i64 %add, i64* %num, !dbg !314
+  br label %forIter, !dbg !314
+
+forIter:                                          ; preds = %forBody
+  %inc = add i64 %iter, 1, !dbg !314
+  br label %forCond, !dbg !314
+
+forExit:                                          ; preds = %forCond
+  %num6 = load i64, i64* %num, !dbg !315
+  ret i64 %num6, !dbg !315
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -750,3 +797,29 @@ $filename
 !287 = !DILocation(line: 149, column: 12, scope: !279)
 !288 = !DILocation(line: 149, column: 14, scope: !279)
 !289 = !DILocation(line: 149, column: 10, scope: !279)
+!290 = distinct !DISubprogram(name: "forIndex", scope: !1, file: !1, line: 152, type: !291, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !297)
+!291 = !DISubroutineType(flags: DIFlagPrototyped, types: !292)
+!292 = !{!74, !293}
+!293 = !DICompositeType(tag: DW_TAG_structure_type, name: "[u32]", size: 128, elements: !294)
+!294 = !{!78, !295}
+!295 = !DIDerivedType(tag: DW_TAG_member, name: "Data", baseType: !296, size: 64, align: 4, offset: 64)
+!296 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "&u32", baseType: !70, size: 64)
+!297 = !{!298, !299, !301, !303}
+!298 = !DILocalVariable(name: "a", arg: 1, scope: !290, file: !1, line: 152, type: !293)
+!299 = !DILocalVariable(name: "num", scope: !300, file: !1, line: 154, type: !74)
+!300 = distinct !DILexicalBlock(scope: !290, file: !1, line: 153, column: 1)
+!301 = !DILocalVariable(name: "x", scope: !302, file: !1, line: 155, type: !70)
+!302 = distinct !DILexicalBlock(scope: !300, file: !1, line: 155, column: 9)
+!303 = !DILocalVariable(name: "i", scope: !302, file: !1, line: 155, type: !74)
+!304 = !DILocation(line: 152, scope: !290)
+!305 = !DILocation(line: 154, column: 9, scope: !300)
+!306 = !DILocation(line: 154, column: 19, scope: !300)
+!307 = !DILocation(line: 155, column: 17, scope: !300)
+!308 = !DILocation(line: 155, column: 9, scope: !302)
+!309 = !DILocation(line: 155, column: 12, scope: !302)
+!310 = !DILocation(line: 157, column: 16, scope: !311)
+!311 = distinct !DILexicalBlock(scope: !302, file: !1, line: 156, column: 5)
+!312 = !DILocation(line: 157, column: 20, scope: !311)
+!313 = !DILocation(line: 157, column: 18, scope: !311)
+!314 = !DILocation(line: 157, column: 13, scope: !311)
+!315 = !DILocation(line: 160, column: 5, scope: !300)

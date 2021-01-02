@@ -148,3 +148,14 @@ fun arrays(a [u16])
     var n = a[0];
     a[1] = n * 2;
 }
+
+fun forIndex(a [u32]) usize
+{
+    var num usize = 0;
+    for x, i in a
+    {
+        num += x * i;
+    }
+
+    num
+}
