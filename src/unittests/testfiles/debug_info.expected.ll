@@ -478,7 +478,7 @@ forBody:                                          ; preds = %forCond
   %value = getelementptr inbounds i32, i32* %data, i64 %iter, !dbg !308
   %load = load i32, i32* %value, !dbg !308
   store i32 %load, i32* %x, !dbg !308
-  store i64 %iter, i64* %i, !dbg !308
+  store i64 %iter, i64* %i, !dbg !309
   %x3 = load i32, i32* %x, !dbg !310
   %i4 = load i64, i64* %i, !dbg !312
   %zeroext = zext i32 %x3 to i64, !dbg !313

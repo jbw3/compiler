@@ -682,6 +682,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
         if (hasIndex)
         {
+            SetDebugLocation(forLoop->indexNameToken);
+
             // store the index value in the index variable
             builder.CreateStore(idx, indexAlloca);
         }
@@ -698,6 +700,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
         if (hasIndex)
         {
+            SetDebugLocation(forLoop->indexNameToken);
+
             // zero extend if necessary
             Value* store = nullptr;
             if (indexTypeInfo->GetNumBits() > TypeInfo::GetUIntSizeType()->GetNumBits())
