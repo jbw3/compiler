@@ -248,8 +248,8 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             case BinaryExpression::eAssign:
                 resultValue = rightValue;
                 break;
-            case BinaryExpression::eInclusiveRange:
-            case BinaryExpression::eExclusiveRange:
+            case BinaryExpression::eClosedRange:
+            case BinaryExpression::eHalfOpenRange:
             {
                 Type* rangeType = GetType(binaryExpression->GetType());
                 if (rangeType == nullptr)
@@ -428,8 +428,8 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
         end = builder.CreateZExt(end, extType, "zeroext");
     }
 
-    // if this range is inclusive, add 1 to the end
-    if (!rightType->IsExclusive())
+    // if this range is closed, add 1 to the end
+    if (!rightType->IsHalfOpen())
     {
         Value* one = ConstantInt::get(context, APInt(uIntSizeNumBits, 1, false));
         end = builder.CreateAdd(end, one, "add");
@@ -648,7 +648,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
             idx->addIncoming(zero, incomingBlock);
         }
 
-        if (iterableType->IsExclusive())
+        if (iterableType->IsHalfOpen())
         {
             predicate = isSigned ? CmpInst::ICMP_SLT : CmpInst::ICMP_ULT;
         }

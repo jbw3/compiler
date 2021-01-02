@@ -212,10 +212,10 @@ const TypeInfo* TypeInfo::GetStringType()
     return stringType;
 }
 
-const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isExclusive)
+const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isHalfOpen)
 {
     // TODO: create a registry for range types instead of creating a new one each time
-    const TypeInfo* rangeType = new RangeType(memberType, isExclusive);
+    const TypeInfo* rangeType = new RangeType(memberType, isHalfOpen);
     return rangeType;
 }
 
@@ -345,9 +345,9 @@ bool TypeInfo::IsAggregate() const
     return (flags & F_AGGREGATE) != 0;
 }
 
-bool TypeInfo::IsExclusive() const
+bool TypeInfo::IsHalfOpen() const
 {
-    return (flags & F_EXCLUSIVE) != 0;
+    return (flags & F_HALF_OPEN) != 0;
 }
 
 bool TypeInfo::IsImmutable() const
@@ -623,31 +623,31 @@ bool StringType::IsSameAs(const TypeInfo& other) const
     return isSame;
 }
 
-string CreateUniqueRangeName(const TypeInfo* memberType, bool isExclusive)
+string CreateUniqueRangeName(const TypeInfo* memberType, bool isHalfOpen)
 {
     string memberUniqueName = memberType->GetUniqueName();
     string name = "Range";
-    name += (isExclusive ? "Exclusive" : "Inclusive");
+    name += (isHalfOpen ? "HalfOpen" : "Closed");
     name += "'" + memberUniqueName + "'";
     return name;
 }
 
-string CreateRangeName(const TypeInfo* memberType, bool isExclusive)
+string CreateRangeName(const TypeInfo* memberType, bool isHalfOpen)
 {
     string memberName = memberType->GetShortName();
     string name = "Range";
-    name += (isExclusive ? "Exclusive" : "Inclusive");
+    name += (isHalfOpen ? "HalfOpen" : "Closed");
     name += "'" + memberName + "'";
     return name;
 }
 
-RangeType::RangeType(const TypeInfo* memberType, bool isExclusive) :
+RangeType::RangeType(const TypeInfo* memberType, bool isHalfOpen) :
     TypeInfo(
         memberType->GetNumBits() * 2,
-        F_RANGE | F_AGGREGATE | (isExclusive ? F_EXCLUSIVE : F_NONE),
+        F_RANGE | F_AGGREGATE | (isHalfOpen ? F_HALF_OPEN : F_NONE),
         TypeInfo::eNotApplicable,
-        CreateUniqueRangeName(memberType, isExclusive),
-        CreateRangeName(memberType, isExclusive)
+        CreateUniqueRangeName(memberType, isHalfOpen),
+        CreateRangeName(memberType, isHalfOpen)
     )
 {
     AddMember("Start", memberType, false, Token::None);

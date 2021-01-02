@@ -213,8 +213,8 @@ public:
         eBitwiseAndAssign,
         eBitwiseXorAssign,
         eBitwiseOrAssign,
-        eInclusiveRange,
-        eExclusiveRange,
+        eClosedRange,
+        eHalfOpenRange,
         eSubscript,
     };
 

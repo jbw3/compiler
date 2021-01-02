@@ -57,7 +57,7 @@ public:
 
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 <<  8;
-    static constexpr uint16_t F_EXCLUSIVE = 1 <<  9;
+    static constexpr uint16_t F_HALF_OPEN = 1 <<  9;
     static constexpr uint16_t F_IMMUTABLE = 1 << 10;
 
     enum ESign
@@ -102,7 +102,7 @@ public:
 
     static const TypeInfo* GetStringType();
 
-    static const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isExclusive);
+    static const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isHalfOpen);
 
     static const TypeInfo* GetType(const std::string& typeName);
 
@@ -142,7 +142,7 @@ public:
 
     bool IsAggregate() const;
 
-    bool IsExclusive() const;
+    bool IsHalfOpen() const;
 
     bool IsImmutable() const;
 
@@ -275,7 +275,7 @@ public:
 class RangeType : public TypeInfo
 {
 public:
-    RangeType(const TypeInfo* memberType, bool isExclusive);
+    RangeType(const TypeInfo* memberType, bool isHalfOpen);
 
     bool IsSameAs(const TypeInfo& other) const override;
 };

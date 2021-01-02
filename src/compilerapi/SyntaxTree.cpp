@@ -304,9 +304,9 @@ std::string BinaryExpression::GetOperatorString(EOperator op)
             return "^=";
         case BinaryExpression::eBitwiseOrAssign:
             return "|=";
-        case BinaryExpression::eInclusiveRange:
+        case BinaryExpression::eClosedRange:
             return "..";
-        case BinaryExpression::eExclusiveRange:
+        case BinaryExpression::eHalfOpenRange:
             return "..<";
         case BinaryExpression::eSubscript:
             return "[]";
@@ -339,8 +339,8 @@ bool BinaryExpression::IsAssignment(EOperator op)
         case BinaryExpression::eBitwiseOr:
         case BinaryExpression::eLogicalAnd:
         case BinaryExpression::eLogicalOr:
-        case BinaryExpression::eInclusiveRange:
-        case BinaryExpression::eExclusiveRange:
+        case BinaryExpression::eClosedRange:
+        case BinaryExpression::eHalfOpenRange:
         case BinaryExpression::eSubscript:
             return false;
         case BinaryExpression::eAssign:
@@ -383,8 +383,8 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eLogicalAnd:
         case BinaryExpression::eLogicalOr:
         case BinaryExpression::eAssign:
-        case BinaryExpression::eInclusiveRange:
-        case BinaryExpression::eExclusiveRange:
+        case BinaryExpression::eClosedRange:
+        case BinaryExpression::eHalfOpenRange:
         case BinaryExpression::eSubscript:
             return false;
         case BinaryExpression::eAddAssign:

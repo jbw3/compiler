@@ -215,8 +215,8 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
 {
     outType = nullptr;
 
-    // make sure both types are ranges and both are inclusive or both are exclusive
-    if (type1->IsRange() && type2->IsRange() && type1->IsExclusive() == type2->IsExclusive())
+    // make sure both types are ranges and both are closed or both are half-open
+    if (type1->IsRange() && type2->IsRange() && type1->IsHalfOpen() == type2->IsHalfOpen())
     {
         const TypeInfo* memberType1 = type1->GetMembers()[0]->GetType();
         const TypeInfo* memberType2 = type2->GetMembers()[0]->GetType();
@@ -354,7 +354,7 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     return resultType;
 }
 
-const TypeInfo* GetLowestType(const TypeInfo* type, unsigned& arrayLevel, bool& hasRange, bool& hasExclusiveRange)
+const TypeInfo* GetLowestType(const TypeInfo* type, unsigned& arrayLevel, bool& hasRange, bool& hasHalfOpenRange)
 {
     arrayLevel = 0;
     while (type->IsArray())
@@ -363,11 +363,11 @@ const TypeInfo* GetLowestType(const TypeInfo* type, unsigned& arrayLevel, bool& 
         ++arrayLevel;
     }
 
-    hasExclusiveRange = false;
+    hasHalfOpenRange = false;
     hasRange = type->IsRange();
     if (hasRange)
     {
-        hasExclusiveRange = type->IsExclusive();
+        hasHalfOpenRange = type->IsHalfOpen();
         type = type->GetMembers()[0]->GetType();
     }
 
@@ -378,8 +378,8 @@ const TypeInfo* GetLowestType(const TypeInfo* type)
 {
     unsigned arrayLevel = 0;
     bool hasRange = false;
-    bool hasExclusiveRange = false;
-    return GetLowestType(type, arrayLevel, hasRange, hasExclusiveRange);
+    bool hasHalfOpenRange = false;
+    return GetLowestType(type, arrayLevel, hasRange, hasHalfOpenRange);
 }
 
 bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* resultType)
@@ -387,8 +387,8 @@ bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* r
     const TypeInfo* exprType = expr->GetType();
     unsigned arrayLevel = 0;
     bool hasRange = false;
-    bool hasExclusiveRange = false;
-    const TypeInfo* lowestType = GetLowestType(exprType, arrayLevel, hasRange, hasExclusiveRange);
+    bool hasHalfOpenRange = false;
+    const TypeInfo* lowestType = GetLowestType(exprType, arrayLevel, hasRange, hasHalfOpenRange);
     const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(lowestType);
 
     if ( literalType != nullptr && (literalType->GetSign() == TypeInfo::eContextDependent || arrayLevel > 0) )
@@ -444,7 +444,7 @@ bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* r
 
         if (hasRange)
         {
-            newType = TypeInfo::GetRangeType(newType, hasExclusiveRange);
+            newType = TypeInfo::GetRangeType(newType, hasHalfOpenRange);
         }
         // TODO: This does not work with nested arrays of integer literals.
         // Need to set the expression type at each level
@@ -527,8 +527,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             case BinaryExpression::eMultiply:
             case BinaryExpression::eDivide:
             case BinaryExpression::eRemainder:
-            case BinaryExpression::eInclusiveRange:
-            case BinaryExpression::eExclusiveRange:
+            case BinaryExpression::eClosedRange:
+            case BinaryExpression::eHalfOpenRange:
                 ok = haveCompatibleSigns;
                 break;
             case BinaryExpression::eAssign:
@@ -598,7 +598,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             else if (rightSign == TypeInfo::eContextDependent)
             {
                 const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
-                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsExclusive());
+                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsHalfOpen());
                 rightExpr->SetType(newType);
 
                 ok = true;
@@ -667,7 +667,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             else if (rightSign == TypeInfo::eContextDependent)
             {
                 const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
-                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsExclusive());
+                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsHalfOpen());
                 rightExpr->SetType(newType);
 
                 ok = true;
@@ -689,8 +689,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
         {
             ok = false;
         }
-        // make sure the ranges' exclusive/inclusive flag matches
-        else if (leftType->IsExclusive() != rightType->IsExclusive())
+        // make sure the ranges' half-open/closed flag matches
+        else if (leftType->IsHalfOpen() != rightType->IsHalfOpen())
         {
             ok = false;
         }
@@ -787,11 +787,11 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eBitwiseXorAssign:
         case BinaryExpression::eBitwiseOrAssign:
             return TypeInfo::UnitType;
-        case BinaryExpression::eInclusiveRange:
-        case BinaryExpression::eExclusiveRange:
+        case BinaryExpression::eClosedRange:
+        case BinaryExpression::eHalfOpenRange:
         {
             const TypeInfo* memberType = GetBiggestSizeType(leftType, rightType);
-            return TypeInfo::GetRangeType(memberType, op == BinaryExpression::eExclusiveRange);
+            return TypeInfo::GetRangeType(memberType, op == BinaryExpression::eHalfOpenRange);
         }
         case BinaryExpression::eSubscript:
         {
@@ -2019,7 +2019,7 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType)
                 return nullptr;
             }
 
-            type = TypeInfo::GetRangeType(newMemberType, type->IsExclusive());
+            type = TypeInfo::GetRangeType(newMemberType, type->IsHalfOpen());
         }
     }
     else if (type->IsArray())

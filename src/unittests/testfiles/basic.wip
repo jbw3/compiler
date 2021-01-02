@@ -219,12 +219,12 @@ fun types_range(b bool)
     var y1 u32 = 25;
     var y2 u32 = 39;
 
-    # exclusive ranges
+    # closed ranges
     var er1 = 39..124; # with int literals
     var er2 = 0..x1;   # one int literal and one variable
     var er3 = x1..x2;  # two int literals
 
-    # inclusive ranges
+    # half-open ranges
     var ir1 = 1..<10;  # with int literals
     var ir2 = 0..<y1;  # one int literal and one variable
     var ir3 = y1..<y2; # two int literals
