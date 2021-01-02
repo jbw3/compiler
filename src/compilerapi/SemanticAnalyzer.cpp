@@ -954,6 +954,19 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         return;
     }
 
+    // add the index variable name to the symbol table
+    const string& indexVarName = forLoop->indexName;
+    if (!indexVarName.empty())
+    {
+        ok = symbolTable.AddVariable(indexVarName, forLoop->indexType);
+        if (!ok)
+        {
+            isError = true;
+            logger.LogError(*forLoop->variableNameToken, "Variable '{}' has already been declared", indexVarName);
+            return;
+        }
+    }
+
     // check variable type and iterable type
     if (!varType->IsSameAs(*inferType) && (!HaveCompatibleSigns(varType, inferType) || !HaveCompatibleAssignmentSizes(varType, inferType)))
     {
