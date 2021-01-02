@@ -561,15 +561,25 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     const TypeInfo* varType = forLoop->GetVariableType();
     bool isSigned = varType->GetSign() == TypeInfo::eSigned;
     Type* type = GetType(varType);
-    if (type == nullptr)
-    {
-        resultValue = nullptr;
-        logger.LogInternalError("Unknown variable declaration type");
-        return;
-    }
+    assert(type != nullptr && "Unknown variable declaration type");
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, varType, alloca);
     CreateDebugVariable(varNameToken, varType, alloca);
+
+    // create index
+    const string& indexName = forLoop->indexName;
+    bool hasIndex = !indexName.empty();
+    const TypeInfo* indexTypeInfo = forLoop->indexType;
+    Type* indexType = nullptr;
+    AllocaInst* indexAlloca = nullptr;
+    if (hasIndex)
+    {
+        indexType = GetType(indexTypeInfo);
+        assert(indexType != nullptr && "Unknown variable declaration type");
+        indexAlloca = CreateVariableAlloc(currentFunction, indexType, indexName);
+        symbolTable.AddVariable(indexName, indexTypeInfo, indexAlloca);
+        CreateDebugVariable(forLoop->indexNameToken, indexTypeInfo, indexAlloca);
+    }
 
     Type* iterType = nullptr;
     Value* startValue = nullptr;
@@ -624,11 +634,20 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     SetDebugLocation(varNameToken);
 
     // generate the condition IR
+    PHINode* idx = nullptr;
     PHINode* iter = builder.CreatePHI(iterType, 2, "iter");
     iter->addIncoming(startValue, incomingBlock);
     CmpInst::Predicate predicate = CmpInst::BAD_ICMP_PREDICATE;
     if (isRangeLoop)
     {
+        if (hasIndex)
+        {
+            Value* zero = ConstantInt::get(indexType, 0, false);
+
+            idx = builder.CreatePHI(indexType, 2, "idx");
+            idx->addIncoming(zero, incomingBlock);
+        }
+
         if (iterableType->IsExclusive())
         {
             predicate = isSigned ? CmpInst::ICMP_SLT : CmpInst::ICMP_ULT;
@@ -660,6 +679,12 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     {
         // store the iter value in the iterator variable
         builder.CreateStore(iter, alloca);
+
+        if (hasIndex)
+        {
+            // store the index value in the index variable
+            builder.CreateStore(idx, indexAlloca);
+        }
     }
     else if (isArrayLoop)
     {
@@ -670,6 +695,23 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
         Value* value = builder.CreateLoad(valuePtr, "load");
         value = CreateExt(value, iterableInnerType, varType);
         builder.CreateStore(value, alloca);
+
+        if (hasIndex)
+        {
+            // zero extend if necessary
+            Value* store = nullptr;
+            if (indexTypeInfo->GetNumBits() > TypeInfo::GetUIntSizeType()->GetNumBits())
+            {
+                store = builder.CreateZExt(iter, indexType, "zeroext");
+            }
+            else
+            {
+                store = iter;
+            }
+
+            // store the index value in the index variable
+            builder.CreateStore(store, indexAlloca);
+        }
     }
 
     // generate loop body IR
@@ -698,6 +740,14 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     Value* one = ConstantInt::get(iterType, 1, oneIsSigned);
     Value* inc = builder.CreateAdd(iter, one, "inc");
     iter->addIncoming(inc, loopIterBlock);
+
+    // increment index
+    if (hasIndex && isRangeLoop)
+    {
+        Value* idxOne = ConstantInt::get(indexType, 1, false);
+        Value* idxInc = builder.CreateAdd(idx, idxOne, "inc");
+        idx->addIncoming(idxInc, loopIterBlock);
+    }
 
     // create unconditional branch to loop condition block
     builder.CreateBr(loopCondBlock);
