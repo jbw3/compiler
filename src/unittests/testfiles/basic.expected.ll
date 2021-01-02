@@ -1843,6 +1843,85 @@ forExit9:                                         ; preds = %forCond
 }
 
 ; Function Attrs: noinline nounwind optnone
+define i64 @forLoopIndex(%"[i32]" %array) #0 {
+entry:
+  %i10 = alloca i64
+  %x9 = alloca i32
+  %num = alloca i64
+  %i = alloca i64
+  %x = alloca i32
+  %array1 = alloca %"[i32]"
+  store %"[i32]" %array, %"[i32]"* %array1
+  %array2 = load %"[i32]", %"[i32]"* %array1
+  %size = extractvalue %"[i32]" %array2, 0
+  %data = extractvalue %"[i32]" %array2, 1
+  br label %forCond
+
+forCond:                                          ; preds = %forIter, %entry
+  %iter = phi i64 [ 0, %entry ], [ %inc, %forIter ]
+  %cmp = icmp ult i64 %iter, %size
+  br i1 %cmp, label %forBody, label %forExit
+
+forBody:                                          ; preds = %forCond
+  %value = getelementptr inbounds i32, i32* %data, i64 %iter
+  %load = load i32, i32* %value
+  store i32 %load, i32* %x
+  store i64 %iter, i64* %i
+  %array3 = load %"[i32]", %"[i32]"* %array1
+  %i4 = load i64, i64* %i
+  %size5 = extractvalue %"[i32]" %array3, 0
+  %check = icmp uge i64 %i4, %size5
+  br i1 %check, label %failed, label %passed
+
+failed:                                           ; preds = %forBody
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %forBody
+  %data6 = extractvalue %"[i32]" %array3, 1
+  %value7 = getelementptr inbounds i32, i32* %data6, i64 %i4
+  %x8 = load i32, i32* %x
+  %mul = mul i32 %x8, 2
+  store i32 %mul, i32* %value7
+  br label %forIter
+
+forIter:                                          ; preds = %passed
+  %inc = add i64 %iter, 1
+  br label %forCond
+
+forExit:                                          ; preds = %forCond
+  store i64 0, i64* %num
+  br label %forCond11
+
+forCond11:                                        ; preds = %forIter19, %forExit
+  %iter12 = phi i32 [ 0, %forExit ], [ %inc20, %forIter19 ]
+  %idx = phi i64 [ 0, %forExit ], [ %inc21, %forIter19 ]
+  %cmp13 = icmp ult i32 %iter12, 10
+  br i1 %cmp13, label %forBody14, label %forExit22
+
+forBody14:                                        ; preds = %forCond11
+  store i32 %iter12, i32* %x9
+  store i64 %idx, i64* %i10
+  %x15 = load i32, i32* %x9
+  %i16 = load i64, i64* %i10
+  %zeroext = zext i32 %x15 to i64
+  %mul17 = mul i64 %zeroext, %i16
+  %load18 = load i64, i64* %num
+  %add = add i64 %load18, %mul17
+  store i64 %add, i64* %num
+  br label %forIter19
+
+forIter19:                                        ; preds = %forBody14
+  %inc20 = add i32 %iter12, 1
+  %inc21 = add i64 %idx, 1
+  br label %forCond11
+
+forExit22:                                        ; preds = %forCond11
+  %num23 = load i64, i64* %num
+  ret i64 %num23
+}
+
+; Function Attrs: noinline nounwind optnone
 define i32 @blockExpression(i32 %param) #0 {
 entry:
   %x = alloca i32

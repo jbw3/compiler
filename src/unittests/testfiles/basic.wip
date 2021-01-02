@@ -590,6 +590,22 @@ fun nestedForLoop() u32
     x
 }
 
+fun forLoopIndex(array [i32]) usize
+{
+    for x, i in array
+    {
+        array[i] = x * 2;
+    }
+
+    var num usize = 0;
+    for x u32, i usize in 0..<10
+    {
+        num += x * i;
+    }
+
+    num
+}
+
 fun blockExpression(param i32) i32
 {
     var x i32 = {
