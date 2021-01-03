@@ -272,14 +272,6 @@ public:
     bool IsSameAs(const TypeInfo& other) const override;
 };
 
-class RangeType : public TypeInfo
-{
-public:
-    RangeType(const TypeInfo* memberType, bool isHalfOpen);
-
-    bool IsSameAs(const TypeInfo& other) const override;
-};
-
 class AggregateType : public TypeInfo
 {
 public:

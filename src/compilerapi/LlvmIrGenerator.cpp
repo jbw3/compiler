@@ -403,8 +403,8 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
     Expression* rightExpr = binaryExpression->GetRightExpression();
     const TypeInfo* rightType = rightExpr->GetType();
-    const TypeInfo* startType = rightType->GetMembers()[0]->GetType();
-    const TypeInfo* endType = rightType->GetMembers()[1]->GetType();
+    const TypeInfo* innerType = rightType->GetInnerType();
+    unsigned innerTypeNumBits = innerType->GetNumBits();
 
     // get array size
     Value* size = builder.CreateExtractValue(leftValue, 0, "size");
@@ -414,7 +414,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
 
     // get range start
     Value* start = builder.CreateExtractValue(rightValue, 0, "start");
-    if (startType->GetNumBits() < uIntSizeNumBits)
+    if (innerTypeNumBits < uIntSizeNumBits)
     {
         Type* extType = GetType(TypeInfo::GetUIntSizeType());
         start = builder.CreateZExt(start, extType, "zeroext");
@@ -422,7 +422,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
 
     // get range end
     Value* end = builder.CreateExtractValue(rightValue, 1, "end");
-    if (endType->GetNumBits() < uIntSizeNumBits)
+    if (innerTypeNumBits < uIntSizeNumBits)
     {
         Type* extType = GetType(TypeInfo::GetUIntSizeType());
         end = builder.CreateZExt(end, extType, "zeroext");
@@ -526,20 +526,9 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     const TypeInfo* iterableType = iterExpr->GetType();
     bool isRangeLoop = iterableType->IsRange();
     bool isArrayLoop = iterableType->IsArray();
-    const TypeInfo* iterableInnerType = nullptr;
-    if (isRangeLoop)
-    {
-        assert(iterableType->GetMemberCount() > 0 && "For loop iterator expression type does not have members");
-        iterableInnerType = iterableType->GetMembers()[0]->GetType();
-    }
-    else if (isArrayLoop)
-    {
-        iterableInnerType = iterableType->GetInnerType();
-    }
-    else
-    {
-        assert(false && "Invalid for loop iterable type");
-    }
+    assert(isRangeLoop || isArrayLoop && "Invalid for loop iterable type");
+
+    const TypeInfo* iterableInnerType = iterableType->GetInnerType();
 
     // create new scope for iterator
     Scope scope(symbolTable);
@@ -1723,7 +1712,7 @@ string createTypeName(const TypeInfo* type)
 
     if (type->IsRange())
     {
-        unsigned memberNumBits = type->GetMembers()[0]->GetType()->GetNumBits();
+        unsigned memberNumBits = type->GetInnerType()->GetNumBits();
         name += "Range" + to_string(memberNumBits);
     }
     else if (type->IsInt())

@@ -218,8 +218,8 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
     // make sure both types are ranges and both are closed or both are half-open
     if (type1->IsRange() && type2->IsRange() && type1->IsHalfOpen() == type2->IsHalfOpen())
     {
-        const TypeInfo* memberType1 = type1->GetMembers()[0]->GetType();
-        const TypeInfo* memberType2 = type2->GetMembers()[0]->GetType();
+        const TypeInfo* memberType1 = type1->GetInnerType();
+        const TypeInfo* memberType2 = type2->GetInnerType();
         const NumericLiteralType* intLit1 = dynamic_cast<const NumericLiteralType*>(memberType1);
         const NumericLiteralType* intLit2 = dynamic_cast<const NumericLiteralType*>(memberType2);
         if (intLit1 != nullptr && intLit2 != nullptr)
@@ -368,7 +368,7 @@ const TypeInfo* GetLowestType(const TypeInfo* type, unsigned& arrayLevel, bool& 
     if (hasRange)
     {
         hasHalfOpenRange = type->IsHalfOpen();
-        type = type->GetMembers()[0]->GetType();
+        type = type->GetInnerType();
     }
 
     return type;
@@ -589,7 +589,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
         }
         else if (op == BinaryExpression::eSubscript && rightType->IsRange())
         {
-            const TypeInfo* innerType = rightType->GetMembers()[0]->GetType();
+            const TypeInfo* innerType = rightType->GetInnerType();
             TypeInfo::ESign rightSign = innerType->GetSign();
             if (rightSign == TypeInfo::eUnsigned)
             {
@@ -658,7 +658,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
         }
         else if (op == BinaryExpression::eSubscript && rightType->IsRange())
         {
-            const TypeInfo* innerType = rightType->GetMembers()[0]->GetType();
+            const TypeInfo* innerType = rightType->GetInnerType();
             TypeInfo::ESign rightSign = innerType->GetSign();
             if (rightSign == TypeInfo::eUnsigned)
             {
@@ -696,8 +696,8 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
         }
         else
         {
-            const TypeInfo* leftIntType = leftType->GetMembers()[0]->GetType();
-            const TypeInfo* rightIntType = rightType->GetMembers()[0]->GetType();
+            const TypeInfo* leftIntType = leftType->GetInnerType();
+            const TypeInfo* rightIntType = rightType->GetInnerType();
 
             // if sizes and signs are the same, we're good
             if (leftType->GetNumBits() == rightType->GetNumBits() && leftIntType->GetSign() == rightIntType->GetSign())
@@ -879,7 +879,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     const TypeInfo* inferType = nullptr;
     if (iterExprType->IsRange())
     {
-        inferType = iterExprType->GetMembers()[0]->GetType();
+        inferType = iterExprType->GetInnerType();
     }
     else if (iterExprType->IsArray())
     {
@@ -2007,7 +2007,7 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType)
     {
         // if this is a range type and the members are int literals, set the members' type
         // to the minimum signed size that will hold the number
-        const TypeInfo* memberType = type->GetMembers()[0]->GetType();
+        const TypeInfo* memberType = type->GetInnerType();
         const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
         if (memberLiteralType != nullptr)
         {

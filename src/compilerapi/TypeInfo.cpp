@@ -214,8 +214,27 @@ const TypeInfo* TypeInfo::GetStringType()
 
 const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isHalfOpen)
 {
-    // TODO: create a registry for range types instead of creating a new one each time
-    const TypeInfo* rangeType = new RangeType(memberType, isHalfOpen);
+    string uniqueName = "Range";
+    uniqueName += (isHalfOpen ? "HalfOpen" : "Closed");
+    uniqueName += "'" + memberType->GetUniqueName() + "'";
+    const TypeInfo* rangeType = GetType(uniqueName);
+    if (rangeType == nullptr)
+    {
+        unsigned size = memberType->GetNumBits() * 2;
+        uint16_t flags = F_RANGE | F_AGGREGATE | (isHalfOpen ? F_HALF_OPEN : F_NONE);
+
+        string name = "Range";
+        name += (isHalfOpen ? "HalfOpen" : "Closed");
+        name += "'" + memberType->GetShortName() + "'";
+
+        TypeInfo* newRangeType = new PrimitiveType(size, flags, TypeInfo::eNotApplicable, uniqueName, name);
+        newRangeType->innerType = memberType;
+        newRangeType->AddMember("Start", memberType, false, Token::None);
+        newRangeType->AddMember("End", memberType, false, Token::None);
+
+        rangeType = newRangeType;
+    }
+
     return rangeType;
 }
 
@@ -620,50 +639,6 @@ StringType::StringType(unsigned numBits) :
 bool StringType::IsSameAs(const TypeInfo& other) const
 {
     bool isSame = typeid(other) == typeid(StringType);
-    return isSame;
-}
-
-string CreateUniqueRangeName(const TypeInfo* memberType, bool isHalfOpen)
-{
-    string memberUniqueName = memberType->GetUniqueName();
-    string name = "Range";
-    name += (isHalfOpen ? "HalfOpen" : "Closed");
-    name += "'" + memberUniqueName + "'";
-    return name;
-}
-
-string CreateRangeName(const TypeInfo* memberType, bool isHalfOpen)
-{
-    string memberName = memberType->GetShortName();
-    string name = "Range";
-    name += (isHalfOpen ? "HalfOpen" : "Closed");
-    name += "'" + memberName + "'";
-    return name;
-}
-
-RangeType::RangeType(const TypeInfo* memberType, bool isHalfOpen) :
-    TypeInfo(
-        memberType->GetNumBits() * 2,
-        F_RANGE | F_AGGREGATE | (isHalfOpen ? F_HALF_OPEN : F_NONE),
-        TypeInfo::eNotApplicable,
-        CreateUniqueRangeName(memberType, isHalfOpen),
-        CreateRangeName(memberType, isHalfOpen)
-    )
-{
-    AddMember("Start", memberType, false, Token::None);
-    AddMember("End", memberType, false, Token::None);
-}
-
-bool RangeType::IsSameAs(const TypeInfo& other) const
-{
-    const RangeType* otherRangeType = dynamic_cast<const RangeType*>(&other);
-    if (otherRangeType == nullptr)
-    {
-        return false;
-    }
-
-    bool isSame = GetMembers()[0]->GetType()->IsSameAs(*otherRangeType->GetMembers()[0]->GetType())
-               && GetFlags() == other.GetFlags();
     return isSame;
 }
 
