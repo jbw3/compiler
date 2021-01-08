@@ -345,9 +345,9 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
         {
             const Token* opToken = binaryExpression->GetOperatorToken();
 
-            Constant* fileStrPtr = CreateConstantString(opToken->GetFilename());
+            Constant* fileStrPtr = CreateConstantString(opToken->filename);
             Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
-            Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->GetLine(), false));
+            Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->line, false));
             Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
             Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
 
@@ -539,8 +539,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     {
         // TODO: it would probably be better to use the 'for' token as the scope start
         DIScope* currentScope = diScopes.top();
-        unsigned line = varNameToken->GetLine();
-        unsigned column = varNameToken->GetColumn();
+        unsigned line = varNameToken->line;
+        unsigned column = varNameToken->column;
         diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
@@ -778,7 +778,7 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
     // need to create a new basic block for any following instructions
     // because we just terminated the current one with a branch
     stringstream ss;
-    ss << "after" << loopControl->GetToken()->GetValue();
+    ss << "after" << loopControl->GetToken()->value;
     Function* function = builder.GetInsertBlock()->getParent();
     BasicBlock* newBlock = BasicBlock::Create(context, ss.str(), function);
     builder.SetInsertPoint(newBlock);
@@ -882,7 +882,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
 
-        unsigned line = declaration->GetNameToken()->GetLine();
+        unsigned line = declaration->GetNameToken()->line;
         diSubprogram = diBuilder->createFunction(diFile, funcName, "", diFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
 
@@ -906,7 +906,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         if (dbgInfo)
         {
             const Token* token = param->GetNameToken();
-            unsigned line = token->GetLine();
+            unsigned line = token->line;
             DIType* paramDebugType = GetDebugType(paramType);
             if (paramDebugType == nullptr)
             {
@@ -1016,7 +1016,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
             uint64_t memberSize = memberDiType->getSizeInBits();
             // TODO: better way to get alignment?
             uint64_t alignment = (memberSize > 32) ? 32 : memberSize;
-            unsigned memberLine = member->GetToken()->GetLine();
+            unsigned memberLine = member->GetToken()->line;
             elements.push_back(diBuilder->createMemberType(file, memberName, file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
 
             offset += memberSize;
@@ -1082,7 +1082,7 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
             const string& name = aggType->GetShortName();
             unsigned numBits = aggType->GetNumBits();
 
-            unsigned line = aggType->GetToken()->GetLine();
+            unsigned line = aggType->GetToken()->line;
             // TODO: set alignment
             SmallVector<Metadata*, 0> elements;
             DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
@@ -1413,8 +1413,8 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     {
         DIScope* currentScope = diScopes.top();
         const Token* startToken = blockExpression->GetStartToken();
-        unsigned line = startToken->GetLine();
-        unsigned column = startToken->GetColumn();
+        unsigned line = startToken->line;
+        unsigned column = startToken->column;
         diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
@@ -2149,8 +2149,8 @@ void LlvmIrGenerator::SetDebugLocation(const Token* token)
 {
     if (dbgInfo)
     {
-        unsigned line = token->GetLine();
-        unsigned column = token->GetColumn();
+        unsigned line = token->line;
+        unsigned column = token->column;
         builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diScopes.top()));
     }
 }
@@ -2159,9 +2159,9 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
 {
     if (dbgInfo)
     {
-        const string& varName = token->GetValue();
-        unsigned line = token->GetLine();
-        unsigned column = token->GetColumn();
+        const string& varName = token->value;
+        unsigned line = token->line;
+        unsigned column = token->column;
         DIType* varDebugType = GetDebugType(type);
         if (varDebugType == nullptr)
         {

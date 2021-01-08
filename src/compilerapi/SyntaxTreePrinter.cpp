@@ -86,7 +86,7 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
     PrintProperty("variableName", forLoop->GetVariableName());
@@ -102,7 +102,7 @@ void SyntaxTreePrinter::Visit(LoopControl* loopControl)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "LoopControl");
-    PrintProperty("value", loopControl->GetToken()->GetValue());
+    PrintProperty("value", loopControl->GetToken()->value);
 }
 
 void SyntaxTreePrinter::Visit(Return* ret)
@@ -178,7 +178,7 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "NumericExpression");
-    PrintProperty("value", numericExpression->GetToken()->GetValue());
+    PrintProperty("value", numericExpression->GetToken()->value);
 }
 
 void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
@@ -186,7 +186,7 @@ void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "BoolLiteralExpression");
-    PrintProperty("value", boolLiteralExpression->GetToken()->GetValue());
+    PrintProperty("value", boolLiteralExpression->GetToken()->value);
 }
 
 void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
@@ -343,7 +343,7 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->GetName());
@@ -367,7 +367,7 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->GetName());
@@ -389,7 +389,7 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->GetValue()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->GetName());

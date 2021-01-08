@@ -1010,7 +1010,7 @@ void SemanticAnalyzer::Visit(LoopControl* loopControl)
     {
         isError = true;
         const Token* token = loopControl->GetToken();
-        logger.LogError(*token, "'{}' can only be used in a loop", token->GetValue());
+        logger.LogError(*token, "'{}' can only be used in a loop", token->value);
         return;
     }
 
@@ -1304,7 +1304,7 @@ bool SemanticAnalyzer::ResolveDependencies(
         if (size == 1)
         {
             const Token* token = typeNameTokens[0];
-            const string& memberTypeName = token->GetValue();
+            const string& memberTypeName = token->value;
 
             // if we have not seen this member's type yet, resolve its dependencies
             if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
@@ -1374,7 +1374,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         --idx;
 
         token = typeNameTokens[idx];
-        if (token->GetValue() == ARRAY_TYPE_END_TOKEN)
+        if (token->value == ARRAY_TYPE_END_TOKEN)
         {
             ++arrayLevel;
 
@@ -1392,7 +1392,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
     }
 
     const Token* typeNameToken = typeNameTokens[idx];
-    const string& name = typeNameToken->GetValue();
+    const string& name = typeNameToken->value;
     const TypeInfo* type = TypeInfo::GetType(name);
     if (type == nullptr)
     {
@@ -1406,7 +1406,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         --idx;
 
         token = typeNameTokens[idx];
-        str = token->GetValue();
+        str = token->value;
         if (str == POINTER_TYPE_TOKEN)
         {
             type = TypeInfo::GetPointerToType(type);
@@ -1439,7 +1439,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         for (size_t i = 0; i < typeNameSize; ++i)
         {
             const Token* t = typeNameTokens[i];
-            const string& v = t->GetValue();
+            const string& v = t->value;
             if (v == ARRAY_TYPE_START_TOKEN)
             {
                 ++level;

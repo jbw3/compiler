@@ -8,21 +8,12 @@ class Token
 public:
     static const Token* None;
 
-    Token(const std::string& value, const std::string& filename, unsigned long line, unsigned long column);
+    Token(const std::string& value, const std::string& filename, unsigned line, unsigned column);
 
-    const std::string& GetValue() const;
-
-    const std::string& GetFilename() const;
-
-    unsigned long GetLine() const;
-
-    unsigned long GetColumn() const;
-
-private:
     std::string value;
     std::string filename;
-    unsigned long line;
-    unsigned long column;
+    unsigned line;
+    unsigned column;
 };
 
 #endif // TOKEN_H_

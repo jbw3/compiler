@@ -157,7 +157,7 @@ void Compiler::PrintTokens(const vector<Token>& tokens) const
 
     for (const Token& token : tokens)
     {
-        *os << token.GetValue() << '\n';
+        *os << token.value << '\n';
     }
 
     if (os != &cout)

@@ -156,24 +156,24 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
 {
     bool areEqual = true;
 
-    const string& expectedValue = expectedToken.GetValue();
-    const string& actualValue = actualToken.GetValue();
+    const string& expectedValue = expectedToken.value;
+    const string& actualValue = actualToken.value;
     if (expectedValue != actualValue)
     {
         cerr << "Token values are not equal: expected: " << expectedValue << ", actual: " << actualValue << "\n";
         areEqual = false;
     }
 
-    unsigned long expectedLine = expectedToken.GetLine();
-    unsigned long actualLine = actualToken.GetLine();
+    unsigned expectedLine = expectedToken.line;
+    unsigned actualLine = actualToken.line;
     if (expectedLine != actualLine)
     {
         cerr << "Token line numbers are not equal: expected: " << expectedLine << ", actual: " << actualLine << "\n";
         areEqual = false;
     }
 
-    unsigned long expectedColumn = expectedToken.GetColumn();
-    unsigned long actualColumn = actualToken.GetColumn();
+    unsigned expectedColumn = expectedToken.column;
+    unsigned actualColumn = actualToken.column;
     if (expectedColumn != actualColumn)
     {
         cerr << "Token column numbers are not equal: expected: " << expectedColumn << ", actual: " << actualColumn << "\n";

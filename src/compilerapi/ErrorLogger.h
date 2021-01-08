@@ -22,7 +22,7 @@ public:
     }
 
     template<typename... Ts>
-    void LogWarning(const std::string& filename, unsigned long line, unsigned long column, const char* format, Ts... args)
+    void LogWarning(const std::string& filename, unsigned line, unsigned column, const char* format, Ts... args)
     {
         LogSourceMessage(WARNING_TAG, filename, line, column, format, args...);
     }
@@ -30,7 +30,7 @@ public:
     template<typename... Ts>
     void LogWarning(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(WARNING_TAG, token.GetFilename(), token.GetLine(), token.GetColumn(), format, args...);
+        LogSourceMessage(WARNING_TAG, token.filename, token.line, token.column, format, args...);
     }
 
     template<typename... Ts>
@@ -40,7 +40,7 @@ public:
     }
 
     template<typename... Ts>
-    void LogError(const std::string& filename, unsigned long line, unsigned long column, const char* format, Ts... args)
+    void LogError(const std::string& filename, unsigned line, unsigned column, const char* format, Ts... args)
     {
         LogSourceMessage(ERROR_TAG, filename, line, column, format, args...);
     }
@@ -48,7 +48,7 @@ public:
     template<typename... Ts>
     void LogError(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(ERROR_TAG, token.GetFilename(), token.GetLine(), token.GetColumn(), format, args...);
+        LogSourceMessage(ERROR_TAG, token.filename, token.line, token.column, format, args...);
     }
 
     template<typename... Ts>
@@ -60,7 +60,7 @@ public:
     template<typename... Ts>
     void LogInternalError(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(INTERNAL_ERROR_TAG, token.GetFilename(), token.GetLine(), token.GetColumn(), format, args...);
+        LogSourceMessage(INTERNAL_ERROR_TAG, token.filename, token.line, token.column, format, args...);
     }
 
 private:
@@ -69,7 +69,7 @@ private:
 
     void Write(const char* format);
 
-    void WriteHeader(const char* tag, const std::string& filename, unsigned long line, unsigned long column);
+    void WriteHeader(const char* tag, const std::string& filename, unsigned line, unsigned column);
 
     template<typename T, typename... Ts>
     void Write(const char* format, T arg, Ts... args)
@@ -99,7 +99,7 @@ private:
     }
 
     template<typename... Ts>
-    void LogSourceMessage(const char* tag, const std::string& filename, unsigned long line, unsigned long column, const char* format, Ts... args)
+    void LogSourceMessage(const char* tag, const std::string& filename, unsigned line, unsigned column, const char* format, Ts... args)
     {
         WriteHeader(tag, filename, line, column);
         Write(format, args...);

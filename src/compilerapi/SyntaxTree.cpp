@@ -800,9 +800,9 @@ const vector<const Token*>& ForLoop::GetVariableTypeNameTokens() const
 LoopControl::LoopControl(const Token* token) :
     token(token)
 {
-    assert(token->GetValue() == BREAK_KEYWORD || token->GetValue() == CONTINUE_KEYWORD);
+    assert(token->value == BREAK_KEYWORD || token->value == CONTINUE_KEYWORD);
 
-    controlType = (token->GetValue() == BREAK_KEYWORD) ? eBreak : eContinue;
+    controlType = (token->value == BREAK_KEYWORD) ? eBreak : eContinue;
 }
 
 void LoopControl::Accept(SyntaxTreeVisitor* visitor)

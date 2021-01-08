@@ -29,12 +29,12 @@ private:
     bool isValid;
     bool isString;
     std::string filename;
-    unsigned long line;
-    unsigned long column;
+    unsigned line;
+    unsigned column;
 
-    unsigned long GetTokenStrStartColumn();
+    unsigned GetTokenStrStartColumn();
 
-    Token CreateToken(unsigned long columnNum = 0);
+    Token CreateToken(unsigned columnNum = 0);
 
     bool ParseChar(char ch, std::vector<Token>& tokens);
 

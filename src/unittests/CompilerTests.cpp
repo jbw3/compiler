@@ -72,7 +72,7 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     fstream expectedFile(expectedFilename);
     fstream outFile(outFilename);
 
-    unsigned long lineNum = 1;
+    unsigned lineNum = 1;
     string expectedLine;
     string outLine;
     while (!expectedFile.eof() && !outFile.eof())

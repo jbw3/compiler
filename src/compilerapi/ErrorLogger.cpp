@@ -95,7 +95,7 @@ void ErrorLogger::Write(const char* format)
     *os << format;
 }
 
-void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsigned long line, unsigned long column)
+void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsigned line, unsigned column)
 {
     if (printColors)
     {

@@ -122,12 +122,12 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     return ok;
 }
 
-unsigned long LexicalAnalyzer::GetTokenStrStartColumn()
+unsigned LexicalAnalyzer::GetTokenStrStartColumn()
 {
     return column - tokenStr.size();
 }
 
-Token LexicalAnalyzer::CreateToken(unsigned long columnNum)
+Token LexicalAnalyzer::CreateToken(unsigned columnNum)
 {
     if (columnNum == 0)
     {
