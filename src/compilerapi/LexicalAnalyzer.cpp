@@ -153,25 +153,93 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             // parse numeric literals
             else if (ch >= '0' && ch <= '9')
             {
-                // TODO: support multiple bases
-
                 unsigned startColumn = column;
                 tokenStr += ch;
                 is.read(&ch, 1);
                 ++column;
-                while ( !is.eof() && ((ch >= '0' && ch <= '9') || ch == '_') )
+
+                if ( !is.eof() && ((ch >= '0' && ch <= '9') || ch == '_' || ch == 'x' || ch == 'b' || ch == 'o') )
                 {
-                    tokenStr += ch;
-                    is.read(&ch, 1);
-                    ++column;
+                    if ((ch >= '0' && ch <= '9') || ch == '_')
+                    {
+                        while ( !is.eof() && ((ch >= '0' && ch <= '9') || ch == '_') )
+                        {
+                            tokenStr += ch;
+                            is.read(&ch, 1);
+                            ++column;
+                        }
+
+                        if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                        {
+                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                            ok = false;
+                        }
+                    }
+                    else if (ch == 'x')
+                    {
+                        tokenStr += ch;
+                        is.read(&ch, 1);
+                        ++column;
+
+                        while ( !is.eof() && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
+                        {
+                            tokenStr += ch;
+                            is.read(&ch, 1);
+                            ++column;
+                        }
+
+                        if ( (ch >= 'g' && ch <= 'z') || (ch >= 'G' && ch <= 'Z') )
+                        {
+                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                            ok = false;
+                        }
+                    }
+                    else if (ch == 'b')
+                    {
+                        tokenStr += ch;
+                        is.read(&ch, 1);
+                        ++column;
+
+                        while ( !is.eof() && (ch == '0' || ch == '1' || ch == '_') )
+                        {
+                            tokenStr += ch;
+                            is.read(&ch, 1);
+                            ++column;
+                        }
+
+                        if ( (ch >= '2' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                        {
+                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                            ok = false;
+                        }
+                    }
+                    else if (ch == 'o')
+                    {
+                        tokenStr += ch;
+                        is.read(&ch, 1);
+                        ++column;
+
+                        while ( !is.eof() && ((ch >= '0' && ch <= '7') || ch == '_') )
+                        {
+                            tokenStr += ch;
+                            is.read(&ch, 1);
+                            ++column;
+                        }
+
+                        if ( (ch >= '8' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                        {
+                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                            ok = false;
+                        }
+                    }
+                    else
+                    {
+                        logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                        ok = false;
+                    }
                 }
 
-                if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
-                {
-                    logger.LogError(filename, line, column, "Invalid numeric literal");
-                    ok = false;
-                }
-                else
+                if (ok)
                 {
                     tokens.push_back(Token(tokenStr, filename, line, startColumn));
                     tokenStr.clear();
