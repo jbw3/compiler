@@ -34,21 +34,9 @@ private:
     unsigned line;
     unsigned column;
 
-    unsigned GetTokenStrStartColumn();
-
-    Token CreateToken(unsigned columnNum = 0);
-
-    bool ParseChar(char ch, std::vector<Token>& tokens);
-
-    bool IsValidToken(const std::string& str) const;
-
-    bool AddTokenIfValid(std::vector<Token>& tokens);
-
     void ParseLineComment(std::istream& is);
 
     bool ParseBlockComment(std::istream& is);
-
-    void PrintError();
 };
 
 #endif // LEXICAL_ANALYZER_H_
