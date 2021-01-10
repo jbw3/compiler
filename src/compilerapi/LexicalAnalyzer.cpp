@@ -133,10 +133,33 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             {
                 // TODO
             }
-            // parse int literals
+            // parse numeric literals
             else if (ch >= '0' && ch <= '9')
             {
-                // TODO
+                // TODO: support multiple bases
+                // TODO: support separators
+
+                unsigned startColumn = column;
+                tokenStr += ch;
+                is.read(&ch, 1);
+                ++column;
+                while (!is.eof() && ch >= '0' && ch <= '9')
+                {
+                    tokenStr += ch;
+                    is.read(&ch, 1);
+                    ++column;
+                }
+
+                if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                {
+                    logger.LogError(filename, line, column, "Invalid numeric literal");
+                    ok = false;
+                }
+                else
+                {
+                    tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                    tokenStr.clear();
+                }
             }
             // parse string literals
             else if (ch == '"')
