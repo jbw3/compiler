@@ -139,9 +139,35 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 // TODO
             }
             // parse string literals
-            else if (false)
+            else if (ch == '"')
             {
-                // TODO
+                unsigned startColumn = column;
+                tokenStr += ch;
+                is.read(&ch, 1);
+                ++column;
+                char prevChar = ch;
+                while (!is.eof() && (ch != '"' || prevChar == '\\'))
+                {
+                    if (ch == '\n')
+                    {
+                        logger.LogError(filename, line, column, "Unexpected string end");
+                        ok = false;
+                        break;
+                    }
+                    tokenStr += ch;
+
+                    prevChar = ch;
+                    is.read(&ch, 1);
+                    ++column;
+                }
+
+                if (ok)
+                {
+                    tokenStr += ch; // add last '"'
+                    tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                    tokenStr.clear();
+                    is.read(&ch, 1);
+                }
             }
             else
             {
