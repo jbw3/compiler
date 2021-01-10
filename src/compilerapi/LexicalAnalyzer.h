@@ -22,6 +22,8 @@ private:
 
     static const char LINE_COMMENT_END;
 
+    static const std::unordered_set<char> SYMBOL_START_CHAR;
+
     static const std::unordered_set<std::string> SYMBOLS;
 
     ErrorLogger& logger;

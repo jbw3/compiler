@@ -11,6 +11,11 @@ const char LexicalAnalyzer::BLOCK_COMMENT_INNER = '!';
 
 const char LexicalAnalyzer::LINE_COMMENT_END = '\n';
 
+const unordered_set<char> LexicalAnalyzer::SYMBOL_START_CHAR =
+{
+    '=', '!', '<', '>', '+', '-', '*', '/', '%', '&', '|', '^', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}',
+};
+
 const unordered_set<string> LexicalAnalyzer::SYMBOLS =
 {
     "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "<<", ">>", ">>>", "!", "&", "^", "|", "&&", "||", "(", ")", "[", "]", "{", "}", ",",
@@ -129,9 +134,21 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 tokenStr.clear();
             }
             // parse operators and separators
-            else if (false)
+            else if (SYMBOL_START_CHAR.find(ch) != SYMBOL_START_CHAR.end())
             {
-                // TODO
+                unsigned startColumn = column;
+                tokenStr += ch;
+                is.read(&ch, 1);
+                ++column;
+                while (!is.eof() && SYMBOLS.find(tokenStr + ch) != SYMBOLS.end())
+                {
+                    tokenStr += ch;
+                    is.read(&ch, 1);
+                    ++column;
+                }
+
+                tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                tokenStr.clear();
             }
             // parse numeric literals
             else if (ch >= '0' && ch <= '9')
