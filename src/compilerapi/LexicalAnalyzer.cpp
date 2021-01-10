@@ -68,8 +68,89 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     bool ok = true;
     char ch = '\0';
     is.read(&ch, 1);
-    while (!is.eof())
+    while (ok && !is.eof())
     {
+        // skip whitespace and comments
+        while (!is.eof() && (isspace(ch) || ch == COMMENT_START))
+        {
+            // skip whitespace
+            while (!is.eof() && isspace(ch))
+            {
+                if (ch == '\n')
+                {
+                    ++line;
+                    column = 1;
+                }
+                else
+                {
+                    ++column;
+                }
+
+                is.read(&ch, 1);
+            }
+
+            // skip comments
+            if (!is.eof() && ch == COMMENT_START)
+            {
+                is.read(&ch, 1);
+                if (!is.eof())
+                {
+                    if (ch == BLOCK_COMMENT_INNER)
+                    {
+                        ok = ParseBlockComment(is);
+                    }
+                    else
+                    {
+                        ParseLineComment(is);
+                    }
+                }
+
+                is.read(&ch, 1);
+            }
+        }
+
+        if (!is.eof())
+        {
+            // parse identifiers and keywords
+            if (isIdentifierChar(ch, true))
+            {
+                unsigned startColumn = column;
+                tokenStr += ch;
+                is.read(&ch, 1);
+                ++column;
+                while (!is.eof() && isIdentifierChar(ch, false))
+                {
+                    tokenStr += ch;
+                    is.read(&ch, 1);
+                    ++column;
+                }
+
+                tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                tokenStr.clear();
+            }
+            // parse operators and separators
+            else if (false)
+            {
+                // TODO
+            }
+            // parse int literals
+            else if (ch >= '0' && ch <= '9')
+            {
+                // TODO
+            }
+            // parse string literals
+            else if (false)
+            {
+                // TODO
+            }
+            else
+            {
+                logger.LogError(filename, line, column, "Invalid character '{}'", ch);
+                ok = false;
+            }
+        }
+
+#if false
         if (ch == COMMENT_START && !isString)
         {
             ok = AddTokenIfValid(tokens);
@@ -108,16 +189,17 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
         {
             break;
         }
-
-        is.read(&ch, 1);
+#endif
     }
 
+#if false
     // check for leftover token
     if (ok && !tokenStr.empty())
     {
         tokens.push_back(CreateToken());
         tokenStr = "";
     }
+#endif
 
     return ok;
 }
