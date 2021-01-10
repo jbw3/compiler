@@ -154,13 +154,12 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             else if (ch >= '0' && ch <= '9')
             {
                 // TODO: support multiple bases
-                // TODO: support separators
 
                 unsigned startColumn = column;
                 tokenStr += ch;
                 is.read(&ch, 1);
                 ++column;
-                while (!is.eof() && ch >= '0' && ch <= '9')
+                while ( !is.eof() && ((ch >= '0' && ch <= '9') || ch == '_') )
                 {
                     tokenStr += ch;
                     is.read(&ch, 1);
