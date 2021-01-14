@@ -33,11 +33,8 @@ private:
     size_t buffSize;
     size_t buffIdx;
     bool isMore;
-
     ErrorLogger& logger;
     std::string tokenStr;
-    bool isValid;
-    bool isString;
     std::string filename;
     unsigned line;
     unsigned column;

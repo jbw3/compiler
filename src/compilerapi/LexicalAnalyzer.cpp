@@ -32,9 +32,7 @@ constexpr bool isWhitespace(char ch)
 }
 
 LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :
-    logger(logger),
-    isValid(false),
-    isString(false)
+    logger(logger)
 {
     buff = new char[MAX_BUFF_CAPACITY];
     buffSize = 0;
@@ -86,8 +84,6 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     isMore = true;
 
     tokenStr = "";
-    isValid = false;
-    isString = false;
     line = 1;
     column = 1;
 
