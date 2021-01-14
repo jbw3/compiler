@@ -11,6 +11,8 @@ class LexicalAnalyzer
 public:
     LexicalAnalyzer(ErrorLogger& logger);
 
+    ~LexicalAnalyzer();
+
     bool Process(const std::string& inFile, std::vector<Token>& tokens);
 
     bool Process(std::istream& is, std::vector<Token>& tokens);
@@ -26,6 +28,12 @@ private:
 
     static const std::unordered_set<std::string> SYMBOLS;
 
+    static constexpr size_t MAX_BUFF_CAPACITY = 1024;
+    char* buff;
+    size_t buffSize;
+    size_t buffIdx;
+    bool isMore;
+
     ErrorLogger& logger;
     std::string tokenStr;
     bool isValid;
@@ -33,6 +41,8 @@ private:
     std::string filename;
     unsigned line;
     unsigned column;
+
+    char Read(std::istream& is);
 
     void ParseLineComment(std::istream& is);
 

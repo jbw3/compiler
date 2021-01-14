@@ -27,6 +27,15 @@ LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :
     isValid(false),
     isString(false)
 {
+    buff = new char[MAX_BUFF_CAPACITY];
+    buffSize = 0;
+    buffIdx = 0;
+    isMore = false;
+}
+
+LexicalAnalyzer::~LexicalAnalyzer()
+{
+    delete [] buff;
 }
 
 bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
@@ -63,6 +72,9 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 {
     tokens.clear();
     tokens.reserve(256);
+    buffSize = 0;
+    buffIdx = 0;
+    isMore = true;
 
     tokenStr = "";
     isValid = false;
@@ -71,15 +83,14 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     column = 1;
 
     bool ok = true;
-    char ch = '\0';
-    is.read(&ch, 1);
-    while (ok && !is.eof())
+    char ch = Read(is);
+    while (ok && isMore)
     {
         // skip whitespace and comments
-        while (!is.eof() && (isspace(ch) || ch == COMMENT_START))
+        while (isMore && (isspace(ch) || ch == COMMENT_START))
         {
             // skip whitespace
-            while (!is.eof() && isspace(ch))
+            while (isMore && isspace(ch))
             {
                 if (ch == '\n')
                 {
@@ -91,14 +102,14 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     ++column;
                 }
 
-                is.read(&ch, 1);
+                ch = Read(is);
             }
 
             // skip comments
-            if (!is.eof() && ch == COMMENT_START)
+            if (isMore && ch == COMMENT_START)
             {
-                is.read(&ch, 1);
-                if (!is.eof())
+                ch = Read(is);
+                if (isMore)
                 {
                     if (ch == BLOCK_COMMENT_INNER)
                     {
@@ -110,23 +121,23 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     }
                 }
 
-                is.read(&ch, 1);
+                ch = Read(is);
             }
         }
 
-        if (!is.eof())
+        if (isMore)
         {
             // parse identifiers and keywords
             if (isIdentifierChar(ch, true))
             {
                 unsigned startColumn = column;
                 tokenStr += ch;
-                is.read(&ch, 1);
+                ch = Read(is);
                 ++column;
-                while (!is.eof() && isIdentifierChar(ch, false))
+                while (isMore && isIdentifierChar(ch, false))
                 {
                     tokenStr += ch;
-                    is.read(&ch, 1);
+                    ch = Read(is);
                     ++column;
                 }
 
@@ -138,12 +149,12 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             {
                 unsigned startColumn = column;
                 tokenStr += ch;
-                is.read(&ch, 1);
+                ch = Read(is);
                 ++column;
-                while (!is.eof() && SYMBOLS.find(tokenStr + ch) != SYMBOLS.end())
+                while (isMore && SYMBOLS.find(tokenStr + ch) != SYMBOLS.end())
                 {
                     tokenStr += ch;
-                    is.read(&ch, 1);
+                    ch = Read(is);
                     ++column;
                 }
 
@@ -155,17 +166,17 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             {
                 unsigned startColumn = column;
                 tokenStr += ch;
-                is.read(&ch, 1);
+                ch = Read(is);
                 ++column;
 
-                if ( !is.eof() && ((ch >= '0' && ch <= '9') || ch == '_' || ch == 'x' || ch == 'b' || ch == 'o') )
+                if ( isMore && ((ch >= '0' && ch <= '9') || ch == '_' || ch == 'x' || ch == 'b' || ch == 'o') )
                 {
                     if ((ch >= '0' && ch <= '9') || ch == '_')
                     {
-                        while ( !is.eof() && ((ch >= '0' && ch <= '9') || ch == '_') )
+                        while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
                             tokenStr += ch;
-                            is.read(&ch, 1);
+                            ch = Read(is);
                             ++column;
                         }
 
@@ -178,13 +189,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     else if (ch == 'x')
                     {
                         tokenStr += ch;
-                        is.read(&ch, 1);
+                        ch = Read(is);
                         ++column;
 
-                        while ( !is.eof() && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
+                        while ( isMore && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
                         {
                             tokenStr += ch;
-                            is.read(&ch, 1);
+                            ch = Read(is);
                             ++column;
                         }
 
@@ -197,13 +208,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     else if (ch == 'b')
                     {
                         tokenStr += ch;
-                        is.read(&ch, 1);
+                        ch = Read(is);
                         ++column;
 
-                        while ( !is.eof() && (ch == '0' || ch == '1' || ch == '_') )
+                        while ( isMore && (ch == '0' || ch == '1' || ch == '_') )
                         {
                             tokenStr += ch;
-                            is.read(&ch, 1);
+                            ch = Read(is);
                             ++column;
                         }
 
@@ -216,13 +227,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     else if (ch == 'o')
                     {
                         tokenStr += ch;
-                        is.read(&ch, 1);
+                        ch = Read(is);
                         ++column;
 
-                        while ( !is.eof() && ((ch >= '0' && ch <= '7') || ch == '_') )
+                        while ( isMore && ((ch >= '0' && ch <= '7') || ch == '_') )
                         {
                             tokenStr += ch;
-                            is.read(&ch, 1);
+                            ch = Read(is);
                             ++column;
                         }
 
@@ -250,10 +261,10 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             {
                 unsigned startColumn = column;
                 tokenStr += ch;
-                is.read(&ch, 1);
+                ch = Read(is);
                 ++column;
                 char prevChar = ch;
-                while (!is.eof() && (ch != '"' || prevChar == '\\'))
+                while (isMore && (ch != '"' || prevChar == '\\'))
                 {
                     if (ch == '\n')
                     {
@@ -264,7 +275,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     tokenStr += ch;
 
                     prevChar = ch;
-                    is.read(&ch, 1);
+                    ch = Read(is);
                     ++column;
                 }
 
@@ -273,7 +284,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     tokenStr += ch; // add last '"'
                     tokens.push_back(Token(tokenStr, filename, line, startColumn));
                     tokenStr.clear();
-                    is.read(&ch, 1);
+                    ch = Read(is);
                     ++column;
                 }
             }
@@ -288,13 +299,40 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     return ok;
 }
 
+char LexicalAnalyzer::Read(istream& is)
+{
+    char ch;
+    if (buffIdx < buffSize)
+    {
+        ch = buff[buffIdx];
+        ++buffIdx;
+    }
+    else
+    {
+        is.read(buff, MAX_BUFF_CAPACITY);
+        buffSize = is.gcount();
+        if (buffSize == 0)
+        {
+            isMore = false;
+            ch = '\0';
+        }
+        else
+        {
+            ch = buff[0];
+            buffIdx = 1;
+        }
+    }
+
+    return ch;
+}
+
 void LexicalAnalyzer::ParseLineComment(istream& is)
 {
     char ch = '\0';
     do
     {
-        is.read(&ch, 1);
-    } while (!is.eof() && ch != LINE_COMMENT_END);
+        ch = Read(is);
+    } while (isMore && ch != LINE_COMMENT_END);
 
     ++line;
     column = 1;
@@ -309,8 +347,8 @@ bool LexicalAnalyzer::ParseBlockComment(istream& is)
     // add 2 for comment start chars
     column += 2;
 
-    is.read(&current, 1);
-    while (!is.eof())
+    current = Read(is);
+    while (isMore)
     {
         if (current == '\n')
         {
@@ -343,7 +381,7 @@ bool LexicalAnalyzer::ParseBlockComment(istream& is)
         }
 
         prev = current;
-        is.read(&current, 1);
+        current = Read(is);
     }
 
     return true;
