@@ -274,6 +274,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     tokens.push_back(Token(tokenStr, filename, line, startColumn));
                     tokenStr.clear();
                     is.read(&ch, 1);
+                    ++column;
                 }
             }
             else
