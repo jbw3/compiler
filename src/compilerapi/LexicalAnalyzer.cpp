@@ -22,6 +22,15 @@ const unordered_set<string> LexicalAnalyzer::SYMBOLS =
     ".", ";", ":", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "..", "..<",
 };
 
+constexpr bool isWhitespace(char ch)
+{
+    bool value = ch == ' ';
+    value |= ch == '\t';
+    value |= ch == '\n';
+    value |= ch == '\r';
+    return value;
+}
+
 LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :
     logger(logger),
     isValid(false),
@@ -87,10 +96,10 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
     while (ok && isMore)
     {
         // skip whitespace and comments
-        while (isMore && (isspace(ch) || ch == COMMENT_START))
+        while (isMore && (isWhitespace(ch) || ch == COMMENT_START))
         {
             // skip whitespace
-            while (isMore && isspace(ch))
+            while (isMore && isWhitespace(ch))
             {
                 if (ch == '\n')
                 {
