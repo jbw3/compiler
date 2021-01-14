@@ -186,16 +186,20 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
 bool LexicalAnalyzerTests::TokenSequencesAreEqual(const std::vector<Token>& expectedTokens,
                                                   const std::vector<Token>& actualTokens)
 {
-    if (expectedTokens.size() != actualTokens.size())
+    size_t expectedSize = expectedTokens.size();
+    size_t actualSize = actualTokens.size();
+    if (expectedSize != actualSize)
     {
+        cerr << "Unexpected number of tokens: expected: " << expectedSize << ", actual: " << actualSize << "\n";
         return false;
     }
 
-    for (size_t i = 0; i < expectedTokens.size(); ++i)
+    for (size_t i = 0; i < expectedSize; ++i)
     {
         bool areEqual = TokensAreEqual(expectedTokens[i], actualTokens[i]);
         if (!areEqual)
         {
+            cerr << "Tokens are not equal\n";
             return false;
         }
     }
