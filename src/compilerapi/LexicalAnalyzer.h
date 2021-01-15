@@ -3,6 +3,7 @@
 
 #include "ErrorLogger.h"
 #include "Token.h"
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -26,7 +27,7 @@ private:
 
     static const std::unordered_set<char> SYMBOL_START_CHAR;
 
-    static const std::unordered_set<std::string> SYMBOLS;
+    static const std::unordered_map<std::string, Token::EType> SYMBOLS;
 
     static constexpr size_t MAX_BUFF_CAPACITY = 1024;
     char* buff;

@@ -18,97 +18,97 @@ bool LexicalAnalyzerTests::TestValidInputs()
         {
             "fun test() i32 { 1 + 2 }\n",
             {
-                {"fun", "", 1, 1},
-                {"test", "", 1, 5},
-                {"(", "", 1, 9},
-                {")", "", 1, 10},
-                {"i32", "", 1, 12},
-                {"{", "", 1, 16},
-                {"1", "", 1, 18},
-                {"+", "", 1, 20},
-                {"2", "", 1, 22},
-                {"}", "", 1, 24}
+                {"fun", "", 1, 1, Token::eInvalid},
+                {"test", "", 1, 5, Token::eInvalid},
+                {"(", "", 1, 9, Token::eInvalid},
+                {")", "", 1, 10, Token::eInvalid},
+                {"i32", "", 1, 12, Token::eInvalid},
+                {"{", "", 1, 16, Token::eInvalid},
+                {"1", "", 1, 18, Token::eInvalid},
+                {"+", "", 1, 20, Token::eInvalid},
+                {"2", "", 1, 22, Token::eInvalid},
+                {"}", "", 1, 24, Token::eInvalid}
             }
         },
         {
             "fun a_function(param1 i32, param2 i32) i32 { param1 - param2 }\n",
             {
-                {"fun", "", 1, 1},
-                {"a_function", "", 1, 5},
-                {"(", "", 1, 15},
-                {"param1", "", 1, 16},
-                {"i32", "", 1, 23},
-                {",", "", 1, 26},
-                {"param2", "", 1, 28},
-                {"i32", "", 1, 35},
-                {")", "", 1, 38},
-                {"i32", "", 1, 40},
-                {"{", "", 1, 44},
-                {"param1", "", 1, 46},
-                {"-", "", 1, 53},
-                {"param2", "", 1, 55},
-                {"}", "", 1, 62}
+                {"fun", "", 1, 1, Token::eInvalid},
+                {"a_function", "", 1, 5, Token::eInvalid},
+                {"(", "", 1, 15, Token::eInvalid},
+                {"param1", "", 1, 16, Token::eInvalid},
+                {"i32", "", 1, 23, Token::eInvalid},
+                {",", "", 1, 26, Token::eInvalid},
+                {"param2", "", 1, 28, Token::eInvalid},
+                {"i32", "", 1, 35, Token::eInvalid},
+                {")", "", 1, 38, Token::eInvalid},
+                {"i32", "", 1, 40, Token::eInvalid},
+                {"{", "", 1, 44, Token::eInvalid},
+                {"param1", "", 1, 46, Token::eInvalid},
+                {"-", "", 1, 53, Token::eInvalid},
+                {"param2", "", 1, 55, Token::eInvalid},
+                {"}", "", 1, 62, Token::eInvalid}
             }
         },
         {
             "1 + 23\n# comment\nnot a comment\n",
             {
-                {"1", "", 1, 1},
-                {"+", "", 1, 3},
-                {"23", "", 1, 5},
-                {"not", "", 3, 1},
-                {"a", "", 3, 5},
-                {"comment", "", 3, 7}
+                {"1", "", 1, 1, Token::eInvalid},
+                {"+", "", 1, 3, Token::eInvalid},
+                {"23", "", 1, 5, Token::eInvalid},
+                {"not", "", 3, 1, Token::eInvalid},
+                {"a", "", 3, 5, Token::eInvalid},
+                {"comment", "", 3, 7, Token::eInvalid}
             }
         },
         {
             "    # comment\n    not a comment\n",
             {
-                {"not", "", 2, 5},
-                {"a", "", 2, 9},
-                {"comment", "", 2, 11}
+                {"not", "", 2, 5, Token::eInvalid},
+                {"a", "", 2, 9, Token::eInvalid},
+                {"comment", "", 2, 11, Token::eInvalid}
             }
         },
         {
             "1 + #! comment !# 2",
             {
-                {"1", "", 1, 1},
-                {"+", "", 1, 3},
-                {"2", "", 1, 19},
+                {"1", "", 1, 1, Token::eInvalid},
+                {"+", "", 1, 3, Token::eInvalid},
+                {"2", "", 1, 19, Token::eInvalid},
             }
         },
         {
             "abc #! comment #! nested comment !# back in outer comment !# ()",
             {
-                {"abc", "", 1, 1},
-                {"(", "", 1, 62},
-                {")", "", 1, 63},
+                {"abc", "", 1, 1, Token::eInvalid},
+                {"(", "", 1, 62, Token::eInvalid},
+                {")", "", 1, 63, Token::eInvalid},
             }
         },
         {
             "x=#! multi-\nline\ncomment\n!# true;",
             {
-                {"x", "", 1, 1},
-                {"=", "", 1, 2},
-                {"true", "", 4, 4},
-                {";", "", 4, 8},
+                {"x", "", 1, 1, Token::eInvalid},
+                {"=", "", 1, 2, Token::eInvalid},
+                {"true", "", 4, 4, Token::eInvalid},
+                {";", "", 4, 8, Token::eInvalid},
             }
         },
         {
             "x = #!# 1 !# 2",
             {
-                {"x", "", 1, 1},
-                {"=", "", 1, 3},
-                {"2", "", 1, 14},
+                {"x", "", 1, 1, Token::eInvalid},
+                {"=", "", 1, 3, Token::eInvalid},
+                {"2", "", 1, 14, Token::eInvalid},
             }
         },
         {
             R"("abc""1\n2\n""#""#!")",
             {
-                {R"("abc")", "", 1, 1},
-                {R"("1\n2\n")", "", 1, 6},
-                {R"("#")", "", 1, 14},
-                {R"("#!")", "", 1, 17},
+                {R"("abc")", "", 1, 1, Token::eInvalid},
+                {R"("1\n2\n")", "", 1, 6, Token::eInvalid},
+                {R"("#")", "", 1, 14, Token::eInvalid},
+                {R"("#!")", "", 1, 17, Token::eInvalid},
             }
         },
     };

@@ -215,12 +215,14 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                 new Token(POINTER_TYPE_TOKEN,
                           originalToken->filename,
                           originalToken->line,
-                          originalToken->column);
+                          originalToken->column,
+                          Token::eAmpersand);
             Token* token2 =
                 new Token(POINTER_TYPE_TOKEN,
                           originalToken->filename,
                           originalToken->line,
-                          originalToken->column + 1);
+                          originalToken->column + 1,
+                          Token::eAmpersand);
 
             typeNameTokens.push_back(token1);
             typeNameTokens.push_back(token2);

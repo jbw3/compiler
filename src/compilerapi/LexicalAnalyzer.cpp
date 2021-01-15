@@ -16,10 +16,52 @@ const unordered_set<char> LexicalAnalyzer::SYMBOL_START_CHAR =
     '=', '!', '<', '>', '+', '-', '*', '/', '%', '&', '|', '^', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}',
 };
 
-const unordered_set<string> LexicalAnalyzer::SYMBOLS =
+const unordered_map<string, Token::EType> LexicalAnalyzer::SYMBOLS =
 {
-    "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%", "<<", ">>", ">>>", "!", "&", "^", "|", "&&", "||", "(", ")", "[", "]", "{", "}", ",",
-    ".", ";", ":", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "..", "..<",
+    { "==", Token::eEqualEqual },
+    { "!=", Token::eExclaimEqual },
+    { "<", Token::eLess },
+    { "<=", Token::eLessEqual },
+    { ">", Token::eGreater },
+    { ">=", Token::eGreaterEqual },
+    { "+", Token::ePlus },
+    { "-", Token::eMinus },
+    { "*", Token::eTimes },
+    { "/", Token::eDivide },
+    { "%", Token::eRemainder },
+    { "<<", Token::eLessLess },
+    { ">>", Token::eGreaterGreater },
+    { ">>>", Token::eGreaterGreaterGreater },
+    { "!", Token::eExclaim },
+    { "&", Token::eAmpersand },
+    { "^", Token::eCaret },
+    { "|", Token::eBar },
+    { "&&", Token::eAmpersandAmpersand },
+    { "||", Token::eBarBar },
+    { "(", Token::eOpenPar },
+    { ")", Token::eClosePar },
+    { "[", Token::eOpenBracket },
+    { "]", Token::eCloseBracket },
+    { "{", Token::eOpenBrace },
+    { "}", Token::eCloseBrace },
+    { ",", Token::eComma },
+    { ".", Token::ePeriod },
+    { ";", Token::eSemiColon },
+    { ":", Token::eColon },
+    { "=", Token::eEqual },
+    { "+=", Token::ePlusEqual },
+    { "-=", Token::eMinusEqual },
+    { "*=", Token::eTimesEqual },
+    { "/=", Token::eDivideEqual },
+    { "%=", Token::eRemainderEqual },
+    { "<<=", Token::eLessLessEqual },
+    { ">>=", Token::eGreaterGreaterEqual },
+    { ">>>=", Token::eGreaterGreaterGreaterEqual },
+    { "&=", Token::eAmpersandEqual },
+    { "^=", Token::eCaretEqual },
+    { "|=", Token::eBarEqual },
+    { "..", Token::ePeriodPeriod },
+    { "..<", Token::ePeriodPeriodLess },
 };
 
 constexpr bool isWhitespace(char ch)
@@ -146,7 +188,18 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     ++column;
                 }
 
-                tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                // get token type
+                Token::EType tokenType = Token::eInvalid;
+                if (false) // TODO: check for keyword
+                {
+
+                }
+                else
+                {
+                    tokenType = Token::eIdentifier;
+                }
+
+                tokens.push_back(Token(tokenStr, filename, line, startColumn, tokenType));
                 tokenStr.clear();
             }
             // parse operators and separators
@@ -163,12 +216,16 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     ++column;
                 }
 
-                tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                auto iter = SYMBOLS.find(tokenStr);
+                Token::EType tokenType = iter->second;
+
+                tokens.push_back(Token(tokenStr, filename, line, startColumn, tokenType));
                 tokenStr.clear();
             }
             // parse numeric literals
             else if (ch >= '0' && ch <= '9')
             {
+                Token::EType tokenType;
                 unsigned startColumn = column;
                 tokenStr += ch;
                 ch = Read(is);
@@ -178,6 +235,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 {
                     if ((ch >= '0' && ch <= '9') || ch == '_')
                     {
+                        tokenType = Token::eDecIntLit;
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
                             tokenStr += ch;
@@ -193,6 +251,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     }
                     else if (ch == 'x')
                     {
+                        tokenType = Token::eHexIntLit;
                         tokenStr += ch;
                         ch = Read(is);
                         ++column;
@@ -212,6 +271,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     }
                     else if (ch == 'b')
                     {
+                        tokenType = Token::eBinIntLit;
                         tokenStr += ch;
                         ch = Read(is);
                         ++column;
@@ -231,6 +291,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     }
                     else if (ch == 'o')
                     {
+                        tokenType = Token::eOctIntLit;
                         tokenStr += ch;
                         ch = Read(is);
                         ++column;
@@ -257,7 +318,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 
                 if (ok)
                 {
-                    tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                    tokens.push_back(Token(tokenStr, filename, line, startColumn, tokenType));
                     tokenStr.clear();
                 }
             }
@@ -287,7 +348,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 if (ok)
                 {
                     tokenStr += ch; // add last '"'
-                    tokens.push_back(Token(tokenStr, filename, line, startColumn));
+                    tokens.push_back(Token(tokenStr, filename, line, startColumn, Token::eStrLit));
                     tokenStr.clear();
                     ch = Read(is);
                     ++column;
