@@ -16,6 +16,8 @@ const std::string ELSE_KEYWORD = "else";
 
 const std::string EXTERN_KEYWORD = "extern";
 
+const std::string FALSE_KEYWORD = "false";
+
 const std::string FOR_KEYWORD = "for";
 
 const std::string FUNCTION_KEYWORD = "fun";
@@ -39,6 +41,8 @@ const std::string RETURN_KEYWORD = "return";
 const std::string STR_KEYWORD = "str";
 
 const std::string STRUCT_KEYWORD = "struct";
+
+const std::string TRUE_KEYWORD = "true";
 
 const std::string UINT8_KEYWORD = "u8";
 

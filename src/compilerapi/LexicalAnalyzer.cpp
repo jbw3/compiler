@@ -1,3 +1,4 @@
+#include "keywords.h"
 #include "LexicalAnalyzer.h"
 #include "utils.h"
 #include <fstream>
@@ -62,6 +63,37 @@ const unordered_map<string, Token::EType> LexicalAnalyzer::SYMBOLS =
     { "|=", Token::eBarEqual },
     { "..", Token::ePeriodPeriod },
     { "..<", Token::ePeriodPeriodLess },
+};
+
+const unordered_map<string, Token::EType> LexicalAnalyzer::KEYWORDS =
+{
+    { BOOL_KEYWORD, Token::eBool },
+    { BREAK_KEYWORD, Token::eBreak },
+    { CONTINUE_KEYWORD, Token::eContinue },
+    { ELIF_KEYWORD, Token::eElif },
+    { ELSE_KEYWORD, Token::eElse },
+    { EXTERN_KEYWORD, Token::eExtern },
+    { FALSE_KEYWORD, Token::eFalseLit },
+    { FOR_KEYWORD, Token::eFor },
+    { FUNCTION_KEYWORD, Token::eFun },
+    { IF_KEYWORD, Token::eIf },
+    { INT8_KEYWORD, Token::eI8 },
+    { INT16_KEYWORD, Token::eI16 },
+    { INT32_KEYWORD, Token::eI32 },
+    { INT64_KEYWORD, Token::eI64 },
+    { IN_KEYWORD, Token::eIn },
+    { INT_SIZE_KEYWORD, Token::eISize },
+    { RETURN_KEYWORD, Token::eReturn },
+    { STR_KEYWORD, Token::eStr },
+    { STRUCT_KEYWORD, Token::eStruct },
+    { TRUE_KEYWORD, Token::eTrueLit },
+    { UINT8_KEYWORD, Token::eU8 },
+    { UINT16_KEYWORD, Token::eU16 },
+    { UINT32_KEYWORD, Token::eU32 },
+    { UINT64_KEYWORD, Token::eU64 },
+    { UINT_SIZE_KEYWORD, Token::eUSize },
+    { VARIABLE_KEYWORD, Token::eVar },
+    { WHILE_KEYWORD, Token::eWhile },
 };
 
 constexpr bool isWhitespace(char ch)
@@ -190,9 +222,10 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 
                 // get token type
                 Token::EType tokenType = Token::eInvalid;
-                if (false) // TODO: check for keyword
+                auto iter = KEYWORDS.find(tokenStr);
+                if (iter != KEYWORDS.end())
                 {
-
+                    tokenType = iter->second;
                 }
                 else
                 {
@@ -225,7 +258,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             // parse numeric literals
             else if (ch >= '0' && ch <= '9')
             {
-                Token::EType tokenType;
+                Token::EType tokenType = Token::eDecIntLit;
                 unsigned startColumn = column;
                 tokenStr += ch;
                 ch = Read(is);
@@ -235,7 +268,6 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 {
                     if ((ch >= '0' && ch <= '9') || ch == '_')
                     {
-                        tokenType = Token::eDecIntLit;
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
                             tokenStr += ch;

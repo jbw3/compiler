@@ -29,6 +29,8 @@ private:
 
     static const std::unordered_map<std::string, Token::EType> SYMBOLS;
 
+    static const std::unordered_map<std::string, Token::EType> KEYWORDS;
+
     static constexpr size_t MAX_BUFF_CAPACITY = 1024;
     char* buff;
     size_t buffSize;
