@@ -122,20 +122,14 @@ unsigned NumericExpression::GetMinUnsignedSize() const
     return numBits;
 }
 
-BoolLiteralExpression::BoolLiteralExpression(bool value, const Token* token) :
-    token(token),
-    value(value)
+BoolLiteralExpression::BoolLiteralExpression(const Token* token) :
+    token(token)
 {
 }
 
 void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-bool BoolLiteralExpression::GetValue() const
-{
-    return value;
 }
 
 const Token* BoolLiteralExpression::GetToken() const

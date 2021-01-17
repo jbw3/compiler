@@ -837,8 +837,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
     }
     else if (mainType == Token::eBoolLiteralType)
     {
-        bool boolValue = type == Token::eTrueLit;
-        expr = new BoolLiteralExpression(boolValue, &*iter);
+        expr = new BoolLiteralExpression(&*iter);
     }
     else if (mainType == Token::eStrLiteralType)
     {

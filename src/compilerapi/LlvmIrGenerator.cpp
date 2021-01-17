@@ -1169,9 +1169,11 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    SetDebugLocation(boolLiteralExpression->GetToken());
+    const Token* token = boolLiteralExpression->GetToken();
 
-    bool value = boolLiteralExpression->GetValue();
+    SetDebugLocation(token);
+
+    bool value = token->type == Token::eTrueLit;
     resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
 }
 

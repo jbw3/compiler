@@ -91,19 +91,16 @@ private:
 class BoolLiteralExpression : public Expression
 {
 public:
-    BoolLiteralExpression(bool value, const Token* token);
+    BoolLiteralExpression(const Token* token);
 
     virtual ~BoolLiteralExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    bool GetValue() const;
-
     const Token* GetToken() const;
 
 private:
     const Token* token;
-    bool value;
 };
 
 class StringLiteralExpression : public Expression
