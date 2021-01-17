@@ -15,51 +15,6 @@ const string SyntaxAnalyzer::BLOCK_END = "}";
 
 const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
 
-const map<string, UnaryExpression::EOperator> SyntaxAnalyzer::UNARY_EXPRESSION_OPERATORS =
-{
-    {"-", UnaryExpression::eNegative},
-    {"!", UnaryExpression::eComplement},
-    {"&", UnaryExpression::eAddressOf},
-    {"*", UnaryExpression::eDereference},
-};
-
-const map<string, BinaryExpression::EOperator> SyntaxAnalyzer::BINARY_EXPRESSION_OPERATORS =
-{
-    {"==", BinaryExpression::eEqual},
-    {"!=", BinaryExpression::eNotEqual},
-    {"<", BinaryExpression::eLessThan},
-    {"<=", BinaryExpression::eLessThanOrEqual},
-    {">", BinaryExpression::eGreaterThan},
-    {">=", BinaryExpression::eGreaterThanOrEqual},
-    {"+", BinaryExpression::eAdd},
-    {"-", BinaryExpression::eSubtract},
-    {"*", BinaryExpression::eMultiply},
-    {"/", BinaryExpression::eDivide},
-    {"%", BinaryExpression::eRemainder},
-    {"<<", BinaryExpression::eShiftLeft},
-    {">>", BinaryExpression::eShiftRightLogical},
-    {">>>", BinaryExpression::eShiftRightArithmetic},
-    {"&", BinaryExpression::eBitwiseAnd},
-    {"^", BinaryExpression::eBitwiseXor},
-    {"|", BinaryExpression::eBitwiseOr},
-    {"&&", BinaryExpression::eLogicalAnd},
-    {"||", BinaryExpression::eLogicalOr},
-    {ASSIGNMENT_OPERATOR, BinaryExpression::eAssign},
-    {"+=", BinaryExpression::eAddAssign},
-    {"-=", BinaryExpression::eSubtractAssign},
-    {"*=", BinaryExpression::eMultiplyAssign},
-    {"/=", BinaryExpression::eDivideAssign},
-    {"%=", BinaryExpression::eRemainderAssign},
-    {"<<=", BinaryExpression::eShiftLeftAssign},
-    {">>=", BinaryExpression::eShiftRightLogicalAssign},
-    {">>>=", BinaryExpression::eShiftRightArithmeticAssign},
-    {"&=", BinaryExpression::eBitwiseAndAssign},
-    {"^=", BinaryExpression::eBitwiseXorAssign},
-    {"|=", BinaryExpression::eBitwiseOrAssign},
-    {"..", BinaryExpression::eClosedRange},
-    {"..<", BinaryExpression::eHalfOpenRange},
-};
-
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
     logger(logger)
 {
@@ -1102,10 +1057,10 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         {
             isPotentialEnd = false;
 
-            auto unaryOpIter = UNARY_EXPRESSION_OPERATORS.find(value);
-            if (unaryOpIter != UNARY_EXPRESSION_OPERATORS.cend())
+            Token::EType tokenType = iter->type;
+            if (Token::IsUnaryOp(tokenType))
             {
-                unaryOperators.push({&*iter, unaryOpIter->second});
+                unaryOperators.push({&*iter, static_cast<UnaryExpression::EOperator>(tokenType)});
                 expectTerm = true;
             }
             else
@@ -1138,12 +1093,11 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         }
         else
         {
-            auto opIter = BINARY_EXPRESSION_OPERATORS.find(value);
-
             // if the token is a binary operator, add it to the list
-            if (opIter != BINARY_EXPRESSION_OPERATORS.cend())
+            Token::EType tokenType = iter->type;
+            if (Token::IsBinaryOp(tokenType))
             {
-                binOperators.push_back({&*iter, opIter->second});
+                binOperators.push_back({&*iter, static_cast<BinaryExpression::EOperator>(tokenType)});
                 expectTerm = true;
             }
             // if we are at the end of an expression, we're done

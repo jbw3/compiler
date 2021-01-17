@@ -1,6 +1,5 @@
 #include "SyntaxTree.h"
 #include "SyntaxTreeVisitor.h"
-#include "Token.h"
 #include "keywords.h"
 #include "utils.h"
 #include <cassert>

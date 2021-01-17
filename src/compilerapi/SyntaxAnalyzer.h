@@ -4,7 +4,6 @@
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "Token.h"
-#include <map>
 #include <stack>
 #include <unordered_set>
 #include <vector>
@@ -22,10 +21,6 @@ public:
     static const std::string BLOCK_END;
 
     static const std::string ASSIGNMENT_OPERATOR;
-
-    static const std::map<std::string, SyntaxTree::UnaryExpression::EOperator> UNARY_EXPRESSION_OPERATORS;
-
-    static const std::map<std::string, SyntaxTree::BinaryExpression::EOperator> BINARY_EXPRESSION_OPERATORS;
 
     SyntaxAnalyzer(ErrorLogger& logger);
 

@@ -4,9 +4,9 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include "Token.h"
 #include "TypeInfo.h"
 
-class Token;
 class SyntaxTreeVisitor;
 
 namespace SyntaxTree
@@ -182,40 +182,40 @@ class BinaryExpression : public Expression
 public:
     enum EOperator
     {
-        eEqual,
-        eNotEqual,
-        eLessThan,
-        eLessThanOrEqual,
-        eGreaterThan,
-        eGreaterThanOrEqual,
-        eAdd,
-        eSubtract,
-        eMultiply,
-        eDivide,
-        eRemainder,
-        eShiftLeft,
-        eShiftRightLogical,
-        eShiftRightArithmetic,
-        eBitwiseAnd,
-        eBitwiseXor,
-        eBitwiseOr,
-        eLogicalAnd,
-        eLogicalOr,
-        eAssign,
-        eAddAssign,
-        eSubtractAssign,
-        eMultiplyAssign,
-        eDivideAssign,
-        eRemainderAssign,
-        eShiftLeftAssign,
-        eShiftRightLogicalAssign,
-        eShiftRightArithmeticAssign,
-        eBitwiseAndAssign,
-        eBitwiseXorAssign,
-        eBitwiseOrAssign,
-        eClosedRange,
-        eHalfOpenRange,
-        eSubscript,
+        eEqual                      = Token::eEqualEqual,
+        eNotEqual                   = Token::eExclaimEqual,
+        eLessThan                   = Token::eLess,
+        eLessThanOrEqual            = Token::eLessEqual,
+        eGreaterThan                = Token::eGreater,
+        eGreaterThanOrEqual         = Token::eGreaterEqual,
+        eAdd                        = Token::ePlus,
+        eSubtract                   = Token::eMinus,
+        eMultiply                   = Token::eTimes,
+        eDivide                     = Token::eDivide,
+        eRemainder                  = Token::eRemainder,
+        eShiftLeft                  = Token::eLessLess,
+        eShiftRightLogical          = Token::eGreaterGreater,
+        eShiftRightArithmetic       = Token::eGreaterGreaterGreater,
+        eBitwiseAnd                 = Token::eAmpersand,
+        eBitwiseXor                 = Token::eCaret,
+        eBitwiseOr                  = Token::eBar,
+        eLogicalAnd                 = Token::eAmpersandAmpersand,
+        eLogicalOr                  = Token::eBarBar,
+        eAssign                     = Token::eEqual,
+        eAddAssign                  = Token::ePlusEqual,
+        eSubtractAssign             = Token::eMinusEqual,
+        eMultiplyAssign             = Token::eTimesEqual,
+        eDivideAssign               = Token::eDivideEqual,
+        eRemainderAssign            = Token::eRemainderEqual,
+        eShiftLeftAssign            = Token::eLessLessEqual,
+        eShiftRightLogicalAssign    = Token::eGreaterGreaterEqual,
+        eShiftRightArithmeticAssign = Token::eGreaterGreaterGreaterEqual,
+        eBitwiseAndAssign           = Token::eAmpersandEqual,
+        eBitwiseXorAssign           = Token::eCaretEqual,
+        eBitwiseOrAssign            = Token::eBarEqual,
+        eClosedRange                = Token::ePeriodPeriod,
+        eHalfOpenRange              = Token::ePeriodPeriodLess,
+        eSubscript                  = Token::eOpenBracket,
     };
 
     static std::string GetOperatorString(EOperator op);
@@ -250,10 +250,10 @@ class UnaryExpression : public Expression
 public:
     enum EOperator
     {
-        eNegative,
-        eComplement,
-        eAddressOf,
-        eDereference,
+        eNegative    = Token::eMinus,
+        eComplement  = Token::eExclaim,
+        eAddressOf   = Token::eAmpersand,
+        eDereference = Token::eTimes,
     };
 
     static std::string GetOperatorString(EOperator op);

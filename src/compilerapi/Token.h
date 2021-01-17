@@ -11,12 +11,18 @@ public:
     // types
     enum EMainType : uint16_t
     {
-        eIdentifierType  = 1 << 8,
-        eKeywordType     = 2 << 8,
-        eBoolLiteralType = 3 << 8,
-        eIntLiteralType  = 4 << 8,
-        eStrLiteralType  = 5 << 8,
-        eSymbolType      = 6 << 8,
+        eIdentifierType  = 0x1000,
+        eKeywordType     = 0x2000,
+        eBoolLiteralType = 0x3000,
+        eIntLiteralType  = 0x4000,
+        eStrLiteralType  = 0x5000,
+        eSymbolType      = 0x6000,
+    };
+
+    enum ESymbolFlags : uint16_t
+    {
+        eUnaryOp  = 0x0800,
+        eBinaryOp = 0x0400,
     };
 
     enum EType : uint16_t
@@ -67,38 +73,38 @@ public:
         eStrLit       = eStrLiteralType,
 
         // symbol
-        eEqual                      = eSymbolType |  0,
-        eEqualEqual                 = eSymbolType |  1,
-        eLess                       = eSymbolType |  2,
-        eLessEqual                  = eSymbolType |  3,
-        eLessLess                   = eSymbolType |  4,
-        eLessLessEqual              = eSymbolType |  5,
-        eGreater                    = eSymbolType |  6,
-        eGreaterEqual               = eSymbolType |  7,
-        eGreaterGreater             = eSymbolType |  8,
-        eGreaterGreaterEqual        = eSymbolType |  9,
-        eGreaterGreaterGreater      = eSymbolType | 10,
-        eGreaterGreaterGreaterEqual = eSymbolType | 11,
-        ePlus                       = eSymbolType | 12,
-        ePlusEqual                  = eSymbolType | 13,
-        eMinus                      = eSymbolType | 14,
-        eMinusEqual                 = eSymbolType | 15,
-        eTimes                      = eSymbolType | 16,
-        eTimesEqual                 = eSymbolType | 17,
-        eDivide                     = eSymbolType | 18,
-        eDivideEqual                = eSymbolType | 19,
-        eRemainder                  = eSymbolType | 20,
-        eRemainderEqual             = eSymbolType | 21,
-        eExclaim                    = eSymbolType | 22,
-        eExclaimEqual               = eSymbolType | 23,
-        eAmpersand                  = eSymbolType | 24,
-        eAmpersandEqual             = eSymbolType | 25,
-        eAmpersandAmpersand         = eSymbolType | 26,
-        eBar                        = eSymbolType | 27,
-        eBarEqual                   = eSymbolType | 28,
-        eBarBar                     = eSymbolType | 29,
-        eCaret                      = eSymbolType | 30,
-        eCaretEqual                 = eSymbolType | 31,
+        eEqual                      = eSymbolType | eBinaryOp |  0,
+        eEqualEqual                 = eSymbolType | eBinaryOp |  1,
+        eLess                       = eSymbolType | eBinaryOp |  2,
+        eLessEqual                  = eSymbolType | eBinaryOp |  3,
+        eLessLess                   = eSymbolType | eBinaryOp |  4,
+        eLessLessEqual              = eSymbolType | eBinaryOp |  5,
+        eGreater                    = eSymbolType | eBinaryOp |  6,
+        eGreaterEqual               = eSymbolType | eBinaryOp |  7,
+        eGreaterGreater             = eSymbolType | eBinaryOp |  8,
+        eGreaterGreaterEqual        = eSymbolType | eBinaryOp |  9,
+        eGreaterGreaterGreater      = eSymbolType | eBinaryOp | 10,
+        eGreaterGreaterGreaterEqual = eSymbolType | eBinaryOp | 11,
+        ePlus                       = eSymbolType | eBinaryOp | 12,
+        ePlusEqual                  = eSymbolType | eBinaryOp | 13,
+        eMinus                      = eSymbolType | eUnaryOp | eBinaryOp | 14,
+        eMinusEqual                 = eSymbolType | eBinaryOp | 15,
+        eTimes                      = eSymbolType | eUnaryOp | eBinaryOp | 16,
+        eTimesEqual                 = eSymbolType | eBinaryOp | 17,
+        eDivide                     = eSymbolType | eBinaryOp | 18,
+        eDivideEqual                = eSymbolType | eBinaryOp | 19,
+        eRemainder                  = eSymbolType | eBinaryOp | 20,
+        eRemainderEqual             = eSymbolType | eBinaryOp | 21,
+        eExclaim                    = eSymbolType | eUnaryOp | 22,
+        eExclaimEqual               = eSymbolType | eBinaryOp | 23,
+        eAmpersand                  = eSymbolType | eUnaryOp | eBinaryOp | 24,
+        eAmpersandEqual             = eSymbolType | eBinaryOp | 25,
+        eAmpersandAmpersand         = eSymbolType | eBinaryOp | 26,
+        eBar                        = eSymbolType | eBinaryOp | 27,
+        eBarEqual                   = eSymbolType | eBinaryOp | 28,
+        eBarBar                     = eSymbolType | eBinaryOp | 29,
+        eCaret                      = eSymbolType | eBinaryOp | 30,
+        eCaretEqual                 = eSymbolType | eBinaryOp | 31,
         eOpenPar                    = eSymbolType | 32,
         eClosePar                   = eSymbolType | 33,
         eOpenBracket                = eSymbolType | 34,
@@ -107,8 +113,8 @@ public:
         eCloseBrace                 = eSymbolType | 37,
         eComma                      = eSymbolType | 38,
         ePeriod                     = eSymbolType | 39,
-        ePeriodPeriod               = eSymbolType | 40,
-        ePeriodPeriodLess           = eSymbolType | 41,
+        ePeriodPeriod               = eSymbolType | eBinaryOp | 40,
+        ePeriodPeriodLess           = eSymbolType | eBinaryOp | 41,
         eSemiColon                  = eSymbolType | 42,
         eColon                      = eSymbolType | 43,
     };
@@ -119,6 +125,20 @@ public:
     {
         EMainType mainType = static_cast<EMainType>(MAIN_TYPE_MASK & type);
         return mainType;
+    }
+
+    static constexpr bool IsUnaryOp(EType type)
+    {
+        constexpr uint16_t mask = eSymbolType | eUnaryOp;
+        bool value = (type & mask) == mask;
+        return value;
+    }
+
+    static constexpr bool IsBinaryOp(EType type)
+    {
+        constexpr uint16_t mask = eSymbolType | eBinaryOp;
+        bool value = (type & mask) == mask;
+        return value;
     }
 
     Token(const std::string& value, const std::string& filename, unsigned line, unsigned column, EType type);
