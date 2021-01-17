@@ -113,6 +113,14 @@ public:
         eColon                      = eSymbolType | 43,
     };
 
+    static constexpr uint16_t MAIN_TYPE_MASK = 0xff00;
+
+    static constexpr EMainType GetMainType(EType type)
+    {
+        EMainType mainType = static_cast<EMainType>(MAIN_TYPE_MASK & type);
+        return mainType;
+    }
+
     Token(const std::string& value, const std::string& filename, unsigned line, unsigned column, EType type);
 
     std::string value;
