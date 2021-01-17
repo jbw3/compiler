@@ -87,28 +87,4 @@ const std::unordered_set<std::string> KEYWORDS =
     WHILE_KEYWORD,
 };
 
-const std::unordered_set<std::string> RESERVED_KEYWORDS =
-{
-    "as",
-    "async",
-    "await",
-    "const",
-    "default",
-    "enum",
-    "f32",
-    "f64",
-    "import",
-    "interface",
-    "let",
-    "match",
-    "namespace",
-    "private",
-    "public",
-    "trusted",
-    "typedef",
-    "using",
-    "where",
-    "yield",
-};
-
 #endif // KEYWORDS_H_

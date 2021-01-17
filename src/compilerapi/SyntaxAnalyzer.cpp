@@ -90,21 +90,6 @@ bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syn
     return ok;
 }
 
-bool SyntaxAnalyzer::IsValidName(const Token& name)
-{
-    bool isValid = name.type == Token::eIdentifier;
-    if (isValid)
-    {
-        const string& value = name.value;
-        if (RESERVED_KEYWORDS.find(value) != RESERVED_KEYWORDS.cend())
-        {
-            logger.LogWarning(name, "'{}' is a reserved keyword and may be an invalid identifier in a future version of the language", value);
-        }
-    }
-
-    return isValid;
-}
-
 bool SyntaxAnalyzer::EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg)
 {
     if (iter == endIter)
@@ -274,7 +259,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (!IsValidName(*iter))
+    if (iter->type != Token::eIdentifier)
     {
         logger.LogError(*iter, "'{}' is not a valid function name", iter->value);
         return nullptr;
@@ -334,7 +319,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     {
         paramName = iter->value;
         paramNameToken = &*iter;
-        if (!IsValidName(*paramNameToken))
+        if (paramNameToken->type != Token::eIdentifier)
         {
             logger.LogError(*iter, "Invalid parameter name: '{}'", paramName);
             return false;
@@ -394,7 +379,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
         return nullptr;
     }
 
-    if (!IsValidName(*iter))
+    if (iter->type != Token::eIdentifier)
     {
         logger.LogError(*iter, "'{}' is not a valid struct name", iter->value);
         return nullptr;
@@ -421,7 +406,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     while (iter != endIter && iter->type != Token::eCloseBrace)
     {
         // get member name
-        if (!IsValidName(*iter))
+        if (iter->type != Token::eIdentifier)
         {
             deletePointerContainer(members);
             logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
@@ -505,7 +490,7 @@ bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator en
     {
         return true;
     }
-    else if (!IsValidName(*iter))
+    else if (iter->type != Token::eIdentifier)
     {
         return false;
     }
@@ -537,7 +522,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
     while (iter != endIter && iter->type != Token::eCloseBrace)
     {
         // get member name
-        if (!IsValidName(*iter))
+        if (iter->type != Token::eIdentifier)
         {
             deletePointerContainer(members);
             logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
@@ -610,7 +595,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (!IsValidName(*iter))
+    if (iter->type != Token::eIdentifier)
     {
         logger.LogError(*iter, "Invalid variable name");
         return nullptr;
@@ -696,7 +681,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    if (!IsValidName(*iter))
+    if (iter->type != Token::eIdentifier)
     {
         logger.LogError(*iter, "Invalid iterator variable name");
         return nullptr;
@@ -727,7 +712,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
             return nullptr;
         }
 
-        if (!IsValidName(*iter))
+        if (iter->type != Token::eIdentifier)
         {
             logger.LogError(*iter, "Invalid index variable name");
             return nullptr;
@@ -901,7 +886,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
         isPotentialEnd = true;
     }
-    else if (IsValidName(*iter))
+    else if (iter->type == Token::eIdentifier)
     {
         // check if it's a function call
         if (nextIter != endIter && nextIter->type == Token::eOpenPar)
@@ -1753,7 +1738,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
                 delete expr;
                 return nullptr;
             }
-            else if (!IsValidName(*iter))
+            else if (iter->type != Token::eIdentifier)
             {
                 logger.LogError(*iter, "Invalid member name");
                 delete expr;

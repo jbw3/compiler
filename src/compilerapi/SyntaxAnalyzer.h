@@ -39,8 +39,6 @@ private:
         SyntaxTree::BinaryExpression::EOperator op;
     };
 
-    bool IsValidName(const Token& name);
-
     ErrorLogger& logger;
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
