@@ -880,7 +880,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
         isPotentialEnd = true;
     }
-    else if (iter->type == Token::eIdentifier)
+    else if (type == Token::eIdentifier)
     {
         // check if it's a function call
         if (nextIter != endIter && nextIter->type == Token::eOpenPar)
