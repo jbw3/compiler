@@ -7,14 +7,6 @@
 using namespace std;
 using namespace SyntaxTree;
 
-const string SyntaxAnalyzer::STATEMENT_END = ";";
-
-const string SyntaxAnalyzer::BLOCK_START = "{";
-
-const string SyntaxAnalyzer::BLOCK_END = "}";
-
-const string SyntaxAnalyzer::ASSIGNMENT_OPERATOR = "=";
-
 SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
     logger(logger)
 {
@@ -115,15 +107,15 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
     return EndIteratorCheck(iter, endIter, errorMsg);
 }
 
-bool SyntaxAnalyzer::IncrementIteratorCheckValue(TokenIterator& iter, const TokenIterator& endIter, const string& expectedValue, const char* errorMsg)
+bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, Token::EType expectedTokenType, const char* errorMsg)
 {
     bool ok = IncrementIterator(iter, endIter, errorMsg);
     if (ok)
     {
-        if (iter->value != expectedValue)
+        if (iter->type != expectedTokenType)
         {
             ok = false;
-            logger.LogError(*iter, "Expected '{}'", expectedValue);
+            logger.LogError(*iter, "Did not expect '{}'", iter->value);
         }
     }
 
@@ -534,7 +526,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
         const string& memberName = iter->value;
 
         // make sure member name is followed by ':'
-        if (!IncrementIteratorCheckValue(iter, endIter, ":", "Expected ':' after member"))
+        if (!IncrementIteratorCheckType(iter, endIter, Token::eColon, "Expected ':' after member"))
         {
             deletePointerContainer(members);
             return nullptr;
@@ -1033,7 +1025,6 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
     while (iter != endIter)
     {
         Token::EType tokenType = iter->type;
-        string value = iter->value;
         TokenIterator nextIter = iter + 1;
 
         if (tokenType == endTokenType1 || tokenType == endTokenType2 || tokenType == endTokenType3)
@@ -1094,7 +1085,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             }
             else
             {
-                logger.LogError(*iter, "Expected an operator, but got '{}' instead", value);
+                logger.LogError(*iter, "Expected an operator, but got '{}' instead", iter->value);
                 deletePointerContainer(terms);
                 return nullptr;
             }

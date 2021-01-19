@@ -71,8 +71,6 @@ bool isNumber(const std::string& tokenStr);
 
 bool isPotentialNumber(const std::string& tokenStr);
 
-bool isBool(const std::string& tokenStr);
-
 bool isString(const std::string& tokenStr);
 
 bool isPotentialString(const std::string& tokenStr);

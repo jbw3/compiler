@@ -132,11 +132,6 @@ bool isPotentialNumber(const string& tokenStr)
     return isNumber(tokenStr, true);
 }
 
-bool isBool(const string& tokenStr)
-{
-    return tokenStr == "true" || tokenStr == "false";
-}
-
 bool isString(const std::string& tokenStr)
 {
     if (tokenStr.size() < 2)

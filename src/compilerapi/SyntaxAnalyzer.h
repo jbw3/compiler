@@ -14,14 +14,6 @@ public:
     typedef std::vector<Token> TokenSequence;
     typedef TokenSequence::const_iterator TokenIterator;
 
-    static const std::string STATEMENT_END;
-
-    static const std::string BLOCK_START;
-
-    static const std::string BLOCK_END;
-
-    static const std::string ASSIGNMENT_OPERATOR;
-
     SyntaxAnalyzer(ErrorLogger& logger);
 
     bool Process(const TokenSequence& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
@@ -45,7 +37,7 @@ private:
 
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
-    bool IncrementIteratorCheckValue(TokenIterator& iter, const TokenIterator& endIter, const std::string& expectedValue, const char* errorMsg = nullptr);
+    bool IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, Token::EType expectedTokenType, const char* errorMsg = nullptr);
 
     bool ProcessType(TokenIterator& iter, const TokenIterator& endIter, std::vector<const Token*>& typeNameTokens,
                      Token::EType endTokenType1, Token::EType endTokenType2 = Token::eInvalid);
