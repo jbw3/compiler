@@ -131,12 +131,13 @@ bool SyntaxAnalyzer::IncrementIteratorCheckValue(TokenIterator& iter, const Toke
 }
 
 bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter, vector<const Token*>& typeNameTokens,
-                                 const unordered_set<string>& endTokens)
+                                 Token::EType endTokenType1, Token::EType endTokenType2)
 {
-    while (endTokens.find(iter->value) == endTokens.cend())
+    Token::EType tokenType = iter->type;
+    while (tokenType != endTokenType1 && tokenType != endTokenType2)
     {
         // the lexer will give us two characters together as one token
-        if (iter->type == Token::eAmpersandAmpersand)
+        if (tokenType == Token::eAmpersandAmpersand)
         {
             // create two tokens from one
             const Token* originalToken = &*iter;
@@ -167,6 +168,7 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
         {
             return false;
         }
+        tokenType = iter->type;
     }
 
     return true;
@@ -191,7 +193,7 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
         return nullptr;
     }
 
-    FunctionDeclaration* decl = ProcessFunctionDeclaration(iter, endIter, STATEMENT_END);
+    FunctionDeclaration* decl = ProcessFunctionDeclaration(iter, endIter, Token::eSemiColon);
     if (decl == nullptr)
     {
         return nullptr;
@@ -207,7 +209,7 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
-    unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, BLOCK_START));
+    unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, Token::eOpenBrace));
     if (functionDeclaration == nullptr)
     {
         return nullptr;
@@ -241,7 +243,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
 
 FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& iter,
                                                                 TokenIterator endIter,
-                                                                const string& endToken)
+                                                                Token::EType endTokenType)
 {
     if (!EndIteratorCheck(iter, endIter, "Expected function keyword"))
     {
@@ -295,7 +297,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
 
     // if a return type is specified, parse it
     vector<const Token*> returnTypeNameTokens;
-    ok = ProcessType(iter, endIter, returnTypeNameTokens, {endToken});
+    ok = ProcessType(iter, endIter, returnTypeNameTokens, endTokenType);
     if (!ok)
     {
         deletePointerContainer(parameters);
@@ -331,7 +333,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
 
         vector<const Token*> paramTypeNameTokens;
-        bool ok = ProcessType(iter, endIter, paramTypeNameTokens, {",", ")"});
+        bool ok = ProcessType(iter, endIter, paramTypeNameTokens, Token::eComma, Token::eClosePar);
         if (!ok)
         {
             return false;
@@ -423,7 +425,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
         }
 
         vector<const Token*> memberTypeTokens;
-        bool ok = ProcessType(iter, endIter, memberTypeTokens, {",", "}"});
+        bool ok = ProcessType(iter, endIter, memberTypeTokens, Token::eComma, Token::eCloseBrace);
         if (!ok)
         {
             deletePointerContainer(members);
@@ -540,7 +542,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
 
         // get member expression
         ++iter;
-        Expression* memberExpr = ProcessExpression(iter, endIter, {",", "}"});
+        Expression* memberExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
         if (memberExpr == nullptr)
         {
             deletePointerContainer(members);
@@ -609,7 +611,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     vector<const Token*> varTypeNameTokens;
-    bool ok = ProcessType(iter, endIter, varTypeNameTokens, {ASSIGNMENT_OPERATOR});
+    bool ok = ProcessType(iter, endIter, varTypeNameTokens, Token::eEqual);
     if (!ok)
     {
         return nullptr;
@@ -622,7 +624,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    Expression* expression = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
+    Expression* expression = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
     if (expression == nullptr)
     {
         return nullptr;
@@ -644,7 +646,7 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
     ++iter;
 
     // read "while" condition
-    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, {BLOCK_START}));
+    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, Token::eOpenBrace));
     if (whileCondition == nullptr)
     {
         return nullptr;
@@ -695,7 +697,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     }
 
     vector<const Token*> varTypeNameTokens;
-    bool ok = ProcessType(iter, endIter, varTypeNameTokens, {",", IN_KEYWORD});
+    bool ok = ProcessType(iter, endIter, varTypeNameTokens, Token::eComma, Token::eIn);
     if (!ok)
     {
         return nullptr;
@@ -725,7 +727,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
             return nullptr;
         }
 
-        bool ok = ProcessType(iter, endIter, indexVarTypeNameTokens, {IN_KEYWORD});
+        bool ok = ProcessType(iter, endIter, indexVarTypeNameTokens, Token::eIn);
         if (!ok)
         {
             return nullptr;
@@ -740,7 +742,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     }
 
     // read "for" iterable expression
-    unique_ptr<Expression> iterExpression(ProcessExpression(iter, endIter, {BLOCK_START}));
+    unique_ptr<Expression> iterExpression(ProcessExpression(iter, endIter, Token::eOpenBrace));
     if (iterExpression == nullptr)
     {
         return nullptr;
@@ -842,7 +844,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         }
 
         ++iter;
-        expr = ProcessExpression(iter, parenEndIter, {});
+        expr = ProcessExpression(iter, parenEndIter);
         if (expr == nullptr)
         {
             return nullptr;
@@ -904,7 +906,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             vector<Expression*> arguments;
             while (iter->type != Token::eClosePar)
             {
-                Expression* argExpr = ProcessExpression(iter, endIter, {",", ")"});
+                Expression* argExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
                 if (argExpr == nullptr)
                 {
                     deletePointerContainer(arguments);
@@ -949,7 +951,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             return nullptr;
         }
 
-        Expression* expr1 = ProcessExpression(iter, endIter, {";", ",", ARRAY_TYPE_END_TOKEN});
+        Expression* expr1 = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eComma, Token::eCloseBracket);
         if (expr1 == nullptr)
         {
             return nullptr;
@@ -962,7 +964,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
                 return nullptr;
             }
 
-            Expression* expr2 = ProcessExpression(iter, endIter, {ARRAY_TYPE_END_TOKEN});
+            Expression* expr2 = ProcessExpression(iter, endIter, Token::eCloseBracket);
             if (expr2 == nullptr)
             {
                 return nullptr;
@@ -989,7 +991,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
                     break;
                 }
 
-                Expression* expr2 = ProcessExpression(iter, endIter, {",", ARRAY_TYPE_END_TOKEN});
+                Expression* expr2 = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBracket);
                 if (expr2 == nullptr)
                 {
                     deletePointerContainer(expressions);
@@ -1017,7 +1019,9 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 }
 
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
-                                              const unordered_set<string>& endTokens)
+                                              Token::EType endTokenType1,
+                                              Token::EType endTokenType2,
+                                              Token::EType endTokenType3)
 {
     bool expectTerm = true;
     bool isEnd = false;
@@ -1028,10 +1032,11 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     while (iter != endIter)
     {
+        Token::EType tokenType = iter->type;
         string value = iter->value;
         TokenIterator nextIter = iter + 1;
 
-        if (endTokens.find(value) != endTokens.cend())
+        if (tokenType == endTokenType1 || tokenType == endTokenType2 || tokenType == endTokenType3)
         {
             break;
         }
@@ -1041,7 +1046,6 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         {
             isPotentialEnd = false;
 
-            Token::EType tokenType = iter->type;
             if (Token::IsUnaryOp(tokenType))
             {
                 unaryOperators.push({&*iter, static_cast<UnaryExpression::EOperator>(tokenType)});
@@ -1078,7 +1082,6 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         else
         {
             // if the token is a binary operator, add it to the list
-            Token::EType tokenType = iter->type;
             if (Token::IsBinaryOp(tokenType))
             {
                 binOperators.push_back({&*iter, static_cast<BinaryExpression::EOperator>(tokenType)});
@@ -1562,7 +1565,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                 }
                 else
                 {
-                    returnExpression = ProcessExpression(iter, endIter, {STATEMENT_END});
+                    returnExpression = ProcessExpression(iter, endIter, Token::eSemiColon);
                 }
 
                 expr = new Return(token, returnExpression);
@@ -1576,7 +1579,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         else
         {
             // process the sub-expression
-            expr = ProcessExpression(iter, endIter, {STATEMENT_END, BLOCK_END});
+            expr = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
         }
 
         // if there was an error, return null
@@ -1632,7 +1635,7 @@ Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIt
     ++iter;
 
     // read "if" condition
-    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, {BLOCK_START}));
+    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, Token::eOpenBrace));
     if (ifCondition == nullptr)
     {
         return nullptr;
@@ -1758,7 +1761,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
             // skip to token after "["
             iter += 2;
 
-            Expression* subscriptExpr = ProcessExpression(iter, endIter, {"]"});
+            Expression* subscriptExpr = ProcessExpression(iter, endIter, Token::eCloseBracket);
             if (subscriptExpr == nullptr)
             {
                 return nullptr;

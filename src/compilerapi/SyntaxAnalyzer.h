@@ -48,7 +48,7 @@ private:
     bool IncrementIteratorCheckValue(TokenIterator& iter, const TokenIterator& endIter, const std::string& expectedValue, const char* errorMsg = nullptr);
 
     bool ProcessType(TokenIterator& iter, const TokenIterator& endIter, std::vector<const Token*>& typeNameTokens,
-                     const std::unordered_set<std::string>& endTokens);
+                     Token::EType endTokenType1, Token::EType endTokenType2 = Token::eInvalid);
 
     SyntaxTree::ExternFunctionDeclaration* ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter);
@@ -58,7 +58,7 @@ private:
 
     SyntaxTree::FunctionDeclaration* ProcessFunctionDeclaration(TokenIterator& iter,
                                                                 TokenIterator endIter,
-                                                                const std::string& endToken);
+                                                                Token::EType endTokenType);
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            SyntaxTree::Parameters& parameters);
@@ -85,7 +85,9 @@ private:
     SyntaxTree::Expression* ProcessTerm(TokenIterator& iter, TokenIterator nextIter, TokenIterator endIter, bool& isPotentialEnd);
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
-                                              const std::unordered_set<std::string>& endTokens);
+                                              Token::EType endTokenType1 = Token::eInvalid,
+                                              Token::EType endTokenType2 = Token::eInvalid,
+                                              Token::EType endTokenType3 = Token::eInvalid);
 
     TokenIterator FindParenthesisEnd(TokenIterator iter, TokenIterator endIter);
 
