@@ -1,4 +1,5 @@
 #include "LexicalAnalyzerTests.h"
+#include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include "LexicalAnalyzer.h"
 #include <iostream>
@@ -18,104 +19,105 @@ bool LexicalAnalyzerTests::TestValidInputs()
         {
             "fun test() i32 { 1 + 2 }\n",
             {
-                {"fun", "", 1, 1, Token::eFun},
-                {"test", "", 1, 5, Token::eIdentifier},
-                {"(", "", 1, 9, Token::eOpenPar},
-                {")", "", 1, 10, Token::eClosePar},
-                {"i32", "", 1, 12, Token::eI32},
-                {"{", "", 1, 16, Token::eOpenBrace},
-                {"1", "", 1, 18, Token::eDecIntLit},
-                {"+", "", 1, 20, Token::ePlus},
-                {"2", "", 1, 22, Token::eDecIntLit},
-                {"}", "", 1, 24, Token::eCloseBrace}
+                {"fun", 0, 1, 1, Token::eFun},
+                {"test", 0, 1, 5, Token::eIdentifier},
+                {"(", 0, 1, 9, Token::eOpenPar},
+                {")", 0, 1, 10, Token::eClosePar},
+                {"i32", 0, 1, 12, Token::eI32},
+                {"{", 0, 1, 16, Token::eOpenBrace},
+                {"1", 0, 1, 18, Token::eDecIntLit},
+                {"+", 0, 1, 20, Token::ePlus},
+                {"2", 0, 1, 22, Token::eDecIntLit},
+                {"}", 0, 1, 24, Token::eCloseBrace}
             }
         },
         {
             "fun a_function(param1 i32, param2 i32) i32 { param1 - param2 }\n",
             {
-                {"fun", "", 1, 1, Token::eFun},
-                {"a_function", "", 1, 5, Token::eIdentifier},
-                {"(", "", 1, 15, Token::eOpenPar},
-                {"param1", "", 1, 16, Token::eIdentifier},
-                {"i32", "", 1, 23, Token::eI32},
-                {",", "", 1, 26, Token::eComma},
-                {"param2", "", 1, 28, Token::eIdentifier},
-                {"i32", "", 1, 35, Token::eI32},
-                {")", "", 1, 38, Token::eClosePar},
-                {"i32", "", 1, 40, Token::eI32},
-                {"{", "", 1, 44, Token::eOpenBrace},
-                {"param1", "", 1, 46, Token::eIdentifier},
-                {"-", "", 1, 53, Token::eMinus},
-                {"param2", "", 1, 55, Token::eIdentifier},
-                {"}", "", 1, 62, Token::eCloseBrace}
+                {"fun", 0, 1, 1, Token::eFun},
+                {"a_function", 0, 1, 5, Token::eIdentifier},
+                {"(", 0, 1, 15, Token::eOpenPar},
+                {"param1", 0, 1, 16, Token::eIdentifier},
+                {"i32", 0, 1, 23, Token::eI32},
+                {",", 0, 1, 26, Token::eComma},
+                {"param2", 0, 1, 28, Token::eIdentifier},
+                {"i32", 0, 1, 35, Token::eI32},
+                {")", 0, 1, 38, Token::eClosePar},
+                {"i32", 0, 1, 40, Token::eI32},
+                {"{", 0, 1, 44, Token::eOpenBrace},
+                {"param1", 0, 1, 46, Token::eIdentifier},
+                {"-", 0, 1, 53, Token::eMinus},
+                {"param2", 0, 1, 55, Token::eIdentifier},
+                {"}", 0, 1, 62, Token::eCloseBrace}
             }
         },
         {
             "1 + 23\n# comment\nnot a comment\n",
             {
-                {"1", "", 1, 1, Token::eDecIntLit},
-                {"+", "", 1, 3, Token::ePlus},
-                {"23", "", 1, 5, Token::eDecIntLit},
-                {"not", "", 3, 1, Token::eIdentifier},
-                {"a", "", 3, 5, Token::eIdentifier},
-                {"comment", "", 3, 7, Token::eIdentifier}
+                {"1", 0, 1, 1, Token::eDecIntLit},
+                {"+", 0, 1, 3, Token::ePlus},
+                {"23", 0, 1, 5, Token::eDecIntLit},
+                {"not", 0, 3, 1, Token::eIdentifier},
+                {"a", 0, 3, 5, Token::eIdentifier},
+                {"comment", 0, 3, 7, Token::eIdentifier}
             }
         },
         {
             "    # comment\n    not a comment\n",
             {
-                {"not", "", 2, 5, Token::eIdentifier},
-                {"a", "", 2, 9, Token::eIdentifier},
-                {"comment", "", 2, 11, Token::eIdentifier}
+                {"not", 0, 2, 5, Token::eIdentifier},
+                {"a", 0, 2, 9, Token::eIdentifier},
+                {"comment", 0, 2, 11, Token::eIdentifier}
             }
         },
         {
             "1 + #! comment !# 2",
             {
-                {"1", "", 1, 1, Token::eDecIntLit},
-                {"+", "", 1, 3, Token::ePlus},
-                {"2", "", 1, 19, Token::eDecIntLit},
+                {"1", 0, 1, 1, Token::eDecIntLit},
+                {"+", 0, 1, 3, Token::ePlus},
+                {"2", 0, 1, 19, Token::eDecIntLit},
             }
         },
         {
             "abc #! comment #! nested comment !# back in outer comment !# ()",
             {
-                {"abc", "", 1, 1, Token::eIdentifier},
-                {"(", "", 1, 62, Token::eOpenPar},
-                {")", "", 1, 63, Token::eClosePar},
+                {"abc", 0, 1, 1, Token::eIdentifier},
+                {"(", 0, 1, 62, Token::eOpenPar},
+                {")", 0, 1, 63, Token::eClosePar},
             }
         },
         {
             "x=#! multi-\nline\ncomment\n!# true;",
             {
-                {"x", "", 1, 1, Token::eIdentifier},
-                {"=", "", 1, 2, Token::eEqual},
-                {"true", "", 4, 4, Token::eTrueLit},
-                {";", "", 4, 8, Token::eSemiColon},
+                {"x", 0, 1, 1, Token::eIdentifier},
+                {"=", 0, 1, 2, Token::eEqual},
+                {"true", 0, 4, 4, Token::eTrueLit},
+                {";", 0, 4, 8, Token::eSemiColon},
             }
         },
         {
             "x = #!# 1 !# 2",
             {
-                {"x", "", 1, 1, Token::eIdentifier},
-                {"=", "", 1, 3, Token::eEqual},
-                {"2", "", 1, 14, Token::eDecIntLit},
+                {"x", 0, 1, 1, Token::eIdentifier},
+                {"=", 0, 1, 3, Token::eEqual},
+                {"2", 0, 1, 14, Token::eDecIntLit},
             }
         },
         {
             R"("abc""1\n2\n""#""#!")",
             {
-                {R"("abc")", "", 1, 1, Token::eStrLit},
-                {R"("1\n2\n")", "", 1, 6, Token::eStrLit},
-                {R"("#")", "", 1, 14, Token::eStrLit},
-                {R"("#!")", "", 1, 17, Token::eStrLit},
+                {R"("abc")", 0, 1, 1, Token::eStrLit},
+                {R"("1\n2\n")", 0, 1, 6, Token::eStrLit},
+                {R"("#")", 0, 1, 14, Token::eStrLit},
+                {R"("#!")", 0, 1, 17, Token::eStrLit},
             }
         },
     };
 
+    CompilerContext compilerContext;
     stringstream errStream;
-    ErrorLogger logger(&errStream, Config::eFalse);
-    LexicalAnalyzer analyzer(logger);
+    ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
+    LexicalAnalyzer analyzer(compilerContext, logger);
 
     stringstream ss;
     vector<Token> actualTokens;

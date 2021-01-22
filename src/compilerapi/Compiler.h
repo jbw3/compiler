@@ -1,6 +1,7 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
+#include "CompilerContext.h"
 #include "Config.h"
 #include "ErrorLogger.h"
 #include "Token.h"
@@ -17,6 +18,7 @@ public:
     bool Compile();
 
 private:
+    CompilerContext compilerContext;
     Config config;
     ErrorLogger logger;
 

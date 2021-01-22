@@ -1,4 +1,5 @@
 #include "SyntaxAnalyzer.h"
+#include "CompilerContext.h"
 #include "keywords.h"
 #include "utils.h"
 #include <cassert>
@@ -7,7 +8,8 @@
 using namespace std;
 using namespace SyntaxTree;
 
-SyntaxAnalyzer::SyntaxAnalyzer(ErrorLogger& logger) :
+SyntaxAnalyzer::SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
+    compilerContext(compilerContext),
     logger(logger)
 {
 }
@@ -137,13 +139,13 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
             // TODO: Memory leak. Someday, I should fix this...
             Token* token1 =
                 new Token(POINTER_TYPE_TOKEN,
-                          originalToken->filename,
+                          originalToken->filenameId,
                           originalToken->line,
                           originalToken->column,
                           Token::eAmpersand);
             Token* token2 =
                 new Token(POINTER_TYPE_TOKEN,
-                          originalToken->filename,
+                          originalToken->filenameId,
                           originalToken->line,
                           originalToken->column + 1,
                           Token::eAmpersand);

@@ -8,13 +8,15 @@
 #include <unordered_set>
 #include <vector>
 
+class CompilerContext;
+
 class SyntaxAnalyzer
 {
 public:
     typedef std::vector<Token> TokenSequence;
     typedef TokenSequence::const_iterator TokenIterator;
 
-    SyntaxAnalyzer(ErrorLogger& logger);
+    SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
 
     bool Process(const TokenSequence& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
@@ -31,6 +33,7 @@ private:
         SyntaxTree::BinaryExpression::EOperator op;
     };
 
+    CompilerContext& compilerContext;
     ErrorLogger& logger;
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);

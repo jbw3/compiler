@@ -1,5 +1,6 @@
-#include "keywords.h"
 #include "LexicalAnalyzer.h"
+#include "CompilerContext.h"
+#include "keywords.h"
 #include "utils.h"
 #include <fstream>
 #include <iostream>
@@ -105,13 +106,16 @@ constexpr bool isWhitespace(char ch)
     return value;
 }
 
-LexicalAnalyzer::LexicalAnalyzer(ErrorLogger& logger) :
+LexicalAnalyzer::LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
+    compilerContext(compilerContext),
     logger(logger)
 {
     buff = new char[MAX_BUFF_CAPACITY];
     buffSize = 0;
     buffIdx = 0;
     isMore = false;
+
+    filenameId = 0;
 }
 
 LexicalAnalyzer::~LexicalAnalyzer()
@@ -138,6 +142,8 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
             return false;
         }
     }
+
+    filenameId = compilerContext.AddFilename(filename);
 
     bool ok = Process(*is, tokens);
 
@@ -232,7 +238,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     tokenType = Token::eIdentifier;
                 }
 
-                tokens.push_back(Token(tokenStr, filename, line, startColumn, tokenType));
+                tokens.push_back(Token(tokenStr, filenameId, line, startColumn, tokenType));
                 tokenStr.clear();
             }
             // parse operators and separators
@@ -252,7 +258,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 auto iter = SYMBOLS.find(tokenStr);
                 Token::EType tokenType = iter->second;
 
-                tokens.push_back(Token(tokenStr, filename, line, startColumn, tokenType));
+                tokens.push_back(Token(tokenStr, filenameId, line, startColumn, tokenType));
                 tokenStr.clear();
             }
             // parse numeric literals
@@ -350,7 +356,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 
                 if (ok)
                 {
-                    tokens.push_back(Token(tokenStr, filename, line, startColumn, tokenType));
+                    tokens.push_back(Token(tokenStr, filenameId, line, startColumn, tokenType));
                     tokenStr.clear();
                 }
             }
@@ -380,7 +386,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 if (ok)
                 {
                     tokenStr += ch; // add last '"'
-                    tokens.push_back(Token(tokenStr, filename, line, startColumn, Token::eStrLit));
+                    tokens.push_back(Token(tokenStr, filenameId, line, startColumn, Token::eStrLit));
                     tokenStr.clear();
                     ch = Read(is);
                     ++column;

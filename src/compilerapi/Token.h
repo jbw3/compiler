@@ -141,10 +141,10 @@ public:
         return value;
     }
 
-    Token(const std::string& value, const std::string& filename, unsigned line, unsigned column, EType type);
+    Token(const std::string& value, unsigned filenameId, unsigned line, unsigned column, EType type);
 
     std::string value;
-    std::string filename;
+    unsigned filenameId;
     unsigned line;
     unsigned column;
     EType type;

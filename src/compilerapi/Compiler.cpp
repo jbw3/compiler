@@ -1,6 +1,7 @@
 #include "Compiler.h"
 #include "AssemblyGenerator.h"
 #include "CHeaderPrinter.h"
+#include "CompilerContext.h"
 #include "LexicalAnalyzer.h"
 #include "LlvmIrGenerator.h"
 #include "LlvmIrOptimizer.h"
@@ -16,13 +17,13 @@ using namespace std;
 using namespace SyntaxTree;
 
 Compiler::Compiler() :
-    logger(&cerr, Config::eAuto)
+    logger(compilerContext, &cerr, Config::eAuto)
 {
 }
 
 Compiler::Compiler(const Config& config) :
     config(config),
-    logger(&cerr, config.color)
+    logger(compilerContext, &cerr, config.color)
 {
     // initialize types
     TypeInfo::InitTypes(config.targetMachine);
@@ -45,7 +46,7 @@ bool Compiler::Compile()
     {
         SW_START(Lexing);
 
-        LexicalAnalyzer lexicalAnalyzer(logger);
+        LexicalAnalyzer lexicalAnalyzer(compilerContext, logger);
         ok = lexicalAnalyzer.Process(config.inFilename, tokens);
 
         SW_STOP(Lexing);
@@ -65,7 +66,7 @@ bool Compiler::Compile()
     {
         SW_START(Syntax);
 
-        SyntaxAnalyzer syntaxAnalyzer(logger);
+        SyntaxAnalyzer syntaxAnalyzer(compilerContext, logger);
         ok = syntaxAnalyzer.Process(tokens, syntaxTree);
 
         SW_STOP(Syntax);
@@ -108,7 +109,7 @@ bool Compiler::Compile()
 
         SW_START(IrGen);
 
-        LlvmIrGenerator irGenerator(config, logger);
+        LlvmIrGenerator irGenerator(compilerContext, config, logger);
         ok = irGenerator.Generate(syntaxTree, module);
 
         SW_STOP(IrGen);

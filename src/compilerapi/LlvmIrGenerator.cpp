@@ -50,12 +50,13 @@ LlvmIrGenerator::DebugScope::~DebugScope()
 
 Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 
-LlvmIrGenerator::LlvmIrGenerator(const Config& config, ErrorLogger& logger) :
+LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext, const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
     inFilename(config.inFilename),
     optimizationLevel(config.optimizationLevel),
     dbgInfo(config.debugInfo),
     boundsCheck(config.boundsCheck),
+    compilerContext(compilerContext),
     logger(logger),
     builder(context),
     diBuilder(nullptr),
@@ -345,7 +346,8 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
         {
             const Token* opToken = binaryExpression->GetOperatorToken();
 
-            Constant* fileStrPtr = CreateConstantString(opToken->filename);
+            const string& filename = compilerContext.GetFilename(opToken->filenameId);
+            Constant* fileStrPtr = CreateConstantString(filename);
             Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
             Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->line, false));
             Constant* msgStrPtr = CreateConstantString("Index is out of bounds");

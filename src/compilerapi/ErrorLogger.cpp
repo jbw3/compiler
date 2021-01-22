@@ -72,7 +72,8 @@ bool configureConsole(ostream* os)
 #endif
 }
 
-ErrorLogger::ErrorLogger(ostream* os, Config::EColor color) :
+ErrorLogger::ErrorLogger(CompilerContext& compilerContext, ostream* os, Config::EColor color) :
+    compilerContext(compilerContext),
     os(os)
 {
     if (color == Config::eAuto)

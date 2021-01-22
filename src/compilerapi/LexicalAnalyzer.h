@@ -7,10 +7,12 @@
 #include <unordered_set>
 #include <vector>
 
+class CompilerContext;
+
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(ErrorLogger& logger);
+    LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
 
     ~LexicalAnalyzer();
 
@@ -32,6 +34,7 @@ private:
     static const std::unordered_map<std::string, Token::EType> KEYWORDS;
 
     static constexpr size_t MAX_BUFF_CAPACITY = 1024;
+    CompilerContext& compilerContext;
     char* buff;
     size_t buffSize;
     size_t buffIdx;
@@ -39,6 +42,7 @@ private:
     ErrorLogger& logger;
     std::string tokenStr;
     std::string filename;
+    unsigned filenameId;
     unsigned line;
     unsigned column;
 

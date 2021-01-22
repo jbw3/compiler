@@ -1,6 +1,7 @@
 #ifndef ERROR_LOGGER_H_
 #define ERROR_LOGGER_H_
 
+#include "CompilerContext.h"
 #include "Config.h"
 #include "Token.h"
 #include <cstring>
@@ -13,7 +14,7 @@ public:
     const char* const ERROR_TAG = "error";
     const char* const INTERNAL_ERROR_TAG = "internal error";
 
-    ErrorLogger(std::ostream* os, Config::EColor color);
+    ErrorLogger(CompilerContext& compilerContext, std::ostream* os, Config::EColor color);
 
     template<typename... Ts>
     void LogWarning(const char* format, Ts... args)
@@ -30,7 +31,8 @@ public:
     template<typename... Ts>
     void LogWarning(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(WARNING_TAG, token.filename, token.line, token.column, format, args...);
+        const std::string& filename = compilerContext.GetFilename(token.filenameId);
+        LogSourceMessage(WARNING_TAG, filename, token.line, token.column, format, args...);
     }
 
     template<typename... Ts>
@@ -48,7 +50,8 @@ public:
     template<typename... Ts>
     void LogError(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(ERROR_TAG, token.filename, token.line, token.column, format, args...);
+        const std::string& filename = compilerContext.GetFilename(token.filenameId);
+        LogSourceMessage(ERROR_TAG, filename, token.line, token.column, format, args...);
     }
 
     template<typename... Ts>
@@ -60,10 +63,12 @@ public:
     template<typename... Ts>
     void LogInternalError(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(INTERNAL_ERROR_TAG, token.filename, token.line, token.column, format, args...);
+        const std::string& filename = compilerContext.GetFilename(token.filenameId);
+        LogSourceMessage(INTERNAL_ERROR_TAG, filename, token.line, token.column, format, args...);
     }
 
 private:
+    CompilerContext& compilerContext;
     std::ostream* os;
     bool printColors;
 

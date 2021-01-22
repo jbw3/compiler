@@ -27,6 +27,7 @@ namespace llvm
 {
 class TargetMachine;
 }
+class CompilerContext;
 class Config;
 class ErrorLogger;
 
@@ -59,7 +60,7 @@ namespace std
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator(const Config& config, ErrorLogger& logger);
+    LlvmIrGenerator(CompilerContext& compilerContext, const Config& config, ErrorLogger& logger);
 
     ~LlvmIrGenerator();
 
@@ -147,6 +148,7 @@ private:
     unsigned optimizationLevel;
     bool dbgInfo;
     bool boundsCheck;
+    CompilerContext& compilerContext;
     ErrorLogger& logger;
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;

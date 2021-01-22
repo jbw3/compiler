@@ -15,6 +15,8 @@ add_library(compilerapi
     CHeaderPrinter.h
     Compiler.cpp
     Compiler.h
+    CompilerContext.cpp
+    CompilerContext.h
     Config.cpp
     Config.h
     ErrorLogger.cpp
