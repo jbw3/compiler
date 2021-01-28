@@ -18,7 +18,7 @@ const unordered_set<char> LexicalAnalyzer::SYMBOL_START_CHAR =
     '=', '!', '<', '>', '+', '-', '*', '/', '%', '&', '|', '^', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}',
 };
 
-const unordered_map<string, Token::EType> LexicalAnalyzer::SYMBOLS =
+const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> LexicalAnalyzer::SYMBOLS =
 {
     { "==", Token::eEqualEqual },
     { "!=", Token::eExclaimEqual },
@@ -66,7 +66,7 @@ const unordered_map<string, Token::EType> LexicalAnalyzer::SYMBOLS =
     { "..<", Token::ePeriodPeriodLess },
 };
 
-const unordered_map<string, Token::EType> LexicalAnalyzer::KEYWORDS =
+const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> LexicalAnalyzer::KEYWORDS =
 {
     { BOOL_KEYWORD, Token::eBool },
     { BREAK_KEYWORD, Token::eBreak },
@@ -227,18 +227,25 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 }
 
                 // get token type
+                const char* value = nullptr;
                 Token::EType tokenType = Token::eInvalid;
-                auto iter = KEYWORDS.find(tokenStr);
+                auto iter = KEYWORDS.find(tokenStr.c_str());
                 if (iter != KEYWORDS.end())
                 {
+                    value = iter->first;
                     tokenType = iter->second;
                 }
                 else
                 {
+                    // TODO: Fix memory leak
+                    char* temp = new char[tokenStr.size() + 1];
+                    strcpy(temp, tokenStr.c_str());
+                    value = temp;
+
                     tokenType = Token::eIdentifier;
                 }
 
-                tokens.push_back(Token(tokenStr, filenameId, line, startColumn, tokenType));
+                tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
                 tokenStr.clear();
             }
             // parse operators and separators
@@ -248,17 +255,20 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 tokenStr += ch;
                 ch = Read(is);
                 ++column;
-                while (isMore && SYMBOLS.find(tokenStr + ch) != SYMBOLS.end())
+                string temp = tokenStr + ch;
+                while (isMore && SYMBOLS.find(temp.c_str()) != SYMBOLS.end())
                 {
                     tokenStr += ch;
                     ch = Read(is);
                     ++column;
+                    temp += ch;
                 }
 
-                auto iter = SYMBOLS.find(tokenStr);
+                auto iter = SYMBOLS.find(tokenStr.c_str());
+                const char* value = iter->first;
                 Token::EType tokenType = iter->second;
 
-                tokens.push_back(Token(tokenStr, filenameId, line, startColumn, tokenType));
+                tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
                 tokenStr.clear();
             }
             // parse numeric literals
@@ -356,7 +366,10 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 
                 if (ok)
                 {
-                    tokens.push_back(Token(tokenStr, filenameId, line, startColumn, tokenType));
+                    // TODO: Fix memory leak
+                    char* temp = new char[tokenStr.size() + 1];
+                    strcpy(temp, tokenStr.c_str());
+                    tokens.push_back(Token(temp, filenameId, line, startColumn, tokenType));
                     tokenStr.clear();
                 }
             }
@@ -386,7 +399,11 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 if (ok)
                 {
                     tokenStr += ch; // add last '"'
-                    tokens.push_back(Token(tokenStr, filenameId, line, startColumn, Token::eStrLit));
+
+                    // TODO: Fix memory leak
+                    char* temp = new char[tokenStr.size() + 1];
+                    strcpy(temp, tokenStr.c_str());
+                    tokens.push_back(Token(temp, filenameId, line, startColumn, Token::eStrLit));
                     tokenStr.clear();
                     ch = Read(is);
                     ++column;

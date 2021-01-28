@@ -1,7 +1,7 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
-#include <string>
+#include <stdint.h>
 
 class Token
 {
@@ -141,9 +141,9 @@ public:
         return value;
     }
 
-    Token(const std::string& value, unsigned filenameId, unsigned line, unsigned column, EType type);
+    Token(const char* value, unsigned filenameId, unsigned line, unsigned column, EType type);
 
-    std::string value;
+    const char* value;
     unsigned filenameId;
     unsigned line;
     unsigned column;

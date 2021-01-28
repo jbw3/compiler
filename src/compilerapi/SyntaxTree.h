@@ -475,12 +475,6 @@ public:
 class LoopControl : public Expression
 {
 public:
-    enum EControlType
-    {
-        eBreak,
-        eContinue,
-    };
-
     LoopControl(const Token* token);
 
     virtual ~LoopControl() = default;
@@ -489,11 +483,8 @@ public:
 
     const Token* GetToken() const;
 
-    EControlType GetControlType() const;
-
 private:
     const Token* token;
-    EControlType controlType;
 };
 
 class Return : public Expression

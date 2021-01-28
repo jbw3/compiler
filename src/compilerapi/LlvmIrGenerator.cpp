@@ -759,16 +759,17 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
 void LlvmIrGenerator::Visit(LoopControl* loopControl)
 {
-    LoopControl::EControlType controlType = loopControl->GetControlType();
+    const Token* token = loopControl->GetToken();
+    Token::EType tokenType = token->type;
     LoopInfo loopInfo = loops.top();
 
-    SetDebugLocation(loopControl->GetToken());
+    SetDebugLocation(token);
 
-    if (controlType == LoopControl::eBreak)
+    if (tokenType == Token::eBreak)
     {
         builder.CreateBr(loopInfo.breakBlock);
     }
-    else if (controlType == LoopControl::eContinue)
+    else if (tokenType == Token::eContinue)
     {
         builder.CreateBr(loopInfo.continueBlock);
     }
@@ -2163,7 +2164,6 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
 {
     if (dbgInfo)
     {
-        const string& varName = token->value;
         unsigned line = token->line;
         unsigned column = token->column;
         DIType* varDebugType = GetDebugType(type);
@@ -2173,7 +2173,7 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
             return;
         }
         DIScope* diScope = diScopes.top();
-        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, varName, diFile, line, varDebugType, true);
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, token->value, diFile, line, varDebugType, true);
         diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diScope), builder.GetInsertBlock());
     }
 }

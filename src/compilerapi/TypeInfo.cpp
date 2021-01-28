@@ -31,15 +31,15 @@ PrimitiveType uInt16TypeInfo(16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KE
 PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD, UINT32_KEYWORD);
 PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD, UINT64_KEYWORD);
 
-PrimitiveType immutBoolTypeInfo(1, TypeInfo::F_BOOL | TypeInfo::F_IMMUTABLE, TypeInfo::eNotApplicable, "immutable_" + BOOL_KEYWORD, BOOL_KEYWORD);
-PrimitiveType immutInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT8_KEYWORD, INT8_KEYWORD);
-PrimitiveType immutInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT16_KEYWORD, INT16_KEYWORD);
-PrimitiveType immutInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT32_KEYWORD, INT32_KEYWORD);
-PrimitiveType immutInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT64_KEYWORD, INT64_KEYWORD);
-PrimitiveType immutUInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT8_KEYWORD, UINT8_KEYWORD);
-PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT16_KEYWORD, UINT16_KEYWORD);
-PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT32_KEYWORD, UINT32_KEYWORD);
-PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT64_KEYWORD, UINT64_KEYWORD);
+PrimitiveType immutBoolTypeInfo(1, TypeInfo::F_BOOL | TypeInfo::F_IMMUTABLE, TypeInfo::eNotApplicable, "immutable_"s + BOOL_KEYWORD, BOOL_KEYWORD);
+PrimitiveType immutInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT8_KEYWORD, INT8_KEYWORD);
+PrimitiveType immutInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT16_KEYWORD, INT16_KEYWORD);
+PrimitiveType immutInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT32_KEYWORD, INT32_KEYWORD);
+PrimitiveType immutInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT64_KEYWORD, INT64_KEYWORD);
+PrimitiveType immutUInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT8_KEYWORD, UINT8_KEYWORD);
+PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT16_KEYWORD, UINT16_KEYWORD);
+PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT32_KEYWORD, UINT32_KEYWORD);
+PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT64_KEYWORD, UINT64_KEYWORD);
 
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
@@ -132,12 +132,12 @@ void TypeInfo::InitTypes(const TargetMachine* targetMachine)
 
     intSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
-    PrimitiveType* immutIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eSigned, "immutable_" + INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
+    PrimitiveType* immutIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     immutableTypes.insert({INT_SIZE_KEYWORD, immutIntSizeType});
 
     uintSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
-    PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_" + UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
+    PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
     immutableTypes.insert({UINT_SIZE_KEYWORD, immutUIntSizeType});
 
     stringType = new StringType(pointerSize * 2);
