@@ -1374,7 +1374,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         --idx;
 
         token = typeNameTokens[idx];
-        if (token->value == ARRAY_TYPE_END_TOKEN)
+        if (token->type == Token::eCloseBracket)
         {
             ++arrayLevel;
 
@@ -1400,18 +1400,17 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         return nullptr;
     }
 
-    string str;
     while (idx > 0)
     {
         --idx;
 
         token = typeNameTokens[idx];
-        str = token->value;
-        if (str == POINTER_TYPE_TOKEN)
+        Token::EType tokenType = token->type;
+        if (tokenType == Token::eAmpersand)
         {
             type = TypeInfo::GetPointerToType(type);
         }
-        else if (str == ARRAY_TYPE_START_TOKEN)
+        else if (tokenType == Token::eOpenBracket)
         {
             if (arrayLevel == 0)
             {
@@ -1425,7 +1424,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         else
         {
             // TODO: better error message?
-            logger.LogError(*token, "Unexpected token '{}'", str);
+            logger.LogError(*token, "Unexpected token '{}'", token->value);
             return nullptr;
         }
     }
@@ -1439,12 +1438,12 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         for (size_t i = 0; i < typeNameSize; ++i)
         {
             const Token* t = typeNameTokens[i];
-            const string& v = t->value;
-            if (v == ARRAY_TYPE_START_TOKEN)
+            Token::EType tokenType = t->type;
+            if (tokenType == Token::eOpenBracket)
             {
                 ++level;
             }
-            else if (v == ARRAY_TYPE_END_TOKEN)
+            else if (tokenType == Token::eCloseBracket)
             {
                 if (level == 0)
                 {
