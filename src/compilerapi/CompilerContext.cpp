@@ -10,5 +10,5 @@ CompilerContext::CompilerContext()
 unsigned CompilerContext::AddFilename(const string& filename)
 {
     filenames.push_back(filename);
-    return static_cast<unsigned>(filenames.size());
+    return static_cast<unsigned>(filenames.size() - 1);
 }
