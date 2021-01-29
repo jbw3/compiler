@@ -4,9 +4,49 @@
 #include <string>
 #include <vector>
 
+class TokenValues
+{
+public:
+    TokenValues();
+
+    ~TokenValues();
+
+    void AppendChar(char ch);
+
+    const char* EndValue()
+    {
+        AppendChar('\0');
+        return current;
+    }
+
+    void StartNew()
+    {
+        current = end;
+    }
+
+    void ClearCurrent()
+    {
+        end = current;
+    }
+
+private:
+    size_t buffArrayCapacity;
+    char** buffArray;
+    size_t buffArraySize;
+
+    size_t buffCapacity;
+    char* buff;
+    char* buffEnd;
+
+    char* current;
+    char* end;
+};
+
 class CompilerContext
 {
 public:
+    TokenValues tokenValues;
+
     CompilerContext();
 
     unsigned AddFilename(const std::string& filename);

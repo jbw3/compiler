@@ -41,7 +41,6 @@ private:
     size_t buffIdx;
     bool isMore;
     ErrorLogger& logger;
-    std::string tokenStr;
     std::string filename;
     unsigned filenameId;
     unsigned line;

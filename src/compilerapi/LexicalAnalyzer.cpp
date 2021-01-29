@@ -157,13 +157,13 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
 
 bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 {
+    TokenValues& tokenValues = compilerContext.tokenValues;
     tokens.clear();
     tokens.reserve(256);
     buffSize = 0;
     buffIdx = 0;
     isMore = true;
 
-    tokenStr = "";
     line = 1;
     column = 1;
 
@@ -216,67 +216,86 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             if (isIdentifierChar(ch, true))
             {
                 unsigned startColumn = column;
-                tokenStr += ch;
+                tokenValues.AppendChar(ch);
                 ch = Read(is);
                 ++column;
                 while (isMore && isIdentifierChar(ch, false))
                 {
-                    tokenStr += ch;
+                    tokenValues.AppendChar(ch);
                     ch = Read(is);
                     ++column;
                 }
 
+                const char* value = tokenValues.EndValue();
+
                 // get token type
-                const char* value = nullptr;
                 Token::EType tokenType = Token::eInvalid;
-                auto iter = KEYWORDS.find(tokenStr.c_str());
+                auto iter = KEYWORDS.find(value);
                 if (iter != KEYWORDS.end())
                 {
                     value = iter->first;
                     tokenType = iter->second;
+
+                    tokenValues.ClearCurrent();
                 }
                 else
                 {
-                    // TODO: Fix memory leak
-                    char* temp = new char[tokenStr.size() + 1];
-                    strcpy(temp, tokenStr.c_str());
-                    value = temp;
-
                     tokenType = Token::eIdentifier;
+
+                    tokenValues.StartNew();
                 }
 
                 tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
-                tokenStr.clear();
             }
             // parse operators and separators
             else if (SYMBOL_START_CHAR.find(ch) != SYMBOL_START_CHAR.end())
             {
                 unsigned startColumn = column;
-                tokenStr += ch;
+                tokenValues.AppendChar(ch);
+
+                char temp[8];
+                size_t tempIdx = 0;
+                temp[tempIdx++] = ch;
+
                 ch = Read(is);
                 ++column;
-                string temp = tokenStr + ch;
-                while (isMore && SYMBOLS.find(temp.c_str()) != SYMBOLS.end())
+
+                temp[tempIdx++] = ch;
+                temp[tempIdx] = '\0';
+                while (isMore && SYMBOLS.find(temp) != SYMBOLS.end())
                 {
-                    tokenStr += ch;
+                    tokenValues.AppendChar(ch);
                     ch = Read(is);
                     ++column;
-                    temp += ch;
+
+                    temp[tempIdx++] = ch;
+                    temp[tempIdx] = '\0';
                 }
 
-                auto iter = SYMBOLS.find(tokenStr.c_str());
-                const char* value = iter->first;
-                Token::EType tokenType = iter->second;
+                const char* symbolValue = tokenValues.EndValue();
 
-                tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
-                tokenStr.clear();
+                auto iter = SYMBOLS.find(symbolValue);
+                if (iter == SYMBOLS.end())
+                {
+                    logger.LogError(filename, line, column, "Invalid symbol");
+                    ok = false;
+                }
+                else
+                {
+                    const char* value = iter->first;
+                    Token::EType tokenType = iter->second;
+
+                    tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
+
+                    tokenValues.ClearCurrent();
+                }
             }
             // parse numeric literals
             else if (ch >= '0' && ch <= '9')
             {
                 Token::EType tokenType = Token::eDecIntLit;
                 unsigned startColumn = column;
-                tokenStr += ch;
+                tokenValues.AppendChar(ch);
                 ch = Read(is);
                 ++column;
 
@@ -286,7 +305,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     {
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
-                            tokenStr += ch;
+                            tokenValues.AppendChar(ch);
                             ch = Read(is);
                             ++column;
                         }
@@ -300,13 +319,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     else if (ch == 'x')
                     {
                         tokenType = Token::eHexIntLit;
-                        tokenStr += ch;
+                        tokenValues.AppendChar(ch);
                         ch = Read(is);
                         ++column;
 
                         while ( isMore && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
                         {
-                            tokenStr += ch;
+                            tokenValues.AppendChar(ch);
                             ch = Read(is);
                             ++column;
                         }
@@ -320,13 +339,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     else if (ch == 'b')
                     {
                         tokenType = Token::eBinIntLit;
-                        tokenStr += ch;
+                        tokenValues.AppendChar(ch);
                         ch = Read(is);
                         ++column;
 
                         while ( isMore && (ch == '0' || ch == '1' || ch == '_') )
                         {
-                            tokenStr += ch;
+                            tokenValues.AppendChar(ch);
                             ch = Read(is);
                             ++column;
                         }
@@ -340,13 +359,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     else if (ch == 'o')
                     {
                         tokenType = Token::eOctIntLit;
-                        tokenStr += ch;
+                        tokenValues.AppendChar(ch);
                         ch = Read(is);
                         ++column;
 
                         while ( isMore && ((ch >= '0' && ch <= '7') || ch == '_') )
                         {
-                            tokenStr += ch;
+                            tokenValues.AppendChar(ch);
                             ch = Read(is);
                             ++column;
                         }
@@ -366,18 +385,16 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 
                 if (ok)
                 {
-                    // TODO: Fix memory leak
-                    char* temp = new char[tokenStr.size() + 1];
-                    strcpy(temp, tokenStr.c_str());
-                    tokens.push_back(Token(temp, filenameId, line, startColumn, tokenType));
-                    tokenStr.clear();
+                    const char* value = tokenValues.EndValue();
+                    tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
+                    tokenValues.StartNew();
                 }
             }
             // parse string literals
             else if (ch == '"')
             {
                 unsigned startColumn = column;
-                tokenStr += ch;
+                tokenValues.AppendChar(ch);
                 ch = Read(is);
                 ++column;
                 char prevChar = ch;
@@ -389,7 +406,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                         ok = false;
                         break;
                     }
-                    tokenStr += ch;
+                    tokenValues.AppendChar(ch);
 
                     prevChar = ch;
                     ch = Read(is);
@@ -398,13 +415,12 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 
                 if (ok)
                 {
-                    tokenStr += ch; // add last '"'
+                    tokenValues.AppendChar(ch); // add last '"'
+                    const char* value = tokenValues.EndValue();
 
-                    // TODO: Fix memory leak
-                    char* temp = new char[tokenStr.size() + 1];
-                    strcpy(temp, tokenStr.c_str());
-                    tokens.push_back(Token(temp, filenameId, line, startColumn, Token::eStrLit));
-                    tokenStr.clear();
+                    tokens.push_back(Token(value, filenameId, line, startColumn, Token::eStrLit));
+                    tokenValues.StartNew();
+
                     ch = Read(is);
                     ++column;
                 }
