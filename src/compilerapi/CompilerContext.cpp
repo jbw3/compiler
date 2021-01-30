@@ -7,51 +7,55 @@ using namespace std;
 
 TokenValues::TokenValues()
 {
-    // TODO: use linked list instead of array
-    buffArrayCapacity = 16;
-    buffArray = new char*[buffArrayCapacity];
-    buffArraySize = 0;
-
     buffCapacity = 1024;
-    buff = new char[buffCapacity];
-    buffEnd = buff + buffCapacity;
-    buffArray[buffArraySize++] = buff;
+    head = new char[buffCapacity];
+    buffEnd = head + buffCapacity;
 
-    current = buff;
-    end = buff;
+    // reserve the first few bytes as a pointer to the next buffer
+    memset(head, 0, sizeof(void*));
+
+    current = head + sizeof(void*);
+    end = current;
 }
 
 TokenValues::~TokenValues()
 {
-    for (size_t i = 0; i < buffArraySize; ++i)
+    while (head != nullptr)
     {
-        delete [] buffArray[i];
-    }
+        char* temp = head;
 
-    delete [] buffArray;
+        // the first bytes in each block of memory point to the next block
+        char** next = reinterpret_cast<char**>(head);
+        head = *next;
+
+        delete [] temp;
+    }
 }
 
 void TokenValues::AppendChar(char ch)
 {
     if (end == buffEnd)
     {
-        // TODO: expand if needed
-        assert(buffArraySize < buffArrayCapacity);
+        char* oldHead = head;
 
         // allocate new buffer
         buffCapacity *= 2;
-        buff = new char[buffCapacity];
-        buffEnd = buff + buffCapacity;
-        buffArray[buffArraySize++] = buff;
+        head = new char[buffCapacity];
+        buffEnd = head + buffCapacity;
+
+        // point this block of memory to the next block
+        char** next = reinterpret_cast<char**>(head);
+        *next = oldHead;
 
         // calculate size of current value
         size_t currentSize = end - current;
 
         // copy current data from last buffer
-        memcpy(buff, current, currentSize);
+        char* newCurrent = head + sizeof(void*);
+        memcpy(newCurrent, current, currentSize);
 
-        current = buff;
-        end = buff + currentSize;
+        current = newCurrent;
+        end = current + currentSize;
     }
 
     *end = ch;

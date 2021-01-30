@@ -30,12 +30,9 @@ public:
     }
 
 private:
-    size_t buffArrayCapacity;
-    char** buffArray;
-    size_t buffArraySize;
+    char* head;
 
     size_t buffCapacity;
-    char* buff;
     char* buffEnd;
 
     char* current;
