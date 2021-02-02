@@ -10,6 +10,7 @@ using namespace std;
 LexicalAnalyzerTests::LexicalAnalyzerTests()
 {
     AddTest(TestValidInputs);
+    AddTest(TestNumbers);
 }
 
 bool LexicalAnalyzerTests::TestValidInputs()
@@ -148,6 +149,130 @@ bool LexicalAnalyzerTests::TestValidInputs()
         if (!ok)
         {
             break;
+        }
+    }
+
+    return ok;
+}
+
+bool LexicalAnalyzerTests::TestNumbers()
+{
+    vector<tuple<const char*, const char*, bool, Token::EType, int64_t>> tests =
+    {
+        // valid numbers
+        make_tuple("0", "0", true, Token::eDecIntLit, 0),
+        make_tuple("0 ", "0", true, Token::eDecIntLit, 0),
+        make_tuple("5\n", "5", true, Token::eDecIntLit, 5),
+        make_tuple("10", "10", true, Token::eDecIntLit, 10),
+        make_tuple("12 ", "12", true, Token::eDecIntLit, 12),
+        make_tuple("123", "123", true, Token::eDecIntLit, 123),
+        make_tuple("1234567890", "1234567890", true, Token::eDecIntLit, 1234567890),
+        make_tuple("1_234", "1_234", true, Token::eDecIntLit, 1234),
+        make_tuple("1_", "1_", true, Token::eDecIntLit, 1),
+        make_tuple("1_1", "1_1", true, Token::eDecIntLit, 11),
+        make_tuple("0b0", "0b0", true, Token::eBinIntLit, 0b0),
+        make_tuple("0b1", "0b1", true, Token::eBinIntLit, 0b1),
+        make_tuple("0b1 ", "0b1", true, Token::eBinIntLit, 0b1),
+        make_tuple("0b101", "0b101", true, Token::eBinIntLit, 0b101),
+        make_tuple("0b_1_0_1_0", "0b_1_0_1_0", true, Token::eBinIntLit, 0b1010),
+        make_tuple("0b_____010_____", "0b_____010_____", true, Token::eBinIntLit, 0b010),
+        make_tuple("0o0", "0o0", true, Token::eOctIntLit, 00),
+        make_tuple("0o4", "0o4", true, Token::eOctIntLit, 04),
+        make_tuple("0o7", "0o7", true, Token::eOctIntLit, 07),
+        make_tuple("0o23", "0o23", true, Token::eOctIntLit, 023),
+        make_tuple("0o1702", "0o1702", true, Token::eOctIntLit, 01702),
+        make_tuple("0o716_012", "0o716_012", true, Token::eOctIntLit, 0716012),
+        make_tuple("0x4", "0x4", true, Token::eHexIntLit, 0x4),
+        make_tuple("0xa", "0xa", true, Token::eHexIntLit, 0xa),
+        make_tuple("0xE", "0xE", true, Token::eHexIntLit, 0xE),
+        make_tuple("0x10Ea5C", "0x10Ea5C", true, Token::eHexIntLit, 0x10Ea5C),
+        make_tuple("0x10ea_5C7a_39c8_", "0x10ea_5C7a_39c8_", true, Token::eHexIntLit, 0x10ea5C7a39c8),
+
+        // invalid numbers
+        make_tuple("0b", "", false, Token::eInvalid, 0),
+        make_tuple("0o", "", false, Token::eInvalid, 0),
+        make_tuple("0x", "", false, Token::eInvalid, 0),
+        make_tuple("1b", "", false, Token::eInvalid, 0),
+        make_tuple("2o", "", false, Token::eInvalid, 0),
+        make_tuple("3x", "", false, Token::eInvalid, 0),
+        make_tuple("0b_", "", false, Token::eInvalid, 0),
+        make_tuple("0o__", "", false, Token::eInvalid, 0),
+        make_tuple("0x___", "", false, Token::eInvalid, 0),
+        make_tuple("23a", "", false, Token::eInvalid, 0),
+        make_tuple("0b120", "", false, Token::eInvalid, 0),
+        make_tuple("0B10", "", false, Token::eInvalid, 0),
+        make_tuple("0B", "", false, Token::eInvalid, 0),
+        make_tuple("0o138", "", false, Token::eInvalid, 0),
+        make_tuple("0O34", "", false, Token::eInvalid, 0),
+        make_tuple("0O", "", false, Token::eInvalid, 0),
+        make_tuple("0x23G4", "", false, Token::eInvalid, 0),
+        make_tuple("0X19A", "", false, Token::eInvalid, 0),
+        make_tuple("0X", "", false, Token::eInvalid, 0),
+        make_tuple("0_b", "", false, Token::eInvalid, 0),
+        make_tuple("0_o", "", false, Token::eInvalid, 0),
+        make_tuple("0_X", "", false, Token::eInvalid, 0),
+
+        // valid non-number tokens
+        make_tuple("_", "_", true, Token::eIdentifier, 0),
+        make_tuple("___", "___", true, Token::eIdentifier, 0),
+        make_tuple("_0b", "_0b", true, Token::eIdentifier, 0),
+        make_tuple("_0o", "_0o", true, Token::eIdentifier, 0),
+        make_tuple("_0X", "_0X", true, Token::eIdentifier, 0),
+        make_tuple("_1", "_1", true, Token::eIdentifier, 0),
+    };
+
+    CompilerContext compilerContext;
+    stringstream errStream;
+    ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
+    LexicalAnalyzer analyzer(compilerContext, logger);
+
+    stringstream ss;
+    vector<Token> tokens;
+    bool ok = true;
+    for (tuple<const char*, const char*, bool, Token::EType, int64_t> test : tests)
+    {
+        const char* input = get<0>(test);
+        const char* expectedOutput = get<1>(test);
+        bool expectedIsValid = get<2>(test);
+        Token::EType expectedTokenType = get<3>(test);
+
+        errStream.clear();
+        errStream.str("");
+
+        ss.clear();
+        ss.str(input);
+
+        bool actualIsValid = analyzer.Process(ss, tokens);
+
+        if (expectedIsValid != actualIsValid)
+        {
+            ok = false;
+            if (expectedIsValid)
+            {
+                cerr << "Expected input '" << input << "' to be valid\n";
+                cerr << errStream.str();
+            }
+            else
+            {
+                cerr << "Expected input '" << input << "' to be invalid\n";
+            }
+        }
+
+        if (expectedIsValid)
+        {
+            if (ok && tokens.size() != 1)
+            {
+                ok = false;
+                cerr << "Expected 1 token but got " << tokens.size() << "\n";
+            }
+
+            if (ok)
+            {
+                Token expectedToken(expectedOutput, 0, 1, 1, expectedTokenType);
+                const Token& actualToken = tokens[0];
+
+                ok = TokensAreEqual(expectedToken, actualToken);
+            }
         }
     }
 

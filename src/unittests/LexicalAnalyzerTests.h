@@ -13,6 +13,8 @@ public:
 private:
     static bool TestValidInputs();
 
+    static bool TestNumbers();
+
     static bool TokensAreEqual(const Token& token1, const Token& token2);
 
     static bool TokenSequencesAreEqual(const std::vector<Token>& sequence1,
