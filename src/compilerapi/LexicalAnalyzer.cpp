@@ -319,6 +319,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     }
                     else if (firstCh == '0')
                     {
+                        bool hasDigit = false;
                         if (ch == 'x')
                         {
                             tokenType = Token::eHexIntLit;
@@ -326,8 +327,17 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                             ch = Read(is);
                             ++column;
 
-                            while ( isMore && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
+                            while (isMore)
                             {
+                                if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'))
+                                {
+                                    hasDigit = true;
+                                }
+                                else if (ch != '_')
+                                {
+                                    break;
+                                }
+
                                 tokenValues.AppendChar(ch);
                                 ch = Read(is);
                                 ++column;
@@ -338,6 +348,11 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                                 logger.LogError(filename, line, column, "Invalid character in numeric literal");
                                 ok = false;
                             }
+                            else if (!hasDigit)
+                            {
+                                logger.LogError(filename, line, column - 1, "Numeric literal ended without a digit");
+                                ok = false;
+                            }
                         }
                         else if (ch == 'b')
                         {
@@ -346,8 +361,17 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                             ch = Read(is);
                             ++column;
 
-                            while ( isMore && (ch == '0' || ch == '1' || ch == '_') )
+                            while (isMore)
                             {
+                                if (ch == '0' || ch == '1')
+                                {
+                                    hasDigit = true;
+                                }
+                                else if (ch != '_')
+                                {
+                                    break;
+                                }
+
                                 tokenValues.AppendChar(ch);
                                 ch = Read(is);
                                 ++column;
@@ -358,6 +382,11 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                                 logger.LogError(filename, line, column, "Invalid character in numeric literal");
                                 ok = false;
                             }
+                            else if (!hasDigit)
+                            {
+                                logger.LogError(filename, line, column - 1, "Numeric literal ended without a digit");
+                                ok = false;
+                            }
                         }
                         else if (ch == 'o')
                         {
@@ -366,8 +395,17 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                             ch = Read(is);
                             ++column;
 
-                            while ( isMore && ((ch >= '0' && ch <= '7') || ch == '_') )
+                            while (isMore)
                             {
+                                if (ch >= '0' && ch <= '7')
+                                {
+                                    hasDigit = true;
+                                }
+                                else if (ch != '_')
+                                {
+                                    break;
+                                }
+
                                 tokenValues.AppendChar(ch);
                                 ch = Read(is);
                                 ++column;
@@ -376,6 +414,11 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                             if ( (ch >= '8' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                             {
                                 logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                ok = false;
+                            }
+                            else if (!hasDigit)
+                            {
+                                logger.LogError(filename, line, column - 1, "Numeric literal ended without a digit");
                                 ok = false;
                             }
                         }
