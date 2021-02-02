@@ -293,13 +293,14 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
             // parse numeric literals
             else if (ch >= '0' && ch <= '9')
             {
+                char firstCh = ch;
                 Token::EType tokenType = Token::eDecIntLit;
                 unsigned startColumn = column;
                 tokenValues.AppendChar(ch);
                 ch = Read(is);
                 ++column;
 
-                if ( isMore && ((ch >= '0' && ch <= '9') || ch == '_' || ch == 'x' || ch == 'b' || ch == 'o') )
+                if (isMore)
                 {
                     if ((ch >= '0' && ch <= '9') || ch == '_')
                     {
@@ -316,67 +317,75 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                             ok = false;
                         }
                     }
-                    else if (ch == 'x')
+                    else if (firstCh == '0')
                     {
-                        tokenType = Token::eHexIntLit;
-                        tokenValues.AppendChar(ch);
-                        ch = Read(is);
-                        ++column;
-
-                        while ( isMore && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
+                        if (ch == 'x')
                         {
+                            tokenType = Token::eHexIntLit;
                             tokenValues.AppendChar(ch);
                             ch = Read(is);
                             ++column;
-                        }
 
-                        if ( (ch >= 'g' && ch <= 'z') || (ch >= 'G' && ch <= 'Z') )
+                            while ( isMore && ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_') )
+                            {
+                                tokenValues.AppendChar(ch);
+                                ch = Read(is);
+                                ++column;
+                            }
+
+                            if ( (ch >= 'g' && ch <= 'z') || (ch >= 'G' && ch <= 'Z') )
+                            {
+                                logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                ok = false;
+                            }
+                        }
+                        else if (ch == 'b')
+                        {
+                            tokenType = Token::eBinIntLit;
+                            tokenValues.AppendChar(ch);
+                            ch = Read(is);
+                            ++column;
+
+                            while ( isMore && (ch == '0' || ch == '1' || ch == '_') )
+                            {
+                                tokenValues.AppendChar(ch);
+                                ch = Read(is);
+                                ++column;
+                            }
+
+                            if ( (ch >= '2' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                            {
+                                logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                ok = false;
+                            }
+                        }
+                        else if (ch == 'o')
+                        {
+                            tokenType = Token::eOctIntLit;
+                            tokenValues.AppendChar(ch);
+                            ch = Read(is);
+                            ++column;
+
+                            while ( isMore && ((ch >= '0' && ch <= '7') || ch == '_') )
+                            {
+                                tokenValues.AppendChar(ch);
+                                ch = Read(is);
+                                ++column;
+                            }
+
+                            if ( (ch >= '8' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                            {
+                                logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                ok = false;
+                            }
+                        }
+                        else if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                         {
                             logger.LogError(filename, line, column, "Invalid character in numeric literal");
                             ok = false;
                         }
                     }
-                    else if (ch == 'b')
-                    {
-                        tokenType = Token::eBinIntLit;
-                        tokenValues.AppendChar(ch);
-                        ch = Read(is);
-                        ++column;
-
-                        while ( isMore && (ch == '0' || ch == '1' || ch == '_') )
-                        {
-                            tokenValues.AppendChar(ch);
-                            ch = Read(is);
-                            ++column;
-                        }
-
-                        if ( (ch >= '2' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
-                        {
-                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
-                            ok = false;
-                        }
-                    }
-                    else if (ch == 'o')
-                    {
-                        tokenType = Token::eOctIntLit;
-                        tokenValues.AppendChar(ch);
-                        ch = Read(is);
-                        ++column;
-
-                        while ( isMore && ((ch >= '0' && ch <= '7') || ch == '_') )
-                        {
-                            tokenValues.AppendChar(ch);
-                            ch = Read(is);
-                            ++column;
-                        }
-
-                        if ( (ch >= '8' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
-                        {
-                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
-                            ok = false;
-                        }
-                    }
-                    else
+                    else if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                     {
                         logger.LogError(filename, line, column, "Invalid character in numeric literal");
                         ok = false;
