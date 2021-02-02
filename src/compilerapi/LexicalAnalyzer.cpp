@@ -158,6 +158,7 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
 bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
 {
     TokenValues& tokenValues = compilerContext.tokenValues;
+    tokenValues.ClearCurrent();
     tokens.clear();
     tokens.reserve(256);
     buffSize = 0;
