@@ -54,8 +54,6 @@ constexpr bool hexDigitToNum(char ch, char& num)
     }
 }
 
-bool isNumber(const std::string& tokenStr);
-
 bool stringToInteger(const std::string& str, int64_t& num);
 
 template<typename T>

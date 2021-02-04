@@ -77,17 +77,8 @@ bool UtilsTests::TestNumberConversion()
         string& testStr = get<0>(test);
 
         int64_t num = -1;
-        bool resultActual = isNumber(testStr);
         bool resultConversion = stringToInteger(testStr, num);
-
         bool expectedIsValid = get<2>(test);
-
-        if (resultActual != expectedIsValid)
-        {
-            cerr << "'" << testStr << "' was incorrectly identified as "
-                 << (resultActual ? "a number" : "not a number") << '\n';
-            ok = false;
-        }
 
         if (resultConversion != expectedIsValid)
         {
