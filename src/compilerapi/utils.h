@@ -30,18 +30,6 @@ constexpr bool isUtf8Continuation(char ch)
     return (ch & 0xc0) == 0x80;
 }
 
-constexpr bool isIdentifierChar(char ch, bool isFirstChar)
-{
-    if (isFirstChar)
-    {
-        return std::isalpha(ch) || ch == '_';
-    }
-    else
-    {
-        return std::isalnum(ch) || ch == '_';
-    }
-}
-
 constexpr bool hexDigitToNum(char ch, char& num)
 {
     if (ch >= '0' && ch <= '9')
@@ -66,19 +54,9 @@ constexpr bool hexDigitToNum(char ch, char& num)
     }
 }
 
-bool isIdentifier(const std::string& str);
-
 bool isNumber(const std::string& tokenStr);
 
-bool isPotentialNumber(const std::string& tokenStr);
-
-bool isString(const std::string& tokenStr);
-
-bool isPotentialString(const std::string& tokenStr);
-
 bool stringToInteger(const std::string& str, int64_t& num);
-
-bool stringToBool(const std::string& str, bool& value);
 
 template<typename T>
 void deletePointerContainer(T& container)

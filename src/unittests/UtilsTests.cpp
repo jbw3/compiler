@@ -10,7 +10,6 @@ using namespace std;
 UtilsTests::UtilsTests()
 {
     AddTest(TestNumberConversion);
-    AddTest(TestStringParsing);
 }
 
 bool UtilsTests::TestNumberConversion()
@@ -78,25 +77,19 @@ bool UtilsTests::TestNumberConversion()
         string& testStr = get<0>(test);
 
         int64_t num = -1;
-        bool resultPotential = isPotentialNumber(testStr);
         bool resultActual = isNumber(testStr);
         bool resultConversion = stringToInteger(testStr, num);
 
-        if (resultPotential != get<1>(test))
+        bool expectedIsValid = get<2>(test);
+
+        if (resultActual != expectedIsValid)
         {
             cerr << "'" << testStr << "' was incorrectly identified as "
-                 << (resultPotential ? "a potential number" : "not a potential number") << '\n';
+                 << (resultActual ? "a number" : "not a number") << '\n';
             ok = false;
         }
 
-        if (resultActual != get<2>(test))
-        {
-            cerr << "'" << testStr << "' was incorrectly identified as "
-                 << (resultPotential ? "a number" : "not a number") << '\n';
-            ok = false;
-        }
-
-        if (resultConversion != get<2>(test))
+        if (resultConversion != expectedIsValid)
         {
             cerr << "'" << testStr << "' was "
                  << (resultConversion ? "incorrectly converted" : "not converted") << '\n';
@@ -106,55 +99,6 @@ bool UtilsTests::TestNumberConversion()
         if (num != get<3>(test))
         {
             cerr << "'" << testStr << "' was incorrectly converted to '" << num << "'\n";
-            ok = false;
-        }
-
-        if (!ok)
-        {
-            break;
-        }
-    }
-
-    return ok;
-}
-
-bool UtilsTests::TestStringParsing()
-{
-    vector<tuple<string, bool, bool>> tests =
-    {
-        make_tuple(R"("")", true, true),
-        make_tuple(R"("A")", true, true),
-        make_tuple(R"("abc")", true, true),
-        make_tuple(R"("Testing 1, 2, 3...")", true, true),
-
-        make_tuple(R"(")", true, false),
-        make_tuple(R"("abc)", true, false),
-
-        make_tuple("", false, false),
-        make_tuple("xyz", false, false),
-        make_tuple("123", false, false),
-        make_tuple(R"("abc"")", false, false),
-    };
-
-    bool ok = true;
-    for (tuple<string, bool, bool> test : tests)
-    {
-        string& testStr = get<0>(test);
-
-        bool resultPotential = isPotentialString(testStr);
-        bool resultActual = isString(testStr);
-
-        if (resultPotential != get<1>(test))
-        {
-            cerr << "'" << testStr << "' was incorrectly identified as "
-                 << (resultPotential ? "a potential string" : "not a potential string") << '\n';
-            ok = false;
-        }
-
-        if (resultActual != get<2>(test))
-        {
-            cerr << "'" << testStr << "' was incorrectly identified as "
-                 << (resultPotential ? "a string" : "not a string") << '\n';
             ok = false;
         }
 

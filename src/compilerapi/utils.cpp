@@ -6,29 +6,6 @@ using namespace std;
 
 constexpr char NUMERIC_LITERAL_SEPERATOR = '_';
 
-bool isIdentifier(const string& str)
-{
-    if (str.empty())
-    {
-        return false;
-    }
-
-    if (!isIdentifierChar(str[0], true))
-    {
-        return false;
-    }
-
-    for (size_t i = 1; i < str.size(); ++i)
-    {
-        if (!isIdentifierChar(str[i], false))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 bool isNumber(const string& tokenStr, bool isPotential)
 {
     if (tokenStr.size() == 0 || tokenStr[0] == NUMERIC_LITERAL_SEPERATOR)
@@ -125,73 +102,6 @@ bool isNumber(const string& tokenStr, bool isPotential)
 bool isNumber(const string& tokenStr)
 {
     return isNumber(tokenStr, false);
-}
-
-bool isPotentialNumber(const string& tokenStr)
-{
-    return isNumber(tokenStr, true);
-}
-
-bool isString(const std::string& tokenStr)
-{
-    if (tokenStr.size() < 2)
-    {
-        return false;
-    }
-
-    for (size_t i = 1; i < tokenStr.size() - 1; ++i)
-    {
-        char ch = tokenStr[i];
-        if (ch == '"' || !isprint(ch))
-        {
-            return false;
-        }
-    }
-
-    if (tokenStr[tokenStr.size() - 1] != '"')
-    {
-        return false;
-    }
-
-    return true;
-}
-
-bool isPotentialString(const std::string& tokenStr)
-{
-    if (tokenStr.empty())
-    {
-        return false;
-    }
-
-    size_t idx = 0;
-
-    if (tokenStr[idx] != '"')
-    {
-        return false;
-    }
-
-    ++idx;
-    while (idx < tokenStr.size() - 1)
-    {
-        char ch = tokenStr[idx];
-        if (ch == '"' || !isprint(ch))
-        {
-            return false;
-        }
-
-        ++idx;
-    }
-
-    if (idx < tokenStr.size())
-    {
-        char ch = tokenStr[idx];
-        if (ch != '"' && !isprint(ch))
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 bool binStringToInteger(const string& str, int64_t& num)
@@ -370,22 +280,4 @@ bool stringToInteger(const string& str, int64_t& num)
     }
 
     return ok;
-}
-
-bool stringToBool(const string& str, bool& value)
-{
-    if (str == "true")
-    {
-        value = true;
-        return true;
-    }
-    else if (str == "false")
-    {
-        value = false;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 }

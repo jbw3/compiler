@@ -1,7 +1,6 @@
 #include "LexicalAnalyzer.h"
 #include "CompilerContext.h"
 #include "keywords.h"
-#include "utils.h"
 #include <fstream>
 #include <iostream>
 
@@ -214,13 +213,13 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
         if (isMore)
         {
             // parse identifiers and keywords
-            if (isIdentifierChar(ch, true))
+            if (std::isalpha(ch) || ch == '_')
             {
                 unsigned startColumn = column;
                 tokenValues.AppendChar(ch);
                 ch = Read(is);
                 ++column;
-                while (isMore && isIdentifierChar(ch, false))
+                while (isMore && (std::isalnum(ch) || ch == '_'))
                 {
                     tokenValues.AppendChar(ch);
                     ch = Read(is);

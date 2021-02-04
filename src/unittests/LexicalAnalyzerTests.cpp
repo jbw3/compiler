@@ -11,6 +11,7 @@ LexicalAnalyzerTests::LexicalAnalyzerTests()
 {
     AddTest(TestValidInputs);
     AddTest(TestNumbers);
+    AddTest(TestStrings);
 }
 
 bool LexicalAnalyzerTests::TestValidInputs()
@@ -269,6 +270,79 @@ bool LexicalAnalyzerTests::TestNumbers()
             if (ok)
             {
                 Token expectedToken(expectedOutput, 0, 1, 1, expectedTokenType);
+                const Token& actualToken = tokens[0];
+
+                ok = TokensAreEqual(expectedToken, actualToken);
+            }
+        }
+    }
+
+    return ok;
+}
+
+bool LexicalAnalyzerTests::TestStrings()
+{
+    vector<tuple<const char*, bool>> tests =
+    {
+        // valid strings
+        make_tuple(R"("")", true),
+        make_tuple(R"("A")", true),
+        make_tuple(R"("abc")", true),
+        make_tuple(R"("Testing 1, 2, 3...")", true),
+        make_tuple(R"("abc\n123")", true),
+
+        // invalid strings
+        make_tuple(R"(")", false),
+        make_tuple(R"("abc)", false),
+        make_tuple(R"("abc"")", false),
+    };
+
+    CompilerContext compilerContext;
+    stringstream errStream;
+    ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
+    LexicalAnalyzer analyzer(compilerContext, logger);
+
+    stringstream ss;
+    vector<Token> tokens;
+    bool ok = true;
+    for (tuple<const char*, bool> test : tests)
+    {
+        const char* input = get<0>(test);
+        bool expectedIsValid = get<1>(test);
+
+        errStream.clear();
+        errStream.str("");
+
+        ss.clear();
+        ss.str(input);
+
+        bool actualIsValid = analyzer.Process(ss, tokens);
+
+        if (expectedIsValid != actualIsValid)
+        {
+            ok = false;
+            if (expectedIsValid)
+            {
+                cerr << "Expected input '" << input << "' to be valid\n";
+                cerr << errStream.str();
+            }
+            else
+            {
+                cerr << "Expected input '" << input << "' to be invalid\n";
+            }
+        }
+
+        if (expectedIsValid)
+        {
+            if (ok && tokens.size() != 1)
+            {
+                ok = false;
+                cerr << "Expected 1 token but got " << tokens.size() << "\n";
+            }
+
+            if (ok)
+            {
+                Token expectedToken(input, 0, 1, 1, Token::eStrLit);
                 const Token& actualToken = tokens[0];
 
                 ok = TokensAreEqual(expectedToken, actualToken);
