@@ -349,7 +349,8 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
             const string& filename = compilerContext.GetFilename(opToken->filenameId);
             Constant* fileStrPtr = CreateConstantString(filename);
             Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
-            Constant* lineNum = ConstantInt::get(context, APInt(32, opToken->line, false));
+            uint64_t line = static_cast<uint64_t>(opToken->line);
+            Constant* lineNum = ConstantInt::get(context, APInt(32, line, false));
             Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
             Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
 
