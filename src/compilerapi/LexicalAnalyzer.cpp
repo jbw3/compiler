@@ -466,6 +466,12 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     ++column;
                 }
 
+                if (!isMore)
+                {
+                    logger.LogError(filename, line, column, "Unexpected string end");
+                    ok = false;
+                }
+
                 if (ok)
                 {
                     tokenValues.AppendChar(ch); // add last '"'
