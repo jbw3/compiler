@@ -4,6 +4,7 @@
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "Token.h"
+#include "TokenList.h"
 #include <stack>
 #include <unordered_set>
 #include <vector>
@@ -13,12 +14,11 @@ class CompilerContext;
 class SyntaxAnalyzer
 {
 public:
-    typedef std::vector<Token> TokenSequence;
-    typedef TokenSequence::const_iterator TokenIterator;
+    typedef TokenList::const_iterator TokenIterator;
 
     SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
 
-    bool Process(const TokenSequence& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
+    bool Process(const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
 private:
     struct UnaryOpData

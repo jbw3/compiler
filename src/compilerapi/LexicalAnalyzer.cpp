@@ -122,7 +122,7 @@ LexicalAnalyzer::~LexicalAnalyzer()
     delete [] buff;
 }
 
-bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
+bool LexicalAnalyzer::Process(const string& inFile, TokenList& tokens)
 {
     istream* is = nullptr;
     if (inFile.empty() || inFile == "-")
@@ -154,12 +154,11 @@ bool LexicalAnalyzer::Process(const string& inFile, vector<Token>& tokens)
     return ok;
 }
 
-bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
+bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
 {
     TokenValues& tokenValues = compilerContext.tokenValues;
     tokenValues.ClearCurrent();
-    tokens.clear();
-    tokens.reserve(256);
+    tokens.Clear();
     buffSize = 0;
     buffIdx = 0;
     isMore = true;
@@ -245,7 +244,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     tokenValues.StartNew();
                 }
 
-                tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
+                tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
             }
             // parse operators and separators
             else if (SYMBOL_START_CHAR.find(ch) != SYMBOL_START_CHAR.end())
@@ -285,7 +284,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     const char* value = iter->first;
                     Token::EType tokenType = iter->second;
 
-                    tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
+                    tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
 
                     tokenValues.ClearCurrent();
                 }
@@ -438,7 +437,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                 if (ok)
                 {
                     const char* value = tokenValues.EndValue();
-                    tokens.push_back(Token(value, filenameId, line, startColumn, tokenType));
+                    tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
                     tokenValues.StartNew();
                 }
             }
@@ -476,7 +475,7 @@ bool LexicalAnalyzer::Process(istream& is, vector<Token>& tokens)
                     tokenValues.AppendChar(ch); // add last '"'
                     const char* value = tokenValues.EndValue();
 
-                    tokens.push_back(Token(value, filenameId, line, startColumn, Token::eStrLit));
+                    tokens.Append(Token(value, filenameId, line, startColumn, Token::eStrLit));
                     tokenValues.StartNew();
 
                     ch = Read(is);

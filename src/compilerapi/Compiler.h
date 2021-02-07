@@ -6,7 +6,8 @@
 #include "ErrorLogger.h"
 #include "Token.h"
 #include <istream>
-#include <vector>
+
+class TokenList;
 
 class Compiler
 {
@@ -22,7 +23,7 @@ private:
     Config config;
     ErrorLogger logger;
 
-    void PrintTokens(const std::vector<Token>& tokens) const;
+    void PrintTokens(const TokenList& tokens) const;
 };
 
 #endif // COMPILER_H_

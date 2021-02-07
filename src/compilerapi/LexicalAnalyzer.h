@@ -3,10 +3,10 @@
 
 #include "ErrorLogger.h"
 #include "Token.h"
+#include "TokenList.h"
 #include "utils.h"
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 class CompilerContext;
 
@@ -17,9 +17,9 @@ public:
 
     ~LexicalAnalyzer();
 
-    bool Process(const std::string& inFile, std::vector<Token>& tokens);
+    bool Process(const std::string& inFile, TokenList& tokens);
 
-    bool Process(std::istream& is, std::vector<Token>& tokens);
+    bool Process(std::istream& is, TokenList& tokens);
 
 private:
     static const char COMMENT_START;

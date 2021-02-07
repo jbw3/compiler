@@ -41,7 +41,7 @@ bool Compiler::Compile()
     bool ok = true;
 
     // lexical analysis
-    vector<Token> tokens;
+    TokenList tokens;
     if (ok)
     {
         SW_START(Lexing);
@@ -144,7 +144,7 @@ bool Compiler::Compile()
     return ok;
 }
 
-void Compiler::PrintTokens(const vector<Token>& tokens) const
+void Compiler::PrintTokens(const TokenList& tokens) const
 {
     ostream* os = nullptr;
     if (config.outFilename.empty())

@@ -43,6 +43,8 @@ add_library(compilerapi
     SyntaxTreeVisitor.h
     Token.cpp
     Token.h
+    TokenList.cpp
+    TokenList.h
     TypeInfo.cpp
     TypeInfo.h
     utils.cpp

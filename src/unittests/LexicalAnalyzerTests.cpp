@@ -16,7 +16,7 @@ LexicalAnalyzerTests::LexicalAnalyzerTests()
 
 bool LexicalAnalyzerTests::TestValidInputs()
 {
-    vector<pair<string, vector<Token>>> tests =
+    vector<pair<string, TokenList>> tests =
     {
         {
             "fun test() i32 { 1 + 2 }\n",
@@ -122,16 +122,16 @@ bool LexicalAnalyzerTests::TestValidInputs()
     LexicalAnalyzer analyzer(compilerContext, logger);
 
     stringstream ss;
-    vector<Token> actualTokens;
+    TokenList actualTokens;
     bool ok = false;
-    for (pair<string, vector<Token>> test : tests)
+    for (pair<string, TokenList> test : tests)
     {
         errStream.clear();
         errStream.str("");
 
         ss.clear();
         ss.str(test.first);
-        const vector<Token>& expectedTokens = test.second;
+        const TokenList& expectedTokens = test.second;
 
         ok = analyzer.Process(ss, actualTokens);
         if (ok)
@@ -228,7 +228,7 @@ bool LexicalAnalyzerTests::TestNumbers()
     LexicalAnalyzer analyzer(compilerContext, logger);
 
     stringstream ss;
-    vector<Token> tokens;
+    TokenList tokens;
     bool ok = true;
     for (tuple<const char*, const char*, bool, Token::EType, int64_t> test : tests)
     {
@@ -261,10 +261,10 @@ bool LexicalAnalyzerTests::TestNumbers()
 
         if (expectedIsValid)
         {
-            if (ok && tokens.size() != 1)
+            if (ok && tokens.GetSize() != 1)
             {
                 ok = false;
-                cerr << "Expected 1 token but got " << tokens.size() << "\n";
+                cerr << "Expected 1 token but got " << tokens.GetSize() << "\n";
             }
 
             if (ok)
@@ -303,7 +303,7 @@ bool LexicalAnalyzerTests::TestStrings()
     LexicalAnalyzer analyzer(compilerContext, logger);
 
     stringstream ss;
-    vector<Token> tokens;
+    TokenList tokens;
     bool ok = true;
     for (tuple<const char*, bool> test : tests)
     {
@@ -334,10 +334,10 @@ bool LexicalAnalyzerTests::TestStrings()
 
         if (expectedIsValid)
         {
-            if (ok && tokens.size() != 1)
+            if (ok && tokens.GetSize() != 1)
             {
                 ok = false;
-                cerr << "Expected 1 token but got " << tokens.size() << "\n";
+                cerr << "Expected 1 token but got " << tokens.GetSize() << "\n";
             }
 
             if (ok)
@@ -392,11 +392,11 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
     return areEqual;
 }
 
-bool LexicalAnalyzerTests::TokenSequencesAreEqual(const std::vector<Token>& expectedTokens,
-                                                  const std::vector<Token>& actualTokens)
+bool LexicalAnalyzerTests::TokenSequencesAreEqual(const TokenList& expectedTokens,
+                                                  const TokenList& actualTokens)
 {
-    size_t expectedSize = expectedTokens.size();
-    size_t actualSize = actualTokens.size();
+    size_t expectedSize = expectedTokens.GetSize();
+    size_t actualSize = actualTokens.GetSize();
     if (expectedSize != actualSize)
     {
         cerr << "Unexpected number of tokens: expected: " << expectedSize << ", actual: " << actualSize << "\n";

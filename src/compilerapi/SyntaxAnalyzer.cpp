@@ -14,10 +14,10 @@ SyntaxAnalyzer::SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& lo
 {
 }
 
-bool SyntaxAnalyzer::Process(const TokenSequence& tokens, ModuleDefinition*& syntaxTree)
+bool SyntaxAnalyzer::Process(const TokenList& tokens, ModuleDefinition*& syntaxTree)
 {
-    TokenIterator iter = tokens.cbegin();
-    TokenIterator endIter = tokens.cend();
+    TokenIterator iter = tokens.begin();
+    TokenIterator endIter = tokens.end();
 
     vector<StructDefinition*> structs;
     vector<FunctionDefinition*> functions;
