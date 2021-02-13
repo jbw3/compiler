@@ -53,6 +53,8 @@ public:
 
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;
 
+    void Visit(SyntaxTree::CastExpression* castExpression) override;
+
     void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
 
     void Visit(SyntaxTree::MemberExpression* memberExpression) override;

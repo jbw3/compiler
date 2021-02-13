@@ -1448,6 +1448,28 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(CastExpression* castExpression)
+{
+    Expression* subExpression = castExpression->subExpression;
+    subExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    const TypeInfo* exprType = subExpression->GetType();
+    const TypeInfo* castType = castExpression->GetType();
+
+    if (exprType->IsBool())
+    {
+        if (castType->IsInt())
+        {
+            Type* dstType = GetType(castType);
+            resultValue = builder.CreateZExt(resultValue, dstType, "cast");
+        }
+    }
+}
+
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();

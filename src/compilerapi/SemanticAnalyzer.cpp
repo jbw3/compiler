@@ -1702,6 +1702,41 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
     }
 }
 
+void SemanticAnalyzer::Visit(CastExpression* castExpression)
+{
+    Expression* subExpression = castExpression->subExpression;
+    subExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    const TypeInfo* exprType = subExpression->GetType();
+
+    const TypeInfo* castType = NameToType(castExpression->castTypeNameTokens);
+    if (castType == nullptr)
+    {
+        isError = true;
+        return;
+    }
+
+    // check if the cast is valid
+    bool canCast = false;
+    if (exprType->IsBool())
+    {
+        canCast = castType->IsInt();
+    }
+
+    if (!canCast)
+    {
+        logger.LogError(*castExpression->castToken, "Cannot cast expression of type '{}' to type '{}'",
+            exprType->GetShortName(), castType->GetShortName());
+        isError = true;
+        return;
+    }
+
+    castExpression->SetType(castType);
+}
+
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();

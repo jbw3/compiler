@@ -9,6 +9,7 @@ class BinaryExpression;
 class BoolLiteralExpression;
 class BlockExpression;
 class BranchExpression;
+class CastExpression;
 class ExternFunctionDeclaration;
 class ForLoop;
 class FunctionDefinition;
@@ -68,6 +69,8 @@ public:
     virtual void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) = 0;
 
     virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
+
+    virtual void Visit(SyntaxTree::CastExpression* castExpression) = 0;
 
     virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
 

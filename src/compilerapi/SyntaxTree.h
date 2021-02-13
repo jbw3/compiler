@@ -301,7 +301,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const TypeInfo* castType;
     Expression* subExpression;
     const Token* castToken;
     std::vector<const Token*> castTypeNameTokens;

@@ -520,7 +520,7 @@ CastExpression::~CastExpression()
 
 void CastExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO: implement
+    visitor->Visit(this);
 }
 
 FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments, const Token* nameToken) :
