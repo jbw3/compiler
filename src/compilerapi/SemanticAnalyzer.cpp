@@ -1725,6 +1725,10 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     {
         canCast = castType->IsBool() | castType->IsInt();
     }
+    else if (exprType->IsInt())
+    {
+        canCast = castType->IsBool() | castType->IsInt();
+    }
 
     if (!canCast)
     {

@@ -1476,6 +1476,48 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
             assert(false && "Invalid cast");
         }
     }
+    else if (exprType->IsInt())
+    {
+        if (castType->IsInt())
+        {
+            unsigned exprSize = exprType->GetNumBits();
+            unsigned castSize = castType->GetNumBits();
+            if (castSize < exprSize)
+            {
+                Type* dstType = GetType(castType);
+                resultValue = builder.CreateTrunc(resultValue, dstType, "cast");
+            }
+            else if (castSize > exprSize)
+            {
+                Type* dstType = GetType(castType);
+
+                TypeInfo::ESign exprSign = exprType->GetSign();
+                if (exprSign == TypeInfo::eSigned)
+                {
+                    resultValue = builder.CreateSExt(resultValue, dstType, "cast");
+                }
+                else
+                {
+                    resultValue = builder.CreateZExt(resultValue, dstType, "cast");
+                }
+            }
+            else // sizes are equal
+            {
+                // nothing to do if the sizes are equal
+            }
+        }
+        else if (castType->IsBool())
+        {
+            Type* resultValueType = resultValue->getType();
+            bool isSigned = exprType->GetSign() == TypeInfo::eSigned;
+            Value* zero = ConstantInt::get(resultValueType, 0, isSigned);
+            resultValue = builder.CreateICmpNE(resultValue, zero, "cast");
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
+    }
     else
     {
         assert(false && "Invalid cast");
