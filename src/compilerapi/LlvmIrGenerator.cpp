@@ -1467,6 +1467,18 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
             Type* dstType = GetType(castType);
             resultValue = builder.CreateZExt(resultValue, dstType, "cast");
         }
+        else if (castType->IsBool())
+        {
+            // nothing to do in this case
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
+    }
+    else
+    {
+        assert(false && "Invalid cast");
     }
 }
 

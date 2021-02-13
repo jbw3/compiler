@@ -1723,7 +1723,7 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     bool canCast = false;
     if (exprType->IsBool())
     {
-        canCast = castType->IsInt();
+        canCast = castType->IsBool() | castType->IsInt();
     }
 
     if (!canCast)
