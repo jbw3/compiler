@@ -505,6 +505,24 @@ const Token* VariableExpression::GetToken() const
     return token;
 }
 
+CastExpression::CastExpression(Expression* subExpression, const Token* castToken,
+                               const vector<const Token*>& castTypeNameTokens) :
+    subExpression(subExpression),
+    castToken(castToken),
+    castTypeNameTokens(castTypeNameTokens)
+{
+}
+
+CastExpression::~CastExpression()
+{
+    delete subExpression;
+}
+
+void CastExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO: implement
+}
+
 FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments, const Token* nameToken) :
     nameToken(nameToken),
     functionDeclaration(nullptr),

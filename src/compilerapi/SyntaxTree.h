@@ -291,6 +291,22 @@ private:
     std::string name;
 };
 
+class CastExpression : public Expression
+{
+public:
+    CastExpression(Expression* subExpression, const Token* castToken,
+                   const std::vector<const Token*>& castTypeNameTokens);
+
+    virtual ~CastExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const TypeInfo* castType;
+    Expression* subExpression;
+    const Token* castToken;
+    std::vector<const Token*> castTypeNameTokens;
+};
+
 class FunctionExpression : public Expression
 {
 public:

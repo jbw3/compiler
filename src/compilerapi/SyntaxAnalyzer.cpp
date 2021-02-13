@@ -1003,6 +1003,74 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             return nullptr;
         }
     }
+    else if (type == Token::eCast)
+    {
+        const Token* castToken = &*iter;
+
+        // ensure there's an open parenthesis after the cast
+        ++iter;
+        if (iter == endIter || iter->type != Token::eOpenPar)
+        {
+            logger.LogError(*castToken, "Expected open parenthesis after cast");
+            return nullptr;
+        }
+
+        ++iter;
+        if (iter == endIter)
+        {
+            logger.LogError("Unexpected end of file in the middle of a cast");
+            return nullptr;
+        }
+
+        // parse the cast type name
+        vector<const Token*> castTypeNameTokens;
+        bool ok = ProcessType(iter, endIter, castTypeNameTokens, Token::eComma);
+        if (!ok)
+        {
+            return nullptr;
+        }
+
+        // make sure there was a type
+        if (castTypeNameTokens.size() == 0)
+        {
+            logger.LogError(*iter, "Expected a cast type");
+            return nullptr;
+        }
+
+        ++iter;
+        if (iter == endIter)
+        {
+            logger.LogError("Unexpected end of file in the middle of a cast");
+            return nullptr;
+        }
+
+        // parse the expression
+        Expression* subExpression = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+        if (subExpression == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (iter->type == Token::eComma)
+        {
+            ++iter;
+            if (iter == endIter)
+            {
+                delete subExpression;
+                logger.LogError("Unexpected end of file in the middle of a cast");
+                return nullptr;
+            }
+        }
+
+        if (iter->type != Token::eClosePar)
+        {
+            delete subExpression;
+            logger.LogError(*castToken, "Cast does not have closing parenthesis");
+            return nullptr;
+        }
+
+        expr = new CastExpression(subExpression, castToken, castTypeNameTokens);
+    }
     else
     {
         logger.LogError(*iter, "Unexpected term '{}'", iter->value);

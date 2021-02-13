@@ -69,6 +69,7 @@ const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> Lexica
 {
     { BOOL_KEYWORD, Token::eBool },
     { BREAK_KEYWORD, Token::eBreak },
+    { CAST_KEYWORD, Token::eCast },
     { CONTINUE_KEYWORD, Token::eContinue },
     { ELIF_KEYWORD, Token::eElif },
     { ELSE_KEYWORD, Token::eElse },
