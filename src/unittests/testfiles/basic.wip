@@ -877,3 +877,22 @@ fun slices(array [i32], s str, start u32, end u32)
 
     var s1 = s[start..end];
 }
+
+fun casts(x i16, y u16, b bool)
+{
+    var c1 = cast(i32, x);
+    var c2 = cast(i32, y);
+    var c3 = cast(i32, b);
+
+    var c4 = cast(u32, x);
+    var c5 = cast(u32, y);
+    var c6 = cast(u32, b);
+
+    var c7 = cast(bool, x);
+    var c8 = cast(bool, y);
+    var c9 = cast(bool, b);
+
+    var c10 = cast(i8, x);
+    var c11 = cast(i8, y);
+    var c12 = cast(i8, b);
+}

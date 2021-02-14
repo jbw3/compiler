@@ -2759,6 +2759,65 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @casts(i16 %x, i16 %y, i1 %b) #0 {
+entry:
+  %c12 = alloca i8
+  %c11 = alloca i8
+  %c10 = alloca i8
+  %c9 = alloca i1
+  %c8 = alloca i1
+  %c7 = alloca i1
+  %c6 = alloca i32
+  %c5 = alloca i32
+  %c4 = alloca i32
+  %c3 = alloca i32
+  %c2 = alloca i32
+  %c1 = alloca i32
+  %b3 = alloca i1
+  %y2 = alloca i16
+  %x1 = alloca i16
+  store i16 %x, i16* %x1
+  store i16 %y, i16* %y2
+  store i1 %b, i1* %b3
+  %x4 = load i16, i16* %x1
+  %cast = sext i16 %x4 to i32
+  store i32 %cast, i32* %c1
+  %y5 = load i16, i16* %y2
+  %cast6 = zext i16 %y5 to i32
+  store i32 %cast6, i32* %c2
+  %b7 = load i1, i1* %b3
+  %cast8 = zext i1 %b7 to i32
+  store i32 %cast8, i32* %c3
+  %x9 = load i16, i16* %x1
+  %cast10 = sext i16 %x9 to i32
+  store i32 %cast10, i32* %c4
+  %y11 = load i16, i16* %y2
+  %cast12 = zext i16 %y11 to i32
+  store i32 %cast12, i32* %c5
+  %b13 = load i1, i1* %b3
+  %cast14 = zext i1 %b13 to i32
+  store i32 %cast14, i32* %c6
+  %x15 = load i16, i16* %x1
+  %cast16 = icmp ne i16 %x15, 0
+  store i1 %cast16, i1* %c7
+  %y17 = load i16, i16* %y2
+  %cast18 = icmp ne i16 %y17, 0
+  store i1 %cast18, i1* %c8
+  %b19 = load i1, i1* %b3
+  store i1 %b19, i1* %c9
+  %x20 = load i16, i16* %x1
+  %cast21 = trunc i16 %x20 to i8
+  store i8 %cast21, i8* %c10
+  %y22 = load i16, i16* %y2
+  %cast23 = trunc i16 %y22 to i8
+  store i8 %cast23, i8* %c11
+  %b24 = load i1, i1* %b3
+  %cast25 = zext i1 %b24 to i8
+  store i8 %cast25, i8* %c12
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
