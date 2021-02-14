@@ -1457,6 +1457,8 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
         return;
     }
 
+    SetDebugLocation(castExpression->castToken);
+
     const TypeInfo* exprType = subExpression->GetType();
     const TypeInfo* castType = castExpression->GetType();
 

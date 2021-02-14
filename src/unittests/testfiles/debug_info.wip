@@ -159,3 +159,8 @@ fun forIndex(a [u32]) usize
 
     num
 }
+
+fun casts(a i32)
+{
+    var x = cast(i8, a);
+}

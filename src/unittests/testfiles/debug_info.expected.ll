@@ -497,6 +497,20 @@ forExit:                                          ; preds = %forCond
   ret i64 %num6, !dbg !315
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @casts(i32 %a) #0 !dbg !316 {
+entry:
+  %x = alloca i8
+  %a1 = alloca i32
+  store i32 %a, i32* %a1
+  call void @llvm.dbg.declare(metadata i32* %a1, metadata !318, metadata !DIExpression()), !dbg !321
+  call void @llvm.dbg.declare(metadata i8* %x, metadata !319, metadata !DIExpression()), !dbg !322
+  %a2 = load i32, i32* %a1, !dbg !323
+  %cast = trunc i32 %a2 to i8, !dbg !324
+  store i8 %cast, i8* %x, !dbg !325
+  ret %UnitType zeroinitializer, !dbg !325
+}
+
 ; Function Attrs: nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -823,3 +837,13 @@ $filename
 !313 = !DILocation(line: 157, column: 18, scope: !311)
 !314 = !DILocation(line: 157, column: 13, scope: !311)
 !315 = !DILocation(line: 160, column: 5, scope: !300)
+!316 = distinct !DISubprogram(name: "casts", scope: !1, file: !1, line: 163, type: !124, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !317)
+!317 = !{!318, !319}
+!318 = !DILocalVariable(name: "a", arg: 1, scope: !316, file: !1, line: 163, type: !6)
+!319 = !DILocalVariable(name: "x", scope: !320, file: !1, line: 165, type: !23)
+!320 = distinct !DILexicalBlock(scope: !316, file: !1, line: 164, column: 1)
+!321 = !DILocation(line: 163, scope: !316)
+!322 = !DILocation(line: 165, column: 9, scope: !320)
+!323 = !DILocation(line: 165, column: 22, scope: !320)
+!324 = !DILocation(line: 165, column: 13, scope: !320)
+!325 = !DILocation(line: 165, column: 11, scope: !320)
