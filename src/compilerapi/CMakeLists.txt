@@ -30,6 +30,8 @@ add_library(compilerapi
     LlvmIrOptimizer.h
     SemanticAnalyzer.cpp
     SemanticAnalyzer.h
+    SourceGenerator.cpp
+    SourceGenerator.h
     Stopwatch.cpp
     Stopwatch.h
     SymbolTable.cpp
