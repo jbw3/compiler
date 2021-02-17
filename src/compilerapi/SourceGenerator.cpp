@@ -9,6 +9,7 @@ using namespace SyntaxTree;
 SourceGenerator::SourceGenerator(const string& outFilename)
 {
     os = outFilename.empty() ? &cout : new fstream(outFilename, ios_base::out);
+    indent = "    ";
 }
 
 SourceGenerator::~SourceGenerator()
@@ -64,6 +65,17 @@ void SourceGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void SourceGenerator::Visit(StructDefinition* structDefinition)
 {
+    *os << "struct " << structDefinition->GetName() << "\n{\n";
+
+    const TypeInfo* structType = structDefinition->GetType();
+    for (const MemberDefinition* member : structDefinition->GetMembers())
+    {
+        const string& memberName = member->GetName();
+        const TypeInfo* memberType = structType->GetMember(memberName)->GetType();
+        *os << indent << memberName << " " << memberType->GetShortName() << ",\n";
+    }
+
+    *os << "}\n";
 }
 
 void SourceGenerator::Visit(StructInitializationExpression* structInitializationExpression)

@@ -68,6 +68,7 @@ public:
 
 private:
     std::ostream* os;
+    std::string indent;
 
     void PrintFunctionDeclaration(SyntaxTree::FunctionDeclaration* functionDeclaration);
 };
