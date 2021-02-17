@@ -1,3 +1,7 @@
 extern fun extern_function(x i16, asdf bool, string str) i32;
 
 extern fun extern_function2(a u8, b u16, c u32, d u64);
+
+fun doNothing()
+{
+}

@@ -57,6 +57,9 @@ void SourceGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration
 
 void SourceGenerator::Visit(FunctionDefinition* functionDefinition)
 {
+    PrintFunctionDeclaration(functionDefinition->GetDeclaration());
+    *os << '\n';
+    functionDefinition->GetExpression()->Accept(this);
 }
 
 void SourceGenerator::Visit(StructDefinition* structDefinition)
@@ -144,6 +147,8 @@ void SourceGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
 
 void SourceGenerator::Visit(BlockExpression* blockExpression)
 {
+    *os << "{\n";
+    *os << "}\n";
 }
 
 void SourceGenerator::Visit(CastExpression* castExpression)
