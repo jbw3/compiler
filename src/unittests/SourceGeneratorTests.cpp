@@ -56,6 +56,7 @@ bool SourceGeneratorTests::TestSourceGenerator()
     }
 
     SourceGenerator generator(outFilename);
+    generator.Visit(syntaxTree);
     generator.Flush();
 
     fstream expectedFile(inFilename);
