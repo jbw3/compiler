@@ -29,45 +29,42 @@ Compiler::Compiler(const Config& config) :
     TypeInfo::InitTypes(config.targetMachine);
 }
 
-bool Compiler::Compile()
+bool Compiler::CompileSyntaxTree(ModuleDefinition*& syntaxTree)
 {
+    syntaxTree = nullptr;
+
     SW_CREATE(Lexing);
     SW_CREATE(Syntax);
     SW_CREATE(Semantic);
-    SW_CREATE(IrGen);
-    SW_CREATE(IrOpt);
-    SW_CREATE(AsmGen);
 
     bool ok = true;
 
     // lexical analysis
-    TokenList tokens;
     if (ok)
     {
         SW_START(Lexing);
 
         LexicalAnalyzer lexicalAnalyzer(compilerContext, logger);
-        ok = lexicalAnalyzer.Process(config.inFilename, tokens);
+        ok = lexicalAnalyzer.Process(config.inFilename, compilerContext.tokens);
 
         SW_STOP(Lexing);
         SW_PRINT(Lexing);
     }
 
-    // check tokens are the output
+    // check if tokens are the output
     if (ok && config.emitType == Config::eTokens)
     {
-        PrintTokens(tokens);
+        PrintTokens(compilerContext.tokens);
         return ok;
     }
 
     // syntax analysis
-    ModuleDefinition* syntaxTree = nullptr;
     if (ok)
     {
         SW_START(Syntax);
 
         SyntaxAnalyzer syntaxAnalyzer(compilerContext, logger);
-        ok = syntaxAnalyzer.Process(tokens, syntaxTree);
+        ok = syntaxAnalyzer.Process(compilerContext.tokens, syntaxTree);
 
         SW_STOP(Syntax);
         SW_PRINT(Syntax);
@@ -84,6 +81,18 @@ bool Compiler::Compile()
         SW_STOP(Semantic);
         SW_PRINT(Semantic);
     }
+
+    return ok;
+}
+
+bool Compiler::Compile()
+{
+    SW_CREATE(IrGen);
+    SW_CREATE(IrOpt);
+    SW_CREATE(AsmGen);
+
+    ModuleDefinition* syntaxTree = nullptr;
+    bool ok = CompileSyntaxTree(syntaxTree);
 
     // check if syntax tree is the output
     if (ok && config.emitType == Config::eSyntaxTree)

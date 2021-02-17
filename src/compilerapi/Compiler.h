@@ -7,6 +7,10 @@
 #include "Token.h"
 #include <istream>
 
+namespace SyntaxTree
+{
+class ModuleDefinition;
+}
 class TokenList;
 
 class Compiler
@@ -15,6 +19,8 @@ public:
     Compiler();
 
     Compiler(const Config& config);
+
+    bool CompileSyntaxTree(SyntaxTree::ModuleDefinition*& syntaxTree);
 
     bool Compile();
 

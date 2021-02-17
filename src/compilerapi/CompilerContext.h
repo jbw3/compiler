@@ -1,6 +1,7 @@
 #ifndef COMPILER_CONTEXT_H_
 #define COMPILER_CONTEXT_H_
 
+#include "TokenList.h"
 #include <string>
 #include <vector>
 
@@ -43,6 +44,7 @@ class CompilerContext
 {
 public:
     TokenValues tokenValues;
+    TokenList tokens;
 
     CompilerContext();
 
