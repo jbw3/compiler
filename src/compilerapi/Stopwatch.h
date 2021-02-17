@@ -41,7 +41,7 @@ public:
 private:
     std::chrono::time_point<std::chrono::steady_clock> start;
     double accum;
-    bool isRunning;
+    unsigned long long startCount;
 };
 
 #endif // STOPWATCH_H_

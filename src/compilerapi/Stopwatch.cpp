@@ -9,29 +9,33 @@ Stopwatch::Stopwatch()
 
 void Stopwatch::Start()
 {
-    if (!isRunning)
+    if (startCount == 0)
     {
-        isRunning = true;
         start = chrono::steady_clock::now();
     }
+    ++startCount;
 }
 
 void Stopwatch::Stop()
 {
-    if (isRunning)
+    if (startCount == 1)
     {
         auto stop = chrono::steady_clock::now();
         auto diff = stop - start;
         accum += chrono::duration<double, milli>(diff).count();
 
-        isRunning = false;
+        startCount = 0;
+    }
+    else if (startCount > 1)
+    {
+        --startCount;
     }
 }
 
 void Stopwatch::Reset()
 {
     accum = 0.0;
-    isRunning = false;
+    startCount = 0;
 }
 
 void Stopwatch::Restart()
@@ -42,12 +46,12 @@ void Stopwatch::Restart()
 
 bool Stopwatch::IsRunning() const
 {
-    return isRunning;
+    return startCount > 0;
 }
 
 double Stopwatch::GetElapsed() const
 {
-    if (isRunning)
+    if (IsRunning())
     {
         auto now = chrono::steady_clock::now();
         auto diff = now - start;
