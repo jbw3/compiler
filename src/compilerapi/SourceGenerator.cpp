@@ -232,10 +232,31 @@ void SourceGenerator::Visit(VariableExpression* variableExpression)
 
 void SourceGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 {
+    *os << '[';
+    arrayExpression->sizeExpression->Accept(this);
+    *os << "; ";
+    arrayExpression->valueExpression->Accept(this);
+    *os << ']';
 }
 
 void SourceGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
 {
+    *os << '[';
+
+    const Expressions& exprs = arrayExpression->expressions;
+    size_t numExprs = exprs.size();
+    if (numExprs > 0)
+    {
+        exprs[0]->Accept(this);
+
+        for (size_t i = 1; i < numExprs; ++i)
+        {
+            *os << ", ";
+            exprs[i]->Accept(this);
+        }
+    }
+
+    *os << ']';
 }
 
 void SourceGenerator::Visit(BlockExpression* blockExpression)
