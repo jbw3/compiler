@@ -9,7 +9,8 @@ using namespace SyntaxTree;
 SourceGenerator::SourceGenerator(const string& outFilename)
 {
     os = outFilename.empty() ? &cout : new fstream(outFilename, ios_base::out);
-    indent = "    ";
+    indentStr = "    ";
+    indentLevel = 0;
 }
 
 SourceGenerator::~SourceGenerator()
@@ -72,7 +73,7 @@ void SourceGenerator::Visit(StructDefinition* structDefinition)
     {
         const string& memberName = member->GetName();
         const TypeInfo* memberType = structType->GetMember(memberName)->GetType();
-        *os << indent << memberName << " " << memberType->GetShortName() << ",\n";
+        *os << indentStr << memberName << " " << memberType->GetShortName() << ",\n";
     }
 
     *os << "}\n";
@@ -131,9 +132,10 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void SourceGenerator::Visit(NumericExpression* numericExpression)
 {
+    *os << numericExpression->GetToken()->value;
 }
 
-void SourceGenerator::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
+void SourceGenerator::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpression*/)
 {
 }
 
@@ -159,7 +161,31 @@ void SourceGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
 
 void SourceGenerator::Visit(BlockExpression* blockExpression)
 {
+    Indent();
     *os << "{\n";
+    ++indentLevel;
+
+    const Expressions& exprs = blockExpression->GetExpressions();
+    size_t numExprs = exprs.size();
+    for (size_t i = 0; i < numExprs - 1; ++i)
+    {
+        Expression* expr = exprs[i];
+
+        Indent();
+        expr->Accept(this);
+        *os << ";\n";
+    }
+
+    Expression* lastExpr = exprs[numExprs - 1];
+    if (dynamic_cast<UnitTypeLiteralExpression*>(lastExpr) == nullptr)
+    {
+        Indent();
+        lastExpr->Accept(this);
+        *os << "\n";
+    }
+
+    --indentLevel;
+    Indent();
     *os << "}\n";
 }
 
@@ -181,6 +207,14 @@ void SourceGenerator::Visit(BranchExpression* branchExpression)
 
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
+}
+
+void SourceGenerator::Indent()
+{
+    for (unsigned i = 0; i < indentLevel; ++i)
+    {
+        *os << indentStr;
+    }
 }
 
 void SourceGenerator::PrintFunctionDeclaration(FunctionDeclaration* functionDeclaration)

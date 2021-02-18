@@ -68,7 +68,10 @@ public:
 
 private:
     std::ostream* os;
-    std::string indent;
+    std::string indentStr;
+    unsigned indentLevel;
+
+    void Indent();
 
     void PrintFunctionDeclaration(SyntaxTree::FunctionDeclaration* functionDeclaration);
 };

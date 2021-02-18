@@ -11,3 +11,8 @@ extern fun extern_function2(a u8, b u16, c u32, d u64);
 fun doNothing()
 {
 }
+
+fun one() i32
+{
+    1
+}
