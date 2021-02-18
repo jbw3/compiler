@@ -16,3 +16,25 @@ fun one() i32
 {
     1
 }
+
+fun passThru(x i32) i32
+{
+    x
+}
+
+fun funCalls1()
+{
+    one();
+    passThru(1);
+}
+
+fun funCalls2() i32
+{
+    one();
+    multi_args(true, false, 0x_0a7C_2380_ABCD_FF00);
+    passThru(10_000)
+}
+
+fun multi_args(b1 bool, b2 bool, y u64)
+{
+}

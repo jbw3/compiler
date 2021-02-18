@@ -141,6 +141,7 @@ void SourceGenerator::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpressi
 
 void SourceGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
+    *os << boolLiteralExpression->GetToken()->value;
 }
 
 void SourceGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
@@ -149,6 +150,7 @@ void SourceGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 
 void SourceGenerator::Visit(VariableExpression* variableExpression)
 {
+    *os << variableExpression->GetName();
 }
 
 void SourceGenerator::Visit(ArraySizeValueExpression* arrayExpression)
@@ -195,6 +197,22 @@ void SourceGenerator::Visit(CastExpression* castExpression)
 
 void SourceGenerator::Visit(FunctionExpression* functionExpression)
 {
+    *os << functionExpression->GetName() << "(";
+
+    const Expressions& args = functionExpression->GetArguments();
+    size_t numArgs = args.size();
+    if (numArgs > 0)
+    {
+        args[0]->Accept(this);
+
+        for (size_t i = 1; i < numArgs; ++i)
+        {
+            *os << ", ";
+            args[i]->Accept(this);
+        }
+    }
+
+    *os << ")";
 }
 
 void SourceGenerator::Visit(MemberExpression* memberExpression)
