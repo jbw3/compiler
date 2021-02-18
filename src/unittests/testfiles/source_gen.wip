@@ -123,3 +123,9 @@ fun vars() i32
     var y i16 = -12;
     x * y
 }
+
+fun casts(x bool, y i32)
+{
+    var b bool = cast(bool, y + 2);
+    var i = cast(i32, x);
+}

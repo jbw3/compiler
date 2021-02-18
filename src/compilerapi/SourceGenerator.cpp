@@ -267,6 +267,9 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
 
 void SourceGenerator::Visit(CastExpression* castExpression)
 {
+    *os << "cast(" << castExpression->GetType()->GetShortName() << ", ";
+    castExpression->subExpression->Accept(this);
+    *os << ')';
 }
 
 void SourceGenerator::Visit(FunctionExpression* functionExpression)
