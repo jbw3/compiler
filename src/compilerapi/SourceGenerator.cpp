@@ -141,6 +141,22 @@ void SourceGenerator::Visit(StructDefinition* structDefinition)
 
 void SourceGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
+    *os << structInitializationExpression->GetStructName() << '\n';
+    Indent();
+    *os << "{\n";
+    ++indentLevel;
+
+    for (const MemberInitialization* memberInit : structInitializationExpression->GetMemberInitializations())
+    {
+        Indent();
+        *os << memberInit->GetName() << ": ";
+        memberInit->GetExpression()->Accept(this);
+        *os << ",\n";
+    }
+
+    --indentLevel;
+    Indent();
+    *os << '}';
 }
 
 void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
@@ -295,6 +311,8 @@ void SourceGenerator::Visit(FunctionExpression* functionExpression)
 
 void SourceGenerator::Visit(MemberExpression* memberExpression)
 {
+    memberExpression->GetSubExpression()->Accept(this);
+    *os << '.' << memberExpression->GetMemberName();
 }
 
 void SourceGenerator::Visit(BranchExpression* branchExpression)

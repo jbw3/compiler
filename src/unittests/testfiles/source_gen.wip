@@ -139,3 +139,13 @@ fun casts(x bool, y i32)
     var b bool = cast(bool, y + 2);
     var i = cast(i32, x);
 }
+
+fun structs(num u32) usize
+{
+    var p1 = Person
+    {
+        name: "Joe",
+        age: num / 2,
+    };
+    p1.name.Size
+}
