@@ -43,3 +43,39 @@ fun operators(x i32, y i32, z i32) i32
 {
     x * 2 - -y + z
 }
+
+fun branches1(x i32, y i32)
+{
+    if x == y
+    {
+        doNothing();
+    }
+}
+
+fun branches2(x i32, y i32) i32
+{
+    if x == y
+    {
+        0
+    }
+    else
+    {
+        1
+    }
+}
+
+fun branches3(x i32, y i32) i32
+{
+    if x < y
+    {
+        -1
+    }
+    elif x > y
+    {
+        1
+    }
+    else
+    {
+        0
+    }
+}

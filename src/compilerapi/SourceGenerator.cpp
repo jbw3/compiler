@@ -93,6 +93,7 @@ void SourceGenerator::Visit(FunctionDefinition* functionDefinition)
     PrintFunctionDeclaration(functionDefinition->GetDeclaration());
     *os << '\n';
     functionDefinition->GetExpression()->Accept(this);
+    *os << '\n';
 }
 
 void SourceGenerator::Visit(StructDefinition* structDefinition)
@@ -219,7 +220,7 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
 
     --indentLevel;
     Indent();
-    *os << "}\n";
+    *os << "}";
 }
 
 void SourceGenerator::Visit(CastExpression* castExpression)
@@ -252,6 +253,30 @@ void SourceGenerator::Visit(MemberExpression* memberExpression)
 
 void SourceGenerator::Visit(BranchExpression* branchExpression)
 {
+    *os << "if ";
+    branchExpression->GetIfCondition()->Accept(this);
+    *os << "\n";
+    branchExpression->GetIfExpression()->Accept(this);
+
+    Expression* elseExpr = branchExpression->GetElseExpression();
+    if (dynamic_cast<UnitTypeLiteralExpression*>(elseExpr) != nullptr)
+    {
+        // do nothing
+    }
+    else if (dynamic_cast<BranchExpression*>(elseExpr) != nullptr)
+    {
+        *os << '\n';
+        Indent();
+        *os << "el";
+        elseExpr->Accept(this);
+    }
+    else
+    {
+        *os << '\n';
+        Indent();
+        *os << "else\n";
+        elseExpr->Accept(this);
+    }
 }
 
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
