@@ -38,3 +38,8 @@ fun funCalls2() i32
 fun multi_args(b1 bool, b2 bool, y u64)
 {
 }
+
+fun operators(x i32, y i32, z i32) i32
+{
+    x * 2 - -y + z
+}

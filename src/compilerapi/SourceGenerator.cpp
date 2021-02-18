@@ -28,10 +28,41 @@ void SourceGenerator::Flush()
 
 void SourceGenerator::Visit(UnaryExpression* unaryExpression)
 {
+    *os << UnaryExpression::GetOperatorString(unaryExpression->GetOperator());
+    unaryExpression->GetSubExpression()->Accept(this);
 }
 
 void SourceGenerator::Visit(BinaryExpression* binaryExpression)
 {
+    // TODO: handle operator precedence
+
+    binaryExpression->GetLeftExpression()->Accept(this);
+
+    BinaryExpression::EOperator op = binaryExpression->GetOperator();
+    if (op == BinaryExpression::eSubscript)
+    {
+        *os << "[";
+        binaryExpression->GetRightExpression()->Accept(this);
+        *os << "]";
+    }
+    else
+    {
+        bool printSpaces = (op != BinaryExpression::eClosedRange) & (op != BinaryExpression::eHalfOpenRange);
+
+        if (printSpaces)
+        {
+            *os << " ";
+        }
+
+        *os << BinaryExpression::GetOperatorString(op);
+
+        if (printSpaces)
+        {
+            *os << " ";
+        }
+
+        binaryExpression->GetRightExpression()->Accept(this);
+    }
 }
 
 void SourceGenerator::Visit(WhileLoop* whileLoop)
