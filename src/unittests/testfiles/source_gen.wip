@@ -104,3 +104,15 @@ fun whileLoop(x i32)
         x -= 1;
     }
 }
+
+fun forLoop(num i32)
+{
+    for x in 0..<num
+    {
+        whileLoop(x);
+    }
+    for x i32, i usize in 0..<num
+    {
+        whileLoop(x);
+    }
+}

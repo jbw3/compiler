@@ -75,6 +75,27 @@ void SourceGenerator::Visit(WhileLoop* whileLoop)
 
 void SourceGenerator::Visit(ForLoop* forLoop)
 {
+    *os << "for ";
+    *os << forLoop->variableName;
+
+    if (forLoop->variableTypeNameTokens.size() > 0)
+    {
+        *os << ' ' << forLoop->variableType->GetShortName();
+    }
+
+    if (!forLoop->indexName.empty())
+    {
+        *os << ", " << forLoop->indexName;
+        if (forLoop->indexTypeNameTokens.size() > 0)
+        {
+            *os << ' ' << forLoop->indexType->GetShortName();
+        }
+    }
+
+    *os << " in ";
+    forLoop->iterExpression->Accept(this);
+    *os << '\n';
+    forLoop->expression->Accept(this);
 }
 
 void SourceGenerator::Visit(LoopControl* loopControl)
