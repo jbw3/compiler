@@ -323,6 +323,13 @@ void SourceGenerator::Visit(BranchExpression* branchExpression)
 
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
+    *os << "var " << variableDeclaration->GetName();
+    if (variableDeclaration->GetTypeNameTokens().size() > 0)
+    {
+        *os << ' ' << variableDeclaration->GetVariableType()->GetShortName();
+    }
+    *os << " = ";
+    variableDeclaration->GetAssignmentExpression()->GetRightExpression()->Accept(this);
 }
 
 void SourceGenerator::Indent()

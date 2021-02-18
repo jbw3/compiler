@@ -116,3 +116,10 @@ fun forLoop(num i32)
         whileLoop(x);
     }
 }
+
+fun vars() i32
+{
+    var x = 2;
+    var y i16 = -12;
+    x * y
+}
