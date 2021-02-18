@@ -67,6 +67,10 @@ void SourceGenerator::Visit(BinaryExpression* binaryExpression)
 
 void SourceGenerator::Visit(WhileLoop* whileLoop)
 {
+    *os << "while ";
+    whileLoop->GetCondition()->Accept(this);
+    *os << '\n';
+    whileLoop->GetExpression()->Accept(this);
 }
 
 void SourceGenerator::Visit(ForLoop* forLoop)
@@ -75,10 +79,13 @@ void SourceGenerator::Visit(ForLoop* forLoop)
 
 void SourceGenerator::Visit(LoopControl* loopControl)
 {
+    *os << loopControl->GetToken()->value;
 }
 
 void SourceGenerator::Visit(Return* ret)
 {
+    *os << "return ";
+    ret->expression->Accept(this);
 }
 
 void SourceGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
@@ -207,7 +214,16 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
 
         Indent();
         expr->Accept(this);
-        *os << ";\n";
+
+        if (
+            dynamic_cast<BranchExpression*>(expr) == nullptr
+         && dynamic_cast<WhileLoop*>(expr) == nullptr
+         && dynamic_cast<ForLoop*>(expr) == nullptr
+        )
+        {
+            *os << ";";
+        }
+        *os << "\n";
     }
 
     Expression* lastExpr = exprs[numExprs - 1];
@@ -215,6 +231,11 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
     {
         Indent();
         lastExpr->Accept(this);
+
+        if (dynamic_cast<Return*>(lastExpr) != nullptr)
+        {
+            *os << ";";
+        }
         *os << "\n";
     }
 

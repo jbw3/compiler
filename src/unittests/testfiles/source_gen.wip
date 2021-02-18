@@ -22,6 +22,11 @@ fun passThru(x i32) i32
     x
 }
 
+fun passThruReturn(x i32) i32
+{
+    return x;
+}
+
 fun funCalls1()
 {
     one();
@@ -77,5 +82,25 @@ fun branches3(x i32, y i32) i32
     else
     {
         0
+    }
+}
+
+fun whileLoop(x i32)
+{
+    while x > 0
+    {
+        if x % 2 == 0
+        {
+            funCalls1();
+        }
+        elif x == 5
+        {
+            continue;
+        }
+        elif x == 1_001
+        {
+            break;
+        }
+        x -= 1;
     }
 }
