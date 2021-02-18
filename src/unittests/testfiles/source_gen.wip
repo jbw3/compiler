@@ -49,6 +49,16 @@ fun operators(x i32, y i32, z i32) i32
     x * 2 - -y + z
 }
 
+fun strings()
+{
+    var s1 str = "";
+    var s2 str = "Is this a test?";
+    var s3 str = "\t\r\n\\\"\'";
+    var s4 str = "café";
+    var s5 str = "\x4a\x42\x57";
+    var s6 str = "\u{a}\u{30}\u{3c0}\u{20BF}\u{1F600}";
+}
+
 fun branches1(x i32, y i32)
 {
     if x == y

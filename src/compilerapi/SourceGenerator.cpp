@@ -206,6 +206,7 @@ void SourceGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void SourceGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
+    *os << stringLiteralExpression->GetToken()->value;
 }
 
 void SourceGenerator::Visit(VariableExpression* variableExpression)
