@@ -369,7 +369,24 @@ void SourceGenerator::Visit(FunctionExpression* functionExpression)
 
 void SourceGenerator::Visit(MemberExpression* memberExpression)
 {
-    memberExpression->GetSubExpression()->Accept(this);
+    Expression* subExpression = memberExpression->GetSubExpression();
+
+    bool needParens =
+        dynamic_cast<UnaryExpression*>(subExpression) != nullptr ||
+        dynamic_cast<BinaryExpression*>(subExpression) != nullptr;
+
+    if (needParens)
+    {
+        *os << '(';
+    }
+
+    subExpression->Accept(this);
+
+    if (needParens)
+    {
+        *os << ')';
+    }
+
     *os << '.' << memberExpression->GetMemberName();
 }
 
