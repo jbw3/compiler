@@ -34,16 +34,34 @@ void SourceGenerator::Visit(UnaryExpression* unaryExpression)
 
 void SourceGenerator::Visit(BinaryExpression* binaryExpression)
 {
-    // TODO: handle operator precedence
-
-    binaryExpression->GetLeftExpression()->Accept(this);
-
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
+    unsigned opPrecedence = BinaryExpression::GetPrecedence(op);
+    Expression* left = binaryExpression->GetLeftExpression();
+
+    BinaryExpression* binLeft = dynamic_cast<BinaryExpression*>(left);
+    bool leftNeedParens = false;
+    if (binLeft != nullptr)
+    {
+        leftNeedParens = opPrecedence < BinaryExpression::GetPrecedence(binLeft->GetOperator());
+    }
+
+    if (leftNeedParens)
+    {
+        *os << '(';
+    }
+
+    left->Accept(this);
+
+    if (leftNeedParens)
+    {
+        *os << ')';
+    }
+
     if (op == BinaryExpression::eSubscript)
     {
-        *os << "[";
+        *os << '[';
         binaryExpression->GetRightExpression()->Accept(this);
-        *os << "]";
+        *os << ']';
     }
     else
     {
@@ -61,7 +79,26 @@ void SourceGenerator::Visit(BinaryExpression* binaryExpression)
             *os << " ";
         }
 
-        binaryExpression->GetRightExpression()->Accept(this);
+        Expression* right = binaryExpression->GetRightExpression();
+
+        BinaryExpression* binRight = dynamic_cast<BinaryExpression*>(right);
+        bool rightNeedParens = false;
+        if (binRight != nullptr)
+        {
+            rightNeedParens = opPrecedence <= BinaryExpression::GetPrecedence(binRight->GetOperator());
+        }
+
+        if (rightNeedParens)
+        {
+            *os << '(';
+        }
+
+        right->Accept(this);
+
+        if (rightNeedParens)
+        {
+            *os << ')';
+        }
     }
 }
 

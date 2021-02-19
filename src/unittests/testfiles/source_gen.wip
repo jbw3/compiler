@@ -49,6 +49,16 @@ fun operators(x i32, y i32, z i32) i32
     x * 2 - -y + z
 }
 
+fun operator_precedence(x i32, y i32, z i32)
+{
+    var a = x * y + z;
+    var b = x + y * z;
+    var c = x * (y + z);
+    var d = x + y - z;
+    var e = x + (y - z);
+    var f = (x + y) * (x - y);
+}
+
 fun strings()
 {
     var s1 str = "";

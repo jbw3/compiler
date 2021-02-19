@@ -309,6 +309,58 @@ std::string BinaryExpression::GetOperatorString(EOperator op)
     return "";
 }
 
+unsigned BinaryExpression::GetPrecedence(EOperator op)
+{
+    switch (op)
+    {
+        case BinaryExpression::eSubscript:
+            return 0;
+        case BinaryExpression::eMultiply:
+        case BinaryExpression::eDivide:
+        case BinaryExpression::eRemainder:
+            return 1;
+        case BinaryExpression::eAdd:
+        case BinaryExpression::eSubtract:
+            return 2;
+        case BinaryExpression::eShiftLeft:
+        case BinaryExpression::eShiftRightLogical:
+        case BinaryExpression::eShiftRightArithmetic:
+            return 3;
+        case BinaryExpression::eBitwiseAnd:
+            return 4;
+        case BinaryExpression::eBitwiseXor:
+            return 5;
+        case BinaryExpression::eBitwiseOr:
+            return 6;
+        case BinaryExpression::eClosedRange:
+        case BinaryExpression::eHalfOpenRange:
+            return 7;
+        case BinaryExpression::eEqual:
+        case BinaryExpression::eNotEqual:
+        case BinaryExpression::eLessThan:
+        case BinaryExpression::eLessThanOrEqual:
+        case BinaryExpression::eGreaterThan:
+        case BinaryExpression::eGreaterThanOrEqual:
+            return 8;
+        case BinaryExpression::eLogicalAnd:
+        case BinaryExpression::eLogicalOr:
+            return 9;
+        case BinaryExpression::eAssign:
+        case BinaryExpression::eAddAssign:
+        case BinaryExpression::eSubtractAssign:
+        case BinaryExpression::eMultiplyAssign:
+        case BinaryExpression::eDivideAssign:
+        case BinaryExpression::eRemainderAssign:
+        case BinaryExpression::eShiftLeftAssign:
+        case BinaryExpression::eShiftRightLogicalAssign:
+        case BinaryExpression::eShiftRightArithmeticAssign:
+        case BinaryExpression::eBitwiseAndAssign:
+        case BinaryExpression::eBitwiseXorAssign:
+        case BinaryExpression::eBitwiseOrAssign:
+            return 10;
+    }
+}
+
 bool BinaryExpression::IsAssignment(EOperator op)
 {
     switch (op)

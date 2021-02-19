@@ -217,6 +217,8 @@ public:
 
     static std::string GetOperatorString(EOperator op);
 
+    static unsigned GetPrecedence(EOperator op);
+
     static bool IsAssignment(EOperator op);
 
     static bool IsComputationAssignment(EOperator op);
