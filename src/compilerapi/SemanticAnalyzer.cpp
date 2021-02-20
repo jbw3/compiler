@@ -1741,6 +1741,11 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     castExpression->SetType(castType);
 }
 
+void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)
+{
+    castExpression->subExpression->Accept(this);
+}
+
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();

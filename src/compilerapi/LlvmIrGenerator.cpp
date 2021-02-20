@@ -1526,6 +1526,35 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
+{
+    Expression* subExpression = castExpression->subExpression;
+    subExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    const TypeInfo* exprType = subExpression->GetType();
+    const TypeInfo* castType = castExpression->GetType();
+
+    if (exprType->IsInt())
+    {
+        if (castType->IsInt())
+        {
+            resultValue = CreateExt(resultValue, exprType, castType);
+        }
+        else
+        {
+            assert(false && "Invalid implicit cast");
+        }
+    }
+    else
+    {
+        assert(false && "Invalid implicit cast");
+    }
+}
+
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
     const string& funcName = functionExpression->GetName();

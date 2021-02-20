@@ -308,6 +308,18 @@ public:
     std::vector<const Token*> castTypeNameTokens;
 };
 
+class ImplicitCastExpression : public Expression
+{
+public:
+    ImplicitCastExpression(Expression* subExpression);
+
+    virtual ~ImplicitCastExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    Expression* subExpression;
+};
+
 class FunctionExpression : public Expression
 {
 public:
@@ -327,7 +339,6 @@ public:
 
     void SetFunctionDeclaration(const FunctionDeclaration* decl);
 
-private:
     const Token* nameToken;
     const FunctionDeclaration* functionDeclaration;
     std::string name;

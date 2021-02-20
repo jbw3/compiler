@@ -575,6 +575,21 @@ void CastExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+ImplicitCastExpression::ImplicitCastExpression(Expression* subExpression) :
+    subExpression(subExpression)
+{
+}
+
+ImplicitCastExpression::~ImplicitCastExpression()
+{
+    delete subExpression;
+}
+
+void ImplicitCastExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
 FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments, const Token* nameToken) :
     nameToken(nameToken),
     functionDeclaration(nullptr),

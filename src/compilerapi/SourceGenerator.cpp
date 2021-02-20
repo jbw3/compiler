@@ -347,6 +347,11 @@ void SourceGenerator::Visit(CastExpression* castExpression)
     *os << ')';
 }
 
+void SourceGenerator::Visit(ImplicitCastExpression* castExpression)
+{
+    castExpression->subExpression->Accept(this);
+}
+
 void SourceGenerator::Visit(FunctionExpression* functionExpression)
 {
     *os << functionExpression->GetName() << "(";
