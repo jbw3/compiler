@@ -1586,11 +1586,6 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
             return;
         }
 
-        // sign extend arg value if needed
-        const TypeInfo* argType = expr->GetType();
-        const TypeInfo* paramType = declParams[i]->GetType();
-        ExtendType(argType, paramType, resultValue);
-
         args.push_back(resultValue);
     }
 

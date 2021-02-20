@@ -1802,7 +1802,14 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 
         if (!argType->IsSameAs(*paramType))
         {
-            if ( !(argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType)) )
+            if (argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType))
+            {
+                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(arg);
+                implicitCast->SetType(paramType);
+
+                functionExpression->arguments[i] = implicitCast;
+            }
+            else
             {
                 logger.LogError(*functionExpression->GetNameToken(), "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
                 isError = true;
