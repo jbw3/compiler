@@ -1035,12 +1035,18 @@ void SemanticAnalyzer::Visit(Return* ret)
         return;
     }
 
-    // check if expression type matchine function return type
-    bool ok = CheckReturnType(currentFunction->GetDeclaration(), expression, ret->token);
+    // check if expression type matches function return type
+    Expression* resultExpression = nullptr;
+    bool ok = CheckReturnType(currentFunction->GetDeclaration(), expression, ret->token, resultExpression);
     if (!ok)
     {
         isError = true;
         return;
+    }
+
+    if (resultExpression != nullptr)
+    {
+        ret->expression = resultExpression;
     }
 
     // return expressions always evaluate to the unit type
@@ -1054,7 +1060,7 @@ void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclarat
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
-    const FunctionDeclaration* funcDecl = functionDefinition->GetDeclaration();
+    const FunctionDeclaration* funcDecl = functionDefinition->declaration;
 
     // create new scope for parameters and add them
     Scope scope(symbolTable);
@@ -1072,7 +1078,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         }
     }
 
-    Expression* expression = functionDefinition->GetExpression();
+    Expression* expression = functionDefinition->expression;
     currentFunction = functionDefinition;
     expression->Accept(this);
     currentFunction = nullptr;
@@ -1098,11 +1104,17 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     if (!endsWithReturn)
     {
         // check last expression
-        bool ok = CheckReturnType(funcDecl, expression, blockExpr->GetEndToken());
+        Expression* resultExpression = nullptr;
+        bool ok = CheckReturnType(funcDecl, expression, blockExpr->GetEndToken(), resultExpression);
         if (!ok)
         {
             isError = true;
             return;
+        }
+
+        if (resultExpression != nullptr)
+        {
+            functionDefinition->expression = resultExpression;
         }
     }
 }
@@ -2108,13 +2120,22 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& ty
     return type;
 }
 
-bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, const Expression* expression, const Token* errorToken)
+bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expression* expression, const Token* errorToken, Expression*& resultExpression)
 {
+    resultExpression = nullptr;
+
     const TypeInfo* returnType = funcDecl->GetReturnType();
     const TypeInfo* expressionType = expression->GetType();
     if (!returnType->IsSameAs(*expressionType))
     {
-        if ( !(expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType)) )
+        if (expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType))
+        {
+            ImplicitCastExpression* implicitCast = new ImplicitCastExpression(expression);
+            implicitCast->SetType(returnType);
+
+            resultExpression = implicitCast;
+        }
+        else
         {
             logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
             return false;

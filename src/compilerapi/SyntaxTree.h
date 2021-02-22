@@ -616,7 +616,6 @@ public:
 
     bool endsWithReturnStatement;
 
-private:
     FunctionDeclaration* declaration;
     Expression* expression;
 };

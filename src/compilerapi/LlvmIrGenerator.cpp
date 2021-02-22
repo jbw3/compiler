@@ -804,7 +804,6 @@ void LlvmIrGenerator::Visit(Return* ret)
     // sign extend return value if needed
     const TypeInfo* expressionType = ret->expression->GetType();
     const TypeInfo* returnType = currentFunctionDefinition->GetDeclaration()->GetReturnType();
-    ExtendType(expressionType, returnType, resultValue);
 
     builder.CreateRet(resultValue);
 
@@ -950,7 +949,6 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         // sign extend return value if needed
         const TypeInfo* expressionType = expression->GetType();
         const TypeInfo* returnType = declaration->GetReturnType();
-        ExtendType(expressionType, returnType, resultValue);
 
         builder.CreateRet(resultValue);
     }
