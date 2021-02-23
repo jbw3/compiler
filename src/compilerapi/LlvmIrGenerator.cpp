@@ -1058,8 +1058,6 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
         const MemberInfo* memberInfo = typeInfo->GetMember(member->GetName());
 
-        ExtendType(expr->GetType(), memberInfo->GetType(), resultValue);
-
         index[0] = memberInfo->GetIndex();
         initValue = builder.CreateInsertValue(initValue, resultValue, index, "agg");
     }

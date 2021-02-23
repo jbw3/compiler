@@ -679,7 +679,6 @@ public:
 
     const Token* GetNameToken() const;
 
-private:
     std::string name;
     Expression* expression;
     const Token* nameToken;

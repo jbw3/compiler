@@ -1195,7 +1195,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         }
 
         // evaluate expression
-        Expression* expr = member->GetExpression();
+        Expression* expr = member->expression;
         expr->Accept(this);
         if (isError)
         {
@@ -1208,7 +1208,14 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (!memberType->IsSameAs(*exprType))
         {
             bool bothAreInts = memberType->IsInt() & exprType->IsInt();
-            if ( !(bothAreInts && HaveCompatibleSigns(memberType, exprType) && HaveCompatibleAssignmentSizes(memberType, exprType)) )
+            if (bothAreInts && HaveCompatibleSigns(memberType, exprType) && HaveCompatibleAssignmentSizes(memberType, exprType))
+            {
+                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(expr);
+                implicitCast->SetType(memberType);
+
+                member->expression = implicitCast;
+            }
+            else
             {
                 isError = true;
                 const Token* token = member->GetNameToken();
