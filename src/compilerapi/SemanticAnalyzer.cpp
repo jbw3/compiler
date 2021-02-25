@@ -1643,8 +1643,9 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
 
 void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
 {
-    const Expressions& expressions = arrayExpression->expressions;
-    assert(expressions.size() > 0);
+    Expressions& expressions = arrayExpression->expressions;
+    size_t exprsSize = expressions.size();
+    assert(exprsSize > 0);
 
     Expression* expr = expressions[0];
     expr->Accept(this);
@@ -1654,7 +1655,7 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
     }
     const TypeInfo* type = expr->GetType();
 
-    for (size_t i = 1; i < expressions.size(); ++i)
+    for (size_t i = 1; i < exprsSize; ++i)
     {
         expr = expressions[i];
         expr->Accept(this);
@@ -1681,6 +1682,22 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
                     type->GetShortName()
                 );
                 return;
+            }
+        }
+    }
+
+    // add implicit casts if necessary
+    if (type->IsInt())
+    {
+        for (size_t i = 0; i < exprsSize; ++i)
+        {
+            Expression* e = expressions[i];
+            if (!e->GetType()->IsSameAs(*type))
+            {
+                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(e);
+                implicitCast->SetType(type);
+
+                expressions[i] = implicitCast;
             }
         }
     }
