@@ -237,7 +237,6 @@ public:
 
     const Token* GetOperatorToken() const;
 
-private:
     const Token* opToken;
     Expression* left;
     Expression* right;

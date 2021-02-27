@@ -47,15 +47,15 @@ entry:
   call void @llvm.dbg.declare(metadata i8* %z3, metadata !27, metadata !DIExpression()), !dbg !28
   %x4 = load i32, i32* %x1, !dbg !29
   %neg = sub i32 0, %x4, !dbg !31
+  %signext = sext i32 %neg to i64, !dbg !31
   %y5 = load i64, i64* %y2, !dbg !32
   %x6 = load i32, i32* %x1, !dbg !33
   %z7 = load i8, i8* %z3, !dbg !34
-  %signext = sext i8 %z7 to i32, !dbg !35
-  %mul = mul i32 %x6, %signext, !dbg !35
-  %signext8 = sext i32 %mul to i64, !dbg !36
-  %div = sdiv i64 %y5, %signext8, !dbg !36
-  %signext9 = sext i32 %neg to i64, !dbg !37
-  %add = add i64 %signext9, %div, !dbg !37
+  %signext8 = sext i8 %z7 to i32, !dbg !34
+  %mul = mul i32 %x6, %signext8, !dbg !35
+  %signext9 = sext i32 %mul to i64, !dbg !35
+  %div = sdiv i64 %y5, %signext9, !dbg !36
+  %add = add i64 %signext, %div, !dbg !37
   ret i64 %add, !dbg !37
 }
 
@@ -480,8 +480,8 @@ forBody:                                          ; preds = %forCond
   store i32 %load, i32* %x, !dbg !308
   store i64 %iter, i64* %i, !dbg !309
   %x3 = load i32, i32* %x, !dbg !310
+  %zeroext = zext i32 %x3 to i64, !dbg !310
   %i4 = load i64, i64* %i, !dbg !312
-  %zeroext = zext i32 %x3 to i64, !dbg !313
   %mul = mul i64 %zeroext, %i4, !dbg !313
   %load5 = load i64, i64* %num, !dbg !314
   %add = add i64 %load5, %mul, !dbg !314

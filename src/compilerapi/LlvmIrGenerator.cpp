@@ -160,8 +160,6 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         Value* storeValue = nullptr;
         if (isAssignment)
         {
-            ExtendType(rightType, leftType, rightValue);
-
             storeValue = leftValue;
 
             // if we are also doing a computation (e.g. +=), we need to load the left value

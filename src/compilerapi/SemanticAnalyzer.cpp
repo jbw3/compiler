@@ -144,8 +144,43 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     }
 
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
+    bool isAssignment = BinaryExpression::IsAssignment(op);
 
-    if (BinaryExpression::IsAssignment(op))
+    // implicit cast if necessary
+    if (left->GetType()->IsInt() && right->GetType()->IsInt())
+    {
+        if (isAssignment)
+        {
+            if (!left->GetType()->IsSameAs(*right->GetType()))
+            {
+                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(right);
+                implicitCast->SetType(left->GetType());
+
+                binaryExpression->right = implicitCast;
+            }
+        }
+        else
+        {
+            unsigned leftSize = left->GetType()->GetNumBits();
+            unsigned rightSize = right->GetType()->GetNumBits();
+            if (leftSize < rightSize)
+            {
+                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(left);
+                implicitCast->SetType(right->GetType());
+
+                binaryExpression->left = implicitCast;
+            }
+            else if (leftSize > rightSize)
+            {
+                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(right);
+                implicitCast->SetType(left->GetType());
+
+                binaryExpression->right = implicitCast;
+            }
+        }
+    }
+
+    if (isAssignment)
     {
         if (!left->GetIsStorage())
         {

@@ -479,9 +479,9 @@ entry:
   %add = add i32 %load, %signext
   store i32 %add, i32* %c3
   %a5 = load i8, i8* %a1
-  %b6 = load i16, i16* %b2
-  %signext7 = sext i8 %a5 to i16
-  %add8 = add i16 %signext7, %b6
+  %signext6 = sext i8 %a5 to i16
+  %b7 = load i16, i16* %b2
+  %add8 = add i16 %signext6, %b7
   %signext9 = sext i16 %add8 to i32
   %load10 = load i32, i32* %c3
   %sub = sub i32 %load10, %signext9
@@ -492,9 +492,9 @@ entry:
   %mul = mul i32 %load13, %signext12
   store i32 %mul, i32* %c3
   %a14 = load i8, i8* %a1
-  %b15 = load i16, i16* %b2
-  %signext16 = sext i8 %a14 to i16
-  %add17 = add i16 %signext16, %b15
+  %signext15 = sext i8 %a14 to i16
+  %b16 = load i16, i16* %b2
+  %add17 = add i16 %signext15, %b16
   %signext18 = sext i16 %add17 to i32
   %load19 = load i32, i32* %c3
   %div = sdiv i32 %load19, %signext18
@@ -505,9 +505,9 @@ entry:
   %rem = srem i32 %load22, %signext21
   store i32 %rem, i32* %c3
   %a23 = load i8, i8* %a1
-  %b24 = load i16, i16* %b2
-  %signext25 = sext i8 %a23 to i16
-  %add26 = add i16 %signext25, %b24
+  %signext24 = sext i8 %a23 to i16
+  %b25 = load i16, i16* %b2
+  %add26 = add i16 %signext24, %b25
   %signext27 = sext i16 %add26 to i32
   %load28 = load i32, i32* %c3
   %shl = shl i32 %load28, %signext27
@@ -523,9 +523,9 @@ entry:
   %ashr = ashr i32 %load34, %signext33
   store i32 %ashr, i32* %c3
   %a35 = load i8, i8* %a1
-  %b36 = load i16, i16* %b2
-  %signext37 = sext i8 %a35 to i16
-  %add38 = add i16 %signext37, %b36
+  %signext36 = sext i8 %a35 to i16
+  %b37 = load i16, i16* %b2
+  %add38 = add i16 %signext36, %b37
   %signext39 = sext i16 %add38 to i32
   %load40 = load i32, i32* %c3
   %bitand = and i32 %load40, %signext39
@@ -536,9 +536,9 @@ entry:
   %bitxor = xor i32 %load43, %signext42
   store i32 %bitxor, i32* %c3
   %a44 = load i8, i8* %a1
-  %b45 = load i16, i16* %b2
-  %signext46 = sext i8 %a44 to i16
-  %add47 = add i16 %signext46, %b45
+  %signext45 = sext i8 %a44 to i16
+  %b46 = load i16, i16* %b2
+  %add47 = add i16 %signext45, %b46
   %signext48 = sext i16 %add47 to i32
   %load49 = load i32, i32* %c3
   %bitor = or i32 %load49, %signext48
@@ -888,12 +888,12 @@ entry:
   store i64 %c, i64* %c3
   store i32 %d, i32* %d4
   %a5 = load i8, i8* %a1
-  %b6 = load i16, i16* %b2
   %signext = sext i8 %a5 to i16
+  %b6 = load i16, i16* %b2
   %mul = mul i16 %signext, %b6
-  %c7 = load i64, i64* %c3
-  %signext8 = sext i16 %mul to i64
-  %div = sdiv i64 %signext8, %c7
+  %signext7 = sext i16 %mul to i64
+  %c8 = load i64, i64* %c3
+  %div = sdiv i64 %signext7, %c8
   %d9 = load i32, i32* %d4
   %signext10 = sext i32 %d9 to i64
   %rem = srem i64 %div, %signext10
@@ -1360,8 +1360,8 @@ if:                                               ; preds = %entry
   %a5 = load i32, i32* %a1
   %b6 = load i32, i32* %b2
   %mul = mul i32 %a5, %b6
-  %c7 = load i64, i64* %c3
   %signext = sext i32 %mul to i64
+  %c7 = load i64, i64* %c3
   %add = add i64 %signext, %c7
   br label %merge
 
@@ -1369,9 +1369,9 @@ else:                                             ; preds = %entry
   %a8 = load i32, i32* %a1
   %b9 = load i32, i32* %b2
   %div = sdiv i32 %a8, %b9
-  %c10 = load i64, i64* %c3
-  %signext11 = sext i32 %div to i64
-  %sub = sub i64 %signext11, %c10
+  %signext10 = sext i32 %div to i64
+  %c11 = load i64, i64* %c3
+  %sub = sub i64 %signext10, %c11
   br label %merge
 
 merge:                                            ; preds = %else, %if
@@ -1903,8 +1903,8 @@ forBody14:                                        ; preds = %forCond11
   store i32 %iter12, i32* %x9
   store i64 %idx, i64* %i10
   %x15 = load i32, i32* %x9
-  %i16 = load i64, i64* %i10
   %zeroext = zext i32 %x15 to i64
+  %i16 = load i64, i64* %i10
   %mul17 = mul i64 %zeroext, %i16
   %load18 = load i64, i64* %num
   %add = add i64 %load18, %mul17
