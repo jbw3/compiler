@@ -1141,15 +1141,16 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
     bool isSigned = false;
 
     const TypeInfo* type = numericExpression->GetType();
+    const NumericLiteralType* numLitType = dynamic_cast<const NumericLiteralType*>(type);
     TypeInfo::ESign sign = type->GetSign();
     if (sign == TypeInfo::eSigned)
     {
-        numBits = numericExpression->GetMinSignedSize();
+        numBits = (numLitType != nullptr) ? numLitType->GetSignedNumBits() : type->GetNumBits();
         isSigned = true;
     }
     else if (sign == TypeInfo::eUnsigned || sign == TypeInfo::eContextDependent)
     {
-        numBits = numericExpression->GetMinUnsignedSize();
+        numBits = (numLitType != nullptr) ? numLitType->GetUnsignedNumBits() : type->GetNumBits();
         isSigned = false;
     }
     else

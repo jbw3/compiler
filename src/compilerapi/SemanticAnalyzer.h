@@ -109,6 +109,8 @@ private:
     const TypeInfo* GetVariableType(const std::vector<const Token*>& typeNameTokens, const TypeInfo* inferType);
 
     bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, SyntaxTree::Expression* expression, const Token* errorToken, SyntaxTree::Expression*& resultExpression);
+
+    SyntaxTree::Expression* ImplicitCast(SyntaxTree::Expression* expression, const TypeInfo* type);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

@@ -153,10 +153,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         {
             if (!left->GetType()->IsSameAs(*right->GetType()))
             {
-                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(right);
-                implicitCast->SetType(left->GetType());
-
-                binaryExpression->right = implicitCast;
+                binaryExpression->right = ImplicitCast(right, left->GetType());
             }
         }
         else
@@ -165,17 +162,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
             unsigned rightSize = right->GetType()->GetNumBits();
             if (leftSize < rightSize)
             {
-                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(left);
-                implicitCast->SetType(right->GetType());
-
-                binaryExpression->left = implicitCast;
+                binaryExpression->left = ImplicitCast(left, right->GetType());
             }
             else if (leftSize > rightSize)
             {
-                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(right);
-                implicitCast->SetType(left->GetType());
-
-                binaryExpression->right = implicitCast;
+                binaryExpression->right = ImplicitCast(right, left->GetType());
             }
         }
     }
@@ -1245,10 +1236,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
             bool bothAreInts = memberType->IsInt() & exprType->IsInt();
             if (bothAreInts && HaveCompatibleSigns(memberType, exprType) && HaveCompatibleAssignmentSizes(memberType, exprType))
             {
-                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(expr);
-                implicitCast->SetType(memberType);
-
-                member->expression = implicitCast;
+                member->expression = ImplicitCast(expr, memberType);
             }
             else
             {
@@ -1729,10 +1717,7 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
             Expression* e = expressions[i];
             if (!e->GetType()->IsSameAs(*type))
             {
-                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(e);
-                implicitCast->SetType(type);
-
-                expressions[i] = implicitCast;
+                expressions[i] = ImplicitCast(e, type);
             }
         }
     }
@@ -1875,10 +1860,7 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         {
             if (argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType))
             {
-                ImplicitCastExpression* implicitCast = new ImplicitCastExpression(arg);
-                implicitCast->SetType(paramType);
-
-                functionExpression->arguments[i] = implicitCast;
+                functionExpression->arguments[i] = ImplicitCast(arg, paramType);
             }
             else
             {
@@ -2189,10 +2171,7 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
     {
         if (expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType))
         {
-            ImplicitCastExpression* implicitCast = new ImplicitCastExpression(expression);
-            implicitCast->SetType(returnType);
-
-            resultExpression = implicitCast;
+            resultExpression = ImplicitCast(expression, returnType);
         }
         else
         {
@@ -2202,4 +2181,22 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
     }
 
     return true;
+}
+
+Expression* SemanticAnalyzer::ImplicitCast(Expression* expression, const TypeInfo* type)
+{
+    NumericExpression* numExpr = dynamic_cast<NumericExpression*>(expression);
+    if (numExpr != nullptr)
+    {
+        expression->SetType(type);
+
+        return expression;
+    }
+    else
+    {
+        ImplicitCastExpression* implicitCast = new ImplicitCastExpression(expression);
+        implicitCast->SetType(type);
+
+        return implicitCast;
+    }
 }
