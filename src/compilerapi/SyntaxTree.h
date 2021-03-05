@@ -168,7 +168,6 @@ public:
 
     const Token* GetEndToken() const;
 
-private:
     const Token* startToken;
     const Token* endToken;
     Expressions expressions;
@@ -268,7 +267,6 @@ public:
 
     const Token* GetOperatorToken() const;
 
-private:
     const Token* opToken;
     Expression* subExpression;
     EOperator op;
@@ -364,7 +362,6 @@ public:
 
     const Token* GetMemberNameToken() const;
 
-private:
     const Token* opToken;
     const Token* memberNameToken;
     Expression* subExpression;
@@ -393,7 +390,6 @@ public:
     const Token* ifToken;
     const Token* elseToken;
 
-private:
     Expression* ifCondition;
     Expression* ifExpression;
     Expression* elseExpression;
@@ -446,7 +442,6 @@ public:
 
     const Token* GetWhileToken() const;
 
-private:
     Expression* condition;
     BlockExpression* expression;
     const Token* whileToken;

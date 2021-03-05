@@ -1311,9 +1311,8 @@ else:                                             ; preds = %ormerge
   br label %merge
 
 merge:                                            ; preds = %else, %if
-  %phi = phi i8 [ 100, %if ], [ -56, %else ]
-  %zeroext = zext i8 %phi to i32
-  ret i32 %zeroext
+  %phi = phi i32 [ 100, %if ], [ 200, %else ]
+  ret i32 %phi
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -2141,30 +2140,29 @@ merge:                                            ; preds = %else, %if
   %signext6 = sext i16 %phi to i32
   store i32 %signext6, i32* %r1
   %x7 = load i8, i8* %x2
-  %signext8 = sext i8 %x7 to i16
-  %add = add i16 %signext8, -200
-  %signext9 = sext i16 %add to i32
-  store i32 %signext9, i32* %r2
+  %signext8 = sext i8 %x7 to i32
+  %add = add i32 %signext8, -200
+  store i32 %add, i32* %r2
   store i32 -20, i32* %r3
   store i32 20, i32* %r4
   store i32 -200, i32* %r5
   store i32 200, i32* %r6
   store i32 -21, i32* %r7
   store i32 20, i32* %r8
-  store i32 235, i32* %r9
+  store i32 -21, i32* %r9
   store i32 20, i32* %r10
-  store i32 55, i32* %r11
+  store i32 -201, i32* %r11
   store i32 200, i32* %r12
-  store i32 55, i32* %r13
+  store i32 -201, i32* %r13
   store i32 200, i32* %r14
-  %x10 = load i8, i8* %x2
-  %signext11 = sext i8 %x10 to i16
-  %add12 = add i16 %signext11, 200
-  %signext13 = sext i16 %add12 to i32
-  store i32 %signext13, i32* %r15
-  %y14 = load i8, i8* %y3
-  %add15 = add i8 %y14, -56
-  %zeroext = zext i8 %add15 to i32
+  %x9 = load i8, i8* %x2
+  %signext10 = sext i8 %x9 to i16
+  %add11 = add i16 %signext10, 200
+  %signext12 = sext i16 %add11 to i32
+  store i32 %signext12, i32* %r15
+  %y13 = load i8, i8* %y3
+  %add14 = add i8 %y13, -56
+  %zeroext = zext i8 %add14 to i32
   store i32 %zeroext, i32* %r16
   ret %UnitType zeroinitializer
 }

@@ -108,21 +108,18 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
 void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 {
-    Expression* left = binaryExpression->GetLeftExpression();
-    Expression* right = binaryExpression->GetRightExpression();
-
-    if (left->GetType() == nullptr)
+    if (binaryExpression->left->GetType() == nullptr)
     {
-        left->Accept(this);
+        binaryExpression->left->Accept(this);
         if (isError)
         {
             return;
         }
     }
 
-    if (right->GetType() == nullptr)
+    if (binaryExpression->right->GetType() == nullptr)
     {
-        right->Accept(this);
+        binaryExpression->right->Accept(this);
         if (isError)
         {
             return;
@@ -130,12 +127,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     }
 
     if (
-         (left->GetType()->IsInt() && right->GetType()->IsInt())
-      || (left->GetType()->IsRange() && right->GetType()->IsRange())
-      || (left->GetType()->IsArray() && right->GetType()->IsArray())
+         (binaryExpression->left->GetType()->IsRange() && binaryExpression->right->GetType()->IsRange())
+      || (binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsArray())
     )
     {
-        bool ok = FixNumericLiteralTypes(left, right);
+        bool ok = FixNumericLiteralTypes(binaryExpression->left, binaryExpression->right);
         if (!ok)
         {
             isError = true;
@@ -147,54 +143,54 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     bool isAssignment = BinaryExpression::IsAssignment(op);
 
     // implicit cast if necessary
-    if (left->GetType()->IsInt() && right->GetType()->IsInt())
+    if (binaryExpression->left->GetType()->IsInt() && binaryExpression->right->GetType()->IsInt())
     {
         if (isAssignment)
         {
-            if (!left->GetType()->IsSameAs(*right->GetType()))
+            if (!binaryExpression->left->GetType()->IsSameAs(*binaryExpression->right->GetType()))
             {
-                binaryExpression->right = ImplicitCast(right, left->GetType());
+                binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
             }
         }
         else
         {
-            unsigned leftSize = left->GetType()->GetNumBits();
-            unsigned rightSize = right->GetType()->GetNumBits();
+            unsigned leftSize = binaryExpression->left->GetType()->GetNumBits();
+            unsigned rightSize = binaryExpression->right->GetType()->GetNumBits();
             if (leftSize < rightSize)
             {
-                binaryExpression->left = ImplicitCast(left, right->GetType());
+                binaryExpression->left = ImplicitCast(binaryExpression->left, binaryExpression->right->GetType());
             }
             else if (leftSize > rightSize)
             {
-                binaryExpression->right = ImplicitCast(right, left->GetType());
+                binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
             }
         }
     }
 
     if (isAssignment)
     {
-        if (!left->GetIsStorage())
+        if (!binaryExpression->left->GetIsStorage())
         {
             logger.LogError(*binaryExpression->GetOperatorToken(), "Cannot assign to expression");
             isError = true;
             return;
         }
 
-        left->SetAccessType(Expression::eAddress);
+        binaryExpression->left->SetAccessType(Expression::eAddress);
     }
 
-    if (!CheckBinaryOperatorTypes(op, left, right, binaryExpression->GetOperatorToken()))
+    if (!CheckBinaryOperatorTypes(binaryExpression))
     {
         isError = true;
         return;
     }
 
-    const TypeInfo* resultType = GetBinaryOperatorResultType(op, left->GetType(), right->GetType());
+    const TypeInfo* resultType = GetBinaryOperatorResultType(op, binaryExpression->left->GetType(), binaryExpression->right->GetType());
     binaryExpression->SetType(resultType);
 
-    if (op == BinaryExpression::eSubscript && left->GetType()->IsArray() && right->GetType()->IsInt())
+    if (op == BinaryExpression::eSubscript && binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsInt())
     {
-        binaryExpression->SetIsStorage(left->GetIsStorage());
+        binaryExpression->SetIsStorage(binaryExpression->left->GetIsStorage());
     }
 }
 
@@ -408,6 +404,66 @@ const TypeInfo* GetLowestType(const TypeInfo* type)
     return GetLowestType(type, arrayLevel, hasRange, hasHalfOpenRange);
 }
 
+void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeInfo* resultType)
+{
+    if (NumericExpression* numExpr = dynamic_cast<NumericExpression*>(expr); numExpr != nullptr)
+    {
+        numExpr->SetType(resultType);
+    }
+    else if (UnaryExpression* unaryExpr = dynamic_cast<UnaryExpression*>(expr); unaryExpr != nullptr)
+    {
+        FixNumericLiteralExpression(unaryExpr->subExpression, resultType);
+        unaryExpr->SetType(resultType);
+    }
+    else if (BinaryExpression* binExpr = dynamic_cast<BinaryExpression*>(expr); binExpr != nullptr)
+    {
+        const TypeInfo* newSubType = resultType;
+        if (newSubType->IsRange())
+        {
+            newSubType = newSubType->GetInnerType();
+        }
+
+        FixNumericLiteralExpression(binExpr->left, newSubType);
+        FixNumericLiteralExpression(binExpr->right, newSubType);
+
+        binExpr->SetType(resultType);
+    }
+    else if (BlockExpression* blockExpr = dynamic_cast<BlockExpression*>(expr); blockExpr != nullptr)
+    {
+        FixNumericLiteralExpression(blockExpr->expressions.back(), resultType);
+        blockExpr->SetType(resultType);
+    }
+    else if (BranchExpression* branchExpr = dynamic_cast<BranchExpression*>(expr); branchExpr != nullptr)
+    {
+        FixNumericLiteralExpression(branchExpr->ifExpression, resultType);
+        FixNumericLiteralExpression(branchExpr->elseExpression, resultType);
+        branchExpr->SetType(resultType);
+    }
+    else if (MemberExpression* memberExpr = dynamic_cast<MemberExpression*>(expr); memberExpr != nullptr)
+    {
+        const TypeInfo* currentSubExprType = memberExpr->subExpression->GetType();
+        const TypeInfo* newSubExprType = resultType;
+        if (currentSubExprType->IsRange())
+        {
+            newSubExprType = TypeInfo::GetRangeType(resultType, currentSubExprType->IsHalfOpen());
+        }
+
+        FixNumericLiteralExpression(memberExpr->subExpression, newSubExprType);
+        memberExpr->SetType(resultType);
+    }
+    else if (ImplicitCastExpression* impCastExpr = dynamic_cast<ImplicitCastExpression*>(expr); impCastExpr != nullptr)
+    {
+        // we shouldn't need to recurse below an implicit cast
+        // because the type should already be known
+
+        impCastExpr->SetType(resultType);
+    }
+    else
+    {
+        assert(false && "Unexpected expression type in FixNumericLiteralExpression()");
+    }
+}
+
 bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* resultType)
 {
     const TypeInfo* exprType = expr->GetType();
@@ -505,11 +561,15 @@ bool SemanticAnalyzer::FixNumericLiteralTypes(Expression* expr1, Expression* exp
     return ok;
 }
 
-bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, Expression* leftExpr, Expression* rightExpr, const Token* opToken)
+bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
 {
     bool ok = false;
-    const TypeInfo* leftType = leftExpr->GetType();
-    const TypeInfo* rightType = rightExpr->GetType();
+    BinaryExpression::EOperator op = binExpr->op;
+    const Token* opToken = binExpr->opToken;
+    Expression* left = binExpr->left;
+    Expression* right = binExpr->right;
+    const TypeInfo* leftType = left->GetType();
+    const TypeInfo* rightType = right->GetType();
 
     if (leftType->IsBool() && rightType->IsBool())
     {
@@ -581,6 +641,30 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
                 ok = false;
                 break;
         }
+
+        if (ok)
+        {
+            const NumericLiteralType* leftNumLit = dynamic_cast<const NumericLiteralType*>(left->GetType());
+            const NumericLiteralType* rightNumLit = dynamic_cast<const NumericLiteralType*>(right->GetType());
+            if (leftNumLit != nullptr && rightNumLit == nullptr)
+            {
+                const TypeInfo* resultType = GetBiggestSizeType(left->GetType(), right->GetType());
+                FixNumericLiteralExpression(left, resultType);
+                if (right->GetType()->GetNumBits() != resultType->GetNumBits())
+                {
+                    binExpr->right = ImplicitCast(right, resultType);
+                }
+            }
+            else if (leftNumLit == nullptr && rightNumLit != nullptr)
+            {
+                const TypeInfo* resultType = GetBiggestSizeType(left->GetType(), right->GetType());
+                FixNumericLiteralExpression(right, resultType);
+                if (left->GetType()->GetNumBits() != resultType->GetNumBits())
+                {
+                    binExpr->left = ImplicitCast(left, resultType);
+                }
+            }
+        }
     }
     else if (leftType->IsPointer() && rightType->IsPointer())
     {
@@ -604,7 +688,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             else if (rightSign == TypeInfo::eContextDependent)
             {
                 const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(rightType->GetNumBits());
-                rightExpr->SetType(newType);
+                right->SetType(newType);
 
                 ok = true;
             }
@@ -625,7 +709,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             {
                 const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
                 const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsHalfOpen());
-                rightExpr->SetType(newType);
+                right->SetType(newType);
 
                 ok = true;
             }
@@ -673,7 +757,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             else if (rightSign == TypeInfo::eContextDependent)
             {
                 const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(rightType->GetNumBits());
-                rightExpr->SetType(newType);
+                right->SetType(newType);
 
                 ok = true;
             }
@@ -694,7 +778,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression::EOperator op, 
             {
                 const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
                 const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsHalfOpen());
-                rightExpr->SetType(newType);
+                right->SetType(newType);
 
                 ok = true;
             }
@@ -2185,10 +2269,9 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
 
 Expression* SemanticAnalyzer::ImplicitCast(Expression* expression, const TypeInfo* type)
 {
-    NumericExpression* numExpr = dynamic_cast<NumericExpression*>(expression);
-    if (numExpr != nullptr)
+    if (dynamic_cast<const NumericLiteralType*>(expression->GetType()) != nullptr)
     {
-        expression->SetType(type);
+        FixNumericLiteralExpression(expression, type);
 
         return expression;
     }

@@ -156,7 +156,6 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         const TypeInfo* leftType = leftExpr->GetType();
         const TypeInfo* rightType = rightExpr->GetType();
 
-        const TypeInfo* intermediateType = nullptr;
         Value* storeValue = nullptr;
         if (isAssignment)
         {
@@ -167,10 +166,6 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             {
                 leftValue = builder.CreateLoad(leftValue, "load");
             }
-        }
-        else
-        {
-            intermediateType = ExtendType(leftType, rightType, leftValue, rightValue);
         }
 
         bool isSigned = leftType->GetSign() == TypeInfo::eSigned;
@@ -296,11 +291,6 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
             // assignment expressions always evaluate to the unit type
             resultValue = ConstantStruct::get(unitType);
-        }
-        else
-        {
-            // if necessary, sign/zero extend the result to match the result type
-            ExtendType(intermediateType, binaryExpression->GetType(), resultValue);
         }
     }
 }
