@@ -145,17 +145,17 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     // implicit cast if necessary
     if (binaryExpression->left->GetType()->IsInt() && binaryExpression->right->GetType()->IsInt())
     {
+        unsigned leftSize = binaryExpression->left->GetType()->GetNumBits();
+        unsigned rightSize = binaryExpression->right->GetType()->GetNumBits();
         if (isAssignment)
         {
-            if (!binaryExpression->left->GetType()->IsSameAs(*binaryExpression->right->GetType()))
+            if (binaryExpression->left->GetType()->GetSign() == binaryExpression->right->GetType()->GetSign() && leftSize > rightSize)
             {
                 binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
             }
         }
         else
         {
-            unsigned leftSize = binaryExpression->left->GetType()->GetNumBits();
-            unsigned rightSize = binaryExpression->right->GetType()->GetNumBits();
             if (leftSize < rightSize)
             {
                 binaryExpression->left = ImplicitCast(binaryExpression->left, binaryExpression->right->GetType());
