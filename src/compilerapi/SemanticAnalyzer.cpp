@@ -2094,10 +2094,6 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
             }
         }
     }
-    else if (ifType->IsSameAs(*elseType))
-    {
-        resultType = ifType;
-    }
     else if (AreCompatibleRanges(ifType, elseType, /*out*/ resultType))
     {
         const NumericLiteralType* ifInnerType = dynamic_cast<const NumericLiteralType*>(ifType->GetInnerType());
@@ -2113,6 +2109,10 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         {
             FixNumericLiteralExpression(branchExpression->elseExpression, resultType);
         }
+    }
+    else if (ifType->IsSameAs(*elseType))
+    {
+        resultType = ifType;
     }
     else
     {
