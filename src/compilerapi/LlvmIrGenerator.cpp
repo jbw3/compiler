@@ -1670,9 +1670,6 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
         return;
     }
 
-    // extend type if necessary
-    ExtendType(ifExpr->GetType(), resultType, resultValue);
-
     Value* ifExprValue = resultValue;
     builder.CreateBr(mergeBlock);
 
@@ -1689,9 +1686,6 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     {
         return;
     }
-
-    // extend type if necessary
-    ExtendType(elseExpr->GetType(), resultType, resultValue);
 
     Value* elseExprValue = resultValue;
     builder.CreateBr(mergeBlock);

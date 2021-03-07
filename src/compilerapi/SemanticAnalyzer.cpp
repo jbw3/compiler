@@ -126,10 +126,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    if (
-         (binaryExpression->left->GetType()->IsRange() && binaryExpression->right->GetType()->IsRange())
-      || (binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsArray())
-    )
+    if (binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsArray())
     {
         bool ok = FixNumericLiteralTypes(binaryExpression->left, binaryExpression->right);
         if (!ok)
@@ -177,6 +174,15 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
 
         binaryExpression->left->SetAccessType(Expression::eAddress);
+
+        if (binaryExpression->left->GetType()->IsRange() && binaryExpression->right->GetType()->IsRange())
+        {
+            const NumericLiteralType* rightInnerType = dynamic_cast<const NumericLiteralType*>(binaryExpression->right->GetType()->GetInnerType());
+            if (rightInnerType != nullptr)
+            {
+                FixNumericLiteralExpression(binaryExpression->right, binaryExpression->left->GetType());
+            }
+        }
     }
 
     if (!CheckBinaryOperatorTypes(binaryExpression))
