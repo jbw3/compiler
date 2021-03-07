@@ -2011,8 +2011,9 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @sign_zero_extension(i1 %b, i8 %x8, i8 %y8) #0 {
+define %UnitType @sign_zero_extension(i1 %b, i8 %x8, i8 %y8, i32 %x32) #0 {
 entry:
+  %r9 = alloca %Range32
   %r8 = alloca i16
   %r7 = alloca i16
   %r6 = alloca i32
@@ -2021,18 +2022,20 @@ entry:
   %r3 = alloca i32
   %r2 = alloca i32
   %r1 = alloca i32
+  %x324 = alloca i32
   %y83 = alloca i8
   %x82 = alloca i8
   %b1 = alloca i1
   store i1 %b, i1* %b1
   store i8 %x8, i8* %x82
   store i8 %y8, i8* %y83
-  %b4 = load i1, i1* %b1
-  br i1 %b4, label %if, label %else
+  store i32 %x32, i32* %x324
+  %b5 = load i1, i1* %b1
+  br i1 %b5, label %if, label %else
 
 if:                                               ; preds = %entry
-  %x85 = load i8, i8* %x82
-  %signext = sext i8 %x85 to i16
+  %x86 = load i8, i8* %x82
+  %signext = sext i8 %x86 to i16
   br label %merge
 
 else:                                             ; preds = %entry
@@ -2040,41 +2043,86 @@ else:                                             ; preds = %entry
 
 merge:                                            ; preds = %else, %if
   %phi = phi i16 [ %signext, %if ], [ 200, %else ]
-  %signext6 = sext i16 %phi to i32
-  store i32 %signext6, i32* %r1
-  %b7 = load i1, i1* %b1
-  br i1 %b7, label %if8, label %else10
+  %signext7 = sext i16 %phi to i32
+  store i32 %signext7, i32* %r1
+  %b8 = load i1, i1* %b1
+  br i1 %b8, label %if9, label %else11
 
-if8:                                              ; preds = %merge
-  %y89 = load i8, i8* %y83
-  br label %merge11
+if9:                                              ; preds = %merge
+  %y810 = load i8, i8* %y83
+  br label %merge12
 
-else10:                                           ; preds = %merge
-  br label %merge11
+else11:                                           ; preds = %merge
+  br label %merge12
 
-merge11:                                          ; preds = %else10, %if8
-  %phi12 = phi i8 [ %y89, %if8 ], [ -56, %else10 ]
-  %zeroext = zext i8 %phi12 to i32
+merge12:                                          ; preds = %else11, %if9
+  %phi13 = phi i8 [ %y810, %if9 ], [ -56, %else11 ]
+  %zeroext = zext i8 %phi13 to i32
   store i32 %zeroext, i32* %r2
-  %x813 = load i8, i8* %x82
-  %add = add i8 %x813, 20
-  %signext14 = sext i8 %add to i32
-  store i32 %signext14, i32* %r3
-  %y815 = load i8, i8* %y83
-  %add16 = add i8 %y815, 20
-  %zeroext17 = zext i8 %add16 to i32
-  store i32 %zeroext17, i32* %r4
-  %x818 = load i8, i8* %x82
-  %signext19 = sext i8 %x818 to i16
-  %add20 = add i16 %signext19, 200
-  %signext21 = sext i16 %add20 to i32
-  store i32 %signext21, i32* %r5
-  %y822 = load i8, i8* %y83
-  %add23 = add i8 %y822, -56
-  %zeroext24 = zext i8 %add23 to i32
-  store i32 %zeroext24, i32* %r6
+  %x814 = load i8, i8* %x82
+  %add = add i8 %x814, 20
+  %signext15 = sext i8 %add to i32
+  store i32 %signext15, i32* %r3
+  %y816 = load i8, i8* %y83
+  %add17 = add i8 %y816, 20
+  %zeroext18 = zext i8 %add17 to i32
+  store i32 %zeroext18, i32* %r4
+  %x819 = load i8, i8* %x82
+  %signext20 = sext i8 %x819 to i16
+  %add21 = add i16 %signext20, 200
+  %signext22 = sext i16 %add21 to i32
+  store i32 %signext22, i32* %r5
+  %y823 = load i8, i8* %y83
+  %add24 = add i8 %y823, -56
+  %zeroext25 = zext i8 %add24 to i32
+  store i32 %zeroext25, i32* %r6
   store i16 201, i16* %r7
   store i16 201, i16* %r8
+  %x3226 = load i32, i32* %x324
+  %x3227 = load i32, i32* %x324
+  %rng = insertvalue %Range32 undef, i32 %x3226, 0
+  %rng28 = insertvalue %Range32 %rng, i32 %x3227, 1
+  store %Range32 %rng28, %Range32* %r9
+  %b29 = load i1, i1* %b1
+  br i1 %b29, label %if30, label %else31
+
+if30:                                             ; preds = %merge12
+  br label %merge32
+
+else31:                                           ; preds = %merge12
+  br label %merge32
+
+merge32:                                          ; preds = %else31, %if30
+  %phi33 = phi %Range32 [ { i32 0, i32 1 }, %if30 ], [ { i32 1, i32 2 }, %else31 ]
+  store %Range32 %phi33, %Range32* %r9
+  %b34 = load i1, i1* %b1
+  br i1 %b34, label %if35, label %else36
+
+if35:                                             ; preds = %merge32
+  br label %merge37
+
+else36:                                           ; preds = %merge32
+  br label %merge37
+
+merge37:                                          ; preds = %else36, %if35
+  %phi38 = phi %Range32 [ { i32 0, i32 1 }, %if35 ], [ { i32 1, i32 1000 }, %else36 ]
+  store %Range32 %phi38, %Range32* %r9
+  %b39 = load i1, i1* %b1
+  br i1 %b39, label %if40, label %else41
+
+if40:                                             ; preds = %merge37
+  br label %merge46
+
+else41:                                           ; preds = %merge37
+  %x3242 = load i32, i32* %x324
+  %x3243 = load i32, i32* %x324
+  %rng44 = insertvalue %Range32 undef, i32 %x3242, 0
+  %rng45 = insertvalue %Range32 %rng44, i32 %x3243, 1
+  br label %merge46
+
+merge46:                                          ; preds = %else41, %if40
+  %phi47 = phi %Range32 [ { i32 0, i32 1 }, %if40 ], [ %rng45, %else41 ]
+  store %Range32 %phi47, %Range32* %r9
   ret %UnitType zeroinitializer
 }
 

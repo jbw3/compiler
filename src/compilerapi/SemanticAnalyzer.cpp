@@ -2100,6 +2100,19 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     }
     else if (AreCompatibleRanges(ifType, elseType, /*out*/ resultType))
     {
+        const NumericLiteralType* ifInnerType = dynamic_cast<const NumericLiteralType*>(ifType->GetInnerType());
+        const NumericLiteralType* elseInnerType = dynamic_cast<const NumericLiteralType*>(elseType->GetInnerType());
+        bool ifIsNumLit = ifInnerType != nullptr;
+        bool elseIsNumLit = elseInnerType != nullptr;
+
+        if (ifIsNumLit && !elseIsNumLit)
+        {
+            FixNumericLiteralExpression(branchExpression->ifExpression, resultType);
+        }
+        else if (!ifIsNumLit && elseIsNumLit)
+        {
+            FixNumericLiteralExpression(branchExpression->elseExpression, resultType);
+        }
     }
     else
     {
