@@ -92,6 +92,10 @@ private:
 
     bool AreCompatibleRanges(const TypeInfo* type1, const TypeInfo* type2, const TypeInfo*& outType);
 
+    const NumericLiteralType* GetBiggestNumLitSizeType(const NumericLiteralType* type1, const NumericLiteralType* type2);
+
+    const TypeInfo* GetBiggestSizeType(const NumericLiteralType* type1, const TypeInfo* type2, unsigned& type1Size, unsigned& type2Size);
+
     const TypeInfo* GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2);
 
     void FixNumericLiteralExpression(SyntaxTree::Expression* expr, const TypeInfo* resultType);

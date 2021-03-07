@@ -301,6 +301,52 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
     return outType != nullptr;
 }
 
+const NumericLiteralType* SemanticAnalyzer::GetBiggestNumLitSizeType(const NumericLiteralType* type1, const NumericLiteralType* type2)
+{
+    const NumericLiteralType* resultType = nullptr;
+
+    if (type1->GetSign() == TypeInfo::eSigned || type2->GetSign() == TypeInfo::eSigned)
+    {
+        unsigned signedNumBits = max(type1->GetSignedNumBits(), type2->GetSignedNumBits());
+        resultType = NumericLiteralType::CreateSigned(signedNumBits);
+    }
+    else
+    {
+        if (type1->GetSignedNumBits() >= type2->GetSignedNumBits())
+        {
+            resultType = type1;
+        }
+        else
+        {
+            resultType = type2;
+        }
+    }
+
+    return resultType;
+}
+
+const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const NumericLiteralType* type1, const TypeInfo* type2, unsigned& type1Size, unsigned& type2Size)
+{
+    const TypeInfo* resultType = nullptr;
+    type2Size = type2->GetNumBits();
+    TypeInfo::ESign type2Sign = type2->GetSign();
+
+    if (type2Sign == TypeInfo::eSigned)
+    {
+        type1Size = type1->GetSignedNumBits();
+        unsigned numBits = (type1Size > type2Size) ? type1Size : type2Size;
+        resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
+    }
+    else
+    {
+        type1Size = type1->GetUnsignedNumBits();
+        unsigned numBits = (type1Size > type2Size) ? type1Size : type2Size;
+        resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
+    }
+
+    return resultType;
+}
+
 const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, const TypeInfo* type2)
 {
     const TypeInfo* resultType = nullptr;
@@ -309,57 +355,17 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
 
     if (literalType1 != nullptr && literalType2 != nullptr)
     {
-        unsigned signedNumBits = max(literalType1->GetSignedNumBits(), literalType2->GetSignedNumBits());
-
-        if (literalType1->GetSign() == TypeInfo::eSigned || literalType2->GetSign() == TypeInfo::eSigned)
-        {
-            resultType = NumericLiteralType::CreateSigned(signedNumBits);
-        }
-        else
-        {
-            if (literalType1->GetSignedNumBits() >= literalType2->GetSignedNumBits())
-            {
-                resultType = type1;
-            }
-            else
-            {
-                resultType = type2;
-            }
-        }
+        resultType = GetBiggestNumLitSizeType(literalType1, literalType2);
     }
     else if (literalType1 != nullptr)
     {
-        unsigned type2NumBits = type2->GetNumBits();
-        TypeInfo::ESign type2Sign = type2->GetSign();
-        if (type2Sign == TypeInfo::eSigned)
-        {
-            unsigned type1NumBits = literalType1->GetSignedNumBits();
-            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
-            resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
-        }
-        else
-        {
-            unsigned type1NumBits = literalType1->GetUnsignedNumBits();
-            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
-            resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
-        }
+        unsigned type1Size, type2Size;
+        resultType = GetBiggestSizeType(literalType1, type2, type1Size, type2Size);
     }
     else if (literalType2 != nullptr)
     {
-        unsigned type1NumBits = type1->GetNumBits();
-        TypeInfo::ESign type1Sign = type1->GetSign();
-        if (type1Sign == TypeInfo::eSigned)
-        {
-            unsigned type2NumBits = literalType2->GetSignedNumBits();
-            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
-            resultType = TypeInfo::GetMinSignedIntTypeForSize(numBits);
-        }
-        else
-        {
-            unsigned type2NumBits = literalType2->GetUnsignedNumBits();
-            unsigned numBits = (type1NumBits > type2NumBits) ? type1NumBits : type2NumBits;
-            resultType = TypeInfo::GetMinUnsignedIntTypeForSize(numBits);
-        }
+        unsigned type1Size, type2Size;
+        resultType = GetBiggestSizeType(literalType2, type1, type1Size, type2Size);
     }
     else // neither types are NumericLiteralType
     {
@@ -2029,17 +2035,65 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     const TypeInfo* ifType = ifExpression->GetType();
     const TypeInfo* elseType = elseExpression->GetType();
     const TypeInfo* resultType = nullptr;
-    if (ifType->IsSameAs(*elseType))
+    if (ifType->IsInt() && elseType->IsInt() && HaveCompatibleSigns(ifType, elseType))
+    {
+        unsigned ifSize = ifType->GetNumBits();
+        unsigned elseSize = elseType->GetNumBits();
+        const NumericLiteralType* ifNumLit = dynamic_cast<const NumericLiteralType*>(ifType);
+        const NumericLiteralType* elseNumLit = dynamic_cast<const NumericLiteralType*>(elseType);
+        bool ifIsNumLit = ifNumLit != nullptr;
+        bool elseIsNumLit = elseNumLit != nullptr;
+
+        if (ifIsNumLit && elseIsNumLit)
+        {
+            resultType = GetBiggestNumLitSizeType(ifNumLit, elseNumLit);
+        }
+        else if (ifIsNumLit && !elseIsNumLit)
+        {
+            unsigned ifSize = 0;
+            unsigned elseSize = 0;
+            resultType = GetBiggestSizeType(ifNumLit, elseType, ifSize, elseSize);
+            FixNumericLiteralExpression(branchExpression->ifExpression, resultType);
+            if (ifSize > elseSize)
+            {
+                branchExpression->elseExpression = ImplicitCast(branchExpression->elseExpression, resultType);
+            }
+        }
+        else if (!ifIsNumLit && elseIsNumLit)
+        {
+            unsigned ifSize = 0;
+            unsigned elseSize = 0;
+            resultType = GetBiggestSizeType(elseNumLit, ifType, elseSize, ifSize);
+            FixNumericLiteralExpression(branchExpression->elseExpression, resultType);
+            if (elseSize > ifSize)
+            {
+                branchExpression->ifExpression = ImplicitCast(branchExpression->ifExpression, resultType);
+            }
+        }
+        else // if (!ifIsNumLit && !elseIsNumLit)
+        {
+            if (ifSize > elseSize)
+            {
+                branchExpression->elseExpression = ImplicitCast(branchExpression->elseExpression, ifType);
+                resultType = ifType;
+            }
+            else if (ifSize < elseSize)
+            {
+                branchExpression->ifExpression = ImplicitCast(branchExpression->ifExpression, elseType);
+                resultType = elseType;
+            }
+            else // both sizes are the same
+            {
+                resultType = ifType;
+            }
+        }
+    }
+    else if (ifType->IsSameAs(*elseType))
     {
         resultType = ifType;
     }
-    else if (ifType->IsInt() && elseType->IsInt() && HaveCompatibleSigns(ifType, elseType))
+    else if (AreCompatibleRanges(ifType, elseType, /*out*/ resultType))
     {
-        resultType = GetBiggestSizeType(ifType, elseType);
-    }
-    else if (AreCompatibleRanges(ifType, elseType, resultType))
-    {
-        // resultType is assigned in else if function call
     }
     else
     {

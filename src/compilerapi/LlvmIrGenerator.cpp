@@ -112,8 +112,6 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             break;
         }
     }
-
-    ExtendType(subExpr->GetType(), unaryExpression->GetType(), resultValue);
 }
 
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
