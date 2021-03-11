@@ -327,9 +327,15 @@ bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, 
         exprInnerType = exprInnerType->GetInnerType();
     }
 
+    if (assignInnerType->IsRange() && exprInnerType->IsRange())
+    {
+        assignInnerType = assignInnerType->GetInnerType();
+        exprInnerType = exprInnerType->GetInnerType();
+    }
+
     if (assignInnerType->IsInt() && exprInnerType->IsNumericLiteral()
-        && HaveCompatibleSigns(assignType, exprType)
-        && HaveCompatibleAssignmentSizes(assignType, exprType))
+        && HaveCompatibleSigns(assignInnerType, exprInnerType)
+        && HaveCompatibleAssignmentSizes(assignInnerType, exprInnerType))
     {
         return true;
     }
