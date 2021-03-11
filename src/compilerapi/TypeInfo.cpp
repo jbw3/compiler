@@ -374,6 +374,16 @@ bool TypeInfo::IsImmutable() const
     return (flags & F_IMMUTABLE) != 0;
 }
 
+bool TypeInfo::IsNumericLiteral() const
+{
+    if (IsArray() || IsRange())
+    {
+        return innerType->IsNumericLiteral();
+    }
+
+    return false;
+}
+
 unsigned TypeInfo::GetNumBits() const
 {
     return numBits;
@@ -583,6 +593,11 @@ bool NumericLiteralType::IsSameAs(const TypeInfo& other) const
     return GetSign() == other.GetSign()
         && signedNumBits == otherLiteralType.signedNumBits
         && unsignedNumBits == otherLiteralType.unsignedNumBits;
+}
+
+bool NumericLiteralType::IsNumericLiteral() const
+{
+    return true;
 }
 
 unsigned NumericLiteralType::GetNumBits() const

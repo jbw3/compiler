@@ -189,10 +189,6 @@ private:
 
     llvm::AllocaInst* CreateVariableAlloc(llvm::Function* function, llvm::Type* type, const std::string& paramName);
 
-    const TypeInfo* ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, llvm::Value*& value);
-
-    const TypeInfo* ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, llvm::Value*& leftValue, llvm::Value*& rightValue);
-
     llvm::Value* CreateExt(llvm::Value* value, const TypeInfo* valueType, const TypeInfo* dstType);
 
     llvm::Value* CreateLogicalBranch(SyntaxTree::Expression* conditionExpr, SyntaxTree::Expression* branchExpr, bool isTrueBranch);

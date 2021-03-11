@@ -1292,7 +1292,6 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
         return;
     }
     Value* valueValue = resultValue;
-    ExtendType(valueExpression->GetType(), innerTypeInfo, valueValue);
 
     // create loop to insert values
     if (arraySize > 0)
@@ -1372,7 +1371,6 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
         {
             return;
         }
-        ExtendType(expr->GetType(), innerTypeInfo, resultValue);
 
         vector<Value*> indices;
         indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
@@ -2065,90 +2063,6 @@ AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, Type* type,
 
     AllocaInst* alloca = tempBuilder.CreateAlloca(type, nullptr, paramName);
     return alloca;
-}
-
-const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* srcType, const TypeInfo* dstType, Value*& value)
-{
-    const TypeInfo* resultType = nullptr;
-
-    // sign extend int value if needed
-    if (srcType->IsInt() && dstType->IsInt() && srcType->GetNumBits() < dstType->GetNumBits())
-    {
-        value = CreateExt(value, srcType, dstType);
-        resultType = dstType;
-    }
-    // sign extend range value if needed
-    else if (srcType->IsRange() && dstType->IsRange() && srcType->GetNumBits() < dstType->GetNumBits())
-    {
-        const vector<const MemberInfo*>& srcMembers = srcType->GetMembers();
-        const NumericLiteralType* srcLeftIntLit = dynamic_cast<const NumericLiteralType*>(srcMembers[0]->GetType());
-        const NumericLiteralType* srcRightIntLit = dynamic_cast<const NumericLiteralType*>(srcMembers[1]->GetType());
-        if (srcLeftIntLit != nullptr && srcRightIntLit != nullptr)
-        {
-            Type* dstRangeType = GetType(dstType);
-            if (dstRangeType == nullptr)
-            {
-                logger.LogInternalError("Unknown range type");
-                return nullptr;
-            }
-            const vector<const MemberInfo*> dstMembers = dstType->GetMembers();
-
-            vector<unsigned> index(1);
-            Value* initValue = UndefValue::get(dstRangeType);
-
-            // extend start
-            index[0] = 0;
-            Value* leftValue = builder.CreateExtractValue(value, index);
-            leftValue = CreateExt(leftValue, srcLeftIntLit, dstMembers[0]->GetType());
-            initValue = builder.CreateInsertValue(initValue, leftValue, index);
-
-            // extend end
-            index[0] = 1;
-            Value* rightValue = builder.CreateExtractValue(value, index);
-            rightValue = CreateExt(rightValue, srcRightIntLit, dstMembers[1]->GetType());
-            initValue = builder.CreateInsertValue(initValue, rightValue, index);
-
-            value = initValue;
-            resultType = dstType;
-        }
-        else
-        {
-            resultType = srcType;
-        }
-    }
-    else
-    {
-        resultType = srcType;
-    }
-
-    return resultType;
-}
-
-const TypeInfo* LlvmIrGenerator::ExtendType(const TypeInfo* leftType, const TypeInfo* rightType, Value*& leftValue, Value*& rightValue)
-{
-    const TypeInfo* resultType = nullptr;
-
-    if (leftType->IsInt() && rightType->IsInt() && leftType->GetNumBits() != rightType->GetNumBits())
-    {
-        if (leftType->GetNumBits() < rightType->GetNumBits())
-        {
-            leftValue = CreateExt(leftValue, leftType, rightType);
-            resultType = rightType;
-        }
-        else
-        {
-            rightValue = CreateExt(rightValue, rightType, leftType);
-            resultType = leftType;
-        }
-    }
-    else
-    {
-        // if the left and right types are not differnet size ints, then they
-        // should be the same, so just pick one to return
-        resultType = leftType;
-    }
-
-    return resultType;
 }
 
 Value* LlvmIrGenerator::CreateExt(llvm::Value* value, const TypeInfo* valueType, const TypeInfo* dstType)

@@ -146,6 +146,8 @@ public:
 
     bool IsImmutable() const;
 
+    virtual bool IsNumericLiteral() const;
+
     virtual unsigned GetNumBits() const;
 
     const std::string& GetUniqueName() const;
@@ -215,6 +217,8 @@ public:
     static const NumericLiteralType* CreateUnsigned(unsigned numBits);
 
     bool IsSameAs(const TypeInfo& other) const override;
+
+    bool IsNumericLiteral() const override;
 
     unsigned GetNumBits() const override;
 

@@ -126,16 +126,6 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    if (binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsArray())
-    {
-        bool ok = FixNumericLiteralTypes(binaryExpression->left, binaryExpression->right);
-        if (!ok)
-        {
-            isError = true;
-            return;
-        }
-    }
-
     BinaryExpression::EOperator op = binaryExpression->GetOperator();
     bool isAssignment = BinaryExpression::IsAssignment(op);
 
@@ -178,6 +168,19 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         if (binaryExpression->left->GetType()->IsRange() && binaryExpression->right->GetType()->IsRange())
         {
             const NumericLiteralType* rightInnerType = dynamic_cast<const NumericLiteralType*>(binaryExpression->right->GetType()->GetInnerType());
+            if (rightInnerType != nullptr)
+            {
+                FixNumericLiteralExpression(binaryExpression->right, binaryExpression->left->GetType());
+            }
+        }
+        else if (binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsArray())
+        {
+            const TypeInfo* type = binaryExpression->right->GetType()->GetInnerType();
+            while (type->IsArray() || type->IsRange())
+            {
+                type = type->GetInnerType();
+            }
+            const NumericLiteralType* rightInnerType = dynamic_cast<const NumericLiteralType*>(type);
             if (rightInnerType != nullptr)
             {
                 FixNumericLiteralExpression(binaryExpression->right, binaryExpression->left->GetType());
@@ -305,6 +308,33 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
     }
 
     return outType != nullptr;
+}
+
+bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, const TypeInfo* exprType)
+{
+    if (assignType->IsInt() && exprType->IsInt()
+        && HaveCompatibleSigns(assignType, exprType)
+        && HaveCompatibleAssignmentSizes(assignType, exprType))
+    {
+        return true;
+    }
+
+    const TypeInfo* assignInnerType = assignType;
+    const TypeInfo* exprInnerType = exprType;
+    while (assignInnerType->IsArray() && exprInnerType->IsArray())
+    {
+        assignInnerType = assignInnerType->GetInnerType();
+        exprInnerType = exprInnerType->GetInnerType();
+    }
+
+    if (assignInnerType->IsInt() && exprInnerType->IsNumericLiteral()
+        && HaveCompatibleSigns(assignType, exprType)
+        && HaveCompatibleAssignmentSizes(assignType, exprType))
+    {
+        return true;
+    }
+
+    return assignType->IsSameAs(*exprType);
 }
 
 const NumericLiteralType* SemanticAnalyzer::GetBiggestNumLitSizeType(const NumericLiteralType* type1, const NumericLiteralType* type2)
@@ -469,6 +499,22 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
         // because the type should already be known
 
         impCastExpr->SetType(resultType);
+    }
+    else if (ArraySizeValueExpression* arrSizeValExpr = dynamic_cast<ArraySizeValueExpression*>(expr); arrSizeValExpr != nullptr)
+    {
+        const TypeInfo* innerType = resultType->GetInnerType();
+        FixNumericLiteralExpression(arrSizeValExpr->valueExpression, innerType);
+        arrSizeValExpr->SetType(resultType);
+    }
+    else if (ArrayMultiValueExpression* arrMultiValExpr = dynamic_cast<ArrayMultiValueExpression*>(expr); arrMultiValExpr != nullptr)
+    {
+        const TypeInfo* innerType = resultType->GetInnerType();
+        for (Expression* valExpr : arrMultiValExpr->expressions)
+        {
+            FixNumericLiteralExpression(valExpr, innerType);
+        }
+
+        arrMultiValExpr->SetType(resultType);
     }
     else
     {
@@ -1938,23 +1984,9 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const TypeInfo* argType = arg->GetType();
         const TypeInfo* paramType = param->GetType();
 
-        // check if we need to fix array literal type
-        if (argType->IsArray() && paramType->IsArray())
-        {
-            bool ok = FixNumericLiteralType(arg, paramType);
-            if (!ok)
-            {
-                isError = true;
-                return;
-            }
-
-            // update argType in case it changed
-            argType = arg->GetType();
-        }
-
         if (!argType->IsSameAs(*paramType))
         {
-            if (argType->IsInt() && paramType->IsInt() && HaveCompatibleSigns(paramType, argType) && HaveCompatibleAssignmentSizes(paramType, argType))
+            if (AreCompatibleAssignmentTypes(paramType, argType))
             {
                 functionExpression->arguments[i] = ImplicitCast(arg, paramType);
             }
@@ -2342,7 +2374,7 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
 
 Expression* SemanticAnalyzer::ImplicitCast(Expression* expression, const TypeInfo* type)
 {
-    if (dynamic_cast<const NumericLiteralType*>(expression->GetType()) != nullptr)
+    if (expression->GetType()->IsNumericLiteral())
     {
         FixNumericLiteralExpression(expression, type);
 
