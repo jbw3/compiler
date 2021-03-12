@@ -639,7 +639,6 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
 {
     bool ok = false;
     BinaryExpression::EOperator op = binExpr->op;
-    const Token* opToken = binExpr->opToken;
     Expression* left = binExpr->left;
     Expression* right = binExpr->right;
     const TypeInfo* leftType = left->GetType();
@@ -2364,17 +2363,16 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
 
     const TypeInfo* returnType = funcDecl->GetReturnType();
     const TypeInfo* expressionType = expression->GetType();
-    if (!returnType->IsSameAs(*expressionType))
+    bool needsCast = false;
+    if (!AreCompatibleAssignmentTypes(returnType, expressionType, needsCast))
     {
-        if (expressionType->IsInt() && returnType->IsInt() && HaveCompatibleSigns(returnType, expressionType) && HaveCompatibleAssignmentSizes(returnType, expressionType))
-        {
-            resultExpression = ImplicitCast(expression, returnType);
-        }
-        else
-        {
-            logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
-            return false;
-        }
+        logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
+        return false;
+    }
+
+    if (needsCast)
+    {
+        resultExpression = ImplicitCast(expression, returnType);
     }
 
     return true;
