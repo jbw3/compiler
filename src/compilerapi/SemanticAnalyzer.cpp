@@ -1381,21 +1381,19 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         // check types
         const TypeInfo* memberType = memberInfo->GetType();
         const TypeInfo* exprType = expr->GetType();
-        if (!memberType->IsSameAs(*exprType))
+        bool needsCast = false;
+        if (!AreCompatibleAssignmentTypes(memberType, exprType, needsCast))
         {
-            bool bothAreInts = memberType->IsInt() & exprType->IsInt();
-            if (bothAreInts && HaveCompatibleSigns(memberType, exprType) && HaveCompatibleAssignmentSizes(memberType, exprType))
-            {
-                member->expression = ImplicitCast(expr, memberType);
-            }
-            else
-            {
-                isError = true;
-                const Token* token = member->GetNameToken();
-                logger.LogError(*token, "Cannot assign expression of type '{}' to member '{}' of type '{}'",
-                                exprType->GetShortName(), memberName, memberType->GetShortName());
-                return;
-            }
+            isError = true;
+            const Token* token = member->GetNameToken();
+            logger.LogError(*token, "Cannot assign expression of type '{}' to member '{}' of type '{}'",
+                            exprType->GetShortName(), memberName, memberType->GetShortName());
+            return;
+        }
+
+        if (needsCast)
+        {
+            member->expression = ImplicitCast(expr, memberType);
         }
     }
 

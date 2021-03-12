@@ -848,6 +848,8 @@ fun arrays1(a1 [i32])
     a1[1] = 17;
 }
 
+struct ArrayTest { arr [i32] }
+
 fun arrays2()
 {
     var x i32 = 12;
@@ -859,6 +861,8 @@ fun arrays2()
     var a5 [i32] = [4; 0];
 
     arrays1([12; 1]);
+
+    var s = ArrayTest { arr: [3; 19] };
 }
 
 fun arrays3()
@@ -872,6 +876,8 @@ fun arrays3()
     var a4 [i32] = [3, 1 + y * 2];
 
     arrays1([10, 20, 30]);
+
+    var s = ArrayTest { arr: [1, 2, 3] };
 }
 
 fun slices(array [i32], s str, start u32, end u32)

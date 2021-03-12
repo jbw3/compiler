@@ -15,6 +15,7 @@ $target_triple
 %EmptyType = type {}
 %SubscriptTest1 = type { %SubscriptTest2 }
 %SubscriptTest2 = type { %str }
+%ArrayTest = type { %"[i32]" }
 %"[i16]" = type { i64, i16* }
 %"[u8]" = type { i64, i8* }
 
@@ -2542,6 +2543,8 @@ passed7:                                          ; preds = %passed
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays2() #0 {
 entry:
+  %array47 = alloca [3 x i32]
+  %s = alloca %ArrayTest
   %array37 = alloca [12 x i32]
   %array27 = alloca [4 x i32]
   %a5 = alloca %"[i32]"
@@ -2638,12 +2641,30 @@ fillExit44:                                       ; preds = %fillBody38
   %arrptr45 = bitcast [12 x i32]* %array37 to i32*
   %agg46 = insertvalue %"[i32]" { i64 12, i32* undef }, i32* %arrptr45, 1
   %call = call %UnitType @arrays1(%"[i32]" %agg46)
+  %startPtr49 = getelementptr inbounds [3 x i32], [3 x i32]* %array47, i64 0, i64 0
+  %endPtr50 = getelementptr inbounds [3 x i32], [3 x i32]* %array47, i64 0, i64 3
+  br label %fillBody48
+
+fillBody48:                                       ; preds = %fillBody48, %fillExit44
+  %phi51 = phi i32* [ %startPtr49, %fillExit44 ], [ %nextPtr52, %fillBody48 ]
+  store i32 19, i32* %phi51
+  %nextPtr52 = getelementptr inbounds i32, i32* %phi51, i64 1
+  %atEnd53 = icmp eq i32* %nextPtr52, %endPtr50
+  br i1 %atEnd53, label %fillExit54, label %fillBody48
+
+fillExit54:                                       ; preds = %fillBody48
+  %arrptr55 = bitcast [3 x i32]* %array47 to i32*
+  %agg56 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr55, 1
+  %agg57 = insertvalue %ArrayTest undef, %"[i32]" %agg56, 0
+  store %ArrayTest %agg57, %ArrayTest* %s
   ret %UnitType zeroinitializer
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays3() #0 {
 entry:
+  %array26 = alloca [3 x i32]
+  %s = alloca %ArrayTest
   %array20 = alloca [3 x i32]
   %array13 = alloca [2 x i32]
   %a4 = alloca %"[i32]"
@@ -2699,6 +2720,16 @@ entry:
   %arrptr24 = bitcast [3 x i32]* %array20 to i32*
   %agg25 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr24, 1
   %call = call %UnitType @arrays1(%"[i32]" %agg25)
+  %ptr27 = getelementptr inbounds [3 x i32], [3 x i32]* %array26, i64 0, i64 0
+  store i32 1, i32* %ptr27
+  %ptr28 = getelementptr inbounds [3 x i32], [3 x i32]* %array26, i64 0, i64 1
+  store i32 2, i32* %ptr28
+  %ptr29 = getelementptr inbounds [3 x i32], [3 x i32]* %array26, i64 0, i64 2
+  store i32 3, i32* %ptr29
+  %arrptr30 = bitcast [3 x i32]* %array26 to i32*
+  %agg31 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr30, 1
+  %agg32 = insertvalue %ArrayTest undef, %"[i32]" %agg31, 0
+  store %ArrayTest %agg32, %ArrayTest* %s
   ret %UnitType zeroinitializer
 }
 
