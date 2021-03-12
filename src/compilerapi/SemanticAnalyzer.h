@@ -92,7 +92,7 @@ private:
 
     bool AreCompatibleRanges(const TypeInfo* type1, const TypeInfo* type2, const TypeInfo*& outType);
 
-    bool AreCompatibleAssignmentTypes(const TypeInfo* assignType, const TypeInfo* exprType);
+    bool AreCompatibleAssignmentTypes(const TypeInfo* assignType, const TypeInfo* exprType, bool& needsCast);
 
     const NumericLiteralType* GetBiggestNumLitSizeType(const NumericLiteralType* type1, const NumericLiteralType* type2);
 

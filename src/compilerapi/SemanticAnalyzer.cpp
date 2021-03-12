@@ -154,6 +154,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
+    bool ok = true;
     if (isAssignment)
     {
         if (!binaryExpression->left->GetIsStorage())
@@ -165,31 +166,31 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
         binaryExpression->left->SetAccessType(Expression::eAddress);
 
-        if (binaryExpression->left->GetType()->IsRange() && binaryExpression->right->GetType()->IsRange())
+        bool needsCast = false;
+        ok = AreCompatibleAssignmentTypes(binaryExpression->left->GetType(), binaryExpression->right->GetType(), needsCast);
+        if (needsCast)
         {
-            const NumericLiteralType* rightInnerType = dynamic_cast<const NumericLiteralType*>(binaryExpression->right->GetType()->GetInnerType());
-            if (rightInnerType != nullptr)
-            {
-                FixNumericLiteralExpression(binaryExpression->right, binaryExpression->left->GetType());
-            }
-        }
-        else if (binaryExpression->left->GetType()->IsArray() && binaryExpression->right->GetType()->IsArray())
-        {
-            const TypeInfo* type = binaryExpression->right->GetType()->GetInnerType();
-            while (type->IsArray() || type->IsRange())
-            {
-                type = type->GetInnerType();
-            }
-            const NumericLiteralType* rightInnerType = dynamic_cast<const NumericLiteralType*>(type);
-            if (rightInnerType != nullptr)
-            {
-                FixNumericLiteralExpression(binaryExpression->right, binaryExpression->left->GetType());
-            }
+            binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
         }
     }
 
-    if (!CheckBinaryOperatorTypes(binaryExpression))
+    if (ok)
     {
+        ok = CheckBinaryOperatorTypes(binaryExpression);
+    }
+
+    if (!ok)
+    {
+        // TODO: Need better error message when integer is too big for assignment: var err u8 = 256;
+        const Token* opToken = binaryExpression->opToken;
+        string opString = BinaryExpression::GetOperatorString(op);
+        logger.LogError(
+            *opToken,
+            "Binary operator '{}' does not support types '{}' and '{}'",
+            opString,
+            binaryExpression->left->GetType()->GetShortName(),
+            binaryExpression->right->GetType()->GetShortName());
+
         isError = true;
         return;
     }
@@ -310,12 +311,19 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
     return outType != nullptr;
 }
 
-bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, const TypeInfo* exprType)
+bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, const TypeInfo* exprType, bool& needsCast)
 {
+    if (assignType->IsSameAs(*exprType))
+    {
+        needsCast = false;
+        return true;
+    }
+
     if (assignType->IsInt() && exprType->IsInt()
         && HaveCompatibleSigns(assignType, exprType)
         && HaveCompatibleAssignmentSizes(assignType, exprType))
     {
+        needsCast = true;
         return true;
     }
 
@@ -337,10 +345,12 @@ bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, 
         && HaveCompatibleSigns(assignInnerType, exprInnerType)
         && HaveCompatibleAssignmentSizes(assignInnerType, exprInnerType))
     {
+        needsCast = true;
         return true;
     }
 
-    return assignType->IsSameAs(*exprType);
+    needsCast = false;
+    return false;
 }
 
 const NumericLiteralType* SemanticAnalyzer::GetBiggestNumLitSizeType(const NumericLiteralType* type1, const NumericLiteralType* type2)
@@ -896,13 +906,6 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
     else if (leftType->IsSameAs(*rightType))
     {
         ok = op == BinaryExpression::eAssign;
-    }
-
-    if (!ok)
-    {
-        // TODO: Need better error message when integer is too big for assignment: var err u8 = 256;
-        string opString = BinaryExpression::GetOperatorString(op);
-        logger.LogError(*opToken, "Binary operator '{}' does not support types '{}' and '{}'", opString, leftType->GetShortName(), rightType->GetShortName());
     }
 
     return ok;
@@ -1990,18 +1993,17 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         const TypeInfo* argType = arg->GetType();
         const TypeInfo* paramType = param->GetType();
 
-        if (!argType->IsSameAs(*paramType))
+        bool needsCast = false;
+        if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
         {
-            if (AreCompatibleAssignmentTypes(paramType, argType))
-            {
-                functionExpression->arguments[i] = ImplicitCast(arg, paramType);
-            }
-            else
-            {
-                logger.LogError(*functionExpression->GetNameToken(), "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
-                isError = true;
-                return;
-            }
+            logger.LogError(*functionExpression->GetNameToken(), "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
+            isError = true;
+            return;
+        }
+
+        if (needsCast)
+        {
+            functionExpression->arguments[i] = ImplicitCast(arg, paramType);
         }
     }
 
