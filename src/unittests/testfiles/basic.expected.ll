@@ -2543,6 +2543,7 @@ passed7:                                          ; preds = %passed
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays2() #0 {
 entry:
+  %array58 = alloca [12 x i32]
   %array47 = alloca [3 x i32]
   %s = alloca %ArrayTest
   %array37 = alloca [12 x i32]
@@ -2657,12 +2658,38 @@ fillExit54:                                       ; preds = %fillBody48
   %agg56 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr55, 1
   %agg57 = insertvalue %ArrayTest undef, %"[i32]" %agg56, 0
   store %ArrayTest %agg57, %ArrayTest* %s
+  %startPtr60 = getelementptr inbounds [12 x i32], [12 x i32]* %array58, i64 0, i64 0
+  %endPtr61 = getelementptr inbounds [12 x i32], [12 x i32]* %array58, i64 0, i64 12
+  br label %fillBody59
+
+fillBody59:                                       ; preds = %fillBody59, %fillExit54
+  %phi62 = phi i32* [ %startPtr60, %fillExit54 ], [ %nextPtr63, %fillBody59 ]
+  store i32 123, i32* %phi62
+  %nextPtr63 = getelementptr inbounds i32, i32* %phi62, i64 1
+  %atEnd64 = icmp eq i32* %nextPtr63, %endPtr61
+  br i1 %atEnd64, label %fillExit65, label %fillBody59
+
+fillExit65:                                       ; preds = %fillBody59
+  %arrptr66 = bitcast [12 x i32]* %array58 to i32*
+  %agg67 = insertvalue %"[i32]" { i64 12, i32* undef }, i32* %arrptr66, 1
+  %size = extractvalue %"[i32]" %agg67, 0
+  %data = extractvalue %"[i32]" %agg67, 1
+  %endok = icmp ult i64 7, %size
+  %checkend = select i1 %endok, i64 7, i64 %size
+  %startok = icmp ule i64 4, %checkend
+  %checkstart = select i1 %startok, i64 4, i64 %checkend
+  %sub = sub i64 %checkend, %checkstart
+  %ptr = getelementptr inbounds i32, i32* %data, i64 %checkstart
+  %agg68 = insertvalue %"[i32]" undef, i64 %sub, 0
+  %agg69 = insertvalue %"[i32]" %agg68, i32* %ptr, 1
+  %call70 = call %UnitType @arrays1(%"[i32]" %agg69)
   ret %UnitType zeroinitializer
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays3() #0 {
 entry:
+  %array33 = alloca [5 x i32]
   %array26 = alloca [3 x i32]
   %s = alloca %ArrayTest
   %array20 = alloca [3 x i32]
@@ -2730,6 +2757,29 @@ entry:
   %agg31 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr30, 1
   %agg32 = insertvalue %ArrayTest undef, %"[i32]" %agg31, 0
   store %ArrayTest %agg32, %ArrayTest* %s
+  %ptr34 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 0
+  store i32 10, i32* %ptr34
+  %ptr35 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 1
+  store i32 20, i32* %ptr35
+  %ptr36 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 2
+  store i32 30, i32* %ptr36
+  %ptr37 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 3
+  store i32 40, i32* %ptr37
+  %ptr38 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 4
+  store i32 50, i32* %ptr38
+  %arrptr39 = bitcast [5 x i32]* %array33 to i32*
+  %agg40 = insertvalue %"[i32]" { i64 5, i32* undef }, i32* %arrptr39, 1
+  %size = extractvalue %"[i32]" %agg40, 0
+  %data = extractvalue %"[i32]" %agg40, 1
+  %endok = icmp ult i64 4, %size
+  %checkend = select i1 %endok, i64 4, i64 %size
+  %startok = icmp ule i64 1, %checkend
+  %checkstart = select i1 %startok, i64 1, i64 %checkend
+  %sub = sub i64 %checkend, %checkstart
+  %ptr41 = getelementptr inbounds i32, i32* %data, i64 %checkstart
+  %agg42 = insertvalue %"[i32]" undef, i64 %sub, 0
+  %agg43 = insertvalue %"[i32]" %agg42, i32* %ptr41, 1
+  %call44 = call %UnitType @arrays1(%"[i32]" %agg43)
   ret %UnitType zeroinitializer
 }
 

@@ -475,14 +475,69 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
     }
     else if (BinaryExpression* binExpr = dynamic_cast<BinaryExpression*>(expr); binExpr != nullptr)
     {
-        const TypeInfo* newSubType = resultType;
-        if (newSubType->IsRange())
-        {
-            newSubType = newSubType->GetInnerType();
-        }
+        BinaryExpression::EOperator op = binExpr->op;
 
-        FixNumericLiteralExpression(binExpr->left, newSubType);
-        FixNumericLiteralExpression(binExpr->right, newSubType);
+        if (op == BinaryExpression::eClosedRange || op == BinaryExpression::eHalfOpenRange)
+        {
+            assert(resultType->IsRange() && "Expected result type to be a range");
+            const TypeInfo* newSubType = resultType->GetInnerType();
+
+            FixNumericLiteralExpression(binExpr->left, newSubType);
+            FixNumericLiteralExpression(binExpr->right, newSubType);
+        }
+        else if (op == BinaryExpression::eSubscript)
+        {
+            const TypeInfo* leftType = binExpr->left->GetType();
+            const TypeInfo* rightType = binExpr->right->GetType();
+
+            // fix left expression
+            if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+            {
+                // nothing to do; the string should already have the correct type
+            }
+            else if (leftType->IsArray())
+            {
+                const TypeInfo* newType = nullptr;
+                if (rightType->IsInt())
+                {
+                    newType = resultType->GetInnerType();
+                }
+                else if (rightType->IsRange())
+                {
+                    newType = resultType;
+                }
+                else
+                {
+                    assert(false && "Unexpected right type for subscript");
+                }
+
+                FixNumericLiteralExpression(binExpr->left, newType);
+            }
+            else
+            {
+                assert(false && "Unexpected left type for subscript");
+            }
+
+            // fix right expression
+            if (rightType->IsInt())
+            {
+                FixNumericLiteralExpression(binExpr->right, TypeInfo::GetUIntSizeType());
+            }
+            else if (rightType->IsRange())
+            {
+                const TypeInfo* newType = TypeInfo::GetRangeType(TypeInfo::GetUIntSizeType(), rightType->IsHalfOpen());
+                FixNumericLiteralExpression(binExpr->right, newType);
+            }
+            else
+            {
+                assert(false && "Unexpected right type for subscript");
+            }
+        }
+        else
+        {
+            FixNumericLiteralExpression(binExpr->left, resultType);
+            FixNumericLiteralExpression(binExpr->right, resultType);
+        }
 
         binExpr->SetType(resultType);
     }
