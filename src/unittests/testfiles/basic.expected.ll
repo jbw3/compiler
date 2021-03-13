@@ -2543,6 +2543,8 @@ passed7:                                          ; preds = %passed
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays2() #0 {
 entry:
+  %array71 = alloca [5 x i8]
+  %r1 = alloca i8
   %array58 = alloca [12 x i32]
   %array47 = alloca [3 x i32]
   %s = alloca %ArrayTest
@@ -2683,12 +2685,41 @@ fillExit65:                                       ; preds = %fillBody59
   %agg68 = insertvalue %"[i32]" undef, i64 %sub, 0
   %agg69 = insertvalue %"[i32]" %agg68, i32* %ptr, 1
   %call70 = call %UnitType @arrays1(%"[i32]" %agg69)
+  %startPtr73 = getelementptr inbounds [5 x i8], [5 x i8]* %array71, i64 0, i64 0
+  %endPtr74 = getelementptr inbounds [5 x i8], [5 x i8]* %array71, i64 0, i64 5
+  br label %fillBody72
+
+fillBody72:                                       ; preds = %fillBody72, %fillExit65
+  %phi75 = phi i8* [ %startPtr73, %fillExit65 ], [ %nextPtr76, %fillBody72 ]
+  store i8 7, i8* %phi75
+  %nextPtr76 = getelementptr inbounds i8, i8* %phi75, i64 1
+  %atEnd77 = icmp eq i8* %nextPtr76, %endPtr74
+  br i1 %atEnd77, label %fillExit78, label %fillBody72
+
+fillExit78:                                       ; preds = %fillBody72
+  %arrptr79 = bitcast [5 x i8]* %array71 to i8*
+  %agg80 = insertvalue %"[i8]" { i64 5, i8* undef }, i8* %arrptr79, 1
+  %size81 = extractvalue %"[i8]" %agg80, 0
+  %check = icmp uge i64 3, %size81
+  br i1 %check, label %failed, label %passed
+
+failed:                                           ; preds = %fillExit78
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %fillExit78
+  %data82 = extractvalue %"[i8]" %agg80, 1
+  %value = getelementptr inbounds i8, i8* %data82, i64 3
+  %load = load i8, i8* %value
+  store i8 %load, i8* %r1
   ret %UnitType zeroinitializer
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays3() #0 {
 entry:
+  %array45 = alloca [2 x i16]
+  %r1 = alloca i16
   %array33 = alloca [5 x i32]
   %array26 = alloca [3 x i32]
   %s = alloca %ArrayTest
@@ -2780,6 +2811,25 @@ entry:
   %agg42 = insertvalue %"[i32]" undef, i64 %sub, 0
   %agg43 = insertvalue %"[i32]" %agg42, i32* %ptr41, 1
   %call44 = call %UnitType @arrays1(%"[i32]" %agg43)
+  %ptr46 = getelementptr inbounds [2 x i16], [2 x i16]* %array45, i64 0, i64 0
+  store i16 100, i16* %ptr46
+  %ptr47 = getelementptr inbounds [2 x i16], [2 x i16]* %array45, i64 0, i64 1
+  store i16 200, i16* %ptr47
+  %arrptr48 = bitcast [2 x i16]* %array45 to i16*
+  %agg49 = insertvalue %"[i16]" { i64 2, i16* undef }, i16* %arrptr48, 1
+  %size50 = extractvalue %"[i16]" %agg49, 0
+  %check = icmp uge i64 0, %size50
+  br i1 %check, label %failed, label %passed
+
+failed:                                           ; preds = %entry
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %entry
+  %data51 = extractvalue %"[i16]" %agg49, 1
+  %value = getelementptr inbounds i16, i16* %data51, i64 0
+  %load = load i16, i16* %value
+  store i16 %load, i16* %r1
   ret %UnitType zeroinitializer
 }
 

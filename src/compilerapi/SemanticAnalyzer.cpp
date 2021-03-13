@@ -500,7 +500,7 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
                 const TypeInfo* newType = nullptr;
                 if (rightType->IsInt())
                 {
-                    newType = resultType->GetInnerType();
+                    newType = TypeInfo::GetArrayOfType(resultType);
                 }
                 else if (rightType->IsRange())
                 {
