@@ -102,10 +102,6 @@ private:
 
     void FixNumericLiteralExpression(SyntaxTree::Expression* expr, const TypeInfo* resultType);
 
-    bool FixNumericLiteralType(SyntaxTree::Expression* expr, const TypeInfo* resultType);
-
-    bool FixNumericLiteralTypes(SyntaxTree::Expression* expr1, SyntaxTree::Expression* expr2);
-
     bool CheckBinaryOperatorTypes(SyntaxTree::BinaryExpression* binExpr);
 
     const TypeInfo* GetBinaryOperatorResultType(SyntaxTree::BinaryExpression::EOperator op, const TypeInfo* leftType, const TypeInfo* rightType);

@@ -58,20 +58,8 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                         return;
                     }
 
-                    resultType = subExprLiteralType->GetMinSizeType(TypeInfo::eSigned);
-                    if (resultType == nullptr)
-                    {
-                        logger.LogInternalError("Could not determine expression result type");
-                        isError = true;
-                        return;
-                    }
-
-                    ok = FixNumericLiteralType(subExpr, resultType);
-                    if (!ok)
-                    {
-                        isError = true;
-                        return;
-                    }
+                    resultType = NumericLiteralType::CreateSigned(subExprLiteralType->GetSignedNumBits());
+                    ok = true;
                 }
             }
             break;
@@ -434,34 +422,6 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
     return resultType;
 }
 
-const TypeInfo* GetLowestType(const TypeInfo* type, unsigned& arrayLevel, bool& hasRange, bool& hasHalfOpenRange)
-{
-    arrayLevel = 0;
-    while (type->IsArray())
-    {
-        type = type->GetInnerType();
-        ++arrayLevel;
-    }
-
-    hasHalfOpenRange = false;
-    hasRange = type->IsRange();
-    if (hasRange)
-    {
-        hasHalfOpenRange = type->IsHalfOpen();
-        type = type->GetInnerType();
-    }
-
-    return type;
-}
-
-const TypeInfo* GetLowestType(const TypeInfo* type)
-{
-    unsigned arrayLevel = 0;
-    bool hasRange = false;
-    bool hasHalfOpenRange = false;
-    return GetLowestType(type, arrayLevel, hasRange, hasHalfOpenRange);
-}
-
 void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeInfo* resultType)
 {
     if (NumericExpression* numExpr = dynamic_cast<NumericExpression*>(expr); numExpr != nullptr)
@@ -591,103 +551,6 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
     {
         assert(false && "Unexpected expression type in FixNumericLiteralExpression()");
     }
-}
-
-bool SemanticAnalyzer::FixNumericLiteralType(Expression* expr, const TypeInfo* resultType)
-{
-    const TypeInfo* exprType = expr->GetType();
-    unsigned arrayLevel = 0;
-    bool hasRange = false;
-    bool hasHalfOpenRange = false;
-    const TypeInfo* lowestType = GetLowestType(exprType, arrayLevel, hasRange, hasHalfOpenRange);
-    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(lowestType);
-
-    if ( literalType != nullptr && (literalType->GetSign() == TypeInfo::eContextDependent || arrayLevel > 0) )
-    {
-        TypeInfo::ESign literalTypeSign = literalType->GetSign();
-        const TypeInfo* lowestResultType = GetLowestType(resultType);
-        TypeInfo::ESign resultSign = lowestResultType->GetSign();
-
-        const TypeInfo* newType = nullptr;
-        if (arrayLevel > 0)
-        {
-            TypeInfo::ESign sign = TypeInfo::eNotApplicable;
-            if (literalTypeSign == TypeInfo::eContextDependent)
-            {
-                sign = resultSign;
-            }
-            else
-            {
-                sign = literalTypeSign;
-            }
-
-            bool isSigned = sign == TypeInfo::eSigned;
-            unsigned literalNumBits = 0;
-            if (isSigned)
-            {
-                literalNumBits = literalType->GetSignedNumBits();
-            }
-            else
-            {
-                literalNumBits = literalType->GetUnsignedNumBits();
-            }
-
-            unsigned resultNumBits = lowestResultType->GetNumBits();
-            unsigned size = (resultNumBits > literalNumBits) ? resultNumBits : literalNumBits;
-            if (isSigned)
-            {
-                newType = TypeInfo::GetMinSignedIntTypeForSize(size);
-            }
-            else
-            {
-                newType = TypeInfo::GetMinUnsignedIntTypeForSize(size);
-            }
-        }
-        else
-        {
-            newType = literalType->GetMinSizeType(resultSign);
-            if (newType == nullptr)
-            {
-                logger.LogInternalError("Could not determine expression result type");
-                return false;
-            }
-        }
-
-        if (hasRange)
-        {
-            newType = TypeInfo::GetRangeType(newType, hasHalfOpenRange);
-        }
-        // TODO: This does not work with nested arrays of integer literals.
-        // Need to set the expression type at each level
-        for (unsigned i = 0; i < arrayLevel; ++i)
-        {
-            newType = TypeInfo::GetArrayOfType(newType);
-        }
-
-        expr->SetType(newType);
-    }
-
-    return true;
-}
-
-bool SemanticAnalyzer::FixNumericLiteralTypes(Expression* expr1, Expression* expr2)
-{
-    const TypeInfo* expr1Type = expr1->GetType();
-    const TypeInfo* expr2Type = expr2->GetType();
-    const NumericLiteralType* literalType1 = dynamic_cast<const NumericLiteralType*>(GetLowestType(expr1Type));
-    const NumericLiteralType* literalType2 = dynamic_cast<const NumericLiteralType*>(GetLowestType(expr2Type));
-
-    bool ok = true;
-    if (literalType1 != nullptr && literalType2 == nullptr)
-    {
-        ok = FixNumericLiteralType(expr1, expr2Type);
-    }
-    else if (literalType1 == nullptr && literalType2 != nullptr)
-    {
-        ok = FixNumericLiteralType(expr2, expr1Type);
-    }
-
-    return ok;
 }
 
 bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
