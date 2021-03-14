@@ -66,16 +66,6 @@ void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-int64_t NumericExpression::GetValue() const
-{
-    return value;
-}
-
-const Token* NumericExpression::GetToken() const
-{
-    return token;
-}
-
 unsigned NumericExpression::GetMinSignedSize() const
 {
     unsigned numBits = 0;
@@ -132,11 +122,6 @@ void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const Token* BoolLiteralExpression::GetToken() const
-{
-    return token;
-}
-
 StringLiteralExpression::StringLiteralExpression(const vector<char> characters, const Token* token) :
     token(token),
     characters(characters)
@@ -146,16 +131,6 @@ StringLiteralExpression::StringLiteralExpression(const vector<char> characters, 
 void StringLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-const vector<char>& StringLiteralExpression::GetCharacters() const
-{
-    return characters;
-}
-
-const Token* StringLiteralExpression::GetToken() const
-{
-    return token;
 }
 
 ArraySizeValueExpression::ArraySizeValueExpression(
@@ -214,21 +189,6 @@ BlockExpression::~BlockExpression()
 void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-const Expressions& BlockExpression::GetExpressions() const
-{
-    return expressions;
-}
-
-const Token* BlockExpression::GetStartToken() const
-{
-    return startToken;
-}
-
-const Token* BlockExpression::GetEndToken() const
-{
-    return endToken;
 }
 
 std::string BinaryExpression::GetOperatorString(EOperator op)
@@ -466,26 +426,6 @@ void BinaryExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-BinaryExpression::EOperator BinaryExpression::GetOperator() const
-{
-    return op;
-}
-
-Expression* BinaryExpression::GetLeftExpression() const
-{
-    return left;
-}
-
-Expression* BinaryExpression::GetRightExpression() const
-{
-    return right;
-}
-
-const Token* BinaryExpression::GetOperatorToken() const
-{
-    return opToken;
-}
-
 string UnaryExpression::GetOperatorString(EOperator op)
 {
     switch (op)
@@ -521,21 +461,6 @@ void UnaryExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-UnaryExpression::EOperator UnaryExpression::GetOperator() const
-{
-    return op;
-}
-
-Expression* UnaryExpression::GetSubExpression() const
-{
-    return subExpression;
-}
-
-const Token* UnaryExpression::GetOperatorToken() const
-{
-    return opToken;
-}
-
 VariableExpression::VariableExpression(const string& name, const Token* token) :
     token(token),
     name(name)
@@ -545,16 +470,6 @@ VariableExpression::VariableExpression(const string& name, const Token* token) :
 void VariableExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-const string& VariableExpression::GetName() const
-{
-    return name;
-}
-
-const Token* VariableExpression::GetToken() const
-{
-    return token;
 }
 
 CastExpression::CastExpression(Expression* subExpression, const Token* castToken,
@@ -611,31 +526,6 @@ void FunctionExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const string& FunctionExpression::GetName() const
-{
-    return name;
-}
-
-const Expressions& FunctionExpression::GetArguments() const
-{
-    return arguments;
-}
-
-const Token* FunctionExpression::GetNameToken() const
-{
-    return nameToken;
-}
-
-const FunctionDeclaration* FunctionExpression::GetFunctionDeclaration() const
-{
-    return functionDeclaration;
-}
-
-void FunctionExpression::SetFunctionDeclaration(const FunctionDeclaration* decl)
-{
-    functionDeclaration = decl;
-}
-
 MemberExpression::MemberExpression(Expression* subExpr, const std::string& memberName,
                                    const Token* opToken, const Token* memberNameToken) :
     opToken(opToken),
@@ -659,26 +549,6 @@ void MemberExpression::SetAccessType(EAccessType newAccessType)
 {
     Expression::SetAccessType(newAccessType);
     subExpression->SetAccessType(newAccessType);
-}
-
-Expression* MemberExpression::GetSubExpression() const
-{
-    return subExpression;
-}
-
-const string& MemberExpression::GetMemberName() const
-{
-    return memberName;
-}
-
-const Token* MemberExpression::GetOperatorToken() const
-{
-    return opToken;
-}
-
-const Token* MemberExpression::GetMemberNameToken() const
-{
-    return memberNameToken;
 }
 
 BranchExpression::BranchExpression(Expression* ifCondition,
@@ -706,21 +576,6 @@ void BranchExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-Expression* BranchExpression::GetIfCondition() const
-{
-    return ifCondition;
-}
-
-Expression* BranchExpression::GetIfExpression() const
-{
-    return ifExpression;
-}
-
-Expression* BranchExpression::GetElseExpression() const
-{
-    return elseExpression;
-}
-
 VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* assignmentExpression,
                                          const Token* nameToken, const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),
@@ -734,36 +589,6 @@ VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* a
 void VariableDeclaration::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-const string& VariableDeclaration::GetName() const
-{
-    return name;
-}
-
-const TypeInfo* VariableDeclaration::GetVariableType() const
-{
-    return variableType;
-}
-
-void VariableDeclaration::SetVariableType(const TypeInfo* newType)
-{
-    variableType = newType;
-}
-
-BinaryExpression* VariableDeclaration::GetAssignmentExpression() const
-{
-    return assignmentExpression;
-}
-
-const Token* VariableDeclaration::GetNameToken() const
-{
-    return nameToken;
-}
-
-const vector<const Token*>& VariableDeclaration::GetTypeNameTokens() const
-{
-    return typeNameTokens;
 }
 
 WhileLoop::WhileLoop(Expression* condition, BlockExpression* expression, const Token* whileToken) :
@@ -782,21 +607,6 @@ WhileLoop::~WhileLoop()
 void WhileLoop::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-Expression* WhileLoop::GetCondition() const
-{
-    return condition;
-}
-
-BlockExpression* WhileLoop::GetExpression() const
-{
-    return expression;
-}
-
-const Token* WhileLoop::GetWhileToken() const
-{
-    return whileToken;
 }
 
 ForLoop::ForLoop(const string& variableName, const string& indexName,
@@ -830,51 +640,6 @@ void ForLoop::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const string& ForLoop::GetVariableName() const
-{
-    return variableName;
-}
-
-const TypeInfo* ForLoop::GetVariableType() const
-{
-    return variableType;
-}
-
-void ForLoop::SetVariableType(const TypeInfo* newType)
-{
-    variableType = newType;
-}
-
-Expression* ForLoop::GetIterExpression()
-{
-    return iterExpression;
-}
-
-BlockExpression* ForLoop::GetExpression()
-{
-    return expression;
-}
-
-const Token* ForLoop::GetForToken() const
-{
-    return forToken;
-}
-
-const Token* ForLoop::GetInToken() const
-{
-    return inToken;
-}
-
-const Token* ForLoop::GetVariableNameToken() const
-{
-    return variableNameToken;
-}
-
-const vector<const Token*>& ForLoop::GetVariableTypeNameTokens() const
-{
-    return variableTypeNameTokens;
-}
-
 LoopControl::LoopControl(const Token* token) :
     token(token)
 {
@@ -883,11 +648,6 @@ LoopControl::LoopControl(const Token* token) :
 void LoopControl::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-const Token* LoopControl::GetToken() const
-{
-    return token;
 }
 
 Return::Return(const Token* token, Expression* expression) :
@@ -915,31 +675,6 @@ Parameter::Parameter(const string& name, const Token* nameToken,
 {
 }
 
-const string& Parameter::GetName() const
-{
-    return name;
-}
-
-const TypeInfo* Parameter::GetType() const
-{
-    return type;
-}
-
-void Parameter::SetType(const TypeInfo* newType)
-{
-    type = newType;
-}
-
-const Token* Parameter::GetNameToken() const
-{
-    return nameToken;
-}
-
-const vector<const Token*>& Parameter::GetTypeNameTokens() const
-{
-    return typeNameTokens;
-}
-
 FunctionDeclaration::FunctionDeclaration(const string& name,
                                          const Parameters& parameters,
                                          const Token* nameToken,
@@ -957,36 +692,6 @@ FunctionDeclaration::~FunctionDeclaration()
     deletePointerContainer(parameters);
 }
 
-const string& FunctionDeclaration::GetName() const
-{
-    return name;
-}
-
-const Parameters& FunctionDeclaration::GetParameters() const
-{
-    return parameters;
-}
-
-const TypeInfo* FunctionDeclaration::GetReturnType() const
-{
-    return returnType;
-}
-
-void FunctionDeclaration::SetReturnType(const TypeInfo* newType)
-{
-    returnType = newType;
-}
-
-const Token* FunctionDeclaration::GetNameToken() const
-{
-    return nameToken;
-}
-
-const vector<const Token*>& FunctionDeclaration::GetReturnTypeNameTokens() const
-{
-    return returnTypeNameTokens;
-}
-
 ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :
     declaration(declaration)
 {
@@ -1002,16 +707,11 @@ void ExternFunctionDeclaration::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-FunctionDeclaration* ExternFunctionDeclaration::GetDeclaration() const
-{
-    return declaration;
-}
-
 FunctionDefinition::FunctionDefinition(FunctionDeclaration* declaration,
                                        Expression* expression) :
-    endsWithReturnStatement(false),
     declaration(declaration),
-    expression(expression)
+    expression(expression),
+    endsWithReturnStatement(false)
 {
 }
 
@@ -1026,37 +726,12 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-FunctionDeclaration* FunctionDefinition::GetDeclaration() const
-{
-    return declaration;
-}
-
-Expression* FunctionDefinition::GetExpression() const
-{
-    return expression;
-}
-
 MemberDefinition::MemberDefinition(const string& name, const Token* nameToken,
                                    const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),
     typeNameTokens(typeNameTokens),
     name(name)
 {
-}
-
-const std::string& MemberDefinition::GetName() const
-{
-    return name;
-}
-
-const Token* MemberDefinition::GetNameToken() const
-{
-    return nameToken;
-}
-
-const vector<const Token*>& MemberDefinition::GetTypeNameTokens() const
-{
-    return typeNameTokens;
 }
 
 StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members,
@@ -1078,31 +753,6 @@ void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-const string& StructDefinition::GetName() const
-{
-    return name;
-}
-
-const vector<MemberDefinition*>& StructDefinition::GetMembers() const
-{
-    return members;
-}
-
-const TypeInfo* StructDefinition::GetType() const
-{
-    return type;
-}
-
-void StructDefinition::SetType(const TypeInfo* newType)
-{
-    type = newType;
-}
-
-const Token* StructDefinition::GetNameToken() const
-{
-    return nameToken;
-}
-
 MemberInitialization::MemberInitialization(const string& name, Expression* expression,
                                            const Token* nameToken) :
     name(name),
@@ -1114,21 +764,6 @@ MemberInitialization::MemberInitialization(const string& name, Expression* expre
 MemberInitialization::~MemberInitialization()
 {
     delete expression;
-}
-
-const string& MemberInitialization::GetName() const
-{
-    return name;
-}
-
-Expression* MemberInitialization::GetExpression() const
-{
-    return expression;
-}
-
-const Token* MemberInitialization::GetNameToken() const
-{
-    return nameToken;
 }
 
 StructInitializationExpression::StructInitializationExpression(const string& structName, const vector<MemberInitialization*>& memberInitializations,
@@ -1147,21 +782,6 @@ StructInitializationExpression::~StructInitializationExpression()
 void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-const string& StructInitializationExpression::GetStructName() const
-{
-    return structName;
-}
-
-const vector<MemberInitialization*>& StructInitializationExpression::GetMemberInitializations() const
-{
-    return memberInitializations;
-}
-
-const Token* StructInitializationExpression::GetStructNameToken() const
-{
-    return structNameToken;
 }
 
 ModuleDefinition::ModuleDefinition(const vector<StructDefinition*>& structDefinitions,
@@ -1183,25 +803,5 @@ ModuleDefinition::~ModuleDefinition()
 void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
-}
-
-void ModuleDefinition::SwapStructDefinitions(vector<StructDefinition*>& newStructDefinitions)
-{
-    structDefinitions.swap(newStructDefinitions);
-}
-
-const vector<StructDefinition*>& ModuleDefinition::GetStructDefinitions() const
-{
-    return structDefinitions;
-}
-
-const vector<ExternFunctionDeclaration*>& ModuleDefinition::GetExternFunctionDeclarations() const
-{
-    return externFunctionDeclarations;
-}
-
-const vector<FunctionDefinition*>& ModuleDefinition::GetFunctionDefinitions() const
-{
-    return functionDefinitions;
 }
 } // namespace SyntaxTree

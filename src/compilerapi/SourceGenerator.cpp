@@ -28,21 +28,21 @@ void SourceGenerator::Flush()
 
 void SourceGenerator::Visit(UnaryExpression* unaryExpression)
 {
-    *os << UnaryExpression::GetOperatorString(unaryExpression->GetOperator());
-    unaryExpression->GetSubExpression()->Accept(this);
+    *os << UnaryExpression::GetOperatorString(unaryExpression->op);
+    unaryExpression->subExpression->Accept(this);
 }
 
 void SourceGenerator::Visit(BinaryExpression* binaryExpression)
 {
-    BinaryExpression::EOperator op = binaryExpression->GetOperator();
+    BinaryExpression::EOperator op = binaryExpression->op;
     unsigned opPrecedence = BinaryExpression::GetPrecedence(op);
-    Expression* left = binaryExpression->GetLeftExpression();
+    Expression* left = binaryExpression->left;
 
     BinaryExpression* binLeft = dynamic_cast<BinaryExpression*>(left);
     bool leftNeedParens = false;
     if (binLeft != nullptr)
     {
-        leftNeedParens = opPrecedence < BinaryExpression::GetPrecedence(binLeft->GetOperator());
+        leftNeedParens = opPrecedence < BinaryExpression::GetPrecedence(binLeft->op);
     }
 
     if (leftNeedParens)
@@ -60,7 +60,7 @@ void SourceGenerator::Visit(BinaryExpression* binaryExpression)
     if (op == BinaryExpression::eSubscript)
     {
         *os << '[';
-        binaryExpression->GetRightExpression()->Accept(this);
+        binaryExpression->right->Accept(this);
         *os << ']';
     }
     else
@@ -79,13 +79,13 @@ void SourceGenerator::Visit(BinaryExpression* binaryExpression)
             *os << " ";
         }
 
-        Expression* right = binaryExpression->GetRightExpression();
+        Expression* right = binaryExpression->right;
 
         BinaryExpression* binRight = dynamic_cast<BinaryExpression*>(right);
         bool rightNeedParens = false;
         if (binRight != nullptr)
         {
-            rightNeedParens = opPrecedence <= BinaryExpression::GetPrecedence(binRight->GetOperator());
+            rightNeedParens = opPrecedence <= BinaryExpression::GetPrecedence(binRight->op);
         }
 
         if (rightNeedParens)
@@ -105,9 +105,9 @@ void SourceGenerator::Visit(BinaryExpression* binaryExpression)
 void SourceGenerator::Visit(WhileLoop* whileLoop)
 {
     *os << "while ";
-    whileLoop->GetCondition()->Accept(this);
+    whileLoop->condition->Accept(this);
     *os << '\n';
-    whileLoop->GetExpression()->Accept(this);
+    whileLoop->expression->Accept(this);
 }
 
 void SourceGenerator::Visit(ForLoop* forLoop)
@@ -137,7 +137,7 @@ void SourceGenerator::Visit(ForLoop* forLoop)
 
 void SourceGenerator::Visit(LoopControl* loopControl)
 {
-    *os << loopControl->GetToken()->value;
+    *os << loopControl->token->value;
 }
 
 void SourceGenerator::Visit(Return* ret)
@@ -149,26 +149,26 @@ void SourceGenerator::Visit(Return* ret)
 void SourceGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
     *os << "extern ";
-    PrintFunctionDeclaration(externFunctionDeclaration->GetDeclaration());
+    PrintFunctionDeclaration(externFunctionDeclaration->declaration);
     *os << ";\n";
 }
 
 void SourceGenerator::Visit(FunctionDefinition* functionDefinition)
 {
-    PrintFunctionDeclaration(functionDefinition->GetDeclaration());
+    PrintFunctionDeclaration(functionDefinition->declaration);
     *os << '\n';
-    functionDefinition->GetExpression()->Accept(this);
+    functionDefinition->expression->Accept(this);
     *os << '\n';
 }
 
 void SourceGenerator::Visit(StructDefinition* structDefinition)
 {
-    *os << "struct " << structDefinition->GetName() << "\n{\n";
+    *os << "struct " << structDefinition->name << "\n{\n";
 
-    const TypeInfo* structType = structDefinition->GetType();
-    for (const MemberDefinition* member : structDefinition->GetMembers())
+    const TypeInfo* structType = structDefinition->type;
+    for (const MemberDefinition* member : structDefinition->members)
     {
-        const string& memberName = member->GetName();
+        const string& memberName = member->name;
         const TypeInfo* memberType = structType->GetMember(memberName)->GetType();
         *os << indentStr << memberName << " " << memberType->GetShortName() << ",\n";
     }
@@ -178,16 +178,16 @@ void SourceGenerator::Visit(StructDefinition* structDefinition)
 
 void SourceGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    *os << structInitializationExpression->GetStructName() << '\n';
+    *os << structInitializationExpression->structName << '\n';
     Indent();
     *os << "{\n";
     ++indentLevel;
 
-    for (const MemberInitialization* memberInit : structInitializationExpression->GetMemberInitializations())
+    for (const MemberInitialization* memberInit : structInitializationExpression->memberInitializations)
     {
         Indent();
-        *os << memberInit->GetName() << ": ";
-        memberInit->GetExpression()->Accept(this);
+        *os << memberInit->name << ": ";
+        memberInit->expression->Accept(this);
         *os << ",\n";
     }
 
@@ -200,7 +200,7 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     bool first = true;
 
-    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
+    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
     {
         if (first)
         {
@@ -214,7 +214,7 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
         structDef->Accept(this);
     }
 
-    for (ExternFunctionDeclaration* externFunDef : moduleDefinition->GetExternFunctionDeclarations())
+    for (ExternFunctionDeclaration* externFunDef : moduleDefinition->externFunctionDeclarations)
     {
         if (first)
         {
@@ -228,7 +228,7 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
         externFunDef->Accept(this);
     }
 
-    for (FunctionDefinition* funDef : moduleDefinition->GetFunctionDefinitions())
+    for (FunctionDefinition* funDef : moduleDefinition->functionDefinitions)
     {
         if (first)
         {
@@ -245,7 +245,7 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void SourceGenerator::Visit(NumericExpression* numericExpression)
 {
-    *os << numericExpression->GetToken()->value;
+    *os << numericExpression->token->value;
 }
 
 void SourceGenerator::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpression*/)
@@ -254,17 +254,17 @@ void SourceGenerator::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpressi
 
 void SourceGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    *os << boolLiteralExpression->GetToken()->value;
+    *os << boolLiteralExpression->token->value;
 }
 
 void SourceGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    *os << stringLiteralExpression->GetToken()->value;
+    *os << stringLiteralExpression->token->value;
 }
 
 void SourceGenerator::Visit(VariableExpression* variableExpression)
 {
-    *os << variableExpression->GetName();
+    *os << variableExpression->name;
 }
 
 void SourceGenerator::Visit(ArraySizeValueExpression* arrayExpression)
@@ -302,7 +302,7 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
     *os << "{\n";
     ++indentLevel;
 
-    const Expressions& exprs = blockExpression->GetExpressions();
+    const Expressions& exprs = blockExpression->expressions;
     size_t numExprs = exprs.size();
     for (size_t i = 0; i < numExprs - 1; ++i)
     {
@@ -354,9 +354,9 @@ void SourceGenerator::Visit(ImplicitCastExpression* castExpression)
 
 void SourceGenerator::Visit(FunctionExpression* functionExpression)
 {
-    *os << functionExpression->GetName() << "(";
+    *os << functionExpression->name << "(";
 
-    const Expressions& args = functionExpression->GetArguments();
+    const Expressions& args = functionExpression->arguments;
     size_t numArgs = args.size();
     if (numArgs > 0)
     {
@@ -374,7 +374,7 @@ void SourceGenerator::Visit(FunctionExpression* functionExpression)
 
 void SourceGenerator::Visit(MemberExpression* memberExpression)
 {
-    Expression* subExpression = memberExpression->GetSubExpression();
+    Expression* subExpression = memberExpression->subExpression;
 
     bool needParens =
         dynamic_cast<UnaryExpression*>(subExpression) != nullptr ||
@@ -392,17 +392,17 @@ void SourceGenerator::Visit(MemberExpression* memberExpression)
         *os << ')';
     }
 
-    *os << '.' << memberExpression->GetMemberName();
+    *os << '.' << memberExpression->memberName;
 }
 
 void SourceGenerator::Visit(BranchExpression* branchExpression)
 {
     *os << "if ";
-    branchExpression->GetIfCondition()->Accept(this);
+    branchExpression->ifCondition->Accept(this);
     *os << "\n";
-    branchExpression->GetIfExpression()->Accept(this);
+    branchExpression->ifExpression->Accept(this);
 
-    Expression* elseExpr = branchExpression->GetElseExpression();
+    Expression* elseExpr = branchExpression->elseExpression;
     if (dynamic_cast<UnitTypeLiteralExpression*>(elseExpr) != nullptr)
     {
         // do nothing
@@ -425,13 +425,13 @@ void SourceGenerator::Visit(BranchExpression* branchExpression)
 
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
-    *os << "var " << variableDeclaration->GetName();
-    if (variableDeclaration->GetTypeNameTokens().size() > 0)
+    *os << "var " << variableDeclaration->name;
+    if (variableDeclaration->typeNameTokens.size() > 0)
     {
-        *os << ' ' << variableDeclaration->GetVariableType()->GetShortName();
+        *os << ' ' << variableDeclaration->variableType->GetShortName();
     }
     *os << " = ";
-    variableDeclaration->GetAssignmentExpression()->GetRightExpression()->Accept(this);
+    variableDeclaration->assignmentExpression->right->Accept(this);
 }
 
 void SourceGenerator::Indent()
@@ -444,15 +444,15 @@ void SourceGenerator::Indent()
 
 void SourceGenerator::PrintFunctionDeclaration(FunctionDeclaration* functionDeclaration)
 {
-    *os << "fun " << functionDeclaration->GetName() << "(";
+    *os << "fun " << functionDeclaration->name << "(";
 
-    const Parameters& parameters = functionDeclaration->GetParameters();
+    const Parameters& parameters = functionDeclaration->parameters;
     size_t numParams = parameters.size();
     for (size_t i = 0; i < numParams; ++i)
     {
         const Parameter* param = parameters[i];
 
-        *os << param->GetName() << " " << param->GetType()->GetShortName();
+        *os << param->name << " " << param->type->GetShortName();
 
         if (i != numParams - 1)
         {
@@ -462,7 +462,7 @@ void SourceGenerator::PrintFunctionDeclaration(FunctionDeclaration* functionDecl
 
     *os << ")";
 
-    const TypeInfo* retType = functionDeclaration->GetReturnType();
+    const TypeInfo* retType = functionDeclaration->returnType;
     if (!retType->IsUnit())
     {
         *os << " " << retType->GetShortName();

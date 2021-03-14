@@ -30,14 +30,14 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                "};\n\n";
 
     // print structs
-    for (const StructDefinition* structDef : module->GetStructDefinitions())
+    for (const StructDefinition* structDef : module->structDefinitions)
     {
-        const TypeInfo* structType = structDef->GetType();
+        const TypeInfo* structType = structDef->type;
 
         // print array structs
-        for (const MemberDefinition* member : structDef->GetMembers())
+        for (const MemberDefinition* member : structDef->members)
         {
-            const string& memberName = member->GetName();
+            const string& memberName = member->name;
             const MemberInfo* memberInfo = structType->GetMember(memberName);
             const TypeInfo* memberType = memberInfo->GetType();
             if (memberType->IsArray())
@@ -49,11 +49,11 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
             }
         }
 
-        outFile << "struct " << structDef->GetName() << "\n{\n";
+        outFile << "struct " << structDef->name << "\n{\n";
 
-        for (const MemberDefinition* member : structDef->GetMembers())
+        for (const MemberDefinition* member : structDef->members)
         {
-            const MemberInfo* memberInfo = structType->GetMember(member->GetName());
+            const MemberInfo* memberInfo = structType->GetMember(member->name);
             const TypeInfo* memberType = memberInfo->GetType();
 
             outFile << "    ";
@@ -62,18 +62,18 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                 return false;
             }
 
-            outFile << " " << member->GetName() << ";\n";
+            outFile << " " << member->name << ";\n";
         }
 
         outFile << "};\n\n";
     }
 
     // print function declarations
-    for (const FunctionDefinition* function : module->GetFunctionDefinitions())
+    for (const FunctionDefinition* function : module->functionDefinitions)
     {
-        const FunctionDeclaration* declaration = function->GetDeclaration();
-        const Parameters& params = declaration->GetParameters();
-        const TypeInfo* returnType = declaration->GetReturnType();
+        const FunctionDeclaration* declaration = function->declaration;
+        const Parameters& params = declaration->parameters;
+        const TypeInfo* returnType = declaration->returnType;
 
         // print array structs
         if (returnType->IsArray())
@@ -85,7 +85,7 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
         }
         for (const Parameter* param : params)
         {
-            const TypeInfo* paramType = param->GetType();
+            const TypeInfo* paramType = param->type;
             if (paramType->IsArray())
             {
                 if (!PrintArrayStruct(outFile, paramType))
@@ -100,19 +100,19 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
             return false;
         }
 
-        outFile << " " << declaration->GetName() << "(";
+        outFile << " " << declaration->name << "(";
 
         // print function parameters
         size_t numParams = params.size();
         for (size_t i = 0; i < numParams; ++i)
         {
             const Parameter* param = params[i];
-            if (!PrintCType(outFile, param->GetType()))
+            if (!PrintCType(outFile, param->type))
             {
                 return false;
             }
 
-            outFile << " " << param->GetName();
+            outFile << " " << param->name;
             if (i < numParams - 1)
             {
                 outFile << ", ";

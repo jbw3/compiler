@@ -22,7 +22,7 @@ bool SemanticAnalyzer::Process(SyntaxTreeNode* syntaxTree)
 
 void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 {
-    Expression* subExpr = unaryExpression->GetSubExpression();
+    Expression* subExpr = unaryExpression->subExpression;
     subExpr->Accept(this);
     if (isError)
     {
@@ -32,7 +32,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     const TypeInfo* subExprType = subExpr->GetType();
     bool isInt = subExprType->IsInt();
 
-    UnaryExpression::EOperator op = unaryExpression->GetOperator();
+    UnaryExpression::EOperator op = unaryExpression->op;
 
     bool ok = false;
     const TypeInfo* resultType = nullptr;
@@ -86,7 +86,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     if (!ok)
     {
         string opString = UnaryExpression::GetOperatorString(op);
-        logger.LogError(*unaryExpression->GetOperatorToken(), "Unary operator '{}' does not support type '{}'", opString, subExprType->GetShortName());
+        logger.LogError(*unaryExpression->opToken, "Unary operator '{}' does not support type '{}'", opString, subExprType->GetShortName());
         isError = true;
         return;
     }
@@ -114,7 +114,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
     }
 
-    BinaryExpression::EOperator op = binaryExpression->GetOperator();
+    BinaryExpression::EOperator op = binaryExpression->op;
     bool isAssignment = BinaryExpression::IsAssignment(op);
 
     // implicit cast if necessary
@@ -147,7 +147,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     {
         if (!binaryExpression->left->GetIsStorage())
         {
-            logger.LogError(*binaryExpression->GetOperatorToken(), "Cannot assign to expression");
+            logger.LogError(*binaryExpression->opToken, "Cannot assign to expression");
             isError = true;
             return;
         }
@@ -921,7 +921,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
 
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 {
-    Expression* condition = whileLoop->GetCondition();
+    Expression* condition = whileLoop->condition;
     condition->Accept(this);
     if (isError)
     {
@@ -932,12 +932,12 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     if (!condition->GetType()->IsBool())
     {
         isError = true;
-        logger.LogError(*whileLoop->GetWhileToken(), "While loop condition must be a boolean expression");
+        logger.LogError(*whileLoop->whileToken, "While loop condition must be a boolean expression");
         return;
     }
 
     // check statements
-    BlockExpression* expression = whileLoop->GetExpression();
+    BlockExpression* expression = whileLoop->expression;
     ++loopLevel;
     expression->Accept(this);
     --loopLevel;
@@ -949,7 +949,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
     {
         isError = true;
-        const Token* endBlockToken = expression->GetEndToken();
+        const Token* endBlockToken = expression->endToken;
         logger.LogError(*endBlockToken, "While loop block expression must return the unit type");
         return;
     }
@@ -961,7 +961,7 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
 void SemanticAnalyzer::Visit(ForLoop* forLoop)
 {
     // process iterable expression
-    Expression* iterExpression = forLoop->GetIterExpression();
+    Expression* iterExpression = forLoop->iterExpression;
     iterExpression->Accept(this);
     if (isError)
     {
@@ -982,17 +982,17 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     else
     {
         isError = true;
-        logger.LogError(*forLoop->GetForToken(), "For loop expression is not iterable");
+        logger.LogError(*forLoop->forToken, "For loop expression is not iterable");
         return;
     }
 
     // set variable type
-    const TypeInfo* varType = GetVariableType(forLoop->GetVariableTypeNameTokens(), inferType);
+    const TypeInfo* varType = GetVariableType(forLoop->variableTypeNameTokens, inferType);
     if (isError)
     {
         return;
     }
-    forLoop->SetVariableType(varType);
+    forLoop->variableType = varType;
 
     // set index type if there is an index variable
     const TypeInfo* indexVarType = GetVariableType(forLoop->indexTypeNameTokens, TypeInfo::GetUIntSizeType());
@@ -1039,12 +1039,12 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     Scope scope(symbolTable);
 
     // add the variable name to the symbol table
-    const string& varName = forLoop->GetVariableName();
-    bool ok = symbolTable.AddVariable(varName, forLoop->GetVariableType());
+    const string& varName = forLoop->variableName;
+    bool ok = symbolTable.AddVariable(varName, forLoop->variableType);
     if (!ok)
     {
         isError = true;
-        logger.LogError(*forLoop->GetVariableNameToken(), "Variable '{}' has already been declared", varName);
+        logger.LogError(*forLoop->variableNameToken, "Variable '{}' has already been declared", varName);
         return;
     }
 
@@ -1066,7 +1066,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     {
         isError = true;
         logger.LogError(
-            *forLoop->GetVariableNameToken(),
+            *forLoop->variableNameToken,
             "Cannot assign value of type '{}' to variable '{}' of type '{}'",
             inferType->GetShortName(),
             varName,
@@ -1076,7 +1076,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
 
     // process body expression
-    BlockExpression* expression = forLoop->GetExpression();
+    BlockExpression* expression = forLoop->expression;
     ++loopLevel;
     expression->Accept(this);
     --loopLevel;
@@ -1088,7 +1088,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     if (!expression->GetType()->IsSameAs(*TypeInfo::UnitType))
     {
         isError = true;
-        const Token* endBlockToken = expression->GetEndToken();
+        const Token* endBlockToken = expression->endToken;
         logger.LogError(*endBlockToken, "For loop block expression must return the unit type");
         return;
     }
@@ -1103,7 +1103,7 @@ void SemanticAnalyzer::Visit(LoopControl* loopControl)
     if (loopLevel == 0)
     {
         isError = true;
-        const Token* token = loopControl->GetToken();
+        const Token* token = loopControl->token;
         logger.LogError(*token, "'{}' can only be used in a loop", token->value);
         return;
     }
@@ -1131,7 +1131,7 @@ void SemanticAnalyzer::Visit(Return* ret)
 
     // check if expression type matches function return type
     Expression* resultExpression = nullptr;
-    bool ok = CheckReturnType(currentFunction->GetDeclaration(), expression, ret->token, resultExpression);
+    bool ok = CheckReturnType(currentFunction->declaration, expression, ret->token, resultExpression);
     if (!ok)
     {
         isError = true;
@@ -1159,14 +1159,14 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     // create new scope for parameters and add them
     Scope scope(symbolTable);
 
-    for (const Parameter* param : funcDecl->GetParameters())
+    for (const Parameter* param : funcDecl->parameters)
     {
-        const string& paramName = param->GetName();
-        bool ok = symbolTable.AddVariable(paramName, param->GetType());
+        const string& paramName = param->name;
+        bool ok = symbolTable.AddVariable(paramName, param->type);
         if (!ok)
         {
             isError = true;
-            const Token* paramToken = param->GetNameToken();
+            const Token* paramToken = param->nameToken;
             logger.LogError(*paramToken, "Variable '{}' has already been declared", paramName);
             return;
         }
@@ -1185,7 +1185,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     bool endsWithReturn = false;
     BlockExpression* blockExpr = dynamic_cast<BlockExpression*>(expression);
     assert(blockExpr != nullptr && "Expected function body to be a BlockExpression");
-    Expression* lastExpr = blockExpr->GetExpressions().back();
+    Expression* lastExpr = blockExpr->expressions.back();
     Return* ret = dynamic_cast<Return*>(lastExpr);
     if (ret != nullptr)
     {
@@ -1199,7 +1199,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     {
         // check last expression
         Expression* resultExpression = nullptr;
-        bool ok = CheckReturnType(funcDecl, expression, blockExpr->GetEndToken(), resultExpression);
+        bool ok = CheckReturnType(funcDecl, expression, blockExpr->endToken, resultExpression);
         if (!ok)
         {
             isError = true;
@@ -1215,15 +1215,15 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 
 void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 {
-    const string& structName = structDefinition->GetName();
+    const string& structName = structDefinition->name;
 
     auto iter = partialStructTypes.find(structName);
     assert(iter != partialStructTypes.cend());
     AggregateType* newType = iter->second;
 
-    for (const MemberDefinition* member : structDefinition->GetMembers())
+    for (const MemberDefinition* member : structDefinition->members)
     {
-        const TypeInfo* memberType = NameToType(member->GetTypeNameTokens());
+        const TypeInfo* memberType = NameToType(member->typeNameTokens);
         if (memberType == nullptr)
         {
             delete newType;
@@ -1231,28 +1231,28 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
             return;
         }
 
-        const string& memberName = member->GetName();
-        bool added = newType->AddMember(memberName, memberType, true, member->GetNameToken());
+        const string& memberName = member->name;
+        bool added = newType->AddMember(memberName, memberType, true, member->nameToken);
         if (!added)
         {
             delete newType;
             isError = true;
-            logger.LogError(*member->GetNameToken(), "Duplicate member '{}' in struct '{}'", memberName, structName);
+            logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, structName);
             return;
         }
     }
 
-    structDefinition->SetType(newType);
+    structDefinition->type = newType;
 }
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    const string& structName = structInitializationExpression->GetStructName();
+    const string& structName = structInitializationExpression->structName;
     const TypeInfo* type = TypeInfo::GetType(structName);
     if (type == nullptr)
     {
         isError = true;
-        const Token* token = structInitializationExpression->GetStructNameToken();
+        const Token* token = structInitializationExpression->structNameToken;
         logger.LogError(*token, "'{}' is not a known type", structName);
         return;
     }
@@ -1265,16 +1265,16 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         membersToInit.insert(member->GetName());
     }
 
-    for (MemberInitialization* member : structInitializationExpression->GetMemberInitializations())
+    for (MemberInitialization* member : structInitializationExpression->memberInitializations)
     {
-        const string& memberName = member->GetName();
+        const string& memberName = member->name;
 
         // get member info
         const MemberInfo* memberInfo = type->GetMember(memberName);
         if (memberInfo == nullptr)
         {
             isError = true;
-            const Token* token = member->GetNameToken();
+            const Token* token = member->nameToken;
             logger.LogError(*token, "Struct '{}' does not have a member named '{}'", structName, memberName);
             return;
         }
@@ -1283,7 +1283,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (num == 0)
         {
             isError = true;
-            const Token* token = member->GetNameToken();
+            const Token* token = member->nameToken;
             logger.LogError(*token, "Member '{}' has already been initialized", memberName);
             return;
         }
@@ -1303,7 +1303,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (!AreCompatibleAssignmentTypes(memberType, exprType, needsCast))
         {
             isError = true;
-            const Token* token = member->GetNameToken();
+            const Token* token = member->nameToken;
             logger.LogError(*token, "Cannot assign expression of type '{}' to member '{}' of type '{}'",
                             exprType->GetShortName(), memberName, memberType->GetShortName());
             return;
@@ -1337,7 +1337,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         }
 
         isError = true;
-        const Token* token = structInitializationExpression->GetStructNameToken();
+        const Token* token = structInitializationExpression->structNameToken;
         logger.LogError(*token, errorMsg.c_str());
         return;
     }
@@ -1345,7 +1345,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
 
 bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
 {
-    const vector<StructDefinition*>& structDefs = moduleDefinition->GetStructDefinitions();
+    const vector<StructDefinition*>& structDefs = moduleDefinition->structDefinitions;
     size_t numStructDefs = structDefs.size();
 
     unordered_map<string, StructDefinition*> nameMap;
@@ -1354,11 +1354,11 @@ bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
     // build map for fast lookup
     for (StructDefinition* structDef : structDefs)
     {
-        const string& structName = structDef->GetName();
+        const string& structName = structDef->name;
         auto rv = nameMap.insert({structName, structDef});
         if (!rv.second)
         {
-            logger.LogError(*structDef->GetNameToken(), "Struct '{}' has already been defined", structName);
+            logger.LogError(*structDef->nameToken, "Struct '{}' has already been defined", structName);
             return false;
         }
     }
@@ -1374,7 +1374,7 @@ bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
     // resolve dependencies
     for (StructDefinition* structDef : structDefs)
     {
-        const string& structName = structDef->GetName();
+        const string& structName = structDef->name;
 
         // resolve this struct's dependencies if we have not done so already
         if (resolved.find(structName) == resolved.end())
@@ -1387,7 +1387,7 @@ bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
         }
     }
 
-    moduleDefinition->SwapStructDefinitions(ordered);
+    moduleDefinition->structDefinitions.swap(ordered);
 
     return true;
 }
@@ -1399,11 +1399,11 @@ bool SemanticAnalyzer::ResolveDependencies(
     unordered_set<string>& resolved,
     unordered_set<string>& dependents)
 {
-    const string& structName = structDef->GetName();
+    const string& structName = structDef->name;
 
-    for (const MemberDefinition* member : structDef->GetMembers())
+    for (const MemberDefinition* member : structDef->members)
     {
-        const vector<const Token*>& typeNameTokens = member->GetTypeNameTokens();
+        const vector<const Token*>& typeNameTokens = member->typeNameTokens;
 
         size_t size = typeNameTokens.size();
 
@@ -1421,8 +1421,8 @@ bool SemanticAnalyzer::ResolveDependencies(
                 auto dependentsIter = dependents.find(memberTypeName);
                 if (dependentsIter != dependents.end())
                 {
-                    const string& memberName = member->GetName();
-                    logger.LogError(*member->GetNameToken(), "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
+                    const string& memberName = member->name;
+                    logger.LogError(*member->nameToken, "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
                     return false;
                 }
 
@@ -1451,13 +1451,13 @@ bool SemanticAnalyzer::ResolveDependencies(
     resolved.insert(structName);
 
     // register the type name. we'll add its members later
-    AggregateType* newType = new AggregateType(structName, structDef->GetNameToken());
+    AggregateType* newType = new AggregateType(structName, structDef->nameToken);
     partialStructTypes.insert({structName, newType});
     bool added = TypeInfo::RegisterType(newType);
     if (!added)
     {
         delete newType;
-        logger.LogError(*structDef->GetNameToken(), "Struct '{}' has already been defined", structName);
+        logger.LogError(*structDef->nameToken, "Struct '{}' has already been defined", structName);
         return false;
     }
 
@@ -1582,7 +1582,7 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     }
 
     // process struct definitions
-    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
+    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
     {
         structDef->Accept(this);
         if (isError)
@@ -1593,15 +1593,15 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
     // build a look-up table for all functions
 
-    const vector<ExternFunctionDeclaration*>& externFuncDecls = moduleDefinition->GetExternFunctionDeclarations();
-    const vector<FunctionDefinition*>& funcDefs = moduleDefinition->GetFunctionDefinitions();
+    const vector<ExternFunctionDeclaration*>& externFuncDecls = moduleDefinition->externFunctionDeclarations;
+    const vector<FunctionDefinition*>& funcDefs = moduleDefinition->functionDefinitions;
 
     functions.clear();
     functions.reserve(externFuncDecls.size() + funcDefs.size());
 
     for (ExternFunctionDeclaration* externFunc : externFuncDecls)
     {
-        FunctionDeclaration* decl = externFunc->GetDeclaration();
+        FunctionDeclaration* decl = externFunc->declaration;
 
         ok = SetFunctionDeclarationTypes(decl);
         if (!ok)
@@ -1610,19 +1610,19 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
             return;
         }
 
-        const string& name = decl->GetName();
+        const string& name = decl->name;
         auto rv = functions.insert({name, decl});
         if (!rv.second)
         {
             isError = true;
-            logger.LogError(*decl->GetNameToken(), "Function '{}' has already been defined", name);
+            logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
             return;
         }
     }
 
     for (FunctionDefinition* funcDef : funcDefs)
     {
-        FunctionDeclaration* decl = funcDef->GetDeclaration();
+        FunctionDeclaration* decl = funcDef->declaration;
 
         ok = SetFunctionDeclarationTypes(decl);
         if (!ok)
@@ -1631,18 +1631,18 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
             return;
         }
 
-        const string& name = decl->GetName();
+        const string& name = decl->name;
         auto rv = functions.insert({name, decl});
         if (!rv.second)
         {
             isError = true;
-            logger.LogError(*decl->GetNameToken(), "Function '{}' has already been defined", name);
+            logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
             return;
         }
     }
 
     // perform semantic analysis on all functions
-    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
     {
         funcDef->Accept(this);
         if (isError)
@@ -1684,11 +1684,11 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
-    const string& varName = variableExpression->GetName();
+    const string& varName = variableExpression->name;
     const TypeInfo* varType = symbolTable.GetVariableType(varName);
     if (varType == nullptr)
     {
-        logger.LogError(*variableExpression->GetToken(), "Variable '{}' is not declared in the current scope", varName);
+        logger.LogError(*variableExpression->token, "Variable '{}' is not declared in the current scope", varName);
         isError = true;
     }
     else
@@ -1797,7 +1797,7 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
     // create new scope for block
     Scope scope(symbolTable);
 
-    const Expressions& expressions = blockExpression->GetExpressions();
+    const Expressions& expressions = blockExpression->expressions;
     size_t size = expressions.size();
 
     if (size == 0)
@@ -1870,11 +1870,11 @@ void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)
 
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
-    const string& funcName = functionExpression->GetName();
+    const string& funcName = functionExpression->name;
     auto iter = functions.find(funcName);
     if (iter == functions.cend())
     {
-        logger.LogError(*functionExpression->GetNameToken(), "Function '{}' is not defined", funcName);
+        logger.LogError(*functionExpression->nameToken, "Function '{}' is not defined", funcName);
         isError = true;
         return;
     }
@@ -1882,12 +1882,12 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     const FunctionDeclaration* funcDecl = iter->second;
 
     // check argument count
-    const vector<Expression*>& args = functionExpression->GetArguments();
-    const Parameters& params = funcDecl->GetParameters();
+    const vector<Expression*>& args = functionExpression->arguments;
+    const Parameters& params = funcDecl->parameters;
     if (args.size() != params.size())
     {
         const char* suffix = (params.size() == 1) ? "" : "s";
-        logger.LogError(*functionExpression->GetNameToken(), "Function '{}' expected {} argument{} but got {}", funcName, params.size(), suffix, args.size());
+        logger.LogError(*functionExpression->nameToken, "Function '{}' expected {} argument{} but got {}", funcName, params.size(), suffix, args.size());
         isError = true;
         return;
     }
@@ -1906,12 +1906,12 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         // check argument against the parameter type
         const Parameter* param = params[i];
         const TypeInfo* argType = arg->GetType();
-        const TypeInfo* paramType = param->GetType();
+        const TypeInfo* paramType = param->type;
 
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
         {
-            logger.LogError(*functionExpression->GetNameToken(), "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
+            logger.LogError(*functionExpression->nameToken, "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
             isError = true;
             return;
         }
@@ -1923,15 +1923,15 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
     }
 
     // set the expression's function declaration
-    functionExpression->SetFunctionDeclaration(funcDecl);
+    functionExpression->functionDeclaration = funcDecl;
 
     // set expression's type to the function's return type
-    functionExpression->SetType(funcDecl->GetReturnType());
+    functionExpression->SetType(funcDecl->returnType);
 }
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
 {
-    Expression* expr = memberExpression->GetSubExpression();
+    Expression* expr = memberExpression->subExpression;
     expr->Accept(this);
     if (isError)
     {
@@ -1947,11 +1947,11 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
     }
 
     // check if member is available for this type
-    const string& memberName = memberExpression->GetMemberName();
+    const string& memberName = memberExpression->memberName;
     const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
-        const Token* memberToken = memberExpression->GetMemberNameToken();
+        const Token* memberToken = memberExpression->memberNameToken;
         logger.LogError(*memberToken, "Type '{}' has no member named '{}'", type->GetShortName(), memberName);
         isError = true;
         return;
@@ -1963,7 +1963,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 {
-    Expression* ifCondition = branchExpression->GetIfCondition();
+    Expression* ifCondition = branchExpression->ifCondition;
     ifCondition->Accept(this);
     if (isError)
     {
@@ -1978,14 +1978,14 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         return;
     }
 
-    Expression* ifExpression = branchExpression->GetIfExpression();
+    Expression* ifExpression = branchExpression->ifExpression;
     ifExpression->Accept(this);
     if (isError)
     {
         return;
     }
 
-    Expression* elseExpression = branchExpression->GetElseExpression();
+    Expression* elseExpression = branchExpression->elseExpression;
     elseExpression->Accept(this);
     if (isError)
     {
@@ -2084,8 +2084,8 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 {
-    BinaryExpression* assignmentExpression = variableDeclaration->GetAssignmentExpression();
-    if (assignmentExpression->GetOperator() != BinaryExpression::eAssign)
+    BinaryExpression* assignmentExpression = variableDeclaration->assignmentExpression;
+    if (assignmentExpression->op != BinaryExpression::eAssign)
     {
         isError = true;
         logger.LogInternalError("Binary expression in variable declaration is not an assignment");
@@ -2094,7 +2094,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 
     // process right of assignment expression before adding variable to symbol
     // table in order to detect if the variable is referenced before it is assigned
-    Expression* rightExpr = assignmentExpression->GetRightExpression();
+    Expression* rightExpr = assignmentExpression->right;
     rightExpr->Accept(this);
     if (isError)
     {
@@ -2102,20 +2102,20 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     // set the variable type
-    const TypeInfo* type = GetVariableType(variableDeclaration->GetTypeNameTokens(), rightExpr->GetType());
+    const TypeInfo* type = GetVariableType(variableDeclaration->typeNameTokens, rightExpr->GetType());
     if (isError)
     {
         return;
     }
-    variableDeclaration->SetVariableType(type);
+    variableDeclaration->variableType = type;
 
     // add the variable name to the symbol table
-    const string& varName = variableDeclaration->GetName();
-    bool ok = symbolTable.AddVariable(varName, variableDeclaration->GetVariableType());
+    const string& varName = variableDeclaration->name;
+    bool ok = symbolTable.AddVariable(varName, variableDeclaration->variableType);
     if (!ok)
     {
         isError = true;
-        logger.LogError(*variableDeclaration->GetNameToken(), "Variable '{}' has already been declared", varName);
+        logger.LogError(*variableDeclaration->nameToken, "Variable '{}' has already been declared", varName);
         return;
     }
 
@@ -2133,29 +2133,29 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     unordered_set<string> processedParams;
 
     // set parameter types
-    for (Parameter* param : functionDeclaration->GetParameters())
+    for (Parameter* param : functionDeclaration->parameters)
     {
-        const string& paramName = param->GetName();
+        const string& paramName = param->name;
         if (processedParams.find(paramName) != processedParams.end())
         {
-            const Token* paramToken = param->GetNameToken();
-            logger.LogError(*paramToken, "Function '{}' has multiple parameters named '{}'", functionDeclaration->GetName(), paramName);
+            const Token* paramToken = param->nameToken;
+            logger.LogError(*paramToken, "Function '{}' has multiple parameters named '{}'", functionDeclaration->name, paramName);
             return false;
         }
 
-        const TypeInfo* paramType = NameToType(param->GetTypeNameTokens());
+        const TypeInfo* paramType = NameToType(param->typeNameTokens);
         if (paramType == nullptr)
         {
             return false;
         }
 
-        param->SetType(paramType);
+        param->type = paramType;
         processedParams.insert(paramName);
     }
 
     // set return type
     const TypeInfo* returnType = nullptr;
-    const vector<const Token*>& returnTypeName = functionDeclaration->GetReturnTypeNameTokens();
+    const vector<const Token*>& returnTypeName = functionDeclaration->returnTypeNameTokens;
     size_t returnTypeNameSize = returnTypeName.size();
     if (returnTypeNameSize == 0)
     {
@@ -2163,37 +2163,37 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     }
     else
     {
-        returnType = NameToType(functionDeclaration->GetReturnTypeNameTokens());
+        returnType = NameToType(functionDeclaration->returnTypeNameTokens);
         if (returnType == nullptr)
         {
             return false;
         }
     }
 
-    functionDeclaration->SetReturnType(returnType);
+    functionDeclaration->returnType = returnType;
 
     // the subscript operator uses exit() if a bounds check fails,
     // so we need to make sure it has the right signature
-    if (functionDeclaration->GetName() == "exit")
+    if (functionDeclaration->name == "exit")
     {
-        const vector<Parameter*>& params = functionDeclaration->GetParameters();
-        if (params.size() != 1 || !params[0]->GetType()->IsSameAs(*TypeInfo::Int32Type))
+        const vector<Parameter*>& params = functionDeclaration->parameters;
+        if (params.size() != 1 || !params[0]->type->IsSameAs(*TypeInfo::Int32Type))
         {
-            logger.LogError(*functionDeclaration->GetNameToken(), "Function 'exit' must have exactly one parameter with type 'i32'");
+            logger.LogError(*functionDeclaration->nameToken, "Function 'exit' must have exactly one parameter with type 'i32'");
             return false;
         }
     }
     // the subscript operator optionally uses logError() if a bounds check fails,
     // so we need to make sure it has the right signature
-    else if (functionDeclaration->GetName() == "logError")
+    else if (functionDeclaration->name == "logError")
     {
-        const vector<Parameter*>& params = functionDeclaration->GetParameters();
+        const vector<Parameter*>& params = functionDeclaration->parameters;
         if (params.size() != 3
-        || !params[0]->GetType()->IsSameAs(*TypeInfo::GetStringType())
-        || !params[1]->GetType()->IsSameAs(*TypeInfo::UInt32Type)
-        || !params[2]->GetType()->IsSameAs(*TypeInfo::GetStringType()))
+        || !params[0]->type->IsSameAs(*TypeInfo::GetStringType())
+        || !params[1]->type->IsSameAs(*TypeInfo::UInt32Type)
+        || !params[2]->type->IsSameAs(*TypeInfo::GetStringType()))
         {
-            logger.LogError(*functionDeclaration->GetNameToken(), "Function 'logError' must have the following parameter types: 'str', 'u32', 'str'");
+            logger.LogError(*functionDeclaration->nameToken, "Function 'logError' must have the following parameter types: 'str', 'u32', 'str'");
             return false;
         }
     }
@@ -2277,12 +2277,12 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
 {
     resultExpression = nullptr;
 
-    const TypeInfo* returnType = funcDecl->GetReturnType();
+    const TypeInfo* returnType = funcDecl->returnType;
     const TypeInfo* expressionType = expression->GetType();
     bool needsCast = false;
     if (!AreCompatibleAssignmentTypes(returnType, expressionType, needsCast))
     {
-        logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->GetName(), returnType->GetShortName(), expressionType->GetShortName());
+        logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->name, returnType->GetShortName(), expressionType->GetShortName());
         return false;
     }
 

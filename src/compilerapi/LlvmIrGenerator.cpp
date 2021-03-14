@@ -77,7 +77,7 @@ LlvmIrGenerator::~LlvmIrGenerator()
 
 void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
 {
-    Expression* subExpr = unaryExpression->GetSubExpression();
+    Expression* subExpr = unaryExpression->subExpression;
 
     subExpr->Accept(this);
     if (resultValue == nullptr)
@@ -86,9 +86,9 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
     }
     Value* subExprValue = resultValue;
 
-    SetDebugLocation(unaryExpression->GetOperatorToken());
+    SetDebugLocation(unaryExpression->opToken);
 
-    switch (unaryExpression->GetOperator())
+    switch (unaryExpression->op)
     {
         case UnaryExpression::eNegative:
             resultValue = builder.CreateNeg(subExprValue, "neg");
@@ -116,18 +116,18 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
 
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 {
-    BinaryExpression::EOperator op = binaryExpression->GetOperator();
-    Expression* leftExpr = binaryExpression->GetLeftExpression();
-    Expression* rightExpr = binaryExpression->GetRightExpression();
+    BinaryExpression::EOperator op = binaryExpression->op;
+    Expression* leftExpr = binaryExpression->left;
+    Expression* rightExpr = binaryExpression->right;
 
     if (op == BinaryExpression::eLogicalAnd)
     {
-        SetDebugLocation(binaryExpression->GetOperatorToken());
+        SetDebugLocation(binaryExpression->opToken);
         resultValue = CreateLogicalBranch(leftExpr, rightExpr, true);
     }
     else if (op == BinaryExpression::eLogicalOr)
     {
-        SetDebugLocation(binaryExpression->GetOperatorToken());
+        SetDebugLocation(binaryExpression->opToken);
         resultValue = CreateLogicalBranch(leftExpr, rightExpr, false);
     }
     else
@@ -146,7 +146,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
         }
         Value* rightValue = resultValue;
 
-        SetDebugLocation(binaryExpression->GetOperatorToken());
+        SetDebugLocation(binaryExpression->opToken);
 
         bool isAssignment = BinaryExpression::IsAssignment(op);
 
@@ -295,7 +295,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 
 Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExpression, Value* leftValue, Value* rightValue)
 {
-    const TypeInfo* rightType = binaryExpression->GetRightExpression()->GetType();
+    const TypeInfo* rightType = binaryExpression->right->GetType();
 
     unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
 
@@ -330,7 +330,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
         Function* logErrorFunc = module->getFunction("logError");
         if (logErrorFunc != nullptr)
         {
-            const Token* opToken = binaryExpression->GetOperatorToken();
+            const Token* opToken = binaryExpression->opToken;
 
             const string& filename = compilerContext.GetFilename(opToken->filenameId);
             Constant* fileStrPtr = CreateConstantString(filename);
@@ -390,7 +390,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryExpression, Value* leftValue, Value* rightValue)
 {
     unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
-    Expression* rightExpr = binaryExpression->GetRightExpression();
+    Expression* rightExpr = binaryExpression->right;
     const TypeInfo* rightType = rightExpr->GetType();
     const TypeInfo* innerType = rightType->GetInnerType();
     unsigned innerTypeNumBits = innerType->GetNumBits();
@@ -460,7 +460,7 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     builder.SetInsertPoint(loopCondBlock);
 
     // generate the condition IR
-    whileLoop->GetCondition()->Accept(this);
+    whileLoop->condition->Accept(this);
     if (resultValue == nullptr)
     {
         return;
@@ -482,7 +482,7 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
     loopInfo.breakBlock = loopExitBlock;
     loopInfo.continueBlock = loopCondBlock;
     loops.push(loopInfo);
-    whileLoop->GetExpression()->Accept(this);
+    whileLoop->expression->Accept(this);
     loops.pop();
     if (resultValue == nullptr)
     {
@@ -504,7 +504,7 @@ void LlvmIrGenerator::Visit(WhileLoop* whileLoop)
 
 void LlvmIrGenerator::Visit(ForLoop* forLoop)
 {
-    Expression* iterExpr = forLoop->GetIterExpression();
+    Expression* iterExpr = forLoop->iterExpression;
     iterExpr->Accept(this);
     if (resultValue == nullptr)
     {
@@ -522,7 +522,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     // create new scope for iterator
     Scope scope(symbolTable);
 
-    const Token* varNameToken = forLoop->GetVariableNameToken();
+    const Token* varNameToken = forLoop->variableNameToken;
     DILexicalBlock* diBlock = nullptr;
     if (dbgInfo)
     {
@@ -535,8 +535,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
     // create iterator
-    const string& varName = forLoop->GetVariableName();
-    const TypeInfo* varType = forLoop->GetVariableType();
+    const string& varName = forLoop->variableName;
+    const TypeInfo* varType = forLoop->variableType;
     bool isSigned = varType->GetSign() == TypeInfo::eSigned;
     Type* type = GetType(varType);
     assert(type != nullptr && "Unknown variable declaration type");
@@ -701,7 +701,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     loopInfo.breakBlock = loopExitBlock;
     loopInfo.continueBlock = loopIterBlock;
     loops.push(loopInfo);
-    forLoop->GetExpression()->Accept(this);
+    forLoop->expression->Accept(this);
     loops.pop();
     if (resultValue == nullptr)
     {
@@ -746,7 +746,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
 void LlvmIrGenerator::Visit(LoopControl* loopControl)
 {
-    const Token* token = loopControl->GetToken();
+    const Token* token = loopControl->token;
     Token::EType tokenType = token->type;
     LoopInfo loopInfo = loops.top();
 
@@ -768,7 +768,7 @@ void LlvmIrGenerator::Visit(LoopControl* loopControl)
     // need to create a new basic block for any following instructions
     // because we just terminated the current one with a branch
     stringstream ss;
-    ss << "after" << loopControl->GetToken()->value;
+    ss << "after" << loopControl->token->value;
     Function* function = builder.GetInsertBlock()->getParent();
     BasicBlock* newBlock = BasicBlock::Create(context, ss.str(), function);
     builder.SetInsertPoint(newBlock);
@@ -786,10 +786,6 @@ void LlvmIrGenerator::Visit(Return* ret)
     {
         return;
     }
-
-    // sign extend return value if needed
-    const TypeInfo* expressionType = ret->expression->GetType();
-    const TypeInfo* returnType = currentFunctionDefinition->GetDeclaration()->GetReturnType();
 
     builder.CreateRet(resultValue);
 
@@ -810,8 +806,8 @@ void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclarati
 
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
-    const FunctionDeclaration* declaration = functionDefinition->GetDeclaration();
-    const string& funcName = declaration->GetName();
+    const FunctionDeclaration* declaration = functionDefinition->declaration;
+    const string& funcName = declaration->name;
     Function* func = module->getFunction(funcName);
     if (func == nullptr)
     {
@@ -844,13 +840,13 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     Scope scope(symbolTable);
 
-    const Parameters& params = declaration->GetParameters();
+    const Parameters& params = declaration->parameters;
 
     DISubprogram* diSubprogram = nullptr;
     if (dbgInfo)
     {
         SmallVector<Metadata*, 8> funTypes;
-        DIType* retDebugType = GetDebugType(declaration->GetReturnType());
+        DIType* retDebugType = GetDebugType(declaration->returnType);
         if (retDebugType == nullptr)
         {
             resultValue = nullptr;
@@ -860,7 +856,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
         for (const Parameter* param : params)
         {
-            DIType* paramDebugType = GetDebugType(param->GetType());
+            DIType* paramDebugType = GetDebugType(param->type);
             if (paramDebugType == nullptr)
             {
                 resultValue = nullptr;
@@ -871,7 +867,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
 
-        unsigned line = declaration->GetNameToken()->line;
+        unsigned line = declaration->nameToken->line;
         diSubprogram = diBuilder->createFunction(diFile, funcName, "", diFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
 
@@ -885,16 +881,16 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     for (Argument& arg : func->args())
     {
         const Parameter* param = params[idx];
-        const string& paramName = param->GetName();
+        const string& paramName = param->name;
         arg.setName(paramName);
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
-        const TypeInfo* paramType = param->GetType();
+        const TypeInfo* paramType = param->type;
         symbolTable.AddVariable(paramName, paramType, alloca);
 
         if (dbgInfo)
         {
-            const Token* token = param->GetNameToken();
+            const Token* token = param->nameToken;
             unsigned line = token->line;
             DIType* paramDebugType = GetDebugType(paramType);
             if (paramDebugType == nullptr)
@@ -912,7 +908,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     // process function body expression
     currentFunctionDefinition = functionDefinition;
     currentFunction = func;
-    Expression* expression = functionDefinition->GetExpression();
+    Expression* expression = functionDefinition->expression;
     expression->Accept(this);
     currentFunction = nullptr;
     currentFunctionDefinition = nullptr;
@@ -934,7 +930,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     {
         // sign extend return value if needed
         const TypeInfo* expressionType = expression->GetType();
-        const TypeInfo* returnType = declaration->GetReturnType();
+        const TypeInfo* returnType = declaration->returnType;
 
         builder.CreateRet(resultValue);
     }
@@ -958,13 +954,13 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
 {
-    const string& structName = structDefinition->GetName();
-    const TypeInfo* typeInfo = structDefinition->GetType();
+    const string& structName = structDefinition->name;
+    const TypeInfo* typeInfo = structDefinition->type;
 
     vector<Type*> members;
-    for (const MemberDefinition* memberDef : structDefinition->GetMembers())
+    for (const MemberDefinition* memberDef : structDefinition->members)
     {
-        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->GetName());
+        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->name);
         Type* memberType = GetType(memberInfo->GetType());
         if (memberType == nullptr)
         {
@@ -1031,18 +1027,18 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
     vector<unsigned> index(1);
     Value* initValue = UndefValue::get(type);
-    for (const MemberInitialization* member : structInitializationExpression->GetMemberInitializations())
+    for (const MemberInitialization* member : structInitializationExpression->memberInitializations)
     {
-        Expression* expr = member->GetExpression();
+        Expression* expr = member->expression;
         expr->Accept(this);
         if (resultValue == nullptr)
         {
             return;
         }
 
-        SetDebugLocation(member->GetNameToken());
+        SetDebugLocation(member->nameToken);
 
-        const MemberInfo* memberInfo = typeInfo->GetMember(member->GetName());
+        const MemberInfo* memberInfo = typeInfo->GetMember(member->name);
 
         index[0] = memberInfo->GetIndex();
         initValue = builder.CreateInsertValue(initValue, resultValue, index, "agg");
@@ -1054,15 +1050,15 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     // add all struct names to types map
-    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
+    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
     {
-        const string& structName = structDef->GetName();
+        const string& structName = structDef->name;
         StructType* structType = StructType::create(context, structName);
         types.insert({structName, structType});
 
         if (dbgInfo)
         {
-            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->GetType());
+            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
 
             DIFile* file = diFile;
             const string& name = aggType->GetShortName();
@@ -1078,16 +1074,16 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     }
 
     // generate struct declarations
-    for (StructDefinition* structDef : moduleDefinition->GetStructDefinitions())
+    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
     {
         structDef->Accept(this);
     }
 
     // create function declarations
 
-    for (ExternFunctionDeclaration* externFunc : moduleDefinition->GetExternFunctionDeclarations())
+    for (ExternFunctionDeclaration* externFunc : moduleDefinition->externFunctionDeclarations)
     {
-        const FunctionDeclaration* decl = externFunc->GetDeclaration();
+        const FunctionDeclaration* decl = externFunc->declaration;
         bool ok = CreateFunctionDeclaration(decl);
         if (!ok)
         {
@@ -1096,9 +1092,9 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
         }
     }
 
-    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
     {
-        const FunctionDeclaration* decl = funcDef->GetDeclaration();
+        const FunctionDeclaration* decl = funcDef->declaration;
         bool ok = CreateFunctionDeclaration(decl);
         if (!ok)
         {
@@ -1108,7 +1104,7 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     }
 
     // generate code for functions
-    for (FunctionDefinition* funcDef : moduleDefinition->GetFunctionDefinitions())
+    for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
     {
         funcDef->Accept(this);
         if (resultValue == nullptr)
@@ -1148,15 +1144,15 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
         return;
     }
 
-    SetDebugLocation(numericExpression->GetToken());
+    SetDebugLocation(numericExpression->token);
 
-    int64_t value = numericExpression->GetValue();
+    int64_t value = numericExpression->value;
     resultValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
 }
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    const Token* token = boolLiteralExpression->GetToken();
+    const Token* token = boolLiteralExpression->token;
 
     SetDebugLocation(token);
 
@@ -1166,7 +1162,7 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    const vector<char>& chars = stringLiteralExpression->GetCharacters();
+    const vector<char>& chars = stringLiteralExpression->characters;
     Constant* strPtr = CreateConstantString(chars);
     resultValue = builder.CreateLoad(strPtr, "load");
 }
@@ -1235,7 +1231,7 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
 
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 {
-    const string& name = variableExpression->GetName();
+    const string& name = variableExpression->name;
     AllocaInst* alloca = symbolTable.GetValue(name);
     if (alloca == nullptr)
     {
@@ -1244,7 +1240,7 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
         return;
     }
 
-    SetDebugLocation(variableExpression->GetToken());
+    SetDebugLocation(variableExpression->token);
 
     Expression::EAccessType accessType = variableExpression->GetAccessType();
     switch (accessType)
@@ -1276,7 +1272,7 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
         Type* extType = GetType(TypeInfo::GetUIntSizeType());
         sizeValue = builder.CreateZExt(sizeValue, extType, "zeroext");
     }
-    uint64_t arraySize = (uint64_t)sizeExpression->GetValue();
+    uint64_t arraySize = (uint64_t)sizeExpression->value;
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
     const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();
@@ -1356,7 +1352,6 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
     uint64_t arraySize = expressions.size();
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
-    const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();
     Type* arrayType = GetType(typeInfo);
     Type* innerType = GetType(typeInfo->GetInnerType());
     Type* llvmArrayType = ArrayType::get(innerType, arraySize);
@@ -1399,14 +1394,14 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     if (dbgInfo)
     {
         DIScope* currentScope = diScopes.top();
-        const Token* startToken = blockExpression->GetStartToken();
+        const Token* startToken = blockExpression->startToken;
         unsigned line = startToken->line;
         unsigned column = startToken->column;
         diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
-    const Expressions& expressions = blockExpression->GetExpressions();
+    const Expressions& expressions = blockExpression->expressions;
     size_t size = expressions.size();
 
     if (size == 0)
@@ -1538,7 +1533,7 @@ void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
 
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
-    const string& funcName = functionExpression->GetName();
+    const string& funcName = functionExpression->name;
     Function* func = module->getFunction(funcName);
     if (func == nullptr)
     {
@@ -1547,16 +1542,16 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         return;
     }
 
-    if (functionExpression->GetArguments().size() != func->arg_size())
+    if (functionExpression->arguments.size() != func->arg_size())
     {
         resultValue = nullptr;
         logger.LogInternalError("Unexpected number of function arguments");
         return;
     }
 
-    const FunctionDeclaration* funcDecl = functionExpression->GetFunctionDeclaration();
-    const Parameters& declParams = funcDecl->GetParameters();
-    vector<Expression*> argExpressions = functionExpression->GetArguments();
+    const FunctionDeclaration* funcDecl = functionExpression->functionDeclaration;
+    const Parameters& declParams = funcDecl->parameters;
+    vector<Expression*> argExpressions = functionExpression->arguments;
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)
     {
@@ -1570,21 +1565,21 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         args.push_back(resultValue);
     }
 
-    SetDebugLocation(functionExpression->GetNameToken());
+    SetDebugLocation(functionExpression->nameToken);
 
     resultValue = builder.CreateCall(func, args, "call");
 }
 
 void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 {
-    Expression* expr = memberExpression->GetSubExpression();
+    Expression* expr = memberExpression->subExpression;
     expr->Accept(this);
     if (resultValue == nullptr)
     {
         return;
     }
 
-    SetDebugLocation(memberExpression->GetMemberNameToken());
+    SetDebugLocation(memberExpression->memberNameToken);
 
     const TypeInfo* type = expr->GetType();
     bool isPointer = type->IsPointer();
@@ -1593,7 +1588,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         type = type->GetInnerType();
     }
 
-    const string& memberName = memberExpression->GetMemberName();
+    const string& memberName = memberExpression->memberName;
     const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
@@ -1643,7 +1638,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     const TypeInfo* resultType = branchExpression->GetType();
 
     // generate the condition IR
-    branchExpression->GetIfCondition()->Accept(this);
+    branchExpression->ifCondition->Accept(this);
     if (resultValue == nullptr)
     {
         return;
@@ -1661,7 +1656,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     // generate "true" block IR
     builder.SetInsertPoint(trueBlock);
 
-    Expression* ifExpr = branchExpression->GetIfExpression();
+    Expression* ifExpr = branchExpression->ifExpression;
     ifExpr->Accept(this);
     if (resultValue == nullptr)
     {
@@ -1678,7 +1673,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     function->getBasicBlockList().push_back(falseBlock);
     builder.SetInsertPoint(falseBlock);
 
-    Expression* elseExpr = branchExpression->GetElseExpression();
+    Expression* elseExpr = branchExpression->elseExpression;
     elseExpr->Accept(this);
     if (resultValue == nullptr)
     {
@@ -1705,8 +1700,8 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
-    const string& varName = variableDeclaration->GetName();
-    const TypeInfo* varType = variableDeclaration->GetVariableType();
+    const string& varName = variableDeclaration->name;
+    const TypeInfo* varType = variableDeclaration->variableType;
     Type* type = GetType(varType);
     if (type == nullptr)
     {
@@ -1717,9 +1712,9 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, varType, alloca);
-    CreateDebugVariable(variableDeclaration->GetNameToken(), varType, alloca);
+    CreateDebugVariable(variableDeclaration->nameToken, varType, alloca);
 
-    variableDeclaration->GetAssignmentExpression()->Accept(this);
+    variableDeclaration->assignmentExpression->Accept(this);
     if (resultValue == nullptr)
     {
         return;
@@ -2032,7 +2027,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
 bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcDecl)
 {
     // get the return type
-    Type* returnType = GetType(funcDecl->GetReturnType());
+    Type* returnType = GetType(funcDecl->returnType);
     if (returnType == nullptr)
     {
         logger.LogInternalError("Invalid function return type");
@@ -2040,17 +2035,17 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     }
 
     // get the parameter types
-    const Parameters& declParams = funcDecl->GetParameters();
+    const Parameters& declParams = funcDecl->parameters;
     vector<Type*> parameters;
     parameters.reserve(declParams.size());
     for (const Parameter* declParam : declParams)
     {
-        Type* varType = GetType(declParam->GetType());
+        Type* varType = GetType(declParam->type);
         parameters.push_back(varType);
     }
 
     FunctionType* funcType = FunctionType::get(returnType, parameters, false);
-    Function::Create(funcType, Function::ExternalLinkage, funcDecl->GetName(), module);
+    Function::Create(funcType, Function::ExternalLinkage, funcDecl->name, module);
 
     return true;
 }

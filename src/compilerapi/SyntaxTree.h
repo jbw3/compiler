@@ -75,15 +75,10 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    int64_t GetValue() const;
-
-    const Token* GetToken() const;
-
     unsigned GetMinSignedSize() const;
 
     unsigned GetMinUnsignedSize() const;
 
-private:
     const Token* token;
     int64_t value;
 };
@@ -97,9 +92,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const Token* GetToken() const;
-
-private:
     const Token* token;
 };
 
@@ -112,11 +104,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::vector<char>& GetCharacters() const;
-
-    const Token* GetToken() const;
-
-private:
     const Token* token;
     std::vector<char> characters;
 };
@@ -161,12 +148,6 @@ public:
     virtual ~BlockExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
-
-    const Expressions& GetExpressions() const;
-
-    const Token* GetStartToken() const;
-
-    const Token* GetEndToken() const;
 
     const Token* startToken;
     const Token* endToken;
@@ -228,14 +209,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    EOperator GetOperator() const;
-
-    Expression* GetLeftExpression() const;
-
-    Expression* GetRightExpression() const;
-
-    const Token* GetOperatorToken() const;
-
     const Token* opToken;
     Expression* left;
     Expression* right;
@@ -261,12 +234,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    EOperator GetOperator() const;
-
-    Expression* GetSubExpression() const;
-
-    const Token* GetOperatorToken() const;
-
     const Token* opToken;
     Expression* subExpression;
     EOperator op;
@@ -281,11 +248,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetName() const;
-
-    const Token* GetToken() const;
-
-private:
     const Token* token;
     std::string name;
 };
@@ -326,16 +288,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetName() const;
-
-    const Expressions& GetArguments() const;
-
-    const Token* GetNameToken() const;
-
-    const FunctionDeclaration* GetFunctionDeclaration() const;
-
-    void SetFunctionDeclaration(const FunctionDeclaration* decl);
-
     const Token* nameToken;
     const FunctionDeclaration* functionDeclaration;
     std::string name;
@@ -353,14 +305,6 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     void SetAccessType(EAccessType newAccessType) override;
-
-    Expression* GetSubExpression() const;
-
-    const std::string& GetMemberName() const;
-
-    const Token* GetOperatorToken() const;
-
-    const Token* GetMemberNameToken() const;
 
     const Token* opToken;
     const Token* memberNameToken;
@@ -381,12 +325,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    Expression* GetIfCondition() const;
-
-    Expression* GetIfExpression() const;
-
-    Expression* GetElseExpression() const;
-
     const Token* ifToken;
     const Token* elseToken;
 
@@ -405,19 +343,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetName() const;
-
-    const TypeInfo* GetVariableType() const;
-
-    void SetVariableType(const TypeInfo* newType);
-
-    BinaryExpression* GetAssignmentExpression() const;
-
-    const Token* GetNameToken() const;
-
-    const std::vector<const Token*>& GetTypeNameTokens() const;
-
-private:
     const Token* nameToken;
     std::vector<const Token*> typeNameTokens;
     std::string name;
@@ -435,12 +360,6 @@ public:
     virtual ~WhileLoop();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
-
-    Expression* GetCondition() const;
-
-    BlockExpression* GetExpression() const;
-
-    const Token* GetWhileToken() const;
 
     Expression* condition;
     BlockExpression* expression;
@@ -461,24 +380,6 @@ public:
     virtual ~ForLoop();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
-
-    const std::string& GetVariableName() const;
-
-    const TypeInfo* GetVariableType() const;
-
-    void SetVariableType(const TypeInfo* newType);
-
-    Expression* GetIterExpression();
-
-    BlockExpression* GetExpression();
-
-    const Token* GetForToken() const;
-
-    const Token* GetInToken() const;
-
-    const Token* GetVariableNameToken() const;
-
-    const std::vector<const Token*>& GetVariableTypeNameTokens() const;
 
     std::string variableName;
     const TypeInfo* variableType;
@@ -503,9 +404,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const Token* GetToken() const;
-
-private:
     const Token* token;
 };
 
@@ -530,17 +428,6 @@ public:
 
     ~Parameter() = default;
 
-    const std::string& GetName() const;
-
-    const TypeInfo* GetType() const;
-
-    void SetType(const TypeInfo* newType);
-
-    const Token* GetNameToken() const;
-
-    const std::vector<const Token*>& GetTypeNameTokens() const;
-
-private:
     const Token* nameToken;
     const std::vector<const Token*> typeNameTokens;
     std::string name;
@@ -559,19 +446,6 @@ public:
 
     virtual ~FunctionDeclaration();
 
-    const std::string& GetName() const;
-
-    const Parameters& GetParameters() const;
-
-    const TypeInfo* GetReturnType() const;
-
-    void SetReturnType(const TypeInfo* newType);
-
-    const Token* GetNameToken() const;
-
-    const std::vector<const Token*>& GetReturnTypeNameTokens() const;
-
-private:
     const Token* nameToken;
     std::vector<const Token*> returnTypeNameTokens;
     std::string name;
@@ -588,9 +462,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    FunctionDeclaration* GetDeclaration() const;
-
-private:
     FunctionDeclaration* declaration;
 };
 
@@ -604,14 +475,9 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    FunctionDeclaration* GetDeclaration() const;
-
-    Expression* GetExpression() const;
-
-    bool endsWithReturnStatement;
-
     FunctionDeclaration* declaration;
     Expression* expression;
+    bool endsWithReturnStatement;
 };
 
 class MemberDefinition
@@ -620,13 +486,6 @@ public:
     MemberDefinition(const std::string& name, const Token* nameToken,
                      const std::vector<const Token*>& typeNameTokens);
 
-    const std::string& GetName() const;
-
-    const Token* GetNameToken() const;
-
-    const std::vector<const Token*>& GetTypeNameTokens() const;
-
-private:
     const Token* nameToken;
     std::vector<const Token*> typeNameTokens;
     std::string name;
@@ -642,17 +501,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetName() const;
-
-    const std::vector<MemberDefinition*>& GetMembers() const;
-
-    const TypeInfo* GetType() const;
-
-    void SetType(const TypeInfo* newType);
-
-    const Token* GetNameToken() const;
-
-private:
     const Token* nameToken;
     std::string name;
     std::vector<MemberDefinition*> members;
@@ -666,12 +514,6 @@ public:
                          const Token* nameToken);
 
     virtual ~MemberInitialization();
-
-    const std::string& GetName() const;
-
-    Expression* GetExpression() const;
-
-    const Token* GetNameToken() const;
 
     std::string name;
     Expression* expression;
@@ -688,13 +530,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const std::string& GetStructName() const;
-
-    const std::vector<MemberInitialization*>& GetMemberInitializations() const;
-
-    const Token* GetStructNameToken() const;
-
-private:
     std::string structName;
     std::vector<MemberInitialization*> memberInitializations;
     const Token* structNameToken;
@@ -711,15 +546,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    void SwapStructDefinitions(std::vector<StructDefinition*>& newStructDefinitions);
-
-    const std::vector<StructDefinition*>& GetStructDefinitions() const;
-
-    const std::vector<ExternFunctionDeclaration*>& GetExternFunctionDeclarations() const;
-
-    const std::vector<FunctionDefinition*>& GetFunctionDefinitions() const;
-
-private:
     std::vector<StructDefinition*> structDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
     std::vector<FunctionDefinition*> functionDefinitions;
