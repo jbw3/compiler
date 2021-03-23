@@ -86,6 +86,8 @@ public:
 
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;
 
+    void Visit(SyntaxTree::Modules* modules) override;
+
     void Visit(SyntaxTree::UnitTypeLiteralExpression* unitTypeLiteralExpression) override;
 
     void Visit(SyntaxTree::NumericExpression* numericExpression) override;
@@ -114,7 +116,7 @@ public:
 
     void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
 
-    bool Generate(SyntaxTree::SyntaxTreeNode* syntaxTree, llvm::Module*& module);
+    bool Generate(SyntaxTree::Modules* syntaxTree, llvm::Module*& module);
 
 private:
     static constexpr size_t STR_STRUCT_ELEMENTS_SIZE = 2;
@@ -148,7 +150,6 @@ private:
     };
 
     llvm::TargetMachine* targetMachine;
-    std::string inFilename;
     unsigned optimizationLevel;
     bool dbgInfo;
     bool boundsCheck;

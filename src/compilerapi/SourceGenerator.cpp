@@ -243,6 +243,11 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
+void SourceGenerator::Visit(Modules* modules)
+{
+    // TODO: implement
+}
+
 void SourceGenerator::Visit(NumericExpression* numericExpression)
 {
     *os << numericExpression->token->value;

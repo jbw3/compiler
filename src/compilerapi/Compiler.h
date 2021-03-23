@@ -4,13 +4,10 @@
 #include "CompilerContext.h"
 #include "Config.h"
 #include "ErrorLogger.h"
+#include "SyntaxTree.h"
 #include "Token.h"
 #include <istream>
 
-namespace SyntaxTree
-{
-class ModuleDefinition;
-}
 class TokenList;
 
 class Compiler
@@ -20,7 +17,7 @@ public:
 
     Compiler(const Config& config);
 
-    bool CompileSyntaxTree(SyntaxTree::ModuleDefinition*& syntaxTree);
+    bool CompileSyntaxTree(SyntaxTree::Modules* syntaxTree);
 
     bool Compile();
 

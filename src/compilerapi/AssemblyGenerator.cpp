@@ -32,8 +32,19 @@ AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) 
 {
     if (config.outFilename.empty())
     {
-        size_t idx = config.inFilename.rfind('.');
-        string baseName = config.inFilename.substr(0, idx);
+        // if there is no output filename specified, just pick the first input filename
+        string filename;
+        if (config.inFilenames.empty())
+        {
+            filename = "-";
+        }
+        else
+        {
+            filename = config.inFilenames[0];
+        }
+
+        size_t idx = filename.rfind('.');
+        string baseName = filename.substr(0, idx);
 
         if (emitType == Config::eLlvmIr)
         {

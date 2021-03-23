@@ -18,6 +18,7 @@ class ImplicitCastExpression;
 class LoopControl;
 class MemberExpression;
 class ModuleDefinition;
+class Modules;
 class NumericExpression;
 class Return;
 class StringLiteralExpression;
@@ -54,6 +55,8 @@ public:
     virtual void Visit(SyntaxTree::StructInitializationExpression* structInitializationExpression) = 0;
 
     virtual void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) = 0;
+
+    virtual void Visit(SyntaxTree::Modules* modules) = 0;
 
     virtual void Visit(SyntaxTree::UnitTypeLiteralExpression* unitTypeLiteralExpression) = 0;
 

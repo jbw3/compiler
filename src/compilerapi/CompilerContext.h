@@ -44,19 +44,29 @@ class CompilerContext
 {
 public:
     TokenValues tokenValues;
-    TokenList tokens;
 
     CompilerContext();
 
-    unsigned AddFilename(const std::string& filename);
+    unsigned AddFile(const std::string& filename);
+
+    unsigned GetFileIdCount() const
+    {
+        return static_cast<unsigned>(filenames.size());
+    }
 
     const std::string& GetFilename(unsigned id) const
     {
         return filenames[id];
     }
 
+    TokenList& GetFileTokens(unsigned id)
+    {
+        return fileTokens[id];
+    }
+
 private:
     std::vector<std::string> filenames;
+    std::vector<TokenList> fileTokens;
 };
 
 #endif // COMPILER_CONTEXT_H_

@@ -14,7 +14,31 @@ SyntaxAnalyzer::SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& lo
 {
 }
 
-bool SyntaxAnalyzer::Process(const TokenList& tokens, ModuleDefinition*& syntaxTree)
+bool SyntaxAnalyzer::Process(Modules* syntaxTree)
+{
+    bool ok = true;
+    unsigned fileCount = compilerContext.GetFileIdCount();
+
+    deletePointerContainer(syntaxTree->modules);
+    syntaxTree->modules.reserve(fileCount);
+
+    for (unsigned fileId = 0; fileId < fileCount; ++fileId)
+    {
+        ModuleDefinition* module = nullptr;
+        const string& filename = compilerContext.GetFilename(fileId);
+        ok = ProcessModule(filename, compilerContext.GetFileTokens(fileId), module);
+        if (!ok)
+        {
+            break;
+        }
+
+        syntaxTree->modules.push_back(module);
+    }
+
+    return ok;
+}
+
+bool SyntaxAnalyzer::ProcessModule(const string& filename, const TokenList& tokens, ModuleDefinition*& syntaxTree)
 {
     TokenIterator iter = tokens.begin();
     TokenIterator endIter = tokens.end();
@@ -71,7 +95,7 @@ bool SyntaxAnalyzer::Process(const TokenList& tokens, ModuleDefinition*& syntaxT
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(structs, externFunctions, functions);
+        syntaxTree = new ModuleDefinition(filename, structs, externFunctions, functions);
     }
     else
     {

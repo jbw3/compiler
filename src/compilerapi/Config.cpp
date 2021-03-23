@@ -264,15 +264,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
     }
     else
     {
-        if (inFilename.empty())
-        {
-            inFilename = arg;
-        }
-        else
-        {
-            cerr << "Error: More than one input file cannot be specified\n";
-            ok = false;
-        }
+        inFilenames.push_back(arg);
     }
 
     return ok;
@@ -280,7 +272,7 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
 
 void Config::PrintHelp() const
 {
-    cout << R"(Usage: wip <filename> [options]
+    cout << R"(Usage: wip <filenames> [options]
 
 Options:
   -h, --help             Print help message

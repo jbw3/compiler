@@ -6,7 +6,7 @@
 using namespace std;
 using namespace SyntaxTree;
 
-bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
+bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
 {
     string outFilename = GetOutFilename(config);
 
@@ -29,97 +29,101 @@ bool CHeaderPrinter::Print(const Config& config, const ModuleDefinition* module)
                "    char* Data;\n"
                "};\n\n";
 
-    // print structs
-    for (const StructDefinition* structDef : module->structDefinitions)
+    // TODO: need to do resolve order first
+    for (const ModuleDefinition* module : modules->modules)
     {
-        const TypeInfo* structType = structDef->type;
-
-        // print array structs
-        for (const MemberDefinition* member : structDef->members)
+        // print structs
+        for (const StructDefinition* structDef : module->structDefinitions)
         {
-            const string& memberName = member->name;
-            const MemberInfo* memberInfo = structType->GetMember(memberName);
-            const TypeInfo* memberType = memberInfo->GetType();
-            if (memberType->IsArray())
+            const TypeInfo* structType = structDef->type;
+
+            // print array structs
+            for (const MemberDefinition* member : structDef->members)
             {
-                if (!PrintArrayStruct(outFile, memberType))
+                const string& memberName = member->name;
+                const MemberInfo* memberInfo = structType->GetMember(memberName);
+                const TypeInfo* memberType = memberInfo->GetType();
+                if (memberType->IsArray())
+                {
+                    if (!PrintArrayStruct(outFile, memberType))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            outFile << "struct " << structDef->name << "\n{\n";
+
+            for (const MemberDefinition* member : structDef->members)
+            {
+                const MemberInfo* memberInfo = structType->GetMember(member->name);
+                const TypeInfo* memberType = memberInfo->GetType();
+
+                outFile << "    ";
+                if (!PrintCType(outFile, memberType))
+                {
+                    return false;
+                }
+
+                outFile << " " << member->name << ";\n";
+            }
+
+            outFile << "};\n\n";
+        }
+
+        // print function declarations
+        for (const FunctionDefinition* function : module->functionDefinitions)
+        {
+            const FunctionDeclaration* declaration = function->declaration;
+            const Parameters& params = declaration->parameters;
+            const TypeInfo* returnType = declaration->returnType;
+
+            // print array structs
+            if (returnType->IsArray())
+            {
+                if (!PrintArrayStruct(outFile, returnType))
                 {
                     return false;
                 }
             }
-        }
+            for (const Parameter* param : params)
+            {
+                const TypeInfo* paramType = param->type;
+                if (paramType->IsArray())
+                {
+                    if (!PrintArrayStruct(outFile, paramType))
+                    {
+                        return false;
+                    }
+                }
+            }
 
-        outFile << "struct " << structDef->name << "\n{\n";
-
-        for (const MemberDefinition* member : structDef->members)
-        {
-            const MemberInfo* memberInfo = structType->GetMember(member->name);
-            const TypeInfo* memberType = memberInfo->GetType();
-
-            outFile << "    ";
-            if (!PrintCType(outFile, memberType))
+            if (!PrintCType(outFile, returnType))
             {
                 return false;
             }
 
-            outFile << " " << member->name << ";\n";
-        }
+            outFile << " " << declaration->name << "(";
 
-        outFile << "};\n\n";
-    }
-
-    // print function declarations
-    for (const FunctionDefinition* function : module->functionDefinitions)
-    {
-        const FunctionDeclaration* declaration = function->declaration;
-        const Parameters& params = declaration->parameters;
-        const TypeInfo* returnType = declaration->returnType;
-
-        // print array structs
-        if (returnType->IsArray())
-        {
-            if (!PrintArrayStruct(outFile, returnType))
+            // print function parameters
+            size_t numParams = params.size();
+            for (size_t i = 0; i < numParams; ++i)
             {
-                return false;
-            }
-        }
-        for (const Parameter* param : params)
-        {
-            const TypeInfo* paramType = param->type;
-            if (paramType->IsArray())
-            {
-                if (!PrintArrayStruct(outFile, paramType))
+                const Parameter* param = params[i];
+                if (!PrintCType(outFile, param->type))
                 {
                     return false;
                 }
-            }
-        }
 
-        if (!PrintCType(outFile, returnType))
-        {
-            return false;
-        }
-
-        outFile << " " << declaration->name << "(";
-
-        // print function parameters
-        size_t numParams = params.size();
-        for (size_t i = 0; i < numParams; ++i)
-        {
-            const Parameter* param = params[i];
-            if (!PrintCType(outFile, param->type))
-            {
-                return false;
+                outFile << " " << param->name;
+                if (i < numParams - 1)
+                {
+                    outFile << ", ";
+                }
             }
 
-            outFile << " " << param->name;
-            if (i < numParams - 1)
-            {
-                outFile << ", ";
-            }
+            outFile << ");\n\n";
         }
-
-        outFile << ");\n\n";
     }
 
     outFile << "#ifdef __cplusplus\n"
@@ -135,8 +139,19 @@ string CHeaderPrinter::GetOutFilename(const Config& config)
     string outFilename;
     if (config.outFilename.empty())
     {
-        size_t idx = config.inFilename.rfind('.');
-        outFilename = config.inFilename.substr(0, idx);
+        // if there is no output filename specified, just pick the first input filename
+        string filename;
+        if (config.inFilenames.empty())
+        {
+            filename = "-";
+        }
+        else
+        {
+            filename = config.inFilenames[0];
+        }
+
+        size_t idx = filename.rfind('.');
+        outFilename = filename.substr(0, idx);
         outFilename += ".h";
     }
     else

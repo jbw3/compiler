@@ -784,9 +784,11 @@ void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-ModuleDefinition::ModuleDefinition(const vector<StructDefinition*>& structDefinitions,
+ModuleDefinition::ModuleDefinition(const string& filename,
+                                   const vector<StructDefinition*>& structDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
+    filename(filename),
     structDefinitions(structDefinitions),
     externFunctionDeclarations(externFunctionDeclarations),
     functionDefinitions(functionDefinitions)

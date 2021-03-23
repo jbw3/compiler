@@ -1652,6 +1652,11 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
+void SemanticAnalyzer::Visit(Modules* modules)
+{
+    // TODO: implement
+}
+
 void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
 {
     unitTypeLiteralExpression->SetType(TypeInfo::UnitType);

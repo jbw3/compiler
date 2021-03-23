@@ -166,6 +166,14 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
     PrintProperty("functions", moduleDefinition->functionDefinitions);
 }
 
+void SyntaxTreePrinter::Visit(Modules* modules)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "Modules");
+    PrintProperty("modules", modules->modules);
+}
+
 void SyntaxTreePrinter::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
 {
     BracePrinter printer(*this, "{", "}");

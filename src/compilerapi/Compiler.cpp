@@ -29,10 +29,8 @@ Compiler::Compiler(const Config& config) :
     TypeInfo::InitTypes(config.targetMachine);
 }
 
-bool Compiler::CompileSyntaxTree(ModuleDefinition*& syntaxTree)
+bool Compiler::CompileSyntaxTree(Modules* syntaxTree)
 {
-    syntaxTree = nullptr;
-
     SW_CREATE(Lexing);
     SW_CREATE(Syntax);
     SW_CREATE(Semantic);
@@ -44,8 +42,16 @@ bool Compiler::CompileSyntaxTree(ModuleDefinition*& syntaxTree)
     {
         SW_START(Lexing);
 
-        LexicalAnalyzer lexicalAnalyzer(compilerContext, logger);
-        ok = lexicalAnalyzer.Process(config.inFilename, compilerContext.tokens);
+        for (string filename : config.inFilenames)
+        {
+            LexicalAnalyzer lexicalAnalyzer(compilerContext, logger);
+            ok = lexicalAnalyzer.Process(filename);
+
+            if (!ok)
+            {
+                break;
+            }
+        }
 
         SW_STOP(Lexing);
         SW_PRINT(Lexing);
@@ -54,7 +60,11 @@ bool Compiler::CompileSyntaxTree(ModuleDefinition*& syntaxTree)
     // check if tokens are the output
     if (ok && config.emitType == Config::eTokens)
     {
-        PrintTokens(compilerContext.tokens);
+        unsigned fileIdCount = compilerContext.GetFileIdCount();
+        for (unsigned fileId = 0; fileId < fileIdCount; ++fileId)
+        {
+            PrintTokens(compilerContext.GetFileTokens(fileId));
+        }
         return ok;
     }
 
@@ -64,7 +74,7 @@ bool Compiler::CompileSyntaxTree(ModuleDefinition*& syntaxTree)
         SW_START(Syntax);
 
         SyntaxAnalyzer syntaxAnalyzer(compilerContext, logger);
-        ok = syntaxAnalyzer.Process(compilerContext.tokens, syntaxTree);
+        ok = syntaxAnalyzer.Process(syntaxTree);
 
         SW_STOP(Syntax);
         SW_PRINT(Syntax);
@@ -91,7 +101,7 @@ bool Compiler::Compile()
     SW_CREATE(IrOpt);
     SW_CREATE(AsmGen);
 
-    ModuleDefinition* syntaxTree = nullptr;
+    Modules* syntaxTree = nullptr;
     bool ok = CompileSyntaxTree(syntaxTree);
 
     // check if syntax tree is the output

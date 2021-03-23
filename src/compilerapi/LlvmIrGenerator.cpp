@@ -11,6 +11,7 @@
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Linker/Linker.h"
 #include "llvm/Target/TargetMachine.h"
 #include <experimental/filesystem>
 #include <iostream>
@@ -52,7 +53,6 @@ Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 
 LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext, const Config& config, ErrorLogger& logger) :
     targetMachine(config.targetMachine),
-    inFilename(config.inFilename),
     optimizationLevel(config.optimizationLevel),
     dbgInfo(config.debugInfo),
     boundsCheck(config.boundsCheck),
@@ -1114,6 +1114,11 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     }
 }
 
+void LlvmIrGenerator::Visit(Modules* modules)
+{
+    assert(false && "TODO: implement");
+}
+
 void LlvmIrGenerator::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
 {
     resultValue = ConstantStruct::get(unitType);
@@ -1724,8 +1729,11 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     resultValue = ConstantStruct::get(unitType);
 }
 
-bool LlvmIrGenerator::Generate(SyntaxTreeNode* syntaxTree, Module*& module)
+bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 {
+    // TODO: implement linking
+    string inFilename = "temp.wip"; // TODO: remove this
+
     module = new Module(inFilename, context);
     module->setDataLayout(targetMachine->createDataLayout());
     module->setTargetTriple(targetMachine->getTargetTriple().str());

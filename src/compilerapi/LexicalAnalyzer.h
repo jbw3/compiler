@@ -17,7 +17,7 @@ public:
 
     ~LexicalAnalyzer();
 
-    bool Process(const std::string& inFile, TokenList& tokens);
+    bool Process(const std::string& inFile);
 
     bool Process(std::istream& is, TokenList& tokens);
 

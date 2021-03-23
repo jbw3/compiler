@@ -18,7 +18,7 @@ public:
 
     SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
 
-    bool Process(const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
+    bool Process(SyntaxTree::Modules* syntaxTree);
 
 private:
     struct UnaryOpData
@@ -35,6 +35,8 @@ private:
 
     CompilerContext& compilerContext;
     ErrorLogger& logger;
+
+    bool ProcessModule(const std::string& filename, const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 

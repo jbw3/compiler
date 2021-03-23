@@ -66,8 +66,10 @@ CompilerContext::CompilerContext()
 {
 }
 
-unsigned CompilerContext::AddFilename(const string& filename)
+unsigned CompilerContext::AddFile(const string& filename)
 {
     filenames.push_back(filename);
+    fileTokens.push_back(TokenList());
+
     return static_cast<unsigned>(filenames.size() - 1);
 }

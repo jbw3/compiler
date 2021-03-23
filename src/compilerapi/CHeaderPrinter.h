@@ -8,7 +8,7 @@
 class CHeaderPrinter
 {
 public:
-    bool Print(const Config& config, const SyntaxTree::ModuleDefinition* module);
+    bool Print(const Config& config, const SyntaxTree::Modules* modules);
 
 private:
     std::unordered_set<std::string> arrayTypeNames;

@@ -37,9 +37,9 @@ bool SourceGeneratorTests::TestSourceGenerator()
     }
 #endif
 
-    SyntaxTree::ModuleDefinition* syntaxTree = nullptr;
+    SyntaxTree::Modules* syntaxTree = nullptr;
     Config config;
-    config.inFilename = inFilename;
+    config.inFilenames.push_back(inFilename);
 
     Compiler compiler(config);
     bool ok = compiler.CompileSyntaxTree(syntaxTree);

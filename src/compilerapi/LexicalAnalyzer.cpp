@@ -123,7 +123,7 @@ LexicalAnalyzer::~LexicalAnalyzer()
     delete [] buff;
 }
 
-bool LexicalAnalyzer::Process(const string& inFile, TokenList& tokens)
+bool LexicalAnalyzer::Process(const string& inFile)
 {
     istream* is = nullptr;
     if (inFile.empty() || inFile == "-")
@@ -143,7 +143,8 @@ bool LexicalAnalyzer::Process(const string& inFile, TokenList& tokens)
         }
     }
 
-    filenameId = compilerContext.AddFilename(filename);
+    filenameId = compilerContext.AddFile(filename);
+    TokenList& tokens = compilerContext.GetFileTokens(filenameId);
 
     bool ok = Process(*is, tokens);
 

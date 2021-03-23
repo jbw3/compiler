@@ -2,6 +2,7 @@
 #define CONFIG_H_
 
 #include <string>
+#include <vector>
 
 namespace llvm
 {
@@ -35,7 +36,7 @@ public:
 
     EEmitType emitType;
     EAssemblyType assemblyType;
-    std::string inFilename;
+    std::vector<std::string> inFilenames;
     std::string outFilename;
     unsigned optimizationLevel;
     std::string architecture;
