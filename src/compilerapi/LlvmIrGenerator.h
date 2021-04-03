@@ -158,12 +158,13 @@ private:
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder;
     llvm::DIBuilder* diBuilder;
-    llvm::DIFile* diFile;
+    llvm::DIFile** diFiles;
     std::stack<llvm::DIScope*> diScopes;
     llvm::Module* module;
     SymbolTable symbolTable;
     llvm::Function* currentFunction;
     SyntaxTree::FunctionDefinition* currentFunctionDefinition;
+    llvm::DIFile* currentDiFile;
     llvm::Value* resultValue;
     llvm::StructType* unitType;
     llvm::StructType* strStructType;

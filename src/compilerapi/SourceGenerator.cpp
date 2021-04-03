@@ -245,7 +245,10 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void SourceGenerator::Visit(Modules* modules)
 {
-    // TODO: implement
+    for (ModuleDefinition* module : modules->modules)
+    {
+        module->Accept(this);
+    }
 }
 
 void SourceGenerator::Visit(NumericExpression* numericExpression)

@@ -29,13 +29,14 @@ Compiler::Compiler(const Config& config) :
     TypeInfo::InitTypes(config.targetMachine);
 }
 
-bool Compiler::CompileSyntaxTree(Modules* syntaxTree)
+bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
 {
     SW_CREATE(Lexing);
     SW_CREATE(Syntax);
     SW_CREATE(Semantic);
 
     bool ok = true;
+    syntaxTree = new Modules;
 
     // lexical analysis
     if (ok)

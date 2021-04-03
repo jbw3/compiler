@@ -17,7 +17,7 @@ public:
 
     Compiler(const Config& config);
 
-    bool CompileSyntaxTree(SyntaxTree::Modules* syntaxTree);
+    bool CompileSyntaxTree(SyntaxTree::Modules*& syntaxTree);
 
     bool Compile();
 

@@ -784,11 +784,11 @@ void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-ModuleDefinition::ModuleDefinition(const string& filename,
+ModuleDefinition::ModuleDefinition(unsigned fileId,
                                    const vector<StructDefinition*>& structDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
-    filename(filename),
+    fileId(fileId),
     structDefinitions(structDefinitions),
     externFunctionDeclarations(externFunctionDeclarations),
     functionDefinitions(functionDefinitions)
@@ -803,6 +803,16 @@ ModuleDefinition::~ModuleDefinition()
 }
 
 void ModuleDefinition::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
+Modules::~Modules()
+{
+    deletePointerContainer(modules);
+}
+
+void Modules::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }

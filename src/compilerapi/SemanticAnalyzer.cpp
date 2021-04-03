@@ -1654,7 +1654,12 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
 void SemanticAnalyzer::Visit(Modules* modules)
 {
-    // TODO: implement
+    // TODO: resolve struct/fun order
+
+    for (ModuleDefinition* module : modules->modules)
+    {
+        module->Accept(this);
+    }
 }
 
 void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)

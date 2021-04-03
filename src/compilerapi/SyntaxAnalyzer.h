@@ -36,7 +36,7 @@ private:
     CompilerContext& compilerContext;
     ErrorLogger& logger;
 
-    bool ProcessModule(const std::string& filename, const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
+    bool ProcessModule(unsigned fileId, const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 

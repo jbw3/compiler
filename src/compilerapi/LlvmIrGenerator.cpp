@@ -11,7 +11,7 @@
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
-#include "llvm/Linker/Linker.h"
+#include "llvm/Linker/Linker.h" // TODO: remove this?
 #include "llvm/Target/TargetMachine.h"
 #include <experimental/filesystem>
 #include <iostream>
@@ -530,7 +530,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
         DIScope* currentScope = diScopes.top();
         unsigned line = varNameToken->line;
         unsigned column = varNameToken->column;
-        diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
+        diBlock = diBuilder->createLexicalBlock(currentScope, currentDiFile, line, column);
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
@@ -868,7 +868,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
 
         unsigned line = declaration->nameToken->line;
-        diSubprogram = diBuilder->createFunction(diFile, funcName, "", diFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
+        diSubprogram = diBuilder->createFunction(currentDiFile, funcName, "", currentDiFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
 
         // unset debug location for function prolog
@@ -898,7 +898,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
                 resultValue = nullptr;
                 return;
             }
-            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx + 1, diFile, line, paramDebugType, true);
+            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx + 1, currentDiFile, line, paramDebugType, true);
             diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, 0, diSubprogram), builder.GetInsertBlock());
         }
 
@@ -981,7 +981,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
     {
         const AggregateType* aggType = dynamic_cast<const AggregateType*>(typeInfo);
 
-        DIFile* file = diFile;
+        DIFile* file = currentDiFile;
 
         SmallVector<Metadata*, 8> elements;
 
@@ -1060,7 +1060,7 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
         {
             const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
 
-            DIFile* file = diFile;
+            DIFile* file = currentDiFile;
             const string& name = aggType->GetShortName();
             unsigned numBits = aggType->GetNumBits();
 
@@ -1116,7 +1116,32 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void LlvmIrGenerator::Visit(Modules* modules)
 {
-    assert(false && "TODO: implement");
+    for (ModuleDefinition* m : modules->modules)
+    {
+        if (dbgInfo)
+        {
+            unsigned fileId = m->fileId;
+            const string& filename = compilerContext.GetFilename(fileId);
+            bool isOptimized = optimizationLevel > 0;
+
+            currentDiFile = diBuilder->createFile(filename, fs::current_path().string());
+            diBuilder->createCompileUnit(dwarf::DW_LANG_C, currentDiFile, "WIP Compiler", isOptimized, "", 0);
+
+            diFiles[fileId] = currentDiFile;
+            diScopes.push(currentDiFile);
+        }
+
+        m->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+
+        if (dbgInfo)
+        {
+            diScopes.pop();
+        }
+    }
 }
 
 void LlvmIrGenerator::Visit(UnitTypeLiteralExpression* /* unitTypeLiteralExpression */)
@@ -1402,7 +1427,7 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
         const Token* startToken = blockExpression->startToken;
         unsigned line = startToken->line;
         unsigned column = startToken->column;
-        diBlock = diBuilder->createLexicalBlock(currentScope, diFile, line, column);
+        diBlock = diBuilder->createLexicalBlock(currentScope, currentDiFile, line, column);
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
@@ -1731,8 +1756,8 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 
 bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 {
-    // TODO: implement linking
-    string inFilename = "temp.wip"; // TODO: remove this
+    unsigned fileId = syntaxTree->modules.front()->fileId;
+    const string& inFilename = compilerContext.GetFilename(fileId);
 
     module = new Module(inFilename, context);
     module->setDataLayout(targetMachine->createDataLayout());
@@ -1758,11 +1783,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
         // initialize debug info builder
         diBuilder = new DIBuilder(*module);
 
-        bool isOptimized = optimizationLevel > 0;
-        diFile = diBuilder->createFile(inFilename, fs::current_path().string());
-        diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
-
-        diScopes.push(diFile);
+        diFiles = new DIFile*[syntaxTree->modules.size()];
     }
 
     // generate LLVM IR from syntax tree
@@ -1779,6 +1800,8 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     if (dbgInfo)
     {
         diBuilder->finalize();
+
+        delete [] diFiles;
     }
 
     return true;
@@ -2170,7 +2193,7 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
             return;
         }
         DIScope* diScope = diScopes.top();
-        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, token->value, diFile, line, varDebugType, true);
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, token->value, currentDiFile, line, varDebugType, true);
         diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diScope), builder.GetInsertBlock());
     }
 }

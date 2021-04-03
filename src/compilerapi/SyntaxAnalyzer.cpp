@@ -25,8 +25,7 @@ bool SyntaxAnalyzer::Process(Modules* syntaxTree)
     for (unsigned fileId = 0; fileId < fileCount; ++fileId)
     {
         ModuleDefinition* module = nullptr;
-        const string& filename = compilerContext.GetFilename(fileId);
-        ok = ProcessModule(filename, compilerContext.GetFileTokens(fileId), module);
+        ok = ProcessModule(fileId, compilerContext.GetFileTokens(fileId), module);
         if (!ok)
         {
             break;
@@ -38,7 +37,7 @@ bool SyntaxAnalyzer::Process(Modules* syntaxTree)
     return ok;
 }
 
-bool SyntaxAnalyzer::ProcessModule(const string& filename, const TokenList& tokens, ModuleDefinition*& syntaxTree)
+bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, ModuleDefinition*& syntaxTree)
 {
     TokenIterator iter = tokens.begin();
     TokenIterator endIter = tokens.end();
@@ -95,7 +94,7 @@ bool SyntaxAnalyzer::ProcessModule(const string& filename, const TokenList& toke
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(filename, structs, externFunctions, functions);
+        syntaxTree = new ModuleDefinition(fileId, structs, externFunctions, functions);
     }
     else
     {
