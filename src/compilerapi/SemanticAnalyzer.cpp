@@ -1343,9 +1343,16 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     }
 }
 
-bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
+bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
 {
-    const vector<StructDefinition*>& structDefs = moduleDefinition->structDefinitions;
+    vector<StructDefinition*> structDefs;
+    for (ModuleDefinition* modDef : modules->modules)
+    {
+        for (StructDefinition* structDef : modDef->structDefinitions)
+        {
+            structDefs.push_back(structDef);
+        }
+    }
     size_t numStructDefs = structDefs.size();
 
     unordered_map<string, StructDefinition*> nameMap;
@@ -1387,7 +1394,7 @@ bool SemanticAnalyzer::SortTypeDefinitions(ModuleDefinition* moduleDefinition)
         }
     }
 
-    moduleDefinition->structDefinitions.swap(ordered);
+    modules->orderedStructDefinitions.swap(ordered);
 
     return true;
 }
@@ -1573,74 +1580,6 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
 
 void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 {
-    // sort struct definitions so each comes after any struct definitions it depends on
-    bool ok = SortTypeDefinitions(moduleDefinition);
-    if (!ok)
-    {
-        isError = true;
-        return;
-    }
-
-    // process struct definitions
-    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
-    {
-        structDef->Accept(this);
-        if (isError)
-        {
-            return;
-        }
-    }
-
-    // build a look-up table for all functions
-
-    const vector<ExternFunctionDeclaration*>& externFuncDecls = moduleDefinition->externFunctionDeclarations;
-    const vector<FunctionDefinition*>& funcDefs = moduleDefinition->functionDefinitions;
-
-    functions.clear();
-    functions.reserve(externFuncDecls.size() + funcDefs.size());
-
-    for (ExternFunctionDeclaration* externFunc : externFuncDecls)
-    {
-        FunctionDeclaration* decl = externFunc->declaration;
-
-        ok = SetFunctionDeclarationTypes(decl);
-        if (!ok)
-        {
-            isError = true;
-            return;
-        }
-
-        const string& name = decl->name;
-        auto rv = functions.insert({name, decl});
-        if (!rv.second)
-        {
-            isError = true;
-            logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
-            return;
-        }
-    }
-
-    for (FunctionDefinition* funcDef : funcDefs)
-    {
-        FunctionDeclaration* decl = funcDef->declaration;
-
-        ok = SetFunctionDeclarationTypes(decl);
-        if (!ok)
-        {
-            isError = true;
-            return;
-        }
-
-        const string& name = decl->name;
-        auto rv = functions.insert({name, decl});
-        if (!rv.second)
-        {
-            isError = true;
-            logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
-            return;
-        }
-    }
-
     // perform semantic analysis on all functions
     for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
     {
@@ -1654,7 +1593,75 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
 void SemanticAnalyzer::Visit(Modules* modules)
 {
-    // TODO: resolve struct/fun order
+    // sort struct definitions so each comes after any struct definitions it depends on
+    bool ok = SortTypeDefinitions(modules);
+    if (!ok)
+    {
+        isError = true;
+        return;
+    }
+
+    // process struct definitions
+    for (StructDefinition* structDef : modules->orderedStructDefinitions)
+    {
+        structDef->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+    }
+
+    // build a look-up table for all functions
+
+    functions.clear();
+
+    for (ModuleDefinition* moduleDefinition : modules->modules)
+    {
+        const vector<ExternFunctionDeclaration*>& externFuncDecls = moduleDefinition->externFunctionDeclarations;
+        const vector<FunctionDefinition*>& funcDefs = moduleDefinition->functionDefinitions;
+
+        for (ExternFunctionDeclaration* externFunc : externFuncDecls)
+        {
+            FunctionDeclaration* decl = externFunc->declaration;
+
+            ok = SetFunctionDeclarationTypes(decl);
+            if (!ok)
+            {
+                isError = true;
+                return;
+            }
+
+            const string& name = decl->name;
+            auto rv = functions.insert({name, decl});
+            if (!rv.second)
+            {
+                isError = true;
+                logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
+                return;
+            }
+        }
+
+        for (FunctionDefinition* funcDef : funcDefs)
+        {
+            FunctionDeclaration* decl = funcDef->declaration;
+
+            ok = SetFunctionDeclarationTypes(decl);
+            if (!ok)
+            {
+                isError = true;
+                return;
+            }
+
+            const string& name = decl->name;
+            auto rv = functions.insert({name, decl});
+            if (!rv.second)
+            {
+                isError = true;
+                logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
+                return;
+            }
+        }
+    }
 
     for (ModuleDefinition* module : modules->modules)
     {

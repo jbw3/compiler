@@ -561,6 +561,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     std::vector<ModuleDefinition*> modules;
+    std::vector<StructDefinition*> orderedStructDefinitions;
 };
 } // namespace SyntaxTree
 

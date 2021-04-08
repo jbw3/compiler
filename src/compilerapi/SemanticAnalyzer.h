@@ -77,7 +77,7 @@ private:
     unsigned loopLevel;
     const SyntaxTree::FunctionDefinition* currentFunction;
 
-    bool SortTypeDefinitions(SyntaxTree::ModuleDefinition* moduleDefinition);
+    bool SortTypeDefinitions(SyntaxTree::Modules* modules);
 
     bool ResolveDependencies(
         SyntaxTree::StructDefinition* structDef,

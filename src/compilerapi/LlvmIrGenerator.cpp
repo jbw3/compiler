@@ -1049,8 +1049,21 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
+    // generate code for functions
+    for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
+    {
+        funcDef->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+    }
+}
+
+void LlvmIrGenerator::Visit(Modules* modules)
+{
     // add all struct names to types map
-    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
+    for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
         const string& structName = structDef->name;
         StructType* structType = StructType::create(context, structName);
@@ -1074,53 +1087,43 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
     }
 
     // generate struct declarations
-    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
+    for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
         structDef->Accept(this);
     }
 
     // create function declarations
 
-    for (ExternFunctionDeclaration* externFunc : moduleDefinition->externFunctionDeclarations)
+    for (ModuleDefinition* moduleDefinition : modules->modules)
     {
-        const FunctionDeclaration* decl = externFunc->declaration;
-        bool ok = CreateFunctionDeclaration(decl);
-        if (!ok)
+        for (ExternFunctionDeclaration* externFunc : moduleDefinition->externFunctionDeclarations)
         {
-            resultValue = nullptr;
-            return;
+            const FunctionDeclaration* decl = externFunc->declaration;
+            bool ok = CreateFunctionDeclaration(decl);
+            if (!ok)
+            {
+                resultValue = nullptr;
+                return;
+            }
+        }
+
+        for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
+        {
+            const FunctionDeclaration* decl = funcDef->declaration;
+            bool ok = CreateFunctionDeclaration(decl);
+            if (!ok)
+            {
+                resultValue = nullptr;
+                return;
+            }
         }
     }
 
-    for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
-    {
-        const FunctionDeclaration* decl = funcDef->declaration;
-        bool ok = CreateFunctionDeclaration(decl);
-        if (!ok)
-        {
-            resultValue = nullptr;
-            return;
-        }
-    }
-
-    // generate code for functions
-    for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
-    {
-        funcDef->Accept(this);
-        if (resultValue == nullptr)
-        {
-            return;
-        }
-    }
-}
-
-void LlvmIrGenerator::Visit(Modules* modules)
-{
-    for (ModuleDefinition* m : modules->modules)
+    for (ModuleDefinition* moduleDefinition : modules->modules)
     {
         if (dbgInfo)
         {
-            unsigned fileId = m->fileId;
+            unsigned fileId = moduleDefinition->fileId;
             const string& filename = compilerContext.GetFilename(fileId);
             bool isOptimized = optimizationLevel > 0;
 
@@ -1131,7 +1134,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
             diScopes.push(currentDiFile);
         }
 
-        m->Accept(this);
+        moduleDefinition->Accept(this);
         if (resultValue == nullptr)
         {
             return;
