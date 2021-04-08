@@ -1049,6 +1049,31 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
+    // add debug info for structs
+    if (dbgInfo)
+    {
+        for (StructDefinition* structDef : moduleDefinition->structDefinitions)
+        {
+            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
+
+            const string& name = aggType->GetShortName();
+            unsigned numBits = aggType->GetNumBits();
+
+            unsigned line = aggType->GetToken()->line;
+            // TODO: set alignment
+            SmallVector<Metadata*, 0> elements;
+            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+            DICompositeType* diType = diBuilder->createStructType(currentDiFile, name, currentDiFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+            diStructTypes.insert({structDef->name, diType});
+        }
+    }
+
+    // generate struct declarations
+    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
+    {
+        structDef->Accept(this);
+    }
+
     // generate code for functions
     for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
     {
@@ -1068,28 +1093,6 @@ void LlvmIrGenerator::Visit(Modules* modules)
         const string& structName = structDef->name;
         StructType* structType = StructType::create(context, structName);
         types.insert({structName, structType});
-
-        if (dbgInfo)
-        {
-            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
-
-            DIFile* file = currentDiFile;
-            const string& name = aggType->GetShortName();
-            unsigned numBits = aggType->GetNumBits();
-
-            unsigned line = aggType->GetToken()->line;
-            // TODO: set alignment
-            SmallVector<Metadata*, 0> elements;
-            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-            DICompositeType* diType = diBuilder->createStructType(file, name, file, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-            diStructTypes.insert({structName, diType});
-        }
-    }
-
-    // generate struct declarations
-    for (StructDefinition* structDef : modules->orderedStructDefinitions)
-    {
-        structDef->Accept(this);
     }
 
     // create function declarations
