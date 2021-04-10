@@ -29,48 +29,47 @@ bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
                "    char* Data;\n"
                "};\n\n";
 
-    // TODO: need to do resolve order first
-    for (const ModuleDefinition* module : modules->modules)
+    // print structs
+    for (const StructDefinition* structDef : modules->orderedStructDefinitions)
     {
-        // print structs
-        for (const StructDefinition* structDef : module->structDefinitions)
+        const TypeInfo* structType = structDef->type;
+
+        // print array structs
+        for (const MemberDefinition* member : structDef->members)
         {
-            const TypeInfo* structType = structDef->type;
-
-            // print array structs
-            for (const MemberDefinition* member : structDef->members)
+            const string& memberName = member->name;
+            const MemberInfo* memberInfo = structType->GetMember(memberName);
+            const TypeInfo* memberType = memberInfo->GetType();
+            if (memberType->IsArray())
             {
-                const string& memberName = member->name;
-                const MemberInfo* memberInfo = structType->GetMember(memberName);
-                const TypeInfo* memberType = memberInfo->GetType();
-                if (memberType->IsArray())
-                {
-                    if (!PrintArrayStruct(outFile, memberType))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            outFile << "struct " << structDef->name << "\n{\n";
-
-            for (const MemberDefinition* member : structDef->members)
-            {
-                const MemberInfo* memberInfo = structType->GetMember(member->name);
-                const TypeInfo* memberType = memberInfo->GetType();
-
-                outFile << "    ";
-                if (!PrintCType(outFile, memberType))
+                if (!PrintArrayStruct(outFile, memberType))
                 {
                     return false;
                 }
-
-                outFile << " " << member->name << ";\n";
             }
-
-            outFile << "};\n\n";
         }
 
+        outFile << "struct " << structDef->name << "\n{\n";
+
+        for (const MemberDefinition* member : structDef->members)
+        {
+            const MemberInfo* memberInfo = structType->GetMember(member->name);
+            const TypeInfo* memberType = memberInfo->GetType();
+
+            outFile << "    ";
+            if (!PrintCType(outFile, memberType))
+            {
+                return false;
+            }
+
+            outFile << " " << member->name << ";\n";
+        }
+
+        outFile << "};\n\n";
+    }
+
+    for (const ModuleDefinition* module : modules->modules)
+    {
         // print function declarations
         for (const FunctionDefinition* function : module->functionDefinitions)
         {
