@@ -63,7 +63,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
         }
         else if (iter->type == Token::eStruct)
         {
-            StructDefinition* structDefinition = ProcessStructDefinition(iter, endIter);
+            StructDefinition* structDefinition = ProcessStructDefinition(iter, endIter, fileId);
             if (structDefinition == nullptr)
             {
                 ok = false;
@@ -381,7 +381,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     return true;
 }
 
-StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, TokenIterator endIter)
+StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, TokenIterator endIter, unsigned fileId)
 {
     if (!EndIteratorCheck(iter, endIter, "Expected struct keyword"))
     {
@@ -483,7 +483,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     // increment past "}"
     ++iter;
 
-    StructDefinition* structDef = new StructDefinition(structName, members, structNameToken);
+    StructDefinition* structDef = new StructDefinition(structName, members, structNameToken, fileId);
     return structDef;
 }
 

@@ -735,11 +735,12 @@ MemberDefinition::MemberDefinition(const string& name, const Token* nameToken,
 }
 
 StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members,
-                                   const Token* nameToken) :
+                                   const Token* nameToken, unsigned fileId) :
     nameToken(nameToken),
     name(name),
     members(members),
-    type(nullptr)
+    type(nullptr),
+    fileId(fileId)
 {
 }
 

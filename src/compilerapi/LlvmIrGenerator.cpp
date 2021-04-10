@@ -928,10 +928,6 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     }
     else // the function does not end with a return statement, so return the last expression
     {
-        // sign extend return value if needed
-        const TypeInfo* expressionType = expression->GetType();
-        const TypeInfo* returnType = declaration->returnType;
-
         builder.CreateRet(resultValue);
     }
 
@@ -981,7 +977,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
     {
         const AggregateType* aggType = dynamic_cast<const AggregateType*>(typeInfo);
 
-        DIFile* file = currentDiFile;
+        DIFile* file = diFiles[structDefinition->fileId];
 
         SmallVector<Metadata*, 8> elements;
 
@@ -1049,31 +1045,6 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
 void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
-    // add debug info for structs
-    if (dbgInfo)
-    {
-        for (StructDefinition* structDef : moduleDefinition->structDefinitions)
-        {
-            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
-
-            const string& name = aggType->GetShortName();
-            unsigned numBits = aggType->GetNumBits();
-
-            unsigned line = aggType->GetToken()->line;
-            // TODO: set alignment
-            SmallVector<Metadata*, 0> elements;
-            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-            DICompositeType* diType = diBuilder->createStructType(currentDiFile, name, currentDiFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-            diStructTypes.insert({structDef->name, diType});
-        }
-    }
-
-    // generate struct declarations
-    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
-    {
-        structDef->Accept(this);
-    }
-
     // generate code for functions
     for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
     {
@@ -1087,12 +1058,48 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void LlvmIrGenerator::Visit(Modules* modules)
 {
+    // create file debug info
+    if (dbgInfo)
+    {
+        for (ModuleDefinition* moduleDefinition : modules->modules)
+        {
+            unsigned fileId = moduleDefinition->fileId;
+            const string& filename = compilerContext.GetFilename(fileId);
+
+            diFiles[fileId] = diBuilder->createFile(filename, fs::current_path().string());
+        }
+    }
+
     // add all struct names to types map
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
         const string& structName = structDef->name;
         StructType* structType = StructType::create(context, structName);
         types.insert({structName, structType});
+
+        // add debug info for structs
+        if (dbgInfo)
+        {
+            DIFile* diFile = diFiles[structDef->fileId];
+
+            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
+
+            const string& name = aggType->GetShortName();
+            unsigned numBits = aggType->GetNumBits();
+
+            unsigned line = aggType->GetToken()->line;
+            // TODO: set alignment
+            SmallVector<Metadata*, 0> elements;
+            DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+            DICompositeType* diType = diBuilder->createStructType(diFile, name, diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+            diStructTypes.insert({structDef->name, diType});
+        }
+    }
+
+    // generate struct declarations
+    for (StructDefinition* structDef : modules->orderedStructDefinitions)
+    {
+        structDef->Accept(this);
     }
 
     // create function declarations
@@ -1127,13 +1134,11 @@ void LlvmIrGenerator::Visit(Modules* modules)
         if (dbgInfo)
         {
             unsigned fileId = moduleDefinition->fileId;
-            const string& filename = compilerContext.GetFilename(fileId);
             bool isOptimized = optimizationLevel > 0;
 
-            currentDiFile = diBuilder->createFile(filename, fs::current_path().string());
+            currentDiFile = diFiles[fileId];
             diBuilder->createCompileUnit(dwarf::DW_LANG_C, currentDiFile, "WIP Compiler", isOptimized, "", 0);
 
-            diFiles[fileId] = currentDiFile;
             diScopes.push(currentDiFile);
         }
 

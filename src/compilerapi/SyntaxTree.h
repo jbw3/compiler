@@ -495,7 +495,7 @@ class StructDefinition : public SyntaxTreeNode
 {
 public:
     StructDefinition(const std::string& name, const std::vector<MemberDefinition*>& members,
-                     const Token* nameToken);
+                     const Token* nameToken, unsigned fileId);
 
     virtual ~StructDefinition();
 
@@ -505,6 +505,7 @@ public:
     std::string name;
     std::vector<MemberDefinition*> members;
     const TypeInfo* type;
+    unsigned fileId;
 };
 
 class MemberInitialization
