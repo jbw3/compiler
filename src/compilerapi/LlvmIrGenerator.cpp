@@ -11,7 +11,6 @@
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
-#include "llvm/Linker/Linker.h" // TODO: remove this?
 #include "llvm/Target/TargetMachine.h"
 #include <experimental/filesystem>
 #include <iostream>
@@ -1767,10 +1766,10 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 
 bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 {
-    unsigned fileId = syntaxTree->modules.front()->fileId;
-    const string& inFilename = compilerContext.GetFilename(fileId);
+    unsigned firstFileId = syntaxTree->modules.front()->fileId;
+    const string& firstInFilename = compilerContext.GetFilename(firstFileId);
 
-    module = new Module(inFilename, context);
+    module = new Module(firstInFilename, context);
     module->setDataLayout(targetMachine->createDataLayout());
     module->setTargetTriple(targetMachine->getTargetTriple().str());
 
