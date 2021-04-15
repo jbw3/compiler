@@ -16,14 +16,27 @@ CompilerTests::CompilerTests()
 {
     AddTest([](){ return RunTest("basic", false); });
     AddTest([](){ return RunTest("debug_info", true); });
+    AddTest([]()
+    {
+        vector<string> multiFiles = { "multi_file1", "multi_file2" };
+        return RunTest(multiFiles, true);
+    });
 }
 
 bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
 {
+    vector<string> baseFilenames;
+    baseFilenames.push_back(baseFilename);
+    return RunTest(baseFilenames, debugInfo);
+}
+
+bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
+{
+    string firstBaseFilename = baseFilenames.front();
+
     fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
-    string inFilename = (testFilesDir / (baseFilename + ".wip")).string();
-    string outFilename = (testFilesDir / (baseFilename + ".out.ll")).string();
-    string expectedFilename = (testFilesDir / (baseFilename + ".expected.ll")).string();
+    string outFilename = (testFilesDir / (firstBaseFilename + ".out.ll")).string();
+    string expectedFilename = (testFilesDir / (firstBaseFilename + ".expected.ll")).string();
 
     string directory = fs::current_path().string();
 #ifdef _WIN32
@@ -40,14 +53,14 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     unordered_map<string, string> lineMap =
     {
 #ifdef _WIN32
-        { "module_id", "; ModuleID = 'src\\unittests\\testfiles\\" + baseFilename + ".wip'" },
-        { "source_filename", "source_filename = \"src\\\\unittests\\\\testfiles\\\\" + baseFilename + ".wip\"" },
+        { "module_id", "; ModuleID = 'src\\unittests\\testfiles\\" + firstBaseFilename + ".wip'" },
+        { "source_filename", "source_filename = \"src\\\\unittests\\\\testfiles\\\\" + firstBaseFilename + ".wip\"" },
         { "target_datalayout", "target datalayout = \"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
         { "target_triple", "target triple = \"x86_64-pc-windows-msvc\"" },
         { "filename", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\debug_info.wip\", directory: \"" + directory + "\")" },
 #else
-        { "module_id", "; ModuleID = 'src/unittests/testfiles/" + baseFilename + ".wip'" },
-        { "source_filename", "source_filename = \"src/unittests/testfiles/" + baseFilename + ".wip\"" },
+        { "module_id", "; ModuleID = 'src/unittests/testfiles/" + firstBaseFilename + ".wip'" },
+        { "source_filename", "source_filename = \"src/unittests/testfiles/" + firstBaseFilename + ".wip\"" },
         { "target_datalayout", "target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
         { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
         { "filename", "!1 = !DIFile(filename: \"src/unittests/testfiles/debug_info.wip\", directory: \"" + directory + "\")" },
@@ -57,7 +70,11 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     Config config;
     config.emitType = Config::eLlvmIr;
     config.assemblyType = Config::eText;
-    config.inFilenames.push_back(inFilename);
+    for (const string& f : baseFilenames)
+    {
+        string inFilename = (testFilesDir / (f + ".wip")).string();
+        config.inFilenames.push_back(inFilename);
+    }
     config.outFilename = outFilename;
     config.debugInfo = debugInfo;
 
@@ -65,7 +82,7 @@ bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
     bool ok = compiler.Compile();
     if (!ok)
     {
-        cerr << "Error: " << inFilename << ": Failed to compile\n";
+        cerr << "Error: Failed to compile\n";
         return false;
     }
 

@@ -3,6 +3,7 @@
 
 #include "TestClass.h"
 #include <string>
+#include <vector>
 
 class CompilerTests : public TestClass
 {
@@ -11,6 +12,8 @@ public:
 
 private:
     static bool RunTest(const std::string& baseFilename, bool debugInfo);
+
+    static bool RunTest(const std::vector<std::string>& baseFilenames, bool debugInfo);
 };
 
 #endif // COMPILER_TESTS_H_
