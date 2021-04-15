@@ -58,12 +58,16 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
         { "target_datalayout", "target datalayout = \"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
         { "target_triple", "target triple = \"x86_64-pc-windows-msvc\"" },
         { "filename", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\debug_info.wip\", directory: \"" + directory + "\")" },
+        { "filename1", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\multi_file1.wip\", directory: \"" + directory + "\")" },
+        { "filename2", "!3 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\multi_file2.wip\", directory: \"" + directory + "\")" },
 #else
         { "module_id", "; ModuleID = 'src/unittests/testfiles/" + firstBaseFilename + ".wip'" },
         { "source_filename", "source_filename = \"src/unittests/testfiles/" + firstBaseFilename + ".wip\"" },
         { "target_datalayout", "target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"" },
         { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
         { "filename", "!1 = !DIFile(filename: \"src/unittests/testfiles/debug_info.wip\", directory: \"" + directory + "\")" },
+        { "filename1", "!1 = !DIFile(filename: \"src/unittests/testfiles/multi_file1.wip\", directory: \"" + directory + "\")" },
+        { "filename2", "!3 = !DIFile(filename: \"src/unittests/testfiles/multi_file2.wip\", directory: \"" + directory + "\")" },
 #endif
     };
 
