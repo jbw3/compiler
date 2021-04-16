@@ -1128,16 +1128,19 @@ void LlvmIrGenerator::Visit(Modules* modules)
         }
     }
 
+    if (dbgInfo)
+    {
+        DIFile* diFile = diFiles[0];
+        bool isOptimized = optimizationLevel > 0;
+        diBuilder->createCompileUnit(dwarf::DW_LANG_C, diFile, "WIP Compiler", isOptimized, "", 0);
+    }
+
     for (ModuleDefinition* moduleDefinition : modules->modules)
     {
         if (dbgInfo)
         {
             unsigned fileId = moduleDefinition->fileId;
-            bool isOptimized = optimizationLevel > 0;
-
             currentDiFile = diFiles[fileId];
-            diBuilder->createCompileUnit(dwarf::DW_LANG_C, currentDiFile, "WIP Compiler", isOptimized, "", 0);
-
             diScopes.push(currentDiFile);
         }
 
