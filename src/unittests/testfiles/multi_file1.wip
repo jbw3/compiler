@@ -7,3 +7,19 @@ fun fun3() i32
 {
     123
 }
+
+fun fun4(s S3) i32
+{
+    s.s2.s1.x + s.s2.s1.y
+}
+
+struct S3
+{
+    s2 S2,
+}
+
+struct S1
+{
+    x i32,
+    y i32,
+}

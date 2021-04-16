@@ -59,7 +59,7 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
         { "target_triple", "target triple = \"x86_64-pc-windows-msvc\"" },
         { "filename", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\debug_info.wip\", directory: \"" + directory + "\")" },
         { "filename1", "!1 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\multi_file1.wip\", directory: \"" + directory + "\")" },
-        { "filename2", "!13 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\multi_file2.wip\", directory: \"" + directory + "\")" },
+        { "filename2", "!19 = !DIFile(filename: \"src\\\\unittests\\\\testfiles\\\\multi_file2.wip\", directory: \"" + directory + "\")" },
 #else
         { "module_id", "; ModuleID = 'src/unittests/testfiles/" + firstBaseFilename + ".wip'" },
         { "source_filename", "source_filename = \"src/unittests/testfiles/" + firstBaseFilename + ".wip\"" },
@@ -67,7 +67,7 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
         { "target_triple", "target triple = \"x86_64-pc-linux-gnu\"" },
         { "filename", "!1 = !DIFile(filename: \"src/unittests/testfiles/debug_info.wip\", directory: \"" + directory + "\")" },
         { "filename1", "!1 = !DIFile(filename: \"src/unittests/testfiles/multi_file1.wip\", directory: \"" + directory + "\")" },
-        { "filename2", "!13 = !DIFile(filename: \"src/unittests/testfiles/multi_file2.wip\", directory: \"" + directory + "\")" },
+        { "filename2", "!19 = !DIFile(filename: \"src/unittests/testfiles/multi_file2.wip\", directory: \"" + directory + "\")" },
 #endif
     };
 
