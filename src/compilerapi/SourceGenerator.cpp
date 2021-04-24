@@ -310,19 +310,19 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
     *os << "{\n";
     ++indentLevel;
 
-    const Expressions& exprs = blockExpression->expressions;
-    size_t numExprs = exprs.size();
-    for (size_t i = 0; i < numExprs - 1; ++i)
+    const SyntaxTreeNodes& statements = blockExpression->statements;
+    size_t numStatements = statements.size();
+    for (size_t i = 0; i < numStatements - 1; ++i)
     {
-        Expression* expr = exprs[i];
+        SyntaxTreeNode* statement = statements[i];
 
         Indent();
-        expr->Accept(this);
+        statement->Accept(this);
 
         if (
-            dynamic_cast<BranchExpression*>(expr) == nullptr
-         && dynamic_cast<WhileLoop*>(expr) == nullptr
-         && dynamic_cast<ForLoop*>(expr) == nullptr
+            dynamic_cast<BranchExpression*>(statement) == nullptr
+         && dynamic_cast<WhileLoop*>(statement) == nullptr
+         && dynamic_cast<ForLoop*>(statement) == nullptr
         )
         {
             *os << ";";
@@ -330,13 +330,13 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
         *os << "\n";
     }
 
-    Expression* lastExpr = exprs[numExprs - 1];
-    if (dynamic_cast<UnitTypeLiteralExpression*>(lastExpr) == nullptr)
+    SyntaxTreeNode* lastStatement = statements[numStatements - 1];
+    if (dynamic_cast<UnitTypeLiteralExpression*>(lastStatement) == nullptr)
     {
         Indent();
-        lastExpr->Accept(this);
+        lastStatement->Accept(this);
 
-        if (dynamic_cast<Return*>(lastExpr) != nullptr)
+        if (dynamic_cast<Return*>(lastStatement) != nullptr)
         {
             *os << ";";
         }

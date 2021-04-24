@@ -173,17 +173,17 @@ void ArrayMultiValueExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-BlockExpression::BlockExpression(const Expressions& expressions,
+BlockExpression::BlockExpression(const SyntaxTreeNodes& statements,
                                  const Token* startToken, const Token* endToken) :
     startToken(startToken),
     endToken(endToken),
-    expressions(expressions)
+    statements(statements)
 {
 }
 
 BlockExpression::~BlockExpression()
 {
-    deletePointerContainer(expressions);
+    deletePointerContainer(statements);
 }
 
 void BlockExpression::Accept(SyntaxTreeVisitor* visitor)

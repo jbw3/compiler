@@ -316,7 +316,7 @@ void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "BlockExpression");
-    PrintProperty("expressions", blockExpression->expressions);
+    PrintProperty("statements", blockExpression->statements);
 }
 
 void SyntaxTreePrinter::Visit(CastExpression* castExpression)

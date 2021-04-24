@@ -1444,19 +1444,19 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
-    const Expressions& expressions = blockExpression->expressions;
-    size_t size = expressions.size();
+    const SyntaxTreeNodes& statements = blockExpression->statements;
+    size_t size = statements.size();
 
     if (size == 0)
     {
         resultValue = nullptr;
-        logger.LogInternalError("Block expression has no sub-expressions");
+        logger.LogInternalError("Block expression has no statements");
     }
     else
     {
-        for (Expression* expression : expressions)
+        for (SyntaxTreeNode* statement : statements)
         {
-            expression->Accept(this);
+            statement->Accept(this);
             if (resultValue == nullptr)
             {
                 break;

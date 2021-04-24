@@ -503,7 +503,8 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
     }
     else if (BlockExpression* blockExpr = dynamic_cast<BlockExpression*>(expr); blockExpr != nullptr)
     {
-        FixNumericLiteralExpression(blockExpr->expressions.back(), resultType);
+        Expression* lastExpression = dynamic_cast<Expression*>(blockExpr->statements.back());
+        FixNumericLiteralExpression(lastExpression, resultType);
         blockExpr->SetType(resultType);
     }
     else if (BranchExpression* branchExpr = dynamic_cast<BranchExpression*>(expr); branchExpr != nullptr)
@@ -1185,8 +1186,8 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     bool endsWithReturn = false;
     BlockExpression* blockExpr = dynamic_cast<BlockExpression*>(expression);
     assert(blockExpr != nullptr && "Expected function body to be a BlockExpression");
-    Expression* lastExpr = blockExpr->expressions.back();
-    Return* ret = dynamic_cast<Return*>(lastExpr);
+    SyntaxTreeNode* lastStatement = blockExpr->statements.back();
+    Return* ret = dynamic_cast<Return*>(lastStatement);
     if (ret != nullptr)
     {
         endsWithReturn = true;
@@ -1814,19 +1815,19 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
     // create new scope for block
     Scope scope(symbolTable);
 
-    const Expressions& expressions = blockExpression->expressions;
-    size_t size = expressions.size();
+    const SyntaxTreeNodes& statements = blockExpression->statements;
+    size_t size = statements.size();
 
     if (size == 0)
     {
         isError = true;
-        logger.LogInternalError("Block expression has no sub-expressions");
+        logger.LogInternalError("Block expression has no statements");
     }
     else
     {
-        for (Expression* expression : expressions)
+        for (SyntaxTreeNode* statement : statements)
         {
-            expression->Accept(this);
+            statement->Accept(this);
             if (isError)
             {
                 break;
@@ -1836,7 +1837,8 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
         if (!isError)
         {
             // the block expression's type is the type of its last expression
-            blockExpression->SetType(expressions[size - 1]->GetType());
+            Expression* lastExpr = dynamic_cast<Expression*>(statements[size - 1]);
+            blockExpression->SetType(lastExpr->GetType());
         }
     }
 }

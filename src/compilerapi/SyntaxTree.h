@@ -22,6 +22,8 @@ public:
     virtual void Accept(SyntaxTreeVisitor* visitor) = 0;
 };
 
+typedef std::vector<SyntaxTreeNode*> SyntaxTreeNodes;
+
 class Expression : public SyntaxTreeNode
 {
 public:
@@ -142,7 +144,7 @@ public:
 class BlockExpression : public Expression
 {
 public:
-    BlockExpression(const Expressions& expressions,
+    BlockExpression(const SyntaxTreeNodes& statements,
                     const Token* startToken, const Token* endToken);
 
     virtual ~BlockExpression();
@@ -151,7 +153,7 @@ public:
 
     const Token* startToken;
     const Token* endToken;
-    Expressions expressions;
+    SyntaxTreeNodes statements;
 };
 
 class BinaryExpression : public Expression

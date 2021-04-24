@@ -1603,7 +1603,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
 BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter)
 {
     bool needsUnitType = true;
-    Expressions expressions;
+    SyntaxTreeNodes statements;
 
     const Token* startToken = &*iter;
 
@@ -1669,16 +1669,16 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         // if there was an error, return null
         if (expr == nullptr)
         {
-            deletePointerContainer(expressions);
+            deletePointerContainer(statements);
             return nullptr;
         }
 
-        expressions.push_back(expr);
+        statements.push_back(expr);
 
         // if we reached the end, log an error and return null
         if (!EndIteratorCheck(iter, endIter, "Expected block end"))
         {
-            deletePointerContainer(expressions);
+            deletePointerContainer(statements);
             return nullptr;
         }
 
@@ -1697,17 +1697,17 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
 
     if (!EndIteratorCheck(iter, endIter, "Expected block end"))
     {
-        deletePointerContainer(expressions);
+        deletePointerContainer(statements);
         return nullptr;
     }
     const Token* endToken = &*iter;
 
     if (needsUnitType)
     {
-        expressions.push_back(new UnitTypeLiteralExpression());
+        statements.push_back(new UnitTypeLiteralExpression());
     }
 
-    BlockExpression* blockExpression = new BlockExpression(expressions, startToken, endToken);
+    BlockExpression* blockExpression = new BlockExpression(statements, startToken, endToken);
     return blockExpression;
 }
 
