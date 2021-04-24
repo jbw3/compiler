@@ -191,6 +191,27 @@ string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
     return macro;
 }
 
+void PrintArrayName(ostream& os, const TypeInfo* arrayType)
+{
+    os << "struct array_";
+
+    const TypeInfo* innerType = arrayType->GetInnerType();
+    while (innerType->IsArray() || innerType->IsPointer())
+    {
+        if (innerType->IsArray())
+        {
+            os << "array_";
+        }
+        else if (innerType->IsPointer())
+        {
+            os << "ptr_";
+        }
+        innerType = innerType->GetInnerType();
+    }
+
+    os << innerType->GetShortName();
+}
+
 bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
 {
     if (type->IsSameAs(*TypeInfo::UnitType))
@@ -243,14 +264,8 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
     }
     else if (type->IsArray())
     {
-        os << "struct ";
-        const TypeInfo* tempType = type;
-        while (tempType->IsArray())
-        {
-            os << "array_";
-            tempType = tempType->GetInnerType();
-        }
-        return PrintCType(os, tempType);
+        PrintArrayName(os, type);
+        return true;
     }
     else if (type->IsAggregate())
     {
@@ -280,19 +295,7 @@ bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
             }
         }
 
-        os << "struct array_";
-
-        const TypeInfo* tempType = innerType;
-        while (tempType->IsArray())
-        {
-            os << "array_";
-            tempType = tempType->GetInnerType();
-        }
-
-        if (!PrintCType(os, tempType))
-        {
-            return false;
-        }
+        PrintArrayName(os, arrayType);
 
         os << "\n"
               "{\n"
