@@ -121,6 +121,7 @@ else()
                     OUTPUT_VARIABLE llvm_system_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(llvm_libs "${llvm_all_libs} ${llvm_system_libs}")
+    string(STRIP ${llvm_libs} llvm_libs)
 endif()
 
 add_subdirectory(compilerapi)
