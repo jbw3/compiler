@@ -335,7 +335,7 @@ public:
     Expression* elseExpression;
 };
 
-class VariableDeclaration : public Expression
+class VariableDeclaration : public SyntaxTreeNode
 {
 public:
     VariableDeclaration(const std::string& name, BinaryExpression* assignmentExpression,

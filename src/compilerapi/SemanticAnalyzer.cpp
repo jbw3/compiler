@@ -2140,8 +2140,6 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     {
         return;
     }
-
-    variableDeclaration->SetType(TypeInfo::UnitType);
 }
 
 bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* functionDeclaration)
