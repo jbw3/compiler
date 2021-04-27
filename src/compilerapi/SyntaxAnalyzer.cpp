@@ -647,6 +647,11 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
+    // TODO: ensure iter is a semicolon
+
+    // increment past semicolon
+    ++iter;
+
     const string& varName = varNameToken->value;
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression, opToken);
     VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, varNameToken, varTypeNameTokens);
@@ -680,6 +685,9 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
     {
         return nullptr;
     }
+
+    // increment iter past end brace
+    ++iter;
 
     WhileLoop* whileLoop = new WhileLoop(whileCondition.release(), expression.release(), whileToken);
     return whileLoop;
@@ -776,6 +784,9 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     {
         return nullptr;
     }
+
+    // increment iter past end brace
+    ++iter;
 
     ForLoop* forLoop = new ForLoop(varNameToken->value, indexVarNameToken->value,
                                    iterExpression.release(), expression.release(),
@@ -878,26 +889,6 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
     else if (type == Token::eIf)
     {
         expr = ProcessBranchExpression(iter, endIter);
-        if (expr == nullptr)
-        {
-            return nullptr;
-        }
-
-        isPotentialEnd = true;
-    }
-    else if (type == Token::eWhile)
-    {
-        expr = ProcessWhileLoop(iter, endIter);
-        if (expr == nullptr)
-        {
-            return nullptr;
-        }
-
-        isPotentialEnd = true;
-    }
-    else if (type == Token::eFor)
-    {
-        expr = ProcessForLoop(iter, endIter);
         if (expr == nullptr)
         {
             return nullptr;
@@ -1612,30 +1603,41 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
 
     while (iter != endIter && iter->type != Token::eCloseBrace)
     {
-        Expression* expr = nullptr;
+        SyntaxTreeNode* statement = nullptr;
 
         Token::EType tokenType = iter->type;
         if (tokenType == Token::eVar)
         {
-            expr = ProcessVariableDeclaration(iter, endIter);
+            statement = ProcessVariableDeclaration(iter, endIter);
+            needsUnitType = true;
+        }
+        else if (tokenType  == Token::eWhile)
+        {
+            statement = ProcessWhileLoop(iter, endIter);
+            needsUnitType = true;
+        }
+        else if (tokenType == Token::eFor)
+        {
+            statement = ProcessForLoop(iter, endIter);
+            needsUnitType = true;
         }
         else if (tokenType == Token::eBreak || tokenType == Token::eContinue)
         {
-            TokenIterator nextIter = iter + 1;
+            TokenIterator tokenIter = iter;
+            ++iter;
 
-            // TODO: check if nextIter equals endIter
-
-            if (nextIter->type != Token::eSemiColon)
+            if (iter == endIter || iter->type != Token::eSemiColon)
             {
-                logger.LogError(*iter, "Expected ';' after '{}'", iter->value);
-                expr = nullptr;
+                logger.LogError(*tokenIter, "Expected ';' after '{}'", tokenIter->value);
+                statement = nullptr;
             }
             else
             {
-                expr = new LoopControl(&*iter);
-            }
+                statement = new LoopControl(&*tokenIter);
 
-            ++iter;
+                ++iter;
+            }
+            needsUnitType = true;
         }
         else if (tokenType == Token::eReturn)
         {
@@ -1652,46 +1654,50 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                     returnExpression = ProcessExpression(iter, endIter, Token::eSemiColon);
                 }
 
-                expr = new Return(token, returnExpression);
+                statement = new Return(token, returnExpression);
                 ++iter;
+                needsUnitType = false;
             }
             else
             {
-                expr = nullptr;
+                statement = nullptr;
             }
         }
         else
         {
             // process the sub-expression
-            expr = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
+            statement = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
+            if (statement != nullptr && iter != endIter)
+            {
+                // if we reached the end of a statement, increment the iterator
+                if (iter->type == Token::eSemiColon)
+                {
+                    ++iter;
+                    needsUnitType = true;
+                }
+                // if we reached the end of a block, we're done, and the last expression is the
+                // block's return type (so we don't need the unit type expression)
+                else if (iter->type == Token::eCloseBrace)
+                {
+                    needsUnitType = false;
+                }
+            }
         }
 
         // if there was an error, return null
-        if (expr == nullptr)
+        if (statement == nullptr)
         {
             deletePointerContainer(statements);
             return nullptr;
         }
 
-        statements.push_back(expr);
+        statements.push_back(statement);
 
         // if we reached the end, log an error and return null
         if (!EndIteratorCheck(iter, endIter, "Expected block end"))
         {
             deletePointerContainer(statements);
             return nullptr;
-        }
-
-        // if we reached the end of a statement, increment the iterator
-        if (iter->type == Token::eSemiColon)
-        {
-            ++iter;
-        }
-        // if we reached the end of a block, we're done, and the last expression is the
-        // block's return type (so we don't need the unit type expression)
-        else if (iter->type == Token::eCloseBrace)
-        {
-            needsUnitType = false;
         }
     }
 

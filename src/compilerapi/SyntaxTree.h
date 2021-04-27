@@ -354,7 +354,7 @@ public:
 
 typedef std::vector<VariableDeclaration*> VariableDeclarations;
 
-class WhileLoop : public Expression
+class WhileLoop : public SyntaxTreeNode
 {
 public:
     WhileLoop(Expression* condition, BlockExpression* expression, const Token* whileToken);
@@ -368,7 +368,7 @@ public:
     const Token* whileToken;
 };
 
-class ForLoop : public Expression
+class ForLoop : public SyntaxTreeNode
 {
 public:
     ForLoop(const std::string& variableName, const std::string& indexName,
@@ -397,7 +397,7 @@ public:
     std::vector<const Token*> indexTypeNameTokens;
 };
 
-class LoopControl : public Expression
+class LoopControl : public SyntaxTreeNode
 {
 public:
     LoopControl(const Token* token);
@@ -409,7 +409,7 @@ public:
     const Token* token;
 };
 
-class Return : public Expression
+class Return : public SyntaxTreeNode
 {
 public:
     Return(const Token* token, Expression* expression);

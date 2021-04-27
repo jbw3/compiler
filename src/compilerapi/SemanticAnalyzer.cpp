@@ -954,9 +954,6 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
         logger.LogError(*endBlockToken, "While loop block expression must return the unit type");
         return;
     }
-
-    // while loop expressions always evaluate to the unit type
-    whileLoop->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(ForLoop* forLoop)
@@ -1093,9 +1090,6 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         logger.LogError(*endBlockToken, "For loop block expression must return the unit type");
         return;
     }
-
-    // for loop expressions always evaluate to the unit type
-    forLoop->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(LoopControl* loopControl)
@@ -1108,9 +1102,6 @@ void SemanticAnalyzer::Visit(LoopControl* loopControl)
         logger.LogError(*token, "'{}' can only be used in a loop", token->value);
         return;
     }
-
-    // loop control expressions always evaluate to the unit type
-    loopControl->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(Return* ret)
@@ -1143,9 +1134,6 @@ void SemanticAnalyzer::Visit(Return* ret)
     {
         ret->expression = resultExpression;
     }
-
-    // return expressions always evaluate to the unit type
-    ret->SetType(TypeInfo::UnitType);
 }
 
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
@@ -1836,9 +1824,18 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
 
         if (!isError)
         {
-            // the block expression's type is the type of its last expression
-            Expression* lastExpr = dynamic_cast<Expression*>(statements[size - 1]);
-            blockExpression->SetType(lastExpr->GetType());
+            SyntaxTreeNode* lastStatement = statements[size - 1];
+            if (dynamic_cast<Return*>(lastStatement) != nullptr)
+            {
+                blockExpression->SetType(TypeInfo::UnitType);
+            }
+            else
+            {
+                // the block expression's type is the type of its last expression
+                Expression* lastExpr = dynamic_cast<Expression*>(lastStatement);
+                assert(lastExpr != nullptr && "lastExpr is null");
+                blockExpression->SetType(lastExpr->GetType());
+            }
         }
     }
 }
