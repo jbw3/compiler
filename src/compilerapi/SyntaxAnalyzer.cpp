@@ -647,7 +647,18 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    // TODO: ensure iter is a semicolon
+    // ensure iter is a semicolon
+    if (iter == endIter)
+    {
+        logger.LogError("Unexpected end of file");
+        return nullptr;
+    }
+
+    if (iter->type != Token::eSemiColon)
+    {
+        logger.LogError(*iter, "Expected ';'");
+        return nullptr;
+    }
 
     // increment past semicolon
     ++iter;
