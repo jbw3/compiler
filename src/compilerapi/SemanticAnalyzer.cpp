@@ -1716,11 +1716,10 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
     const TypeInfo* sizeType = sizeExpression->GetType();
     TypeInfo::ESign sign = sizeType->GetSign();
 
-    NumericExpression* numExpression = dynamic_cast<NumericExpression*>(sizeExpression);
-    if ( numExpression == nullptr || (sign != TypeInfo::eUnsigned && sign != TypeInfo::eContextDependent) )
+    if ( !sizeExpression->GetIsConstant() || (sign != TypeInfo::eUnsigned && sign != TypeInfo::eContextDependent) )
     {
         isError = true;
-        logger.LogError(*arrayExpression->startToken, "Invalid array size. Array sizes must be unsigned numeric literals");
+        logger.LogError(*arrayExpression->startToken, "Invalid array size. Array sizes must be unsigned constant expressions");
         return;
     }
 

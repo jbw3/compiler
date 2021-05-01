@@ -89,6 +89,7 @@ NumericExpression::NumericExpression(int64_t value, const Token* token) :
     token(token),
     value(value)
 {
+    SetIsConstant(true);
 }
 
 void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
@@ -145,6 +146,7 @@ unsigned NumericExpression::GetMinUnsignedSize() const
 BoolLiteralExpression::BoolLiteralExpression(const Token* token) :
     token(token)
 {
+    SetIsConstant(true);
 }
 
 void BoolLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
@@ -156,6 +158,7 @@ StringLiteralExpression::StringLiteralExpression(const vector<char> characters, 
     token(token),
     characters(characters)
 {
+    SetIsConstant(true);
 }
 
 void StringLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
