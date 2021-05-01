@@ -5,6 +5,7 @@ const char* const BOOL_KEYWORD = "bool";
 const char* const BREAK_KEYWORD = "break";
 const char* const CAST_KEYWORD = "cast";
 const char* const CONTINUE_KEYWORD = "continue";
+const char* const CONST_KEYWORD = "const";
 const char* const ELIF_KEYWORD = "elif";
 const char* const ELSE_KEYWORD = "else";
 const char* const EXTERN_KEYWORD = "extern";
