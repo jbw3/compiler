@@ -2100,7 +2100,51 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
 void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 {
-    // TODO: implement
+    BinaryExpression* assignmentExpression = constantDeclaration->assignmentExpression;
+    if (assignmentExpression->op != BinaryExpression::eAssign)
+    {
+        isError = true;
+        logger.LogInternalError("Binary expression in constant declaration is not an assignment");
+        return;
+    }
+
+    // process right of assignment expression before adding constant to symbol
+    // table in order to detect if the constant is referenced before it is assigned
+    Expression* rightExpr = assignmentExpression->right;
+    rightExpr->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+
+    // set the variable type
+    const TypeInfo* type = GetVariableType(constantDeclaration->typeNameTokens, rightExpr->GetType());
+    if (isError)
+    {
+        return;
+    }
+    constantDeclaration->constantType = type;
+
+    // TODO: add the constant name to the symbol table
+    /*
+    const string& constName = constantDeclaration->name;
+    bool ok = symbolTable.AddVariable(constName, constantDeclaration->constantType);
+    if (!ok)
+    {
+        isError = true;
+        logger.LogError(*constantDeclaration->nameToken, "Identifier '{}' has already been declared", constName);
+        return;
+    }
+    */
+
+    // TODO: calculate value of assignment expression
+    /*
+    assignmentExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    */
 }
 
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)

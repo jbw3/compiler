@@ -368,7 +368,14 @@ void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
 
 void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
 {
-    // TODO: implement
+    BracePrinter printer(*this, "{", "}");
+
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+
+    PrintProperty(NODE_TYPE_PROPERTY, "ConstantDeclaration");
+    PrintProperty("name", constantDeclaration->name);
+    PrintProperty("typeName", constantDeclaration->typeNameTokens, printTypeName);
+    PrintProperty("assignmentExpression", constantDeclaration->assignmentExpression);
 }
 
 void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)

@@ -71,6 +71,12 @@ fun strings()
     var s6 str = "\u{a}\u{30}\u{3c0}\u{20BF}\u{1F600}";
 }
 
+fun constants()
+{
+    const c1 = 123;
+    const c2 i32 = 456;
+}
+
 fun branches1(x i32, y i32)
 {
     if x == y

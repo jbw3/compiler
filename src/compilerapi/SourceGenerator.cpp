@@ -433,7 +433,13 @@ void SourceGenerator::Visit(BranchExpression* branchExpression)
 
 void SourceGenerator::Visit(ConstantDeclaration* constantDeclaration)
 {
-    // TODO: implement
+    *os << "const " << constantDeclaration->name;
+    if (constantDeclaration->typeNameTokens.size() > 0)
+    {
+        *os << ' ' << constantDeclaration->constantType->GetShortName();
+    }
+    *os << " = ";
+    constantDeclaration->assignmentExpression->right->Accept(this);
 }
 
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
