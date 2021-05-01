@@ -601,6 +601,74 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
     return structInit;
 }
 
+ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& iter, TokenIterator endIter)
+{
+    if (iter->type != Token::eConst)
+    {
+        logger.LogError("Expected '{}'", CONST_KEYWORD);
+        return nullptr;
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected a constant name"))
+    {
+        return nullptr;
+    }
+
+    if (iter->type != Token::eIdentifier)
+    {
+        logger.LogError(*iter, "Invalid constant name");
+        return nullptr;
+    }
+
+    const Token* constNameToken = &*iter;
+
+    if (!IncrementIterator(iter, endIter, "Expected constant type or assignment operator"))
+    {
+        return nullptr;
+    }
+
+    vector<const Token*> constTypeNameTokens;
+    bool ok = ProcessType(iter, endIter, constTypeNameTokens, Token::eEqual);
+    if (!ok)
+    {
+        return nullptr;
+    }
+
+    const Token* opToken = &*iter;
+
+    if (!IncrementIterator(iter, endIter, "Expected expression"))
+    {
+        return nullptr;
+    }
+
+    Expression* expression = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
+    if (expression == nullptr)
+    {
+        return nullptr;
+    }
+
+    // ensure iter is a semicolon
+    if (iter == endIter)
+    {
+        logger.LogError("Unexpected end of file");
+        return nullptr;
+    }
+
+    if (iter->type != Token::eSemiColon)
+    {
+        logger.LogError(*iter, "Expected ';'");
+        return nullptr;
+    }
+
+    // increment past semicolon
+    ++iter;
+
+    const string& constName = constNameToken->value;
+    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(constName, constNameToken), expression, opToken);
+    ConstantDeclaration* constDecl = new ConstantDeclaration(constName, assignment, constNameToken, constTypeNameTokens);
+    return constDecl;
+}
+
 VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter)
 {
     if (iter->type != Token::eVar)
@@ -1620,6 +1688,11 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         if (tokenType == Token::eVar)
         {
             statement = ProcessVariableDeclaration(iter, endIter);
+            needsUnitType = true;
+        }
+        else if (tokenType == Token::eConst)
+        {
+            statement = ProcessConstantDeclaration(iter, endIter);
             needsUnitType = true;
         }
         else if (tokenType  == Token::eWhile)

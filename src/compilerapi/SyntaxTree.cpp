@@ -576,6 +576,26 @@ void BranchExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+ConstantDeclaration::ConstantDeclaration(const string& name, BinaryExpression* assignmentExpression,
+                                         const Token* nameToken, const vector<const Token*>& typeNameTokens) :
+    nameToken(nameToken),
+    typeNameTokens(typeNameTokens),
+    name(name),
+    constantType(nullptr),
+    assignmentExpression(assignmentExpression)
+{
+}
+
+ConstantDeclaration::~ConstantDeclaration()
+{
+    delete assignmentExpression;
+}
+
+void ConstantDeclaration::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO: implement
+}
+
 VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* assignmentExpression,
                                          const Token* nameToken, const vector<const Token*>& typeNameTokens) :
     nameToken(nameToken),
@@ -584,6 +604,11 @@ VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* a
     variableType(nullptr),
     assignmentExpression(assignmentExpression)
 {
+}
+
+VariableDeclaration::~VariableDeclaration()
+{
+    delete assignmentExpression;
 }
 
 void VariableDeclaration::Accept(SyntaxTreeVisitor* visitor)

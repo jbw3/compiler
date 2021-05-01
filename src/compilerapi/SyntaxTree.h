@@ -335,13 +335,30 @@ public:
     Expression* elseExpression;
 };
 
+class ConstantDeclaration : public SyntaxTreeNode
+{
+public:
+    ConstantDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
+                        const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
+
+    virtual ~ConstantDeclaration();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* nameToken;
+    std::vector<const Token*> typeNameTokens;
+    std::string name;
+    const TypeInfo* constantType;
+    BinaryExpression* assignmentExpression;
+};
+
 class VariableDeclaration : public SyntaxTreeNode
 {
 public:
     VariableDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
                         const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
 
-    virtual ~VariableDeclaration() = default;
+    virtual ~VariableDeclaration();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 

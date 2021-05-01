@@ -69,6 +69,8 @@ private:
     SyntaxTree::StructInitializationExpression* ProcessStructInitialization(TokenIterator& iter,
                                                                             TokenIterator endIter);
 
+    SyntaxTree::ConstantDeclaration* ProcessConstantDeclaration(TokenIterator& iter, TokenIterator endIter);
+
     SyntaxTree::VariableDeclaration* ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::WhileLoop* ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter);
