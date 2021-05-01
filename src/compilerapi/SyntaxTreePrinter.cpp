@@ -366,6 +366,11 @@ void SyntaxTreePrinter::Visit(BranchExpression* branchExpression)
     PrintProperty("elseExpression", branchExpression->elseExpression);
 }
 
+void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
+{
+    // TODO: implement
+}
+
 void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 {
     BracePrinter printer(*this, "{", "}");

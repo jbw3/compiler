@@ -593,7 +593,7 @@ ConstantDeclaration::~ConstantDeclaration()
 
 void ConstantDeclaration::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO: implement
+    visitor->Visit(this);
 }
 
 VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* assignmentExpression,

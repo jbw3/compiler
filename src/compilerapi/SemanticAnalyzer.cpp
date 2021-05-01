@@ -2098,6 +2098,11 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     branchExpression->SetType(resultType);
 }
 
+void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
+{
+    // TODO: implement
+}
+
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 {
     BinaryExpression* assignmentExpression = variableDeclaration->assignmentExpression;

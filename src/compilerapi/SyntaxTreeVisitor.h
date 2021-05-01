@@ -10,6 +10,7 @@ class BoolLiteralExpression;
 class BlockExpression;
 class BranchExpression;
 class CastExpression;
+class ConstantDeclaration;
 class ExternFunctionDeclaration;
 class ForLoop;
 class FunctionDefinition;
@@ -83,6 +84,8 @@ public:
     virtual void Visit(SyntaxTree::MemberExpression* memberExpression) = 0;
 
     virtual void Visit(SyntaxTree::BranchExpression* branchExpression) = 0;
+
+    virtual void Visit(SyntaxTree::ConstantDeclaration* constantDeclaration) = 0;
 
     virtual void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) = 0;
 };

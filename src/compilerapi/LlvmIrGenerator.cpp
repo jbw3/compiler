@@ -1741,6 +1741,11 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     resultValue = phiNode;
 }
 
+void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
+{
+    // TODO: implement
+}
+
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     const string& varName = variableDeclaration->name;

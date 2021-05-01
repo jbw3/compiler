@@ -114,6 +114,8 @@ public:
 
     void Visit(SyntaxTree::BranchExpression* branchExpression) override;
 
+    void Visit(SyntaxTree::ConstantDeclaration* constantDeclaration) override;
+
     void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
 
     bool Generate(SyntaxTree::Modules* syntaxTree, llvm::Module*& module);

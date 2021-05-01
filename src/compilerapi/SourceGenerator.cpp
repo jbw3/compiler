@@ -431,6 +431,11 @@ void SourceGenerator::Visit(BranchExpression* branchExpression)
     }
 }
 
+void SourceGenerator::Visit(ConstantDeclaration* constantDeclaration)
+{
+    // TODO: implement
+}
+
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     *os << "var " << variableDeclaration->name;
