@@ -49,10 +49,17 @@ public:
 
     virtual void SetAccessType(EAccessType newAccessType);
 
+    bool GetIsConstant() const;
+
+    void SetIsConstant(bool newIsConstant);
+
 private:
+    static constexpr uint8_t F_ACCESS_TYPE = 1 << 0;
+    static constexpr uint8_t F_IS_STORAGE  = 1 << 1;
+    static constexpr uint8_t F_IS_CONSTANT = 1 << 2;
+
     const TypeInfo* type;
-    bool isStorage;
-    EAccessType accessType;
+    uint8_t flags;
 };
 
 typedef std::vector<Expression*> Expressions;

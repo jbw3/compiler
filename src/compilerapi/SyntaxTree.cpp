@@ -11,8 +11,7 @@ namespace SyntaxTree
 {
 Expression::Expression() :
     type(nullptr),
-    isStorage(false),
-    accessType(eValue)
+    flags(0 | eValue)
 {
 }
 
@@ -28,22 +27,53 @@ void Expression::SetType(const TypeInfo* newType)
 
 bool Expression::GetIsStorage() const
 {
-    return isStorage;
+    return (flags & F_IS_STORAGE) != 0;
 }
 
 void Expression::SetIsStorage(bool newIsStorage)
 {
-    isStorage = newIsStorage;
+    if (newIsStorage)
+    {
+        flags |= F_IS_STORAGE;
+    }
+    else
+    {
+        flags &= ~F_IS_STORAGE;
+    }
 }
 
 Expression::EAccessType Expression::GetAccessType() const
 {
-    return accessType;
+    return static_cast<EAccessType>(flags & F_ACCESS_TYPE);
 }
 
 void Expression::SetAccessType(EAccessType newAccessType)
 {
-    accessType = newAccessType;
+    if (newAccessType == eValue)
+    {
+        flags &= ~F_ACCESS_TYPE;
+    }
+    else
+    {
+        flags |= F_ACCESS_TYPE;
+    }
+}
+
+bool Expression::GetIsConstant() const
+{
+    return (flags & F_IS_CONSTANT) != 0;
+}
+
+void Expression::SetIsConstant(bool newIsConstant)
+{
+    if (newIsConstant)
+    {
+        flags |= F_IS_CONSTANT;
+    }
+    else
+    {
+        flags &= F_IS_CONSTANT;
+    }
 }
 
 UnitTypeLiteralExpression::UnitTypeLiteralExpression()
