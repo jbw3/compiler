@@ -1676,16 +1676,19 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 
     const NumericLiteralType* type = NumericLiteralType::Create(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
+    numericExpression->SetIsConstant(true);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     boolLiteralExpression->SetType(TypeInfo::BoolType);
+    boolLiteralExpression->SetIsConstant(true);
 }
 
 void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     stringLiteralExpression->SetType(TypeInfo::GetStringType());
+    stringLiteralExpression->SetIsConstant(true);
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
@@ -2113,6 +2116,13 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     rightExpr->Accept(this);
     if (isError)
     {
+        return;
+    }
+
+    if (!rightExpr->GetIsConstant())
+    {
+        isError = true;
+        logger.LogError(*assignmentExpression->opToken, "Assigned expression is not a constant value");
         return;
     }
 
