@@ -72,7 +72,7 @@ void Expression::SetIsConstant(bool newIsConstant)
     }
     else
     {
-        flags &= F_IS_CONSTANT;
+        flags &= ~F_IS_CONSTANT;
     }
 }
 
