@@ -1275,8 +1275,8 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
 void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 {
     const string& name = variableExpression->name;
-    AllocaInst* alloca = symbolTable.GetValue(name);
-    if (alloca == nullptr)
+    const SymbolTable::VariableData* varData = symbolTable.GetVariableData(name);
+    if (varData == nullptr)
     {
         resultValue = nullptr;
         logger.LogInternalError("No alloca found for '{}'", name);
@@ -1285,15 +1285,42 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
 
     SetDebugLocation(variableExpression->token);
 
-    Expression::EAccessType accessType = variableExpression->GetAccessType();
-    switch (accessType)
+    if (varData->IsConstant())
     {
-        case Expression::eValue:
-            resultValue = builder.CreateLoad(alloca, name);
-            break;
-        case Expression::eAddress:
-            resultValue = alloca;
-            break;
+        unsigned constIdx = varData->constValueIndex;
+        const ConstantValue& value = compilerContext.GetConstantValue(constIdx);
+
+        const TypeInfo* type = variableExpression->GetType();
+        if (type->IsBool())
+        {
+            resultValue = value.boolValue ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
+        }
+        else if (type->IsInt())
+        {
+            unsigned numBits = type->GetNumBits();
+            bool isSigned = type->GetSign() == TypeInfo::eSigned;
+            resultValue = ConstantInt::get(context, APInt(numBits, value.intValue, isSigned));
+        }
+        else
+        {
+            resultValue = nullptr;
+            logger.LogInternalError("Unexpected type for constant '{}'", name);
+            return;
+        }
+    }
+    else
+    {
+        AllocaInst* alloca = varData->value;
+        Expression::EAccessType accessType = variableExpression->GetAccessType();
+        switch (accessType)
+        {
+            case Expression::eValue:
+                resultValue = builder.CreateLoad(alloca, name);
+                break;
+            case Expression::eAddress:
+                resultValue = alloca;
+                break;
+        }
     }
 }
 
@@ -1743,7 +1770,22 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 
 void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 {
-    // TODO: implement
+    const string& constName = constantDeclaration->name;
+    const TypeInfo* constType = constantDeclaration->constantType;
+    Type* type = GetType(constType);
+    if (type == nullptr)
+    {
+        resultValue = nullptr;
+        logger.LogInternalError("Unknown constant declaration type");
+        return;
+    }
+
+    unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
+    symbolTable.AddConstant(constName, constType, constIdx);
+
+    // TODO: create debug info
+
+    resultValue = ConstantStruct::get(unitType);
 }
 
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)

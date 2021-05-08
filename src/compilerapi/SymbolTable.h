@@ -14,13 +14,16 @@ class TypeInfo;
 class SymbolTable
 {
 public:
-    static constexpr unsigned NON_CONST_VALUE = static_cast<unsigned>(-1);
-
     struct VariableData
     {
         const TypeInfo* type;
         llvm::AllocaInst* value;
         unsigned constValueIndex;
+
+        bool IsConstant() const
+        {
+            return constValueIndex != NON_CONST_VALUE;
+        }
     };
 
     SymbolTable();
@@ -44,6 +47,8 @@ public:
     VariableData* GetVariableData(const std::string& name) const;
 
 private:
+    static constexpr unsigned NON_CONST_VALUE = static_cast<unsigned>(-1);
+
     struct ScopeData
     {
         std::unordered_map<std::string, VariableData> variables;

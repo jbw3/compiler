@@ -1714,9 +1714,9 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
         variableExpression->SetType(varType);
         variableExpression->SetIsStorage(!varType->IsImmutable());
 
-        unsigned constIdx = varData->constValueIndex;
-        if (constIdx != SymbolTable::NON_CONST_VALUE)
+        if (varData->IsConstant())
         {
+            unsigned constIdx = varData->constValueIndex;
             variableExpression->SetConstantValueIndex(constIdx);
         }
     }
