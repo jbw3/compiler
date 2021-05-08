@@ -26,15 +26,20 @@ public:
 
     bool AddVariable(const std::string& name, const TypeInfo* type, llvm::AllocaInst* value);
 
+    bool AddConstant(const std::string& name, const TypeInfo* type);
+
     const TypeInfo* GetVariableType(const std::string& name) const;
 
     llvm::AllocaInst* GetValue(const std::string& name) const;
+
+    bool IsIdentifierConstant(const std::string& name) const;
 
 private:
     struct VariableData
     {
         const TypeInfo* type;
         llvm::AllocaInst* value;
+        bool isConstant;
     };
 
     struct ScopeData

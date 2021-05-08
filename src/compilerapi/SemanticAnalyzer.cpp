@@ -1704,6 +1704,7 @@ void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
     {
         variableExpression->SetType(varType);
         variableExpression->SetIsStorage(!varType->IsImmutable());
+        variableExpression->SetIsConstant(symbolTable.IsIdentifierConstant(varName));
     }
 }
 
@@ -2134,26 +2135,24 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     }
     constantDeclaration->constantType = type;
 
-    // TODO: add the constant name to the symbol table
-    /*
+    // TODO: calculate value of assignment expression
+
+    // add the constant name to the symbol table
     const string& constName = constantDeclaration->name;
-    bool ok = symbolTable.AddVariable(constName, constantDeclaration->constantType);
+    bool ok = symbolTable.AddConstant(constName, constantDeclaration->constantType);
     if (!ok)
     {
         isError = true;
         logger.LogError(*constantDeclaration->nameToken, "Identifier '{}' has already been declared", constName);
         return;
     }
-    */
 
-    // TODO: calculate value of assignment expression
-    /*
+    // assignment expression type check
     assignmentExpression->Accept(this);
     if (isError)
     {
         return;
     }
-    */
 }
 
 void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
