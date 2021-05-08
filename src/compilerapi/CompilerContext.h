@@ -40,6 +40,12 @@ private:
     char* end;
 };
 
+union ConstantValue
+{
+    bool boolValue;
+    int64_t intValue;
+};
+
 class CompilerContext
 {
 public:
@@ -64,9 +70,17 @@ public:
         return fileTokens[id];
     }
 
+    unsigned AddConstantValue(ConstantValue value);
+
+    const ConstantValue& GetConstantValue(unsigned id) const
+    {
+        return constantValues[id];
+    }
+
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
+    std::vector<ConstantValue> constantValues;
 };
 
 #endif // COMPILER_CONTEXT_H_

@@ -11,7 +11,7 @@ namespace SyntaxTree
 {
 Expression::Expression() :
     type(nullptr),
-    flags(0 | eValue)
+    flags(CONST_VALUE_MASK)
 {
 }
 
@@ -44,7 +44,7 @@ void Expression::SetIsStorage(bool newIsStorage)
 
 Expression::EAccessType Expression::GetAccessType() const
 {
-    return static_cast<EAccessType>(flags & F_ACCESS_TYPE);
+    return static_cast<EAccessType>((flags & F_ACCESS_TYPE) >> 31);
 }
 
 void Expression::SetAccessType(EAccessType newAccessType)
@@ -59,21 +59,21 @@ void Expression::SetAccessType(EAccessType newAccessType)
     }
 }
 
-bool Expression::GetIsConstant() const
+unsigned Expression::GetConstantValueIndex() const
 {
-    return (flags & F_IS_CONSTANT) != 0;
+    return flags & CONST_VALUE_MASK;
 }
 
-void Expression::SetIsConstant(bool newIsConstant)
+void Expression::SetConstantValueIndex(unsigned newConstantValueIndex)
 {
-    if (newIsConstant)
-    {
-        flags |= F_IS_CONSTANT;
-    }
-    else
-    {
-        flags &= ~F_IS_CONSTANT;
-    }
+    flags &= ~CONST_VALUE_MASK;
+    flags |= newConstantValueIndex & CONST_VALUE_MASK;
+}
+
+bool Expression::GetIsConstant() const
+{
+    // if the constant value index is its max value, this is not a constant
+    return (flags & CONST_VALUE_MASK) != CONST_VALUE_MASK;
 }
 
 UnitTypeLiteralExpression::UnitTypeLiteralExpression()

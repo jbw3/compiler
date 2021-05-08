@@ -6,7 +6,8 @@
 using namespace std;
 using namespace SyntaxTree;
 
-SemanticAnalyzer::SemanticAnalyzer(ErrorLogger& logger) :
+SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
+    compilerContext(compilerContext),
     logger(logger),
     isError(false),
     loopLevel(0),
@@ -1676,35 +1677,48 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 
     const NumericLiteralType* type = NumericLiteralType::Create(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
-    numericExpression->SetIsConstant(true);
+
+    ConstantValue value;
+    value.intValue = numericExpression->value;
+    unsigned idx = compilerContext.AddConstantValue(value);
+    numericExpression->SetConstantValueIndex(idx);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     boolLiteralExpression->SetType(TypeInfo::BoolType);
-    boolLiteralExpression->SetIsConstant(true);
+
+    ConstantValue value;
+    value.boolValue = boolLiteralExpression->token->type == Token::eTrueLit;
+    unsigned idx = compilerContext.AddConstantValue(value);
+    boolLiteralExpression->SetConstantValueIndex(idx);
 }
 
 void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     stringLiteralExpression->SetType(TypeInfo::GetStringType());
-    stringLiteralExpression->SetIsConstant(true);
 }
 
 void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
 {
     const string& varName = variableExpression->name;
-    const TypeInfo* varType = symbolTable.GetVariableType(varName);
-    if (varType == nullptr)
+    const SymbolTable::VariableData* varData = symbolTable.GetVariableData(varName);
+    if (varData == nullptr)
     {
         logger.LogError(*variableExpression->token, "Variable '{}' is not declared in the current scope", varName);
         isError = true;
     }
     else
     {
+        const TypeInfo* varType = varData->type;
         variableExpression->SetType(varType);
         variableExpression->SetIsStorage(!varType->IsImmutable());
-        variableExpression->SetIsConstant(symbolTable.IsIdentifierConstant(varName));
+
+        unsigned constIdx = varData->constValueIndex;
+        if (constIdx != SymbolTable::NON_CONST_VALUE)
+        {
+            variableExpression->SetConstantValueIndex(constIdx);
+        }
     }
 }
 
@@ -2135,11 +2149,12 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     }
     constantDeclaration->constantType = type;
 
-    // TODO: calculate value of assignment expression
+    // calculate value of assignment expression
+    unsigned constIdx = rightExpr->GetConstantValueIndex();
 
     // add the constant name to the symbol table
     const string& constName = constantDeclaration->name;
-    bool ok = symbolTable.AddConstant(constName, constantDeclaration->constantType);
+    bool ok = symbolTable.AddConstant(constName, constantDeclaration->constantType, constIdx);
     if (!ok)
     {
         isError = true;

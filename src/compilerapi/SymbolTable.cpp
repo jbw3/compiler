@@ -62,7 +62,7 @@ bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaIn
     // only insert if there is not already a variable with this name
     if (varData == nullptr)
     {
-        scopes.back()->variables.insert({name, {type, value, false}});
+        scopes.back()->variables.insert({name, {type, value, NON_CONST_VALUE}});
         return true;
     }
     else
@@ -71,14 +71,14 @@ bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaIn
     }
 }
 
-bool SymbolTable::AddConstant(const string& name, const TypeInfo* type)
+bool SymbolTable::AddConstant(const string& name, const TypeInfo* type, unsigned constValueIndex)
 {
     VariableData* data = GetVariableData(name);
 
     // only insert if there is not already an identifier with this name
     if (data == nullptr)
     {
-        scopes.back()->variables.insert({name, {type, nullptr, true}});
+        scopes.back()->variables.insert({name, {type, nullptr, constValueIndex}});
         return true;
     }
     else
@@ -107,12 +107,6 @@ AllocaInst* SymbolTable::GetValue(const string& name) const
     }
 
     return varData->value;
-}
-
-bool SymbolTable::IsIdentifierConstant(const string& name) const
-{
-    VariableData* data = GetVariableData(name);
-    return data->isConstant;
 }
 
 SymbolTable::VariableData* SymbolTable::GetVariableData(const string& name) const

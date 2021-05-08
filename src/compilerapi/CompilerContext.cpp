@@ -68,8 +68,17 @@ CompilerContext::CompilerContext()
 
 unsigned CompilerContext::AddFile(const string& filename)
 {
+    unsigned id = static_cast<unsigned>(filenames.size());
     filenames.push_back(filename);
     fileTokens.push_back(TokenList());
 
-    return static_cast<unsigned>(filenames.size() - 1);
+    return id;
+}
+
+unsigned CompilerContext::AddConstantValue(ConstantValue value)
+{
+    unsigned id = static_cast<unsigned>(constantValues.size());
+    constantValues.push_back(value);
+
+    return id;
 }

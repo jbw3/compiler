@@ -49,17 +49,19 @@ public:
 
     virtual void SetAccessType(EAccessType newAccessType);
 
+    unsigned GetConstantValueIndex() const;
+
+    void SetConstantValueIndex(unsigned newConstantValueIndex);
+
     bool GetIsConstant() const;
 
-    void SetIsConstant(bool newIsConstant);
-
 private:
-    static constexpr uint8_t F_ACCESS_TYPE = 1 << 0;
-    static constexpr uint8_t F_IS_STORAGE  = 1 << 1;
-    static constexpr uint8_t F_IS_CONSTANT = 1 << 2;
+    static constexpr uint32_t F_ACCESS_TYPE    = 0x8000'0000;
+    static constexpr uint32_t F_IS_STORAGE     = 0x4000'0000;
+    static constexpr uint32_t CONST_VALUE_MASK = 0x00ff'ffff;
 
     const TypeInfo* type;
-    uint8_t flags;
+    uint32_t flags;
 };
 
 typedef std::vector<Expression*> Expressions;

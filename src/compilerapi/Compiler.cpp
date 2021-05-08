@@ -86,7 +86,7 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
     {
         SW_START(Semantic);
 
-        SemanticAnalyzer semanticAnalyzer(logger);
+        SemanticAnalyzer semanticAnalyzer(compilerContext, logger);
         ok = semanticAnalyzer.Process(syntaxTree);
 
         SW_STOP(Semantic);

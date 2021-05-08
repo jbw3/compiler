@@ -7,12 +7,13 @@
 #include <unordered_map>
 #include <unordered_set>
 
+class CompilerContext;
 class ErrorLogger;
 
 class SemanticAnalyzer : public SyntaxTreeVisitor
 {
 public:
-    SemanticAnalyzer(ErrorLogger& logger);
+    SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
 
     bool Process(SyntaxTree::SyntaxTreeNode* syntaxTree);
 
@@ -75,6 +76,7 @@ private:
     bool isError;
     std::unordered_map<std::string, AggregateType*> partialStructTypes;
     std::unordered_map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
+    CompilerContext& compilerContext;
     SymbolTable symbolTable;
     unsigned loopLevel;
     const SyntaxTree::FunctionDefinition* currentFunction;
