@@ -1784,8 +1784,6 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
     symbolTable.AddConstant(constName, constType, constIdx);
 
-    // TODO: create debug info
-
     resultValue = ConstantStruct::get(unitType);
 }
 
