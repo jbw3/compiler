@@ -1328,8 +1328,7 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 {
     unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
 
-    NumericExpression* sizeExpression = dynamic_cast<NumericExpression*>(arrayExpression->sizeExpression);
-    assert(sizeExpression != nullptr);
+    Expression* sizeExpression = arrayExpression->sizeExpression;
 
     sizeExpression->Accept(this);
     if (resultValue == nullptr)
@@ -1342,7 +1341,9 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
         Type* extType = GetType(TypeInfo::GetUIntSizeType());
         sizeValue = builder.CreateZExt(sizeValue, extType, "zeroext");
     }
-    uint64_t arraySize = (uint64_t)sizeExpression->value;
+    unsigned constIdx = sizeExpression->GetConstantValueIndex();
+    const ConstantValue& constValue = compilerContext.GetConstantValue(constIdx);
+    uint64_t arraySize = static_cast<uint64_t>(constValue.intValue);
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
     const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();
