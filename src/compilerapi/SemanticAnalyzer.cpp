@@ -2392,6 +2392,7 @@ Expression* SemanticAnalyzer::ImplicitCast(Expression* expression, const TypeInf
     {
         ImplicitCastExpression* implicitCast = new ImplicitCastExpression(expression);
         implicitCast->SetType(type);
+        implicitCast->SetConstantValueIndex(expression->GetConstantValueIndex());
 
         return implicitCast;
     }
