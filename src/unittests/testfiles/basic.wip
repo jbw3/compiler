@@ -918,3 +918,19 @@ fun casts(x i16, y u16, b bool)
     var c11 = cast(i8, y);
     var c12 = cast(i8, b);
 }
+
+fun consts()
+{
+    const c1 = 12;
+    const c2 = 1_000;
+    const c3 i32 = c2;
+    const c4 = true;
+    const c5 u32 = 13;
+
+    var v1 = c1;
+    var v2 = c2;
+    var v3 = c3;
+    var v4 = c4;
+
+    var a1 [i32] = [c5; 0];
+}

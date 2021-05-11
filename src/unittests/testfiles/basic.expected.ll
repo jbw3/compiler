@@ -3058,6 +3058,37 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @consts() #0 {
+entry:
+  %array = alloca [13 x i32]
+  %a1 = alloca %"[i32]"
+  %v4 = alloca i1
+  %v3 = alloca i32
+  %v2 = alloca i16
+  %v1 = alloca i8
+  store i8 12, i8* %v1
+  store i16 1000, i16* %v2
+  store i32 1000, i32* %v3
+  store i1 true, i1* %v4
+  %startPtr = getelementptr inbounds [13 x i32], [13 x i32]* %array, i64 0, i64 0
+  %endPtr = getelementptr inbounds [13 x i32], [13 x i32]* %array, i64 0, i64 13
+  br label %fillBody
+
+fillBody:                                         ; preds = %fillBody, %entry
+  %phi = phi i32* [ %startPtr, %entry ], [ %nextPtr, %fillBody ]
+  store i32 0, i32* %phi
+  %nextPtr = getelementptr inbounds i32, i32* %phi, i64 1
+  %atEnd = icmp eq i32* %nextPtr, %endPtr
+  br i1 %atEnd, label %fillExit, label %fillBody
+
+fillExit:                                         ; preds = %fillBody
+  %arrptr = bitcast [13 x i32]* %array to i32*
+  %agg = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr, 1
+  store %"[i32]" %agg, %"[i32]"* %a1
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
