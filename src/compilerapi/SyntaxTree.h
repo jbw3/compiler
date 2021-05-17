@@ -250,12 +250,12 @@ public:
     EOperator op;
 };
 
-class VariableExpression : public Expression
+class IdentifierExpression : public Expression
 {
 public:
-    VariableExpression(const std::string& name, const Token* token);
+    IdentifierExpression(const std::string& name, const Token* token);
 
-    virtual ~VariableExpression() = default;
+    virtual ~IdentifierExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 

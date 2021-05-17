@@ -50,7 +50,7 @@ public:
 
     void Visit(SyntaxTree::StringLiteralExpression* stringLiteralExpression) override;
 
-    void Visit(SyntaxTree::VariableExpression* variableExpression) override;
+    void Visit(SyntaxTree::IdentifierExpression* identifierExpression) override;
 
     void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) override;
 

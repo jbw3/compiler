@@ -1272,25 +1272,25 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
     return globalString;
 }
 
-void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
+void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
 {
-    const string& name = variableExpression->name;
-    const SymbolTable::VariableData* varData = symbolTable.GetVariableData(name);
-    if (varData == nullptr)
+    const string& name = identifierExpression->name;
+    const SymbolTable::VariableData* data = symbolTable.GetVariableData(name);
+    if (data == nullptr)
     {
         resultValue = nullptr;
         logger.LogInternalError("No alloca found for '{}'", name);
         return;
     }
 
-    SetDebugLocation(variableExpression->token);
+    SetDebugLocation(identifierExpression->token);
 
-    if (varData->IsConstant())
+    if (data->IsConstant())
     {
-        unsigned constIdx = varData->constValueIndex;
+        unsigned constIdx = data->constValueIndex;
         const ConstantValue& value = compilerContext.GetConstantValue(constIdx);
 
-        const TypeInfo* type = variableExpression->GetType();
+        const TypeInfo* type = identifierExpression->GetType();
         if (type->IsBool())
         {
             resultValue = value.boolValue ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
@@ -1310,8 +1310,8 @@ void LlvmIrGenerator::Visit(VariableExpression* variableExpression)
     }
     else
     {
-        AllocaInst* alloca = varData->value;
-        Expression::EAccessType accessType = variableExpression->GetAccessType();
+        AllocaInst* alloca = data->value;
+        Expression::EAccessType accessType = identifierExpression->GetAccessType();
         switch (accessType)
         {
             case Expression::eValue:

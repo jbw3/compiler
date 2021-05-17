@@ -1699,25 +1699,25 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
     stringLiteralExpression->SetType(TypeInfo::GetStringType());
 }
 
-void SemanticAnalyzer::Visit(VariableExpression* variableExpression)
+void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
 {
-    const string& varName = variableExpression->name;
-    const SymbolTable::VariableData* varData = symbolTable.GetVariableData(varName);
-    if (varData == nullptr)
+    const string& name = identifierExpression->name;
+    const SymbolTable::VariableData* data = symbolTable.GetVariableData(name);
+    if (data == nullptr)
     {
-        logger.LogError(*variableExpression->token, "Variable '{}' is not declared in the current scope", varName);
+        logger.LogError(*identifierExpression->token, "Identifier '{}' is not declared in the current scope", name);
         isError = true;
     }
     else
     {
-        const TypeInfo* varType = varData->type;
-        variableExpression->SetType(varType);
-        variableExpression->SetIsStorage(!varType->IsImmutable());
+        const TypeInfo* type = data->type;
+        identifierExpression->SetType(type);
+        identifierExpression->SetIsStorage(!type->IsImmutable());
 
-        if (varData->IsConstant())
+        if (data->IsConstant())
         {
-            unsigned constIdx = varData->constValueIndex;
-            variableExpression->SetConstantValueIndex(constIdx);
+            unsigned constIdx = data->constValueIndex;
+            identifierExpression->SetConstantValueIndex(constIdx);
         }
     }
 }

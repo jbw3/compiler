@@ -286,12 +286,12 @@ void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
     PrintProperty("value", ss.str());
 }
 
-void SyntaxTreePrinter::Visit(VariableExpression* variableExpression)
+void SyntaxTreePrinter::Visit(IdentifierExpression* identifierExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    PrintProperty(NODE_TYPE_PROPERTY, "VariableExpression");
-    PrintProperty("name", variableExpression->name);
+    PrintProperty(NODE_TYPE_PROPERTY, "IdentifierExpression");
+    PrintProperty("name", identifierExpression->name);
 }
 
 void SyntaxTreePrinter::Visit(ArraySizeValueExpression* arrayExpression)

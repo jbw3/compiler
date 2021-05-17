@@ -270,9 +270,9 @@ void SourceGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
     *os << stringLiteralExpression->token->value;
 }
 
-void SourceGenerator::Visit(VariableExpression* variableExpression)
+void SourceGenerator::Visit(IdentifierExpression* identifierExpression)
 {
-    *os << variableExpression->name;
+    *os << identifierExpression->name;
 }
 
 void SourceGenerator::Visit(ArraySizeValueExpression* arrayExpression)

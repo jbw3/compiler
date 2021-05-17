@@ -491,13 +491,13 @@ void UnaryExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-VariableExpression::VariableExpression(const string& name, const Token* token) :
+IdentifierExpression::IdentifierExpression(const string& name, const Token* token) :
     token(token),
     name(name)
 {
 }
 
-void VariableExpression::Accept(SyntaxTreeVisitor* visitor)
+void IdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }

@@ -15,6 +15,7 @@ class ExternFunctionDeclaration;
 class ForLoop;
 class FunctionDefinition;
 class FunctionExpression;
+class IdentifierExpression;
 class ImplicitCastExpression;
 class LoopControl;
 class MemberExpression;
@@ -28,7 +29,6 @@ class StructInitializationExpression;
 class UnaryExpression;
 class UnitTypeLiteralExpression;
 class VariableDeclaration;
-class VariableExpression;
 class WhileLoop;
 } // namespace SyntaxTree
 
@@ -67,7 +67,7 @@ public:
 
     virtual void Visit(SyntaxTree::StringLiteralExpression* stringLiteralExpression) = 0;
 
-    virtual void Visit(SyntaxTree::VariableExpression* variableExpression) = 0;
+    virtual void Visit(SyntaxTree::IdentifierExpression* identifierExpression) = 0;
 
     virtual void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) = 0;
 

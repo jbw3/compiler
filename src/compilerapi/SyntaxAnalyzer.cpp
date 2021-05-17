@@ -664,7 +664,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     ++iter;
 
     const string& constName = constNameToken->value;
-    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(constName, constNameToken), expression, opToken);
+    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(constName, constNameToken), expression, opToken);
     ConstantDeclaration* constDecl = new ConstantDeclaration(constName, assignment, constNameToken, constTypeNameTokens);
     return constDecl;
 }
@@ -732,7 +732,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     ++iter;
 
     const string& varName = varNameToken->value;
-    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new VariableExpression(varName, varNameToken), expression, opToken);
+    BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(varName, varNameToken), expression, opToken);
     VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, varNameToken, varTypeNameTokens);
     return varDecl;
 }
@@ -1020,7 +1020,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         }
         else // it's a variable
         {
-            expr = new VariableExpression(iter->value, &*iter);
+            expr = new IdentifierExpression(iter->value, &*iter);
         }
     }
     else if (type == Token::eOpenBracket)
