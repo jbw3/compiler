@@ -1275,7 +1275,7 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
 void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
 {
     const string& name = identifierExpression->name;
-    const SymbolTable::VariableData* data = symbolTable.GetVariableData(name);
+    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
     if (data == nullptr)
     {
         resultValue = nullptr;

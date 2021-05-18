@@ -57,12 +57,12 @@ bool SymbolTable::AddVariable(const std::string& name, const TypeInfo* type)
 
 bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaInst* value)
 {
-    VariableData* varData = GetVariableData(name);
+    IdentifierData* data = GetIdentifierData(name);
 
     // only insert if there is not already a variable with this name
-    if (varData == nullptr)
+    if (data == nullptr)
     {
-        scopes.back()->variables.insert({name, {type, value, NON_CONST_VALUE}});
+        scopes.back()->identifiers.insert({name, {type, value, NON_CONST_VALUE}});
         return true;
     }
     else
@@ -73,12 +73,12 @@ bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaIn
 
 bool SymbolTable::AddConstant(const string& name, const TypeInfo* type, unsigned constValueIndex)
 {
-    VariableData* data = GetVariableData(name);
+    IdentifierData* data = GetIdentifierData(name);
 
     // only insert if there is not already an identifier with this name
     if (data == nullptr)
     {
-        scopes.back()->variables.insert({name, {type, nullptr, constValueIndex}});
+        scopes.back()->identifiers.insert({name, {type, nullptr, constValueIndex}});
         return true;
     }
     else
@@ -87,37 +87,15 @@ bool SymbolTable::AddConstant(const string& name, const TypeInfo* type, unsigned
     }
 }
 
-const TypeInfo* SymbolTable::GetVariableType(const string& name) const
-{
-    VariableData* varData = GetVariableData(name);
-    if (varData == nullptr)
-    {
-        return nullptr;
-    }
-
-    return varData->type;
-}
-
-AllocaInst* SymbolTable::GetValue(const string& name) const
-{
-    VariableData* varData = GetVariableData(name);
-    if (varData == nullptr)
-    {
-        return nullptr;
-    }
-
-    return varData->value;
-}
-
-SymbolTable::VariableData* SymbolTable::GetVariableData(const string& name) const
+SymbolTable::IdentifierData* SymbolTable::GetIdentifierData(const string& name) const
 {
     for (auto iter = scopes.rbegin(); iter != scopes.rend(); ++iter)
     {
-        unordered_map<string, VariableData>& variables = (*iter)->variables;
-        auto varIter = variables.find(name);
-        if (varIter != variables.cend())
+        unordered_map<string, IdentifierData>& identifiers = (*iter)->identifiers;
+        auto identifierIter = identifiers.find(name);
+        if (identifierIter != identifiers.cend())
         {
-            return &varIter->second;
+            return &identifierIter->second;
         }
     }
 

@@ -1702,7 +1702,7 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
 {
     const string& name = identifierExpression->name;
-    const SymbolTable::VariableData* data = symbolTable.GetVariableData(name);
+    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
     if (data == nullptr)
     {
         logger.LogError(*identifierExpression->token, "Identifier '{}' is not declared in the current scope", name);
