@@ -42,6 +42,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
     TokenIterator iter = tokens.begin();
     TokenIterator endIter = tokens.end();
 
+    vector<ConstantDeclaration*> constantDeclarations;
     vector<StructDefinition*> structs;
     vector<FunctionDefinition*> functions;
     vector<ExternFunctionDeclaration*> externFunctions;
@@ -49,7 +50,20 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
     bool ok = true;
     while (ok && iter != endIter)
     {
-        if (iter->type == Token::eFun)
+
+        if (iter->type == Token::eConst)
+        {
+            ConstantDeclaration* constantDeclaration = ProcessConstantDeclaration(iter, endIter);
+            if (constantDeclaration == nullptr)
+            {
+                ok = false;
+            }
+            else
+            {
+                constantDeclarations.push_back(constantDeclaration);
+            }
+        }
+        else if (iter->type == Token::eFun)
         {
             FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
             if (functionDefinition == nullptr)
@@ -94,10 +108,11 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(fileId, structs, externFunctions, functions);
+        syntaxTree = new ModuleDefinition(fileId, constantDeclarations, structs, externFunctions, functions);
     }
     else
     {
+        deletePointerContainer(constantDeclarations);
         deletePointerContainer(structs);
         deletePointerContainer(functions);
         deletePointerContainer(externFunctions);

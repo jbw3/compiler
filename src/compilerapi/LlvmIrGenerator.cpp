@@ -1069,6 +1069,15 @@ void LlvmIrGenerator::Visit(Modules* modules)
         }
     }
 
+    // add global constants to symbol table
+    for (ModuleDefinition* moduleDefinition : modules->modules)
+    {
+        for (ConstantDeclaration* constDecl : moduleDefinition->constantDeclarations)
+        {
+            constDecl->Accept(this);
+        }
+    }
+
     // add all struct names to types map
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
@@ -1279,7 +1288,7 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
     if (data == nullptr)
     {
         resultValue = nullptr;
-        logger.LogInternalError("No alloca found for '{}'", name);
+        logger.LogInternalError("No identifier data found for '{}'", name);
         return;
     }
 

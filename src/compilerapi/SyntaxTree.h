@@ -568,6 +568,7 @@ class ModuleDefinition : public SyntaxTreeNode
 {
 public:
     ModuleDefinition(unsigned fileId,
+                     const std::vector<ConstantDeclaration*> constantDeclarations,
                      const std::vector<StructDefinition*>& structDefinitions,
                      const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                      const std::vector<FunctionDefinition*>& functionDefinitions);
@@ -577,6 +578,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     unsigned fileId;
+    std::vector<ConstantDeclaration*> constantDeclarations;
     std::vector<StructDefinition*> structDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
     std::vector<FunctionDefinition*> functionDefinitions;

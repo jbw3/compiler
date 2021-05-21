@@ -841,10 +841,12 @@ void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
 }
 
 ModuleDefinition::ModuleDefinition(unsigned fileId,
+                                   const vector<ConstantDeclaration*> constantDeclarations,
                                    const vector<StructDefinition*>& structDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
     fileId(fileId),
+    constantDeclarations(constantDeclarations),
     structDefinitions(structDefinitions),
     externFunctionDeclarations(externFunctionDeclarations),
     functionDefinitions(functionDefinitions)
@@ -853,6 +855,7 @@ ModuleDefinition::ModuleDefinition(unsigned fileId,
 
 ModuleDefinition::~ModuleDefinition()
 {
+    deletePointerContainer(constantDeclarations);
     deletePointerContainer(structDefinitions);
     deletePointerContainer(externFunctionDeclarations);
     deletePointerContainer(functionDefinitions);

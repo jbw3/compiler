@@ -1583,6 +1583,21 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
 void SemanticAnalyzer::Visit(Modules* modules)
 {
+    // process constants
+    for (ModuleDefinition* moduleDefinition : modules->modules)
+    {
+        const vector<ConstantDeclaration*>& constantDeclarations = moduleDefinition->constantDeclarations;
+
+        for (ConstantDeclaration* constDecl : constantDeclarations)
+        {
+            constDecl->Accept(this);
+            if (isError)
+            {
+                return;
+            }
+        }
+    }
+
     // sort struct definitions so each comes after any struct definitions it depends on
     bool ok = SortTypeDefinitions(modules);
     if (!ok)
