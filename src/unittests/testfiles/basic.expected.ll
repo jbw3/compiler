@@ -3063,6 +3063,8 @@ define %UnitType @consts() #0 {
 entry:
   %array = alloca [13 x i32]
   %a1 = alloca %"[i32]"
+  %v6 = alloca i32
+  %v5 = alloca i8
   %v4 = alloca i1
   %v3 = alloca i32
   %v2 = alloca i16
@@ -3071,6 +3073,8 @@ entry:
   store i16 1000, i16* %v2
   store i32 1000, i32* %v3
   store i1 true, i1* %v4
+  store i8 9, i8* %v5
+  store i32 122, i32* %v6
   %startPtr = getelementptr inbounds [13 x i32], [13 x i32]* %array, i64 0, i64 0
   %endPtr = getelementptr inbounds [13 x i32], [13 x i32]* %array, i64 0, i64 13
   br label %fillBody

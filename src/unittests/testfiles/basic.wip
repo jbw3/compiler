@@ -919,6 +919,9 @@ fun casts(x i16, y u16, b bool)
     var c12 = cast(i8, b);
 }
 
+const global_constant1 = 9;
+const global_constant2 i32 = 0x7a;
+
 fun consts()
 {
     const c1 = 12;
@@ -931,6 +934,8 @@ fun consts()
     var v2 = c2;
     var v3 = c3;
     var v4 = c4;
+    var v5 = global_constant1;
+    var v6 = global_constant2;
 
     var a1 [i32] = [c5; 0];
 }
