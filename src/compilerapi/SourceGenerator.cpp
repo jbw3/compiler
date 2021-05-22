@@ -200,6 +200,20 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
 {
     bool first = true;
 
+    if (first)
+    {
+        first = false;
+    }
+    else
+    {
+        os->put('\n');
+    }
+    for (ConstantDeclaration* constDecl : moduleDefinition->constantDeclarations)
+    {
+        constDecl->Accept(this);
+        *os << ";\n";
+    }
+
     for (StructDefinition* structDef : moduleDefinition->structDefinitions)
     {
         if (first)

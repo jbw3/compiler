@@ -1,3 +1,7 @@
+const GLOBAL_CONST1 = true;
+const GLOBAL_CONST2 bool = false;
+const GLOBAL_CONST3 i32 = 1_234;
+
 struct Person
 {
     name str,
