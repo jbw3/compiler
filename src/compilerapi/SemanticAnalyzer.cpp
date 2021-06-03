@@ -1712,6 +1712,11 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     stringLiteralExpression->SetType(TypeInfo::GetStringType());
+
+    ConstantValue value;
+    value.strValue = &stringLiteralExpression->characters;
+    unsigned idx = compilerContext.AddConstantValue(value);
+    stringLiteralExpression->SetConstantValueIndex(idx);
 }
 
 void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)

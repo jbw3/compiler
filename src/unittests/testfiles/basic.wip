@@ -929,6 +929,7 @@ fun consts()
     const c3 i32 = c2;
     const c4 = true;
     const c5 u32 = 13;
+    const c6 = "abc";
 
     var v1 = c1;
     var v2 = c2;
@@ -936,6 +937,7 @@ fun consts()
     var v4 = c4;
     var v5 = global_constant1;
     var v6 = global_constant2;
+    var v7 = c6;
 
     var a1 [i32] = [c5; 0];
 }

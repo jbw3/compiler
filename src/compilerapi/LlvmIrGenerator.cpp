@@ -1310,6 +1310,11 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
             bool isSigned = type->GetSign() == TypeInfo::eSigned;
             resultValue = ConstantInt::get(context, APInt(numBits, value.intValue, isSigned));
         }
+        else if (type->IsSameAs(*TypeInfo::GetStringType()))
+        {
+            Constant* strPtr = CreateConstantString(*value.strValue);
+            resultValue = builder.CreateLoad(strPtr, "load");
+        }
         else
         {
             resultValue = nullptr;

@@ -44,6 +44,7 @@ union ConstantValue
 {
     bool boolValue;
     int64_t intValue;
+    std::vector<char>* strValue;
 };
 
 class CompilerContext
