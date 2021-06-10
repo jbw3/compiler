@@ -10,6 +10,7 @@ SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger
     compilerContext(compilerContext),
     logger(logger),
     isError(false),
+    isConstDecl(false),
     loopLevel(0),
     currentFunction(nullptr)
 {
@@ -149,6 +150,12 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         if (!binaryExpression->left->GetIsStorage())
         {
             logger.LogError(*binaryExpression->opToken, "Cannot assign to expression");
+            isError = true;
+            return;
+        }
+        else if (binaryExpression->left->GetIsConstant() && !isConstDecl)
+        {
+            logger.LogError(*binaryExpression->opToken, "Cannot assign to constant identifier");
             isError = true;
             return;
         }
@@ -2183,7 +2190,9 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     }
 
     // assignment expression type check
+    isConstDecl = true; // TODO: isConstDecl is a bit hacky. Maybe fix by seeing if const has been initialized yet?
     assignmentExpression->Accept(this);
+    isConstDecl = false;
     if (isError)
     {
         return;

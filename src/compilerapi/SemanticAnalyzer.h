@@ -74,6 +74,7 @@ public:
 private:
     ErrorLogger& logger;
     bool isError;
+    bool isConstDecl;
     std::unordered_map<std::string, AggregateType*> partialStructTypes;
     std::unordered_map<std::string, const SyntaxTree::FunctionDeclaration*> functions;
     CompilerContext& compilerContext;
