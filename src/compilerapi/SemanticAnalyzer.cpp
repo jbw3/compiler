@@ -94,6 +94,50 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     }
 
     unaryExpression->SetType(resultType);
+
+    if (subExpr->GetIsConstant())
+    {
+        const ConstantValue& subValue = compilerContext.GetConstantValue(subExpr->GetConstantValueIndex());
+
+        bool isConst = true;
+        ConstantValue value;
+        if (subExprType->IsBool())
+        {
+            if (op == UnaryExpression::eComplement)
+            {
+                value.boolValue = !subValue.boolValue;
+            }
+            else
+            {
+                isConst = false;
+            }
+        }
+        else if (subExprType->IsInt())
+        {
+            switch (op)
+            {
+                case UnaryExpression::eNegative:
+                    value.intValue = -subValue.intValue;
+                    break;
+                case UnaryExpression::eComplement:
+                    value.intValue = ~subValue.intValue;
+                    break;
+                default:
+                    isConst = false;
+                    break;
+            }
+        }
+        else
+        {
+            isConst = false;
+        }
+
+        if (isConst)
+        {
+            unsigned idx = compilerContext.AddConstantValue(value);
+            unaryExpression->SetConstantValueIndex(idx);
+        }
+    }
 }
 
 void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
