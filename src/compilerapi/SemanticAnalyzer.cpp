@@ -210,6 +210,24 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
             bool isConst = true;
             switch (op)
             {
+                case BinaryExpression::eEqual:
+                    value.boolValue = leftValue.intValue == rightValue.intValue;
+                    break;
+                case BinaryExpression::eNotEqual:
+                    value.boolValue = leftValue.intValue != rightValue.intValue;
+                    break;
+                case BinaryExpression::eLessThan:
+                    value.boolValue = leftValue.intValue < rightValue.intValue;
+                    break;
+                case BinaryExpression::eLessThanOrEqual:
+                    value.boolValue = leftValue.intValue <= rightValue.intValue;
+                    break;
+                case BinaryExpression::eGreaterThan:
+                    value.boolValue = leftValue.intValue > rightValue.intValue;
+                    break;
+                case BinaryExpression::eGreaterThanOrEqual:
+                    value.boolValue = leftValue.intValue >= rightValue.intValue;
+                    break;
                 case BinaryExpression::eAdd:
                     value.intValue = leftValue.intValue + rightValue.intValue;
                     break;
