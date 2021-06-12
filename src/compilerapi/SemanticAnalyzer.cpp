@@ -198,6 +198,63 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     {
         binaryExpression->SetIsStorage(binaryExpression->left->GetIsStorage());
     }
+
+    if (binaryExpression->left->GetIsConstant() && binaryExpression->right->GetIsConstant())
+    {
+        if (binaryExpression->left->GetType()->IsInt() && binaryExpression->right->GetType()->IsInt())
+        {
+            const ConstantValue& leftValue = compilerContext.GetConstantValue(binaryExpression->left->GetConstantValueIndex());
+            const ConstantValue& rightValue = compilerContext.GetConstantValue(binaryExpression->right->GetConstantValueIndex());
+
+            ConstantValue value;
+            bool isConst = true;
+            switch (op)
+            {
+                case BinaryExpression::eAdd:
+                    value.intValue = leftValue.intValue + rightValue.intValue;
+                    break;
+                case BinaryExpression::eSubtract:
+                    value.intValue = leftValue.intValue - rightValue.intValue;
+                    break;
+                case BinaryExpression::eMultiply:
+                    value.intValue = leftValue.intValue * rightValue.intValue;
+                    break;
+                case BinaryExpression::eDivide:
+                {
+                    if (rightValue.intValue == 0)
+                    {
+                        const Token* opToken = binaryExpression->opToken;
+                        logger.LogError(*opToken, "Divide by zero in constant expression");
+                        isError = true;
+                        return;
+                    }
+                    value.intValue = leftValue.intValue / rightValue.intValue;
+                    break;
+                }
+                case BinaryExpression::eRemainder:
+                {
+                    if (rightValue.intValue == 0)
+                    {
+                        const Token* opToken = binaryExpression->opToken;
+                        logger.LogError(*opToken, "Divide by zero in constant expression");
+                        isError = true;
+                        return;
+                    }
+                    value.intValue = leftValue.intValue % rightValue.intValue;
+                    break;
+                }
+                default:
+                    isConst = false;
+                    break;
+            }
+
+            if (isConst)
+            {
+                unsigned idx = compilerContext.AddConstantValue(value);
+                binaryExpression->SetConstantValueIndex(idx);
+            }
+        }
+    }
 }
 
 bool SemanticAnalyzer::HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType)
