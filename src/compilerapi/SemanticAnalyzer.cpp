@@ -201,13 +201,30 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
     if (binaryExpression->left->GetIsConstant() && binaryExpression->right->GetIsConstant())
     {
-        if (binaryExpression->left->GetType()->IsInt() && binaryExpression->right->GetType()->IsInt())
-        {
-            const ConstantValue& leftValue = compilerContext.GetConstantValue(binaryExpression->left->GetConstantValueIndex());
-            const ConstantValue& rightValue = compilerContext.GetConstantValue(binaryExpression->right->GetConstantValueIndex());
+        const TypeInfo* leftType = binaryExpression->left->GetType();
+        const TypeInfo* rightType = binaryExpression->right->GetType();
+        const ConstantValue& leftValue = compilerContext.GetConstantValue(binaryExpression->left->GetConstantValueIndex());
+        const ConstantValue& rightValue = compilerContext.GetConstantValue(binaryExpression->right->GetConstantValueIndex());
 
-            ConstantValue value;
-            bool isConst = true;
+        bool isConst = true;
+        ConstantValue value;
+        if (leftType->IsBool() && rightType->IsBool())
+        {
+            switch (op)
+            {
+                case BinaryExpression::eEqual:
+                    value.boolValue = leftValue.boolValue == rightValue.boolValue;
+                    break;
+                case BinaryExpression::eNotEqual:
+                    value.boolValue = leftValue.boolValue != rightValue.boolValue;
+                    break;
+                default:
+                    isConst = false;
+                    break;
+            }
+        }
+        else if (leftType->IsInt() && rightType->IsInt())
+        {
             switch (op)
             {
                 case BinaryExpression::eEqual:
@@ -265,12 +282,16 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                     isConst = false;
                     break;
             }
+        }
+        else
+        {
+            isConst = false;
+        }
 
-            if (isConst)
-            {
-                unsigned idx = compilerContext.AddConstantValue(value);
-                binaryExpression->SetConstantValueIndex(idx);
-            }
+        if (isConst)
+        {
+            unsigned idx = compilerContext.AddConstantValue(value);
+            binaryExpression->SetConstantValueIndex(idx);
         }
     }
 }
