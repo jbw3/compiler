@@ -331,6 +331,37 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                     value.intValue = leftValue.intValue % rightValue.intValue;
                     break;
                 }
+                case BinaryExpression::eShiftLeft:
+                    value.intValue = leftValue.intValue << rightValue.intValue;
+                    break;
+                case BinaryExpression::eShiftRightLogical:
+                {
+                    int64_t mask = 0;
+                    switch (leftType->GetNumBits())
+                    {
+                        case 8:
+                            mask = 0xff;
+                            break;
+                        case 16:
+                            mask = 0xffff;
+                            break;
+                        case 32:
+                            mask = 0xffff'ffff;
+                            break;
+                        case 64:
+                            mask = 0xffff'ffff'ffff'ffff;
+                            break;
+                        default:
+                            logger.LogInternalError("Invalid int type size");
+                            isError = true;
+                            return;
+                    }
+                    value.intValue = static_cast<uint64_t>(leftValue.intValue & mask) >> rightValue.intValue;
+                    break;
+                }
+                case BinaryExpression::eShiftRightArithmetic:
+                    value.intValue = leftValue.intValue >> rightValue.intValue;
+                    break;
                 case BinaryExpression::eBitwiseAnd:
                     value.intValue = leftValue.intValue & rightValue.intValue;
                     break;
