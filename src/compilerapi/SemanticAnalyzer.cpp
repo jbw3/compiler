@@ -218,6 +218,15 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 case BinaryExpression::eNotEqual:
                     value.boolValue = leftValue.boolValue != rightValue.boolValue;
                     break;
+                case BinaryExpression::eBitwiseAnd:
+                    value.boolValue = leftValue.boolValue & rightValue.boolValue;
+                    break;
+                case BinaryExpression::eBitwiseXor:
+                    value.boolValue = leftValue.boolValue ^ rightValue.boolValue;
+                    break;
+                case BinaryExpression::eBitwiseOr:
+                    value.boolValue = leftValue.boolValue | rightValue.boolValue;
+                    break;
                 default:
                     isConst = false;
                     break;
@@ -278,6 +287,15 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                     value.intValue = leftValue.intValue % rightValue.intValue;
                     break;
                 }
+                case BinaryExpression::eBitwiseAnd:
+                    value.intValue = leftValue.intValue & rightValue.intValue;
+                    break;
+                case BinaryExpression::eBitwiseXor:
+                    value.intValue = leftValue.intValue ^ rightValue.intValue;
+                    break;
+                case BinaryExpression::eBitwiseOr:
+                    value.intValue = leftValue.intValue | rightValue.intValue;
+                    break;
                 default:
                     isConst = false;
                     break;
