@@ -1,6 +1,7 @@
 #include "ErrorLogger.h"
 #include "SemanticAnalyzer.h"
 #include "SyntaxTree.h"
+#include "utils.h"
 #include <cassert>
 
 using namespace std;
@@ -336,25 +337,12 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                     break;
                 case BinaryExpression::eShiftRightLogical:
                 {
-                    int64_t mask = 0;
-                    switch (leftType->GetNumBits())
+                    int64_t mask = getBitMask(leftType->GetNumBits());
+                    if (mask == 0)
                     {
-                        case 8:
-                            mask = 0xff;
-                            break;
-                        case 16:
-                            mask = 0xffff;
-                            break;
-                        case 32:
-                            mask = 0xffff'ffff;
-                            break;
-                        case 64:
-                            mask = 0xffff'ffff'ffff'ffff;
-                            break;
-                        default:
-                            logger.LogInternalError("Invalid int type size");
-                            isError = true;
-                            return;
+                        logger.LogInternalError("Invalid int type size");
+                        isError = true;
+                        return;
                     }
                     value.intValue = static_cast<uint64_t>(leftValue.intValue & mask) >> rightValue.intValue;
                     break;
@@ -2110,6 +2098,87 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     }
 
     castExpression->SetType(castType);
+
+    if (subExpression->GetIsConstant())
+    {
+        unsigned subExprConstIdx = subExpression->GetConstantValueIndex();
+        const ConstantValue& subValue = compilerContext.GetConstantValue(subExprConstIdx);
+
+        if (exprType->IsBool())
+        {
+            if (castType->IsBool())
+            {
+                castExpression->SetConstantValueIndex(subExprConstIdx);
+            }
+            else if (castType->IsInt())
+            {
+                ConstantValue value;
+                value.intValue = subValue.boolValue ? 1 : 0;
+                unsigned idx = compilerContext.AddConstantValue(value);
+                castExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (exprType->IsInt())
+        {
+            if (castType->IsBool())
+            {
+                ConstantValue value;
+                value.boolValue = subValue.intValue != 0;
+                unsigned idx = compilerContext.AddConstantValue(value);
+                castExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsInt())
+            {
+                ConstantValue value;
+                value.intValue = subValue.intValue;
+
+                unsigned exprSize = exprType->GetNumBits();
+                unsigned castSize = castType->GetNumBits();
+                if (castSize < exprSize)
+                {
+                    int64_t mask = getBitMask(castSize);
+                    if (mask == 0)
+                    {
+                        logger.LogInternalError("Invalid int type size");
+                        isError = true;
+                        return;
+                    }
+                    value.intValue &= mask;
+                }
+                else if (castSize > exprSize)
+                {
+                    TypeInfo::ESign exprSign = exprType->GetSign();
+                    if (exprSign == TypeInfo::eSigned)
+                    {
+                        // sign extend
+                        int64_t signBit = 1 << (castSize - 1);
+                        bool isOne = (value.intValue & signBit) != 0;
+                        if (isOne)
+                        {
+                            unsigned size = exprSize;
+                            while (size < castSize)
+                            {
+                                signBit <<= 1;
+                                value.intValue |= signBit;
+                                ++size;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // zero extension; nothing to do
+                    }
+                }
+                else // sizes are equal
+                {
+                    // nothing to do if the sizes are equal
+                }
+
+                unsigned idx = compilerContext.AddConstantValue(value);
+                castExpression->SetConstantValueIndex(idx);
+            }
+        }
+    }
 }
 
 void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)

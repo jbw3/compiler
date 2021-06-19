@@ -56,6 +56,28 @@ constexpr bool hexDigitToNum(char ch, char& num)
 
 bool stringToInteger(const std::string& str, int64_t& num);
 
+constexpr int64_t getBitMask(unsigned size)
+{
+    int64_t mask = 0;
+    switch (size)
+    {
+        case 8:
+            mask = 0xff;
+            break;
+        case 16:
+            mask = 0xffff;
+            break;
+        case 32:
+            mask = 0xffff'ffff;
+            break;
+        case 64:
+            mask = 0xffff'ffff'ffff'ffff;
+            break;
+    }
+
+    return mask;
+}
+
 template<typename T>
 void deletePointerContainer(T& container)
 {

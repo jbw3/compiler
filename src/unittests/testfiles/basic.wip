@@ -934,6 +934,13 @@ fun consts()
     const c8 = ((c1 >> 2) | (c1 << 1)) ^ 0x6;
     const c9 = global_constant1 & global_constant2;
     const c10 = c4 & !c4 ^ true | false;
+    const c11 = cast(bool, true);
+    const c12 = cast(bool, 0);
+    const c13 = cast(bool, 1);
+    const c14 = cast(i8, true);
+    const c15 = cast(u8, c2);
+    const c16 = cast(i16, 100);
+    const c17 = cast(i16, c1 - 13);
 
     var v1 = c1;
     var v2 = c2;
@@ -946,6 +953,13 @@ fun consts()
     var v9 = c8;
     var v10 = c9;
     var v11 = c10;
+    var v12 = c11;
+    var v13 = c12;
+    var v14 = c13;
+    var v15 = c14;
+    var v16 = c15;
+    var v17 = c16;
+    var v18 = c17;
 
     var a1 [i32] = [c5; 0];
 }
