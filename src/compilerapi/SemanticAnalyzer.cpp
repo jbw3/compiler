@@ -192,7 +192,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     bool ok = true;
     if (isAssignment)
     {
-        if (!binaryExpression->left->GetIsStorage())
+        if (!binaryExpression->left->GetIsStorage() && !binaryExpression->left->GetIsConstant())
         {
             logger.LogError(*binaryExpression->opToken, "Cannot assign to expression");
             isError = true;
@@ -1914,11 +1914,12 @@ void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
     }
     else
     {
+        bool isConst = data->IsConstant();
         const TypeInfo* type = data->type;
         identifierExpression->SetType(type);
-        identifierExpression->SetIsStorage(!type->IsImmutable());
+        identifierExpression->SetIsStorage(!type->IsImmutable() && !isConst);
 
-        if (data->IsConstant())
+        if (isConst)
         {
             unsigned constIdx = data->constValueIndex;
             identifierExpression->SetConstantValueIndex(constIdx);
