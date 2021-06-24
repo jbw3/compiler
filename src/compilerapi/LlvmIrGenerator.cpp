@@ -1297,22 +1297,23 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
     if (data->IsConstant())
     {
         unsigned constIdx = data->constValueIndex;
-        const ConstantValue& value = compilerContext.GetConstantValue(constIdx);
-
         const TypeInfo* type = identifierExpression->GetType();
         if (type->IsBool())
         {
-            resultValue = value.boolValue ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
+            bool value = compilerContext.GetBoolConstantValue(constIdx);
+            resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
         }
         else if (type->IsInt())
         {
+            int64_t value = compilerContext.GetIntConstantValue(constIdx);
             unsigned numBits = type->GetNumBits();
             bool isSigned = type->GetSign() == TypeInfo::eSigned;
-            resultValue = ConstantInt::get(context, APInt(numBits, value.intValue, isSigned));
+            resultValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
         }
         else if (type->IsSameAs(*TypeInfo::GetStringType()))
         {
-            Constant* strPtr = CreateConstantString(*value.strValue);
+            vector<char>* value = compilerContext.GetStrConstantValue(constIdx);
+            Constant* strPtr = CreateConstantString(*value);
             resultValue = builder.CreateLoad(strPtr, "load");
         }
         else
@@ -1356,8 +1357,8 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
         sizeValue = builder.CreateZExt(sizeValue, extType, "zeroext");
     }
     unsigned constIdx = sizeExpression->GetConstantValueIndex();
-    const ConstantValue& constValue = compilerContext.GetConstantValue(constIdx);
-    uint64_t arraySize = static_cast<uint64_t>(constValue.intValue);
+    int64_t constValue = compilerContext.GetIntConstantValue(constIdx);
+    uint64_t arraySize = static_cast<uint64_t>(constValue);
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
     const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();

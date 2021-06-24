@@ -75,10 +75,23 @@ unsigned CompilerContext::AddFile(const string& filename)
     return id;
 }
 
-unsigned CompilerContext::AddConstantValue(ConstantValue value)
+unsigned CompilerContext::AddIntConstantValue(int64_t value)
 {
-    unsigned id = static_cast<unsigned>(constantValues.size());
-    constantValues.push_back(value);
+    unsigned id = static_cast<unsigned>(intConstants.size());
+    intConstants.push_back(value);
+
+    return id;
+}
+
+int64_t CompilerContext::GetIntConstantValue(unsigned id) const
+{
+    return intConstants[id];
+}
+
+unsigned CompilerContext::AddStrConstantValue(vector<char>* value)
+{
+    unsigned id = static_cast<unsigned>(strConstants.size());
+    strConstants.push_back(value);
 
     return id;
 }

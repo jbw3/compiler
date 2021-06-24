@@ -40,13 +40,6 @@ private:
     char* end;
 };
 
-union ConstantValue
-{
-    bool boolValue;
-    int64_t intValue;
-    std::vector<char>* strValue;
-};
-
 class CompilerContext
 {
 public:
@@ -71,17 +64,34 @@ public:
         return fileTokens[id];
     }
 
-    unsigned AddConstantValue(ConstantValue value);
-
-    const ConstantValue& GetConstantValue(unsigned id) const
+    unsigned AddBoolConstantValue(bool value)
     {
-        return constantValues[id];
+        // encode the value in the index
+        return static_cast<unsigned>(value);
+    }
+
+    bool GetBoolConstantValue(unsigned id) const
+    {
+        // the value is encoded in the index
+        return static_cast<bool>(id);
+    }
+
+    unsigned AddIntConstantValue(int64_t value);
+
+    int64_t GetIntConstantValue(unsigned id) const;
+
+    unsigned AddStrConstantValue(std::vector<char>* value);
+
+    std::vector<char>* GetStrConstantValue(unsigned id) const
+    {
+        return strConstants[id];
     }
 
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
-    std::vector<ConstantValue> constantValues;
+    std::vector<int64_t> intConstants;
+    std::vector<std::vector<char>*> strConstants;
 };
 
 #endif // COMPILER_CONTEXT_H_

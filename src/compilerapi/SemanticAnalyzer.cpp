@@ -98,45 +98,39 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
     if (subExpr->GetIsConstant())
     {
-        const ConstantValue& subValue = compilerContext.GetConstantValue(subExpr->GetConstantValueIndex());
-
-        bool isConst = true;
-        ConstantValue value;
         if (subExprType->IsBool())
         {
             if (op == UnaryExpression::eComplement)
             {
-                value.boolValue = !subValue.boolValue;
-            }
-            else
-            {
-                isConst = false;
+                bool subValue = compilerContext.GetBoolConstantValue(subExpr->GetConstantValueIndex());
+                unsigned idx = compilerContext.AddBoolConstantValue(!subValue);
+                unaryExpression->SetConstantValueIndex(idx);
             }
         }
         else if (subExprType->IsInt())
         {
+            int64_t subValue = compilerContext.GetIntConstantValue(subExpr->GetConstantValueIndex());
+
+            bool isConst = true;
+            int64_t value = 0;
             switch (op)
             {
                 case UnaryExpression::eNegative:
-                    value.intValue = -subValue.intValue;
+                    value = -subValue;
                     break;
                 case UnaryExpression::eComplement:
-                    value.intValue = ~subValue.intValue;
+                    value = ~subValue;
                     break;
                 default:
                     isConst = false;
                     break;
             }
-        }
-        else
-        {
-            isConst = false;
-        }
 
-        if (isConst)
-        {
-            unsigned idx = compilerContext.AddConstantValue(value);
-            unaryExpression->SetConstantValueIndex(idx);
+            if (isConst)
+            {
+                unsigned idx = compilerContext.AddIntConstantValue(value);
+                unaryExpression->SetConstantValueIndex(idx);
+            }
         }
     }
 }
@@ -248,92 +242,118 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     {
         const TypeInfo* leftType = binaryExpression->left->GetType();
         const TypeInfo* rightType = binaryExpression->right->GetType();
-        const ConstantValue& leftValue = compilerContext.GetConstantValue(binaryExpression->left->GetConstantValueIndex());
-        const ConstantValue& rightValue = compilerContext.GetConstantValue(binaryExpression->right->GetConstantValueIndex());
 
-        bool isConst = true;
-        ConstantValue value;
         if (leftType->IsBool() && rightType->IsBool())
         {
+            bool leftValue = compilerContext.GetBoolConstantValue(binaryExpression->left->GetConstantValueIndex());
+            bool rightValue = compilerContext.GetBoolConstantValue(binaryExpression->right->GetConstantValueIndex());
+
+            bool isConst = true;
+            bool value = false;
             switch (op)
             {
                 case BinaryExpression::eEqual:
-                    value.boolValue = leftValue.boolValue == rightValue.boolValue;
+                    value = leftValue == rightValue;
                     break;
                 case BinaryExpression::eNotEqual:
-                    value.boolValue = leftValue.boolValue != rightValue.boolValue;
+                    value = leftValue != rightValue;
                     break;
                 case BinaryExpression::eBitwiseAnd:
-                    value.boolValue = leftValue.boolValue & rightValue.boolValue;
+                    value = leftValue & rightValue;
                     break;
                 case BinaryExpression::eBitwiseXor:
-                    value.boolValue = leftValue.boolValue ^ rightValue.boolValue;
+                    value = leftValue ^ rightValue;
                     break;
                 case BinaryExpression::eBitwiseOr:
-                    value.boolValue = leftValue.boolValue | rightValue.boolValue;
+                    value = leftValue | rightValue;
                     break;
                 default:
                     isConst = false;
                     break;
             }
+
+            if (isConst)
+            {
+                unsigned idx = compilerContext.AddBoolConstantValue(value);
+                binaryExpression->SetConstantValueIndex(idx);
+            }
         }
         else if (leftType->IsInt() && rightType->IsInt())
         {
+            int64_t leftValue = compilerContext.GetIntConstantValue(binaryExpression->left->GetConstantValueIndex());
+            int64_t rightValue = compilerContext.GetIntConstantValue(binaryExpression->right->GetConstantValueIndex());
+
+            bool isConst = true;
+            bool boolValue = false;
+            int64_t intValue = 0;
+            bool resultIsBool = false;
             switch (op)
             {
                 case BinaryExpression::eEqual:
-                    value.boolValue = leftValue.intValue == rightValue.intValue;
+                    boolValue = leftValue == rightValue;
+                    resultIsBool = true;
                     break;
                 case BinaryExpression::eNotEqual:
-                    value.boolValue = leftValue.intValue != rightValue.intValue;
+                    boolValue = leftValue != rightValue;
+                    resultIsBool = true;
                     break;
                 case BinaryExpression::eLessThan:
-                    value.boolValue = leftValue.intValue < rightValue.intValue;
+                    boolValue = leftValue < rightValue;
+                    resultIsBool = true;
                     break;
                 case BinaryExpression::eLessThanOrEqual:
-                    value.boolValue = leftValue.intValue <= rightValue.intValue;
+                    boolValue = leftValue <= rightValue;
+                    resultIsBool = true;
                     break;
                 case BinaryExpression::eGreaterThan:
-                    value.boolValue = leftValue.intValue > rightValue.intValue;
+                    boolValue = leftValue > rightValue;
+                    resultIsBool = true;
                     break;
                 case BinaryExpression::eGreaterThanOrEqual:
-                    value.boolValue = leftValue.intValue >= rightValue.intValue;
+                    boolValue = leftValue >= rightValue;
+                    resultIsBool = true;
                     break;
                 case BinaryExpression::eAdd:
-                    value.intValue = leftValue.intValue + rightValue.intValue;
+                    intValue = leftValue + rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eSubtract:
-                    value.intValue = leftValue.intValue - rightValue.intValue;
+                    intValue = leftValue - rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eMultiply:
-                    value.intValue = leftValue.intValue * rightValue.intValue;
+                    intValue = leftValue * rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eDivide:
                 {
-                    if (rightValue.intValue == 0)
+                    if (rightValue == 0)
                     {
                         const Token* opToken = binaryExpression->opToken;
                         logger.LogError(*opToken, "Divide by zero in constant expression");
                         isError = true;
                         return;
                     }
-                    value.intValue = leftValue.intValue / rightValue.intValue;
+                    intValue = leftValue / rightValue;
+                    resultIsBool = false;
                     break;
                 }
                 case BinaryExpression::eRemainder:
                 {
-                    if (rightValue.intValue == 0)
+                    if (rightValue == 0)
                     {
                         const Token* opToken = binaryExpression->opToken;
                         logger.LogError(*opToken, "Divide by zero in constant expression");
                         isError = true;
                         return;
                     }
-                    value.intValue = leftValue.intValue % rightValue.intValue;
+                    intValue = leftValue % rightValue;
+                    resultIsBool = false;
                     break;
                 }
                 case BinaryExpression::eShiftLeft:
-                    value.intValue = leftValue.intValue << rightValue.intValue;
+                    intValue = leftValue << rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eShiftRightLogical:
                 {
@@ -344,35 +364,45 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                         isError = true;
                         return;
                     }
-                    value.intValue = static_cast<uint64_t>(leftValue.intValue & mask) >> rightValue.intValue;
+                    intValue = static_cast<uint64_t>(leftValue & mask) >> rightValue;
+                    resultIsBool = false;
                     break;
                 }
                 case BinaryExpression::eShiftRightArithmetic:
-                    value.intValue = leftValue.intValue >> rightValue.intValue;
+                    intValue = leftValue >> rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eBitwiseAnd:
-                    value.intValue = leftValue.intValue & rightValue.intValue;
+                    intValue = leftValue & rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eBitwiseXor:
-                    value.intValue = leftValue.intValue ^ rightValue.intValue;
+                    intValue = leftValue ^ rightValue;
+                    resultIsBool = false;
                     break;
                 case BinaryExpression::eBitwiseOr:
-                    value.intValue = leftValue.intValue | rightValue.intValue;
+                    intValue = leftValue | rightValue;
+                    resultIsBool = false;
                     break;
                 default:
                     isConst = false;
                     break;
             }
-        }
-        else
-        {
-            isConst = false;
-        }
 
-        if (isConst)
-        {
-            unsigned idx = compilerContext.AddConstantValue(value);
-            binaryExpression->SetConstantValueIndex(idx);
+            if (isConst)
+            {
+                unsigned idx = 0;
+                if (resultIsBool)
+                {
+                    idx = compilerContext.AddBoolConstantValue(boolValue);
+                }
+                else
+                {
+                    idx = compilerContext.AddIntConstantValue(intValue);
+                }
+
+                binaryExpression->SetConstantValueIndex(idx);
+            }
         }
     }
 }
@@ -1877,9 +1907,8 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     const NumericLiteralType* type = NumericLiteralType::Create(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
 
-    ConstantValue value;
-    value.intValue = numericExpression->value;
-    unsigned idx = compilerContext.AddConstantValue(value);
+    int64_t value = numericExpression->value;
+    unsigned idx = compilerContext.AddIntConstantValue(value);
     numericExpression->SetConstantValueIndex(idx);
 }
 
@@ -1887,9 +1916,8 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     boolLiteralExpression->SetType(TypeInfo::BoolType);
 
-    ConstantValue value;
-    value.boolValue = boolLiteralExpression->token->type == Token::eTrueLit;
-    unsigned idx = compilerContext.AddConstantValue(value);
+    bool value = boolLiteralExpression->token->type == Token::eTrueLit;
+    unsigned idx = compilerContext.AddBoolConstantValue(value);
     boolLiteralExpression->SetConstantValueIndex(idx);
 }
 
@@ -1897,9 +1925,8 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     stringLiteralExpression->SetType(TypeInfo::GetStringType());
 
-    ConstantValue value;
-    value.strValue = &stringLiteralExpression->characters;
-    unsigned idx = compilerContext.AddConstantValue(value);
+    vector<char>* value = &stringLiteralExpression->characters;
+    unsigned idx = compilerContext.AddStrConstantValue(value);
     stringLiteralExpression->SetConstantValueIndex(idx);
 }
 
@@ -2103,7 +2130,6 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     if (subExpression->GetIsConstant())
     {
         unsigned subExprConstIdx = subExpression->GetConstantValueIndex();
-        const ConstantValue& subValue = compilerContext.GetConstantValue(subExprConstIdx);
 
         if (exprType->IsBool())
         {
@@ -2113,25 +2139,26 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
             }
             else if (castType->IsInt())
             {
-                ConstantValue value;
-                value.intValue = subValue.boolValue ? 1 : 0;
-                unsigned idx = compilerContext.AddConstantValue(value);
+                bool subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
+                int64_t value = subValue ? 1 : 0;
+                unsigned idx = compilerContext.AddIntConstantValue(value);
                 castExpression->SetConstantValueIndex(idx);
             }
         }
         else if (exprType->IsInt())
         {
+            int64_t subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
             if (castType->IsBool())
             {
-                ConstantValue value;
-                value.boolValue = subValue.intValue != 0;
-                unsigned idx = compilerContext.AddConstantValue(value);
+                bool value = subValue != 0;
+                unsigned idx = compilerContext.AddBoolConstantValue(value);
                 castExpression->SetConstantValueIndex(idx);
             }
             else if (castType->IsInt())
             {
-                ConstantValue value;
-                value.intValue = subValue.intValue;
+                int64_t value = subValue;
 
                 unsigned exprSize = exprType->GetNumBits();
                 unsigned castSize = castType->GetNumBits();
@@ -2144,7 +2171,7 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                         isError = true;
                         return;
                     }
-                    value.intValue &= mask;
+                    value &= mask;
                 }
                 else if (castSize > exprSize)
                 {
@@ -2153,14 +2180,14 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                     {
                         // sign extend
                         int64_t signBit = 1 << (castSize - 1);
-                        bool isOne = (value.intValue & signBit) != 0;
+                        bool isOne = (value & signBit) != 0;
                         if (isOne)
                         {
                             unsigned size = exprSize;
                             while (size < castSize)
                             {
                                 signBit <<= 1;
-                                value.intValue |= signBit;
+                                value |= signBit;
                                 ++size;
                             }
                         }
@@ -2175,7 +2202,7 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                     // nothing to do if the sizes are equal
                 }
 
-                unsigned idx = compilerContext.AddConstantValue(value);
+                unsigned idx = compilerContext.AddIntConstantValue(value);
                 castExpression->SetConstantValueIndex(idx);
             }
         }
