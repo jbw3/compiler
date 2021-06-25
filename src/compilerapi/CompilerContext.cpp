@@ -75,17 +75,35 @@ unsigned CompilerContext::AddFile(const string& filename)
     return id;
 }
 
+constexpr int64_t INT_ENCODE_THRESHOLD = 256;
+
 unsigned CompilerContext::AddIntConstantValue(int64_t value)
 {
-    unsigned id = static_cast<unsigned>(intConstants.size());
-    intConstants.push_back(value);
+    unsigned id = 0;
+    if (value >= 0 && value < INT_ENCODE_THRESHOLD)
+    {
+        // encode small values in the index
+        id = static_cast<unsigned>(value);
+    }
+    else
+    {
+        id = static_cast<unsigned>(intConstants.size()) + INT_ENCODE_THRESHOLD;
+        intConstants.push_back(value);
+    }
 
     return id;
 }
 
 int64_t CompilerContext::GetIntConstantValue(unsigned id) const
 {
-    return intConstants[id];
+    if (id < INT_ENCODE_THRESHOLD)
+    {
+        return static_cast<int64_t>(id);
+    }
+    else
+    {
+        return intConstants[id - INT_ENCODE_THRESHOLD];
+    }
 }
 
 unsigned CompilerContext::AddStrConstantValue(vector<char>* value)
