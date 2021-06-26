@@ -3063,6 +3063,7 @@ define %UnitType @consts() #0 {
 entry:
   %array = alloca [13 x i32]
   %a1 = alloca %"[i32]"
+  %v19 = alloca %Test2
   %v18 = alloca i16
   %v17 = alloca i16
   %v16 = alloca i8
@@ -3100,6 +3101,11 @@ entry:
   store i8 -24, i8* %v16
   store i16 100, i16* %v17
   store i16 -1, i16* %v18
+  %load1 = load %str, %str* @strStruct6
+  %agg = insertvalue %Test1 { i32 7, i1 true, %str undef }, %str %load1, 2
+  %agg2 = insertvalue %Test2 undef, %Test1 %agg, 0
+  %agg3 = insertvalue %Test2 %agg2, i32 1012, 1
+  store %Test2 %agg3, %Test2* %v19
   %startPtr = getelementptr inbounds [13 x i32], [13 x i32]* %array, i64 0, i64 0
   %endPtr = getelementptr inbounds [13 x i32], [13 x i32]* %array, i64 0, i64 13
   br label %fillBody
@@ -3113,8 +3119,8 @@ fillBody:                                         ; preds = %fillBody, %entry
 
 fillExit:                                         ; preds = %fillBody
   %arrptr = bitcast [13 x i32]* %array to i32*
-  %agg = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr, 1
-  store %"[i32]" %agg, %"[i32]"* %a1
+  %agg4 = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr, 1
+  store %"[i32]" %agg4, %"[i32]"* %a1
   ret %UnitType zeroinitializer
 }
 

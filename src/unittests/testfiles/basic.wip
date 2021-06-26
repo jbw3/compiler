@@ -941,6 +941,16 @@ fun consts()
     const c15 = cast(u8, c2);
     const c16 = cast(i16, 100);
     const c17 = cast(i16, c1 - 13);
+    const c18 = Test2
+    {
+        test: Test1
+        {
+            a: 7,
+            b: true,
+            c: c6,
+        },
+        n: c1 + c2,
+    };
 
     var v1 = c1;
     var v2 = c2;
@@ -960,6 +970,7 @@ fun consts()
     var v16 = c15;
     var v17 = c16;
     var v18 = c17;
+    var v19 = c18;
 
     var a1 [i32] = [c5; 0];
 }

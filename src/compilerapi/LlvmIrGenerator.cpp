@@ -1016,7 +1016,7 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
     if (type == nullptr)
     {
         resultValue = nullptr;
-        logger.LogInternalError("Unknown member definition type");
+        logger.LogInternalError("Unknown struct init type");
         return;
     }
 
@@ -1281,6 +1281,68 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
     return globalString;
 }
 
+Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned constIdx)
+{
+    Value* constValue = nullptr;
+
+    if (type->IsBool())
+    {
+        bool value = compilerContext.GetBoolConstantValue(constIdx);
+        constValue  = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
+    }
+    else if (type->IsInt())
+    {
+        int64_t value = compilerContext.GetIntConstantValue(constIdx);
+        unsigned numBits = type->GetNumBits();
+        bool isSigned = type->GetSign() == TypeInfo::eSigned;
+        constValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
+    }
+    else if (type->IsSameAs(*TypeInfo::GetStringType()))
+    {
+        vector<char>* value = compilerContext.GetStrConstantValue(constIdx);
+        Constant* strPtr = CreateConstantString(*value);
+        constValue = builder.CreateLoad(strPtr, "load");
+    }
+    else if (type->IsAggregate())
+    {
+        Type* llvmType = GetType(type);
+        if (llvmType == nullptr)
+        {
+            logger.LogInternalError("Unknown const struct definition type");
+            return nullptr;
+        }
+
+        const vector<const MemberInfo*>& members = type->GetMembers();
+        const StructConstValue& value = compilerContext.GetStructConstantValue(constIdx);
+        if (members.size() != value.memberIndices.size())
+        {
+            logger.LogInternalError("Member size mismatch for const struct");
+            return nullptr;
+        }
+
+        vector<unsigned> index(1);
+        Value* llvmValue = UndefValue::get(llvmType);
+        unsigned memberIdx = 0;
+        for (unsigned memberConstIdx : value.memberIndices)
+        {
+            const TypeInfo* memberType = members[memberIdx]->GetType();
+            Value* memberValue = CreateConstantValue(memberType, memberConstIdx);
+
+            index[0] = memberIdx;
+            llvmValue = builder.CreateInsertValue(llvmValue, memberValue, index, "agg");
+            ++memberIdx;
+        }
+
+        constValue = llvmValue;
+    }
+    else
+    {
+        logger.LogInternalError("Unexpected constant type '{}'", type->GetShortName());
+    }
+
+    return constValue;
+}
+
 void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
 {
     const string& name = identifierExpression->name;
@@ -1298,28 +1360,9 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
     {
         unsigned constIdx = data->constValueIndex;
         const TypeInfo* type = identifierExpression->GetType();
-        if (type->IsBool())
+        resultValue = CreateConstantValue(type, constIdx);
+        if (resultValue == nullptr)
         {
-            bool value = compilerContext.GetBoolConstantValue(constIdx);
-            resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
-        }
-        else if (type->IsInt())
-        {
-            int64_t value = compilerContext.GetIntConstantValue(constIdx);
-            unsigned numBits = type->GetNumBits();
-            bool isSigned = type->GetSign() == TypeInfo::eSigned;
-            resultValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
-        }
-        else if (type->IsSameAs(*TypeInfo::GetStringType()))
-        {
-            vector<char>* value = compilerContext.GetStrConstantValue(constIdx);
-            Constant* strPtr = CreateConstantString(*value);
-            resultValue = builder.CreateLoad(strPtr, "load");
-        }
-        else
-        {
-            resultValue = nullptr;
-            logger.LogInternalError("Unexpected type for constant '{}'", name);
             return;
         }
     }

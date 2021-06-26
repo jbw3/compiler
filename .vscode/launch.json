@@ -9,7 +9,13 @@
             "request": "launch",
             "name": "compiler",
             "program": "${workspaceFolder}/debug/compiler/wip",
-            "args": ["${workspaceFolder}/../compiler_test/main.wip", "-e", "llvm"],
+            "args": [
+                "${workspaceFolder}/../compiler_test/main.wip",
+                "${workspaceFolder}/../compiler_test/print.wip",
+                "${workspaceFolder}/../compiler_test/posix.wip",
+                "-e",
+                "llvm"
+            ],
             "cwd": "${workspaceFolder}"
         },
         {

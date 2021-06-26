@@ -185,6 +185,8 @@ private:
 
     llvm::Constant* CreateConstantString(const std::vector<char>& chars);
 
+    llvm::Value* CreateConstantValue(const TypeInfo* type, unsigned constIdx);
+
     llvm::Type* GetType(const TypeInfo* type);
 
     llvm::DIType* GetDebugType(const TypeInfo* type);

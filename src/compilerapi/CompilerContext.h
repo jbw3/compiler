@@ -40,6 +40,11 @@ private:
     char* end;
 };
 
+struct StructConstValue
+{
+    std::vector<unsigned> memberIndices;
+};
+
 class CompilerContext
 {
 public:
@@ -87,11 +92,19 @@ public:
         return strConstants[id];
     }
 
+    unsigned AddStructConstantValue(const StructConstValue& value);
+
+    const StructConstValue& GetStructConstantValue(unsigned id) const
+    {
+        return structConstants[id];
+    }
+
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
     std::vector<int64_t> intConstants;
     std::vector<std::vector<char>*> strConstants;
+    std::vector<StructConstValue> structConstants;
 };
 
 #endif // COMPILER_CONTEXT_H_

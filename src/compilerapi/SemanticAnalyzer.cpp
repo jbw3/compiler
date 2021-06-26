@@ -1469,6 +1469,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         membersToInit.insert(member->GetName());
     }
 
+    bool allMembersAreConst = true;
     for (MemberInitialization* member : structInitializationExpression->memberInitializations)
     {
         const string& memberName = member->name;
@@ -1499,6 +1500,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         {
             return;
         }
+        allMembersAreConst &= expr->GetIsConstant();
 
         // check types
         const TypeInfo* memberType = memberInfo->GetType();
@@ -1544,6 +1546,18 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         const Token* token = structInitializationExpression->structNameToken;
         logger.LogError(*token, errorMsg.c_str());
         return;
+    }
+
+    if (allMembersAreConst)
+    {
+        StructConstValue constValue;
+        for (const MemberInitialization* member : structInitializationExpression->memberInitializations)
+        {
+            constValue.memberIndices.push_back(member->expression->GetConstantValueIndex());
+        }
+
+        unsigned idx = compilerContext.AddStructConstantValue(constValue);
+        structInitializationExpression->SetConstantValueIndex(idx);
     }
 }
 

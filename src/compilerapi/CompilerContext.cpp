@@ -113,3 +113,11 @@ unsigned CompilerContext::AddStrConstantValue(vector<char>* value)
 
     return id;
 }
+
+unsigned CompilerContext::AddStructConstantValue(const StructConstValue& value)
+{
+    unsigned id = static_cast<unsigned>(structConstants.size());
+    structConstants.push_back(value);
+
+    return id;
+}
