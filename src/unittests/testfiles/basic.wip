@@ -951,6 +951,8 @@ fun consts()
         },
         n: c1 + c2,
     };
+    const c19 = c6.Size;
+    const c20 = c18.test.a;
 
     var v1 = c1;
     var v2 = c2;
@@ -971,6 +973,8 @@ fun consts()
     var v17 = c16;
     var v18 = c17;
     var v19 = c18;
+    var v20 = c19;
+    var v21 = c20;
 
     var a1 [i32] = [c5; 0];
 }

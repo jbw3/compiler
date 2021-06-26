@@ -2319,6 +2319,27 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
 
     memberExpression->SetType(member->GetType());
     memberExpression->SetIsStorage(expr->GetIsStorage() && member->GetIsStorage());
+
+    if (expr->GetIsConstant())
+    {
+        if (type->IsSameAs(*TypeInfo::GetStringType()))
+        {
+            // check if it's the 'Size' member
+            if (member->GetIndex() == 0)
+            {
+                vector<char>* strValue = compilerContext.GetStrConstantValue(expr->GetConstantValueIndex());
+                unsigned idx = compilerContext.AddIntConstantValue(strValue->size());
+                memberExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (type->IsAggregate())
+        {
+            unsigned structIdx = expr->GetConstantValueIndex();
+            StructConstValue structValue = compilerContext.GetStructConstantValue(structIdx);
+            unsigned memberIdx = structValue.memberIndices[member->GetIndex()];
+            memberExpression->SetConstantValueIndex(memberIdx);
+        }
+    }
 }
 
 void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
