@@ -172,13 +172,16 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
         else
         {
-            if (leftSize < rightSize)
+            if (binaryExpression->left->GetType()->GetSign() == binaryExpression->right->GetType()->GetSign())
             {
-                binaryExpression->left = ImplicitCast(binaryExpression->left, binaryExpression->right->GetType());
-            }
-            else if (leftSize > rightSize)
-            {
-                binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
+                if (leftSize < rightSize)
+                {
+                    binaryExpression->left = ImplicitCast(binaryExpression->left, binaryExpression->right->GetType());
+                }
+                else if (leftSize > rightSize)
+                {
+                    binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
+                }
             }
         }
     }
