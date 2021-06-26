@@ -114,6 +114,14 @@ unsigned CompilerContext::AddStrConstantValue(vector<char>* value)
     return id;
 }
 
+unsigned CompilerContext::AddRangeConstantValue(const RangeConstValue& value)
+{
+    unsigned id = static_cast<unsigned>(rangeConstants.size());
+    rangeConstants.push_back(value);
+
+    return id;
+}
+
 unsigned CompilerContext::AddStructConstantValue(const StructConstValue& value)
 {
     unsigned id = static_cast<unsigned>(structConstants.size());

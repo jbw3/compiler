@@ -953,6 +953,8 @@ fun consts()
     };
     const c19 = c6.Size;
     const c20 = c18.test.a;
+    const c21 = c1..c3;
+    const c22 = -4..200;
 
     var v1 = c1;
     var v2 = c2;
@@ -975,6 +977,10 @@ fun consts()
     var v19 = c18;
     var v20 = c19;
     var v21 = c20;
+    var v22 = c21;
+    var v23 = c22;
+    var v24 = c21.Start;
+    var v25 = c21.End / 2;
 
     var a1 [i32] = [c5; 0];
 }

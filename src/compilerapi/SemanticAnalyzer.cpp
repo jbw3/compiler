@@ -289,44 +289,35 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
             bool isConst = true;
             bool boolValue = false;
             int64_t intValue = 0;
-            bool resultIsBool = false;
+            RangeConstValue rangeValue;
             switch (op)
             {
                 case BinaryExpression::eEqual:
                     boolValue = leftValue == rightValue;
-                    resultIsBool = true;
                     break;
                 case BinaryExpression::eNotEqual:
                     boolValue = leftValue != rightValue;
-                    resultIsBool = true;
                     break;
                 case BinaryExpression::eLessThan:
                     boolValue = leftValue < rightValue;
-                    resultIsBool = true;
                     break;
                 case BinaryExpression::eLessThanOrEqual:
                     boolValue = leftValue <= rightValue;
-                    resultIsBool = true;
                     break;
                 case BinaryExpression::eGreaterThan:
                     boolValue = leftValue > rightValue;
-                    resultIsBool = true;
                     break;
                 case BinaryExpression::eGreaterThanOrEqual:
                     boolValue = leftValue >= rightValue;
-                    resultIsBool = true;
                     break;
                 case BinaryExpression::eAdd:
                     intValue = leftValue + rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eSubtract:
                     intValue = leftValue - rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eMultiply:
                     intValue = leftValue * rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eDivide:
                 {
@@ -338,7 +329,6 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                         return;
                     }
                     intValue = leftValue / rightValue;
-                    resultIsBool = false;
                     break;
                 }
                 case BinaryExpression::eRemainder:
@@ -351,12 +341,10 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                         return;
                     }
                     intValue = leftValue % rightValue;
-                    resultIsBool = false;
                     break;
                 }
                 case BinaryExpression::eShiftLeft:
                     intValue = leftValue << rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eShiftRightLogical:
                 {
@@ -368,24 +356,24 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                         return;
                     }
                     intValue = static_cast<uint64_t>(leftValue & mask) >> rightValue;
-                    resultIsBool = false;
                     break;
                 }
                 case BinaryExpression::eShiftRightArithmetic:
                     intValue = leftValue >> rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eBitwiseAnd:
                     intValue = leftValue & rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eBitwiseXor:
                     intValue = leftValue ^ rightValue;
-                    resultIsBool = false;
                     break;
                 case BinaryExpression::eBitwiseOr:
                     intValue = leftValue | rightValue;
-                    resultIsBool = false;
+                    break;
+                case BinaryExpression::eClosedRange:
+                case BinaryExpression::eHalfOpenRange:
+                    rangeValue.start = leftValue;
+                    rangeValue.end = rightValue;
                     break;
                 default:
                     isConst = false;
@@ -395,13 +383,17 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
             if (isConst)
             {
                 unsigned idx = 0;
-                if (resultIsBool)
+                if (resultType->IsBool())
                 {
                     idx = compilerContext.AddBoolConstantValue(boolValue);
                 }
-                else
+                else if (resultType->IsInt())
                 {
                     idx = compilerContext.AddIntConstantValue(intValue);
+                }
+                else if (resultType->IsRange())
+                {
+                    idx = compilerContext.AddRangeConstantValue(rangeValue);
                 }
 
                 binaryExpression->SetConstantValueIndex(idx);
@@ -2334,6 +2326,25 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
                 unsigned idx = compilerContext.AddIntConstantValue(strValue->size());
                 memberExpression->SetConstantValueIndex(idx);
             }
+        }
+        else if (type->IsRange())
+        {
+            unsigned rangeIdx = expr->GetConstantValueIndex();
+            RangeConstValue rangeValue = compilerContext.GetRangeConstantValue(rangeIdx);
+
+            unsigned memberIdx = member->GetIndex();
+            int64_t memberValue = 0;
+            if (memberIdx == 0)
+            {
+                memberValue = rangeValue.start;
+            }
+            else
+            {
+                memberValue = rangeValue.end;
+            }
+
+            unsigned idx = compilerContext.AddIntConstantValue(memberValue);
+            memberExpression->SetConstantValueIndex(idx);
         }
         else if (type->IsAggregate())
         {

@@ -1303,6 +1303,35 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
         Constant* strPtr = CreateConstantString(*value);
         constValue = builder.CreateLoad(strPtr, "load");
     }
+    else if (type->IsRange())
+    {
+        Type* rangeType = GetType(type);
+        if (rangeType == nullptr)
+        {
+            logger.LogInternalError("Unknown range type");
+            return nullptr;
+        }
+
+        const RangeConstValue& value = compilerContext.GetRangeConstantValue(constIdx);
+
+        const TypeInfo* innerType = type->GetInnerType();
+        unsigned numBits = innerType->GetNumBits();
+        bool isSigned = innerType->GetSign() == TypeInfo::eSigned;
+
+        Value* startValue = ConstantInt::get(context, APInt(numBits, value.start, isSigned));
+        Value* endValue = ConstantInt::get(context, APInt(numBits, value.end, isSigned));
+
+        vector<unsigned> index(1);
+        constValue = UndefValue::get(rangeType);
+
+        // set start
+        index[0] = 0;
+        constValue = builder.CreateInsertValue(constValue, startValue, index, "rng");
+
+        // set end
+        index[0] = 1;
+        constValue = builder.CreateInsertValue(constValue, endValue, index, "rng");
+    }
     else if (type->IsAggregate())
     {
         Type* llvmType = GetType(type);

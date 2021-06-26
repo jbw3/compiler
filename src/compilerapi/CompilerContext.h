@@ -40,6 +40,12 @@ private:
     char* end;
 };
 
+struct RangeConstValue
+{
+    int64_t start;
+    int64_t end;
+};
+
 struct StructConstValue
 {
     std::vector<unsigned> memberIndices;
@@ -92,6 +98,13 @@ public:
         return strConstants[id];
     }
 
+    unsigned AddRangeConstantValue(const RangeConstValue& value);
+
+    const RangeConstValue& GetRangeConstantValue(unsigned id) const
+    {
+        return rangeConstants[id];
+    }
+
     unsigned AddStructConstantValue(const StructConstValue& value);
 
     const StructConstValue& GetStructConstantValue(unsigned id) const
@@ -104,6 +117,7 @@ private:
     std::vector<TokenList> fileTokens;
     std::vector<int64_t> intConstants;
     std::vector<std::vector<char>*> strConstants;
+    std::vector<RangeConstValue> rangeConstants;
     std::vector<StructConstValue> structConstants;
 };
 
