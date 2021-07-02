@@ -2007,6 +2007,7 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
         return;
     }
     const TypeInfo* type = expr->GetType();
+    bool allExprsAreConst = expr->GetIsConstant();
 
     for (size_t i = 1; i < exprsSize; ++i)
     {
@@ -2037,6 +2038,8 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
                 return;
             }
         }
+
+        allExprsAreConst &= expr->GetIsConstant();
     }
 
     // add implicit casts if necessary
@@ -2054,6 +2057,19 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
 
     const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
     arrayExpression->SetType(arrayType);
+
+    if (allExprsAreConst)
+    {
+        ArrayConstValue constValue;
+        constValue.type = ArrayConstValue::eMultiValue;
+        for (Expression* constExpr : expressions)
+        {
+            constValue.valueIndices.push_back(constExpr->GetConstantValueIndex());
+        }
+
+        unsigned idx = compilerContext.AddArrayConstantValue(constValue);
+        arrayExpression->SetConstantValueIndex(idx);
+    }
 }
 
 void SemanticAnalyzer::Visit(BlockExpression* blockExpression)

@@ -51,6 +51,15 @@ struct StructConstValue
     std::vector<unsigned> memberIndices;
 };
 
+struct ArrayConstValue
+{
+    std::vector<unsigned> valueIndices;
+    enum EType
+    {
+        eMultiValue,
+    } type;
+};
+
 class CompilerContext
 {
 public:
@@ -112,6 +121,13 @@ public:
         return structConstants[id];
     }
 
+    unsigned AddArrayConstantValue(const ArrayConstValue& value);
+
+    const ArrayConstValue& GetArrayConstantValue(unsigned id) const
+    {
+        return arrayConstants[id];
+    }
+
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
@@ -119,6 +135,7 @@ private:
     std::vector<std::vector<char>*> strConstants;
     std::vector<RangeConstValue> rangeConstants;
     std::vector<StructConstValue> structConstants;
+    std::vector<ArrayConstValue> arrayConstants;
 };
 
 #endif // COMPILER_CONTEXT_H_

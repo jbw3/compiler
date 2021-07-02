@@ -129,3 +129,11 @@ unsigned CompilerContext::AddStructConstantValue(const StructConstValue& value)
 
     return id;
 }
+
+unsigned CompilerContext::AddArrayConstantValue(const ArrayConstValue& value)
+{
+    unsigned id = static_cast<unsigned>(arrayConstants.size());
+    arrayConstants.push_back(value);
+
+    return id;
+}

@@ -1364,6 +1364,40 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
 
         constValue = llvmValue;
     }
+    else if (type->IsArray())
+    {
+        const ArrayConstValue& value = compilerContext.GetArrayConstantValue(constIdx);
+        uint64_t arraySize = value.valueIndices.size();
+        const TypeInfo* elementType = type->GetInnerType();
+
+        Type* arrayType = GetType(type);
+        Type* innerType = GetType(elementType);
+        Type* llvmArrayType = ArrayType::get(innerType, arraySize);
+        AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
+
+        unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+        for (uint64_t i = 0; i < arraySize; ++i)
+        {
+            unsigned elementConstIdx = value.valueIndices[i];
+            Value* elementValue = CreateConstantValue(elementType, elementConstIdx);
+
+            vector<Value*> indices;
+            indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
+            indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
+
+            Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
+            builder.CreateStore(elementValue, ptr);
+        }
+
+        // create array struct
+        Value* ptrValue = builder.CreateBitCast(alloca, arrayType->getStructElementType(1), "arrptr");
+        Value* structValue = UndefValue::get(arrayType);
+        Value* sizeValue = ConstantInt::get(context, APInt(uIntSizeNumBits, arraySize));
+        structValue = builder.CreateInsertValue(structValue, sizeValue, 0, "agg");
+        structValue = builder.CreateInsertValue(structValue, ptrValue, 1, "agg");
+
+        constValue = structValue;
+    }
     else
     {
         logger.LogInternalError("Unexpected constant type '{}'", type->GetShortName());
