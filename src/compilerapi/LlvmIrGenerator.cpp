@@ -1296,7 +1296,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     }
     else if (type->IsRange())
     {
-        Type* rangeType = GetType(type);
+        StructType* rangeType = static_cast<StructType*>(GetType(type));
         if (rangeType == nullptr)
         {
             logger.LogInternalError("Unknown range type");
@@ -1309,19 +1309,11 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
         unsigned numBits = innerType->GetNumBits();
         bool isSigned = innerType->GetSign() == TypeInfo::eSigned;
 
-        Value* startValue = ConstantInt::get(context, APInt(numBits, value.start, isSigned));
-        Value* endValue = ConstantInt::get(context, APInt(numBits, value.end, isSigned));
+        Constant* startValue = ConstantInt::get(context, APInt(numBits, value.start, isSigned));
+        Constant* endValue = ConstantInt::get(context, APInt(numBits, value.end, isSigned));
+        vector<Constant*> initValues = { startValue, endValue };
 
-        vector<unsigned> index(1);
-        constValue = UndefValue::get(rangeType);
-
-        // set start
-        index[0] = 0;
-        constValue = builder.CreateInsertValue(constValue, startValue, index, "rng");
-
-        // set end
-        index[0] = 1;
-        constValue = builder.CreateInsertValue(constValue, endValue, index, "rng");
+        constValue = ConstantStruct::get(rangeType, initValues);
     }
     else if (type->IsAggregate())
     {
