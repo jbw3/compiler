@@ -332,12 +332,10 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
             const Token* opToken = binaryExpression->opToken;
 
             const string& filename = compilerContext.GetFilename(opToken->filenameId);
-            Constant* fileStrPtr = CreateConstantString(filename);
-            Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
+            Constant* fileStr = CreateConstantString(filename);
             uint64_t line = static_cast<uint64_t>(opToken->line);
             Constant* lineNum = ConstantInt::get(context, APInt(32, line, false));
-            Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
-            Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
+            Constant* msgStr = CreateConstantString("Index is out of bounds");
 
             vector<Value*> logErrorArgs;
             logErrorArgs.push_back(fileStr);
@@ -1215,8 +1213,7 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     const vector<char>& chars = stringLiteralExpression->characters;
-    Constant* strPtr = CreateConstantString(chars);
-    resultValue = builder.CreateLoad(strPtr, "load");
+    resultValue = CreateConstantString(chars);
 }
 
 Constant* LlvmIrGenerator::CreateConstantString(const string& str)
@@ -1268,14 +1265,9 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
         };
         Constant* initializer = ConstantStruct::get(strStructType, initValues);
 
-        module->getOrInsertGlobal(structName.str(), initializer->getType());
-        GlobalVariable* globalStruct = module->getNamedGlobal(structName.str());
-        globalStruct->setConstant(true);
-        globalStruct->setInitializer(initializer);
+        strings[chars] = initializer;
 
-        strings[chars] = globalStruct;
-
-        globalString = globalStruct;
+        globalString = initializer;
     }
 
     return globalString;
@@ -1300,8 +1292,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
         vector<char>* value = compilerContext.GetStrConstantValue(constIdx);
-        Constant* strPtr = CreateConstantString(*value);
-        constValue = builder.CreateLoad(strPtr, "load");
+        constValue = CreateConstantString(*value);
     }
     else if (type->IsRange())
     {
