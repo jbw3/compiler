@@ -3,8 +3,8 @@ $source_filename
 $target_datalayout
 $target_triple
 
-%UnitType = type {}
 %str = type { i64, i8* }
+%UnitType = type {}
 %Range16 = type { i16, i16 }
 %Range32 = type { i32, i32 }
 %Range8 = type { i8, i8 }
@@ -21,12 +21,19 @@ $target_triple
 %"[u8]" = type { i64, i8* }
 
 @strData0 = constant [0 x i8] zeroinitializer
+@strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
 @strData1 = constant [15 x i8] c"Is this a test?"
+@strStruct1 = constant %str { i64 15, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @strData1, i32 0, i32 0) }
 @strData2 = constant [6 x i8] c"\09\0D\0A\\\22'"
+@strStruct2 = constant %str { i64 6, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @strData2, i32 0, i32 0) }
 @strData3 = constant [5 x i8] c"caf\C3\A9"
+@strStruct3 = constant %str { i64 5, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strData3, i32 0, i32 0) }
 @strData4 = constant [3 x i8] c"JBW"
+@strStruct4 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData4, i32 0, i32 0) }
 @strData5 = constant [11 x i8] c"\0A0\CF\80\E2\82\BF\F0\9F\98\80"
+@strStruct5 = constant %str { i64 11, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @strData5, i32 0, i32 0) }
 @strData6 = constant [3 x i8] c"abc"
+@strStruct6 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }
 
 declare %UnitType @extern1()
 
@@ -743,14 +750,22 @@ entry:
   %s3 = alloca %str
   %s2 = alloca %str
   %s1 = alloca %str
-  store %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }, %str* %s1
-  store %str { i64 15, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @strData1, i32 0, i32 0) }, %str* %s2
-  store %str { i64 6, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @strData2, i32 0, i32 0) }, %str* %s3
-  store %str { i64 5, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strData3, i32 0, i32 0) }, %str* %s4
-  store %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData4, i32 0, i32 0) }, %str* %s5
-  store %str { i64 11, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @strData5, i32 0, i32 0) }, %str* %s6
-  store %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }, %str* %dup1
-  store %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }, %str* %dup2
+  %load = load %str, %str* @strStruct0
+  store %str %load, %str* %s1
+  %load1 = load %str, %str* @strStruct1
+  store %str %load1, %str* %s2
+  %load2 = load %str, %str* @strStruct2
+  store %str %load2, %str* %s3
+  %load3 = load %str, %str* @strStruct3
+  store %str %load3, %str* %s4
+  %load4 = load %str, %str* @strStruct4
+  store %str %load4, %str* %s5
+  %load5 = load %str, %str* @strStruct5
+  store %str %load5, %str* %s6
+  %load6 = load %str, %str* @strStruct6
+  store %str %load6, %str* %dup1
+  %load7 = load %str, %str* @strStruct6
+  store %str %load7, %str* %dup2
   ret %UnitType zeroinitializer
 }
 
@@ -821,7 +836,8 @@ define i64 @str_member1() #0 {
 entry:
   %size = alloca i64
   %s = alloca %str
-  store %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }, %str* %s
+  %load = load %str, %str* @strStruct6
+  store %str %load, %str* %s
   %s1 = load %str, %str* %s
   %mber = extractvalue %str %s1, 0
   store i64 %mber, i64* %size
@@ -839,13 +855,15 @@ entry:
   br i1 %cmpeq, label %if, label %else
 
 if:                                               ; preds = %entry
+  %load = load %str, %str* @strStruct6
   br label %merge
 
 else:                                             ; preds = %entry
+  %load3 = load %str, %str* @strStruct3
   br label %merge
 
 merge:                                            ; preds = %else, %if
-  %phi = phi %str [ { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }, %if ], [ { i64 5, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strData3, i32 0, i32 0) }, %else ]
+  %phi = phi %str [ %load, %if ], [ %load3, %else ]
   %mber = extractvalue %str %phi, 0
   ret i64 %mber
 }
@@ -1972,19 +1990,25 @@ entry:
   %test1 = alloca %Test1
   %empty = alloca %EmptyType
   store %EmptyType undef, %EmptyType* %empty
+  %load = load %str, %str* @strStruct3
+  %agg = insertvalue %Test1 undef, %str %load, 2
   %call = call i16 @types_i16(i16 1, i16 2)
   %signext = sext i16 %call to i32
-  %agg = insertvalue %Test1 { i32 undef, i1 undef, %str { i64 5, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @strData3, i32 0, i32 0) } }, i32 %signext, 0
-  %agg1 = insertvalue %Test1 %agg, i1 true, 1
-  store %Test1 %agg1, %Test1* %test1
-  store %Test2 { %Test1 { i32 1, i1 false, %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) } }, i32 12 }, %Test2* %test2
+  %agg1 = insertvalue %Test1 %agg, i32 %signext, 0
+  %agg2 = insertvalue %Test1 %agg1, i1 true, 1
+  store %Test1 %agg2, %Test1* %test1
+  %load3 = load %str, %str* @strStruct6
+  %agg4 = insertvalue %Test1 { i32 1, i1 false, %str undef }, %str %load3, 2
+  %agg5 = insertvalue %Test2 undef, %Test1 %agg4, 0
+  %agg6 = insertvalue %Test2 %agg5, i32 12, 1
+  store %Test2 %agg6, %Test2* %test2
   %mber = getelementptr inbounds %Test1, %Test1* %test1, i64 0, i32 1
   store i1 false, i1* %mber
-  %mber2 = getelementptr inbounds %Test2, %Test2* %test2, i64 0, i32 0
-  %mber3 = getelementptr inbounds %Test1, %Test1* %mber2, i64 0, i32 0
-  %load = load i32, i32* %mber3
-  %add = add i32 %load, 7
-  store i32 %add, i32* %mber3
+  %mber7 = getelementptr inbounds %Test2, %Test2* %test2, i64 0, i32 0
+  %mber8 = getelementptr inbounds %Test1, %Test1* %mber7, i64 0, i32 0
+  %load9 = load i32, i32* %mber8
+  %add = add i32 %load9, 7
+  store i32 %add, i32* %mber8
   ret %UnitType zeroinitializer
 }
 
@@ -2223,17 +2247,18 @@ entry:
   %signext = sext i8 %load7 to i32
   %agg = insertvalue %Test1 undef, i32 %signext, 0
   %agg8 = insertvalue %Test1 %agg, i1 true, 1
-  %agg9 = insertvalue %Test1 %agg8, %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }, 2
-  store %Test1 %agg9, %Test1* %test
+  %load9 = load %str, %str* @strStruct6
+  %agg10 = insertvalue %Test1 %agg8, %str %load9, 2
+  store %Test1 %agg10, %Test1* %test
   %mber = getelementptr inbounds %Test1, %Test1* %test, i64 0, i32 1
   store i1* %mber, i1** %bPtr1
   store i1** %bPtr1, i1*** %bPtr2
-  %bPtr210 = load i1**, i1*** %bPtr2
-  %load11 = load i1*, i1** %bPtr210
-  %load12 = load i1, i1* %load11
-  store i1 %load12, i1* %b
-  %p113 = load i32*, i32** %p11
-  ret i32* %p113
+  %bPtr211 = load i1**, i1*** %bPtr2
+  %load12 = load i1*, i1** %bPtr211
+  %load13 = load i1, i1* %load12
+  store i1 %load13, i1* %b
+  %p114 = load i32*, i32** %p11
+  ret i32* %p114
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -3069,7 +3094,8 @@ entry:
   store i1 true, i1* %v4
   store i8 9, i8* %v5
   store i32 122, i32* %v6
-  store %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }, %str* %v7
+  %load = load %str, %str* @strStruct6
+  store %str %load, %str* %v7
   store i16 7, i16* %v8
   store i8 29, i8* %v9
   store i32 8, i32* %v10
@@ -3081,7 +3107,11 @@ entry:
   store i8 -24, i8* %v16
   store i16 100, i16* %v17
   store i16 -1, i16* %v18
-  store %Test2 { %Test1 { i32 7, i1 true, %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) } }, i32 1012 }, %Test2* %v19
+  %load1 = load %str, %str* @strStruct6
+  %agg = insertvalue %Test1 { i32 7, i1 true, %str undef }, %str %load1, 2
+  %agg2 = insertvalue %Test2 undef, %Test1 %agg, 0
+  %agg3 = insertvalue %Test2 %agg2, i32 1012, 1
+  store %Test2 %agg3, %Test2* %v19
   store i64 3, i64* %v20
   store i32 7, i32* %v21
   store %Range32 { i32 12, i32 1000 }, %Range32* %v22
@@ -3101,8 +3131,8 @@ fillBody:                                         ; preds = %fillBody, %entry
 
 fillExit:                                         ; preds = %fillBody
   %arrptr = bitcast [13 x i32]* %array to i32*
-  %agg = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr, 1
-  store %"[i32]" %agg, %"[i32]"* %a1
+  %agg4 = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr, 1
+  store %"[i32]" %agg4, %"[i32]"* %a1
   ret %UnitType zeroinitializer
 }
 

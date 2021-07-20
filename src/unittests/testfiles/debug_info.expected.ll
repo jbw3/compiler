@@ -3,8 +3,8 @@ $source_filename
 $target_datalayout
 $target_triple
 
-%UnitType = type {}
 %str = type { i64, i8* }
+%UnitType = type {}
 %TestStruct = type { i32, i64, i1 }
 %Range32 = type { i32, i32 }
 %A = type { i32, %B }
@@ -14,6 +14,7 @@ $target_triple
 %"[u32]" = type { i64, i32* }
 
 @strData0 = constant [3 x i8] c"abc"
+@strStruct0 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData0, i32 0, i32 0) }
 
 ; Function Attrs: noinline nounwind optnone
 define i32 @noParams() #0 !dbg !3 {
@@ -126,7 +127,8 @@ entry:
   call void @llvm.dbg.declare(metadata i64* %x9, metadata !73, metadata !DIExpression()), !dbg !101
   store i64 9, i64* %x9, !dbg !102
   call void @llvm.dbg.declare(metadata %str* %s, metadata !75, metadata !DIExpression()), !dbg !103
-  store %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData0, i32 0, i32 0) }, %str* %s, !dbg !104
+  %load = load %str, %str* @strStruct0, !dbg !103
+  store %str %load, %str* %s, !dbg !104
   ret %UnitType zeroinitializer, !dbg !104
 }
 
