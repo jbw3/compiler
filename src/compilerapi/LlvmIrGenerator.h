@@ -187,6 +187,8 @@ private:
 
     llvm::Value* CreateConstantValue(const TypeInfo* type, unsigned constIdx);
 
+    llvm::Value* CreateSizeValueArrayIr(const TypeInfo* arrayTypeInfo, uint64_t arraySize, llvm::Value* arrayValue);
+
     llvm::Type* GetType(const TypeInfo* type);
 
     llvm::DIType* GetDebugType(const TypeInfo* type);

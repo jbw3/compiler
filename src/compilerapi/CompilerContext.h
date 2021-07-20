@@ -56,6 +56,7 @@ struct ArrayConstValue
     std::vector<unsigned> valueIndices;
     enum EType
     {
+        eSizeValue,
         eMultiValue,
     } type;
 };

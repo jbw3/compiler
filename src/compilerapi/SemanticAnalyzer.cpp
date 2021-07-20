@@ -1992,6 +1992,17 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
     const TypeInfo* type = valueExpression->GetType();
     const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
     arrayExpression->SetType(arrayType);
+
+    if (valueExpression->GetIsConstant())
+    {
+        ArrayConstValue constValue;
+        constValue.type = ArrayConstValue::eSizeValue;
+        constValue.valueIndices.push_back(sizeExpression->GetConstantValueIndex());
+        constValue.valueIndices.push_back(valueExpression->GetConstantValueIndex());
+
+        unsigned idx = compilerContext.AddArrayConstantValue(constValue);
+        arrayExpression->SetConstantValueIndex(idx);
+    }
 }
 
 void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)

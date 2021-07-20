@@ -1288,7 +1288,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     if (type->IsBool())
     {
         bool value = compilerContext.GetBoolConstantValue(constIdx);
-        constValue  = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
+        constValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
     }
     else if (type->IsInt())
     {
@@ -1359,36 +1359,56 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     else if (type->IsArray())
     {
         const ArrayConstValue& value = compilerContext.GetArrayConstantValue(constIdx);
-        uint64_t arraySize = value.valueIndices.size();
-        const TypeInfo* elementType = type->GetInnerType();
 
-        Type* arrayType = GetType(type);
-        Type* innerType = GetType(elementType);
-        Type* llvmArrayType = ArrayType::get(innerType, arraySize);
-        AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
-
-        unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
-        for (uint64_t i = 0; i < arraySize; ++i)
+        if (value.type == ArrayConstValue::eSizeValue)
         {
-            unsigned elementConstIdx = value.valueIndices[i];
-            Value* elementValue = CreateConstantValue(elementType, elementConstIdx);
+            unsigned sizeConstIdx = value.valueIndices[0];
+            unsigned valueConstIdx = value.valueIndices[1];
 
-            vector<Value*> indices;
-            indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
-            indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
+            int64_t sizeConstValue = compilerContext.GetIntConstantValue(sizeConstIdx);
+            uint64_t arraySize = static_cast<uint64_t>(sizeConstValue);
 
-            Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
-            builder.CreateStore(elementValue, ptr);
+            Value* arrayValue = CreateConstantValue(type->GetInnerType(), valueConstIdx);
+
+            constValue = CreateSizeValueArrayIr(type, arraySize, arrayValue);
         }
+        else if (value.type == ArrayConstValue::eMultiValue)
+        {
+            uint64_t arraySize = value.valueIndices.size();
+            const TypeInfo* elementType = type->GetInnerType();
 
-        // create array struct
-        Value* ptrValue = builder.CreateBitCast(alloca, arrayType->getStructElementType(1), "arrptr");
-        Value* structValue = UndefValue::get(arrayType);
-        Value* sizeValue = ConstantInt::get(context, APInt(uIntSizeNumBits, arraySize));
-        structValue = builder.CreateInsertValue(structValue, sizeValue, 0, "agg");
-        structValue = builder.CreateInsertValue(structValue, ptrValue, 1, "agg");
+            Type* arrayType = GetType(type);
+            Type* innerType = GetType(elementType);
+            Type* llvmArrayType = ArrayType::get(innerType, arraySize);
+            AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
-        constValue = structValue;
+            unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+            for (uint64_t i = 0; i < arraySize; ++i)
+            {
+                unsigned elementConstIdx = value.valueIndices[i];
+                Value* elementValue = CreateConstantValue(elementType, elementConstIdx);
+
+                vector<Value*> indices;
+                indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
+                indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
+
+                Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
+                builder.CreateStore(elementValue, ptr);
+            }
+
+            // create array struct
+            Value* ptrValue = builder.CreateBitCast(alloca, arrayType->getStructElementType(1), "arrptr");
+            Value* structValue = UndefValue::get(arrayType);
+            Value* sizeValue = ConstantInt::get(context, APInt(uIntSizeNumBits, arraySize));
+            structValue = builder.CreateInsertValue(structValue, sizeValue, 0, "agg");
+            structValue = builder.CreateInsertValue(structValue, ptrValue, 1, "agg");
+
+            constValue = structValue;
+        }
+        else
+        {
+            logger.LogInternalError("Unexpected constant array type '{}'", value.type);
+        }
     }
     else
     {
@@ -1439,31 +1459,10 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
 
 void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 {
-    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
-
     Expression* sizeExpression = arrayExpression->sizeExpression;
-
-    sizeExpression->Accept(this);
-    if (resultValue == nullptr)
-    {
-        return;
-    }
-    Value* sizeValue = resultValue;
-    if (sizeExpression->GetType()->GetNumBits() < uIntSizeNumBits)
-    {
-        Type* extType = GetType(TypeInfo::GetUIntSizeType());
-        sizeValue = builder.CreateZExt(sizeValue, extType, "zeroext");
-    }
     unsigned constIdx = sizeExpression->GetConstantValueIndex();
     int64_t constValue = compilerContext.GetIntConstantValue(constIdx);
     uint64_t arraySize = static_cast<uint64_t>(constValue);
-
-    const TypeInfo* typeInfo = arrayExpression->GetType();
-    const TypeInfo* innerTypeInfo = typeInfo->GetInnerType();
-    Type* arrayType = GetType(typeInfo);
-    Type* innerType = GetType(innerTypeInfo);
-    Type* llvmArrayType = ArrayType::get(innerType, arraySize);
-    AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
     Expression* valueExpression = arrayExpression->valueExpression;
     valueExpression->Accept(this);
@@ -1472,6 +1471,21 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
         return;
     }
     Value* valueValue = resultValue;
+
+    resultValue = CreateSizeValueArrayIr(arrayExpression->GetType(), arraySize, valueValue);
+}
+
+llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeInfo, uint64_t arraySize, Value* arrayValue)
+{
+    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+
+    const TypeInfo* innerTypeInfo = arrayTypeInfo->GetInnerType();
+    Type* arrayType = GetType(arrayTypeInfo);
+    Type* innerType = GetType(innerTypeInfo);
+    Type* llvmArrayType = ArrayType::get(innerType, arraySize);
+    AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
+
+    Value* sizeValue = ConstantInt::get(context, APInt(uIntSizeNumBits, arraySize));
 
     // create loop to insert values
     if (arraySize > 0)
@@ -1504,7 +1518,7 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
         phi->addIncoming(startPtr, preLoopBlock);
 
         // store the value
-        builder.CreateStore(valueValue, phi);
+        builder.CreateStore(arrayValue, phi);
 
         // increment the address
         Value* nextPtr = builder.CreateInBoundsGEP(phi, one, "nextPtr");
@@ -1527,7 +1541,7 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
     structValue = builder.CreateInsertValue(structValue, sizeValue, 0, "agg");
     structValue = builder.CreateInsertValue(structValue, ptrValue, 1, "agg");
 
-    resultValue = structValue;
+    return structValue;
 }
 
 void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
