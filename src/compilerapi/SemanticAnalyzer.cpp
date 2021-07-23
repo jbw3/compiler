@@ -2594,7 +2594,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     if (!ok)
     {
         isError = true;
-        logger.LogError(*variableDeclaration->nameToken, "Variable '{}' has already been declared", varName);
+        logger.LogError(*variableDeclaration->nameToken, "Identifier '{}' has already been declared", varName);
         return;
     }
 
