@@ -957,6 +957,8 @@ fun consts()
     const c22 = -4..200;
     const c23 = [10, 11, c1];
     const c24 = [5; -c16];
+    const c25 = c23[c23.Size - 1];
+    const c26 = c24[2];
 
     var v1 = c1;
     var v2 = c2;
@@ -985,6 +987,8 @@ fun consts()
     var v25 = c21.End / 2;
     var v26 = c23;
     var v27 = c24;
+    var v28 = c25;
+    var v29 = c26;
 
     var a1 [i32] = [c5; 0];
 }

@@ -3063,6 +3063,8 @@ define %UnitType @consts() #0 {
 entry:
   %array10 = alloca [13 x i32]
   %a1 = alloca %"[i32]"
+  %v29 = alloca i16
+  %v28 = alloca i8
   %array7 = alloca [5 x i16]
   %v27 = alloca %"[i16]"
   %array = alloca [3 x i8]
@@ -3146,6 +3148,8 @@ fillExit:                                         ; preds = %fillBody
   %arrptr8 = bitcast [5 x i16]* %array7 to i16*
   %agg9 = insertvalue %"[i16]" { i64 5, i16* undef }, i16* %arrptr8, 1
   store %"[i16]" %agg9, %"[i16]"* %v27
+  store i8 12, i8* %v28
+  store i16 -100, i16* %v29
   %startPtr12 = getelementptr inbounds [13 x i32], [13 x i32]* %array10, i64 0, i64 0
   %endPtr13 = getelementptr inbounds [13 x i32], [13 x i32]* %array10, i64 0, i64 13
   br label %fillBody11
