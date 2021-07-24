@@ -399,6 +399,34 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 binaryExpression->SetConstantValueIndex(idx);
             }
         }
+        else if (leftType->IsSameAs(*TypeInfo::GetStringType()) && op == BinaryExpression::eSubscript)
+        {
+            vector<char>* strValue = compilerContext.GetStrConstantValue(binaryExpression->left->GetConstantValueIndex());
+
+            if (rightType->IsInt())
+            {
+                int64_t rightValue = compilerContext.GetIntConstantValue(binaryExpression->right->GetConstantValueIndex());
+                uint64_t strIdx = static_cast<uint64_t>(rightValue);
+
+                // check index
+                size_t strSize = strValue->size();
+                if (strIdx >= strSize)
+                {
+                    logger.LogError(
+                        *binaryExpression->opToken,
+                        "Index out-of-bounds. Index: {}, string size: {}",
+                        strIdx,
+                        strSize
+                    );
+                    isError = true;
+                    return;
+                }
+
+                uint8_t value = (*strValue)[strIdx];
+                unsigned idx = compilerContext.AddIntConstantValue(value);
+                binaryExpression->SetConstantValueIndex(idx);
+            }
+        }
     }
 }
 
