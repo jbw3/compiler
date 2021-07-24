@@ -137,3 +137,27 @@ unsigned CompilerContext::AddArrayConstantValue(const ArrayConstValue& value)
 
     return id;
 }
+
+size_t CompilerContext::GetArrayConstantValueSize(unsigned arrayId) const
+{
+    const ArrayConstValue& arrayValue = GetArrayConstantValue(arrayId);
+    size_t arraySize = GetArrayConstantValueSize(arrayValue);
+    return arraySize;
+}
+
+size_t CompilerContext::GetArrayConstantValueSize(const ArrayConstValue& value) const
+{
+    size_t arraySize = 0;
+    if (value.type == ArrayConstValue::eMultiValue)
+    {
+        arraySize = value.valueIndices.size();
+    }
+    else
+    {
+        unsigned sizeIdx = value.valueIndices[0];
+        int64_t sizeValue = GetIntConstantValue(sizeIdx);
+        arraySize = static_cast<size_t>(sizeValue);
+    }
+
+    return arraySize;
+}

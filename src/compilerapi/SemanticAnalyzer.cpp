@@ -427,6 +427,40 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 binaryExpression->SetConstantValueIndex(idx);
             }
         }
+        else if (leftType->IsArray() && op == BinaryExpression::eSubscript)
+        {
+            ArrayConstValue arrayValue = compilerContext.GetArrayConstantValue(binaryExpression->left->GetConstantValueIndex());
+            if (rightType->IsInt())
+            {
+                int64_t rightValue = compilerContext.GetIntConstantValue(binaryExpression->right->GetConstantValueIndex());
+                uint64_t arrayIdx = static_cast<uint64_t>(rightValue);
+
+                // check index
+                size_t arraySize = compilerContext.GetArrayConstantValueSize(arrayValue);
+                if (arrayIdx >= arraySize)
+                {
+                    logger.LogError(
+                        *binaryExpression->opToken,
+                        "Index out-of-bounds. Index: {}, array size: {}",
+                        arrayIdx,
+                        arraySize
+                    );
+                    isError = true;
+                    return;
+                }
+
+                unsigned valueIdx = 0;
+                if (arrayValue.type == ArrayConstValue::eMultiValue)
+                {
+                    valueIdx = arrayValue.valueIndices[arrayIdx];
+                }
+                else
+                {
+                    valueIdx = arrayValue.valueIndices[1];
+                }
+                binaryExpression->SetConstantValueIndex(valueIdx);
+            }
+        }
     }
 }
 
@@ -2379,6 +2413,16 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
             {
                 vector<char>* strValue = compilerContext.GetStrConstantValue(expr->GetConstantValueIndex());
                 unsigned idx = compilerContext.AddIntConstantValue(strValue->size());
+                memberExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (type->IsArray())
+        {
+            // check if it's the 'Size' member
+            if (member->GetIndex() == 0)
+            {
+                size_t arraySize = compilerContext.GetArrayConstantValueSize(expr->GetConstantValueIndex());
+                unsigned idx = compilerContext.AddIntConstantValue(arraySize);
                 memberExpression->SetConstantValueIndex(idx);
             }
         }

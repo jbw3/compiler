@@ -129,6 +129,10 @@ public:
         return arrayConstants[id];
     }
 
+    size_t GetArrayConstantValueSize(unsigned arrayId) const;
+
+    size_t GetArrayConstantValueSize(const ArrayConstValue& value) const;
+
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
