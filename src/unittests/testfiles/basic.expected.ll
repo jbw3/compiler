@@ -34,6 +34,12 @@ $target_triple
 @strStruct5 = constant %str { i64 11, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @strData5, i32 0, i32 0) }
 @strData6 = constant [3 x i8] c"abc"
 @strStruct6 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData6, i32 0, i32 0) }
+@strData7 = constant [4 x i8] c"cdef"
+@strStruct7 = constant %str { i64 4, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strData7, i32 0, i32 0) }
+@strData8 = constant [3 x i8] c"cde"
+@strStruct8 = constant %str { i64 3, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strData8, i32 0, i32 0) }
+@strData9 = constant [2 x i8] c"ij"
+@strStruct9 = constant %str { i64 2, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @strData9, i32 0, i32 0) }
 
 declare %UnitType @extern1()
 
@@ -3061,8 +3067,12 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @consts() #0 {
 entry:
-  %array10 = alloca [13 x i32]
+  %array14 = alloca [13 x i32]
   %a1 = alloca %"[i32]"
+  %v33 = alloca %str
+  %v32 = alloca %str
+  %v31 = alloca %str
+  %v30 = alloca %str
   %v29 = alloca i16
   %v28 = alloca i8
   %array7 = alloca [5 x i16]
@@ -3150,21 +3160,29 @@ fillExit:                                         ; preds = %fillBody
   store %"[i16]" %agg9, %"[i16]"* %v27
   store i8 12, i8* %v28
   store i16 -100, i16* %v29
-  %startPtr12 = getelementptr inbounds [13 x i32], [13 x i32]* %array10, i64 0, i64 0
-  %endPtr13 = getelementptr inbounds [13 x i32], [13 x i32]* %array10, i64 0, i64 13
-  br label %fillBody11
+  %load10 = load %str, %str* @strStruct7
+  store %str %load10, %str* %v30
+  %load11 = load %str, %str* @strStruct8
+  store %str %load11, %str* %v31
+  %load12 = load %str, %str* @strStruct9
+  store %str %load12, %str* %v32
+  %load13 = load %str, %str* @strStruct0
+  store %str %load13, %str* %v33
+  %startPtr16 = getelementptr inbounds [13 x i32], [13 x i32]* %array14, i64 0, i64 0
+  %endPtr17 = getelementptr inbounds [13 x i32], [13 x i32]* %array14, i64 0, i64 13
+  br label %fillBody15
 
-fillBody11:                                       ; preds = %fillBody11, %fillExit
-  %phi14 = phi i32* [ %startPtr12, %fillExit ], [ %nextPtr15, %fillBody11 ]
-  store i32 0, i32* %phi14
-  %nextPtr15 = getelementptr inbounds i32, i32* %phi14, i64 1
-  %atEnd16 = icmp eq i32* %nextPtr15, %endPtr13
-  br i1 %atEnd16, label %fillExit17, label %fillBody11
+fillBody15:                                       ; preds = %fillBody15, %fillExit
+  %phi18 = phi i32* [ %startPtr16, %fillExit ], [ %nextPtr19, %fillBody15 ]
+  store i32 0, i32* %phi18
+  %nextPtr19 = getelementptr inbounds i32, i32* %phi18, i64 1
+  %atEnd20 = icmp eq i32* %nextPtr19, %endPtr17
+  br i1 %atEnd20, label %fillExit21, label %fillBody15
 
-fillExit17:                                       ; preds = %fillBody11
-  %arrptr18 = bitcast [13 x i32]* %array10 to i32*
-  %agg19 = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr18, 1
-  store %"[i32]" %agg19, %"[i32]"* %a1
+fillExit21:                                       ; preds = %fillBody15
+  %arrptr22 = bitcast [13 x i32]* %array14 to i32*
+  %agg23 = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr22, 1
+  store %"[i32]" %agg23, %"[i32]"* %a1
   ret %UnitType zeroinitializer
 }
 

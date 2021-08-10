@@ -921,6 +921,7 @@ fun casts(x i16, y u16, b bool)
 
 const global_constant1 = 9;
 const global_constant2 i32 = 0x7a;
+const global_constant3 = "abcdefghij";
 
 fun consts()
 {
@@ -959,6 +960,10 @@ fun consts()
     const c24 = [5; -c16];
     const c25 = c23[c23.Size - 1];
     const c26 = c24[2];
+    const c27 = global_constant3[2..5];
+    const c28 = global_constant3[2..<5];
+    const c29 = global_constant3[8..100];
+    const c30 = global_constant3[5..<5];
 
     var v1 = c1;
     var v2 = c2;
@@ -989,6 +994,10 @@ fun consts()
     var v27 = c24;
     var v28 = c25;
     var v29 = c26;
+    var v30 = c27;
+    var v31 = c28;
+    var v32 = c29;
+    var v33 = c30;
 
     var a1 [i32] = [c5; 0];
 }

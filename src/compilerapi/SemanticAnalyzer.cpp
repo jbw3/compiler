@@ -402,6 +402,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         else if (leftType->IsSameAs(*TypeInfo::GetStringType()) && op == BinaryExpression::eSubscript)
         {
             vector<char> strValue = compilerContext.GetStrConstantValue(binaryExpression->left->GetConstantValueIndex());
+            size_t strSize = strValue.size();
 
             if (rightType->IsInt())
             {
@@ -409,7 +410,6 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 uint64_t strIdx = static_cast<uint64_t>(rightValue);
 
                 // check index
-                size_t strSize = strValue.size();
                 if (strIdx >= strSize)
                 {
                     logger.LogError(
@@ -424,6 +424,39 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
                 uint8_t value = strValue[strIdx];
                 unsigned idx = compilerContext.AddIntConstantValue(value);
+                binaryExpression->SetConstantValueIndex(idx);
+            }
+            else if (rightType->IsRange())
+            {
+                const RangeConstValue& rightValue = compilerContext.GetRangeConstantValue(binaryExpression->right->GetConstantValueIndex());
+                uint64_t startIdx = static_cast<uint64_t>(rightValue.start);
+                uint64_t endIdx = static_cast<uint64_t>(rightValue.end);
+
+                // if this range is closed, add 1 to the end
+                if (!rightType->IsHalfOpen())
+                {
+                    endIdx += 1;
+                }
+
+                // check end
+                if (endIdx > strSize)
+                {
+                    endIdx = strSize;
+                }
+
+                // check start
+                if (startIdx > endIdx)
+                {
+                    startIdx = endIdx;
+                }
+
+                vector<char> newStrValue;
+                for (uint64_t i = startIdx; i < endIdx; ++i)
+                {
+                    newStrValue.push_back(strValue[i]);
+                }
+
+                unsigned idx = compilerContext.AddStrConstantValue(newStrValue);
                 binaryExpression->SetConstantValueIndex(idx);
             }
         }
