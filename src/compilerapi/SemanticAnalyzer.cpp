@@ -463,13 +463,13 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         else if (leftType->IsArray() && op == BinaryExpression::eSubscript)
         {
             ArrayConstValue arrayValue = compilerContext.GetArrayConstantValue(binaryExpression->left->GetConstantValueIndex());
+            size_t arraySize = compilerContext.GetArrayConstantValueSize(arrayValue);
             if (rightType->IsInt())
             {
                 int64_t rightValue = compilerContext.GetIntConstantValue(binaryExpression->right->GetConstantValueIndex());
                 uint64_t arrayIdx = static_cast<uint64_t>(rightValue);
 
                 // check index
-                size_t arraySize = compilerContext.GetArrayConstantValueSize(arrayValue);
                 if (arrayIdx >= arraySize)
                 {
                     logger.LogError(
@@ -492,6 +492,52 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                     valueIdx = arrayValue.valueIndices[1];
                 }
                 binaryExpression->SetConstantValueIndex(valueIdx);
+            }
+            else if (rightType->IsRange())
+            {
+                const RangeConstValue& rightValue = compilerContext.GetRangeConstantValue(binaryExpression->right->GetConstantValueIndex());
+                uint64_t startIdx = static_cast<uint64_t>(rightValue.start);
+                uint64_t endIdx = static_cast<uint64_t>(rightValue.end);
+
+                // if this range is closed, add 1 to the end
+                if (!rightType->IsHalfOpen())
+                {
+                    endIdx += 1;
+                }
+
+                // check end
+                if (endIdx > arraySize)
+                {
+                    endIdx = arraySize;
+                }
+
+                // check start
+                if (startIdx > endIdx)
+                {
+                    startIdx = endIdx;
+                }
+
+                ArrayConstValue newArrayValue;
+                if (arrayValue.type == ArrayConstValue::eMultiValue)
+                {
+                    newArrayValue.type = ArrayConstValue::eMultiValue;
+                    for (uint64_t i = startIdx; i < endIdx; ++i)
+                    {
+                        newArrayValue.valueIndices.push_back(arrayValue.valueIndices[i]);
+                    }
+                }
+                else
+                {
+                    int64_t newSize = endIdx - startIdx;
+                    unsigned newSizeIdx = compilerContext.AddIntConstantValue(newSize);
+
+                    newArrayValue.type = ArrayConstValue::eSizeValue;
+                    newArrayValue.valueIndices.push_back(newSizeIdx);
+                    newArrayValue.valueIndices.push_back(arrayValue.valueIndices[1]);
+                }
+
+                unsigned idx = compilerContext.AddArrayConstantValue(newArrayValue);
+                binaryExpression->SetConstantValueIndex(idx);
             }
         }
     }

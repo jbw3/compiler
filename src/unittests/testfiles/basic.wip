@@ -964,6 +964,8 @@ fun consts()
     const c28 = global_constant3[2..<5];
     const c29 = global_constant3[8..100];
     const c30 = global_constant3[5..<5];
+    const c31 = c23[1..2];
+    const c32 = c24[1..<4];
 
     var v1 = c1;
     var v2 = c2;
@@ -998,6 +1000,8 @@ fun consts()
     var v31 = c28;
     var v32 = c29;
     var v33 = c30;
+    var v34 = c31;
+    var v35 = c32;
 
     var a1 [i32] = [c5; 0];
 }
