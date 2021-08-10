@@ -106,7 +106,7 @@ int64_t CompilerContext::GetIntConstantValue(unsigned id) const
     }
 }
 
-unsigned CompilerContext::AddStrConstantValue(vector<char>* value)
+unsigned CompilerContext::AddStrConstantValue(vector<char> value)
 {
     unsigned id = static_cast<unsigned>(strConstants.size());
     strConstants.push_back(value);

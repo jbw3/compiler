@@ -1299,8 +1299,8 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     }
     else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
-        vector<char>* value = compilerContext.GetStrConstantValue(constIdx);
-        Constant* strPtr = CreateConstantString(*value);
+        const vector<char>& value = compilerContext.GetStrConstantValue(constIdx);
+        Constant* strPtr = CreateConstantString(value);
         constValue = builder.CreateLoad(strPtr, "load");
     }
     else if (type->IsRange())

@@ -101,9 +101,9 @@ public:
 
     int64_t GetIntConstantValue(unsigned id) const;
 
-    unsigned AddStrConstantValue(std::vector<char>* value);
+    unsigned AddStrConstantValue(std::vector<char> value);
 
-    std::vector<char>* GetStrConstantValue(unsigned id) const
+    std::vector<char> GetStrConstantValue(unsigned id) const
     {
         return strConstants[id];
     }
@@ -137,7 +137,7 @@ private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
     std::vector<int64_t> intConstants;
-    std::vector<std::vector<char>*> strConstants;
+    std::vector<std::vector<char>> strConstants;
     std::vector<RangeConstValue> rangeConstants;
     std::vector<StructConstValue> structConstants;
     std::vector<ArrayConstValue> arrayConstants;

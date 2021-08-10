@@ -401,7 +401,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
         }
         else if (leftType->IsSameAs(*TypeInfo::GetStringType()) && op == BinaryExpression::eSubscript)
         {
-            vector<char>* strValue = compilerContext.GetStrConstantValue(binaryExpression->left->GetConstantValueIndex());
+            vector<char> strValue = compilerContext.GetStrConstantValue(binaryExpression->left->GetConstantValueIndex());
 
             if (rightType->IsInt())
             {
@@ -409,7 +409,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 uint64_t strIdx = static_cast<uint64_t>(rightValue);
 
                 // check index
-                size_t strSize = strValue->size();
+                size_t strSize = strValue.size();
                 if (strIdx >= strSize)
                 {
                     logger.LogError(
@@ -422,7 +422,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                     return;
                 }
 
-                uint8_t value = (*strValue)[strIdx];
+                uint8_t value = strValue[strIdx];
                 unsigned idx = compilerContext.AddIntConstantValue(value);
                 binaryExpression->SetConstantValueIndex(idx);
             }
@@ -1996,7 +1996,7 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     stringLiteralExpression->SetType(TypeInfo::GetStringType());
 
-    vector<char>* value = &stringLiteralExpression->characters;
+    const vector<char>& value = stringLiteralExpression->characters;
     unsigned idx = compilerContext.AddStrConstantValue(value);
     stringLiteralExpression->SetConstantValueIndex(idx);
 }
@@ -2411,8 +2411,8 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
             // check if it's the 'Size' member
             if (member->GetIndex() == 0)
             {
-                vector<char>* strValue = compilerContext.GetStrConstantValue(expr->GetConstantValueIndex());
-                unsigned idx = compilerContext.AddIntConstantValue(strValue->size());
+                vector<char> strValue = compilerContext.GetStrConstantValue(expr->GetConstantValueIndex());
+                unsigned idx = compilerContext.AddIntConstantValue(strValue.size());
                 memberExpression->SetConstantValueIndex(idx);
             }
         }
