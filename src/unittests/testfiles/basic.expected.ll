@@ -2287,7 +2287,7 @@ failed:                                           ; preds = %entry
 
 passed:                                           ; preds = %entry
   %data = extractvalue %str %s3, 1
-  %value = getelementptr inbounds i8, i8* %data, i8 0
+  %value = getelementptr inbounds i8, i8* %data, i64 0
   %load = load i8, i8* %value
   store i8 %load, i8* %x
   %t4 = load %SubscriptTest1, %SubscriptTest1* %t2
@@ -2303,7 +2303,7 @@ failed8:                                          ; preds = %passed
 
 passed9:                                          ; preds = %passed
   %data10 = extractvalue %str %mber5, 1
-  %value11 = getelementptr inbounds i8, i8* %data10, i8 5
+  %value11 = getelementptr inbounds i8, i8* %data10, i64 5
   %load12 = load i8, i8* %value11
   store i8 %load12, i8* %y
   ret %UnitType zeroinitializer
@@ -2528,7 +2528,7 @@ failed:                                           ; preds = %entry
 
 passed:                                           ; preds = %entry
   %data = extractvalue %"[i32]" %a12, 1
-  %value = getelementptr inbounds i32, i32* %data, i8 0
+  %value = getelementptr inbounds i32, i32* %data, i64 0
   %load = load i32, i32* %value
   store i32 %load, i32* %n
   %a13 = load %"[i32]", %"[i32]"* %a11
@@ -2542,7 +2542,7 @@ failed6:                                          ; preds = %passed
 
 passed7:                                          ; preds = %passed
   %data8 = extractvalue %"[i32]" %a13, 1
-  %value9 = getelementptr inbounds i32, i32* %data8, i8 1
+  %value9 = getelementptr inbounds i32, i32* %data8, i64 1
   store i32 17, i32* %value9
   ret %UnitType zeroinitializer
 }

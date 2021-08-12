@@ -298,22 +298,22 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 
     unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
 
+    Value* indexValue = nullptr;
+    if (rightType->GetNumBits() < uIntSizeNumBits)
+    {
+        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
+    }
+    else
+    {
+        indexValue = rightValue;
+    }
+
     if (boundsCheck)
     {
         vector<uint32_t> sizeIndex;
         sizeIndex.push_back(0);
         Value* size = builder.CreateExtractValue(leftValue, sizeIndex, "size");
-
-        Value* indexValue = nullptr;
-        if (rightType->GetNumBits() < uIntSizeNumBits)
-        {
-            Type* extType = GetType(TypeInfo::GetUIntSizeType());
-            indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
-        }
-        else
-        {
-            indexValue = rightValue;
-        }
 
         Value* boundsCheck = builder.CreateICmpUGE(indexValue, size, "check");
 
@@ -371,7 +371,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
     Value* data = builder.CreateExtractValue(leftValue, dataIndex, "data");
 
     vector<Value*> valueIndices;
-    valueIndices.push_back(rightValue);
+    valueIndices.push_back(indexValue);
     Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
     Value* result = nullptr;
     if (binaryExpression->GetAccessType() == Expression::eAddress)

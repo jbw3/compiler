@@ -430,7 +430,7 @@ failed:                                           ; preds = %entry
 
 passed:                                           ; preds = %entry
   %data = extractvalue %"[u16]" %a2, 1, !dbg !283
-  %value = getelementptr inbounds i16, i16* %data, i8 0, !dbg !283
+  %value = getelementptr inbounds i16, i16* %data, i64 0, !dbg !283
   %load = load i16, i16* %value, !dbg !283
   store i16 %load, i16* %n, !dbg !284
   %a3 = load %"[u16]", %"[u16]"* %a1, !dbg !285
@@ -444,7 +444,7 @@ failed6:                                          ; preds = %passed
 
 passed7:                                          ; preds = %passed
   %data8 = extractvalue %"[u16]" %a3, 1, !dbg !286
-  %value9 = getelementptr inbounds i16, i16* %data8, i8 1, !dbg !286
+  %value9 = getelementptr inbounds i16, i16* %data8, i64 1, !dbg !286
   %n10 = load i16, i16* %n, !dbg !287
   %mul = mul i16 %n10, 2, !dbg !288
   store i16 %mul, i16* %value9, !dbg !289
