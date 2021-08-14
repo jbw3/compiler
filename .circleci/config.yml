@@ -4,13 +4,13 @@ jobs:
     working_directory: ~/compiler
 
     docker:
-      - image: jbw3/compiler:0.4.0
+      - image: jbw3/compiler:0.5.0
 
     steps:
       - checkout
       - run: |
           mkdir release
           cd release
-          cmake ../src -DCMAKE_CXX_COMPILER=clang++-10 -DLLVM_DIR=/usr/lib/llvm-10/cmake -DCMAKE_BUILD_TYPE=Release
+          cmake ../src -DCMAKE_CXX_COMPILER=clang++-12 -DLLVM_DIR=/usr/lib/llvm-12/cmake -DCMAKE_BUILD_TYPE=Release
           make
           make test

@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 
 # point package manager to clang/LLVM
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key 2>/dev/null | apt-key add - && \
-    apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main"
+    apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
 
 # install clang/LLVM
 RUN apt-get update && apt-get install -y \
-    clang-10
+    clang-12
