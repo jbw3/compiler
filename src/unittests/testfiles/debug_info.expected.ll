@@ -25,10 +25,10 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define i16 @param(i8 %param1) #0 !dbg !9 {
 entry:
-  %param11 = alloca i8
-  store i8 %param1, i8* %param11
+  %param11 = alloca i8, align 1
+  store i8 %param1, i8* %param11, align 1
   call void @llvm.dbg.declare(metadata i8* %param11, metadata !15, metadata !DIExpression()), !dbg !16
-  %param12 = load i8, i8* %param11, !dbg !17
+  %param12 = load i8, i8* %param11, align 1, !dbg !17
   %zeroext = zext i8 %param12 to i16, !dbg !17
   ret i16 %zeroext, !dbg !17
 }
@@ -36,21 +36,21 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define i64 @operators(i32 %x, i64 %y, i8 %z) #0 !dbg !19 {
 entry:
-  %z3 = alloca i8
-  %y2 = alloca i64
-  %x1 = alloca i32
-  store i32 %x, i32* %x1
+  %z3 = alloca i8, align 1
+  %y2 = alloca i64, align 8
+  %x1 = alloca i32, align 4
+  store i32 %x, i32* %x1, align 4
   call void @llvm.dbg.declare(metadata i32* %x1, metadata !25, metadata !DIExpression()), !dbg !28
-  store i64 %y, i64* %y2
+  store i64 %y, i64* %y2, align 8
   call void @llvm.dbg.declare(metadata i64* %y2, metadata !26, metadata !DIExpression()), !dbg !28
-  store i8 %z, i8* %z3
+  store i8 %z, i8* %z3, align 1
   call void @llvm.dbg.declare(metadata i8* %z3, metadata !27, metadata !DIExpression()), !dbg !28
-  %x4 = load i32, i32* %x1, !dbg !29
+  %x4 = load i32, i32* %x1, align 4, !dbg !29
   %neg = sub i32 0, %x4, !dbg !31
   %signext = sext i32 %neg to i64, !dbg !31
-  %y5 = load i64, i64* %y2, !dbg !32
-  %x6 = load i32, i32* %x1, !dbg !33
-  %z7 = load i8, i8* %z3, !dbg !34
+  %y5 = load i64, i64* %y2, align 8, !dbg !32
+  %x6 = load i32, i32* %x1, align 4, !dbg !33
+  %z7 = load i8, i8* %z3, align 1, !dbg !34
   %signext8 = sext i8 %z7 to i32, !dbg !34
   %mul = mul i32 %x6, %signext8, !dbg !35
   %signext9 = sext i32 %mul to i64, !dbg !35
@@ -62,126 +62,126 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define i32 @whileLoop(i32 %a, i32 %b) #0 !dbg !38 {
 entry:
-  %b2 = alloca i32
-  %a1 = alloca i32
-  store i32 %a, i32* %a1
+  %b2 = alloca i32, align 4
+  %a1 = alloca i32, align 4
+  store i32 %a, i32* %a1, align 4
   call void @llvm.dbg.declare(metadata i32* %a1, metadata !42, metadata !DIExpression()), !dbg !44
-  store i32 %b, i32* %b2
+  store i32 %b, i32* %b2, align 4
   call void @llvm.dbg.declare(metadata i32* %b2, metadata !43, metadata !DIExpression()), !dbg !44
   br label %whileCond
 
 whileCond:                                        ; preds = %whileBody, %entry
-  %a3 = load i32, i32* %a1, !dbg !45
+  %a3 = load i32, i32* %a1, align 4, !dbg !45
   %cmpgt = icmp sgt i32 %a3, 0, !dbg !47
   br i1 %cmpgt, label %whileBody, label %whileExit, !dbg !47
 
 whileBody:                                        ; preds = %whileCond
-  %load = load i32, i32* %b2, !dbg !48
+  %load = load i32, i32* %b2, align 4, !dbg !48
   %mul = mul i32 %load, 3, !dbg !48
-  store i32 %mul, i32* %b2, !dbg !48
-  %load4 = load i32, i32* %a1, !dbg !50
+  store i32 %mul, i32* %b2, align 4, !dbg !48
+  %load4 = load i32, i32* %a1, align 4, !dbg !50
   %sub = sub i32 %load4, 1, !dbg !50
-  store i32 %sub, i32* %a1, !dbg !50
+  store i32 %sub, i32* %a1, align 4, !dbg !50
   br label %whileCond, !dbg !50
 
 whileExit:                                        ; preds = %whileCond
-  %b5 = load i32, i32* %b2, !dbg !51
+  %b5 = load i32, i32* %b2, align 4, !dbg !51
   ret i32 %b5, !dbg !51
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @types() #0 !dbg !52 {
 entry:
-  %s = alloca %str
-  %x9 = alloca i64
-  %x8 = alloca i64
-  %x7 = alloca i32
-  %x6 = alloca i16
-  %x5 = alloca i8
-  %x4 = alloca i64
-  %x3 = alloca i64
-  %x2 = alloca i32
-  %x1 = alloca i16
-  %x0 = alloca i8
-  %b = alloca i1
+  %s = alloca %str, align 8
+  %x9 = alloca i64, align 8
+  %x8 = alloca i64, align 8
+  %x7 = alloca i32, align 4
+  %x6 = alloca i16, align 2
+  %x5 = alloca i8, align 1
+  %x4 = alloca i64, align 8
+  %x3 = alloca i64, align 8
+  %x2 = alloca i32, align 4
+  %x1 = alloca i16, align 2
+  %x0 = alloca i8, align 1
+  %b = alloca i1, align 1
   call void @llvm.dbg.declare(metadata i1* %b, metadata !57, metadata !DIExpression()), !dbg !81
-  store i1 true, i1* %b, !dbg !82
+  store i1 true, i1* %b, align 1, !dbg !82
   call void @llvm.dbg.declare(metadata i8* %x0, metadata !60, metadata !DIExpression()), !dbg !83
-  store i8 0, i8* %x0, !dbg !84
+  store i8 0, i8* %x0, align 1, !dbg !84
   call void @llvm.dbg.declare(metadata i16* %x1, metadata !61, metadata !DIExpression()), !dbg !85
-  store i16 1, i16* %x1, !dbg !86
+  store i16 1, i16* %x1, align 2, !dbg !86
   call void @llvm.dbg.declare(metadata i32* %x2, metadata !63, metadata !DIExpression()), !dbg !87
-  store i32 2, i32* %x2, !dbg !88
+  store i32 2, i32* %x2, align 4, !dbg !88
   call void @llvm.dbg.declare(metadata i64* %x3, metadata !64, metadata !DIExpression()), !dbg !89
-  store i64 3, i64* %x3, !dbg !90
+  store i64 3, i64* %x3, align 8, !dbg !90
   call void @llvm.dbg.declare(metadata i64* %x4, metadata !65, metadata !DIExpression()), !dbg !91
-  store i64 4, i64* %x4, !dbg !92
+  store i64 4, i64* %x4, align 8, !dbg !92
   call void @llvm.dbg.declare(metadata i8* %x5, metadata !67, metadata !DIExpression()), !dbg !93
-  store i8 5, i8* %x5, !dbg !94
+  store i8 5, i8* %x5, align 1, !dbg !94
   call void @llvm.dbg.declare(metadata i16* %x6, metadata !68, metadata !DIExpression()), !dbg !95
-  store i16 6, i16* %x6, !dbg !96
+  store i16 6, i16* %x6, align 2, !dbg !96
   call void @llvm.dbg.declare(metadata i32* %x7, metadata !69, metadata !DIExpression()), !dbg !97
-  store i32 7, i32* %x7, !dbg !98
+  store i32 7, i32* %x7, align 4, !dbg !98
   call void @llvm.dbg.declare(metadata i64* %x8, metadata !71, metadata !DIExpression()), !dbg !99
-  store i64 8, i64* %x8, !dbg !100
+  store i64 8, i64* %x8, align 8, !dbg !100
   call void @llvm.dbg.declare(metadata i64* %x9, metadata !73, metadata !DIExpression()), !dbg !101
-  store i64 9, i64* %x9, !dbg !102
+  store i64 9, i64* %x9, align 8, !dbg !102
   call void @llvm.dbg.declare(metadata %str* %s, metadata !75, metadata !DIExpression()), !dbg !103
-  %load = load %str, %str* @strStruct0, !dbg !103
-  store %str %load, %str* %s, !dbg !104
+  %load = load %str, %str* @strStruct0, align 8, !dbg !103
+  store %str %load, %str* %s, align 8, !dbg !104
   ret %UnitType zeroinitializer, !dbg !104
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @structType(i64 %n) #0 !dbg !105 {
 entry:
-  %t = alloca %TestStruct
-  %n1 = alloca i64
-  store i64 %n, i64* %n1
+  %t = alloca %TestStruct, align 8
+  %n1 = alloca i64, align 8
+  store i64 %n, i64* %n1, align 8
   call void @llvm.dbg.declare(metadata i64* %n1, metadata !109, metadata !DIExpression()), !dbg !117
   call void @llvm.dbg.declare(metadata %TestStruct* %t, metadata !110, metadata !DIExpression()), !dbg !118
-  %n2 = load i64, i64* %n1, !dbg !119
+  %n2 = load i64, i64* %n1, align 8, !dbg !119
   %agg = insertvalue %TestStruct { i32 12, i64 undef, i1 undef }, i64 %n2, 1, !dbg !120
   %agg3 = insertvalue %TestStruct %agg, i1 true, 2, !dbg !121
-  store %TestStruct %agg3, %TestStruct* %t, !dbg !122
+  store %TestStruct %agg3, %TestStruct* %t, align 8, !dbg !122
   ret %UnitType zeroinitializer, !dbg !122
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @ranges(i32 %n) #0 !dbg !123 {
 entry:
-  %r2 = alloca %Range32
-  %r1 = alloca %Range32
-  %n1 = alloca i32
-  store i32 %n, i32* %n1
+  %r2 = alloca %Range32, align 8
+  %r1 = alloca %Range32, align 8
+  %n1 = alloca i32, align 4
+  store i32 %n, i32* %n1, align 4
   call void @llvm.dbg.declare(metadata i32* %n1, metadata !127, metadata !DIExpression()), !dbg !136
   call void @llvm.dbg.declare(metadata %Range32* %r1, metadata !128, metadata !DIExpression()), !dbg !137
-  %n2 = load i32, i32* %n1, !dbg !138
+  %n2 = load i32, i32* %n1, align 4, !dbg !138
   %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !139
-  store %Range32 %rng, %Range32* %r1, !dbg !140
+  store %Range32 %rng, %Range32* %r1, align 4, !dbg !140
   call void @llvm.dbg.declare(metadata %Range32* %r2, metadata !134, metadata !DIExpression()), !dbg !141
-  %n3 = load i32, i32* %n1, !dbg !142
+  %n3 = load i32, i32* %n1, align 4, !dbg !142
   %neg = sub i32 0, %n3, !dbg !143
-  %n4 = load i32, i32* %n1, !dbg !144
+  %n4 = load i32, i32* %n1, align 4, !dbg !144
   %mul = mul i32 %n4, 3, !dbg !145
   %rng5 = insertvalue %Range32 undef, i32 %neg, 0, !dbg !146
   %rng6 = insertvalue %Range32 %rng5, i32 %mul, 1, !dbg !146
-  store %Range32 %rng6, %Range32* %r2, !dbg !147
+  store %Range32 %rng6, %Range32* %r2, align 4, !dbg !147
   ret %UnitType zeroinitializer, !dbg !147
 }
 
 ; Function Attrs: noinline nounwind optnone
 define i32 @forLoop(i32 %n) #0 !dbg !148 {
 entry:
-  %j = alloca i32
-  %i = alloca i32
-  %a = alloca i32
-  %n1 = alloca i32
-  store i32 %n, i32* %n1
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %a = alloca i32, align 4
+  %n1 = alloca i32, align 4
+  store i32 %n, i32* %n1, align 4
   call void @llvm.dbg.declare(metadata i32* %n1, metadata !152, metadata !DIExpression()), !dbg !160
   call void @llvm.dbg.declare(metadata i32* %a, metadata !153, metadata !DIExpression()), !dbg !161
-  store i32 0, i32* %a, !dbg !162
-  %n2 = load i32, i32* %n1, !dbg !163
+  store i32 0, i32* %a, align 4, !dbg !162
+  %n2 = load i32, i32* %n1, align 4, !dbg !163
   %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !164
   call void @llvm.dbg.declare(metadata i32* %i, metadata !155, metadata !DIExpression()), !dbg !165
   %start = extractvalue %Range32 %rng, 0, !dbg !164
@@ -194,8 +194,8 @@ forCond:                                          ; preds = %forIter14, %entry
   br i1 %cmp, label %forBody, label %forExit16, !dbg !165
 
 forBody:                                          ; preds = %forCond
-  store i32 %iter, i32* %i, !dbg !165
-  %n3 = load i32, i32* %n1, !dbg !166
+  store i32 %iter, i32* %i, align 4, !dbg !165
+  %n3 = load i32, i32* %n1, align 4, !dbg !166
   %rng4 = insertvalue %Range32 undef, i32 %n3, 0, !dbg !167
   %rng5 = insertvalue %Range32 %rng4, i32 10, 1, !dbg !167
   call void @llvm.dbg.declare(metadata i32* %j, metadata !157, metadata !DIExpression()), !dbg !168
@@ -209,13 +209,13 @@ forCond8:                                         ; preds = %forIter, %forBody
   br i1 %cmp10, label %forBody11, label %forExit, !dbg !168
 
 forBody11:                                        ; preds = %forCond8
-  store i32 %iter9, i32* %j, !dbg !168
-  %i12 = load i32, i32* %i, !dbg !169
-  %j13 = load i32, i32* %j, !dbg !171
+  store i32 %iter9, i32* %j, align 4, !dbg !168
+  %i12 = load i32, i32* %i, align 4, !dbg !169
+  %j13 = load i32, i32* %j, align 4, !dbg !171
   %mul = mul i32 %i12, %j13, !dbg !172
-  %load = load i32, i32* %a, !dbg !173
+  %load = load i32, i32* %a, align 4, !dbg !173
   %add = add i32 %load, %mul, !dbg !173
-  store i32 %add, i32* %a, !dbg !173
+  store i32 %add, i32* %a, align 4, !dbg !173
   br label %forIter, !dbg !173
 
 forIter:                                          ; preds = %forBody11
@@ -230,15 +230,15 @@ forIter14:                                        ; preds = %forExit
   br label %forCond, !dbg !173
 
 forExit16:                                        ; preds = %forCond
-  %a17 = load i32, i32* %a, !dbg !174
+  %a17 = load i32, i32* %a, align 4, !dbg !174
   ret i32 %a17, !dbg !174
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @pointerStructTest(%A %a) #0 !dbg !175 {
 entry:
-  %a1 = alloca %A
-  store %A %a, %A* %a1
+  %a1 = alloca %A, align 8
+  store %A %a, %A* %a1, align 8
   call void @llvm.dbg.declare(metadata %A* %a1, metadata !192, metadata !DIExpression()), !dbg !193
   ret %UnitType zeroinitializer
 }
@@ -246,22 +246,22 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @pointers(i32 %x) #0 !dbg !194 {
 entry:
-  %ptr = alloca i32*
-  %x1 = alloca i32
-  store i32 %x, i32* %x1
+  %ptr = alloca i32*, align 8
+  %x1 = alloca i32, align 4
+  store i32 %x, i32* %x1, align 4
   call void @llvm.dbg.declare(metadata i32* %x1, metadata !196, metadata !DIExpression()), !dbg !200
   call void @llvm.dbg.declare(metadata i32** %ptr, metadata !197, metadata !DIExpression()), !dbg !201
-  store i32* %x1, i32** %ptr, !dbg !202
-  %ptr2 = load i32*, i32** %ptr, !dbg !203
-  store i32 17, i32* %ptr2, !dbg !204
+  store i32* %x1, i32** %ptr, align 8, !dbg !202
+  %ptr2 = load i32*, i32** %ptr, align 8, !dbg !203
+  store i32 17, i32* %ptr2, align 4, !dbg !204
   ret %UnitType zeroinitializer, !dbg !204
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @break_and_continue() #0 !dbg !205 {
 entry:
-  %j = alloca i8
-  %i = alloca i8
+  %j = alloca i8, align 1
+  %i = alloca i8, align 1
   call void @llvm.dbg.declare(metadata i8* %i, metadata !207, metadata !DIExpression()), !dbg !211
   br label %forCond, !dbg !212
 
@@ -271,8 +271,8 @@ forCond:                                          ; preds = %forIter, %entry
   br i1 %cmp, label %forBody, label %forExit, !dbg !211
 
 forBody:                                          ; preds = %forCond
-  store i8 %iter, i8* %i, !dbg !211
-  %i1 = load i8, i8* %i, !dbg !213
+  store i8 %iter, i8* %i, align 1, !dbg !211
+  %i1 = load i8, i8* %i, align 1, !dbg !213
   %cmpeq = icmp eq i8 %i1, 5, !dbg !215
   br i1 %cmpeq, label %if, label %else, !dbg !215
 
@@ -283,7 +283,7 @@ afterbreak:                                       ; No predecessors!
   br label %merge6, !dbg !216
 
 else:                                             ; preds = %forBody
-  %i2 = load i8, i8* %i, !dbg !218
+  %i2 = load i8, i8* %i, align 1, !dbg !218
   %cmpeq3 = icmp eq i8 %i2, 2, !dbg !219
   br i1 %cmpeq3, label %if4, label %else5, !dbg !219
 
@@ -311,16 +311,16 @@ forIter:                                          ; preds = %merge6, %if4
 
 forExit:                                          ; preds = %if, %forCond
   call void @llvm.dbg.declare(metadata i8* %j, metadata !210, metadata !DIExpression()), !dbg !223
-  store i8 1, i8* %j, !dbg !224
+  store i8 1, i8* %j, align 1, !dbg !224
   br label %whileCond, !dbg !224
 
 whileCond:                                        ; preds = %merge20, %if11, %forExit
-  %j8 = load i8, i8* %j, !dbg !225
+  %j8 = load i8, i8* %j, align 1, !dbg !225
   %cmplt = icmp slt i8 %j8, 100, !dbg !226
   br i1 %cmplt, label %whileBody, label %whileExit, !dbg !226
 
 whileBody:                                        ; preds = %whileCond
-  %j9 = load i8, i8* %j, !dbg !227
+  %j9 = load i8, i8* %j, align 1, !dbg !227
   %rem = srem i8 %j9, 7, !dbg !229
   %cmpeq10 = icmp eq i8 %rem, 0, !dbg !230
   br i1 %cmpeq10, label %if11, label %else13, !dbg !230
@@ -336,7 +336,7 @@ else13:                                           ; preds = %whileBody
 
 merge14:                                          ; preds = %else13, %aftercontinue12
   %phi15 = phi %UnitType [ zeroinitializer, %aftercontinue12 ], [ zeroinitializer, %else13 ], !dbg !231
-  %j16 = load i8, i8* %j, !dbg !233
+  %j16 = load i8, i8* %j, align 1, !dbg !233
   %cmpgt = icmp sgt i8 %j16, 89, !dbg !234
   br i1 %cmpgt, label %if17, label %else19, !dbg !234
 
@@ -352,9 +352,9 @@ else19:                                           ; preds = %merge14
 merge20:                                          ; preds = %else19, %afterbreak18
   %phi21 = phi %UnitType [ zeroinitializer, %afterbreak18 ], [ zeroinitializer, %else19 ], !dbg !235
   %call22 = call i32 @noParams(), !dbg !237
-  %load = load i8, i8* %j, !dbg !238
+  %load = load i8, i8* %j, align 1, !dbg !238
   %add = add i8 %load, 1, !dbg !238
-  store i8 %add, i8* %j, !dbg !238
+  store i8 %add, i8* %j, align 1, !dbg !238
   br label %whileCond, !dbg !238
 
 whileExit:                                        ; preds = %if17, %whileCond
@@ -364,19 +364,19 @@ whileExit:                                        ; preds = %if17, %whileCond
 ; Function Attrs: noinline nounwind optnone
 define i32 @ret1(i16 %a, i16 %b) #0 !dbg !239 {
 entry:
-  %rv = alloca i16
-  %b2 = alloca i16
-  %a1 = alloca i16
-  store i16 %a, i16* %a1
+  %rv = alloca i16, align 2
+  %b2 = alloca i16, align 2
+  %a1 = alloca i16, align 2
+  store i16 %a, i16* %a1, align 2
   call void @llvm.dbg.declare(metadata i16* %a1, metadata !243, metadata !DIExpression()), !dbg !247
-  store i16 %b, i16* %b2
+  store i16 %b, i16* %b2, align 2
   call void @llvm.dbg.declare(metadata i16* %b2, metadata !244, metadata !DIExpression()), !dbg !247
   call void @llvm.dbg.declare(metadata i16* %rv, metadata !245, metadata !DIExpression()), !dbg !248
-  %a3 = load i16, i16* %a1, !dbg !249
-  %b4 = load i16, i16* %b2, !dbg !250
+  %a3 = load i16, i16* %a1, align 2, !dbg !249
+  %b4 = load i16, i16* %b2, align 2, !dbg !250
   %add = add i16 %a3, %b4, !dbg !251
-  store i16 %add, i16* %rv, !dbg !252
-  %rv5 = load i16, i16* %rv, !dbg !253
+  store i16 %add, i16* %rv, align 2, !dbg !252
+  %rv5 = load i16, i16* %rv, align 2, !dbg !253
   %signext = sext i16 %rv5 to i32, !dbg !253
   ret i32 %signext, !dbg !253
 }
@@ -384,13 +384,13 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @ret2(i32 %a, i32* %p) #0 !dbg !254 {
 entry:
-  %p2 = alloca i32*
-  %a1 = alloca i32
-  store i32 %a, i32* %a1
+  %p2 = alloca i32*, align 8
+  %a1 = alloca i32, align 4
+  store i32 %a, i32* %a1, align 4
   call void @llvm.dbg.declare(metadata i32* %a1, metadata !258, metadata !DIExpression()), !dbg !260
-  store i32* %p, i32** %p2
+  store i32* %p, i32** %p2, align 8
   call void @llvm.dbg.declare(metadata i32** %p2, metadata !259, metadata !DIExpression()), !dbg !260
-  %a3 = load i32, i32* %a1, !dbg !261
+  %a3 = load i32, i32* %a1, align 4, !dbg !261
   %cmplt = icmp slt i32 %a3, 0, !dbg !263
   br i1 %cmplt, label %if, label %else, !dbg !263
 
@@ -405,21 +405,21 @@ else:                                             ; preds = %entry
 
 merge:                                            ; preds = %else, %afterreturn
   %phi = phi %UnitType [ zeroinitializer, %afterreturn ], [ zeroinitializer, %else ], !dbg !264
-  %p4 = load i32*, i32** %p2, !dbg !266
-  %a5 = load i32, i32* %a1, !dbg !267
-  store i32 %a5, i32* %p4, !dbg !268
+  %p4 = load i32*, i32** %p2, align 8, !dbg !266
+  %a5 = load i32, i32* %a1, align 4, !dbg !267
+  store i32 %a5, i32* %p4, align 4, !dbg !268
   ret %UnitType zeroinitializer, !dbg !268
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays(%"[u16]" %a) #0 !dbg !269 {
 entry:
-  %n = alloca i16
-  %a1 = alloca %"[u16]"
-  store %"[u16]" %a, %"[u16]"* %a1
+  %n = alloca i16, align 2
+  %a1 = alloca %"[u16]", align 8
+  store %"[u16]" %a, %"[u16]"* %a1, align 8
   call void @llvm.dbg.declare(metadata %"[u16]"* %a1, metadata !277, metadata !DIExpression()), !dbg !280
   call void @llvm.dbg.declare(metadata i16* %n, metadata !278, metadata !DIExpression()), !dbg !281
-  %a2 = load %"[u16]", %"[u16]"* %a1, !dbg !282
+  %a2 = load %"[u16]", %"[u16]"* %a1, align 8, !dbg !282
   %size = extractvalue %"[u16]" %a2, 0, !dbg !283
   %check = icmp uge i64 0, %size, !dbg !283
   br i1 %check, label %failed, label %passed, !dbg !283
@@ -431,9 +431,9 @@ failed:                                           ; preds = %entry
 passed:                                           ; preds = %entry
   %data = extractvalue %"[u16]" %a2, 1, !dbg !283
   %value = getelementptr inbounds i16, i16* %data, i64 0, !dbg !283
-  %load = load i16, i16* %value, !dbg !283
-  store i16 %load, i16* %n, !dbg !284
-  %a3 = load %"[u16]", %"[u16]"* %a1, !dbg !285
+  %load = load i16, i16* %value, align 2, !dbg !283
+  store i16 %load, i16* %n, align 2, !dbg !284
+  %a3 = load %"[u16]", %"[u16]"* %a1, align 8, !dbg !285
   %size4 = extractvalue %"[u16]" %a3, 0, !dbg !286
   %check5 = icmp uge i64 1, %size4, !dbg !286
   br i1 %check5, label %failed6, label %passed7, !dbg !286
@@ -445,24 +445,24 @@ failed6:                                          ; preds = %passed
 passed7:                                          ; preds = %passed
   %data8 = extractvalue %"[u16]" %a3, 1, !dbg !286
   %value9 = getelementptr inbounds i16, i16* %data8, i64 1, !dbg !286
-  %n10 = load i16, i16* %n, !dbg !287
+  %n10 = load i16, i16* %n, align 2, !dbg !287
   %mul = mul i16 %n10, 2, !dbg !288
-  store i16 %mul, i16* %value9, !dbg !289
+  store i16 %mul, i16* %value9, align 2, !dbg !289
   ret %UnitType zeroinitializer, !dbg !289
 }
 
 ; Function Attrs: noinline nounwind optnone
 define i64 @forIndex(%"[u32]" %a) #0 !dbg !290 {
 entry:
-  %i = alloca i64
-  %x = alloca i32
-  %num = alloca i64
-  %a1 = alloca %"[u32]"
-  store %"[u32]" %a, %"[u32]"* %a1
+  %i = alloca i64, align 8
+  %x = alloca i32, align 4
+  %num = alloca i64, align 8
+  %a1 = alloca %"[u32]", align 8
+  store %"[u32]" %a, %"[u32]"* %a1, align 8
   call void @llvm.dbg.declare(metadata %"[u32]"* %a1, metadata !298, metadata !DIExpression()), !dbg !304
   call void @llvm.dbg.declare(metadata i64* %num, metadata !299, metadata !DIExpression()), !dbg !305
-  store i64 0, i64* %num, !dbg !306
-  %a2 = load %"[u32]", %"[u32]"* %a1, !dbg !307
+  store i64 0, i64* %num, align 8, !dbg !306
+  %a2 = load %"[u32]", %"[u32]"* %a1, align 8, !dbg !307
   call void @llvm.dbg.declare(metadata i32* %x, metadata !301, metadata !DIExpression()), !dbg !308
   call void @llvm.dbg.declare(metadata i64* %i, metadata !303, metadata !DIExpression()), !dbg !309
   %size = extractvalue %"[u32]" %a2, 0, !dbg !307
@@ -476,16 +476,16 @@ forCond:                                          ; preds = %forIter, %entry
 
 forBody:                                          ; preds = %forCond
   %value = getelementptr inbounds i32, i32* %data, i64 %iter, !dbg !308
-  %load = load i32, i32* %value, !dbg !308
-  store i32 %load, i32* %x, !dbg !308
-  store i64 %iter, i64* %i, !dbg !309
-  %x3 = load i32, i32* %x, !dbg !310
+  %load = load i32, i32* %value, align 4, !dbg !308
+  store i32 %load, i32* %x, align 4, !dbg !308
+  store i64 %iter, i64* %i, align 8, !dbg !309
+  %x3 = load i32, i32* %x, align 4, !dbg !310
   %zeroext = zext i32 %x3 to i64, !dbg !310
-  %i4 = load i64, i64* %i, !dbg !312
+  %i4 = load i64, i64* %i, align 8, !dbg !312
   %mul = mul i64 %zeroext, %i4, !dbg !313
-  %load5 = load i64, i64* %num, !dbg !314
+  %load5 = load i64, i64* %num, align 8, !dbg !314
   %add = add i64 %load5, %mul, !dbg !314
-  store i64 %add, i64* %num, !dbg !314
+  store i64 %add, i64* %num, align 8, !dbg !314
   br label %forIter, !dbg !314
 
 forIter:                                          ; preds = %forBody
@@ -493,31 +493,31 @@ forIter:                                          ; preds = %forBody
   br label %forCond, !dbg !314
 
 forExit:                                          ; preds = %forCond
-  %num6 = load i64, i64* %num, !dbg !315
+  %num6 = load i64, i64* %num, align 8, !dbg !315
   ret i64 %num6, !dbg !315
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @casts(i32 %a) #0 !dbg !316 {
 entry:
-  %x = alloca i8
-  %a1 = alloca i32
-  store i32 %a, i32* %a1
+  %x = alloca i8, align 1
+  %a1 = alloca i32, align 4
+  store i32 %a, i32* %a1, align 4
   call void @llvm.dbg.declare(metadata i32* %a1, metadata !318, metadata !DIExpression()), !dbg !321
   call void @llvm.dbg.declare(metadata i8* %x, metadata !319, metadata !DIExpression()), !dbg !322
-  %a2 = load i32, i32* %a1, !dbg !323
+  %a2 = load i32, i32* %a1, align 4, !dbg !323
   %cast = trunc i32 %a2 to i8, !dbg !324
-  store i8 %cast, i8* %x, !dbg !325
+  store i8 %cast, i8* %x, align 1, !dbg !325
   ret %UnitType zeroinitializer, !dbg !325
 }
 
-; Function Attrs: nounwind readnone speculatable willreturn
+; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
-attributes #1 = { nounwind readnone speculatable willreturn }
+attributes #1 = { nofree nosync nounwind readnone speculatable willreturn }
 
 !llvm.dbg.cu = !{!0}
 

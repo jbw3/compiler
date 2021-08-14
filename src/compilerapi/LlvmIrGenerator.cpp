@@ -898,7 +898,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
                 return;
             }
             DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx + 1, currentDiFile, line, paramDebugType, true);
-            diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, 0, diSubprogram), builder.GetInsertBlock());
+            diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DILocation::get(context, line, 0, diSubprogram), builder.GetInsertBlock());
         }
 
         ++idx;
@@ -2362,7 +2362,7 @@ void LlvmIrGenerator::SetDebugLocation(const Token* token)
     {
         unsigned line = token->line;
         unsigned column = token->column;
-        builder.SetCurrentDebugLocation(DebugLoc::get(line, column, diScopes.top()));
+        builder.SetCurrentDebugLocation(DILocation::get(context, line, column, diScopes.top()));
     }
 }
 
@@ -2380,6 +2380,6 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
         }
         DIScope* diScope = diScopes.top();
         DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, token->value, currentDiFile, line, varDebugType, true);
-        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DebugLoc::get(line, column, diScope), builder.GetInsertBlock());
+        diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DILocation::get(context, line, column, diScope), builder.GetInsertBlock());
     }
 }

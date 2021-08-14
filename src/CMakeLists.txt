@@ -114,10 +114,10 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMDemangle.lib
     )
 else()
-    execute_process(COMMAND llvm-config-10 --libs all
+    execute_process(COMMAND llvm-config-12 --libs all
                     OUTPUT_VARIABLE llvm_all_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND llvm-config-10 --system-libs
+    execute_process(COMMAND llvm-config-12 --system-libs
                     OUTPUT_VARIABLE llvm_system_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(llvm_libs "${llvm_all_libs} ${llvm_system_libs}")

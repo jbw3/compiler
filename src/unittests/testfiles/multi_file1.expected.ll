@@ -24,14 +24,14 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define i32 @fun4(%S3 %s) #0 !dbg !12 {
 entry:
-  %s1 = alloca %S3
-  store %S3 %s, %S3* %s1
+  %s1 = alloca %S3, align 8
+  store %S3 %s, %S3* %s1, align 8
   call void @llvm.dbg.declare(metadata %S3* %s1, metadata !35, metadata !DIExpression()), !dbg !36
-  %s2 = load %S3, %S3* %s1, !dbg !37
+  %s2 = load %S3, %S3* %s1, align 8, !dbg !37
   %mber = extractvalue %S3 %s2, 0, !dbg !39
   %mber3 = extractvalue %S2 %mber, 0, !dbg !40
   %mber4 = extractvalue %S1 %mber3, 0, !dbg !41
-  %s5 = load %S3, %S3* %s1, !dbg !42
+  %s5 = load %S3, %S3* %s1, align 8, !dbg !42
   %mber6 = extractvalue %S3 %s5, 0, !dbg !43
   %mber7 = extractvalue %S2 %mber6, 0, !dbg !44
   %mber8 = extractvalue %S1 %mber7, 1, !dbg !45
@@ -46,11 +46,11 @@ entry:
   ret i32 %call, !dbg !48
 }
 
-; Function Attrs: nounwind readnone speculatable willreturn
+; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
 attributes #0 = { noinline nounwind optnone }
-attributes #1 = { nounwind readnone speculatable willreturn }
+attributes #1 = { nofree nosync nounwind readnone speculatable willreturn }
 
 !llvm.dbg.cu = !{!0}
 
