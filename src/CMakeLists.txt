@@ -19,7 +19,6 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMX86AsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86CodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86Desc.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMX86Utils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86Info.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyDesc.lib
@@ -36,7 +35,6 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVDesc.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMRISCVUtils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMPowerPCCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMPowerPCAsmParser.lib
@@ -71,6 +69,10 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMARMUtils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMARMInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMAMDGPUCodeGen.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMAVRCodeGen.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMAVRAsmParser.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMAVRDesc.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMAVRInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMIRParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMipo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMInstrumentation.lib
@@ -112,6 +114,13 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMAArch64Info.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSupport.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDemangle.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMPasses.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMFrontendOpenMP.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMHelloNew.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMObjCARCOpts.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMCoroutines.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMIRReader.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMLinker.lib
     )
 else()
     execute_process(COMMAND llvm-config-12 --libs all

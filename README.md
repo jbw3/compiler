@@ -55,22 +55,17 @@ make
 
 #### Dependencies
 
-LLVM 10 is required to build the compiler.
+LLVM 12 is required to build the compiler.
 The standard LLVM Windows install is not sufficient to be able to build against LLVM.
-Instead, the LLVM [source](https://releases.llvm.org/download.html) must be downloaded and built from scratch.
-
-Notes:
-* Do NOT use LLVM 10.0.0!
-It has a major bug on Windows when built with Visual Studio that prevents passing command line arguments to the LLVM tools
-* CMake version 3.8.0 or higher is needed
-* The compiler is built with the C++17 standard. This requires LLVM to also to be built with the C++17 standard to work around a [bug](https://erikmcclure.com/blog/why-you-cant-use-prebuilt-llvm-with-cpp17) in LLVM 10.0.1 (LLVM is built with C++14 by default)
+Instead, the LLVM source must be downloaded and built from scratch.
+Download `llvm-12.0.1.src.tar.xz` from [here](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1).
 
 Configure the LLVM project.
-The following assumes the LLVM source has been extracted into a directory named `llvm-10.0.1.src`.
+The following assumes the LLVM source has been extracted into a directory named `llvm-12.0.1.src`.
 ```
 mkdir llvm-build
 cd llvm-build
-cmake ..\llvm-10.0.1.src -Thost=x64 -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
+cmake ..\llvm-12.0.1.src -Thost=x64
 ```
 
 Build and install debug:
