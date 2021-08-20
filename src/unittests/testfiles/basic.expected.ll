@@ -2232,7 +2232,7 @@ entry:
   %test = alloca %Test1, align 8
   %xPtr = alloca i8*, align 8
   %x = alloca i8, align 1
-  %equal = alloca i1, align 1
+  %isEqual = alloca i1, align 1
   %p2 = alloca i32*, align 8
   %p11 = alloca i32*, align 8
   store i32* %p1, i32** %p11, align 8
@@ -2241,7 +2241,7 @@ entry:
   %p13 = load i32*, i32** %p11, align 8
   %p24 = load i32*, i32** %p2, align 8
   %cmpeq = icmp eq i32* %p13, %p24
-  store i1 %cmpeq, i1* %equal, align 1
+  store i1 %cmpeq, i1* %isEqual, align 1
   store i8 2, i8* %x, align 1
   store i8* %x, i8** %xPtr, align 8
   %xPtr5 = load i8*, i8** %xPtr, align 8

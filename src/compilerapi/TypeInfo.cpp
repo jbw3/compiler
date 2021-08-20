@@ -238,6 +238,20 @@ const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isHalfOp
     return rangeType;
 }
 
+const TypeInfo* TypeInfo::GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration)
+{
+    string uniqueName = "fun()"; // TODO: add param and return types
+    const TypeInfo* funType = GetType(uniqueName);
+    if (funType == nullptr)
+    {
+        string name = "fun()"; // TODO: add param and return types
+        funType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
+        // TODO: add param and return types
+    }
+
+    return funType;
+}
+
 const TypeInfo* TypeInfo::GetType(const string& typeName)
 {
     auto iter = types.find(typeName);
@@ -352,6 +366,11 @@ bool TypeInfo::IsPointer() const
 bool TypeInfo::IsArray() const
 {
     return (flags & F_ARRAY) != 0;
+}
+
+bool TypeInfo::IsFunction() const
+{
+    return (flags & F_FUNCTION) != 0;
 }
 
 TypeInfo::ESign TypeInfo::GetSign() const
@@ -491,6 +510,7 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && IsInt() == primitiveOther.IsInt()
         && IsPointer() == primitiveOther.IsPointer()
         && IsArray() == primitiveOther.IsArray()
+        && IsFunction() == primitiveOther.IsFunction()
         && GetSign() == primitiveOther.GetSign();
 
     if (isSame)

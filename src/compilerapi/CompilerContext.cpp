@@ -161,3 +161,11 @@ size_t CompilerContext::GetArrayConstantValueSize(const ArrayConstValue& value) 
 
     return arraySize;
 }
+
+unsigned CompilerContext::AddFunctionConstantValue(const SyntaxTree::FunctionDeclaration* value)
+{
+    unsigned id = static_cast<unsigned>(functionConstants.size());
+    functionConstants.push_back(value);
+
+    return id;
+}

@@ -747,7 +747,7 @@ fun unary_operator(b bool, x i8, y u8)
 fun pointers(p1 &i32) &i32
 {
     var p2 = p1;
-    var equal = p1 == p2;
+    var isEqual = p1 == p2;
 
     var x = 2;
     var xPtr = &x;

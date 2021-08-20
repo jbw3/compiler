@@ -5,6 +5,11 @@
 #include <string>
 #include <vector>
 
+namespace SyntaxTree
+{
+class FunctionDeclaration;
+}
+
 class TokenValues
 {
 public:
@@ -133,6 +138,13 @@ public:
 
     size_t GetArrayConstantValueSize(const ArrayConstValue& value) const;
 
+    unsigned AddFunctionConstantValue(const SyntaxTree::FunctionDeclaration* value);
+
+    const SyntaxTree::FunctionDeclaration* GetFunctionConstantValue(unsigned id) const
+    {
+        return functionConstants[id];
+    }
+
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
@@ -141,6 +153,7 @@ private:
     std::vector<RangeConstValue> rangeConstants;
     std::vector<StructConstValue> structConstants;
     std::vector<ArrayConstValue> arrayConstants;
+    std::vector<const SyntaxTree::FunctionDeclaration*> functionConstants;
 };
 
 #endif // COMPILER_CONTEXT_H_

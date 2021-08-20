@@ -9,6 +9,10 @@ namespace llvm
 {
 class TargetMachine;
 }
+namespace SyntaxTree
+{
+class FunctionDeclaration;
+}
 class RangeType;
 class Token;
 class TypeInfo;
@@ -48,12 +52,13 @@ public:
     static constexpr uint16_t F_NONE = 0;
 
     // main types
-    static constexpr uint16_t F_UNIT    = 1 << 0;
-    static constexpr uint16_t F_BOOL    = 1 << 1;
-    static constexpr uint16_t F_INT     = 1 << 2;
-    static constexpr uint16_t F_RANGE   = 1 << 3;
-    static constexpr uint16_t F_POINTER = 1 << 4;
-    static constexpr uint16_t F_ARRAY   = 1 << 5;
+    static constexpr uint16_t F_UNIT     = 1 << 0;
+    static constexpr uint16_t F_BOOL     = 1 << 1;
+    static constexpr uint16_t F_INT      = 1 << 2;
+    static constexpr uint16_t F_RANGE    = 1 << 3;
+    static constexpr uint16_t F_POINTER  = 1 << 4;
+    static constexpr uint16_t F_ARRAY    = 1 << 5;
+    static constexpr uint16_t F_FUNCTION = 1 << 6;
 
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 <<  8;
@@ -104,6 +109,8 @@ public:
 
     static const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isHalfOpen);
 
+    static const TypeInfo* GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration);
+
     static const TypeInfo* GetType(const std::string& typeName);
 
     static bool RegisterType(const TypeInfo* typeInfo);
@@ -137,6 +144,8 @@ public:
     bool IsPointer() const;
 
     bool IsArray() const;
+
+    bool IsFunction() const;
 
     ESign GetSign() const;
 
