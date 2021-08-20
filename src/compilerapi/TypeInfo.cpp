@@ -5,6 +5,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
+#include "SyntaxTree.h"
 #include "Token.h"
 #include "TypeInfo.h"
 #include "keywords.h"
@@ -19,6 +20,7 @@
 
 using namespace llvm;
 using namespace std;
+using namespace SyntaxTree;
 
 UnitTypeInfo unitType;
 PrimitiveType boolTypeInfo(1, TypeInfo::F_BOOL, TypeInfo::eNotApplicable, BOOL_KEYWORD, BOOL_KEYWORD);
@@ -238,15 +240,41 @@ const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isHalfOp
     return rangeType;
 }
 
-const TypeInfo* TypeInfo::GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration)
+const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDeclaration)
 {
-    string uniqueName = "fun()"; // TODO: add param and return types
+    string uniqueName = "fun(";
+    string name = "fun(";
+    for (const Parameter* param : functionDeclaration->parameters)
+    {
+        uniqueName += param->type->GetUniqueName();
+        uniqueName += ",";
+
+        name += param->type->GetShortName();
+        name += ",";
+    }
+
+    uniqueName += ")";
+    name += ")";
+
+    uniqueName += functionDeclaration->returnType->GetUniqueName();
+    if (!functionDeclaration->returnType->IsUnit())
+    {
+        name += functionDeclaration->returnType->GetShortName();
+    }
+
     const TypeInfo* funType = GetType(uniqueName);
     if (funType == nullptr)
     {
-        string name = "fun()"; // TODO: add param and return types
-        funType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
-        // TODO: add param and return types
+        TypeInfo* newFunType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
+
+        // add param and return types
+        for (const Parameter* param : functionDeclaration->parameters)
+        {
+            newFunType->paramTypes.push_back(param->type);
+        }
+        newFunType->returnType = functionDeclaration->returnType;
+
+        funType = newFunType;
     }
 
     return funType;
@@ -323,7 +351,8 @@ TypeInfo::TypeInfo(
     sign(sign),
     uniqueName(uniqueName),
     shortName(shortName),
-    innerType(nullptr)
+    innerType(nullptr),
+    returnType(nullptr)
 {
 }
 
@@ -474,6 +503,16 @@ const TypeInfo* TypeInfo::GetInnerType() const
     return innerType;
 }
 
+const vector<const TypeInfo*>& TypeInfo::GetParamTypes() const
+{
+    return paramTypes;
+}
+
+const TypeInfo* TypeInfo::GetReturnType() const
+{
+    return returnType;
+}
+
 UnitTypeInfo::UnitTypeInfo() :
     TypeInfo(0, F_UNIT, TypeInfo::eNotApplicable, "Unit", "Unit")
 {
@@ -496,6 +535,18 @@ PrimitiveType::PrimitiveType(
 {
 }
 
+bool pointersIsSameAs(const TypeInfo* type1, const TypeInfo* type2)
+{
+    if (type1 == nullptr || type2 == nullptr)
+    {
+        return type1 == type2;
+    }
+    else
+    {
+        return type1->IsSameAs(*type2);
+    }
+}
+
 bool PrimitiveType::IsSameAs(const TypeInfo& other) const
 {
     if (typeid(other) != typeid(PrimitiveType))
@@ -513,21 +564,39 @@ bool PrimitiveType::IsSameAs(const TypeInfo& other) const
         && IsFunction() == primitiveOther.IsFunction()
         && GetSign() == primitiveOther.GetSign();
 
+    // compare inner types
     if (isSame)
     {
-        const TypeInfo* inner = GetInnerType();
-        const TypeInfo* otherInner = primitiveOther.GetInnerType();
-        if (inner != otherInner)
+        isSame = pointersIsSameAs(GetInnerType(), primitiveOther.GetInnerType());
+    }
+
+    // compare param types
+    if (isSame)
+    {
+        const vector<const TypeInfo*>& myParamTypes = GetParamTypes();
+        const vector<const TypeInfo*>& otherParamTypes = primitiveOther.GetParamTypes();
+        if (myParamTypes.size() != otherParamTypes.size())
         {
-            if (inner == nullptr || otherInner == nullptr)
+            isSame = false;
+        }
+        else
+        {
+            size_t size = myParamTypes.size();
+            for (size_t i = 0; i < size; ++i)
             {
-                isSame = false;
-            }
-            else
-            {
-                isSame = inner->IsSameAs(*otherInner);
+                if (!myParamTypes[i]->IsSameAs(*otherParamTypes[i]))
+                {
+                    isSame = false;
+                    break;
+                }
             }
         }
+    }
+
+    // compare return types
+    if (isSame)
+    {
+        isSame = pointersIsSameAs(GetReturnType(), primitiveOther.GetReturnType());
     }
 
     return isSame;

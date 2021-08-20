@@ -2014,6 +2014,13 @@ void SemanticAnalyzer::Visit(Modules* modules)
         {
             FunctionDeclaration* decl = funcDef->declaration;
 
+            ok = SetFunctionDeclarationTypes(decl);
+            if (!ok)
+            {
+                isError = true;
+                return;
+            }
+
             const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             bool ok = symbolTable.AddConstant(decl->name, funType, idx);
@@ -2021,13 +2028,6 @@ void SemanticAnalyzer::Visit(Modules* modules)
             {
                 isError = true;
                 logger.LogError(*decl->nameToken, "Identifier '{}' has already been declared", decl->name);
-                return;
-            }
-
-            ok = SetFunctionDeclarationTypes(decl);
-            if (!ok)
-            {
-                isError = true;
                 return;
             }
 

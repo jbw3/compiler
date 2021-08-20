@@ -176,6 +176,10 @@ public:
 
     const TypeInfo* GetInnerType() const;
 
+    const std::vector<const TypeInfo*>& GetParamTypes() const;
+
+    const TypeInfo* GetReturnType() const;
+
 private:
     static unsigned pointerSize;
     static TypeInfo* intSizeType;
@@ -192,6 +196,8 @@ private:
     std::map<std::string, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
     const TypeInfo* innerType;
+    std::vector<const TypeInfo*> paramTypes;
+    const TypeInfo* returnType;
 };
 
 class UnitTypeInfo : public TypeInfo
