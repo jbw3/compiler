@@ -1134,6 +1134,8 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 resultValue = nullptr;
                 return;
             }
+
+            symbolTable.AddConstant(decl->name, funcDef->GetType(), funcDef->GetConstantValueIndex());
         }
     }
 
@@ -1409,6 +1411,12 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
         {
             logger.LogInternalError("Unexpected constant array type '{}'", value.type);
         }
+    }
+    else if (type->IsFunction())
+    {
+        const FunctionDeclaration* decl = compilerContext.GetFunctionConstantValue(constIdx);
+        Function* func = module->getFunction(decl->name);
+        constValue = func;
     }
     else
     {
@@ -2098,6 +2106,36 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
                 // register type so we don't have to create it again
                 types.insert({llvmName, llvmType});
             }
+        }
+        else if (type->IsFunction())
+        {
+            // get the return type
+            Type* returnType = GetType(type->GetReturnType());
+            if (returnType == nullptr)
+            {
+                logger.LogInternalError("Invalid function return type");
+                return nullptr;
+            }
+
+            // get the parameter types
+            vector<Type*> paramTypes;
+            for (const TypeInfo* paramTypeInfo : type->GetParamTypes())
+            {
+                Type* paramType = GetType(paramTypeInfo);
+                if (paramType == nullptr)
+                {
+                    logger.LogInternalError("Invalid function param type");
+                    return nullptr;
+                }
+                paramTypes.push_back(paramType);
+            }
+
+            FunctionType* funType = FunctionType::get(returnType, paramTypes, false);
+
+            llvmType = funType->getPointerTo();
+
+            // register type so we don't have to create it again
+            types.insert({llvmName, llvmType});
         }
         else // could not determine the type
         {

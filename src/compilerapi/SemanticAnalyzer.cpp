@@ -1496,6 +1496,9 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     const FunctionDeclaration* funcDecl = functionDefinition->declaration;
 
+    const TypeInfo* type = TypeInfo::GetFunctionType(funcDecl);
+    functionDefinition->SetType(type);
+
     // create new scope for parameters and add them
     Scope scope(symbolTable);
 
@@ -2023,6 +2026,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
 
             const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
+            funcDef->SetConstantValueIndex(idx);
             bool ok = symbolTable.AddConstant(decl->name, funType, idx);
             if (!ok)
             {

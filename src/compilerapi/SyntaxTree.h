@@ -493,7 +493,7 @@ public:
     FunctionDeclaration* declaration;
 };
 
-class FunctionDefinition : public SyntaxTreeNode
+class FunctionDefinition : public Expression
 {
 public:
     FunctionDefinition(FunctionDeclaration* declaration,
