@@ -1513,7 +1513,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
         {
             isError = true;
             const Token* paramToken = param->nameToken;
-            logger.LogError(*paramToken, "Variable '{}' has already been declared", paramName);
+            logger.LogError(*paramToken, "Identifier '{}' has already been declared", paramName);
             return;
         }
     }
