@@ -242,15 +242,24 @@ const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isHalfOp
 
 const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDeclaration)
 {
+    const Parameters& parameters = functionDeclaration->parameters;
     string uniqueName = "fun(";
     string name = "fun(";
-    for (const Parameter* param : functionDeclaration->parameters)
+    if (parameters.size() > 0)
     {
-        uniqueName += param->type->GetUniqueName();
-        uniqueName += ",";
+        uniqueName += parameters[0]->type->GetUniqueName();
+        name += parameters[0]->type->GetShortName();
 
-        name += param->type->GetShortName();
-        name += ",";
+        for (size_t i = 0; i < parameters.size(); ++i)
+        {
+            const TypeInfo* paramType = parameters[i]->type;
+
+            uniqueName += ", ";
+            uniqueName += paramType->GetUniqueName();
+
+            name += ", ";
+            name += paramType->GetShortName();
+        }
     }
 
     uniqueName += ")";
@@ -259,6 +268,7 @@ const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDec
     uniqueName += functionDeclaration->returnType->GetUniqueName();
     if (!functionDeclaration->returnType->IsUnit())
     {
+        name += ' ';
         name += functionDeclaration->returnType->GetShortName();
     }
 
@@ -268,7 +278,7 @@ const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDec
         TypeInfo* newFunType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
 
         // add param and return types
-        for (const Parameter* param : functionDeclaration->parameters)
+        for (const Parameter* param : parameters)
         {
             newFunType->paramTypes.push_back(param->type);
         }
