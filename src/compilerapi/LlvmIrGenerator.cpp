@@ -2280,6 +2280,29 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         // TODO: set alignment
         diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
+    else if (type->IsFunction())
+    {
+        SmallVector<Metadata*, 8> funTypes;
+        DIType* retDebugType = GetDebugType(type->GetReturnType());
+        if (retDebugType == nullptr)
+        {
+            return nullptr;
+        }
+        funTypes.push_back(retDebugType);
+
+        for (const TypeInfo* paramType : type->GetParamTypes())
+        {
+            DIType* paramDebugType = GetDebugType(paramType);
+            if (paramDebugType == nullptr)
+            {
+                return nullptr;
+            }
+            funTypes.push_back(paramDebugType);
+        }
+
+        DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
+        diType = diBuilder->createPointerType(subroutine, TypeInfo::GetPointerSize(), 0, llvm::None, type->GetShortName());
+    }
     else
     {
         const string& name = type->GetShortName();
