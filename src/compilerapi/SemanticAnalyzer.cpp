@@ -1988,8 +1988,6 @@ void SemanticAnalyzer::Visit(Modules* modules)
 
     // build a look-up table for all functions
 
-    functions.clear();
-
     for (ModuleDefinition* moduleDefinition : modules->modules)
     {
         const vector<ExternFunctionDeclaration*>& externFuncDecls = moduleDefinition->externFunctionDeclarations;
@@ -2016,15 +2014,6 @@ void SemanticAnalyzer::Visit(Modules* modules)
                 logger.LogError(*decl->nameToken, "Identifier '{}' has already been declared", decl->name);
                 return;
             }
-
-            const string& name = decl->name;
-            auto rv = functions.insert({name, decl});
-            if (!rv.second)
-            {
-                isError = true;
-                logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
-                return;
-            }
         }
 
         for (FunctionDefinition* funcDef : funcDefs)
@@ -2046,15 +2035,6 @@ void SemanticAnalyzer::Visit(Modules* modules)
             {
                 isError = true;
                 logger.LogError(*decl->nameToken, "Identifier '{}' has already been declared", decl->name);
-                return;
-            }
-
-            const string& name = decl->name;
-            auto rv = functions.insert({name, decl});
-            if (!rv.second)
-            {
-                isError = true;
-                logger.LogError(*decl->nameToken, "Function '{}' has already been defined", name);
                 return;
             }
         }
@@ -2421,19 +2401,22 @@ void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)
 
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
-    // TODO: get rid of functions
-
     const string& funcName = functionExpression->name;
     const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(funcName);
-    auto iter = functions.find(funcName);
-    if (iter == functions.cend() && data == nullptr)
+    if (data == nullptr)
     {
         logger.LogError(*functionExpression->nameToken, "Function '{}' is not defined", funcName);
         isError = true;
         return;
     }
+    else if (!data->type->IsFunction())
+    {
+        logger.LogError(*functionExpression->nameToken, "Cannot call '{}' because it is not a function", funcName);
+        isError = true;
+        return;
+    }
 
-    const TypeInfo* funType = (iter != functions.cend()) ? TypeInfo::GetFunctionType(iter->second) : data->type;
+    const TypeInfo* funType = data->type;
 
     // check argument count
     const vector<Expression*>& args = functionExpression->arguments;
