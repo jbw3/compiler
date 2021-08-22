@@ -300,7 +300,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* nameToken;
-    const FunctionDeclaration* functionDeclaration;
+    const TypeInfo* functionType;
     std::string name;
     Expressions arguments;
 };
@@ -481,7 +481,7 @@ public:
     const TypeInfo* returnType;
 };
 
-class ExternFunctionDeclaration : public SyntaxTreeNode
+class ExternFunctionDeclaration : public Expression
 {
 public:
     ExternFunctionDeclaration(FunctionDeclaration* declaration);

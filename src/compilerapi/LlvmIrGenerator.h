@@ -189,6 +189,8 @@ private:
 
     llvm::Value* CreateSizeValueArrayIr(const TypeInfo* arrayTypeInfo, uint64_t arraySize, llvm::Value* arrayValue);
 
+    llvm::FunctionType* CreateLlvmFunctionType(const TypeInfo* type);
+
     llvm::Type* GetType(const TypeInfo* type);
 
     llvm::DIType* GetDebugType(const TypeInfo* type);

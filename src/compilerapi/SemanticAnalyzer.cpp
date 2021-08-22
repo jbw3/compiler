@@ -1487,9 +1487,12 @@ void SemanticAnalyzer::Visit(Return* ret)
     }
 }
 
-void SemanticAnalyzer::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
+void SemanticAnalyzer::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
-    // nothing to do here
+    const FunctionDeclaration* funcDecl = externFunctionDeclaration->declaration;
+
+    const TypeInfo* type = TypeInfo::GetFunctionType(funcDecl);
+    externFunctionDeclaration->SetType(type);
 }
 
 void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
@@ -2003,6 +2006,17 @@ void SemanticAnalyzer::Visit(Modules* modules)
                 return;
             }
 
+            const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
+            unsigned idx = compilerContext.AddFunctionConstantValue(decl);
+            externFunc->SetConstantValueIndex(idx);
+            bool ok = symbolTable.AddConstant(decl->name, funType, idx);
+            if (!ok)
+            {
+                isError = true;
+                logger.LogError(*decl->nameToken, "Identifier '{}' has already been declared", decl->name);
+                return;
+            }
+
             const string& name = decl->name;
             auto rv = functions.insert({name, decl});
             if (!rv.second)
@@ -2407,24 +2421,27 @@ void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)
 
 void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
 {
+    // TODO: get rid of functions
+
     const string& funcName = functionExpression->name;
+    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(funcName);
     auto iter = functions.find(funcName);
-    if (iter == functions.cend())
+    if (iter == functions.cend() && data == nullptr)
     {
         logger.LogError(*functionExpression->nameToken, "Function '{}' is not defined", funcName);
         isError = true;
         return;
     }
 
-    const FunctionDeclaration* funcDecl = iter->second;
+    const TypeInfo* funType = (iter != functions.cend()) ? TypeInfo::GetFunctionType(iter->second) : data->type;
 
     // check argument count
     const vector<Expression*>& args = functionExpression->arguments;
-    const Parameters& params = funcDecl->parameters;
-    if (args.size() != params.size())
+    const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
+    if (args.size() != paramTypes.size())
     {
-        const char* suffix = (params.size() == 1) ? "" : "s";
-        logger.LogError(*functionExpression->nameToken, "Function '{}' expected {} argument{} but got {}", funcName, params.size(), suffix, args.size());
+        const char* suffix = (paramTypes.size() == 1) ? "" : "s";
+        logger.LogError(*functionExpression->nameToken, "Function '{}' expected {} argument{} but got {}", funcName, paramTypes.size(), suffix, args.size());
         isError = true;
         return;
     }
@@ -2441,9 +2458,8 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         }
 
         // check argument against the parameter type
-        const Parameter* param = params[i];
         const TypeInfo* argType = arg->GetType();
-        const TypeInfo* paramType = param->type;
+        const TypeInfo* paramType = paramTypes[i];
 
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
@@ -2459,11 +2475,11 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         }
     }
 
-    // set the expression's function declaration
-    functionExpression->functionDeclaration = funcDecl;
+    // set the expression's function type
+    functionExpression->functionType = funType;
 
     // set expression's type to the function's return type
-    functionExpression->SetType(funcDecl->returnType);
+    functionExpression->SetType(funType->GetReturnType());
 }
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)

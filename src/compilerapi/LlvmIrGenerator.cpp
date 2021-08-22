@@ -1123,6 +1123,8 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 resultValue = nullptr;
                 return;
             }
+
+            symbolTable.AddConstant(decl->name, externFunc->GetType(), externFunc->GetConstantValueIndex());
         }
 
         for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
@@ -1739,24 +1741,15 @@ void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
 
 void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 {
-    const string& funcName = functionExpression->name;
-    Function* func = module->getFunction(funcName);
-    if (func == nullptr)
+    const string& name = functionExpression->name;
+    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
+    if (data == nullptr)
     {
         resultValue = nullptr;
-        logger.LogInternalError("Use of undeclared function '{}'", funcName);
+        logger.LogInternalError("No identifier data found for '{}'", name);
         return;
     }
 
-    if (functionExpression->arguments.size() != func->arg_size())
-    {
-        resultValue = nullptr;
-        logger.LogInternalError("Unexpected number of function arguments");
-        return;
-    }
-
-    const FunctionDeclaration* funcDecl = functionExpression->functionDeclaration;
-    const Parameters& declParams = funcDecl->parameters;
     vector<Expression*> argExpressions = functionExpression->arguments;
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)
@@ -1773,6 +1766,21 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
 
     SetDebugLocation(functionExpression->nameToken);
 
+    FunctionType* funType = CreateLlvmFunctionType(functionExpression->functionType);
+    Value* funValue = nullptr;
+    if (data->IsConstant())
+    {
+        unsigned constIdx = data->constValueIndex;
+        const TypeInfo* type = functionExpression->functionType;
+        funValue = CreateConstantValue(type, constIdx);
+    }
+    else
+    {
+        AllocaInst* alloca = data->value;
+        funValue = builder.CreateLoad(alloca, name);
+    }
+
+    FunctionCallee func(funType, funValue);
     resultValue = builder.CreateCall(func, args, "call");
 }
 
@@ -2040,6 +2048,33 @@ string createTypeName(const TypeInfo* type)
     return name;
 }
 
+FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
+{
+    // get the return type
+    Type* returnType = GetType(type->GetReturnType());
+    if (returnType == nullptr)
+    {
+        logger.LogInternalError("Invalid function return type");
+        return nullptr;
+    }
+
+    // get the parameter types
+    vector<Type*> paramTypes;
+    for (const TypeInfo* paramTypeInfo : type->GetParamTypes())
+    {
+        Type* paramType = GetType(paramTypeInfo);
+        if (paramType == nullptr)
+        {
+            logger.LogInternalError("Invalid function param type");
+            return nullptr;
+        }
+        paramTypes.push_back(paramType);
+    }
+
+    FunctionType* funType = FunctionType::get(returnType, paramTypes, false);
+    return funType;
+}
+
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     Type* llvmType = nullptr;
@@ -2109,28 +2144,11 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
         }
         else if (type->IsFunction())
         {
-            // get the return type
-            Type* returnType = GetType(type->GetReturnType());
-            if (returnType == nullptr)
+            FunctionType* funType = CreateLlvmFunctionType(type);
+            if (funType == nullptr)
             {
-                logger.LogInternalError("Invalid function return type");
                 return nullptr;
             }
-
-            // get the parameter types
-            vector<Type*> paramTypes;
-            for (const TypeInfo* paramTypeInfo : type->GetParamTypes())
-            {
-                Type* paramType = GetType(paramTypeInfo);
-                if (paramType == nullptr)
-                {
-                    logger.LogInternalError("Invalid function param type");
-                    return nullptr;
-                }
-                paramTypes.push_back(paramType);
-            }
-
-            FunctionType* funType = FunctionType::get(returnType, paramTypes, false);
 
             llvmType = funType->getPointerTo();
 

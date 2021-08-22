@@ -537,7 +537,7 @@ void ImplicitCastExpression::Accept(SyntaxTreeVisitor* visitor)
 
 FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments, const Token* nameToken) :
     nameToken(nameToken),
-    functionDeclaration(nullptr),
+    functionType(nullptr),
     name(name),
     arguments(arguments)
 {
