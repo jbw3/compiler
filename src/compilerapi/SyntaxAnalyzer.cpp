@@ -166,7 +166,8 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                                  Token::EType endTokenType1, Token::EType endTokenType2)
 {
     Token::EType tokenType = iter->type;
-    while (tokenType != endTokenType1 && tokenType != endTokenType2)
+    bool done = tokenType == endTokenType1 || tokenType == endTokenType2;
+    while (!done)
     {
         // the lexer will give us two characters together as one token
         if (tokenType == Token::eAmpersandAmpersand)
@@ -218,18 +219,38 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
             }
             typeNameTokens.push_back(&*iter);
 
-            // TODO: parse possible return type
+            // parse return type
+            TokenIterator nextIter = iter + 1;
+            if (nextIter != endIter
+            && nextIter->type != Token::eCloseBracket // TODO: fix this 'cause it's a bit hacky
+            && nextIter->type != endTokenType1
+            && nextIter->type != endTokenType2)
+            {
+                ++iter;
+                bool ok = ProcessType(iter, endIter, typeNameTokens, endTokenType1, endTokenType2);
+                if (!ok)
+                {
+                    return false;
+                }
+
+                tokenType = iter->type;
+                done = tokenType == endTokenType1 || tokenType == endTokenType2;
+            }
         }
         else
         {
             typeNameTokens.push_back(&*iter);
         }
 
-        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        if (!done)
         {
-            return false;
+            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+            {
+                return false;
+            }
+            tokenType = iter->type;
+            done = tokenType == endTokenType1 || tokenType == endTokenType2;
         }
-        tokenType = iter->type;
     }
 
     return true;

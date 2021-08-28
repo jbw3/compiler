@@ -1859,12 +1859,20 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
     {
         ++idx;
         const TypeInfo* innerType = NameToType(typeNameTokens, idx);
+        if (innerType == nullptr)
+        {
+            return nullptr;
+        }
         type = TypeInfo::GetPointerToType(innerType);
     }
     else if (token->type == Token::eOpenBracket)
     {
         ++idx;
         const TypeInfo* innerType = NameToType(typeNameTokens, idx);
+        if (innerType == nullptr)
+        {
+            return nullptr;
+        }
         type = TypeInfo::GetArrayOfType(innerType);
 
         if (idx >= typeNameTokens.size())
@@ -1887,10 +1895,25 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
     {
         vector<const TypeInfo*> paramTypes;
         vector<string> paramNames;
-        const TypeInfo* returnType = TypeInfo::UnitType;// TODO: parse return type
-        type = TypeInfo::GetFunctionType(paramTypes, paramNames, returnType);
 
-        idx += 3; // TODO: handle params and return type
+        idx += 3; // TODO: handle params
+
+        const TypeInfo* returnType = nullptr;
+        if (idx >= typeNameTokens.size()
+        || typeNameTokens[idx]->type == Token::eCloseBracket /*TODO: fix this 'cause it's a bit hacky*/)
+        {
+            returnType = TypeInfo::UnitType;
+        }
+        else
+        {
+            returnType = NameToType(typeNameTokens, idx);
+            if (returnType == nullptr)
+            {
+                return nullptr;
+            }
+        }
+
+        type = TypeInfo::GetFunctionType(paramTypes, paramNames, returnType);
     }
     else
     {
