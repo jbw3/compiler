@@ -191,6 +191,35 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
             typeNameTokens.push_back(token1);
             typeNameTokens.push_back(token2);
         }
+        else if (tokenType == Token::eFun)
+        {
+            typeNameTokens.push_back(&*iter);
+            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+            {
+                return false;
+            }
+            if (iter->type != Token::eOpenPar)
+            {
+                logger.LogError(*iter, "Expected '('");
+                return false;
+            }
+            typeNameTokens.push_back(&*iter);
+
+            // TODO: parse parameters
+
+            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+            {
+                return false;
+            }
+            if (iter->type != Token::eClosePar)
+            {
+                logger.LogError(*iter, "Expected ')'");
+                return false;
+            }
+            typeNameTokens.push_back(&*iter);
+
+            // TODO: parse possible return type
+        }
         else
         {
             typeNameTokens.push_back(&*iter);

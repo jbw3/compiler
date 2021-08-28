@@ -281,6 +281,7 @@ const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDec
         for (const Parameter* param : parameters)
         {
             newFunType->paramTypes.push_back(param->type);
+            newFunType->paramNames.push_back(param->name);
         }
         newFunType->returnType = functionDeclaration->returnType;
 
@@ -288,6 +289,62 @@ const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDec
     }
 
     return funType;
+}
+
+const TypeInfo* TypeInfo::GetFunctionType(
+        const vector<const TypeInfo*>& parameterTypes,
+        const vector<string>& parameterNames,
+        const TypeInfo* returnType
+)
+{
+    size_t paramSize = parameterTypes.size();
+    string uniqueName = "fun(";
+    string name = "fun(";
+    if (paramSize > 0)
+    {
+        uniqueName += parameterTypes[0]->GetUniqueName();
+        name += parameterTypes[0]->GetShortName();
+
+        for (size_t i = 0; i < paramSize; ++i)
+        {
+            const TypeInfo* paramType = parameterTypes[i];
+
+            uniqueName += ", ";
+            uniqueName += paramType->GetUniqueName();
+
+            name += ", ";
+            name += paramType->GetShortName();
+        }
+    }
+
+    uniqueName += ")";
+    name += ")";
+
+    uniqueName += returnType->GetUniqueName();
+    if (!returnType->IsUnit())
+    {
+        name += ' ';
+        name += returnType->GetShortName();
+    }
+
+    const TypeInfo* funType = GetType(uniqueName);
+    if (funType == nullptr)
+    {
+        TypeInfo* newFunType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
+
+        // add param and return types
+        for (size_t i = 0; i < paramSize; ++i)
+        {
+            newFunType->paramTypes.push_back(parameterTypes[i]);
+            newFunType->paramNames.push_back(parameterNames[i]);
+        }
+        newFunType->returnType = returnType;
+
+        funType = newFunType;
+    }
+
+    return funType;
+
 }
 
 const TypeInfo* TypeInfo::GetType(const string& typeName)
@@ -516,6 +573,11 @@ const TypeInfo* TypeInfo::GetInnerType() const
 const vector<const TypeInfo*>& TypeInfo::GetParamTypes() const
 {
     return paramTypes;
+}
+
+const vector<string>& TypeInfo::GetParamNames() const
+{
+    return paramNames;
 }
 
 const TypeInfo* TypeInfo::GetReturnType() const

@@ -1833,106 +1833,76 @@ bool SemanticAnalyzer::ResolveDependencies(
 
 const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNameTokens)
 {
-    size_t typeNameSize = typeNameTokens.size();
-    if (typeNameSize == 0)
+    if (typeNameTokens.size() == 0)
     {
         logger.LogInternalError("Empty type name");
         return nullptr;
     }
 
-    size_t idx = typeNameSize;
-
-    const Token* token = nullptr;
-    size_t arrayLevel = 0;
-    while (idx > 0)
+    size_t idx = 0;
+    const TypeInfo* type = NameToType(typeNameTokens, idx);
+    if (type != nullptr && idx < typeNameTokens.size())
     {
-        --idx;
-
-        token = typeNameTokens[idx];
-        if (token->type == Token::eCloseBracket)
-        {
-            ++arrayLevel;
-
-            if (idx == 0)
-            {
-                // TODO: better error message?
-                logger.LogError(*token, "Invalid type");
-                return nullptr;
-            }
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    const Token* typeNameToken = typeNameTokens[idx];
-    const string& name = typeNameToken->value;
-    const TypeInfo* type = TypeInfo::GetType(name);
-    if (type == nullptr)
-    {
-        logger.LogError(*typeNameToken, "'{}' is not a known type", name);
+        const Token* token = typeNameTokens[idx];
+        logger.LogError(*token, "Unexpected token '{}'", token->value);
         return nullptr;
     }
 
-    while (idx > 0)
+    return type;
+}
+
+const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNameTokens, size_t& idx)
+{
+    const TypeInfo* type = nullptr;
+    const Token* token = typeNameTokens[idx];
+    if (token->type == Token::eAmpersand)
     {
-        --idx;
+        ++idx;
+        const TypeInfo* innerType = NameToType(typeNameTokens, idx);
+        type = TypeInfo::GetPointerToType(innerType);
+    }
+    else if (token->type == Token::eOpenBracket)
+    {
+        ++idx;
+        const TypeInfo* innerType = NameToType(typeNameTokens, idx);
+        type = TypeInfo::GetArrayOfType(innerType);
 
-        token = typeNameTokens[idx];
-        Token::EType tokenType = token->type;
-        if (tokenType == Token::eAmpersand)
+        if (idx >= typeNameTokens.size())
         {
-            type = TypeInfo::GetPointerToType(type);
-        }
-        else if (tokenType == Token::eOpenBracket)
-        {
-            if (arrayLevel == 0)
-            {
-                logger.LogError(*token, "'[' does not have closing ']'");
-                return nullptr;
-            }
-
-            --arrayLevel;
-            type = TypeInfo::GetArrayOfType(type);
-        }
-        else
-        {
-            // TODO: better error message?
-            logger.LogError(*token, "Unexpected token '{}'", token->value);
+            logger.LogError(*token, "'[' does not have closing ']'");
             return nullptr;
         }
-    }
 
-    // check if there is an extra closing brace
-    if (arrayLevel > 0)
-    {
-        // find the extra brace
-        size_t level = 0;
-        const Token* braceToken = nullptr;
-        for (size_t i = 0; i < typeNameSize; ++i)
+        const Token* nextToken = typeNameTokens[idx];
+        if (nextToken->type != Token::eCloseBracket)
         {
-            const Token* t = typeNameTokens[i];
-            Token::EType tokenType = t->type;
-            if (tokenType == Token::eOpenBracket)
-            {
-                ++level;
-            }
-            else if (tokenType == Token::eCloseBracket)
-            {
-                if (level == 0)
-                {
-                    braceToken = t;
-                    break;
-                }
-
-                --level;
-            }
+            logger.LogError(*nextToken, "Expected ']'");
+            return nullptr;
         }
 
-        assert(braceToken != nullptr);
-        logger.LogError(*braceToken, "Extra closing ']'");
-        return nullptr;
+        // increment past ']'
+        ++idx;
+    }
+    else if (token->type == Token::eFun)
+    {
+        vector<const TypeInfo*> paramTypes;
+        vector<string> paramNames;
+        const TypeInfo* returnType = TypeInfo::UnitType;// TODO: parse return type
+        type = TypeInfo::GetFunctionType(paramTypes, paramNames, returnType);
+
+        idx += 3; // TODO: handle params and return type
+    }
+    else
+    {
+        const string& name = token->value;
+        type = TypeInfo::GetType(name);
+        if (type == nullptr)
+        {
+            logger.LogError(*token, "'{}' is not a known type", name);
+            return nullptr;
+        }
+
+        ++idx;
     }
 
     return type;

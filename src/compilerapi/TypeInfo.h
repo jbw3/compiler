@@ -111,6 +111,12 @@ public:
 
     static const TypeInfo* GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration);
 
+    static const TypeInfo* GetFunctionType(
+        const std::vector<const TypeInfo*>& parameterTypes,
+        const std::vector<std::string>& parameterNames,
+        const TypeInfo* returnType
+    );
+
     static const TypeInfo* GetType(const std::string& typeName);
 
     static bool RegisterType(const TypeInfo* typeInfo);
@@ -178,6 +184,8 @@ public:
 
     const std::vector<const TypeInfo*>& GetParamTypes() const;
 
+    const std::vector<std::string>& GetParamNames() const;
+
     const TypeInfo* GetReturnType() const;
 
 private:
@@ -197,6 +205,7 @@ private:
     std::vector<const MemberInfo*> members;
     const TypeInfo* innerType;
     std::vector<const TypeInfo*> paramTypes;
+    std::vector<std::string> paramNames;
     const TypeInfo* returnType;
 };
 
