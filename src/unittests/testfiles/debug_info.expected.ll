@@ -511,6 +511,34 @@ entry:
   ret %UnitType zeroinitializer, !dbg !325
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @ftype1() #0 !dbg !326 {
+entry:
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define i1 @ftype2() #0 !dbg !327 {
+entry:
+  ret i1 false, !dbg !330
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @function_type() #0 !dbg !332 {
+entry:
+  %f2 = alloca i1 ()*, align 8
+  %f1 = alloca %UnitType ()*, align 8
+  call void @llvm.dbg.declare(metadata %UnitType ()** %f1, metadata !334, metadata !DIExpression()), !dbg !341
+  store %UnitType ()* @ftype1, %UnitType ()** %f1, align 8, !dbg !342
+  %f11 = load %UnitType ()*, %UnitType ()** %f1, align 8, !dbg !343
+  %call = call %UnitType %f11(), !dbg !343
+  call void @llvm.dbg.declare(metadata i1 ()** %f2, metadata !338, metadata !DIExpression()), !dbg !344
+  store i1 ()* @ftype2, i1 ()** %f2, align 8, !dbg !345
+  %f22 = load i1 ()*, i1 ()** %f2, align 8, !dbg !346
+  %call3 = call i1 %f22(), !dbg !346
+  ret %UnitType zeroinitializer, !dbg !346
+}
+
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -847,3 +875,24 @@ $filename
 !323 = !DILocation(line: 165, column: 22, scope: !320)
 !324 = !DILocation(line: 165, column: 13, scope: !320)
 !325 = !DILocation(line: 165, column: 11, scope: !320)
+!326 = distinct !DISubprogram(name: "ftype1", scope: !1, file: !1, line: 168, type: !53, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !2)
+!327 = distinct !DISubprogram(name: "ftype2", scope: !1, file: !1, line: 169, type: !328, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !2)
+!328 = !DISubroutineType(flags: DIFlagPrototyped, types: !329)
+!329 = !{!59}
+!330 = !DILocation(line: 169, column: 18, scope: !331)
+!331 = distinct !DILexicalBlock(scope: !327, file: !1, line: 169, column: 17)
+!332 = distinct !DISubprogram(name: "function_type", scope: !1, file: !1, line: 171, type: !53, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !333)
+!333 = !{!334, !338}
+!334 = !DILocalVariable(name: "f1", scope: !335, file: !1, line: 173, type: !336)
+!335 = distinct !DILexicalBlock(scope: !332, file: !1, line: 172, column: 1)
+!336 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "fun()", baseType: !337, size: 64)
+!337 = !DISubroutineType(types: !54)
+!338 = !DILocalVariable(name: "f2", scope: !335, file: !1, line: 175, type: !339)
+!339 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "fun() bool", baseType: !340, size: 64)
+!340 = !DISubroutineType(types: !329)
+!341 = !DILocation(line: 173, column: 9, scope: !335)
+!342 = !DILocation(line: 173, column: 12, scope: !335)
+!343 = !DILocation(line: 174, column: 5, scope: !335)
+!344 = !DILocation(line: 175, column: 9, scope: !335)
+!345 = !DILocation(line: 175, column: 12, scope: !335)
+!346 = !DILocation(line: 176, column: 5, scope: !335)

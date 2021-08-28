@@ -164,3 +164,14 @@ fun casts(a i32)
 {
     var x = cast(i8, a);
 }
+
+fun ftype1(){}
+fun ftype2()bool{false}
+
+fun function_type()
+{
+    var f1 = ftype1;
+    f1();
+    var f2 = ftype2;
+    f2();
+}

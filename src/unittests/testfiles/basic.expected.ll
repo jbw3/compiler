@@ -3069,6 +3069,7 @@ define %UnitType @consts() #0 {
 entry:
   %array29 = alloca [13 x i32], align 4
   %a1 = alloca %"[i32]", align 8
+  %v36 = alloca %UnitType ()*, align 8
   %array19 = alloca [3 x i16], align 2
   %v35 = alloca %"[i16]", align 8
   %array14 = alloca [2 x i8], align 1
@@ -3194,6 +3195,7 @@ fillExit26:                                       ; preds = %fillBody20
   %arrptr27 = bitcast [3 x i16]* %array19 to i16*
   %agg28 = insertvalue %"[i16]" { i64 3, i16* undef }, i16* %arrptr27, 1
   store %"[i16]" %agg28, %"[i16]"* %v35, align 8
+  store %UnitType ()* @ftype1, %UnitType ()** %v36, align 8
   %startPtr31 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 0
   %endPtr32 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 13
   br label %fillBody30
@@ -3209,6 +3211,45 @@ fillExit36:                                       ; preds = %fillBody30
   %arrptr37 = bitcast [13 x i32]* %array29 to i32*
   %agg38 = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr37, 1
   store %"[i32]" %agg38, %"[i32]"* %a1, align 8
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @ftype1() #0 {
+entry:
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @ftype2() #0 {
+entry:
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define i32 @ftype3() #0 {
+entry:
+  ret i32 3
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @function_type() #0 {
+entry:
+  %f3 = alloca i32 ()*, align 8
+  %f2 = alloca %UnitType ()*, align 8
+  %f1 = alloca %UnitType ()*, align 8
+  store %UnitType ()* @ftype1, %UnitType ()** %f1, align 8
+  %f11 = load %UnitType ()*, %UnitType ()** %f1, align 8
+  %call = call %UnitType %f11()
+  store %UnitType ()* @ftype1, %UnitType ()** %f2, align 8
+  store %UnitType ()* @ftype2, %UnitType ()** %f2, align 8
+  %f12 = load %UnitType ()*, %UnitType ()** %f1, align 8
+  store %UnitType ()* %f12, %UnitType ()** %f2, align 8
+  %f23 = load %UnitType ()*, %UnitType ()** %f2, align 8
+  %call4 = call %UnitType %f23()
+  store i32 ()* @ftype3, i32 ()** %f3, align 8
+  %f35 = load i32 ()*, i32 ()** %f3, align 8
+  %call6 = call i32 %f35()
   ret %UnitType zeroinitializer
 }
 
