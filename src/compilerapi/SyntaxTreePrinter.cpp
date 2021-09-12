@@ -90,9 +90,9 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
 
     PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
     PrintProperty("variableName", forLoop->variableName);
-    PrintProperty("variableTypeName", forLoop->variableTypeNameTokens, printTypeName);
+    PrintProperty("varTypeExpression", forLoop->varTypeExpression);
     PrintProperty("indexName", forLoop->indexName);
-    PrintProperty("indexTypeName", forLoop->indexTypeNameTokens, printTypeName);
+    PrintProperty("indexTypeExpression", forLoop->indexTypeExpression);
     PrintProperty("iterExpression", forLoop->iterExpression);
     PrintProperty("expression", forLoop->expression);
 }
@@ -327,7 +327,7 @@ void SyntaxTreePrinter::Visit(CastExpression* castExpression)
     function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "CastExpression");
-    PrintProperty("castTypeName", castExpression->castTypeNameTokens, printTypeName);
+    PrintProperty("typeExpression", castExpression->typeExpression);
     PrintProperty("expression", castExpression->subExpression);
 }
 
@@ -375,7 +375,7 @@ void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
 
     PrintProperty(NODE_TYPE_PROPERTY, "ConstantDeclaration");
     PrintProperty("name", constantDeclaration->name);
-    PrintProperty("typeName", constantDeclaration->typeNameTokens, printTypeName);
+    PrintProperty("typeExpression", constantDeclaration->typeExpression);
     PrintProperty("assignmentExpression", constantDeclaration->assignmentExpression);
 }
 
@@ -387,7 +387,7 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->name);
-    PrintProperty("typeName", variableDeclaration->typeNameTokens, printTypeName);
+    PrintProperty("typeExpression", variableDeclaration->typeExpression);
     PrintProperty("assignmentExpression", variableDeclaration->assignmentExpression);
 }
 
@@ -411,7 +411,7 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->name);
-    PrintProperty("typeName", parameter->typeNameTokens, printTypeName);
+    PrintProperty("typeExpression", parameter->typeExpression);
 }
 
 void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* declaration)
@@ -433,7 +433,7 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
 
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->name);
-    PrintProperty("typeName", member->typeNameTokens, printTypeName);
+    PrintProperty("typeExpression", member->typeExpression);
 }
 
 void SyntaxTreePrinter::PrintMemberInitialization(const MemberInitialization* memberInitialization)

@@ -115,7 +115,7 @@ void SourceGenerator::Visit(ForLoop* forLoop)
     *os << "for ";
     *os << forLoop->variableName;
 
-    if (forLoop->variableTypeNameTokens.size() > 0)
+    if (forLoop->varTypeExpression != nullptr)
     {
         *os << ' ' << forLoop->variableType->GetShortName();
     }
@@ -123,7 +123,7 @@ void SourceGenerator::Visit(ForLoop* forLoop)
     if (!forLoop->indexName.empty())
     {
         *os << ", " << forLoop->indexName;
-        if (forLoop->indexTypeNameTokens.size() > 0)
+        if (forLoop->indexTypeExpression != nullptr)
         {
             *os << ' ' << forLoop->indexType->GetShortName();
         }
@@ -448,7 +448,7 @@ void SourceGenerator::Visit(BranchExpression* branchExpression)
 void SourceGenerator::Visit(ConstantDeclaration* constantDeclaration)
 {
     *os << "const " << constantDeclaration->name;
-    if (constantDeclaration->typeNameTokens.size() > 0)
+    if (constantDeclaration->typeExpression != nullptr)
     {
         *os << ' ' << constantDeclaration->constantType->GetShortName();
     }
@@ -459,7 +459,7 @@ void SourceGenerator::Visit(ConstantDeclaration* constantDeclaration)
 void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     *os << "var " << variableDeclaration->name;
-    if (variableDeclaration->typeNameTokens.size() > 0)
+    if (variableDeclaration->typeExpression != nullptr)
     {
         *os << ' ' << variableDeclaration->variableType->GetShortName();
     }

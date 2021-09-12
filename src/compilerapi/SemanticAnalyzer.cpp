@@ -1336,7 +1336,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
 
     // set variable type
-    const TypeInfo* varType = GetVariableType(forLoop->variableTypeNameTokens, inferType);
+    const TypeInfo* varType = GetVariableType(forLoop->varTypeExpression, inferType, forLoop->variableNameToken);
     if (isError)
     {
         return;
@@ -1344,7 +1344,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     forLoop->variableType = varType;
 
     // set index type if there is an index variable
-    const TypeInfo* indexVarType = GetVariableType(forLoop->indexTypeNameTokens, TypeInfo::GetUIntSizeType());
+    const TypeInfo* indexVarType = GetVariableType(forLoop->indexTypeExpression, TypeInfo::GetUIntSizeType(), forLoop->indexNameToken);
     if (isError)
     {
         return;
@@ -1569,7 +1569,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
     for (const MemberDefinition* member : structDefinition->members)
     {
-        const TypeInfo* memberType = NameToType(member->typeNameTokens);
+        const TypeInfo* memberType = TypeExpressionToType(member->typeExpression, member->nameToken);
         if (memberType == nullptr)
         {
             delete newType;
@@ -1770,16 +1770,13 @@ bool SemanticAnalyzer::ResolveDependencies(
 
     for (const MemberDefinition* member : structDef->members)
     {
-        const vector<const Token*>& typeNameTokens = member->typeNameTokens;
-
-        size_t size = typeNameTokens.size();
+        IdentifierExpression* typeExpr = dynamic_cast<IdentifierExpression*>(member->typeExpression);
 
         // we only need to check types that might be structs
-        // (which will only have 1 token as a type name)
-        if (size == 1)
+        // (which will be an IdentifierExpression)
+        if (typeExpr != nullptr)
         {
-            const Token* token = typeNameTokens[0];
-            const string& memberTypeName = token->value;
+            const string& memberTypeName = typeExpr->name;
 
             // if we have not seen this member's type yet, resolve its dependencies
             if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
@@ -1798,7 +1795,7 @@ bool SemanticAnalyzer::ResolveDependencies(
                 auto nameMapIter = nameMap.find(memberTypeName);
                 if (nameMapIter == nameMap.end())
                 {
-                    logger.LogError(*token, "'{}' is not a known type", memberTypeName);
+                    logger.LogError(*typeExpr->token, "'{}' is not a known type", memberTypeName);
                     return false;
                 }
 
@@ -1831,6 +1828,34 @@ bool SemanticAnalyzer::ResolveDependencies(
     return true;
 }
 
+const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpression, const Token* errorToken)
+{
+    typeExpression->Accept(this);
+    if (isError)
+    {
+        return nullptr;
+    }
+
+    if (!typeExpression->GetType()->IsType())
+    {
+        // TODO: need a way to get the type expression tokens
+        // TODO: use constant for type name
+        logger.LogError(*errorToken, "Expected expression to be of type '{}'", "type");
+        return nullptr;
+    }
+    if (!typeExpression->GetIsConstant())
+    {
+        // TODO: need a way to get the type expression tokens
+        logger.LogError(*errorToken, "Type must be a constant expression");
+        return nullptr;
+    }
+
+    unsigned idx = typeExpression->GetConstantValueIndex();
+    const TypeInfo* type = compilerContext.GetTypeConstantValue(idx);
+    return type;
+}
+
+// TODO: remove this?
 const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNameTokens)
 {
     if (typeNameTokens.size() == 0)
@@ -1851,6 +1876,7 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
     return type;
 }
 
+// TODO: remove this?
 const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNameTokens, size_t& idx)
 {
     const TypeInfo* type = nullptr;
@@ -1896,7 +1922,16 @@ const TypeInfo* SemanticAnalyzer::NameToType(const vector<const Token*>& typeNam
         vector<const TypeInfo*> paramTypes;
         vector<string> paramNames;
 
-        idx += 3; // TODO: handle params
+        // increment to first param
+        idx += 2;
+
+        while (typeNameTokens[idx]->type != Token::eClosePar)
+        {
+            ++idx;
+        }
+
+        // increment past ')'
+        ++idx;
 
         const TypeInfo* returnType = nullptr;
         if (idx >= typeNameTokens.size()
@@ -2277,7 +2312,7 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     }
     const TypeInfo* exprType = subExpression->GetType();
 
-    const TypeInfo* castType = NameToType(castExpression->castTypeNameTokens);
+    const TypeInfo* castType = TypeExpressionToType(castExpression->typeExpression, castExpression->castToken);
     if (castType == nullptr)
     {
         isError = true;
@@ -2688,7 +2723,7 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     }
 
     // set the variable type
-    const TypeInfo* type = GetVariableType(constantDeclaration->typeNameTokens, rightExpr->GetType());
+    const TypeInfo* type = GetVariableType(constantDeclaration->typeExpression, rightExpr->GetType(), constantDeclaration->nameToken);
     if (isError)
     {
         return;
@@ -2738,7 +2773,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     }
 
     // set the variable type
-    const TypeInfo* type = GetVariableType(variableDeclaration->typeNameTokens, rightExpr->GetType());
+    const TypeInfo* type = GetVariableType(variableDeclaration->typeExpression, rightExpr->GetType(), variableDeclaration->nameToken);
     if (isError)
     {
         return;
@@ -2777,7 +2812,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
-        const TypeInfo* paramType = NameToType(param->typeNameTokens);
+        const TypeInfo* paramType = TypeExpressionToType(param->typeExpression, param->nameToken);
         if (paramType == nullptr)
         {
             return false;
@@ -2789,15 +2824,14 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
 
     // set return type
     const TypeInfo* returnType = nullptr;
-    const vector<const Token*>& returnTypeName = functionDeclaration->returnTypeNameTokens;
-    size_t returnTypeNameSize = returnTypeName.size();
-    if (returnTypeNameSize == 0)
+    Expression* returnTypeExpr = functionDeclaration->returnTypeExpression;
+    if (returnTypeExpr == nullptr)
     {
         returnType = TypeInfo::UnitType;
     }
     else
     {
-        returnType = NameToType(functionDeclaration->returnTypeNameTokens);
+        returnType = TypeExpressionToType(returnTypeExpr, functionDeclaration->nameToken);
         if (returnType == nullptr)
         {
             return false;
@@ -2884,24 +2918,18 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType)
     return type;
 }
 
-const TypeInfo* SemanticAnalyzer::GetVariableType(const vector<const Token*>& typeNameTokens, const TypeInfo* inferType)
+const TypeInfo* SemanticAnalyzer::GetVariableType(Expression* typeExpression, const TypeInfo* inferType, const Token* errorToken)
 {
-    bool inferTypeName = typeNameTokens.empty();
     const TypeInfo* type = nullptr;
 
     // if no type name was given, infer it from the expression
-    if (inferTypeName)
+    if (typeExpression == nullptr)
     {
         type = InferType(inferType);
     }
     else // get the type from the name given
     {
-        type = NameToType(typeNameTokens);
-        if (type == nullptr)
-        {
-            isError = true;
-            return nullptr;
-        }
+        type = TypeExpressionToType(typeExpression, errorToken);
     }
 
     return type;

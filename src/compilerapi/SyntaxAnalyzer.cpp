@@ -162,9 +162,11 @@ bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const Token
     return ok;
 }
 
-bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter, vector<const Token*>& typeNameTokens,
+bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter,
+                                 Expression*& typeExpression,
                                  Token::EType endTokenType1, Token::EType endTokenType2)
 {
+    typeExpression = nullptr;
     Token::EType tokenType = iter->type;
     bool done = tokenType == endTokenType1 || tokenType == endTokenType2;
     while (!done)
@@ -189,12 +191,11 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                           originalToken->column + 1,
                           Token::eAmpersand);
 
-            typeNameTokens.push_back(token1);
-            typeNameTokens.push_back(token2);
+            // TODO
         }
         else if (tokenType == Token::eFun)
         {
-            typeNameTokens.push_back(&*iter);
+            const Token* funToken = &*iter;
             if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
             {
                 return false;
@@ -204,10 +205,13 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                 logger.LogError(*iter, "Expected '('");
                 return false;
             }
-            typeNameTokens.push_back(&*iter);
 
             // TODO: parse parameters
+            vector<Expression*> paramTypes;
+            vector<string> paramNames;
+            vector<const Token*> paramNameTokens;
 
+            // increment past '('
             if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
             {
                 return false;
@@ -217,9 +221,9 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                 logger.LogError(*iter, "Expected ')'");
                 return false;
             }
-            typeNameTokens.push_back(&*iter);
 
             // parse return type
+            Expression* returnType = nullptr;
             TokenIterator nextIter = iter + 1;
             if (nextIter != endIter
             && nextIter->type != Token::eCloseBracket // TODO: fix this 'cause it's a bit hacky
@@ -227,7 +231,7 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
             && nextIter->type != endTokenType2)
             {
                 ++iter;
-                bool ok = ProcessType(iter, endIter, typeNameTokens, endTokenType1, endTokenType2);
+                bool ok = ProcessType(iter, endIter, returnType, endTokenType1, endTokenType2);
                 if (!ok)
                 {
                     return false;
@@ -236,10 +240,13 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                 tokenType = iter->type;
                 done = tokenType == endTokenType1 || tokenType == endTokenType2;
             }
+
+            typeExpression = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, paramNameTokens);
         }
         else
         {
-            typeNameTokens.push_back(&*iter);
+            logger.LogError(*iter, "Unknown token in type expression: '{}'", iter->value);
+            return false;
         }
 
         if (!done)
@@ -378,8 +385,8 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     // if a return type is specified, parse it
-    vector<const Token*> returnTypeNameTokens;
-    ok = ProcessType(iter, endIter, returnTypeNameTokens, endTokenType);
+    Expression* returnTypeExpr = nullptr;
+    ok = ProcessType(iter, endIter, returnTypeExpr, endTokenType);
     if (!ok)
     {
         deletePointerContainer(parameters);
@@ -387,8 +394,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
     }
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
-        functionName, parameters,
-        nameToken, returnTypeNameTokens);
+        functionName, parameters, returnTypeExpr, nameToken);
     return functionDeclaration;
 }
 
@@ -414,21 +420,21 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        vector<const Token*> paramTypeNameTokens;
-        bool ok = ProcessType(iter, endIter, paramTypeNameTokens, Token::eComma, Token::eClosePar);
+        Expression* paramTypeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, paramTypeExpr, Token::eComma, Token::eClosePar);
         if (!ok)
         {
             return false;
         }
 
         // make sure there was a type
-        if (paramTypeNameTokens.size() == 0)
+        if (paramTypeExpr == nullptr)
         {
             logger.LogError(*iter, "Expected a parameter type");
             return false;
         }
 
-        Parameter* param = new Parameter(paramName, paramNameToken, paramTypeNameTokens);
+        Parameter* param = new Parameter(paramName, paramTypeExpr, paramNameToken);
         parameters.push_back(param);
 
         if (iter->type != Token::eClosePar)
@@ -506,15 +512,15 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             return nullptr;
         }
 
-        vector<const Token*> memberTypeTokens;
-        bool ok = ProcessType(iter, endIter, memberTypeTokens, Token::eComma, Token::eCloseBrace);
+        Expression* memberTypeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, memberTypeExpr, Token::eComma, Token::eCloseBrace);
         if (!ok)
         {
             deletePointerContainer(members);
             return nullptr;
         }
 
-        MemberDefinition* member = new MemberDefinition(memberName, memberNameToken, memberTypeTokens);
+        MemberDefinition* member = new MemberDefinition(memberName, memberTypeExpr, memberNameToken);
         members.push_back(member);
 
         Token::EType delimiter = iter->type;
@@ -692,8 +698,8 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    vector<const Token*> constTypeNameTokens;
-    bool ok = ProcessType(iter, endIter, constTypeNameTokens, Token::eEqual);
+    Expression* typeExpr = nullptr;
+    bool ok = ProcessType(iter, endIter, typeExpr, Token::eEqual);
     if (!ok)
     {
         return nullptr;
@@ -703,12 +709,14 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
     {
+        delete typeExpr;
         return nullptr;
     }
 
     Expression* expression = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
     if (expression == nullptr)
     {
+        delete typeExpr;
         return nullptr;
     }
 
@@ -716,12 +724,14 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     if (iter == endIter)
     {
         logger.LogError("Unexpected end of file");
+        delete typeExpr;
         return nullptr;
     }
 
     if (iter->type != Token::eSemiColon)
     {
         logger.LogError(*iter, "Expected ';'");
+        delete typeExpr;
         return nullptr;
     }
 
@@ -730,7 +740,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
 
     const string& constName = constNameToken->value;
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(constName, constNameToken), expression, opToken);
-    ConstantDeclaration* constDecl = new ConstantDeclaration(constName, assignment, constNameToken, constTypeNameTokens);
+    ConstantDeclaration* constDecl = new ConstantDeclaration(constName, assignment, typeExpr, constNameToken);
     return constDecl;
 }
 
@@ -760,8 +770,8 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    vector<const Token*> varTypeNameTokens;
-    bool ok = ProcessType(iter, endIter, varTypeNameTokens, Token::eEqual);
+    Expression* typeExpr = nullptr;
+    bool ok = ProcessType(iter, endIter, typeExpr, Token::eEqual);
     if (!ok)
     {
         return nullptr;
@@ -771,12 +781,14 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     if (!IncrementIterator(iter, endIter, "Expected expression"))
     {
+        delete typeExpr;
         return nullptr;
     }
 
     Expression* expression = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
     if (expression == nullptr)
     {
+        delete typeExpr;
         return nullptr;
     }
 
@@ -784,12 +796,14 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     if (iter == endIter)
     {
         logger.LogError("Unexpected end of file");
+        delete typeExpr;
         return nullptr;
     }
 
     if (iter->type != Token::eSemiColon)
     {
         logger.LogError(*iter, "Expected ';'");
+        delete typeExpr;
         return nullptr;
     }
 
@@ -798,7 +812,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     const string& varName = varNameToken->value;
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(varName, varNameToken), expression, opToken);
-    VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, varNameToken, varTypeNameTokens);
+    VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, typeExpr, varNameToken);
     return varDecl;
 }
 
@@ -865,8 +879,8 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    vector<const Token*> varTypeNameTokens;
-    bool ok = ProcessType(iter, endIter, varTypeNameTokens, Token::eComma, Token::eIn);
+    Expression* varTypeExpr = nullptr;
+    bool ok = ProcessType(iter, endIter, varTypeExpr, Token::eComma, Token::eIn);
     if (!ok)
     {
         return nullptr;
@@ -874,7 +888,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 
     // check if there's an index variable
     const Token* indexVarNameToken = Token::None;
-    vector<const Token*> indexVarTypeNameTokens;
+    Expression* indexVarTypeExpr = nullptr;
     if (iter->type == Token::eComma)
     {
         // read variable name
@@ -896,7 +910,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
             return nullptr;
         }
 
-        bool ok = ProcessType(iter, endIter, indexVarTypeNameTokens, Token::eIn);
+        bool ok = ProcessType(iter, endIter, indexVarTypeExpr, Token::eIn);
         if (!ok)
         {
             return nullptr;
@@ -932,11 +946,11 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     // increment iter past end brace
     ++iter;
 
-    ForLoop* forLoop = new ForLoop(varNameToken->value, indexVarNameToken->value,
+    ForLoop* forLoop = new ForLoop(varNameToken->value, varTypeExpr,
+                                   indexVarNameToken->value, indexVarTypeExpr,
                                    iterExpression.release(), expression.release(),
                                    forToken, inToken,
-                                   varNameToken, varTypeNameTokens,
-                                   indexVarNameToken, indexVarTypeNameTokens);
+                                   varNameToken, indexVarNameToken);
     return forLoop;
 }
 
@@ -1181,15 +1195,15 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         }
 
         // parse the cast type name
-        vector<const Token*> castTypeNameTokens;
-        bool ok = ProcessType(iter, endIter, castTypeNameTokens, Token::eComma);
+        Expression* typeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, typeExpr, Token::eComma);
         if (!ok)
         {
             return nullptr;
         }
 
         // make sure there was a type
-        if (castTypeNameTokens.size() == 0)
+        if (typeExpr == nullptr)
         {
             logger.LogError(*iter, "Expected a cast type");
             return nullptr;
@@ -1198,6 +1212,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         ++iter;
         if (iter == endIter)
         {
+            delete typeExpr;
             logger.LogError("Unexpected end of file in the middle of a cast");
             return nullptr;
         }
@@ -1206,6 +1221,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
         Expression* subExpression = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
         if (subExpression == nullptr)
         {
+            delete typeExpr;
             return nullptr;
         }
 
@@ -1214,6 +1230,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
             ++iter;
             if (iter == endIter)
             {
+                delete typeExpr;
                 delete subExpression;
                 logger.LogError("Unexpected end of file in the middle of a cast");
                 return nullptr;
@@ -1222,12 +1239,13 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
 
         if (iter->type != Token::eClosePar)
         {
+            delete typeExpr;
             delete subExpression;
             logger.LogError(*castToken, "Cast does not have closing parenthesis");
             return nullptr;
         }
 
-        expr = new CastExpression(subExpression, castToken, castTypeNameTokens);
+        expr = new CastExpression(typeExpr, subExpression, castToken);
     }
     else
     {

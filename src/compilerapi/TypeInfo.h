@@ -59,6 +59,7 @@ public:
     static constexpr uint16_t F_POINTER  = 1 << 4;
     static constexpr uint16_t F_ARRAY    = 1 << 5;
     static constexpr uint16_t F_FUNCTION = 1 << 6;
+    static constexpr uint16_t F_TYPE     = 1 << 7;
 
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 <<  8;
@@ -152,6 +153,8 @@ public:
     bool IsArray() const;
 
     bool IsFunction() const;
+
+    bool IsType() const;
 
     ESign GetSign() const;
 

@@ -2,6 +2,7 @@
 #define COMPILER_CONTEXT_H_
 
 #include "TokenList.h"
+#include "TypeInfo.h"
 #include <string>
 #include <vector>
 
@@ -145,6 +146,13 @@ public:
         return functionConstants[id];
     }
 
+    unsigned AddTypeConstantValue(const TypeInfo* value);
+
+    const TypeInfo* GetTypeConstantValue(unsigned id) const
+    {
+        return typeConstants[id];
+    }
+
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
@@ -154,6 +162,7 @@ private:
     std::vector<StructConstValue> structConstants;
     std::vector<ArrayConstValue> arrayConstants;
     std::vector<const SyntaxTree::FunctionDeclaration*> functionConstants;
+    std::vector<const TypeInfo*> typeConstants;
 };
 
 #endif // COMPILER_CONTEXT_H_

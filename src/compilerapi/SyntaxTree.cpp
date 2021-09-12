@@ -502,16 +502,16 @@ void IdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-CastExpression::CastExpression(Expression* subExpression, const Token* castToken,
-                               const vector<const Token*>& castTypeNameTokens) :
+CastExpression::CastExpression(Expression* typeExpression, Expression* subExpression, const Token* castToken) :
+    typeExpression(typeExpression),
     subExpression(subExpression),
-    castToken(castToken),
-    castTypeNameTokens(castTypeNameTokens)
+    castToken(castToken)
 {
 }
 
 CastExpression::~CastExpression()
 {
+    delete typeExpression;
     delete subExpression;
 }
 
@@ -607,18 +607,19 @@ void BranchExpression::Accept(SyntaxTreeVisitor* visitor)
 }
 
 ConstantDeclaration::ConstantDeclaration(const string& name, BinaryExpression* assignmentExpression,
-                                         const Token* nameToken, const vector<const Token*>& typeNameTokens) :
+                                         Expression* typeExpression, const Token* nameToken) :
     nameToken(nameToken),
-    typeNameTokens(typeNameTokens),
     name(name),
     constantType(nullptr),
-    assignmentExpression(assignmentExpression)
+    assignmentExpression(assignmentExpression),
+    typeExpression(typeExpression)
 {
 }
 
 ConstantDeclaration::~ConstantDeclaration()
 {
     delete assignmentExpression;
+    delete typeExpression;
 }
 
 void ConstantDeclaration::Accept(SyntaxTreeVisitor* visitor)
@@ -627,18 +628,19 @@ void ConstantDeclaration::Accept(SyntaxTreeVisitor* visitor)
 }
 
 VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* assignmentExpression,
-                                         const Token* nameToken, const vector<const Token*>& typeNameTokens) :
+                                         Expression* typeExpression, const Token* nameToken) :
     nameToken(nameToken),
-    typeNameTokens(typeNameTokens),
     name(name),
     variableType(nullptr),
-    assignmentExpression(assignmentExpression)
+    assignmentExpression(assignmentExpression),
+    typeExpression(typeExpression)
 {
 }
 
 VariableDeclaration::~VariableDeclaration()
 {
     delete assignmentExpression;
+    delete typeExpression;
 }
 
 void VariableDeclaration::Accept(SyntaxTreeVisitor* visitor)
@@ -664,23 +666,24 @@ void WhileLoop::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-ForLoop::ForLoop(const string& variableName, const string& indexName,
+ForLoop::ForLoop(const string& variableName,
+                 Expression* varTypeExpression,
+                 const string& indexName,
+                 Expression* indexTypeExpression,
                  Expression* iterExpression,
                  BlockExpression* expression, const Token* forToken,
                  const Token* inToken, const Token* variableNameToken,
-                 const vector<const Token*>& variableTypeNameTokens,
-                 const Token* indexNameToken,
-                 const vector<const Token*>& indexTypeNameTokens) :
+                 const Token* indexNameToken) :
     variableName(variableName),
+    varTypeExpression(varTypeExpression),
     indexName(indexName),
+    indexTypeExpression(indexTypeExpression),
     iterExpression(iterExpression),
     expression(expression),
     forToken(forToken),
     inToken(inToken),
     variableNameToken(variableNameToken),
-    variableTypeNameTokens(variableTypeNameTokens),
-    indexNameToken(indexNameToken),
-    indexTypeNameTokens(indexTypeNameTokens)
+    indexNameToken(indexNameToken)
 {
 }
 
@@ -688,6 +691,8 @@ ForLoop::~ForLoop()
 {
     delete expression;
     delete iterExpression;
+    delete indexTypeExpression;
+    delete varTypeExpression;
 }
 
 void ForLoop::Accept(SyntaxTreeVisitor* visitor)
@@ -721,23 +726,29 @@ void Return::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-Parameter::Parameter(const string& name, const Token* nameToken,
-                     const vector<const Token*>& typeNameTokens) :
+Parameter::Parameter(const string& name,
+                     Expression* typeExpression,
+                     const Token* nameToken) :
     nameToken(nameToken),
-    typeNameTokens(typeNameTokens),
     name(name),
+    typeExpression(typeExpression),
     type(nullptr)
 {
 }
 
+Parameter::~Parameter()
+{
+    delete typeExpression;
+}
+
 FunctionDeclaration::FunctionDeclaration(const string& name,
                                          const Parameters& parameters,
-                                         const Token* nameToken,
-                                         const vector<const Token*>& returnTypeNameTokens) :
+                                         Expression* returnTypeExpression,
+                                         const Token* nameToken) :
     nameToken(nameToken),
-    returnTypeNameTokens(returnTypeNameTokens),
     name(name),
     parameters(parameters),
+    returnTypeExpression(returnTypeExpression),
     returnType(nullptr)
 {
 }
@@ -745,6 +756,33 @@ FunctionDeclaration::FunctionDeclaration(const string& name,
 FunctionDeclaration::~FunctionDeclaration()
 {
     deletePointerContainer(parameters);
+    delete returnTypeExpression;
+}
+
+FunctionTypeExpression::FunctionTypeExpression(
+    const vector<Expression*>& paramTypes,
+    const vector<string>& paramNames,
+    Expression* returnTypeExpression,
+    const Token* funToken,
+    const vector<const Token*> paramNameTokens
+) :
+    funToken(funToken),
+    paramNameTokens(paramNameTokens),
+    paramTypes(paramTypes),
+    paramNames(paramNames),
+    returnTypeExpression(returnTypeExpression)
+{
+}
+
+FunctionTypeExpression::~FunctionTypeExpression()
+{
+    deletePointerContainer(paramTypes);
+    delete returnTypeExpression;
+}
+
+void FunctionTypeExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO
 }
 
 ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :
@@ -781,12 +819,17 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-MemberDefinition::MemberDefinition(const string& name, const Token* nameToken,
-                                   const vector<const Token*>& typeNameTokens) :
+MemberDefinition::MemberDefinition(const string& name, Expression* typeExpression,
+                                   const Token* nameToken) :
     nameToken(nameToken),
-    typeNameTokens(typeNameTokens),
+    typeExpression(typeExpression),
     name(name)
 {
+}
+
+MemberDefinition::~MemberDefinition()
+{
+    delete typeExpression;
 }
 
 StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members,

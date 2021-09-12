@@ -90,6 +90,8 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
+    const TypeInfo* TypeExpressionToType(SyntaxTree::Expression* typeExpression, const Token* errorToken);
+
     const TypeInfo* NameToType(const std::vector<const Token*>& typeNameTokens);
 
     const TypeInfo* NameToType(const std::vector<const Token*>& typeNameTokens, size_t& idx);
@@ -118,7 +120,7 @@ private:
 
     const TypeInfo* InferType(const TypeInfo* inferType);
 
-    const TypeInfo* GetVariableType(const std::vector<const Token*>& typeNameTokens, const TypeInfo* inferType);
+    const TypeInfo* GetVariableType(SyntaxTree::Expression* typeExpression, const TypeInfo* inferType, const Token* errorToken);
 
     bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, SyntaxTree::Expression* expression, const Token* errorToken, SyntaxTree::Expression*& resultExpression);
 

@@ -469,6 +469,11 @@ bool TypeInfo::IsFunction() const
     return (flags & F_FUNCTION) != 0;
 }
 
+bool TypeInfo::IsType() const
+{
+    return (flags & F_TYPE) != 0;
+}
+
 TypeInfo::ESign TypeInfo::GetSign() const
 {
     return sign;

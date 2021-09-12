@@ -266,16 +266,15 @@ public:
 class CastExpression : public Expression
 {
 public:
-    CastExpression(Expression* subExpression, const Token* castToken,
-                   const std::vector<const Token*>& castTypeNameTokens);
+    CastExpression(Expression* typeExpression, Expression* subExpression, const Token* castToken);
 
     virtual ~CastExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
+    Expression* typeExpression;
     Expression* subExpression;
     const Token* castToken;
-    std::vector<const Token*> castTypeNameTokens;
 };
 
 class ImplicitCastExpression : public Expression
@@ -348,34 +347,34 @@ class ConstantDeclaration : public SyntaxTreeNode
 {
 public:
     ConstantDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
-                        const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
+                        Expression* typeExpression, const Token* nameToken);
 
     virtual ~ConstantDeclaration();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* nameToken;
-    std::vector<const Token*> typeNameTokens;
     std::string name;
     const TypeInfo* constantType;
     BinaryExpression* assignmentExpression;
+    Expression* typeExpression;
 };
 
 class VariableDeclaration : public SyntaxTreeNode
 {
 public:
     VariableDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
-                        const Token* nameToken, const std::vector<const Token*>& typeNameTokens);
+                        Expression* typeExpression, const Token* nameToken);
 
     virtual ~VariableDeclaration();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* nameToken;
-    std::vector<const Token*> typeNameTokens;
     std::string name;
     const TypeInfo* variableType;
     BinaryExpression* assignmentExpression;
+    Expression* typeExpression;
 };
 
 typedef std::vector<VariableDeclaration*> VariableDeclarations;
@@ -397,30 +396,31 @@ public:
 class ForLoop : public SyntaxTreeNode
 {
 public:
-    ForLoop(const std::string& variableName, const std::string& indexName,
+    ForLoop(const std::string& variableName,
+            Expression* varTypeExpression,
+            const std::string& indexName,
+            Expression* indexTypeExpression,
             Expression* iterExpression,
             BlockExpression* expression, const Token* forToken,
             const Token* inToken, const Token* variableNameToken,
-            const std::vector<const Token*>& variableTypeNameTokens,
-            const Token* indexNameToken,
-            const std::vector<const Token*>& indexTypeNameTokens);
+            const Token* indexNameToken);
 
     virtual ~ForLoop();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     std::string variableName;
+    Expression* varTypeExpression;
     const TypeInfo* variableType;
     std::string indexName;
+    Expression* indexTypeExpression;
     const TypeInfo* indexType;
     Expression* iterExpression;
     BlockExpression* expression;
     const Token* forToken;
     const Token* inToken;
     const Token* variableNameToken;
-    std::vector<const Token*> variableTypeNameTokens;
     const Token* indexNameToken;
-    std::vector<const Token*> indexTypeNameTokens;
 };
 
 class LoopControl : public SyntaxTreeNode
@@ -451,14 +451,15 @@ public:
 class Parameter
 {
 public:
-    Parameter(const std::string& name, const Token* nameToken,
-              const std::vector<const Token*>& typeNameTokens);
+    Parameter(const std::string& name,
+              Expression* typeExpression,
+              const Token* nameToken);
 
-    ~Parameter() = default;
+    ~Parameter();
 
     const Token* nameToken;
-    const std::vector<const Token*> typeNameTokens;
     std::string name;
+    Expression* typeExpression;
     const TypeInfo* type;
 };
 
@@ -469,16 +470,38 @@ class FunctionDeclaration
 public:
     FunctionDeclaration(const std::string& name,
                         const Parameters& parameters,
-                        const Token* nameToken,
-                        const std::vector<const Token*>& returnTypeNameTokens);
+                        Expression* returnTypeExpression,
+                        const Token* nameToken);
 
     virtual ~FunctionDeclaration();
 
     const Token* nameToken;
-    std::vector<const Token*> returnTypeNameTokens;
     std::string name;
     Parameters parameters;
+    Expression* returnTypeExpression;
     const TypeInfo* returnType;
+};
+
+class FunctionTypeExpression : public Expression
+{
+public:
+    FunctionTypeExpression(
+        const std::vector<Expression*>& paramTypes,
+        const std::vector<std::string>& paramNames,
+        Expression* returnTypeExpression,
+        const Token* funToken,
+        const std::vector<const Token*> paramNameTokens
+    );
+
+    virtual ~FunctionTypeExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* funToken;
+    std::vector<const Token*> paramNameTokens;
+    std::vector<Expression*> paramTypes;
+    std::vector<std::string> paramNames;
+    Expression* returnTypeExpression;
 };
 
 class ExternFunctionDeclaration : public Expression
@@ -511,11 +534,13 @@ public:
 class MemberDefinition
 {
 public:
-    MemberDefinition(const std::string& name, const Token* nameToken,
-                     const std::vector<const Token*>& typeNameTokens);
+    MemberDefinition(const std::string& name, Expression* typeExpression,
+                     const Token* nameToken);
+
+    ~MemberDefinition();
 
     const Token* nameToken;
-    std::vector<const Token*> typeNameTokens;
+    Expression* typeExpression;
     std::string name;
 };
 

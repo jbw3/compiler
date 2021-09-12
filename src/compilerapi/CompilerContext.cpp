@@ -169,3 +169,11 @@ unsigned CompilerContext::AddFunctionConstantValue(const SyntaxTree::FunctionDec
 
     return id;
 }
+
+unsigned CompilerContext::AddTypeConstantValue(const TypeInfo* value)
+{
+    unsigned id = static_cast<unsigned>(typeConstants.size());
+    typeConstants.push_back(value);
+
+    return id;
+}

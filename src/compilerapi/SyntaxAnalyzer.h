@@ -44,7 +44,8 @@ private:
 
     bool IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, Token::EType expectedTokenType, const char* errorMsg = nullptr);
 
-    bool ProcessType(TokenIterator& iter, const TokenIterator& endIter, std::vector<const Token*>& typeNameTokens,
+    bool ProcessType(TokenIterator& iter, const TokenIterator& endIter,
+                     SyntaxTree::Expression*& typeExpression,
                      Token::EType endTokenType1, Token::EType endTokenType2 = Token::eInvalid);
 
     SyntaxTree::ExternFunctionDeclaration* ProcessExternFunction(TokenIterator& iter,
