@@ -27,6 +27,8 @@ Compiler::Compiler(const Config& config) :
 {
     // initialize types
     TypeInfo::InitTypes(config.targetMachine);
+
+    compilerContext.InitBasicTypes();
 }
 
 bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)

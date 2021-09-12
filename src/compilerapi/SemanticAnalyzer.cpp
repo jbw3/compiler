@@ -9,6 +9,7 @@ using namespace SyntaxTree;
 
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
     compilerContext(compilerContext),
+    symbolTable(compilerContext),
     logger(logger),
     isError(false),
     isConstDecl(false),

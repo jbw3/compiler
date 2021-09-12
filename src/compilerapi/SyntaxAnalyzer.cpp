@@ -171,8 +171,12 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
     bool done = tokenType == endTokenType1 || tokenType == endTokenType2;
     while (!done)
     {
+        if (tokenType == Token::eIdentifier || Token::IsTypeName(tokenType))
+        {
+            typeExpression = new IdentifierExpression(iter->value, &*iter);
+        }
         // the lexer will give us two characters together as one token
-        if (tokenType == Token::eAmpersandAmpersand)
+        else if (tokenType == Token::eAmpersandAmpersand)
         {
             // create two tokens from one
             const Token* originalToken = &*iter;

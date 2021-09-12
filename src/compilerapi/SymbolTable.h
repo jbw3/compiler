@@ -9,6 +9,7 @@ namespace llvm
 class AllocaInst;
 } // namespace llvm
 
+class CompilerContext;
 class TypeInfo;
 
 class SymbolTable
@@ -26,7 +27,7 @@ public:
         }
     };
 
-    SymbolTable();
+    SymbolTable(CompilerContext& compilerContext);
 
     ~SymbolTable();
 

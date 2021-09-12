@@ -91,6 +91,13 @@ public:
         return fileTokens[id];
     }
 
+    void InitBasicTypes();
+
+    unsigned GetBasicTypeCount() const
+    {
+        return basicTypeCount;
+    }
+
     unsigned AddBoolConstantValue(bool value)
     {
         // encode the value in the index
@@ -156,6 +163,7 @@ public:
 private:
     std::vector<std::string> filenames;
     std::vector<TokenList> fileTokens;
+    unsigned basicTypeCount;
     std::vector<int64_t> intConstants;
     std::vector<std::vector<char>> strConstants;
     std::vector<RangeConstValue> rangeConstants;

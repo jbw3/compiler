@@ -60,6 +60,7 @@ LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext, const Config&
     builder(context),
     diBuilder(nullptr),
     module(nullptr),
+    symbolTable(compilerContext),
     currentFunction(nullptr),
     resultValue(nullptr),
     unitType(nullptr),

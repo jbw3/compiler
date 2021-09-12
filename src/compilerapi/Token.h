@@ -25,6 +25,11 @@ public:
         eBinaryOp = 0x0400,
     };
 
+    enum ETypeNameFlag : uint16_t
+    {
+        eTypeName = 0x0800,
+    };
+
     enum EType : uint16_t
     {
         eInvalid      = 0,
@@ -33,7 +38,7 @@ public:
         eIdentifier   = eIdentifierType,
 
         // keyword
-        eBool         = eKeywordType |  0,
+        eBool         = eKeywordType | eTypeName |  0,
         eBreak        = eKeywordType |  1,
         eCast         = eKeywordType |  2,
         eConst        = eKeywordType |  3,
@@ -44,20 +49,20 @@ public:
         eFor          = eKeywordType |  8,
         eFun          = eKeywordType |  9,
         eIf           = eKeywordType | 10,
-        eI8           = eKeywordType | 11,
-        eI16          = eKeywordType | 12,
-        eI32          = eKeywordType | 13,
-        eI64          = eKeywordType | 14,
+        eI8           = eKeywordType | eTypeName | 11,
+        eI16          = eKeywordType | eTypeName | 12,
+        eI32          = eKeywordType | eTypeName | 13,
+        eI64          = eKeywordType | eTypeName | 14,
         eIn           = eKeywordType | 15,
-        eISize        = eKeywordType | 16,
+        eISize        = eKeywordType | eTypeName | 16,
         eReturn       = eKeywordType | 17,
-        eStr          = eKeywordType | 18,
+        eStr          = eKeywordType | eTypeName | 18,
         eStruct       = eKeywordType | 19,
-        eU8           = eKeywordType | 20,
-        eU16          = eKeywordType | 21,
-        eU32          = eKeywordType | 22,
-        eU64          = eKeywordType | 23,
-        eUSize        = eKeywordType | 24,
+        eU8           = eKeywordType | eTypeName | 20,
+        eU16          = eKeywordType | eTypeName | 21,
+        eU32          = eKeywordType | eTypeName | 22,
+        eU64          = eKeywordType | eTypeName | 23,
+        eUSize        = eKeywordType | eTypeName | 24,
         eVar          = eKeywordType | 25,
         eWhile        = eKeywordType | 26,
 
@@ -139,6 +144,13 @@ public:
     static constexpr bool IsBinaryOp(EType type)
     {
         constexpr uint16_t mask = eSymbolType | eBinaryOp;
+        bool value = (type & mask) == mask;
+        return value;
+    }
+
+    static constexpr bool IsTypeName(EType type)
+    {
+        constexpr uint16_t mask = eKeywordType | eTypeName;
         bool value = (type & mask) == mask;
         return value;
     }

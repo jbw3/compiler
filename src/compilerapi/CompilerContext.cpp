@@ -62,7 +62,8 @@ void TokenValues::AppendChar(char ch)
     ++end;
 }
 
-CompilerContext::CompilerContext()
+CompilerContext::CompilerContext() :
+    basicTypeCount(0)
 {
 }
 
@@ -73,6 +74,24 @@ unsigned CompilerContext::AddFile(const string& filename)
     fileTokens.push_back(TokenList());
 
     return id;
+}
+
+void CompilerContext::InitBasicTypes()
+{
+    AddTypeConstantValue(TypeInfo::BoolType);
+    AddTypeConstantValue(TypeInfo::Int8Type);
+    AddTypeConstantValue(TypeInfo::Int16Type);
+    AddTypeConstantValue(TypeInfo::Int32Type);
+    AddTypeConstantValue(TypeInfo::Int64Type);
+    AddTypeConstantValue(TypeInfo::GetIntSizeType());
+    AddTypeConstantValue(TypeInfo::UInt8Type);
+    AddTypeConstantValue(TypeInfo::UInt16Type);
+    AddTypeConstantValue(TypeInfo::UInt32Type);
+    AddTypeConstantValue(TypeInfo::UInt64Type);
+    AddTypeConstantValue(TypeInfo::GetUIntSizeType());
+    AddTypeConstantValue(TypeInfo::GetStringType());
+
+    basicTypeCount = static_cast<unsigned>(typeConstants.size());
 }
 
 constexpr int64_t INT_ENCODE_THRESHOLD = 256;

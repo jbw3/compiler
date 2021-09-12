@@ -5,7 +5,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
+#include "CompilerContext.h"
 #include "SymbolTable.h"
+#include "TypeInfo.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/IR/Instructions.h"
 #ifdef _MSC_VER
@@ -17,9 +19,15 @@
 using namespace llvm;
 using namespace std;
 
-SymbolTable::SymbolTable()
+SymbolTable::SymbolTable(CompilerContext& compilerContext)
 {
     Push();
+
+    for (unsigned id = 0; id < compilerContext.GetBasicTypeCount(); ++id)
+    {
+        const TypeInfo* type = compilerContext.GetTypeConstantValue(id);
+        AddConstant(type->GetShortName(), TypeInfo::TypeType, id);
+    }
 }
 
 SymbolTable::~SymbolTable()
