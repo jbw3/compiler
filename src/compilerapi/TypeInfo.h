@@ -84,6 +84,7 @@ public:
     static const TypeInfo* UInt16Type;
     static const TypeInfo* UInt32Type;
     static const TypeInfo* UInt64Type;
+    static const TypeInfo* TypeType;
     static const TypeInfo* ImmutBoolType;
     static const TypeInfo* ImmutInt8Type;
     static const TypeInfo* ImmutInt16Type;
