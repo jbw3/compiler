@@ -126,7 +126,7 @@ public:
         eColon                      = eSymbolType | 43,
     };
 
-    static constexpr uint16_t MAIN_TYPE_MASK = 0xff00;
+    static constexpr uint16_t MAIN_TYPE_MASK = 0xf000;
 
     static constexpr EMainType GetMainType(EType type)
     {
@@ -136,6 +136,7 @@ public:
 
     static constexpr bool IsUnaryOp(EType type)
     {
+        // TODO: use GetMainType?
         constexpr uint16_t mask = eSymbolType | eUnaryOp;
         bool value = (type & mask) == mask;
         return value;
@@ -143,6 +144,7 @@ public:
 
     static constexpr bool IsBinaryOp(EType type)
     {
+        // TODO: use GetMainType?
         constexpr uint16_t mask = eSymbolType | eBinaryOp;
         bool value = (type & mask) == mask;
         return value;
@@ -150,9 +152,9 @@ public:
 
     static constexpr bool IsTypeName(EType type)
     {
-        constexpr uint16_t mask = eKeywordType | eTypeName;
-        bool value = (type & mask) == mask;
-        return value;
+        bool isKeyword = GetMainType(type) == eKeywordType;
+        bool isTypeName = (type & eTypeName) == eTypeName;
+        return isKeyword & isTypeName;
     }
 
     Token(const char* value, unsigned filenameId, unsigned line, unsigned column, EType type);

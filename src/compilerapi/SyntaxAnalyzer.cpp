@@ -168,100 +168,129 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
 {
     typeExpression = nullptr;
     Token::EType tokenType = iter->type;
-    bool done = tokenType == endTokenType1 || tokenType == endTokenType2;
-    while (!done)
+    if (tokenType == endTokenType1 || tokenType == endTokenType2)
     {
-        if (tokenType == Token::eIdentifier || Token::IsTypeName(tokenType))
+        typeExpression = nullptr;
+    }
+    else if (tokenType == Token::eIdentifier || Token::IsTypeName(tokenType))
+    {
+        typeExpression = new IdentifierExpression(iter->value, &*iter);
+
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
         {
-            typeExpression = new IdentifierExpression(iter->value, &*iter);
+            return false;
         }
-        // the lexer will give us two characters together as one token
-        else if (tokenType == Token::eAmpersandAmpersand)
+    }
+    else if (tokenType == Token::eAmpersand)
+    {
+        const Token* opToken = &*iter;
+
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
         {
-            // create two tokens from one
-            const Token* originalToken = &*iter;
-
-            // TODO: Memory leak. Someday, I should fix this...
-            Token* token1 =
-                new Token(POINTER_TYPE_TOKEN,
-                          originalToken->filenameId,
-                          originalToken->line,
-                          originalToken->column,
-                          Token::eAmpersand);
-            Token* token2 =
-                new Token(POINTER_TYPE_TOKEN,
-                          originalToken->filenameId,
-                          originalToken->line,
-                          originalToken->column + 1,
-                          Token::eAmpersand);
-
-            // TODO
-        }
-        else if (tokenType == Token::eFun)
-        {
-            const Token* funToken = &*iter;
-            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
-            {
-                return false;
-            }
-            if (iter->type != Token::eOpenPar)
-            {
-                logger.LogError(*iter, "Expected '('");
-                return false;
-            }
-
-            // TODO: parse parameters
-            vector<Expression*> paramTypes;
-            vector<string> paramNames;
-            vector<const Token*> paramNameTokens;
-
-            // increment past '('
-            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
-            {
-                return false;
-            }
-            if (iter->type != Token::eClosePar)
-            {
-                logger.LogError(*iter, "Expected ')'");
-                return false;
-            }
-
-            // parse return type
-            Expression* returnType = nullptr;
-            TokenIterator nextIter = iter + 1;
-            if (nextIter != endIter
-            && nextIter->type != Token::eCloseBracket // TODO: fix this 'cause it's a bit hacky
-            && nextIter->type != endTokenType1
-            && nextIter->type != endTokenType2)
-            {
-                ++iter;
-                bool ok = ProcessType(iter, endIter, returnType, endTokenType1, endTokenType2);
-                if (!ok)
-                {
-                    return false;
-                }
-
-                tokenType = iter->type;
-                done = tokenType == endTokenType1 || tokenType == endTokenType2;
-            }
-
-            typeExpression = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, paramNameTokens);
-        }
-        else
-        {
-            logger.LogError(*iter, "Unknown token in type expression: '{}'", iter->value);
             return false;
         }
 
-        if (!done)
+        Expression* innerTypeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, innerTypeExpr, endTokenType1, endTokenType2);
+        if (!ok)
         {
-            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+            return false;
+        }
+
+        typeExpression = new UnaryExpression(UnaryExpression::eAddressOf, innerTypeExpr, opToken);
+    }
+    // the lexer will give us two characters together as one token
+    else if (tokenType == Token::eAmpersandAmpersand)
+    {
+        // create two tokens from one
+        const Token* originalToken = &*iter;
+
+        // TODO: Memory leak. Someday, I should fix this...
+        Token* token1 =
+            new Token(POINTER_TYPE_TOKEN,
+                      originalToken->filenameId,
+                      originalToken->line,
+                      originalToken->column,
+                      Token::eAmpersand);
+        Token* token2 =
+            new Token(POINTER_TYPE_TOKEN,
+                      originalToken->filenameId,
+                      originalToken->line,
+                      originalToken->column + 1,
+                      Token::eAmpersand);
+
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return false;
+        }
+
+        Expression* innerTypeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, innerTypeExpr, endTokenType1, endTokenType2);
+        if (!ok)
+        {
+            return false;
+        }
+
+        typeExpression = new UnaryExpression(UnaryExpression::eAddressOf, innerTypeExpr, token2);
+        typeExpression = new UnaryExpression(UnaryExpression::eAddressOf, typeExpression, token1);
+    }
+    else if (tokenType == Token::eFun)
+    {
+        const Token* funToken = &*iter;
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return false;
+        }
+        if (iter->type != Token::eOpenPar)
+        {
+            logger.LogError(*iter, "Expected '('");
+            return false;
+        }
+
+        // TODO: parse parameters
+        vector<Expression*> paramTypes;
+        vector<string> paramNames;
+        vector<const Token*> paramNameTokens;
+
+        // increment past '('
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return false;
+        }
+        if (iter->type != Token::eClosePar)
+        {
+            logger.LogError(*iter, "Expected ')'");
+            return false;
+        }
+
+        // parse return type
+        Expression* returnType = nullptr;
+        TokenIterator nextIter = iter + 1;
+        if (nextIter != endIter
+        && nextIter->type != Token::eCloseBracket // TODO: fix this 'cause it's a bit hacky
+        && nextIter->type != endTokenType1
+        && nextIter->type != endTokenType2)
+        {
+            ++iter;
+            bool ok = ProcessType(iter, endIter, returnType, endTokenType1, endTokenType2);
+            if (!ok)
             {
                 return false;
             }
-            tokenType = iter->type;
-            done = tokenType == endTokenType1 || tokenType == endTokenType2;
         }
+
+        typeExpression = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, paramNameTokens);
+    }
+    else
+    {
+        logger.LogError(*iter, "Unknown token in type expression: '{}'", iter->value);
+        return false;
+    }
+
+    if (iter->type != endTokenType1 && iter->type != endTokenType2)
+    {
+        logger.LogError(*iter, "Unknown token in type expression: '{}'", iter->value);
+        return false;
     }
 
     return true;

@@ -75,10 +75,29 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
             break;
 
         case UnaryExpression::eAddressOf:
-            ok = subExpr->GetIsStorage();
-            subExpr->SetAccessType(Expression::eAddress);
-            resultType = TypeInfo::GetPointerToType(subExprType);
+        {
+            if (subExprType->IsType())
+            {
+                if (subExpr->GetIsConstant())
+                {
+                    const TypeInfo* subExprValue = compilerContext.GetTypeConstantValue(subExpr->GetConstantValueIndex());
+                    const TypeInfo* exprValue = TypeInfo::GetPointerToType(subExprValue);
+                    unsigned idx = compilerContext.AddTypeConstantValue(exprValue);
+                    unaryExpression->SetConstantValueIndex(idx);
+
+                    ok = true;
+                    resultType = TypeInfo::TypeType;
+                }
+                // TODO: log specific error message if subExpr is not a constant
+            }
+            else
+            {
+                ok = subExpr->GetIsStorage();
+                subExpr->SetAccessType(Expression::eAddress);
+                resultType = TypeInfo::GetPointerToType(subExprType);
+            }
             break;
+        }
 
         case UnaryExpression::eDereference:
             ok = subExprType->IsPointer();
