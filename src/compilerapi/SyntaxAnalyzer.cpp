@@ -234,6 +234,30 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
         typeExpression = new UnaryExpression(UnaryExpression::eAddressOf, innerTypeExpr, token2);
         typeExpression = new UnaryExpression(UnaryExpression::eAddressOf, typeExpression, token1);
     }
+    else if (tokenType == Token::eOpenBracket)
+    {
+        const Token* opToken = &*iter;
+
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return false;
+        }
+
+        Expression* innerTypeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, innerTypeExpr, Token::eCloseBracket);
+        if (!ok)
+        {
+            return false;
+        }
+
+        // increment past ']'
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return false;
+        }
+
+        typeExpression = new UnaryExpression(UnaryExpression::eArrayOf, innerTypeExpr, opToken);
+    }
     else if (tokenType == Token::eFun)
     {
         const Token* funToken = &*iter;

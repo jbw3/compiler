@@ -235,6 +235,7 @@ public:
         eComplement  = Token::eExclaim,
         eAddressOf   = Token::eAmpersand,
         eDereference = Token::eTimes,
+        eArrayOf     = Token::eOpenBracket,
     };
 
     static std::string GetOperatorString(EOperator op);

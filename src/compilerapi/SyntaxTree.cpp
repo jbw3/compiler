@@ -468,6 +468,8 @@ string UnaryExpression::GetOperatorString(EOperator op)
             return "&";
         case UnaryExpression::eDereference:
             return "*";
+        case UnaryExpression::eArrayOf:
+            return "[]";
     }
 
     // we should never get here

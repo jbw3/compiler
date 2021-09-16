@@ -104,6 +104,25 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
             resultType = subExprType->GetInnerType();
             unaryExpression->SetIsStorage(subExpr->GetIsStorage());
             break;
+
+        case UnaryExpression::eArrayOf:
+        {
+            if (subExprType->IsType())
+            {
+                if (subExpr->GetIsConstant())
+                {
+                    const TypeInfo* subExprValue = compilerContext.GetTypeConstantValue(subExpr->GetConstantValueIndex());
+                    const TypeInfo* exprValue = TypeInfo::GetArrayOfType(subExprValue);
+                    unsigned idx = compilerContext.AddTypeConstantValue(exprValue);
+                    unaryExpression->SetConstantValueIndex(idx);
+
+                    ok = true;
+                    resultType = TypeInfo::TypeType;
+                }
+                // TODO: log specific error message if subExpr is not a constant
+            }
+            break;
+        }
     }
 
     if (!ok)
