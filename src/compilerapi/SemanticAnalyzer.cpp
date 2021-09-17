@@ -1628,6 +1628,15 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
     }
 
     structDefinition->type = newType;
+
+    unsigned idx = compilerContext.AddTypeConstantValue(newType);
+    bool ok = symbolTable.AddConstant(structName, TypeInfo::TypeType, idx);
+    if (!ok)
+    {
+        isError = true;
+        logger.LogError(*structDefinition->nameToken, "Identifier '{}' has already been declared", structName);
+        return;
+    }
 }
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
