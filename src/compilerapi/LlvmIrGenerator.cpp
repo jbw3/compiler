@@ -111,6 +111,10 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             }
             break;
         }
+        case UnaryExpression::eArrayOf:
+            resultValue = nullptr;
+            logger.LogInternalError("Cannot generate LLVM IR for eArrayOf operator");
+            break;
     }
 }
 
