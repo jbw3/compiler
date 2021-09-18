@@ -762,7 +762,7 @@ FunctionDeclaration::~FunctionDeclaration()
 }
 
 FunctionTypeExpression::FunctionTypeExpression(
-    const vector<Expression*>& paramTypeExpressions,
+    const Expressions& paramTypeExpressions,
     const vector<string>& paramNames,
     Expression* returnTypeExpression,
     const Token* funToken,

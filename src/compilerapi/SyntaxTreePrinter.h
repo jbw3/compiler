@@ -164,6 +164,8 @@ private:
         PrintProperty(name, values, fun);
     }
 
+    void PrintProperty(const std::string& name, const std::vector<std::string>& values);
+
     void Print(const std::string& str);
 };
 

@@ -115,7 +115,12 @@ void SyntaxTreePrinter::Visit(Return* ret)
 
 void SyntaxTreePrinter::Visit(FunctionTypeExpression* functionTypeExpression)
 {
-    // TODO
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "FunctionTypeExpression");
+    PrintProperty("paramTypeExpressions", functionTypeExpression->paramTypeExpressions);
+    PrintProperty("paramNames", functionTypeExpression->paramNames);
+    PrintProperty("returnTypeExpression", functionTypeExpression->returnTypeExpression);
 }
 
 void SyntaxTreePrinter::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
@@ -478,9 +483,21 @@ void SyntaxTreePrinter::PrintProperty(const string& name, SyntaxTreeNode* value)
     }
 
     PrintString(name);
-    Print(":\n");
+    if (value == nullptr)
+    {
+        Print(": null");
+    }
+    else
+    {
+        Print(":\n");
+        value->Accept(this);
+    }
+}
 
-    value->Accept(this);
+void SyntaxTreePrinter::PrintProperty(const string& name, const vector<string>& values)
+{
+    function<void (string)> fun = [this](string s){ PrintString(s); };
+    PrintProperty(name, values, fun);
 }
 
 void SyntaxTreePrinter::Print(const string& str)
