@@ -302,6 +302,14 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
                 return false;
             }
         }
+        else
+        {
+            // increment past ')'
+            if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+            {
+                return false;
+            }
+        }
 
         typeExpression = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, paramNameTokens);
     }

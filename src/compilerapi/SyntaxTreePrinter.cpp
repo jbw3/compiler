@@ -113,6 +113,11 @@ void SyntaxTreePrinter::Visit(Return* ret)
     PrintProperty("expression", ret->expression);
 }
 
+void SyntaxTreePrinter::Visit(FunctionTypeExpression* functionTypeExpression)
+{
+    // TODO
+}
+
 void SyntaxTreePrinter::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
     BracePrinter printer(*this, "{", "}");

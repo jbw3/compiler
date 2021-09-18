@@ -799,6 +799,11 @@ void LlvmIrGenerator::Visit(Return* ret)
     resultValue = ConstantStruct::get(unitType);
 }
 
+void LlvmIrGenerator::Visit(FunctionTypeExpression* functionTypeExpression)
+{
+    // TODO
+}
+
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
 {
     // nothing to do here

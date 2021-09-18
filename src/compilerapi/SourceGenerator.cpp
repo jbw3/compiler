@@ -146,6 +146,11 @@ void SourceGenerator::Visit(Return* ret)
     ret->expression->Accept(this);
 }
 
+void SourceGenerator::Visit(FunctionTypeExpression* functionTypeExpression)
+{
+    // TODO
+}
+
 void SourceGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
     *os << "extern ";

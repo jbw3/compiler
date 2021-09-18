@@ -15,6 +15,7 @@ class ExternFunctionDeclaration;
 class ForLoop;
 class FunctionDefinition;
 class FunctionExpression;
+class FunctionTypeExpression;
 class IdentifierExpression;
 class ImplicitCastExpression;
 class LoopControl;
@@ -46,6 +47,8 @@ public:
     virtual void Visit(SyntaxTree::LoopControl* loopControl) = 0;
 
     virtual void Visit(SyntaxTree::Return* ret) = 0;
+
+    virtual void Visit(SyntaxTree::FunctionTypeExpression* functionTypeExpression) = 0;
 
     virtual void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) = 0;
 

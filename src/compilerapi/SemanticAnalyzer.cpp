@@ -1526,6 +1526,65 @@ void SemanticAnalyzer::Visit(Return* ret)
     }
 }
 
+void SemanticAnalyzer::Visit(FunctionTypeExpression* functionTypeExpression)
+{
+    functionTypeExpression->SetType(TypeInfo::TypeType);
+
+    // process param types
+    vector<const TypeInfo*> paramTypes;
+    size_t numParams = functionTypeExpression->paramTypeExpressions.size();
+    for (size_t i = 0; i < numParams; ++i)
+    {
+        Expression* paramTypeExpr = functionTypeExpression->paramTypeExpressions[i];
+        paramTypeExpr->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        const TypeInfo* paramType = TypeExpressionToType(paramTypeExpr, functionTypeExpression->paramNameTokens[i]);
+        if (paramType == nullptr)
+        {
+            isError = true;
+            return;
+        }
+
+        paramTypes.push_back(paramType);
+    }
+
+    // process return type
+    const TypeInfo* returnType = nullptr;
+    Expression* returnTypeExpr = functionTypeExpression->returnTypeExpression;
+    if (returnTypeExpr == nullptr)
+    {
+        returnType = TypeInfo::UnitType;
+    }
+    else
+    {
+        returnTypeExpr->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        returnType = TypeExpressionToType(functionTypeExpression->returnTypeExpression, functionTypeExpression->funToken);
+        if (returnType == nullptr)
+        {
+            isError = true;
+            return;
+        }
+    }
+
+    const TypeInfo* funType =
+        TypeInfo::GetFunctionType(
+            paramTypes,
+            functionTypeExpression->paramNames,
+            returnType
+        );
+    unsigned idx = compilerContext.AddTypeConstantValue(funType);
+    functionTypeExpression->SetConstantValueIndex(idx);
+}
+
 void SemanticAnalyzer::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
 {
     const FunctionDeclaration* funcDecl = externFunctionDeclaration->declaration;

@@ -29,6 +29,8 @@ public:
 
     void Visit(SyntaxTree::Return* ret) override;
 
+    void Visit(SyntaxTree::FunctionTypeExpression* functionTypeExpression) override;
+
     void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) override;
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;

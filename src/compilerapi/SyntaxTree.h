@@ -487,7 +487,7 @@ class FunctionTypeExpression : public Expression
 {
 public:
     FunctionTypeExpression(
-        const std::vector<Expression*>& paramTypes,
+        const std::vector<Expression*>& paramTypeExpressions,
         const std::vector<std::string>& paramNames,
         Expression* returnTypeExpression,
         const Token* funToken,
@@ -500,7 +500,7 @@ public:
 
     const Token* funToken;
     std::vector<const Token*> paramNameTokens;
-    std::vector<Expression*> paramTypes;
+    std::vector<Expression*> paramTypeExpressions;
     std::vector<std::string> paramNames;
     Expression* returnTypeExpression;
 };

@@ -762,7 +762,7 @@ FunctionDeclaration::~FunctionDeclaration()
 }
 
 FunctionTypeExpression::FunctionTypeExpression(
-    const vector<Expression*>& paramTypes,
+    const vector<Expression*>& paramTypeExpressions,
     const vector<string>& paramNames,
     Expression* returnTypeExpression,
     const Token* funToken,
@@ -770,7 +770,7 @@ FunctionTypeExpression::FunctionTypeExpression(
 ) :
     funToken(funToken),
     paramNameTokens(paramNameTokens),
-    paramTypes(paramTypes),
+    paramTypeExpressions(paramTypeExpressions),
     paramNames(paramNames),
     returnTypeExpression(returnTypeExpression)
 {
@@ -778,13 +778,13 @@ FunctionTypeExpression::FunctionTypeExpression(
 
 FunctionTypeExpression::~FunctionTypeExpression()
 {
-    deletePointerContainer(paramTypes);
+    deletePointerContainer(paramTypeExpressions);
     delete returnTypeExpression;
 }
 
 void FunctionTypeExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO
+    visitor->Visit(this);
 }
 
 ExternFunctionDeclaration::ExternFunctionDeclaration(FunctionDeclaration* declaration) :
