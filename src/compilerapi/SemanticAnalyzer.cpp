@@ -1687,15 +1687,6 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
     }
 
     structDefinition->type = newType;
-
-    unsigned idx = compilerContext.AddTypeConstantValue(newType);
-    bool ok = symbolTable.AddConstant(structName, TypeInfo::TypeType, idx);
-    if (!ok)
-    {
-        isError = true;
-        logger.LogError(*structDefinition->nameToken, "Identifier '{}' has already been declared", structName);
-        return;
-    }
 }
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
@@ -1924,11 +1915,22 @@ bool SemanticAnalyzer::ResolveDependencies(
     // register the type name. we'll add its members later
     AggregateType* newType = new AggregateType(structName, structDef->nameToken);
     partialStructTypes.insert({structName, newType});
+
+    // TODO: Is this needed?
     bool added = TypeInfo::RegisterType(newType);
     if (!added)
     {
         delete newType;
         logger.LogError(*structDef->nameToken, "Struct '{}' has already been defined", structName);
+        return false;
+    }
+
+    unsigned idx = compilerContext.AddTypeConstantValue(newType);
+    bool ok = symbolTable.AddConstant(structName, TypeInfo::TypeType, idx);
+    if (!ok)
+    {
+        delete newType;
+        logger.LogError(*structDef->nameToken, "Identifier '{}' has already been declared", structName);
         return false;
     }
 
