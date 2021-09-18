@@ -585,6 +585,13 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             return nullptr;
         }
 
+        // make sure there was a type
+        if (memberTypeExpr == nullptr)
+        {
+            logger.LogError(*iter, "Expected a member type");
+            return nullptr;
+        }
+
         MemberDefinition* member = new MemberDefinition(memberName, memberTypeExpr, memberNameToken);
         members.push_back(member);
 
