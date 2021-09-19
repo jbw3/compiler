@@ -94,10 +94,6 @@ private:
 
     const TypeInfo* TypeExpressionToType(SyntaxTree::Expression* typeExpression, const Token* errorToken);
 
-    const TypeInfo* NameToType(const std::vector<const Token*>& typeNameTokens);
-
-    const TypeInfo* NameToType(const std::vector<const Token*>& typeNameTokens, size_t& idx);
-
     bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
 
     bool HaveCompatibleAssignmentSizes(const TypeInfo* assignType, const TypeInfo* exprType);
