@@ -803,9 +803,10 @@ void LlvmIrGenerator::Visit(Return* ret)
     resultValue = ConstantStruct::get(unitType);
 }
 
-void LlvmIrGenerator::Visit(FunctionTypeExpression* functionTypeExpression)
+void LlvmIrGenerator::Visit(FunctionTypeExpression* /*functionTypeExpression*/)
 {
-    // TODO
+    resultValue = nullptr;
+    logger.LogInternalError("Cannot generate LLVM IR for FunctionTypeExpression");
 }
 
 void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
