@@ -252,7 +252,7 @@ const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDec
         uniqueName += parameters[0]->type->GetUniqueName();
         name += parameters[0]->type->GetShortName();
 
-        for (size_t i = 0; i < parameters.size(); ++i)
+        for (size_t i = 1; i < parameters.size(); ++i)
         {
             const TypeInfo* paramType = parameters[i]->type;
 
@@ -307,7 +307,7 @@ const TypeInfo* TypeInfo::GetFunctionType(
         uniqueName += parameterTypes[0]->GetUniqueName();
         name += parameterTypes[0]->GetShortName();
 
-        for (size_t i = 0; i < paramSize; ++i)
+        for (size_t i = 1; i < paramSize; ++i)
         {
             const TypeInfo* paramType = parameterTypes[i];
 

@@ -271,19 +271,58 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
             return false;
         }
 
-        // TODO: parse parameters
-        vector<Expression*> paramTypes;
+        // parse parameters
         vector<string> paramNames;
         vector<const Token*> paramNameTokens;
+        vector<Expression*> paramTypes;
 
         // increment past '('
         if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
         {
             return false;
         }
-        if (iter->type != Token::eClosePar)
+
+        while (iter != endIter && iter->type != Token::eClosePar)
         {
-            logger.LogError(*iter, "Expected ')'");
+            if (iter->type != Token::eIdentifier)
+            {
+                logger.LogError(*iter, "Invalid parameter name: '{}'", iter->value);
+                return false;
+            }
+
+            paramNames.push_back(iter->value);
+            paramNameTokens.push_back(&*iter);
+
+            if (!IncrementIterator(iter, endIter, "Expected a type"))
+            {
+                return false;
+            }
+
+            Expression* paramTypeExpr = nullptr;
+            bool ok = ProcessType(iter, endIter, paramTypeExpr, Token::eComma, Token::eClosePar);
+            if (!ok)
+            {
+                return false;
+            }
+
+            // make sure there was a type
+            if (paramTypeExpr == nullptr)
+            {
+                logger.LogError(*iter, "Expected a parameter type");
+                return false;
+            }
+
+            paramTypes.push_back(paramTypeExpr);
+
+            if (iter->type != Token::eClosePar)
+            {
+                ++iter;
+            }
+        }
+
+        if (iter == endIter)
+        {
+            logger.LogError("Expected ')'");
             return false;
         }
 

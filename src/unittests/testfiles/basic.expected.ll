@@ -3233,8 +3233,28 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
+define %UnitType @ftype4(i32 %x) #0 {
+entry:
+  %x1 = alloca i32, align 4
+  store i32 %x, i32* %x1, align 4
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @ftype5(i32 %x, i1 %y) #0 {
+entry:
+  %y2 = alloca i1, align 1
+  %x1 = alloca i32, align 4
+  store i32 %x, i32* %x1, align 4
+  store i1 %y, i1* %y2, align 1
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
 define %UnitType @function_type() #0 {
 entry:
+  %f5 = alloca %UnitType (i32, i1)*, align 8
+  %f4 = alloca %UnitType (i32)*, align 8
   %f3 = alloca i32 ()*, align 8
   %f2 = alloca %UnitType ()*, align 8
   %f1 = alloca %UnitType ()*, align 8
@@ -3250,6 +3270,12 @@ entry:
   store i32 ()* @ftype3, i32 ()** %f3, align 8
   %f35 = load i32 ()*, i32 ()** %f3, align 8
   %call6 = call i32 %f35()
+  store %UnitType (i32)* @ftype4, %UnitType (i32)** %f4, align 8
+  %f47 = load %UnitType (i32)*, %UnitType (i32)** %f4, align 8
+  %call8 = call %UnitType %f47(i32 123)
+  store %UnitType (i32, i1)* @ftype5, %UnitType (i32, i1)** %f5, align 8
+  %f59 = load %UnitType (i32, i1)*, %UnitType (i32, i1)** %f5, align 8
+  %call10 = call %UnitType %f59(i32 456, i1 true)
   ret %UnitType zeroinitializer
 }
 

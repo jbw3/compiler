@@ -1010,8 +1010,9 @@ fun consts()
 
 fun ftype1(){}
 fun ftype2(){}
-
 fun ftype3() i32 {3}
+fun ftype4(x i32){}
+fun ftype5(x i32, y bool){}
 
 fun function_type()
 {
@@ -1025,4 +1026,10 @@ fun function_type()
 
     var f3 fun() i32 = ftype3;
     f3();
+
+    var f4 fun(a i32) = ftype4;
+    f4(123);
+
+    var f5 fun(a i32, b bool,) = ftype5;
+    f5(456, true);
 }
