@@ -136,18 +136,16 @@ public:
 
     static constexpr bool IsUnaryOp(EType type)
     {
-        // TODO: use GetMainType?
-        constexpr uint16_t mask = eSymbolType | eUnaryOp;
-        bool value = (type & mask) == mask;
-        return value;
+        bool isSymbol = GetMainType(type) == eSymbolType;
+        bool isUnaryOp = (type & eUnaryOp) == eUnaryOp;
+        return isSymbol & isUnaryOp;
     }
 
     static constexpr bool IsBinaryOp(EType type)
     {
-        // TODO: use GetMainType?
-        constexpr uint16_t mask = eSymbolType | eBinaryOp;
-        bool value = (type & mask) == mask;
-        return value;
+        bool isSymbol = GetMainType(type) == eSymbolType;
+        bool isBinaryOp = (type & eBinaryOp) == eBinaryOp;
+        return isSymbol & isBinaryOp;
     }
 
     static constexpr bool IsTypeName(EType type)
