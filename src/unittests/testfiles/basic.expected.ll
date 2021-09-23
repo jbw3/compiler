@@ -3251,8 +3251,16 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
+define i32 ()* @ftype6() #0 {
+entry:
+  ret i32 ()* @ftype3
+}
+
+; Function Attrs: noinline nounwind optnone
 define %UnitType @function_type() #0 {
 entry:
+  %f7 = alloca i32 ()*, align 8
+  %f6 = alloca i32 ()* ()*, align 8
   %f5 = alloca %UnitType (i32, i1)*, align 8
   %f4 = alloca %UnitType (i32)*, align 8
   %f3 = alloca i32 ()*, align 8
@@ -3276,6 +3284,12 @@ entry:
   store %UnitType (i32, i1)* @ftype5, %UnitType (i32, i1)** %f5, align 8
   %f59 = load %UnitType (i32, i1)*, %UnitType (i32, i1)** %f5, align 8
   %call10 = call %UnitType %f59(i32 456, i1 true)
+  store i32 ()* ()* @ftype6, i32 ()* ()** %f6, align 8
+  %f611 = load i32 ()* ()*, i32 ()* ()** %f6, align 8
+  %call12 = call i32 ()* %f611()
+  store i32 ()* %call12, i32 ()** %f7, align 8
+  %f713 = load i32 ()*, i32 ()** %f7, align 8
+  %call14 = call i32 %f713()
   ret %UnitType zeroinitializer
 }
 
