@@ -120,7 +120,10 @@ void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsi
         *os << ":";
     }
 
-    *os << " ";
+    if (!filename.empty() || line > 0 || column > 0)
+    {
+        *os << " ";
+    }
 
     if (printColors)
     {

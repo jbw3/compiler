@@ -1,4 +1,5 @@
 #include "CHeaderPrinter.h"
+#include "ErrorLogger.h"
 #include "keywords.h"
 #include <fstream>
 #include <iostream>
@@ -6,6 +7,12 @@
 using namespace std;
 using namespace SyntaxTree;
 
+CHeaderPrinter::CHeaderPrinter(ErrorLogger& logger) :
+    logger(logger)
+{
+}
+
+// TODO: write to temp file; then move temp file to output file
 bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
 {
     string outFilename = GetOutFilename(config);
@@ -314,8 +321,8 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, const string&
     }
     else
     {
-        // TODO: use error logger
-        cerr << "Unsupported type\n";
+        logger.LogError("C header printer does not support type '{}'", type->GetShortName());
+
         return false;
     }
 }
@@ -359,6 +366,17 @@ bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
     {
         const TypeInfo* innerType = arrayType->GetInnerType();
 
+        const TypeInfo* testType = innerType;
+        while (testType->IsPointer())
+        {
+            testType = testType->GetInnerType();
+        }
+        if (testType->IsFunction())
+        {
+            logger.LogError("C header printer does not support arrays of function pointers");
+            return false;
+        }
+
         if (innerType->IsArray())
         {
             if (!PrintArrayStruct(os, innerType))
@@ -373,7 +391,7 @@ bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
               "{\n"
               "    size_t Size;\n"
               "    ";
-        if (!PrintCType(os, innerType, ""/*TODO: does this work for arrays of function pointers?*/))
+        if (!PrintCType(os, innerType, ""))
         {
             return false;
         }

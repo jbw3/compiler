@@ -98,7 +98,7 @@ private:
     template<typename... Ts>
     void LogMessage(const char* tag, const char* format, Ts... args)
     {
-        *os << tag << ": ";
+        WriteHeader(tag, "", 0, 0);
         Write(format, args...);
         *os << '\n';
     }

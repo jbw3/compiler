@@ -5,12 +5,17 @@
 #include "SyntaxTree.h"
 #include <unordered_set>
 
+class ErrorLogger;
+
 class CHeaderPrinter
 {
 public:
+    CHeaderPrinter(ErrorLogger& logger);
+
     bool Print(const Config& config, const SyntaxTree::Modules* modules);
 
 private:
+    ErrorLogger& logger;
     std::unordered_set<std::string> arrayTypeNames;
 
     std::string GetOutFilename(const Config& config);
