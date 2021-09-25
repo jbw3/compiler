@@ -57,12 +57,12 @@ bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
             const TypeInfo* memberType = memberInfo->GetType();
 
             outFile << "    ";
-            if (!PrintCType(outFile, memberType))
+            if (!PrintCType(outFile, memberType, member->name))
             {
                 return false;
             }
 
-            outFile << " " << member->name << ";\n";
+            outFile << ";\n";
         }
 
         outFile << "};\n\n";
@@ -97,7 +97,7 @@ bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
                 }
             }
 
-            if (!PrintCType(outFile, returnType))
+            if (!PrintCType(outFile, returnType, ""))
             {
                 return false;
             }
@@ -109,12 +109,11 @@ bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
             for (size_t i = 0; i < numParams; ++i)
             {
                 const Parameter* param = params[i];
-                if (!PrintCType(outFile, param->type))
+                if (!PrintCType(outFile, param->type, param->name))
                 {
                     return false;
                 }
 
-                outFile << " " << param->name;
                 if (i < numParams - 1)
                 {
                     outFile << ", ";
@@ -212,16 +211,26 @@ void PrintArrayName(ostream& os, const TypeInfo* arrayType)
     os << innerType->GetShortName();
 }
 
-bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
+void printVarName(ostream& os, const string& varName)
+{
+    if (!varName.empty())
+    {
+        os << ' ' << varName;
+    }
+}
+
+bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, const string& varName)
 {
     if (type->IsSameAs(*TypeInfo::UnitType))
     {
         os << "void";
+        printVarName(os, varName);
         return true;
     }
     else if (type->IsBool())
     {
         os << "bool";
+        printVarName(os, varName);
         return true;
     }
     else if (type->IsInt())
@@ -245,32 +254,63 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
             os << "int" << type->GetNumBits() << "_t";
         }
 
+        printVarName(os, varName);
         return true;
     }
     else if (type->IsPointer())
     {
-        if (!PrintCType(os, type->GetInnerType()))
+        unsigned pointerCount = 1;
+        const TypeInfo* innerType = type->GetInnerType();
+        while (innerType->IsPointer())
         {
-            return false;
+            ++pointerCount;
+            innerType = innerType->GetInnerType();
         }
 
-        os << "*";
+        if (innerType->IsFunction())
+        {
+            if (!PrintCFunctionType(os, innerType, varName, pointerCount))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (!PrintCType(os, innerType, ""))
+            {
+                return false;
+            }
+
+            for (unsigned i = 0; i < pointerCount; ++i)
+            {
+                os << '*';
+            }
+            printVarName(os, varName);
+        }
+
         return true;
     }
     else if (type->IsSameAs(*TypeInfo::GetStringType()))
     {
         os << "struct str";
+        printVarName(os, varName);
         return true;
     }
     else if (type->IsArray())
     {
         PrintArrayName(os, type);
+        printVarName(os, varName);
         return true;
     }
     else if (type->IsAggregate())
     {
         os << "struct " << type->GetShortName();
+        printVarName(os, varName);
         return true;
+    }
+    else if (type->IsFunction())
+    {
+        return PrintCFunctionType(os, type, varName, 0);
     }
     else
     {
@@ -278,6 +318,38 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type)
         cerr << "Unsupported type\n";
         return false;
     }
+}
+
+bool CHeaderPrinter::PrintCFunctionType(std::ostream& os, const TypeInfo* type, const std::string& varName, unsigned pointerCount)
+{
+    if (!PrintCType(os, type->GetReturnType(), ""))
+    {
+        return false;
+    }
+    os << " (*";
+    for (unsigned i = 0; i < pointerCount; ++i)
+    {
+        os << '*';
+    }
+    os << varName << ")(";
+
+    size_t numParams = type->GetParamTypes().size();
+    for (size_t i = 0; i < numParams; ++i)
+    {
+        if (!PrintCType(os, type->GetParamTypes()[i], type->GetParamNames()[i]))
+        {
+            return false;
+        }
+
+        if (i < numParams - 1)
+        {
+            os << ", ";
+        }
+    }
+
+    os << ")";
+
+    return true;
 }
 
 bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
@@ -301,7 +373,7 @@ bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
               "{\n"
               "    size_t Size;\n"
               "    ";
-        if (!PrintCType(os, innerType))
+        if (!PrintCType(os, innerType, ""/*TODO: does this work for arrays of function pointers?*/))
         {
             return false;
         }

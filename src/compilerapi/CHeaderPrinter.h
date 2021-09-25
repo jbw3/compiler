@@ -17,7 +17,9 @@ private:
 
     std::string GetFilenameMacro(const std::string& outFilename);
 
-    bool PrintCType(std::ostream& os, const TypeInfo* type);
+    bool PrintCType(std::ostream& os, const TypeInfo* type, const std::string& varName);
+
+    bool PrintCFunctionType(std::ostream& os, const TypeInfo* type, const std::string& varName, unsigned pointerCount);
 
     bool PrintArrayStruct(std::ostream& os, const TypeInfo* arrayType);
 };
