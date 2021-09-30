@@ -191,8 +191,19 @@ unsigned CompilerContext::AddFunctionConstantValue(const SyntaxTree::FunctionDec
 
 unsigned CompilerContext::AddTypeConstantValue(const TypeInfo* value)
 {
-    unsigned id = static_cast<unsigned>(typeConstants.size());
-    typeConstants.push_back(value);
+    unsigned id = 0;
+    const string& uniqueName = value->GetUniqueName();
+    auto iter = typeConstantsIdMap.find(uniqueName);
+    if (iter != typeConstantsIdMap.cend())
+    {
+        id = iter->second;
+    }
+    else
+    {
+        id = static_cast<unsigned>(typeConstants.size());
+        typeConstants.push_back(value);
+        typeConstantsIdMap.insert({uniqueName, id});
+    }
 
     return id;
 }

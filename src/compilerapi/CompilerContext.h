@@ -170,6 +170,8 @@ private:
     std::vector<StructConstValue> structConstants;
     std::vector<ArrayConstValue> arrayConstants;
     std::vector<const SyntaxTree::FunctionDeclaration*> functionConstants;
+
+    std::unordered_map<std::string, unsigned> typeConstantsIdMap;
     std::vector<const TypeInfo*> typeConstants;
 };
 
