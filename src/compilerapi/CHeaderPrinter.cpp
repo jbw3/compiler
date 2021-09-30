@@ -104,6 +104,18 @@ bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
                 }
             }
 
+            // check return type
+            const TypeInfo* innerReturnType = returnType;
+            while (innerReturnType->IsPointer())
+            {
+                innerReturnType = innerReturnType->GetInnerType();
+            }
+            if (innerReturnType->IsFunction())
+            {
+                logger.LogError("C header printer does not support function return types");
+                return false;
+            }
+
             if (!PrintCType(outFile, returnType, ""))
             {
                 return false;
