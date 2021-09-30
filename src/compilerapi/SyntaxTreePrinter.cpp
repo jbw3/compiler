@@ -433,6 +433,7 @@ void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* decl
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionDeclaration");
     PrintProperty("name", declaration->name);
     PrintProperty("parameters", declaration->parameters, printParameter);
+    PrintProperty("returnTypeExpression", declaration->returnTypeExpression);
 }
 
 void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
