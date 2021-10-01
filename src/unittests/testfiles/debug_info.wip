@@ -143,13 +143,13 @@ fun ret2(a i32, p &i32)
     (*p) = a;
 }
 
-fun arrays(a [u16])
+fun arrays(a []u16)
 {
     var n = a[0];
     a[1] = n * 2;
 }
 
-fun forIndex(a [u32]) usize
+fun forIndex(a []u32) usize
 {
     var num usize = 0;
     for x, i in a

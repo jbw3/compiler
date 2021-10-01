@@ -554,7 +554,7 @@ fun forLoop(start i32, end i32) i32
     num
 }
 
-fun forLoopArray(a [i32]) i32
+fun forLoopArray(a []i32) i32
 {
     var sum i32 = 0;
 
@@ -590,7 +590,7 @@ fun nestedForLoop() u32
     x
 }
 
-fun forLoopIndex(array [i32]) usize
+fun forLoopIndex(array []i32) usize
 {
     for x, i in array
     {
@@ -842,23 +842,23 @@ fun ret2(a i32, b i32) i32
     0
 }
 
-fun arrays1(a1 [i32])
+fun arrays1(a1 []i32)
 {
     var n = a1[0];
     a1[1] = 17;
 }
 
-struct ArrayTest { arr [i32] }
+struct ArrayTest { arr []i32 }
 
 fun arrays2()
 {
     var x i32 = 12;
 
-    var a1 [i32] = [10; x];
-    var a2 [i32] = [0; x];
-    var a3 [i16] = [3; 1 + 200];
-    var a4 [i32] = [3; 1 + x * 2];
-    var a5 [i32] = [4; 0];
+    var a1 []i32 = [10; x];
+    var a2 []i32 = [0; x];
+    var a3 []i16 = [3; 1 + 200];
+    var a4 []i32 = [3; 1 + x * 2];
+    var a5 []i32 = [4; 0];
 
     arrays1([12; 1]);
 
@@ -874,10 +874,10 @@ fun arrays3()
     var x i16 = 12;
     var y i32 = 123;
 
-    var a1 [i8] = [1, -2];
-    var a2 [u8] = [1, 2];
-    var a3 [i16] = [20, x + 1];
-    var a4 [i32] = [3, 1 + y * 2];
+    var a1 []i8 = [1, -2];
+    var a2 []u8 = [1, 2];
+    var a3 []i16 = [20, x + 1];
+    var a4 []i32 = [3, 1 + y * 2];
 
     arrays1([10, 20, 30]);
 
@@ -887,14 +887,14 @@ fun arrays3()
 
     var r1 = [100, 200][0];
 
-    var a6 [[i32]] = [[10, 20], [30, 40]];
-    var a7 [[i32]] = [[2; 8], [3; 9]];
+    var a6 [][]i32 = [[10, 20], [30, 40]];
+    var a7 [][]i32 = [[2; 8], [3; 9]];
 }
 
-fun slices(array [i32], s str, start u32, end u32)
+fun slices(array []i32, s str, start u32, end u32)
 {
     var a1 = array[start..end];
-    var a2 [i32] = array[start..<end];
+    var a2 []i32 = array[start..<end];
     var a3 = a2[start+1..end-1];
 
     var s1 = s[start..end];
@@ -1005,7 +1005,7 @@ fun consts()
     var v35 = c32;
     var v36 = c33;
 
-    var a1 [i32] = [c5; 0];
+    var a1 []i32 = [c5; 0];
 }
 
 fun ftype1(){}

@@ -8,17 +8,17 @@ $target_triple
 %Range16 = type { i16, i16 }
 %Range32 = type { i32, i32 }
 %Range8 = type { i8, i8 }
-%"[i32]" = type { i64, i32* }
-%"[i8]" = type { i64, i8* }
+%"[]i32" = type { i64, i32* }
+%"[]i8" = type { i64, i8* }
 %Test2 = type { %Test1, i32 }
 %Test1 = type { i32, i1, %str }
 %EmptyType = type {}
 %SubscriptTest1 = type { %SubscriptTest2 }
 %SubscriptTest2 = type { %str }
-%ArrayTest = type { %"[i32]" }
-%"[i16]" = type { i64, i16* }
-%"[[i32]]" = type { i64, %"[i32]"* }
-%"[u8]" = type { i64, i8* }
+%ArrayTest = type { %"[]i32" }
+%"[]i16" = type { i64, i16* }
+%"[][]i32" = type { i64, %"[]i32"* }
+%"[]u8" = type { i64, i8* }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -1693,7 +1693,7 @@ forExit:                                          ; preds = %forCond
 }
 
 ; Function Attrs: noinline nounwind optnone
-define i32 @forLoopArray(%"[i32]" %a) #0 {
+define i32 @forLoopArray(%"[]i32" %a) #0 {
 entry:
   %x30 = alloca i32, align 4
   %x12 = alloca i16, align 2
@@ -1701,8 +1701,8 @@ entry:
   %x = alloca i8, align 1
   %array = alloca [3 x i8], align 1
   %sum = alloca i32, align 4
-  %a1 = alloca %"[i32]", align 8
-  store %"[i32]" %a, %"[i32]"* %a1, align 8
+  %a1 = alloca %"[]i32", align 8
+  store %"[]i32" %a, %"[]i32"* %a1, align 8
   store i32 0, i32* %sum, align 4
   %ptr = getelementptr inbounds [3 x i8], [3 x i8]* %array, i64 0, i64 0
   store i8 1, i8* %ptr, align 1
@@ -1711,9 +1711,9 @@ entry:
   %ptr3 = getelementptr inbounds [3 x i8], [3 x i8]* %array, i64 0, i64 2
   store i8 3, i8* %ptr3, align 1
   %arrptr = bitcast [3 x i8]* %array to i8*
-  %agg = insertvalue %"[i8]" { i64 3, i8* undef }, i8* %arrptr, 1
-  %size = extractvalue %"[i8]" %agg, 0
-  %data = extractvalue %"[i8]" %agg, 1
+  %agg = insertvalue %"[]i8" { i64 3, i8* undef }, i8* %arrptr, 1
+  %size = extractvalue %"[]i8" %agg, 0
+  %data = extractvalue %"[]i8" %agg, 1
   br label %forCond
 
 forCond:                                          ; preds = %forIter, %entry
@@ -1744,9 +1744,9 @@ forExit:                                          ; preds = %forCond
   %ptr9 = getelementptr inbounds [3 x i8], [3 x i8]* %array6, i64 0, i64 2
   store i8 30, i8* %ptr9, align 1
   %arrptr10 = bitcast [3 x i8]* %array6 to i8*
-  %agg11 = insertvalue %"[i8]" { i64 3, i8* undef }, i8* %arrptr10, 1
-  %size13 = extractvalue %"[i8]" %agg11, 0
-  %data14 = extractvalue %"[i8]" %agg11, 1
+  %agg11 = insertvalue %"[]i8" { i64 3, i8* undef }, i8* %arrptr10, 1
+  %size13 = extractvalue %"[]i8" %agg11, 0
+  %data14 = extractvalue %"[]i8" %agg11, 1
   br label %forCond15
 
 forCond15:                                        ; preds = %forIter26, %forExit
@@ -1771,9 +1771,9 @@ forIter26:                                        ; preds = %forBody18
   br label %forCond15
 
 forExit28:                                        ; preds = %forCond15
-  %a29 = load %"[i32]", %"[i32]"* %a1, align 8
-  %size31 = extractvalue %"[i32]" %a29, 0
-  %data32 = extractvalue %"[i32]" %a29, 1
+  %a29 = load %"[]i32", %"[]i32"* %a1, align 8
+  %size31 = extractvalue %"[]i32" %a29, 0
+  %data32 = extractvalue %"[]i32" %a29, 1
   br label %forCond33
 
 forCond33:                                        ; preds = %forIter42, %forExit28
@@ -1850,18 +1850,18 @@ forExit9:                                         ; preds = %forCond
 }
 
 ; Function Attrs: noinline nounwind optnone
-define i64 @forLoopIndex(%"[i32]" %array) #0 {
+define i64 @forLoopIndex(%"[]i32" %array) #0 {
 entry:
   %i10 = alloca i64, align 8
   %x9 = alloca i32, align 4
   %num = alloca i64, align 8
   %i = alloca i64, align 8
   %x = alloca i32, align 4
-  %array1 = alloca %"[i32]", align 8
-  store %"[i32]" %array, %"[i32]"* %array1, align 8
-  %array2 = load %"[i32]", %"[i32]"* %array1, align 8
-  %size = extractvalue %"[i32]" %array2, 0
-  %data = extractvalue %"[i32]" %array2, 1
+  %array1 = alloca %"[]i32", align 8
+  store %"[]i32" %array, %"[]i32"* %array1, align 8
+  %array2 = load %"[]i32", %"[]i32"* %array1, align 8
+  %size = extractvalue %"[]i32" %array2, 0
+  %data = extractvalue %"[]i32" %array2, 1
   br label %forCond
 
 forCond:                                          ; preds = %forIter, %entry
@@ -1874,9 +1874,9 @@ forBody:                                          ; preds = %forCond
   %load = load i32, i32* %value, align 4
   store i32 %load, i32* %x, align 4
   store i64 %iter, i64* %i, align 8
-  %array3 = load %"[i32]", %"[i32]"* %array1, align 8
+  %array3 = load %"[]i32", %"[]i32"* %array1, align 8
   %i4 = load i64, i64* %i, align 8
-  %size5 = extractvalue %"[i32]" %array3, 0
+  %size5 = extractvalue %"[]i32" %array3, 0
   %check = icmp uge i64 %i4, %size5
   br i1 %check, label %failed, label %passed
 
@@ -1885,7 +1885,7 @@ failed:                                           ; preds = %forBody
   unreachable
 
 passed:                                           ; preds = %forBody
-  %data6 = extractvalue %"[i32]" %array3, 1
+  %data6 = extractvalue %"[]i32" %array3, 1
   %value7 = getelementptr inbounds i32, i32* %data6, i64 %i4
   %x8 = load i32, i32* %x, align 4
   %mul = mul i32 %x8, 2
@@ -2512,13 +2512,13 @@ merge10:                                          ; preds = %merge, %afterreturn
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @arrays1(%"[i32]" %a1) #0 {
+define %UnitType @arrays1(%"[]i32" %a1) #0 {
 entry:
   %n = alloca i32, align 4
-  %a11 = alloca %"[i32]", align 8
-  store %"[i32]" %a1, %"[i32]"* %a11, align 8
-  %a12 = load %"[i32]", %"[i32]"* %a11, align 8
-  %size = extractvalue %"[i32]" %a12, 0
+  %a11 = alloca %"[]i32", align 8
+  store %"[]i32" %a1, %"[]i32"* %a11, align 8
+  %a12 = load %"[]i32", %"[]i32"* %a11, align 8
+  %size = extractvalue %"[]i32" %a12, 0
   %check = icmp uge i64 0, %size
   br i1 %check, label %failed, label %passed
 
@@ -2527,12 +2527,12 @@ failed:                                           ; preds = %entry
   unreachable
 
 passed:                                           ; preds = %entry
-  %data = extractvalue %"[i32]" %a12, 1
+  %data = extractvalue %"[]i32" %a12, 1
   %value = getelementptr inbounds i32, i32* %data, i64 0
   %load = load i32, i32* %value, align 4
   store i32 %load, i32* %n, align 4
-  %a13 = load %"[i32]", %"[i32]"* %a11, align 8
-  %size4 = extractvalue %"[i32]" %a13, 0
+  %a13 = load %"[]i32", %"[]i32"* %a11, align 8
+  %size4 = extractvalue %"[]i32" %a13, 0
   %check5 = icmp uge i64 1, %size4
   br i1 %check5, label %failed6, label %passed7
 
@@ -2541,7 +2541,7 @@ failed6:                                          ; preds = %passed
   unreachable
 
 passed7:                                          ; preds = %passed
-  %data8 = extractvalue %"[i32]" %a13, 1
+  %data8 = extractvalue %"[]i32" %a13, 1
   %value9 = getelementptr inbounds i32, i32* %data8, i64 1
   store i32 17, i32* %value9, align 4
   ret %UnitType zeroinitializer
@@ -2557,15 +2557,15 @@ entry:
   %s = alloca %ArrayTest, align 8
   %array37 = alloca [12 x i32], align 4
   %array27 = alloca [4 x i32], align 4
-  %a5 = alloca %"[i32]", align 8
+  %a5 = alloca %"[]i32", align 8
   %array17 = alloca [3 x i32], align 4
-  %a4 = alloca %"[i32]", align 8
+  %a4 = alloca %"[]i32", align 8
   %array6 = alloca [3 x i16], align 2
-  %a3 = alloca %"[i16]", align 8
+  %a3 = alloca %"[]i16", align 8
   %array3 = alloca [0 x i32], align 4
-  %a2 = alloca %"[i32]", align 8
+  %a2 = alloca %"[]i32", align 8
   %array = alloca [10 x i32], align 4
-  %a1 = alloca %"[i32]", align 8
+  %a1 = alloca %"[]i32", align 8
   %x = alloca i32, align 4
   store i32 12, i32* %x, align 4
   %x1 = load i32, i32* %x, align 4
@@ -2582,12 +2582,12 @@ fillBody:                                         ; preds = %fillBody, %entry
 
 fillExit:                                         ; preds = %fillBody
   %arrptr = bitcast [10 x i32]* %array to i32*
-  %agg = insertvalue %"[i32]" { i64 10, i32* undef }, i32* %arrptr, 1
-  store %"[i32]" %agg, %"[i32]"* %a1, align 8
+  %agg = insertvalue %"[]i32" { i64 10, i32* undef }, i32* %arrptr, 1
+  store %"[]i32" %agg, %"[]i32"* %a1, align 8
   %x2 = load i32, i32* %x, align 4
   %arrptr4 = bitcast [0 x i32]* %array3 to i32*
-  %agg5 = insertvalue %"[i32]" { i64 0, i32* undef }, i32* %arrptr4, 1
-  store %"[i32]" %agg5, %"[i32]"* %a2, align 8
+  %agg5 = insertvalue %"[]i32" { i64 0, i32* undef }, i32* %arrptr4, 1
+  store %"[]i32" %agg5, %"[]i32"* %a2, align 8
   %startPtr8 = getelementptr inbounds [3 x i16], [3 x i16]* %array6, i64 0, i64 0
   %endPtr9 = getelementptr inbounds [3 x i16], [3 x i16]* %array6, i64 0, i64 3
   br label %fillBody7
@@ -2601,8 +2601,8 @@ fillBody7:                                        ; preds = %fillBody7, %fillExi
 
 fillExit13:                                       ; preds = %fillBody7
   %arrptr14 = bitcast [3 x i16]* %array6 to i16*
-  %agg15 = insertvalue %"[i16]" { i64 3, i16* undef }, i16* %arrptr14, 1
-  store %"[i16]" %agg15, %"[i16]"* %a3, align 8
+  %agg15 = insertvalue %"[]i16" { i64 3, i16* undef }, i16* %arrptr14, 1
+  store %"[]i16" %agg15, %"[]i16"* %a3, align 8
   %x16 = load i32, i32* %x, align 4
   %mul = mul i32 %x16, 2
   %add = add i32 1, %mul
@@ -2619,8 +2619,8 @@ fillBody18:                                       ; preds = %fillBody18, %fillEx
 
 fillExit24:                                       ; preds = %fillBody18
   %arrptr25 = bitcast [3 x i32]* %array17 to i32*
-  %agg26 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr25, 1
-  store %"[i32]" %agg26, %"[i32]"* %a4, align 8
+  %agg26 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr25, 1
+  store %"[]i32" %agg26, %"[]i32"* %a4, align 8
   %startPtr29 = getelementptr inbounds [4 x i32], [4 x i32]* %array27, i64 0, i64 0
   %endPtr30 = getelementptr inbounds [4 x i32], [4 x i32]* %array27, i64 0, i64 4
   br label %fillBody28
@@ -2634,8 +2634,8 @@ fillBody28:                                       ; preds = %fillBody28, %fillEx
 
 fillExit34:                                       ; preds = %fillBody28
   %arrptr35 = bitcast [4 x i32]* %array27 to i32*
-  %agg36 = insertvalue %"[i32]" { i64 4, i32* undef }, i32* %arrptr35, 1
-  store %"[i32]" %agg36, %"[i32]"* %a5, align 8
+  %agg36 = insertvalue %"[]i32" { i64 4, i32* undef }, i32* %arrptr35, 1
+  store %"[]i32" %agg36, %"[]i32"* %a5, align 8
   %startPtr39 = getelementptr inbounds [12 x i32], [12 x i32]* %array37, i64 0, i64 0
   %endPtr40 = getelementptr inbounds [12 x i32], [12 x i32]* %array37, i64 0, i64 12
   br label %fillBody38
@@ -2649,8 +2649,8 @@ fillBody38:                                       ; preds = %fillBody38, %fillEx
 
 fillExit44:                                       ; preds = %fillBody38
   %arrptr45 = bitcast [12 x i32]* %array37 to i32*
-  %agg46 = insertvalue %"[i32]" { i64 12, i32* undef }, i32* %arrptr45, 1
-  %call = call %UnitType @arrays1(%"[i32]" %agg46)
+  %agg46 = insertvalue %"[]i32" { i64 12, i32* undef }, i32* %arrptr45, 1
+  %call = call %UnitType @arrays1(%"[]i32" %agg46)
   %startPtr49 = getelementptr inbounds [3 x i32], [3 x i32]* %array47, i64 0, i64 0
   %endPtr50 = getelementptr inbounds [3 x i32], [3 x i32]* %array47, i64 0, i64 3
   br label %fillBody48
@@ -2664,8 +2664,8 @@ fillBody48:                                       ; preds = %fillBody48, %fillEx
 
 fillExit54:                                       ; preds = %fillBody48
   %arrptr55 = bitcast [3 x i32]* %array47 to i32*
-  %agg56 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr55, 1
-  %agg57 = insertvalue %ArrayTest undef, %"[i32]" %agg56, 0
+  %agg56 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr55, 1
+  %agg57 = insertvalue %ArrayTest undef, %"[]i32" %agg56, 0
   store %ArrayTest %agg57, %ArrayTest* %s, align 8
   %startPtr60 = getelementptr inbounds [12 x i32], [12 x i32]* %array58, i64 0, i64 0
   %endPtr61 = getelementptr inbounds [12 x i32], [12 x i32]* %array58, i64 0, i64 12
@@ -2680,18 +2680,18 @@ fillBody59:                                       ; preds = %fillBody59, %fillEx
 
 fillExit65:                                       ; preds = %fillBody59
   %arrptr66 = bitcast [12 x i32]* %array58 to i32*
-  %agg67 = insertvalue %"[i32]" { i64 12, i32* undef }, i32* %arrptr66, 1
-  %size = extractvalue %"[i32]" %agg67, 0
-  %data = extractvalue %"[i32]" %agg67, 1
+  %agg67 = insertvalue %"[]i32" { i64 12, i32* undef }, i32* %arrptr66, 1
+  %size = extractvalue %"[]i32" %agg67, 0
+  %data = extractvalue %"[]i32" %agg67, 1
   %endok = icmp ult i64 7, %size
   %checkend = select i1 %endok, i64 7, i64 %size
   %startok = icmp ule i64 4, %checkend
   %checkstart = select i1 %startok, i64 4, i64 %checkend
   %sub = sub i64 %checkend, %checkstart
   %ptr = getelementptr inbounds i32, i32* %data, i64 %checkstart
-  %agg68 = insertvalue %"[i32]" undef, i64 %sub, 0
-  %agg69 = insertvalue %"[i32]" %agg68, i32* %ptr, 1
-  %call70 = call %UnitType @arrays1(%"[i32]" %agg69)
+  %agg68 = insertvalue %"[]i32" undef, i64 %sub, 0
+  %agg69 = insertvalue %"[]i32" %agg68, i32* %ptr, 1
+  %call70 = call %UnitType @arrays1(%"[]i32" %agg69)
   %startPtr73 = getelementptr inbounds [5 x i8], [5 x i8]* %array71, i64 0, i64 0
   %endPtr74 = getelementptr inbounds [5 x i8], [5 x i8]* %array71, i64 0, i64 5
   br label %fillBody72
@@ -2705,8 +2705,8 @@ fillBody72:                                       ; preds = %fillBody72, %fillEx
 
 fillExit78:                                       ; preds = %fillBody72
   %arrptr79 = bitcast [5 x i8]* %array71 to i8*
-  %agg80 = insertvalue %"[i8]" { i64 5, i8* undef }, i8* %arrptr79, 1
-  %size81 = extractvalue %"[i8]" %agg80, 0
+  %agg80 = insertvalue %"[]i8" { i64 5, i8* undef }, i8* %arrptr79, 1
+  %size81 = extractvalue %"[]i8" %agg80, 0
   %check = icmp uge i64 3, %size81
   br i1 %check, label %failed, label %passed
 
@@ -2715,7 +2715,7 @@ failed:                                           ; preds = %fillExit78
   unreachable
 
 passed:                                           ; preds = %fillExit78
-  %data82 = extractvalue %"[i8]" %agg80, 1
+  %data82 = extractvalue %"[]i8" %agg80, 1
   %value = getelementptr inbounds i8, i8* %data82, i64 3
   %load = load i8, i8* %value, align 1
   store i8 %load, i8* %r1, align 1
@@ -2727,12 +2727,12 @@ define %UnitType @arrays3() #0 {
 entry:
   %array72 = alloca [3 x i32], align 4
   %array68 = alloca [2 x i32], align 4
-  %array67 = alloca [2 x %"[i32]"], align 8
-  %a7 = alloca %"[[i32]]", align 8
+  %array67 = alloca [2 x %"[]i32"], align 8
+  %a7 = alloca %"[][]i32", align 8
   %array59 = alloca [2 x i32], align 4
   %array53 = alloca [2 x i32], align 4
-  %array52 = alloca [2 x %"[i32]"], align 8
-  %a6 = alloca %"[[i32]]", align 8
+  %array52 = alloca [2 x %"[]i32"], align 8
+  %a6 = alloca %"[][]i32", align 8
   %array45 = alloca [2 x i16], align 2
   %r1 = alloca i16, align 2
   %array33 = alloca [5 x i32], align 4
@@ -2740,13 +2740,13 @@ entry:
   %s = alloca %ArrayTest, align 8
   %array20 = alloca [3 x i32], align 4
   %array13 = alloca [2 x i32], align 4
-  %a4 = alloca %"[i32]", align 8
+  %a4 = alloca %"[]i32", align 8
   %array7 = alloca [2 x i16], align 2
-  %a3 = alloca %"[i16]", align 8
+  %a3 = alloca %"[]i16", align 8
   %array2 = alloca [2 x i8], align 1
-  %a2 = alloca %"[u8]", align 8
+  %a2 = alloca %"[]u8", align 8
   %array = alloca [2 x i8], align 1
-  %a1 = alloca %"[i8]", align 8
+  %a1 = alloca %"[]i8", align 8
   %y = alloca i32, align 4
   %x = alloca i16, align 2
   store i16 12, i16* %x, align 2
@@ -2756,15 +2756,15 @@ entry:
   %ptr1 = getelementptr inbounds [2 x i8], [2 x i8]* %array, i64 0, i64 1
   store i8 -2, i8* %ptr1, align 1
   %arrptr = bitcast [2 x i8]* %array to i8*
-  %agg = insertvalue %"[i8]" { i64 2, i8* undef }, i8* %arrptr, 1
-  store %"[i8]" %agg, %"[i8]"* %a1, align 8
+  %agg = insertvalue %"[]i8" { i64 2, i8* undef }, i8* %arrptr, 1
+  store %"[]i8" %agg, %"[]i8"* %a1, align 8
   %ptr3 = getelementptr inbounds [2 x i8], [2 x i8]* %array2, i64 0, i64 0
   store i8 1, i8* %ptr3, align 1
   %ptr4 = getelementptr inbounds [2 x i8], [2 x i8]* %array2, i64 0, i64 1
   store i8 2, i8* %ptr4, align 1
   %arrptr5 = bitcast [2 x i8]* %array2 to i8*
-  %agg6 = insertvalue %"[u8]" { i64 2, i8* undef }, i8* %arrptr5, 1
-  store %"[u8]" %agg6, %"[u8]"* %a2, align 8
+  %agg6 = insertvalue %"[]u8" { i64 2, i8* undef }, i8* %arrptr5, 1
+  store %"[]u8" %agg6, %"[]u8"* %a2, align 8
   %ptr8 = getelementptr inbounds [2 x i16], [2 x i16]* %array7, i64 0, i64 0
   store i16 20, i16* %ptr8, align 2
   %x9 = load i16, i16* %x, align 2
@@ -2772,8 +2772,8 @@ entry:
   %ptr10 = getelementptr inbounds [2 x i16], [2 x i16]* %array7, i64 0, i64 1
   store i16 %add, i16* %ptr10, align 2
   %arrptr11 = bitcast [2 x i16]* %array7 to i16*
-  %agg12 = insertvalue %"[i16]" { i64 2, i16* undef }, i16* %arrptr11, 1
-  store %"[i16]" %agg12, %"[i16]"* %a3, align 8
+  %agg12 = insertvalue %"[]i16" { i64 2, i16* undef }, i16* %arrptr11, 1
+  store %"[]i16" %agg12, %"[]i16"* %a3, align 8
   %ptr14 = getelementptr inbounds [2 x i32], [2 x i32]* %array13, i64 0, i64 0
   store i32 3, i32* %ptr14, align 4
   %y15 = load i32, i32* %y, align 4
@@ -2782,8 +2782,8 @@ entry:
   %ptr17 = getelementptr inbounds [2 x i32], [2 x i32]* %array13, i64 0, i64 1
   store i32 %add16, i32* %ptr17, align 4
   %arrptr18 = bitcast [2 x i32]* %array13 to i32*
-  %agg19 = insertvalue %"[i32]" { i64 2, i32* undef }, i32* %arrptr18, 1
-  store %"[i32]" %agg19, %"[i32]"* %a4, align 8
+  %agg19 = insertvalue %"[]i32" { i64 2, i32* undef }, i32* %arrptr18, 1
+  store %"[]i32" %agg19, %"[]i32"* %a4, align 8
   %ptr21 = getelementptr inbounds [3 x i32], [3 x i32]* %array20, i64 0, i64 0
   store i32 10, i32* %ptr21, align 4
   %ptr22 = getelementptr inbounds [3 x i32], [3 x i32]* %array20, i64 0, i64 1
@@ -2791,8 +2791,8 @@ entry:
   %ptr23 = getelementptr inbounds [3 x i32], [3 x i32]* %array20, i64 0, i64 2
   store i32 30, i32* %ptr23, align 4
   %arrptr24 = bitcast [3 x i32]* %array20 to i32*
-  %agg25 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr24, 1
-  %call = call %UnitType @arrays1(%"[i32]" %agg25)
+  %agg25 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr24, 1
+  %call = call %UnitType @arrays1(%"[]i32" %agg25)
   %ptr27 = getelementptr inbounds [3 x i32], [3 x i32]* %array26, i64 0, i64 0
   store i32 1, i32* %ptr27, align 4
   %ptr28 = getelementptr inbounds [3 x i32], [3 x i32]* %array26, i64 0, i64 1
@@ -2800,8 +2800,8 @@ entry:
   %ptr29 = getelementptr inbounds [3 x i32], [3 x i32]* %array26, i64 0, i64 2
   store i32 3, i32* %ptr29, align 4
   %arrptr30 = bitcast [3 x i32]* %array26 to i32*
-  %agg31 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr30, 1
-  %agg32 = insertvalue %ArrayTest undef, %"[i32]" %agg31, 0
+  %agg31 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr30, 1
+  %agg32 = insertvalue %ArrayTest undef, %"[]i32" %agg31, 0
   store %ArrayTest %agg32, %ArrayTest* %s, align 8
   %ptr34 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 0
   store i32 10, i32* %ptr34, align 4
@@ -2814,25 +2814,25 @@ entry:
   %ptr38 = getelementptr inbounds [5 x i32], [5 x i32]* %array33, i64 0, i64 4
   store i32 50, i32* %ptr38, align 4
   %arrptr39 = bitcast [5 x i32]* %array33 to i32*
-  %agg40 = insertvalue %"[i32]" { i64 5, i32* undef }, i32* %arrptr39, 1
-  %size = extractvalue %"[i32]" %agg40, 0
-  %data = extractvalue %"[i32]" %agg40, 1
+  %agg40 = insertvalue %"[]i32" { i64 5, i32* undef }, i32* %arrptr39, 1
+  %size = extractvalue %"[]i32" %agg40, 0
+  %data = extractvalue %"[]i32" %agg40, 1
   %endok = icmp ult i64 4, %size
   %checkend = select i1 %endok, i64 4, i64 %size
   %startok = icmp ule i64 1, %checkend
   %checkstart = select i1 %startok, i64 1, i64 %checkend
   %sub = sub i64 %checkend, %checkstart
   %ptr41 = getelementptr inbounds i32, i32* %data, i64 %checkstart
-  %agg42 = insertvalue %"[i32]" undef, i64 %sub, 0
-  %agg43 = insertvalue %"[i32]" %agg42, i32* %ptr41, 1
-  %call44 = call %UnitType @arrays1(%"[i32]" %agg43)
+  %agg42 = insertvalue %"[]i32" undef, i64 %sub, 0
+  %agg43 = insertvalue %"[]i32" %agg42, i32* %ptr41, 1
+  %call44 = call %UnitType @arrays1(%"[]i32" %agg43)
   %ptr46 = getelementptr inbounds [2 x i16], [2 x i16]* %array45, i64 0, i64 0
   store i16 100, i16* %ptr46, align 2
   %ptr47 = getelementptr inbounds [2 x i16], [2 x i16]* %array45, i64 0, i64 1
   store i16 200, i16* %ptr47, align 2
   %arrptr48 = bitcast [2 x i16]* %array45 to i16*
-  %agg49 = insertvalue %"[i16]" { i64 2, i16* undef }, i16* %arrptr48, 1
-  %size50 = extractvalue %"[i16]" %agg49, 0
+  %agg49 = insertvalue %"[]i16" { i64 2, i16* undef }, i16* %arrptr48, 1
+  %size50 = extractvalue %"[]i16" %agg49, 0
   %check = icmp uge i64 0, %size50
   br i1 %check, label %failed, label %passed
 
@@ -2841,7 +2841,7 @@ failed:                                           ; preds = %entry
   unreachable
 
 passed:                                           ; preds = %entry
-  %data51 = extractvalue %"[i16]" %agg49, 1
+  %data51 = extractvalue %"[]i16" %agg49, 1
   %value = getelementptr inbounds i16, i16* %data51, i64 0
   %load = load i16, i16* %value, align 2
   store i16 %load, i16* %r1, align 2
@@ -2850,20 +2850,20 @@ passed:                                           ; preds = %entry
   %ptr55 = getelementptr inbounds [2 x i32], [2 x i32]* %array53, i64 0, i64 1
   store i32 20, i32* %ptr55, align 4
   %arrptr56 = bitcast [2 x i32]* %array53 to i32*
-  %agg57 = insertvalue %"[i32]" { i64 2, i32* undef }, i32* %arrptr56, 1
-  %ptr58 = getelementptr inbounds [2 x %"[i32]"], [2 x %"[i32]"]* %array52, i64 0, i64 0
-  store %"[i32]" %agg57, %"[i32]"* %ptr58, align 8
+  %agg57 = insertvalue %"[]i32" { i64 2, i32* undef }, i32* %arrptr56, 1
+  %ptr58 = getelementptr inbounds [2 x %"[]i32"], [2 x %"[]i32"]* %array52, i64 0, i64 0
+  store %"[]i32" %agg57, %"[]i32"* %ptr58, align 8
   %ptr60 = getelementptr inbounds [2 x i32], [2 x i32]* %array59, i64 0, i64 0
   store i32 30, i32* %ptr60, align 4
   %ptr61 = getelementptr inbounds [2 x i32], [2 x i32]* %array59, i64 0, i64 1
   store i32 40, i32* %ptr61, align 4
   %arrptr62 = bitcast [2 x i32]* %array59 to i32*
-  %agg63 = insertvalue %"[i32]" { i64 2, i32* undef }, i32* %arrptr62, 1
-  %ptr64 = getelementptr inbounds [2 x %"[i32]"], [2 x %"[i32]"]* %array52, i64 0, i64 1
-  store %"[i32]" %agg63, %"[i32]"* %ptr64, align 8
-  %arrptr65 = bitcast [2 x %"[i32]"]* %array52 to %"[i32]"*
-  %agg66 = insertvalue %"[[i32]]" { i64 2, %"[i32]"* undef }, %"[i32]"* %arrptr65, 1
-  store %"[[i32]]" %agg66, %"[[i32]]"* %a6, align 8
+  %agg63 = insertvalue %"[]i32" { i64 2, i32* undef }, i32* %arrptr62, 1
+  %ptr64 = getelementptr inbounds [2 x %"[]i32"], [2 x %"[]i32"]* %array52, i64 0, i64 1
+  store %"[]i32" %agg63, %"[]i32"* %ptr64, align 8
+  %arrptr65 = bitcast [2 x %"[]i32"]* %array52 to %"[]i32"*
+  %agg66 = insertvalue %"[][]i32" { i64 2, %"[]i32"* undef }, %"[]i32"* %arrptr65, 1
+  store %"[][]i32" %agg66, %"[][]i32"* %a6, align 8
   %startPtr = getelementptr inbounds [2 x i32], [2 x i32]* %array68, i64 0, i64 0
   %endPtr = getelementptr inbounds [2 x i32], [2 x i32]* %array68, i64 0, i64 2
   br label %fillBody
@@ -2877,9 +2877,9 @@ fillBody:                                         ; preds = %fillBody, %passed
 
 fillExit:                                         ; preds = %fillBody
   %arrptr69 = bitcast [2 x i32]* %array68 to i32*
-  %agg70 = insertvalue %"[i32]" { i64 2, i32* undef }, i32* %arrptr69, 1
-  %ptr71 = getelementptr inbounds [2 x %"[i32]"], [2 x %"[i32]"]* %array67, i64 0, i64 0
-  store %"[i32]" %agg70, %"[i32]"* %ptr71, align 8
+  %agg70 = insertvalue %"[]i32" { i64 2, i32* undef }, i32* %arrptr69, 1
+  %ptr71 = getelementptr inbounds [2 x %"[]i32"], [2 x %"[]i32"]* %array67, i64 0, i64 0
+  store %"[]i32" %agg70, %"[]i32"* %ptr71, align 8
   %startPtr74 = getelementptr inbounds [3 x i32], [3 x i32]* %array72, i64 0, i64 0
   %endPtr75 = getelementptr inbounds [3 x i32], [3 x i32]* %array72, i64 0, i64 3
   br label %fillBody73
@@ -2893,37 +2893,37 @@ fillBody73:                                       ; preds = %fillBody73, %fillEx
 
 fillExit79:                                       ; preds = %fillBody73
   %arrptr80 = bitcast [3 x i32]* %array72 to i32*
-  %agg81 = insertvalue %"[i32]" { i64 3, i32* undef }, i32* %arrptr80, 1
-  %ptr82 = getelementptr inbounds [2 x %"[i32]"], [2 x %"[i32]"]* %array67, i64 0, i64 1
-  store %"[i32]" %agg81, %"[i32]"* %ptr82, align 8
-  %arrptr83 = bitcast [2 x %"[i32]"]* %array67 to %"[i32]"*
-  %agg84 = insertvalue %"[[i32]]" { i64 2, %"[i32]"* undef }, %"[i32]"* %arrptr83, 1
-  store %"[[i32]]" %agg84, %"[[i32]]"* %a7, align 8
+  %agg81 = insertvalue %"[]i32" { i64 3, i32* undef }, i32* %arrptr80, 1
+  %ptr82 = getelementptr inbounds [2 x %"[]i32"], [2 x %"[]i32"]* %array67, i64 0, i64 1
+  store %"[]i32" %agg81, %"[]i32"* %ptr82, align 8
+  %arrptr83 = bitcast [2 x %"[]i32"]* %array67 to %"[]i32"*
+  %agg84 = insertvalue %"[][]i32" { i64 2, %"[]i32"* undef }, %"[]i32"* %arrptr83, 1
+  store %"[][]i32" %agg84, %"[][]i32"* %a7, align 8
   ret %UnitType zeroinitializer
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @slices(%"[i32]" %array, %str %s, i32 %start, i32 %end) #0 {
+define %UnitType @slices(%"[]i32" %array, %str %s, i32 %start, i32 %end) #0 {
 entry:
   %s1 = alloca %str, align 8
-  %a3 = alloca %"[i32]", align 8
-  %a2 = alloca %"[i32]", align 8
-  %a1 = alloca %"[i32]", align 8
+  %a3 = alloca %"[]i32", align 8
+  %a2 = alloca %"[]i32", align 8
+  %a1 = alloca %"[]i32", align 8
   %end4 = alloca i32, align 4
   %start3 = alloca i32, align 4
   %s2 = alloca %str, align 8
-  %array1 = alloca %"[i32]", align 8
-  store %"[i32]" %array, %"[i32]"* %array1, align 8
+  %array1 = alloca %"[]i32", align 8
+  store %"[]i32" %array, %"[]i32"* %array1, align 8
   store %str %s, %str* %s2, align 8
   store i32 %start, i32* %start3, align 4
   store i32 %end, i32* %end4, align 4
-  %array5 = load %"[i32]", %"[i32]"* %array1, align 8
+  %array5 = load %"[]i32", %"[]i32"* %array1, align 8
   %start6 = load i32, i32* %start3, align 4
   %end7 = load i32, i32* %end4, align 4
   %rng = insertvalue %Range32 undef, i32 %start6, 0
   %rng8 = insertvalue %Range32 %rng, i32 %end7, 1
-  %size = extractvalue %"[i32]" %array5, 0
-  %data = extractvalue %"[i32]" %array5, 1
+  %size = extractvalue %"[]i32" %array5, 0
+  %data = extractvalue %"[]i32" %array5, 1
   %start9 = extractvalue %Range32 %rng8, 0
   %zeroext = zext i32 %start9 to i64
   %end10 = extractvalue %Range32 %rng8, 1
@@ -2935,16 +2935,16 @@ entry:
   %checkstart = select i1 %startok, i64 %zeroext, i64 %checkend
   %sub = sub i64 %checkend, %checkstart
   %ptr = getelementptr inbounds i32, i32* %data, i64 %checkstart
-  %agg = insertvalue %"[i32]" undef, i64 %sub, 0
-  %agg12 = insertvalue %"[i32]" %agg, i32* %ptr, 1
-  store %"[i32]" %agg12, %"[i32]"* %a1, align 8
-  %array13 = load %"[i32]", %"[i32]"* %array1, align 8
+  %agg = insertvalue %"[]i32" undef, i64 %sub, 0
+  %agg12 = insertvalue %"[]i32" %agg, i32* %ptr, 1
+  store %"[]i32" %agg12, %"[]i32"* %a1, align 8
+  %array13 = load %"[]i32", %"[]i32"* %array1, align 8
   %start14 = load i32, i32* %start3, align 4
   %end15 = load i32, i32* %end4, align 4
   %rng16 = insertvalue %Range32 undef, i32 %start14, 0
   %rng17 = insertvalue %Range32 %rng16, i32 %end15, 1
-  %size18 = extractvalue %"[i32]" %array13, 0
-  %data19 = extractvalue %"[i32]" %array13, 1
+  %size18 = extractvalue %"[]i32" %array13, 0
+  %data19 = extractvalue %"[]i32" %array13, 1
   %start20 = extractvalue %Range32 %rng17, 0
   %zeroext21 = zext i32 %start20 to i64
   %end22 = extractvalue %Range32 %rng17, 1
@@ -2955,18 +2955,18 @@ entry:
   %checkstart27 = select i1 %startok26, i64 %zeroext21, i64 %checkend25
   %sub28 = sub i64 %checkend25, %checkstart27
   %ptr29 = getelementptr inbounds i32, i32* %data19, i64 %checkstart27
-  %agg30 = insertvalue %"[i32]" undef, i64 %sub28, 0
-  %agg31 = insertvalue %"[i32]" %agg30, i32* %ptr29, 1
-  store %"[i32]" %agg31, %"[i32]"* %a2, align 8
-  %a232 = load %"[i32]", %"[i32]"* %a2, align 8
+  %agg30 = insertvalue %"[]i32" undef, i64 %sub28, 0
+  %agg31 = insertvalue %"[]i32" %agg30, i32* %ptr29, 1
+  store %"[]i32" %agg31, %"[]i32"* %a2, align 8
+  %a232 = load %"[]i32", %"[]i32"* %a2, align 8
   %start33 = load i32, i32* %start3, align 4
   %add34 = add i32 %start33, 1
   %end35 = load i32, i32* %end4, align 4
   %sub36 = sub i32 %end35, 1
   %rng37 = insertvalue %Range32 undef, i32 %add34, 0
   %rng38 = insertvalue %Range32 %rng37, i32 %sub36, 1
-  %size39 = extractvalue %"[i32]" %a232, 0
-  %data40 = extractvalue %"[i32]" %a232, 1
+  %size39 = extractvalue %"[]i32" %a232, 0
+  %data40 = extractvalue %"[]i32" %a232, 1
   %start41 = extractvalue %Range32 %rng38, 0
   %zeroext42 = zext i32 %start41 to i64
   %end43 = extractvalue %Range32 %rng38, 1
@@ -2978,9 +2978,9 @@ entry:
   %checkstart49 = select i1 %startok48, i64 %zeroext42, i64 %checkend47
   %sub50 = sub i64 %checkend47, %checkstart49
   %ptr51 = getelementptr inbounds i32, i32* %data40, i64 %checkstart49
-  %agg52 = insertvalue %"[i32]" undef, i64 %sub50, 0
-  %agg53 = insertvalue %"[i32]" %agg52, i32* %ptr51, 1
-  store %"[i32]" %agg53, %"[i32]"* %a3, align 8
+  %agg52 = insertvalue %"[]i32" undef, i64 %sub50, 0
+  %agg53 = insertvalue %"[]i32" %agg52, i32* %ptr51, 1
+  store %"[]i32" %agg53, %"[]i32"* %a3, align 8
   %s54 = load %str, %str* %s2, align 8
   %start55 = load i32, i32* %start3, align 4
   %end56 = load i32, i32* %end4, align 4
@@ -3068,12 +3068,12 @@ entry:
 define %UnitType @consts() #0 {
 entry:
   %array29 = alloca [13 x i32], align 4
-  %a1 = alloca %"[i32]", align 8
+  %a1 = alloca %"[]i32", align 8
   %v36 = alloca %UnitType ()*, align 8
   %array19 = alloca [3 x i16], align 2
-  %v35 = alloca %"[i16]", align 8
+  %v35 = alloca %"[]i16", align 8
   %array14 = alloca [2 x i8], align 1
-  %v34 = alloca %"[i8]", align 8
+  %v34 = alloca %"[]i8", align 8
   %v33 = alloca %str, align 8
   %v32 = alloca %str, align 8
   %v31 = alloca %str, align 8
@@ -3081,9 +3081,9 @@ entry:
   %v29 = alloca i16, align 2
   %v28 = alloca i8, align 1
   %array7 = alloca [5 x i16], align 2
-  %v27 = alloca %"[i16]", align 8
+  %v27 = alloca %"[]i16", align 8
   %array = alloca [3 x i8], align 1
-  %v26 = alloca %"[i8]", align 8
+  %v26 = alloca %"[]i8", align 8
   %v25 = alloca i32, align 4
   %v24 = alloca i32, align 4
   %v23 = alloca %Range16, align 8
@@ -3146,8 +3146,8 @@ entry:
   %ptr5 = getelementptr inbounds [3 x i8], [3 x i8]* %array, i64 0, i64 2
   store i8 12, i8* %ptr5, align 1
   %arrptr = bitcast [3 x i8]* %array to i8*
-  %agg6 = insertvalue %"[i8]" { i64 3, i8* undef }, i8* %arrptr, 1
-  store %"[i8]" %agg6, %"[i8]"* %v26, align 8
+  %agg6 = insertvalue %"[]i8" { i64 3, i8* undef }, i8* %arrptr, 1
+  store %"[]i8" %agg6, %"[]i8"* %v26, align 8
   %startPtr = getelementptr inbounds [5 x i16], [5 x i16]* %array7, i64 0, i64 0
   %endPtr = getelementptr inbounds [5 x i16], [5 x i16]* %array7, i64 0, i64 5
   br label %fillBody
@@ -3161,8 +3161,8 @@ fillBody:                                         ; preds = %fillBody, %entry
 
 fillExit:                                         ; preds = %fillBody
   %arrptr8 = bitcast [5 x i16]* %array7 to i16*
-  %agg9 = insertvalue %"[i16]" { i64 5, i16* undef }, i16* %arrptr8, 1
-  store %"[i16]" %agg9, %"[i16]"* %v27, align 8
+  %agg9 = insertvalue %"[]i16" { i64 5, i16* undef }, i16* %arrptr8, 1
+  store %"[]i16" %agg9, %"[]i16"* %v27, align 8
   store i8 12, i8* %v28, align 1
   store i16 -100, i16* %v29, align 2
   %load10 = load %str, %str* @strStruct7, align 8
@@ -3178,8 +3178,8 @@ fillExit:                                         ; preds = %fillBody
   %ptr16 = getelementptr inbounds [2 x i8], [2 x i8]* %array14, i64 0, i64 1
   store i8 12, i8* %ptr16, align 1
   %arrptr17 = bitcast [2 x i8]* %array14 to i8*
-  %agg18 = insertvalue %"[i8]" { i64 2, i8* undef }, i8* %arrptr17, 1
-  store %"[i8]" %agg18, %"[i8]"* %v34, align 8
+  %agg18 = insertvalue %"[]i8" { i64 2, i8* undef }, i8* %arrptr17, 1
+  store %"[]i8" %agg18, %"[]i8"* %v34, align 8
   %startPtr21 = getelementptr inbounds [3 x i16], [3 x i16]* %array19, i64 0, i64 0
   %endPtr22 = getelementptr inbounds [3 x i16], [3 x i16]* %array19, i64 0, i64 3
   br label %fillBody20
@@ -3193,8 +3193,8 @@ fillBody20:                                       ; preds = %fillBody20, %fillEx
 
 fillExit26:                                       ; preds = %fillBody20
   %arrptr27 = bitcast [3 x i16]* %array19 to i16*
-  %agg28 = insertvalue %"[i16]" { i64 3, i16* undef }, i16* %arrptr27, 1
-  store %"[i16]" %agg28, %"[i16]"* %v35, align 8
+  %agg28 = insertvalue %"[]i16" { i64 3, i16* undef }, i16* %arrptr27, 1
+  store %"[]i16" %agg28, %"[]i16"* %v35, align 8
   store %UnitType ()* @ftype1, %UnitType ()** %v36, align 8
   %startPtr31 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 0
   %endPtr32 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 13
@@ -3209,8 +3209,8 @@ fillBody30:                                       ; preds = %fillBody30, %fillEx
 
 fillExit36:                                       ; preds = %fillBody30
   %arrptr37 = bitcast [13 x i32]* %array29 to i32*
-  %agg38 = insertvalue %"[i32]" { i64 13, i32* undef }, i32* %arrptr37, 1
-  store %"[i32]" %agg38, %"[i32]"* %a1, align 8
+  %agg38 = insertvalue %"[]i32" { i64 13, i32* undef }, i32* %arrptr37, 1
+  store %"[]i32" %agg38, %"[]i32"* %a1, align 8
   ret %UnitType zeroinitializer
 }
 

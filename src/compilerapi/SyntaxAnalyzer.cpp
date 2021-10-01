@@ -242,16 +242,20 @@ bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIt
         {
             return false;
         }
+        if (iter->type != Token::eCloseBracket)
+        {
+            logger.LogError(*iter, "Expected ']'");
+            return false;
+        }
 
-        Expression* innerTypeExpr = nullptr;
-        bool ok = ProcessType(iter, endIter, innerTypeExpr, Token::eCloseBracket);
-        if (!ok)
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
         {
             return false;
         }
 
-        // increment past ']'
-        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        Expression* innerTypeExpr = nullptr;
+        bool ok = ProcessType(iter, endIter, innerTypeExpr, endTokenType1, endTokenType2);
+        if (!ok)
         {
             return false;
         }

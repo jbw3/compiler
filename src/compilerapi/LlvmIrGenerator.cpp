@@ -2023,13 +2023,11 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 string createTypeName(const TypeInfo* type)
 {
     string name;
-    string postfix;
 
     while (type->IsArray())
     {
         type = type->GetInnerType();
-        name += "[";
-        postfix += "]";
+        name += "[]";
     }
 
     if (type->IsRange())
@@ -2053,8 +2051,6 @@ string createTypeName(const TypeInfo* type)
     {
         name += type->GetShortName();
     }
-
-    name += postfix;
 
     return name;
 }
