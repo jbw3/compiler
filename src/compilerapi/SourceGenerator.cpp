@@ -117,7 +117,8 @@ void SourceGenerator::Visit(ForLoop* forLoop)
 
     if (forLoop->varTypeExpression != nullptr)
     {
-        *os << ' ' << forLoop->variableType->GetShortName();
+        *os << ' ';
+        forLoop->varTypeExpression->Accept(this);
     }
 
     if (!forLoop->indexName.empty())
@@ -125,7 +126,8 @@ void SourceGenerator::Visit(ForLoop* forLoop)
         *os << ", " << forLoop->indexName;
         if (forLoop->indexTypeExpression != nullptr)
         {
-            *os << ' ' << forLoop->indexType->GetShortName();
+            *os << ' ';
+            forLoop->indexTypeExpression->Accept(this);
         }
     }
 
@@ -529,6 +531,7 @@ void SourceGenerator::PrintFunctionDeclaration(FunctionDeclaration* functionDecl
     const TypeInfo* retType = functionDeclaration->returnType;
     if (!retType->IsUnit())
     {
-        *os << " " << retType->GetShortName();
+        *os << ' ';
+        functionDeclaration->returnTypeExpression->Accept(this);
     }
 }
