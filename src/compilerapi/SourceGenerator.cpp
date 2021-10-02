@@ -148,7 +148,28 @@ void SourceGenerator::Visit(Return* ret)
 
 void SourceGenerator::Visit(FunctionTypeExpression* functionTypeExpression)
 {
-    // TODO
+    *os << "fun(";
+
+    size_t numParams = functionTypeExpression->paramNames.size();
+    for (size_t i = 0; i < numParams; ++i)
+    {
+        *os << functionTypeExpression->paramNames[i] << ' ';
+        functionTypeExpression->paramTypeExpressions[i]->Accept(this);
+
+        if (i < numParams - 1)
+        {
+            *os << ", ";
+        }
+    }
+
+    *os << ')';
+
+    Expression* returnTypeExpression = functionTypeExpression->returnTypeExpression;
+    if (returnTypeExpression != nullptr)
+    {
+        *os << ' ';
+        returnTypeExpression->Accept(this);
+    }
 }
 
 void SourceGenerator::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
@@ -170,12 +191,12 @@ void SourceGenerator::Visit(StructDefinition* structDefinition)
 {
     *os << "struct " << structDefinition->name << "\n{\n";
 
-    const TypeInfo* structType = structDefinition->type;
     for (const MemberDefinition* member : structDefinition->members)
     {
         const string& memberName = member->name;
-        const TypeInfo* memberType = structType->GetMember(memberName)->GetType();
-        *os << indentStr << memberName << " " << memberType->GetShortName() << ",\n";
+        *os << indentStr << memberName << ' ';
+        member->typeExpression->Accept(this);
+        *os << ",\n";
     }
 
     *os << "}\n";
@@ -369,7 +390,9 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
 
 void SourceGenerator::Visit(CastExpression* castExpression)
 {
-    *os << "cast(" << castExpression->GetType()->GetShortName() << ", ";
+    *os << "cast(";
+    castExpression->typeExpression->Accept(this);
+    *os << ", ";
     castExpression->subExpression->Accept(this);
     *os << ')';
 }
@@ -455,7 +478,8 @@ void SourceGenerator::Visit(ConstantDeclaration* constantDeclaration)
     *os << "const " << constantDeclaration->name;
     if (constantDeclaration->typeExpression != nullptr)
     {
-        *os << ' ' << constantDeclaration->constantType->GetShortName();
+        *os << ' ';
+        constantDeclaration->typeExpression->Accept(this);
     }
     *os << " = ";
     constantDeclaration->assignmentExpression->right->Accept(this);
@@ -466,7 +490,8 @@ void SourceGenerator::Visit(VariableDeclaration* variableDeclaration)
     *os << "var " << variableDeclaration->name;
     if (variableDeclaration->typeExpression != nullptr)
     {
-        *os << ' ' << variableDeclaration->variableType->GetShortName();
+        *os << ' ';
+        variableDeclaration->typeExpression->Accept(this);
     }
     *os << " = ";
     variableDeclaration->assignmentExpression->right->Accept(this);
@@ -490,7 +515,8 @@ void SourceGenerator::PrintFunctionDeclaration(FunctionDeclaration* functionDecl
     {
         const Parameter* param = parameters[i];
 
-        *os << param->name << " " << param->type->GetShortName();
+        *os << param->name << ' ';
+        param->typeExpression->Accept(this);
 
         if (i != numParams - 1)
         {
