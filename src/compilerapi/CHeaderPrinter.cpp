@@ -1,9 +1,11 @@
 #include "CHeaderPrinter.h"
 #include "ErrorLogger.h"
 #include "keywords.h"
+#include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
 
+namespace fs = std::experimental::filesystem;
 using namespace std;
 using namespace SyntaxTree;
 
@@ -12,12 +14,35 @@ CHeaderPrinter::CHeaderPrinter(ErrorLogger& logger) :
 {
 }
 
-// TODO: write to temp file; then move temp file to output file
 bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
 {
     string outFilename = GetOutFilename(config);
+    string tempFilename = outFilename + ".0.tmp";
 
-    fstream outFile(outFilename.c_str(), ios_base::out);
+    unsigned i = 0;
+    while (fs::exists(tempFilename))
+    {
+        ++i;
+        tempFilename = outFilename + "." + to_string(i) + ".tmp";
+    }
+
+    bool ok = WriteFile(tempFilename, outFilename, modules);
+
+    if (ok)
+    {
+        // copy temp file to output file
+        fs::copy_file(tempFilename, outFilename, fs::copy_options::overwrite_existing);
+    }
+
+    // delete temp file
+    fs::remove(tempFilename);
+
+    return ok;
+}
+
+bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFilename, const Modules* modules)
+{
+    fstream outFile(tempFilename.c_str(), ios_base::out);
 
     string macro = GetFilenameMacro(outFilename);
 

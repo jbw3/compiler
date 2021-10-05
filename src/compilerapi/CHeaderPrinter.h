@@ -18,6 +18,8 @@ private:
     ErrorLogger& logger;
     std::unordered_set<std::string> arrayTypeNames;
 
+    bool WriteFile(const std::string& tempFilename, const std::string& outFilename, const SyntaxTree::Modules* modules);
+
     std::string GetOutFilename(const Config& config);
 
     std::string GetFilenameMacro(const std::string& outFilename);
