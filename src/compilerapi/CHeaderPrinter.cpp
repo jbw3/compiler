@@ -30,12 +30,14 @@ bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
 
     if (ok)
     {
-        // copy temp file to output file
-        fs::copy_file(tempFilename, outFilename, fs::copy_options::overwrite_existing);
+        // rename temp file as output file
+        fs::rename(tempFilename, outFilename);
     }
-
-    // delete temp file
-    fs::remove(tempFilename);
+    else
+    {
+        // delete temp file
+        fs::remove(tempFilename);
+    }
 
     return ok;
 }
