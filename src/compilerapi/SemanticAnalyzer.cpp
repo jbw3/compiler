@@ -1308,6 +1308,9 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             }
         }
     }
+
+    logger.LogInternalError("Operator type was not handled in switch statement");
+    return nullptr;
 }
 
 void SemanticAnalyzer::Visit(WhileLoop* whileLoop)

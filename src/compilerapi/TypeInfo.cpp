@@ -557,7 +557,7 @@ size_t TypeInfo::GetMemberCount() const
 
 bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable, const Token* token)
 {
-    MemberInfo* member = new MemberInfo(name, members.size(), type, isAssignable, token);
+    MemberInfo* member = new MemberInfo(name, static_cast<unsigned>(members.size()), type, isAssignable, token);
     auto rv = memberMap.insert({name, member});
 
     bool inserted = rv.second;

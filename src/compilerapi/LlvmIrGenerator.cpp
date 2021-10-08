@@ -887,7 +887,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
     DebugScope dbgScope(dbgInfo, diScopes, diSubprogram);
 
-    size_t idx = 0;
+    unsigned idx = 0;
     for (Argument& arg : func->args())
     {
         const Parameter* param = params[idx];
@@ -1005,7 +1005,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
             const string& memberName = member->GetName();
             uint64_t memberSize = memberDiType->getSizeInBits();
             // TODO: better way to get alignment?
-            uint64_t alignment = (memberSize > 32) ? 32 : memberSize;
+            uint32_t alignment = (memberSize > 32) ? 32 : static_cast<uint32_t>(memberSize);
             unsigned memberLine = member->GetToken()->line;
             elements.push_back(diBuilder->createMemberType(file, memberName, file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
 
@@ -2276,7 +2276,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
             const string& memberName = member->GetName();
             uint64_t memberSize = memberDiType->getSizeInBits();
             // TODO: better way to get alignment?
-            uint64_t alignment = (memberSize > 32) ? 32 : memberSize;
+            uint32_t alignment = (memberSize > 32) ? 32 : static_cast<uint32_t>(memberSize);
             elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
 
             offset += memberSize;
