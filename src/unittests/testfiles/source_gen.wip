@@ -61,7 +61,7 @@ fun operator_precedence(x i32, y i32, z i32, p Person)
     var d = x + y - z;
     var e = x + (y - z);
     var f = (x + y) * (x - y);
-    var g = (10..20).Start;
+    var g i8 = (10..20).Start;
     var h = (&p).name;
 }
 
@@ -77,7 +77,7 @@ fun strings()
 
 fun constants()
 {
-    const c1 = 123;
+    const c1 i8 = 123;
     const c2 i32 = 456;
 }
 
@@ -151,7 +151,7 @@ fun forLoop(num i32)
 
 fun vars() i32
 {
-    var x = 2;
+    var x i8 = 2;
     var y i16 = -12;
     x * y
 }

@@ -5,9 +5,7 @@ $target_triple
 
 %str = type { i64, i8* }
 %UnitType = type {}
-%Range16 = type { i16, i16 }
 %Range32 = type { i32, i32 }
-%Range8 = type { i8, i8 }
 %"[]i32" = type { i64, i32* }
 %"[]i8" = type { i64, i8* }
 %Test2 = type { %Test1, i32 }
@@ -19,6 +17,7 @@ $target_triple
 %"[]i16" = type { i64, i16* }
 %"[][]i32" = type { i64, %"[]i32"* }
 %"[]u8" = type { i64, i8* }
+%Range16 = type { i16, i16 }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -778,14 +777,9 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @types_range(i1 %b) #0 {
 entry:
-  %r1 = alloca %Range16, align 8
-  %ir4 = alloca %Range32, align 8
-  %ir3 = alloca %Range32, align 8
-  %ir2 = alloca %Range32, align 8
-  %ir1 = alloca %Range8, align 8
-  %er3 = alloca %Range32, align 8
-  %er2 = alloca %Range32, align 8
-  %er1 = alloca %Range8, align 8
+  %r1 = alloca %Range32, align 8
+  %hr = alloca %Range32, align 8
+  %cr = alloca %Range32, align 8
   %y2 = alloca i32, align 4
   %y1 = alloca i32, align 4
   %x2 = alloca i32, align 4
@@ -796,34 +790,37 @@ entry:
   store i32 13, i32* %x2, align 4
   store i32 25, i32* %y1, align 4
   store i32 39, i32* %y2, align 4
-  store %Range8 { i8 39, i8 124 }, %Range8* %er1, align 1
   %x12 = load i32, i32* %x1, align 4
   %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %x12, 1
-  store %Range32 %rng, %Range32* %er2, align 4
+  store %Range32 %rng, %Range32* %cr, align 4
   %x13 = load i32, i32* %x1, align 4
   %x24 = load i32, i32* %x2, align 4
   %rng5 = insertvalue %Range32 undef, i32 %x13, 0
   %rng6 = insertvalue %Range32 %rng5, i32 %x24, 1
-  store %Range32 %rng6, %Range32* %er3, align 4
-  store %Range8 { i8 1, i8 10 }, %Range8* %ir1, align 1
-  %y17 = load i32, i32* %y1, align 4
-  %rng8 = insertvalue %Range32 { i32 0, i32 undef }, i32 %y17, 1
-  store %Range32 %rng8, %Range32* %ir2, align 4
-  %y19 = load i32, i32* %y1, align 4
-  %y210 = load i32, i32* %y2, align 4
-  %rng11 = insertvalue %Range32 undef, i32 %y19, 0
-  %rng12 = insertvalue %Range32 %rng11, i32 %y210, 1
-  store %Range32 %rng12, %Range32* %ir3, align 4
-  %x213 = load i32, i32* %x2, align 4
-  %neg = sub i32 0, %x213
-  %x114 = load i32, i32* %x1, align 4
-  %x215 = load i32, i32* %x2, align 4
-  %add = add i32 %x114, %x215
-  %rng16 = insertvalue %Range32 undef, i32 %neg, 0
-  %rng17 = insertvalue %Range32 %rng16, i32 %add, 1
-  store %Range32 %rng17, %Range32* %ir4, align 4
-  %b18 = load i1, i1* %b1, align 1
-  br i1 %b18, label %if, label %else
+  store %Range32 %rng6, %Range32* %cr, align 4
+  store %Range32 { i32 0, i32 1 }, %Range32* %cr, align 4
+  %x27 = load i32, i32* %x2, align 4
+  %neg = sub i32 0, %x27
+  %x18 = load i32, i32* %x1, align 4
+  %x29 = load i32, i32* %x2, align 4
+  %add = add i32 %x18, %x29
+  %rng10 = insertvalue %Range32 undef, i32 %neg, 0
+  %rng11 = insertvalue %Range32 %rng10, i32 %add, 1
+  store %Range32 %rng11, %Range32* %cr, align 4
+  %y112 = load i32, i32* %y1, align 4
+  %rng13 = insertvalue %Range32 { i32 0, i32 undef }, i32 %y112, 1
+  store %Range32 %rng13, %Range32* %hr, align 4
+  %y114 = load i32, i32* %y1, align 4
+  %y215 = load i32, i32* %y2, align 4
+  %rng16 = insertvalue %Range32 undef, i32 %y114, 0
+  %rng17 = insertvalue %Range32 %rng16, i32 %y215, 1
+  store %Range32 %rng17, %Range32* %hr, align 4
+  store %Range32 { i32 0, i32 1 }, %Range32* %hr, align 4
+  %x118 = load i32, i32* %x1, align 4
+  %rng19 = insertvalue %Range32 { i32 0, i32 undef }, i32 %x118, 1
+  store %Range32 %rng19, %Range32* %r1, align 4
+  %b20 = load i1, i1* %b1, align 1
+  br i1 %b20, label %if, label %else
 
 if:                                               ; preds = %entry
   br label %merge
@@ -832,8 +829,8 @@ else:                                             ; preds = %entry
   br label %merge
 
 merge:                                            ; preds = %else, %if
-  %phi = phi %Range16 [ { i16 0, i16 3 }, %if ], [ { i16 100, i16 200 }, %else ]
-  store %Range16 %phi, %Range16* %r1, align 2
+  %phi = phi %Range32 [ { i32 0, i32 3 }, %if ], [ { i32 100, i32 200 }, %else ]
+  store %Range32 %phi, %Range32* %r1, align 4
   ret %UnitType zeroinitializer
 }
 
@@ -1467,20 +1464,10 @@ define i32 @inferTypes(i32 %a, i32 %b) #0 {
 entry:
   %quotient = alloca i32, align 4
   %bIsZero = alloca i1, align 1
-  %unaryOps = alloca i16, align 2
-  %n64 = alloca i64, align 8
-  %n32 = alloca i32, align 4
-  %n16 = alloca i16, align 2
-  %n8 = alloca i8, align 1
   %b2 = alloca i32, align 4
   %a1 = alloca i32, align 4
   store i32 %a, i32* %a1, align 4
   store i32 %b, i32* %b2, align 4
-  store i8 0, i8* %n8, align 1
-  store i16 200, i16* %n16, align 2
-  store i32 1000000, i32* %n32, align 4
-  store i64 3000000000, i64* %n64, align 8
-  store i16 200, i16* %unaryOps, align 2
   %b3 = load i32, i32* %b2, align 4
   %cmpeq = icmp eq i32 %b3, 0
   store i1 %cmpeq, i1* %bIsZero, align 1

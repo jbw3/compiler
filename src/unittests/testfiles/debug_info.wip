@@ -94,7 +94,7 @@ fun pointers(x i32)
 
 fun break_and_continue()
 {
-    for i in 0..7
+    for i i8 in 0..7
     {
         if i == 5
         {
@@ -108,7 +108,7 @@ fun break_and_continue()
         noParams();
     }
 
-    var j = 1;
+    var j i8 = 1;
     while j < 100
     {
         if j % 7 == 0

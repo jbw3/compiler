@@ -2870,50 +2870,51 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     return true;
 }
 
-const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType)
+const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType, const Token* errorToken)
 {
     const TypeInfo* type = inferType;
 
-    // if this is an int literal, set the type to the minimum signed size
-    // that will hold the number
-    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(type);
+    // check if this is an integer literal
+    const TypeInfo* checkType = type;
+    bool isArray = checkType->IsArray();
+    while (checkType->IsArray())
+    {
+        checkType = checkType->GetInnerType();
+    }
+
+    bool isRange = checkType->IsRange();
+    if (isRange)
+    {
+        checkType = checkType->GetInnerType();
+    }
+
+    const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(checkType);
     if (literalType != nullptr)
     {
-        type = TypeInfo::GetMinSignedIntTypeForSize(literalType->GetSignedNumBits());
-        if (type == nullptr)
+        const char* typeMsg = nullptr;
+        if (isArray)
         {
-            isError = true;
-            logger.LogInternalError("Could not infer integer literal type");
-            return nullptr;
-        }
-    }
-    else if (type->IsRange())
-    {
-        // if this is a range type and the members are int literals, set the members' type
-        // to the minimum signed size that will hold the number
-        const TypeInfo* memberType = type->GetInnerType();
-        const NumericLiteralType* memberLiteralType = dynamic_cast<const NumericLiteralType*>(memberType);
-        if (memberLiteralType != nullptr)
-        {
-            const TypeInfo* newMemberType = TypeInfo::GetMinSignedIntTypeForSize(memberLiteralType->GetSignedNumBits());
-            if (newMemberType == nullptr)
+            if (isRange)
             {
-                isError = true;
-                logger.LogInternalError("Could not infer Range integer literal type");
-                return nullptr;
+                typeMsg = "array of range literals";
             }
-
-            type = TypeInfo::GetRangeType(newMemberType, type->IsHalfOpen());
+            else
+            {
+                typeMsg = "array of integer literals";
+            }
         }
-    }
-    else if (type->IsArray())
-    {
-        // if this is an array type and the items are int literals, set the inner type
-        // to the minimum signed size that will hold the numbers
-        const TypeInfo* innerType = type->GetInnerType();
-        const TypeInfo* newInnerType = InferType(innerType);
+        else if (isRange)
+        {
+            typeMsg = "range literals";
+        }
+        else
+        {
+            typeMsg = "integer literals";
+        }
 
-        type = TypeInfo::GetArrayOfType(newInnerType);
+        isError = true;
+        logger.LogError(*errorToken, "Type inference is not allowed for {}", typeMsg);
+        return nullptr;
     }
 
     return type;
@@ -2926,7 +2927,7 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(Expression* typeExpression, co
     // if no type name was given, infer it from the expression
     if (typeExpression == nullptr)
     {
-        type = InferType(inferType);
+        type = InferType(inferType, errorToken);
     }
     else // get the type from the name given
     {

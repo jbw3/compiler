@@ -220,18 +220,19 @@ fun types_range(b bool)
     var y2 u32 = 39;
 
     # closed ranges
-    var er1 = 39..124; # with int literals
-    var er2 = 0..x1;   # one int literal and one variable
-    var er3 = x1..x2;  # two int literals
+    var cr = 0..x1;    # one int literal and one variable
+    cr = x1..x2;       # two variables
+    cr = 0..1;         # two int literals
+    cr = -x2..x1 + x2; # expressions
 
     # half-open ranges
-    var ir1 = 1..<10;  # with int literals
-    var ir2 = 0..<y1;  # one int literal and one variable
-    var ir3 = y1..<y2; # two int literals
-    var ir4 = -x2..x1 + x2; # expressions
+    var hr = 0..<y1; # one int literal and one variable
+    hr = y1..<y2;    # two variables
+    hr = 0..<1;      # two int literals
 
     # test sign extension
-    var r1 = if b { 0..3 } else { 100..200 };
+    var r1 = 0..x1;
+    r1 = if b { 0..3 } else { 100..200 };
 }
 
 fun str_member1() usize
@@ -477,13 +478,6 @@ fun createVars(num i32) i64
 
 fun inferTypes(a i32, b i32) i32
 {
-    var n8 = 0;
-    var n16 = 200;
-    var n32 = 1_000_000;
-    var n64 = 3_000_000_000;
-
-    var unaryOps = !!200;
-
     var bIsZero = b == 0;
     var quotient =
         if bIsZero
@@ -558,7 +552,8 @@ fun forLoopArray(a []i32) i32
 {
     var sum i32 = 0;
 
-    for x in [1, 2, 3]
+    const two i8 = 2;
+    for x in [1, two, 3]
     {
         sum += x;
     }
@@ -749,7 +744,7 @@ fun pointers(p1 &i32) &i32
     var p2 = p1;
     var isEqual = p1 == p2;
 
-    var x = 2;
+    var x i8 = 2;
     var xPtr = &x;
     *xPtr += 5;
 
@@ -778,9 +773,9 @@ struct SubscriptTest2 { s str, }
 
 fun break_and_continue()
 {
-    for i in 0..10
+    for i i8 in 0..10
     {
-        for j in 0..7
+        for j i8 in 0..7
         {
             if j == 4
             {
@@ -866,7 +861,7 @@ fun arrays2()
 
     arrays1([12; 123][4..<7]);
 
-    var r1 = [5; 7][3];
+    var r1 i8 = [5; 7][3];
 }
 
 fun arrays3()
@@ -885,7 +880,7 @@ fun arrays3()
 
     arrays1([10, 20, 30, 40, 50][1..3]);
 
-    var r1 = [100, 200][0];
+    var r1 i16 = [100, 200][0];
 
     var a6 [][]i32 = [[10, 20], [30, 40]];
     var a7 [][]i32 = [[2; 8], [3; 9]];
@@ -919,14 +914,14 @@ fun casts(x i16, y u16, b bool)
     var c12 = cast(i8, b);
 }
 
-const global_constant1 = 9;
+const global_constant1 i8 = 9;
 const global_constant2 i32 = 0x7a;
 const global_constant3 = "abcdefghij";
 
 fun consts()
 {
-    const c1 = 12;
-    const c2 = 1_000;
+    const c1 i8 = 12;
+    const c2 i16 = 1_000;
     const c3 i32 = c2;
     const c4 = true;
     const c5 u32 = 13;
@@ -955,7 +950,7 @@ fun consts()
     const c19 = c6.Size;
     const c20 = c18.test.a;
     const c21 = c1..c3;
-    const c22 = -4..200;
+    const c22 = (c1 - 16)..200;
     const c23 = [10, 11, c1];
     const c24 = [5; -c16];
     const c25 = c23[c23.Size - 1];

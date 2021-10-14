@@ -116,7 +116,7 @@ private:
 
     bool SetFunctionDeclarationTypes(SyntaxTree::FunctionDeclaration* functionDeclaration);
 
-    const TypeInfo* InferType(const TypeInfo* inferType);
+    const TypeInfo* InferType(const TypeInfo* inferType, const Token* errorToken);
 
     const TypeInfo* GetVariableType(SyntaxTree::Expression* typeExpression, const TypeInfo* inferType, const Token* errorToken);
 
