@@ -1032,4 +1032,6 @@ fun function_type()
     var f6 fun() fun() i32 = ftype6;
     var f7 fun() i32 = f6();
     f7();
+
+    var x = f6()();
 }

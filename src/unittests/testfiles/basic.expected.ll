@@ -3246,6 +3246,7 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @function_type() #0 {
 entry:
+  %x = alloca i32, align 4
   %f7 = alloca i32 ()*, align 8
   %f6 = alloca i32 ()* ()*, align 8
   %f5 = alloca %UnitType (i32, i1)*, align 8
@@ -3277,6 +3278,10 @@ entry:
   store i32 ()* %call12, i32 ()** %f7, align 8
   %f713 = load i32 ()*, i32 ()** %f7, align 8
   %call14 = call i32 %f713()
+  %f615 = load i32 ()* ()*, i32 ()* ()** %f6, align 8
+  %call16 = call i32 ()* %f615()
+  %call17 = call i32 %call16()
+  store i32 %call17, i32* %x, align 4
   ret %UnitType zeroinitializer
 }
 

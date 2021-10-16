@@ -196,6 +196,11 @@ fun test4(x i32) i32
     x
 }
 
+fun test5() fun() i32
+{
+    test2
+}
+
 fun function_types()
 {
     var f1 fun() = test1;
@@ -208,4 +213,5 @@ fun function_types()
     f4(0);
     var f5 = test4;
     f5(0);
+    var x = test5()();
 }
