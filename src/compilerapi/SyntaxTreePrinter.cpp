@@ -349,13 +349,13 @@ void SyntaxTreePrinter::Visit(ImplicitCastExpression* castExpression)
     PrintProperty("expression", castExpression->subExpression);
 }
 
-void SyntaxTreePrinter::Visit(FunctionExpression* functionExpression)
+void SyntaxTreePrinter::Visit(FunctionCallExpression* functionCallExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionExpression");
-    PrintProperty("name", functionExpression->name);
-    PrintProperty("arguments", functionExpression->arguments);
+    PrintProperty("functionExpression", functionCallExpression->functionExpression);
+    PrintProperty("arguments", functionCallExpression->arguments);
 }
 
 void SyntaxTreePrinter::Visit(MemberExpression* memberExpression)

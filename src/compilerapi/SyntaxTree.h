@@ -290,18 +290,20 @@ public:
     Expression* subExpression;
 };
 
-class FunctionExpression : public Expression
+class FunctionCallExpression : public Expression
 {
 public:
-    FunctionExpression(const std::string& name, const Expressions& arguments, const Token* nameToken);
+    FunctionCallExpression(Expression* functionExpr, const Expressions& arguments,
+                           const Token* openParToken, const Token* closeParToken);
 
-    virtual ~FunctionExpression();
+    virtual ~FunctionCallExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    const Token* nameToken;
+    const Token* openParToken;
+    const Token* closeParToken;
     const TypeInfo* functionType;
-    std::string name;
+    Expression* functionExpression;
     Expressions arguments;
 };
 

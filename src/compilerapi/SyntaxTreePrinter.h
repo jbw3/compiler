@@ -61,7 +61,7 @@ public:
 
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 
-    void Visit(SyntaxTree::FunctionExpression* functionExpression) override;
+    void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) override;
 
     void Visit(SyntaxTree::MemberExpression* memberExpression) override;
 

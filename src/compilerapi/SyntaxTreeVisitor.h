@@ -14,7 +14,7 @@ class ConstantDeclaration;
 class ExternFunctionDeclaration;
 class ForLoop;
 class FunctionDefinition;
-class FunctionExpression;
+class FunctionCallExpression;
 class FunctionTypeExpression;
 class IdentifierExpression;
 class ImplicitCastExpression;
@@ -82,7 +82,7 @@ public:
 
     virtual void Visit(SyntaxTree::ImplicitCastExpression* castExpression) = 0;
 
-    virtual void Visit(SyntaxTree::FunctionExpression* functionExpression) = 0;
+    virtual void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) = 0;
 
     virtual void Visit(SyntaxTree::MemberExpression* memberExpression) = 0;
 

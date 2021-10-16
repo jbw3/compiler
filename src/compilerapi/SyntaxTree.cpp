@@ -537,23 +537,27 @@ void ImplicitCastExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-FunctionExpression::FunctionExpression(const string& name, const Expressions& arguments, const Token* nameToken) :
-    nameToken(nameToken),
+FunctionCallExpression::FunctionCallExpression(Expression* functionExpr, const Expressions& arguments,
+                                               const Token* openParToken, const Token* closeParToken) :
+    openParToken(openParToken),
+    closeParToken(closeParToken),
     functionType(nullptr),
-    name(name),
+    functionExpression(functionExpr),
     arguments(arguments)
 {
 }
 
-FunctionExpression::~FunctionExpression()
+FunctionCallExpression::~FunctionCallExpression()
 {
     for (Expression* arg : arguments)
     {
         delete arg;
     }
+
+    delete functionExpression;
 }
 
-void FunctionExpression::Accept(SyntaxTreeVisitor* visitor)
+void FunctionCallExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
 }

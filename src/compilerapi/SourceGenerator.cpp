@@ -404,11 +404,13 @@ void SourceGenerator::Visit(ImplicitCastExpression* castExpression)
     castExpression->subExpression->Accept(this);
 }
 
-void SourceGenerator::Visit(FunctionExpression* functionExpression)
+void SourceGenerator::Visit(FunctionCallExpression* functionCallExpression)
 {
-    *os << functionExpression->name << "(";
+    functionCallExpression->functionExpression->Accept(this);
 
-    const Expressions& args = functionExpression->arguments;
+    *os << '(';
+
+    const Expressions& args = functionCallExpression->arguments;
     size_t numArgs = args.size();
     if (numArgs > 0)
     {

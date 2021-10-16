@@ -1171,40 +1171,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
     }
     else if (type == Token::eIdentifier)
     {
-        // check if it's a function call
-        if (nextIter != endIter && nextIter->type == Token::eOpenPar)
-        {
-            const Token* nameToken = &*iter;
-
-            iter += 2;
-            if (iter == endIter)
-            {
-                logger.LogError("Unexpected end of file in the middle of a function call");
-                return nullptr;
-            }
-
-            // process arguments
-            vector<Expression*> arguments;
-            while (iter->type != Token::eClosePar)
-            {
-                Expression* argExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
-                if (argExpr == nullptr)
-                {
-                    deletePointerContainer(arguments);
-                    return nullptr;
-                }
-                arguments.push_back(argExpr);
-
-                if (iter->type == Token::eComma)
-                {
-                    ++iter;
-                }
-            }
-
-            expr = new FunctionExpression(nameToken->value, arguments, nameToken);
-        }
         // check if it's a struct initialization
-        else if (IsStructInitialization(iter, endIter))
+        if (IsStructInitialization(iter, endIter))
         {
             expr = ProcessStructInitialization(iter, endIter);
             if (expr == nullptr)
@@ -1212,7 +1180,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextI
                 return nullptr;
             }
         }
-        else // it's a variable
+        else // it's an identifier
         {
             expr = new IdentifierExpression(iter->value, &*iter);
         }
@@ -1415,7 +1383,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 // update nextIter since iter may have changed in ProcessTerm()
                 nextIter = (iter == endIter) ? endIter : iter + 1;
 
-                if ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenBracket) )
+                if ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket) )
                 {
                     expr = ProcessPostTerm(expr, iter, endIter);
                     if (expr == nullptr)
@@ -2097,7 +2065,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
 {
     TokenIterator nextIter = iter + 1;
 
-    while ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenBracket) )
+    while ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket) )
     {
         // process member expressions
         while (nextIter != endIter && nextIter->type == Token::ePeriod)
@@ -2109,7 +2077,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
 
             if (iter == endIter)
             {
-                logger.LogError(*iter, "No member name after member operator");
+                logger.LogError("No member name after member operator");
                 delete expr;
                 return nullptr;
             }
@@ -2121,6 +2089,44 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
             }
 
             expr = new MemberExpression(expr, iter->value, opToken, &*iter);
+
+            nextIter = iter + 1;
+        }
+
+        // process function calls
+        while (nextIter != endIter && nextIter->type == Token::eOpenPar)
+        {
+            const Token* openParToken = &*nextIter;
+
+            // skip to token after "("
+            iter += 2;
+            if (iter == endIter)
+            {
+                logger.LogError("Unexpected end of file in the middle of a function call");
+                return nullptr;
+            }
+
+            // process arguments
+            vector<Expression*> arguments;
+            while (iter->type != Token::eClosePar)
+            {
+                Expression* argExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+                if (argExpr == nullptr)
+                {
+                    deletePointerContainer(arguments);
+                    return nullptr;
+                }
+                arguments.push_back(argExpr);
+
+                if (iter->type == Token::eComma)
+                {
+                    ++iter;
+                }
+            }
+
+            const Token* closeParToken = &*iter;
+
+            expr = new FunctionCallExpression(expr, arguments, openParToken, closeParToken);
 
             nextIter = iter + 1;
         }

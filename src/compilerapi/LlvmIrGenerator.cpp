@@ -1750,18 +1750,16 @@ void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
     }
 }
 
-void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
+void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
 {
-    const string& name = functionExpression->name;
-    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
-    if (data == nullptr)
+    functionCallExpression->functionExpression->Accept(this);
+    if (resultValue == nullptr)
     {
-        resultValue = nullptr;
-        logger.LogInternalError("No identifier data found for '{}'", name);
         return;
     }
+    Value* funValue = resultValue;
 
-    vector<Expression*> argExpressions = functionExpression->arguments;
+    vector<Expression*> argExpressions = functionCallExpression->arguments;
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)
     {
@@ -1775,21 +1773,7 @@ void LlvmIrGenerator::Visit(FunctionExpression* functionExpression)
         args.push_back(resultValue);
     }
 
-    SetDebugLocation(functionExpression->nameToken);
-
-    FunctionType* funType = CreateLlvmFunctionType(functionExpression->functionType);
-    Value* funValue = nullptr;
-    if (data->IsConstant())
-    {
-        unsigned constIdx = data->constValueIndex;
-        const TypeInfo* type = functionExpression->functionType;
-        funValue = CreateConstantValue(type, constIdx);
-    }
-    else
-    {
-        AllocaInst* alloca = data->value;
-        funValue = builder.CreateLoad(alloca, name);
-    }
+    FunctionType* funType = CreateLlvmFunctionType(functionCallExpression->functionType);
 
     FunctionCallee func(funType, funValue);
     resultValue = builder.CreateCall(func, args, "call");

@@ -2428,32 +2428,23 @@ void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)
     castExpression->subExpression->Accept(this);
 }
 
-void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
+void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
 {
-    const string& funcName = functionExpression->name;
-    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(funcName);
-    if (data == nullptr)
+    functionCallExpression->functionExpression->Accept(this);
+    if (isError)
     {
-        logger.LogError(*functionExpression->nameToken, "Function '{}' is not defined", funcName);
-        isError = true;
-        return;
-    }
-    else if (!data->type->IsFunction())
-    {
-        logger.LogError(*functionExpression->nameToken, "Cannot call '{}' because it is not a function", funcName);
-        isError = true;
         return;
     }
 
-    const TypeInfo* funType = data->type;
+    const TypeInfo* funType = functionCallExpression->functionExpression->GetType();
 
     // check argument count
-    const vector<Expression*>& args = functionExpression->arguments;
+    const vector<Expression*>& args = functionCallExpression->arguments;
     const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
     if (args.size() != paramTypes.size())
     {
         const char* suffix = (paramTypes.size() == 1) ? "" : "s";
-        logger.LogError(*functionExpression->nameToken, "Function '{}' expected {} argument{} but got {}", funcName, paramTypes.size(), suffix, args.size());
+        logger.LogError(*functionCallExpression->openParToken, "Function expected {} argument{} but got {}", paramTypes.size(), suffix, args.size());
         isError = true;
         return;
     }
@@ -2476,22 +2467,22 @@ void SemanticAnalyzer::Visit(FunctionExpression* functionExpression)
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
         {
-            logger.LogError(*functionExpression->nameToken, "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
+            logger.LogError(*functionCallExpression->openParToken, "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
             isError = true;
             return;
         }
 
         if (needsCast)
         {
-            functionExpression->arguments[i] = ImplicitCast(arg, paramType);
+            functionCallExpression->arguments[i] = ImplicitCast(arg, paramType);
         }
     }
 
     // set the expression's function type
-    functionExpression->functionType = funType;
+    functionCallExpression->functionType = funType;
 
     // set expression's type to the function's return type
-    functionExpression->SetType(funType->GetReturnType());
+    functionCallExpression->SetType(funType->GetReturnType());
 }
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
