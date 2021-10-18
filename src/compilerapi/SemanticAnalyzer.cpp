@@ -243,11 +243,18 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
 
         binaryExpression->left->SetAccessType(Expression::eAddress);
 
+        // we need to check if the assignment types are compatible unless it's a shift
         bool needsCast = false;
-        ok = AreCompatibleAssignmentTypes(binaryExpression->left->GetType(), binaryExpression->right->GetType(), needsCast);
-        if (needsCast)
+        if (op != BinaryExpression::eShiftLeftAssign &&
+            op != BinaryExpression::eShiftRightLogicalAssign &&
+            op != BinaryExpression::eShiftRightArithmeticAssign
+        )
         {
-            binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
+            ok = AreCompatibleAssignmentTypes(binaryExpression->left->GetType(), binaryExpression->right->GetType(), needsCast);
+            if (needsCast)
+            {
+                binaryExpression->right = ImplicitCast(binaryExpression->right, binaryExpression->left->GetType());
+            }
         }
     }
 
@@ -1016,9 +1023,56 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             case BinaryExpression::eShiftLeftAssign:
             case BinaryExpression::eShiftRightLogicalAssign:
             case BinaryExpression::eShiftRightArithmeticAssign:
-                // TODO: Require right op of shift to be unsigned
-                ok = true;
+            {
+                unsigned leftSize = leftType->GetNumBits();
+                unsigned rightSize = rightType->GetNumBits();
+
+                // require right operand of shift to be unsigned
+                TypeInfo::ESign rightSign = rightType->GetSign();
+                if (rightSign == TypeInfo::eUnsigned)
+                {
+                    // LLVM expects the sizes to be the same
+                    if (leftSize == rightSize)
+                    {
+                        ok = true;
+                    }
+                    else if (leftSize > rightSize)
+                    {
+                        const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(leftSize);
+                        binExpr->right = ImplicitCast(right, newType);
+                        ok = true;
+                    }
+                    else // error if the right type is larger than the left type (LLVM expects the sizes to be the same)
+                    {
+                        ok = false;
+                    }
+                }
+                else if (rightSign == TypeInfo::eContextDependent)
+                {
+                    const TypeInfo* minSizeType = TypeInfo::GetMinUnsignedIntTypeForSize(rightSize);
+
+                    // LLVM expects the sizes to be the same
+                    if (leftSize == minSizeType->GetNumBits())
+                    {
+                        right->SetType(minSizeType);
+                        ok = true;
+                    }
+                    else if (leftSize > minSizeType->GetNumBits())
+                    {
+                        right->SetType(NumericLiteralType::GetMinUnsignedIntTypeForSize(leftSize));
+                        ok = true;
+                    }
+                    else // error if the right type is larger than the left type (LLVM expects the sizes to be the same)
+                    {
+                        ok = false;
+                    }
+                }
+                else
+                {
+                    ok = false;
+                }
                 break;
+            }
             default:
                 ok = false;
                 break;

@@ -515,40 +515,36 @@ entry:
   %signext24 = sext i8 %a23 to i16
   %b25 = load i16, i16* %b2, align 2
   %add26 = add i16 %signext24, %b25
-  %signext27 = sext i16 %add26 to i32
-  %load28 = load i32, i32* %c3, align 4
-  %shl = shl i32 %load28, %signext27
+  %cast = sext i16 %add26 to i32
+  %load27 = load i32, i32* %c3, align 4
+  %shl = shl i32 %load27, %cast
   store i32 %shl, i32* %c3, align 4
-  %a29 = load i8, i8* %a1, align 1
-  %signext30 = sext i8 %a29 to i32
-  %load31 = load i32, i32* %c3, align 4
-  %lshr = lshr i32 %load31, %signext30
+  %load28 = load i32, i32* %c3, align 4
+  %lshr = lshr i32 %load28, 2
   store i32 %lshr, i32* %c3, align 4
-  %b32 = load i16, i16* %b2, align 2
-  %signext33 = sext i16 %b32 to i32
-  %load34 = load i32, i32* %c3, align 4
-  %ashr = ashr i32 %load34, %signext33
+  %load29 = load i32, i32* %c3, align 4
+  %ashr = ashr i32 %load29, 9
   store i32 %ashr, i32* %c3, align 4
-  %a35 = load i8, i8* %a1, align 1
-  %signext36 = sext i8 %a35 to i16
-  %b37 = load i16, i16* %b2, align 2
-  %add38 = add i16 %signext36, %b37
-  %signext39 = sext i16 %add38 to i32
-  %load40 = load i32, i32* %c3, align 4
-  %bitand = and i32 %load40, %signext39
+  %a30 = load i8, i8* %a1, align 1
+  %signext31 = sext i8 %a30 to i16
+  %b32 = load i16, i16* %b2, align 2
+  %add33 = add i16 %signext31, %b32
+  %signext34 = sext i16 %add33 to i32
+  %load35 = load i32, i32* %c3, align 4
+  %bitand = and i32 %load35, %signext34
   store i32 %bitand, i32* %c3, align 4
-  %a41 = load i8, i8* %a1, align 1
-  %signext42 = sext i8 %a41 to i32
-  %load43 = load i32, i32* %c3, align 4
-  %bitxor = xor i32 %load43, %signext42
+  %a36 = load i8, i8* %a1, align 1
+  %signext37 = sext i8 %a36 to i32
+  %load38 = load i32, i32* %c3, align 4
+  %bitxor = xor i32 %load38, %signext37
   store i32 %bitxor, i32* %c3, align 4
-  %a44 = load i8, i8* %a1, align 1
-  %signext45 = sext i8 %a44 to i16
-  %b46 = load i16, i16* %b2, align 2
-  %add47 = add i16 %signext45, %b46
-  %signext48 = sext i16 %add47 to i32
-  %load49 = load i32, i32* %c3, align 4
-  %bitor = or i32 %load49, %signext48
+  %a39 = load i8, i8* %a1, align 1
+  %signext40 = sext i8 %a39 to i16
+  %b41 = load i16, i16* %b2, align 2
+  %add42 = add i16 %signext40, %b41
+  %signext43 = sext i16 %add42 to i32
+  %load44 = load i32, i32* %c3, align 4
+  %bitor = or i32 %load44, %signext43
   store i32 %bitor, i32* %c3, align 4
   ret %UnitType zeroinitializer
 }
