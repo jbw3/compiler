@@ -842,6 +842,11 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
             FixNumericLiteralExpression(binExpr->left, newSubType);
             FixNumericLiteralExpression(binExpr->right, newSubType);
         }
+        else if (op == BinaryExpression::eShiftLeft || op == BinaryExpression::eShiftRightLogical || op == BinaryExpression::eShiftRightArithmetic)
+        {
+            FixNumericLiteralExpression(binExpr->left, resultType);
+            FixNumericLiteralExpression(binExpr->right, TypeInfo::GetMinUnsignedIntTypeForSize(resultType->GetNumBits()));
+        }
         else if (op == BinaryExpression::eSubscript)
         {
             const TypeInfo* leftType = binExpr->left->GetType();
@@ -1052,7 +1057,12 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
                     const TypeInfo* minSizeType = TypeInfo::GetMinUnsignedIntTypeForSize(rightSize);
 
                     // LLVM expects the sizes to be the same
-                    if (leftSize == minSizeType->GetNumBits())
+                    if (leftType->GetSign() == TypeInfo::eContextDependent)
+                    {
+                        // the sizes will be fixed later if both operands are literals
+                        ok = true;
+                    }
+                    else if (leftSize == minSizeType->GetNumBits())
                     {
                         right->SetType(minSizeType);
                         ok = true;
