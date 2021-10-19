@@ -1035,3 +1035,23 @@ fun function_type()
 
     var x = f6()();
 }
+
+fun shift()
+{
+    var x i32 = 1;
+    var y u16 = 2;
+
+    x <<= 1;
+    x <<= y;
+    x >>= 1;
+    x >>= y;
+    x >>>= 1;
+    x >>>= y;
+
+    x = x << 1;
+    x = x << y;
+    x = x >> 1;
+    x = x >> y;
+    x = x >>> 1;
+    x = x >>> y;
+}

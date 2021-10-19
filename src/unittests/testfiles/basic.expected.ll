@@ -3281,6 +3281,64 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @shift() #0 {
+entry:
+  %y = alloca i16, align 2
+  %x = alloca i32, align 4
+  store i32 1, i32* %x, align 4
+  store i16 2, i16* %y, align 2
+  %load = load i32, i32* %x, align 4
+  %shl = shl i32 %load, 1
+  store i32 %shl, i32* %x, align 4
+  %y1 = load i16, i16* %y, align 2
+  %zeroext = zext i16 %y1 to i32
+  %load2 = load i32, i32* %x, align 4
+  %shl3 = shl i32 %load2, %zeroext
+  store i32 %shl3, i32* %x, align 4
+  %load4 = load i32, i32* %x, align 4
+  %lshr = lshr i32 %load4, 1
+  store i32 %lshr, i32* %x, align 4
+  %y5 = load i16, i16* %y, align 2
+  %zeroext6 = zext i16 %y5 to i32
+  %load7 = load i32, i32* %x, align 4
+  %lshr8 = lshr i32 %load7, %zeroext6
+  store i32 %lshr8, i32* %x, align 4
+  %load9 = load i32, i32* %x, align 4
+  %ashr = ashr i32 %load9, 1
+  store i32 %ashr, i32* %x, align 4
+  %y10 = load i16, i16* %y, align 2
+  %zeroext11 = zext i16 %y10 to i32
+  %load12 = load i32, i32* %x, align 4
+  %ashr13 = ashr i32 %load12, %zeroext11
+  store i32 %ashr13, i32* %x, align 4
+  %x14 = load i32, i32* %x, align 4
+  %shl15 = shl i32 %x14, 1
+  store i32 %shl15, i32* %x, align 4
+  %x16 = load i32, i32* %x, align 4
+  %y17 = load i16, i16* %y, align 2
+  %zeroext18 = zext i16 %y17 to i32
+  %shl19 = shl i32 %x16, %zeroext18
+  store i32 %shl19, i32* %x, align 4
+  %x20 = load i32, i32* %x, align 4
+  %lshr21 = lshr i32 %x20, 1
+  store i32 %lshr21, i32* %x, align 4
+  %x22 = load i32, i32* %x, align 4
+  %y23 = load i16, i16* %y, align 2
+  %zeroext24 = zext i16 %y23 to i32
+  %lshr25 = lshr i32 %x22, %zeroext24
+  store i32 %lshr25, i32* %x, align 4
+  %x26 = load i32, i32* %x, align 4
+  %ashr27 = ashr i32 %x26, 1
+  store i32 %ashr27, i32* %x, align 4
+  %x28 = load i32, i32* %x, align 4
+  %y29 = load i16, i16* %y, align 2
+  %zeroext30 = zext i16 %y29 to i32
+  %ashr31 = ashr i32 %x28, %zeroext30
+  store i32 %ashr31, i32* %x, align 4
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
