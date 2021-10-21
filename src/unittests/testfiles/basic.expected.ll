@@ -3336,6 +3336,21 @@ entry:
   %zeroext30 = zext i16 %y29 to i32
   %ashr31 = ashr i32 %x28, %zeroext30
   store i32 %ashr31, i32* %x, align 4
+  store i32 8, i32* %x, align 4
+  %y32 = load i16, i16* %y, align 2
+  %zeroext33 = zext i16 %y32 to i32
+  %shl34 = shl i32 4, %zeroext33
+  store i32 %shl34, i32* %x, align 4
+  store i32 2, i32* %x, align 4
+  %y35 = load i16, i16* %y, align 2
+  %zeroext36 = zext i16 %y35 to i32
+  %lshr37 = lshr i32 4, %zeroext36
+  store i32 %lshr37, i32* %x, align 4
+  store i32 2, i32* %x, align 4
+  %y38 = load i16, i16* %y, align 2
+  %zeroext39 = zext i16 %y38 to i32
+  %ashr40 = ashr i32 4, %zeroext39
+  store i32 %ashr40, i32* %x, align 4
   ret %UnitType zeroinitializer
 }
 

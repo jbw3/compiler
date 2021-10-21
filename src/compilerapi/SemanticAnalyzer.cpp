@@ -1047,6 +1047,14 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
                         binExpr->right = ImplicitCast(right, newType);
                         ok = true;
                     }
+                    // if the left side is a literal expression, we'll fix the size later
+                    else if (leftType->GetSign() == TypeInfo::eContextDependent)
+                    {
+                        // add an implicit cast in case we need to change the type later when
+                        // setting the literal expression's type
+                        binExpr->right = ImplicitCast(right, right->GetType());
+                        ok = true;
+                    }
                     else // error if the right type is larger than the left type (LLVM expects the sizes to be the same)
                     {
                         ok = false;
@@ -1094,11 +1102,16 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             const NumericLiteralType* rightNumLit = dynamic_cast<const NumericLiteralType*>(right->GetType());
             if (leftNumLit != nullptr && rightNumLit == nullptr)
             {
-                const TypeInfo* resultType = GetBiggestSizeType(left->GetType(), right->GetType());
-                FixNumericLiteralExpression(left, resultType);
-                if (right->GetType()->GetNumBits() != resultType->GetNumBits())
+                // if the left operand is an integer literal and the operator is a shift, then we
+                // don't have enough information yet to be able to determine the int literal's type
+                if (op != BinaryExpression::eShiftLeft && op != BinaryExpression::eShiftRightArithmetic && op != BinaryExpression::eShiftRightLogical)
                 {
-                    binExpr->right = ImplicitCast(right, resultType);
+                    const TypeInfo* resultType = GetBiggestSizeType(left->GetType(), right->GetType());
+                    FixNumericLiteralExpression(left, resultType);
+                    if (right->GetType()->GetNumBits() != resultType->GetNumBits())
+                    {
+                        binExpr->right = ImplicitCast(right, resultType);
+                    }
                 }
             }
             else if (leftNumLit == nullptr && rightNumLit != nullptr)
