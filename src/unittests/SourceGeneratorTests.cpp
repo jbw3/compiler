@@ -1,17 +1,13 @@
-#ifdef _MSC_VER
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
-#endif
-
 #include "Compiler.h"
 #include "SourceGenerator.h"
 #include "SourceGeneratorTests.h"
 #include "SyntaxTree.h"
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 using namespace std;
 
 SourceGeneratorTests::SourceGeneratorTests()

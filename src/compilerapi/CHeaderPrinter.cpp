@@ -1,14 +1,11 @@
-#ifdef _MSC_VER
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
-#endif
 #include "CHeaderPrinter.h"
 #include "ErrorLogger.h"
 #include "keywords.h"
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 using namespace std;
 using namespace SyntaxTree;
 

@@ -1,15 +1,11 @@
-#ifdef _MSC_VER
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
-#endif
-
 #include "CompilerTests.h"
 #include "Compiler.h"
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 using namespace std;
 
 CompilerTests::CompilerTests()

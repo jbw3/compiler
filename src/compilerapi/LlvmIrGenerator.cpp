@@ -1,7 +1,6 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4141 4146 4244 4267 4624 6001 6011 6297 26439 26450 26451 26495 26812)
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -12,7 +11,7 @@
 #include "SyntaxTree.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Target/TargetMachine.h"
-#include <experimental/filesystem>
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #ifdef _MSC_VER
@@ -21,7 +20,7 @@
 #pragma clang diagnostic pop
 #endif
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
