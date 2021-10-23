@@ -845,7 +845,10 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
         else if (op == BinaryExpression::eShiftLeft || op == BinaryExpression::eShiftRightLogical || op == BinaryExpression::eShiftRightArithmetic)
         {
             FixNumericLiteralExpression(binExpr->left, resultType);
-            FixNumericLiteralExpression(binExpr->right, TypeInfo::GetMinUnsignedIntTypeForSize(resultType->GetNumBits()));
+            if (binExpr->right->GetType()->GetSign() == TypeInfo::eContextDependent)
+            {
+                FixNumericLiteralExpression(binExpr->right, TypeInfo::GetMinUnsignedIntTypeForSize(resultType->GetNumBits()));
+            }
         }
         else if (op == BinaryExpression::eSubscript)
         {
@@ -1029,61 +1032,11 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             case BinaryExpression::eShiftRightLogicalAssign:
             case BinaryExpression::eShiftRightArithmeticAssign:
             {
-                unsigned leftSize = leftType->GetNumBits();
-                unsigned rightSize = rightType->GetNumBits();
-
                 // require right operand of shift to be unsigned
                 TypeInfo::ESign rightSign = rightType->GetSign();
-                if (rightSign == TypeInfo::eUnsigned)
+                if (rightSign == TypeInfo::eUnsigned || rightSign == TypeInfo::eContextDependent)
                 {
-                    // LLVM expects the sizes to be the same
-                    if (leftSize == rightSize)
-                    {
-                        ok = true;
-                    }
-                    else if (leftSize > rightSize)
-                    {
-                        const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(leftSize);
-                        binExpr->right = ImplicitCast(right, newType);
-                        ok = true;
-                    }
-                    // if the left side is a literal expression, we'll fix the size later
-                    else if (leftType->GetSign() == TypeInfo::eContextDependent)
-                    {
-                        // add an implicit cast in case we need to change the type later when
-                        // setting the literal expression's type
-                        binExpr->right = ImplicitCast(right, right->GetType());
-                        ok = true;
-                    }
-                    else // error if the right type is larger than the left type (LLVM expects the sizes to be the same)
-                    {
-                        ok = false;
-                    }
-                }
-                else if (rightSign == TypeInfo::eContextDependent)
-                {
-                    const TypeInfo* minSizeType = TypeInfo::GetMinUnsignedIntTypeForSize(rightSize);
-
-                    // LLVM expects the sizes to be the same
-                    if (leftType->GetSign() == TypeInfo::eContextDependent)
-                    {
-                        // the sizes will be fixed later if both operands are literals
-                        ok = true;
-                    }
-                    else if (leftSize == minSizeType->GetNumBits())
-                    {
-                        right->SetType(minSizeType);
-                        ok = true;
-                    }
-                    else if (leftSize > minSizeType->GetNumBits())
-                    {
-                        right->SetType(NumericLiteralType::GetMinUnsignedIntTypeForSize(leftSize));
-                        ok = true;
-                    }
-                    else // error if the right type is larger than the left type (LLVM expects the sizes to be the same)
-                    {
-                        ok = false;
-                    }
+                    ok = true;
                 }
                 else
                 {
@@ -1116,11 +1069,21 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             }
             else if (leftNumLit == nullptr && rightNumLit != nullptr)
             {
-                const TypeInfo* resultType = GetBiggestSizeType(left->GetType(), right->GetType());
-                FixNumericLiteralExpression(right, resultType);
-                if (left->GetType()->GetNumBits() != resultType->GetNumBits())
+                if (op == BinaryExpression::eShiftLeft || op == BinaryExpression::eShiftLeftAssign
+                || op == BinaryExpression::eShiftRightArithmetic || op == BinaryExpression::eShiftRightArithmeticAssign
+                || op == BinaryExpression::eShiftRightLogical || op == BinaryExpression::eShiftRightLogicalAssign)
                 {
-                    binExpr->left = ImplicitCast(left, resultType);
+                    const TypeInfo* newType = TypeInfo::GetMinUnsignedIntTypeForSize(rightType->GetNumBits());
+                    FixNumericLiteralExpression(right, newType);
+                }
+                else
+                {
+                    const TypeInfo* resultType = GetBiggestSizeType(left->GetType(), right->GetType());
+                    FixNumericLiteralExpression(right, resultType);
+                    if (left->GetType()->GetNumBits() != resultType->GetNumBits())
+                    {
+                        binExpr->left = ImplicitCast(left, resultType);
+                    }
                 }
             }
         }

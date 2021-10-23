@@ -214,16 +214,51 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 break;
             case BinaryExpression::eShiftLeft:
             case BinaryExpression::eShiftLeftAssign:
-                resultValue = builder.CreateShl(leftValue, rightValue, "shl");
-                break;
             case BinaryExpression::eShiftRightLogical:
             case BinaryExpression::eShiftRightLogicalAssign:
-                resultValue = builder.CreateLShr(leftValue, rightValue, "lshr");
-                break;
             case BinaryExpression::eShiftRightArithmetic:
             case BinaryExpression::eShiftRightArithmeticAssign:
-                resultValue = builder.CreateAShr(leftValue, rightValue, "ashr");
+            {
+                unsigned leftSize = leftType->GetNumBits();
+                unsigned rightSize = rightType->GetNumBits();
+                Type* origLeftType = leftValue->getType();
+                if (leftSize < rightSize)
+                {
+                    leftValue = isSigned ?
+                        builder.CreateSExt(leftValue, Type::getIntNTy(context, rightSize), "signext") :
+                        builder.CreateZExt(leftValue, Type::getIntNTy(context, rightSize), "zeroext");
+                }
+                else if (leftSize > rightSize)
+                {
+                    rightValue = builder.CreateZExt(rightValue, Type::getIntNTy(context, leftSize), "zeroext");
+                }
+
+                switch (op)
+                {
+                    case BinaryExpression::eShiftLeft:
+                    case BinaryExpression::eShiftLeftAssign:
+                        resultValue = builder.CreateShl(leftValue, rightValue, "shl");
+                        break;
+                    case BinaryExpression::eShiftRightLogical:
+                    case BinaryExpression::eShiftRightLogicalAssign:
+                        resultValue = builder.CreateLShr(leftValue, rightValue, "lshr");
+                        break;
+                    case BinaryExpression::eShiftRightArithmetic:
+                    case BinaryExpression::eShiftRightArithmeticAssign:
+                        resultValue = builder.CreateAShr(leftValue, rightValue, "ashr");
+                        break;
+                    default:
+                        logger.LogInternalError("Unexpected shift operator");
+                        resultValue = nullptr;
+                        return;
+                }
+
+                if (leftSize < rightSize)
+                {
+                    resultValue = builder.CreateTrunc(resultValue, origLeftType, "trunc");
+                }
                 break;
+            }
             case BinaryExpression::eBitwiseAnd:
             case BinaryExpression::eBitwiseAndAssign:
                 resultValue = builder.CreateAnd(leftValue, rightValue, "bitand");

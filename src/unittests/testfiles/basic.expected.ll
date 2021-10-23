@@ -3284,33 +3284,35 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @shift() #0 {
 entry:
+  %z = alloca i64, align 8
   %y = alloca i16, align 2
   %x = alloca i32, align 4
   store i32 1, i32* %x, align 4
   store i16 2, i16* %y, align 2
+  store i64 3, i64* %z, align 8
   %load = load i32, i32* %x, align 4
   %shl = shl i32 %load, 1
   store i32 %shl, i32* %x, align 4
   %y1 = load i16, i16* %y, align 2
-  %zeroext = zext i16 %y1 to i32
   %load2 = load i32, i32* %x, align 4
+  %zeroext = zext i16 %y1 to i32
   %shl3 = shl i32 %load2, %zeroext
   store i32 %shl3, i32* %x, align 4
   %load4 = load i32, i32* %x, align 4
   %lshr = lshr i32 %load4, 1
   store i32 %lshr, i32* %x, align 4
   %y5 = load i16, i16* %y, align 2
-  %zeroext6 = zext i16 %y5 to i32
-  %load7 = load i32, i32* %x, align 4
-  %lshr8 = lshr i32 %load7, %zeroext6
+  %load6 = load i32, i32* %x, align 4
+  %zeroext7 = zext i16 %y5 to i32
+  %lshr8 = lshr i32 %load6, %zeroext7
   store i32 %lshr8, i32* %x, align 4
   %load9 = load i32, i32* %x, align 4
   %ashr = ashr i32 %load9, 1
   store i32 %ashr, i32* %x, align 4
   %y10 = load i16, i16* %y, align 2
-  %zeroext11 = zext i16 %y10 to i32
-  %load12 = load i32, i32* %x, align 4
-  %ashr13 = ashr i32 %load12, %zeroext11
+  %load11 = load i32, i32* %x, align 4
+  %zeroext12 = zext i16 %y10 to i32
+  %ashr13 = ashr i32 %load11, %zeroext12
   store i32 %ashr13, i32* %x, align 4
   %x14 = load i32, i32* %x, align 4
   %shl15 = shl i32 %x14, 1
@@ -3351,6 +3353,28 @@ entry:
   %zeroext39 = zext i16 %y38 to i32
   %ashr40 = ashr i32 4, %zeroext39
   store i32 %ashr40, i32* %x, align 4
+  %z41 = load i64, i64* %z, align 8
+  %load42 = load i32, i32* %x, align 4
+  %signext = sext i32 %load42 to i64
+  %shl43 = shl i64 %signext, %z41
+  %trunc = trunc i64 %shl43 to i32
+  store i32 %trunc, i32* %x, align 4
+  %x44 = load i32, i32* %x, align 4
+  %z45 = load i64, i64* %z, align 8
+  %signext46 = sext i32 %x44 to i64
+  %lshr47 = lshr i64 %signext46, %z45
+  %trunc48 = trunc i64 %lshr47 to i32
+  store i32 %trunc48, i32* %x, align 4
+  %load49 = load i32, i32* %x, align 4
+  %signext50 = sext i32 %load49 to i64
+  %shl51 = shl i64 %signext50, 1000000000000
+  %trunc52 = trunc i64 %shl51 to i32
+  store i32 %trunc52, i32* %x, align 4
+  %x53 = load i32, i32* %x, align 4
+  %signext54 = sext i32 %x53 to i64
+  %ashr55 = ashr i64 %signext54, 1000000000000
+  %trunc56 = trunc i64 %ashr55 to i32
+  store i32 %trunc56, i32* %x, align 4
   ret %UnitType zeroinitializer
 }
 
