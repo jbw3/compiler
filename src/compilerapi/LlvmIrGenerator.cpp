@@ -1997,8 +1997,6 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     ArrayRef<Type*> emptyArray;
     unitType = StructType::create(context, emptyArray, "UnitType");
 
-    unsigned int addressSpace = module->getDataLayout().getProgramAddressSpace();
-
     strStructElements[0] = GetType(TypeInfo::GetUIntSizeType());
     strStructElements[1] = PointerType::get(Type::getInt8Ty(context), 0);
 

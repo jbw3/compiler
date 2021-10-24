@@ -37,7 +37,7 @@ bool isConsole(ostream* os)
     return value;
 }
 
-bool configureConsole(ostream* os)
+bool configureConsole([[maybe_unused]] ostream* os)
 {
 #ifdef _WIN32
     bool ok = false;

@@ -1111,7 +1111,7 @@ Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<Unar
     return result;
 }
 
-Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator nextIter, TokenIterator endIter, bool& isPotentialEnd)
+Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator endIter, bool& isPotentialEnd)
 {
     Token::EType type = iter->type;
     Token::EMainType mainType = Token::GetMainType(type);
@@ -1373,7 +1373,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             }
             else
             {
-                Expression* expr = ProcessTerm(iter, nextIter, endIter, isPotentialEnd);
+                Expression* expr = ProcessTerm(iter, endIter, isPotentialEnd);
                 if (expr == nullptr)
                 {
                     deletePointerContainer(terms);

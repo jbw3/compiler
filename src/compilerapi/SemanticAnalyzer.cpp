@@ -8,11 +8,11 @@ using namespace std;
 using namespace SyntaxTree;
 
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
-    compilerContext(compilerContext),
-    symbolTable(compilerContext),
     logger(logger),
     isError(false),
     isConstDecl(false),
+    compilerContext(compilerContext),
+    symbolTable(compilerContext),
     loopLevel(0),
     currentFunction(nullptr)
 {
