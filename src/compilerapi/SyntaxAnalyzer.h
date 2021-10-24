@@ -104,7 +104,7 @@ private:
 
     SyntaxTree::BlockExpression* ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter);
 
-    SyntaxTree::Expression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
+    SyntaxTree::BranchExpression* ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter);
 
     SyntaxTree::Expression* ProcessPostTerm(SyntaxTree::Expression* expr, TokenIterator& iter, TokenIterator endIter);
 };

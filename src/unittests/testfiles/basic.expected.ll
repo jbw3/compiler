@@ -847,6 +847,7 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define i64 @str_member2(i32 %x) #0 {
 entry:
+  %size = alloca i64, align 8
   %x1 = alloca i32, align 4
   store i32 %x, i32* %x1, align 4
   %x2 = load i32, i32* %x1, align 4
@@ -864,7 +865,9 @@ else:                                             ; preds = %entry
 merge:                                            ; preds = %else, %if
   %phi = phi %str [ %load, %if ], [ %load3, %else ]
   %mber = extractvalue %str %phi, 0
-  ret i64 %mber
+  store i64 %mber, i64* %size, align 8
+  %size4 = load i64, i64* %size, align 8
+  ret i64 %size4
 }
 
 ; Function Attrs: noinline nounwind optnone
@@ -1250,6 +1253,7 @@ merge43:                                          ; preds = %merge41, %if
 ; Function Attrs: noinline nounwind optnone
 define i32 @branchInExpression(i32 %x, i32 %y, i32 %z) #0 {
 entry:
+  %num = alloca i32, align 4
   %z3 = alloca i32, align 4
   %y2 = alloca i32, align 4
   %x1 = alloca i32, align 4
@@ -1271,7 +1275,9 @@ else:                                             ; preds = %entry
 merge:                                            ; preds = %else, %if
   %phi = phi i32 [ %y5, %if ], [ %z6, %else ]
   %add = add i32 %phi, 58
-  ret i32 %add
+  store i32 %add, i32* %num, align 4
+  %num7 = load i32, i32* %num, align 4
+  ret i32 %num7
 }
 
 ; Function Attrs: noinline nounwind optnone

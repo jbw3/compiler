@@ -244,14 +244,16 @@ fun str_member1() usize
 
 fun str_member2(x i32) usize
 {
-    if x == 0
-    {
-        "abc"
-    }
-    else
-    {
-        "café"
-    }.Size
+    var size =
+        if x == 0
+        {
+            "abc"
+        }
+        else
+        {
+            "café"
+        }.Size;
+    size
 }
 
 fun types_add_literal(num i8) i8
@@ -398,14 +400,16 @@ fun elseIfBranchesNesting(x i32, y i32, z i32) i32
 
 fun branchInExpression(x i32, y i32, z i32) i32
 {
-    if x == 0
-    {
-        y
-    }
-    else
-    {
-        z
-    } + 58
+    var num =
+        if x == 0
+        {
+            y
+        }
+        else
+        {
+            z
+        } + 58;
+    num
 }
 
 fun branchWithLogicalOperators(x i32, y i32, z i32) i32

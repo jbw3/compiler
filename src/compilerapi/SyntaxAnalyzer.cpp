@@ -1861,6 +1861,19 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             statement = ProcessConstantDeclaration(iter, endIter);
             needsUnitType = true;
         }
+        else if (tokenType == Token::eIf)
+        {
+            BranchExpression* branchExpr = ProcessBranchExpression(iter, endIter);
+            statement = branchExpr;
+
+            if (branchExpr != nullptr)
+            {
+                ++iter; // increment past end brace
+
+                // we need to add a unit type if there is not an else expression
+                needsUnitType = dynamic_cast<UnitTypeLiteralExpression*>(branchExpr->elseExpression) != nullptr;
+            }
+        }
         else if (tokenType  == Token::eWhile)
         {
             statement = ProcessWhileLoop(iter, endIter);
@@ -1967,7 +1980,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
     return blockExpression;
 }
 
-Expression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter)
+BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, TokenIterator endIter)
 {
     const Token* ifToken = &*iter;
 

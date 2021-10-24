@@ -139,7 +139,7 @@ fun ret2(a i32, p &i32)
     {
         return;
     }
-    ; # TODO: fix bug so this is not needed
+
     *p = a;
 }
 
