@@ -52,3 +52,8 @@ add_library(compilerapi
     utils.cpp
     utils.h
 )
+
+if(WIN32)
+else()
+    target_compile_options(compilerapi PRIVATE -Wall -Wextra)
+endif()
