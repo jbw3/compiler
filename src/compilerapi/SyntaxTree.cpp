@@ -349,6 +349,9 @@ unsigned BinaryExpression::GetPrecedence(EOperator op)
         case BinaryExpression::eBitwiseOrAssign:
             return 10;
     }
+
+    // we should never get here
+    return static_cast<unsigned>(-1);
 }
 
 bool BinaryExpression::IsAssignment(EOperator op)
@@ -392,6 +395,9 @@ bool BinaryExpression::IsAssignment(EOperator op)
         case BinaryExpression::eBitwiseOrAssign:
             return true;
     }
+
+    // we should never get here
+    return false;
 }
 
 bool BinaryExpression::IsComputationAssignment(EOperator op)
@@ -435,6 +441,9 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
         case BinaryExpression::eBitwiseOrAssign:
             return true;
     }
+
+    // we should never get here
+    return false;
 }
 
 BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken) :

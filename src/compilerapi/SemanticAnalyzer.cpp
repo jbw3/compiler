@@ -2433,7 +2433,7 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                     if (exprSign == TypeInfo::eSigned)
                     {
                         // sign extend
-                        int64_t signBit = 1 << (castSize - 1);
+                        int64_t signBit = static_cast<int64_t>(1) << (castSize - 1);
                         bool isOne = (value & signBit) != 0;
                         if (isOne)
                         {
