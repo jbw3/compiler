@@ -1874,6 +1874,14 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                 needsUnitType = dynamic_cast<UnitTypeLiteralExpression*>(branchExpr->elseExpression) != nullptr;
             }
         }
+        else if (tokenType == Token::eOpenBrace)
+        {
+            BlockExpression* blockExpr = ProcessBlockExpression(iter, endIter);
+            statement = blockExpr;
+
+            ++iter; // increment past end brace
+            needsUnitType = false;
+        }
         else if (tokenType  == Token::eWhile)
         {
             statement = ProcessWhileLoop(iter, endIter);

@@ -616,6 +616,18 @@ fun blockExpression(param i32) i32
     x
 }
 
+fun nestedBlockExpression()
+{
+    {
+        var x i32 = 12;
+        types_unit(x);
+    }
+
+    {
+        types_unit2();
+    }
+}
+
 extern fun extern1();
 
 fun externTest() u64

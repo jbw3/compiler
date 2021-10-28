@@ -1939,6 +1939,18 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
+define %UnitType @nestedBlockExpression() #0 {
+entry:
+  %x = alloca i32, align 4
+  store i32 12, i32* %x, align 4
+  %x1 = load i32, i32* %x, align 4
+  %signext = sext i32 %x1 to i64
+  %call = call %UnitType @types_unit(i64 %signext)
+  %call2 = call %UnitType @types_unit2()
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
 define i64 @externTest() #0 {
 entry:
   %call = call %UnitType @extern1()
