@@ -11,6 +11,12 @@ namespace SyntaxTree
 class FunctionDeclaration;
 }
 
+struct CharBuffer
+{
+    size_t size;
+    const char* ptr;
+};
+
 class TokenValues
 {
 public:
@@ -74,7 +80,9 @@ public:
 
     CompilerContext();
 
-    unsigned AddFile(const std::string& filename);
+    ~CompilerContext();
+
+    unsigned AddFile(const std::string& filename, CharBuffer fileBuffer);
 
     unsigned GetFileIdCount() const
     {
@@ -84,6 +92,11 @@ public:
     const std::string& GetFilename(unsigned id) const
     {
         return filenames[id];
+    }
+
+    CharBuffer GetFileBuffer(unsigned id) const
+    {
+        return fileBuffers[id];
     }
 
     TokenList& GetFileTokens(unsigned id)
@@ -162,6 +175,7 @@ public:
 
 private:
     std::vector<std::string> filenames;
+    std::vector<CharBuffer> fileBuffers;
     std::vector<TokenList> fileTokens;
     unsigned basicTypeCount;
     std::vector<int64_t> intConstants;

@@ -1,9 +1,11 @@
 #include "LexicalAnalyzer.h"
 #include "CompilerContext.h"
 #include "keywords.h"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
+namespace fs = std::filesystem;
 using namespace std;
 
 const char LexicalAnalyzer::COMMENT_START = '#';
@@ -111,58 +113,73 @@ LexicalAnalyzer::LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& 
     compilerContext(compilerContext),
     logger(logger)
 {
-    buff = new char[MAX_BUFF_CAPACITY];
-    buffSize = 0;
     buffIdx = 0;
     isMore = false;
 
     filenameId = 0;
 }
 
-LexicalAnalyzer::~LexicalAnalyzer()
-{
-    delete [] buff;
-}
-
 bool LexicalAnalyzer::Process(const string& inFile)
 {
-    istream* is = nullptr;
+    CharBuffer fileBuff;
     if (inFile.empty() || inFile == "-")
     {
         filename = "<stdin>";
-        is = &cin;
+
+        size_t numChars = 0;
+        size_t buffSize = 1024;
+        char* buff = new char[buffSize];
+        cin.read(buff, buffSize);
+        size_t readSize = cin.gcount();
+        numChars += readSize;
+        while (readSize > 0)
+        {
+            size_t oldSize = buffSize;
+            buffSize *= 2;
+
+            char* oldBuff = buff;
+            buff = new char[buffSize];
+
+            memcpy(buff, oldBuff, oldSize);
+            delete [] oldBuff;
+
+            cin.read(buff + numChars, buffSize - numChars);
+            readSize = cin.gcount();
+            numChars += readSize;
+        }
+
+        fileBuff.size = numChars;
+        fileBuff.ptr = buff;
     }
     else
     {
         filename = inFile;
-        is = new fstream(inFile, ios_base::in);
-        if (is->fail())
+        fstream file(inFile, ios_base::in);
+        if (file.fail())
         {
-            delete is;
             logger.LogError("Could not open file '{}'", inFile);
             return false;
         }
+
+        fileBuff.size = fs::file_size(inFile);
+        char* buff = new char[fileBuff.size];
+        file.read(buff, fileBuff.size);
+        fileBuff.ptr = buff;
     }
 
-    filenameId = compilerContext.AddFile(filename);
+    filenameId = compilerContext.AddFile(filename, fileBuff);
     TokenList& tokens = compilerContext.GetFileTokens(filenameId);
 
-    bool ok = Process(*is, tokens);
-
-    if (is != &cin)
-    {
-        delete is;
-    }
+    bool ok = Process(fileBuff, tokens);
 
     return ok;
 }
 
-bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
+bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 {
     TokenValues& tokenValues = compilerContext.tokenValues;
     tokenValues.ClearCurrent();
     tokens.Clear();
-    buffSize = 0;
     buffIdx = 0;
     isMore = true;
 
@@ -170,7 +187,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
     column = 1;
 
     bool ok = true;
-    char ch = Read(is);
+    char ch = Read(buff);
     while (ok && isMore)
     {
         // skip whitespace and comments
@@ -189,26 +206,26 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                     ++column;
                 }
 
-                ch = Read(is);
+                ch = Read(buff);
             }
 
             // skip comments
             if (isMore && ch == COMMENT_START)
             {
-                ch = Read(is);
+                ch = Read(buff);
                 if (isMore)
                 {
                     if (ch == BLOCK_COMMENT_INNER)
                     {
-                        ok = ParseBlockComment(is);
+                        ok = ParseBlockComment(buff);
                     }
                     else
                     {
-                        ParseLineComment(is);
+                        ParseLineComment(buff);
                     }
                 }
 
-                ch = Read(is);
+                ch = Read(buff);
             }
         }
 
@@ -219,12 +236,12 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
             {
                 unsigned startColumn = column;
                 tokenValues.AppendChar(ch);
-                ch = Read(is);
+                ch = Read(buff);
                 ++column;
                 while (isMore && (std::isalnum(ch) || ch == '_'))
                 {
                     tokenValues.AppendChar(ch);
-                    ch = Read(is);
+                    ch = Read(buff);
                     ++column;
                 }
 
@@ -259,7 +276,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                 size_t tempIdx = 0;
                 temp[tempIdx++] = ch;
 
-                ch = Read(is);
+                ch = Read(buff);
                 ++column;
 
                 temp[tempIdx++] = ch;
@@ -267,7 +284,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                 while (isMore && SYMBOLS.find(temp) != SYMBOLS.end())
                 {
                     tokenValues.AppendChar(ch);
-                    ch = Read(is);
+                    ch = Read(buff);
                     ++column;
 
                     temp[tempIdx++] = ch;
@@ -299,7 +316,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                 Token::EType tokenType = Token::eDecIntLit;
                 unsigned startColumn = column;
                 tokenValues.AppendChar(ch);
-                ch = Read(is);
+                ch = Read(buff);
                 ++column;
 
                 if (isMore)
@@ -309,7 +326,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
                             tokenValues.AppendChar(ch);
-                            ch = Read(is);
+                            ch = Read(buff);
                             ++column;
                         }
 
@@ -326,7 +343,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                         {
                             tokenType = Token::eHexIntLit;
                             tokenValues.AppendChar(ch);
-                            ch = Read(is);
+                            ch = Read(buff);
                             ++column;
 
                             while (isMore)
@@ -341,7 +358,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                                 }
 
                                 tokenValues.AppendChar(ch);
-                                ch = Read(is);
+                                ch = Read(buff);
                                 ++column;
                             }
 
@@ -360,7 +377,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                         {
                             tokenType = Token::eBinIntLit;
                             tokenValues.AppendChar(ch);
-                            ch = Read(is);
+                            ch = Read(buff);
                             ++column;
 
                             while (isMore)
@@ -375,7 +392,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                                 }
 
                                 tokenValues.AppendChar(ch);
-                                ch = Read(is);
+                                ch = Read(buff);
                                 ++column;
                             }
 
@@ -394,7 +411,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                         {
                             tokenType = Token::eOctIntLit;
                             tokenValues.AppendChar(ch);
-                            ch = Read(is);
+                            ch = Read(buff);
                             ++column;
 
                             while (isMore)
@@ -409,7 +426,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                                 }
 
                                 tokenValues.AppendChar(ch);
-                                ch = Read(is);
+                                ch = Read(buff);
                                 ++column;
                             }
 
@@ -449,7 +466,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
             {
                 unsigned startColumn = column;
                 tokenValues.AppendChar(ch);
-                ch = Read(is);
+                ch = Read(buff);
                 ++column;
                 char prevChar = ch;
                 while (isMore && (ch != '"' || prevChar == '\\'))
@@ -463,7 +480,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                     tokenValues.AppendChar(ch);
 
                     prevChar = ch;
-                    ch = Read(is);
+                    ch = Read(buff);
                     ++column;
                 }
 
@@ -481,7 +498,7 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
                     tokens.Append(Token(value, filenameId, line, startColumn, Token::eStrLit));
                     tokenValues.StartNew();
 
-                    ch = Read(is);
+                    ch = Read(buff);
                     ++column;
                 }
             }
@@ -496,46 +513,36 @@ bool LexicalAnalyzer::Process(istream& is, TokenList& tokens)
     return ok;
 }
 
-char LexicalAnalyzer::Read(istream& is)
+char LexicalAnalyzer::Read(CharBuffer buff)
 {
     char ch;
-    if (buffIdx < buffSize)
+    isMore = buffIdx < buff.size;
+    if (isMore)
     {
-        ch = buff[buffIdx];
+        ch = buff.ptr[buffIdx];
         ++buffIdx;
     }
     else
     {
-        is.read(buff, MAX_BUFF_CAPACITY);
-        buffSize = is.gcount();
-        if (buffSize == 0)
-        {
-            isMore = false;
-            ch = '\0';
-        }
-        else
-        {
-            ch = buff[0];
-            buffIdx = 1;
-        }
+        ch = '\0';
     }
 
     return ch;
 }
 
-void LexicalAnalyzer::ParseLineComment(istream& is)
+void LexicalAnalyzer::ParseLineComment(CharBuffer buff)
 {
     char ch = '\0';
     do
     {
-        ch = Read(is);
+        ch = Read(buff);
     } while (isMore && ch != LINE_COMMENT_END);
 
     ++line;
     column = 1;
 }
 
-bool LexicalAnalyzer::ParseBlockComment(istream& is)
+bool LexicalAnalyzer::ParseBlockComment(CharBuffer buff)
 {
     unsigned level = 0;
     char prev = '\0';
@@ -544,7 +551,7 @@ bool LexicalAnalyzer::ParseBlockComment(istream& is)
     // add 2 for comment start chars
     column += 2;
 
-    current = Read(is);
+    current = Read(buff);
     while (isMore)
     {
         if (current == '\n')
@@ -578,7 +585,7 @@ bool LexicalAnalyzer::ParseBlockComment(istream& is)
         }
 
         prev = current;
-        current = Read(is);
+        current = Read(buff);
     }
 
     return true;

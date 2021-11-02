@@ -121,7 +121,6 @@ bool LexicalAnalyzerTests::TestValidInputs()
     ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
     LexicalAnalyzer analyzer(compilerContext, logger);
 
-    stringstream ss;
     TokenList actualTokens;
     bool ok = false;
     for (pair<string, TokenList> test : tests)
@@ -129,11 +128,14 @@ bool LexicalAnalyzerTests::TestValidInputs()
         errStream.clear();
         errStream.str("");
 
-        ss.clear();
-        ss.str(test.first);
         const TokenList& expectedTokens = test.second;
 
-        ok = analyzer.Process(ss, actualTokens);
+        CharBuffer buff
+        {
+            .size = test.first.size(),
+            .ptr = test.first.c_str(),
+        };
+        ok = analyzer.Process(buff, actualTokens);
         if (ok)
         {
             ok = TokenSequencesAreEqual(expectedTokens, actualTokens);
@@ -227,7 +229,6 @@ bool LexicalAnalyzerTests::TestNumbers()
     ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
     LexicalAnalyzer analyzer(compilerContext, logger);
 
-    stringstream ss;
     TokenList tokens;
     bool ok = true;
     for (tuple<const char*, const char*, bool, Token::EType, int64_t> test : tests)
@@ -240,10 +241,12 @@ bool LexicalAnalyzerTests::TestNumbers()
         errStream.clear();
         errStream.str("");
 
-        ss.clear();
-        ss.str(input);
-
-        bool actualIsValid = analyzer.Process(ss, tokens);
+        CharBuffer buff
+        {
+            .size = strlen(input),
+            .ptr = input,
+        };
+        bool actualIsValid = analyzer.Process(buff, tokens);
 
         if (expectedIsValid != actualIsValid)
         {
@@ -302,7 +305,6 @@ bool LexicalAnalyzerTests::TestStrings()
     ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
     LexicalAnalyzer analyzer(compilerContext, logger);
 
-    stringstream ss;
     TokenList tokens;
     bool ok = true;
     for (tuple<const char*, bool> test : tests)
@@ -313,10 +315,12 @@ bool LexicalAnalyzerTests::TestStrings()
         errStream.clear();
         errStream.str("");
 
-        ss.clear();
-        ss.str(input);
-
-        bool actualIsValid = analyzer.Process(ss, tokens);
+        CharBuffer buff
+        {
+            .size = strlen(input),
+            .ptr = input,
+        };
+        bool actualIsValid = analyzer.Process(buff, tokens);
 
         if (expectedIsValid != actualIsValid)
         {

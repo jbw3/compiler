@@ -15,11 +15,9 @@ class LexicalAnalyzer
 public:
     LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
 
-    ~LexicalAnalyzer();
-
     bool Process(const std::string& inFile);
 
-    bool Process(std::istream& is, TokenList& tokens);
+    bool Process(CharBuffer buff, TokenList& tokens);
 
 private:
     static const char COMMENT_START;
@@ -36,8 +34,6 @@ private:
 
     static constexpr size_t MAX_BUFF_CAPACITY = 1024;
     CompilerContext& compilerContext;
-    char* buff;
-    size_t buffSize;
     size_t buffIdx;
     bool isMore;
     ErrorLogger& logger;
@@ -46,11 +42,11 @@ private:
     unsigned line;
     unsigned column;
 
-    char Read(std::istream& is);
+    char Read(CharBuffer buff);
 
-    void ParseLineComment(std::istream& is);
+    void ParseLineComment(CharBuffer buff);
 
-    bool ParseBlockComment(std::istream& is);
+    bool ParseBlockComment(CharBuffer buff);
 };
 
 #endif // LEXICAL_ANALYZER_H_

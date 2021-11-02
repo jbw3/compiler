@@ -67,10 +67,19 @@ CompilerContext::CompilerContext() :
 {
 }
 
-unsigned CompilerContext::AddFile(const string& filename)
+CompilerContext::~CompilerContext()
+{
+    for (size_t i = 0; i < fileBuffers.size(); ++i)
+    {
+        delete [] fileBuffers[i].ptr;
+    }
+}
+
+unsigned CompilerContext::AddFile(const string& filename, CharBuffer fileBuffer)
 {
     unsigned id = static_cast<unsigned>(filenames.size());
     filenames.push_back(filename);
+    fileBuffers.push_back(fileBuffer);
     fileTokens.push_back(TokenList());
 
     return id;
