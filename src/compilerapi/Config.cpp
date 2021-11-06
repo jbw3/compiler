@@ -50,6 +50,13 @@ bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
 
     if (ok)
     {
+        // if no filenames were specified, add an empty string to indicate
+        // we should read from stdin
+        if (inFilenames.empty())
+        {
+            inFilenames.push_back("");
+        }
+
         targetMachine = CreateTargetMachine(architecture, optimizationLevel);
         if (targetMachine == nullptr)
         {
