@@ -91,6 +91,37 @@ ErrorLogger::ErrorLogger(CompilerContext& compilerContext, ostream* os, Config::
     }
 }
 
+void ErrorLogger::SetBold()
+{
+    if (printColors)
+    {
+        *os << "\x1B[1m";
+    }
+}
+
+void ErrorLogger::SetColor(const char* tag)
+{
+    if (printColors)
+    {
+        if (strcmp(tag, WARNING_TAG) == 0)
+        {
+            *os << "\x1B[33m";
+        }
+        else if (strcmp(tag, ERROR_TAG) == 0 || strcmp(tag, INTERNAL_ERROR_TAG) == 0)
+        {
+            *os << "\x1B[31m";
+        }
+    }
+}
+
+void ErrorLogger::ResetFormat()
+{
+    if (printColors)
+    {
+        *os << "\x1B[0m";
+    }
+}
+
 void ErrorLogger::WriteHeader(const char* tag, unsigned filenameId, unsigned line, unsigned column)
 {
     string filename = "";
@@ -99,10 +130,7 @@ void ErrorLogger::WriteHeader(const char* tag, unsigned filenameId, unsigned lin
         filename = compilerContext.GetFilename(filenameId);
     }
 
-    if (printColors)
-    {
-        *os << "\x1B[1m";
-    }
+    SetBold();
 
     if (!filename.empty())
     {
@@ -126,22 +154,10 @@ void ErrorLogger::WriteHeader(const char* tag, unsigned filenameId, unsigned lin
         *os << " ";
     }
 
-    if (printColors)
-    {
-        if (strcmp(tag, WARNING_TAG) == 0)
-        {
-            *os << "\x1B[33m";
-        }
-        else if (strcmp(tag, ERROR_TAG) == 0 || strcmp(tag, INTERNAL_ERROR_TAG) == 0)
-        {
-            *os << "\x1B[31m";
-        }
-        *os << tag << ":\x1B[0m ";
-    }
-    else
-    {
-        *os << tag << ": ";
-    }
+    SetColor(tag);
+    *os << tag << ':';
+    ResetFormat();
+    *os << ' ';
 }
 
 void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned line, unsigned column, unsigned width)
@@ -182,26 +198,13 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
     {
         *os << ' ';
     }
-    if (printColors)
-    {
-        *os << "\x1B[1m";
-        if (strcmp(tag, WARNING_TAG) == 0)
-        {
-            *os << "\x1B[33m";
-        }
-        else if (strcmp(tag, ERROR_TAG) == 0 || strcmp(tag, INTERNAL_ERROR_TAG) == 0)
-        {
-            *os << "\x1B[31m";
-        }
-    }
+    SetBold();
+    SetColor(tag);
     for (unsigned i = 0; i < width; ++i)
     {
         *os << '~';
     }
-    if (printColors)
-    {
-        *os << "\x1B[0m";
-    }
+    ResetFormat();
 
     *os << '\n';
 }

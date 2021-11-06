@@ -72,6 +72,12 @@ private:
     std::ostream* os;
     bool printColors;
 
+    void SetBold();
+
+    void SetColor(const char* tag);
+
+    void ResetFormat();
+
     void WriteHeader(const char* tag, unsigned filenameId, unsigned line, unsigned column);
 
     void WriteSourceLine(const char* tag, unsigned filenameId, unsigned line, unsigned column, unsigned width);
