@@ -72,9 +72,11 @@ private:
     std::ostream* os;
     bool printColors;
 
-    void Write(const char* format);
-
     void WriteHeader(const char* tag, const std::string& filename, unsigned line, unsigned column);
+
+    void WriteSourceLine(const std::string& filename, unsigned line, unsigned column);
+
+    void Write(const char* format);
 
     template<typename T, typename... Ts>
     void Write(const char* format, T arg, Ts... args)
@@ -109,6 +111,7 @@ private:
         WriteHeader(tag, filename, line, column);
         Write(format, args...);
         *os << '\n';
+        WriteSourceLine(filename, line, column);
     }
 };
 

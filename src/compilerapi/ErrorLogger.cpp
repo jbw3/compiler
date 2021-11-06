@@ -91,11 +91,6 @@ ErrorLogger::ErrorLogger(CompilerContext& compilerContext, ostream* os, Config::
     }
 }
 
-void ErrorLogger::Write(const char* format)
-{
-    *os << format;
-}
-
 void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsigned line, unsigned column)
 {
     if (printColors)
@@ -141,4 +136,70 @@ void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsi
     {
         *os << tag << ": ";
     }
+}
+
+void ErrorLogger::WriteSourceLine(const string& filename, unsigned line, unsigned column)
+{
+    // find the file contents
+    unsigned idCount = compilerContext.GetFileIdCount();
+    unsigned id = 0;
+    for (; id < idCount; ++id)
+    {
+        if (compilerContext.GetFilename(id) == filename)
+        {
+            break;
+        }
+    }
+
+    if (id >= idCount)
+    {
+        return;
+    }
+
+    CharBuffer buff = compilerContext.GetFileBuffer(id);
+
+    // find the start of the line
+    size_t idx = 0;
+    unsigned l = 1;
+    while (l < line)
+    {
+        while (idx < buff.size && buff.ptr[idx] != '\n')
+        {
+            ++idx;
+        }
+
+        ++idx;
+        ++l;
+    }
+
+    // write the line
+    while (idx < buff.size && buff.ptr[idx] != '\n')
+    {
+        *os << buff.ptr[idx];
+        ++idx;
+    }
+    *os << '\n';
+
+    // underline token
+    for (unsigned i = 1; i < column; ++i)
+    {
+        *os << ' ';
+    }
+
+    if (printColors)
+    {
+        *os << "\x1B[1m\x1B[31m";
+    }
+    *os << '^';
+    if (printColors)
+    {
+        *os << "\x1B[0m";
+    }
+
+    *os << '\n';
+}
+
+void ErrorLogger::Write(const char* format)
+{
+    *os << format;
 }
