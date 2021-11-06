@@ -121,6 +121,7 @@ LexicalAnalyzer::LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& 
 
 bool LexicalAnalyzer::Process(const string& inFile)
 {
+    string filename;
     CharBuffer fileBuff;
     if (inFile.empty() || inFile == "-")
     {
@@ -296,7 +297,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 auto iter = SYMBOLS.find(symbolValue);
                 if (iter == SYMBOLS.end())
                 {
-                    logger.LogError(filename, line, column, "Invalid symbol");
+                    logger.LogError(filenameId, line, column, "Invalid symbol");
                     ok = false;
                 }
                 else
@@ -332,7 +333,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                         if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                         {
-                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                            logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                             ok = false;
                         }
                     }
@@ -364,12 +365,12 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                             if ( (ch >= 'g' && ch <= 'z') || (ch >= 'G' && ch <= 'Z') )
                             {
-                                logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                                 ok = false;
                             }
                             else if (!hasDigit)
                             {
-                                logger.LogError(filename, line, column - 1, "Numeric literal ended without a digit");
+                                logger.LogError(filenameId, line, column - 1, "Numeric literal ended without a digit");
                                 ok = false;
                             }
                         }
@@ -398,12 +399,12 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                             if ( (ch >= '2' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                             {
-                                logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                                 ok = false;
                             }
                             else if (!hasDigit)
                             {
-                                logger.LogError(filename, line, column - 1, "Numeric literal ended without a digit");
+                                logger.LogError(filenameId, line, column - 1, "Numeric literal ended without a digit");
                                 ok = false;
                             }
                         }
@@ -432,24 +433,24 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                             if ( (ch >= '8' && ch <= '9') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                             {
-                                logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                                logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                                 ok = false;
                             }
                             else if (!hasDigit)
                             {
-                                logger.LogError(filename, line, column - 1, "Numeric literal ended without a digit");
+                                logger.LogError(filenameId, line, column - 1, "Numeric literal ended without a digit");
                                 ok = false;
                             }
                         }
                         else if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                         {
-                            logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                            logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                             ok = false;
                         }
                     }
                     else if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
                     {
-                        logger.LogError(filename, line, column, "Invalid character in numeric literal");
+                        logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                         ok = false;
                     }
                 }
@@ -473,7 +474,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 {
                     if (ch == '\n')
                     {
-                        logger.LogError(filename, line, column, "Unexpected string end");
+                        logger.LogError(filenameId, line, column, "Unexpected string end");
                         ok = false;
                         break;
                     }
@@ -486,7 +487,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                 if (!isMore)
                 {
-                    logger.LogError(filename, line, column, "Unexpected string end");
+                    logger.LogError(filenameId, line, column, "Unexpected string end");
                     ok = false;
                 }
 
@@ -504,7 +505,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
             }
             else
             {
-                logger.LogError(filename, line, column, "Invalid character '{}'", ch);
+                logger.LogError(filenameId, line, column, "Invalid character '{}'", ch);
                 ok = false;
             }
         }

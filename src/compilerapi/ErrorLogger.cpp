@@ -91,8 +91,14 @@ ErrorLogger::ErrorLogger(CompilerContext& compilerContext, ostream* os, Config::
     }
 }
 
-void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsigned line, unsigned column)
+void ErrorLogger::WriteHeader(const char* tag, unsigned filenameId, unsigned line, unsigned column)
 {
+    string filename = "";
+    if (filenameId < compilerContext.GetFileIdCount())
+    {
+        filename = compilerContext.GetFilename(filenameId);
+    }
+
     if (printColors)
     {
         *os << "\x1B[1m";
@@ -138,25 +144,14 @@ void ErrorLogger::WriteHeader(const char* tag, const std::string& filename, unsi
     }
 }
 
-void ErrorLogger::WriteSourceLine(const string& filename, unsigned line, unsigned column)
+void ErrorLogger::WriteSourceLine(unsigned filenameId, unsigned line, unsigned column)
 {
-    // find the file contents
-    unsigned idCount = compilerContext.GetFileIdCount();
-    unsigned id = 0;
-    for (; id < idCount; ++id)
-    {
-        if (compilerContext.GetFilename(id) == filename)
-        {
-            break;
-        }
-    }
-
-    if (id >= idCount)
+    if (filenameId >= compilerContext.GetFileIdCount())
     {
         return;
     }
 
-    CharBuffer buff = compilerContext.GetFileBuffer(id);
+    CharBuffer buff = compilerContext.GetFileBuffer(filenameId);
 
     // find the start of the line
     size_t idx = 0;

@@ -37,7 +37,6 @@ private:
     size_t buffIdx;
     bool isMore;
     ErrorLogger& logger;
-    std::string filename;
     unsigned filenameId;
     unsigned line;
     unsigned column;
