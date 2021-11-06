@@ -144,7 +144,7 @@ void ErrorLogger::WriteHeader(const char* tag, unsigned filenameId, unsigned lin
     }
 }
 
-void ErrorLogger::WriteSourceLine(unsigned filenameId, unsigned line, unsigned column, unsigned width)
+void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned line, unsigned column, unsigned width)
 {
     if (filenameId >= compilerContext.GetFileIdCount())
     {
@@ -184,7 +184,15 @@ void ErrorLogger::WriteSourceLine(unsigned filenameId, unsigned line, unsigned c
     }
     if (printColors)
     {
-        *os << "\x1B[1m\x1B[31m";
+        *os << "\x1B[1m";
+        if (strcmp(tag, WARNING_TAG) == 0)
+        {
+            *os << "\x1B[33m";
+        }
+        else if (strcmp(tag, ERROR_TAG) == 0 || strcmp(tag, INTERNAL_ERROR_TAG) == 0)
+        {
+            *os << "\x1B[31m";
+        }
     }
     for (unsigned i = 0; i < width; ++i)
     {

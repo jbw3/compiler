@@ -74,7 +74,7 @@ private:
 
     void WriteHeader(const char* tag, unsigned filenameId, unsigned line, unsigned column);
 
-    void WriteSourceLine(unsigned filenameId, unsigned line, unsigned column, unsigned width);
+    void WriteSourceLine(const char* tag, unsigned filenameId, unsigned line, unsigned column, unsigned width);
 
     void Write(const char* format);
 
@@ -111,7 +111,7 @@ private:
         WriteHeader(tag, filenameId, line, column);
         Write(format, args...);
         *os << '\n';
-        WriteSourceLine(filenameId, line, column, width);
+        WriteSourceLine(tag, filenameId, line, column, width);
     }
 };
 
