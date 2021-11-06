@@ -25,13 +25,14 @@ public:
     template<typename... Ts>
     void LogWarning(unsigned filenameId, unsigned line, unsigned column, const char* format, Ts... args)
     {
-        LogSourceMessage(WARNING_TAG, filenameId, line, column, format, args...);
+        LogSourceMessage(WARNING_TAG, filenameId, line, column, 1, format, args...);
     }
 
     template<typename... Ts>
     void LogWarning(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(WARNING_TAG, token.filenameId, token.line, token.column, format, args...);
+        unsigned width = strlen(token.value);
+        LogSourceMessage(WARNING_TAG, token.filenameId, token.line, token.column, width, format, args...);
     }
 
     template<typename... Ts>
@@ -43,13 +44,14 @@ public:
     template<typename... Ts>
     void LogError(unsigned filenameId, unsigned line, unsigned column, const char* format, Ts... args)
     {
-        LogSourceMessage(ERROR_TAG, filenameId, line, column, format, args...);
+        LogSourceMessage(ERROR_TAG, filenameId, line, column, 1, format, args...);
     }
 
     template<typename... Ts>
     void LogError(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(ERROR_TAG, token.filenameId, token.line, token.column, format, args...);
+        unsigned width = strlen(token.value);
+        LogSourceMessage(ERROR_TAG, token.filenameId, token.line, token.column, width, format, args...);
     }
 
     template<typename... Ts>
@@ -61,7 +63,8 @@ public:
     template<typename... Ts>
     void LogInternalError(const Token& token, const char* format, Ts... args)
     {
-        LogSourceMessage(INTERNAL_ERROR_TAG, token.filenameId, token.line, token.column, format, args...);
+        unsigned width = strlen(token.value);
+        LogSourceMessage(INTERNAL_ERROR_TAG, token.filenameId, token.line, token.column, width, format, args...);
     }
 
 private:
@@ -71,7 +74,7 @@ private:
 
     void WriteHeader(const char* tag, unsigned filenameId, unsigned line, unsigned column);
 
-    void WriteSourceLine(unsigned filenameId, unsigned line, unsigned column);
+    void WriteSourceLine(unsigned filenameId, unsigned line, unsigned column, unsigned width);
 
     void Write(const char* format);
 
@@ -103,12 +106,12 @@ private:
     }
 
     template<typename... Ts>
-    void LogSourceMessage(const char* tag, unsigned filenameId, unsigned line, unsigned column, const char* format, Ts... args)
+    void LogSourceMessage(const char* tag, unsigned filenameId, unsigned line, unsigned column, unsigned width, const char* format, Ts... args)
     {
         WriteHeader(tag, filenameId, line, column);
         Write(format, args...);
         *os << '\n';
-        WriteSourceLine(filenameId, line, column);
+        WriteSourceLine(filenameId, line, column, width);
     }
 };
 
