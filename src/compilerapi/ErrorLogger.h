@@ -10,11 +10,31 @@
 class ErrorLogger
 {
 public:
+    const char* const NOTE_TAG = "note";
     const char* const WARNING_TAG = "warning";
     const char* const ERROR_TAG = "error";
     const char* const INTERNAL_ERROR_TAG = "internal error";
 
     ErrorLogger(CompilerContext& compilerContext, std::ostream* os, Config::EColor color);
+
+    template<typename... Ts>
+    void LogNote(const char* format, Ts... args)
+    {
+        LogMessage(NOTE_TAG, format, args...);
+    }
+
+    template<typename... Ts>
+    void LogNote(unsigned filenameId, unsigned line, unsigned column, const char* format, Ts... args)
+    {
+        LogSourceMessage(NOTE_TAG, filenameId, line, column, 1, format, args...);
+    }
+
+    template<typename... Ts>
+    void LogNote(const Token& token, const char* format, Ts... args)
+    {
+        unsigned width = strlen(token.value);
+        LogSourceMessage(NOTE_TAG, token.filenameId, token.line, token.column, width, format, args...);
+    }
 
     template<typename... Ts>
     void LogWarning(const char* format, Ts... args)

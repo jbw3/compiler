@@ -103,7 +103,11 @@ void ErrorLogger::SetColor(const char* tag)
 {
     if (printColors)
     {
-        if (strcmp(tag, WARNING_TAG) == 0)
+        if (strcmp(tag, NOTE_TAG) == 0)
+        {
+            *os << "\x1B[34m";
+        }
+        else if (strcmp(tag, WARNING_TAG) == 0)
         {
             *os << "\x1B[33m";
         }
