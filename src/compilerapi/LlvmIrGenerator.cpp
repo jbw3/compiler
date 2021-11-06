@@ -579,7 +579,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     Type* type = GetType(varType);
     assert(type != nullptr && "Unknown variable declaration type");
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
-    symbolTable.AddVariable(varName, varType, alloca);
+    symbolTable.AddVariable(varName, forLoop->variableNameToken, varType, alloca);
     CreateDebugVariable(varNameToken, varType, alloca);
 
     // create index
@@ -593,7 +593,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
         indexType = GetType(indexTypeInfo);
         assert(indexType != nullptr && "Unknown variable declaration type");
         indexAlloca = CreateVariableAlloc(currentFunction, indexType, indexName);
-        symbolTable.AddVariable(indexName, indexTypeInfo, indexAlloca);
+        symbolTable.AddVariable(indexName, forLoop->indexNameToken, indexTypeInfo, indexAlloca);
         CreateDebugVariable(forLoop->indexNameToken, indexTypeInfo, indexAlloca);
     }
 
@@ -930,11 +930,11 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
         const TypeInfo* paramType = param->type;
-        symbolTable.AddVariable(paramName, paramType, alloca);
+        const Token* token = param->nameToken;
+        symbolTable.AddVariable(paramName, token, paramType, alloca);
 
         if (dbgInfo)
         {
-            const Token* token = param->nameToken;
             unsigned line = token->line;
             DIType* paramDebugType = GetDebugType(paramType);
             if (paramDebugType == nullptr)
@@ -1169,7 +1169,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 return;
             }
 
-            symbolTable.AddConstant(decl->name, externFunc->GetType(), externFunc->GetConstantValueIndex());
+            symbolTable.AddConstant(decl->name, decl->nameToken, externFunc->GetType(), externFunc->GetConstantValueIndex());
         }
 
         for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
@@ -1182,7 +1182,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 return;
             }
 
-            symbolTable.AddConstant(decl->name, funcDef->GetType(), funcDef->GetConstantValueIndex());
+            symbolTable.AddConstant(decl->name, decl->nameToken, funcDef->GetType(), funcDef->GetConstantValueIndex());
         }
     }
 
@@ -1954,7 +1954,7 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
     }
 
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
-    symbolTable.AddConstant(constName, constType, constIdx);
+    symbolTable.AddConstant(constName, constantDeclaration->nameToken, constType, constIdx);
 
     resultValue = ConstantStruct::get(unitType);
 }
@@ -1972,7 +1972,7 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
     }
 
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
-    symbolTable.AddVariable(varName, varType, alloca);
+    symbolTable.AddVariable(varName, variableDeclaration->nameToken, varType, alloca);
     CreateDebugVariable(variableDeclaration->nameToken, varType, alloca);
 
     variableDeclaration->assignmentExpression->Accept(this);

@@ -27,7 +27,7 @@ SymbolTable::SymbolTable(CompilerContext& compilerContext)
     for (unsigned id = 0; id < compilerContext.GetBasicTypeCount(); ++id)
     {
         const TypeInfo* type = compilerContext.GetTypeConstantValue(id);
-        AddConstant(type->GetShortName(), TypeInfo::TypeType, id);
+        AddConstant(type->GetShortName(), nullptr, TypeInfo::TypeType, id);
     }
 }
 
@@ -59,19 +59,19 @@ void SymbolTable::Pop()
     }
 }
 
-bool SymbolTable::AddVariable(const std::string& name, const TypeInfo* type)
+bool SymbolTable::AddVariable(const string& name, const Token* token, const TypeInfo* type)
 {
-    return AddVariable(name, type, nullptr);
+    return AddVariable(name, token, type, nullptr);
 }
 
-bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaInst* value)
+bool SymbolTable::AddVariable(const string& name, const Token* token, const TypeInfo* type, AllocaInst* value)
 {
     IdentifierData* data = GetIdentifierData(name);
 
     // only insert if there is not already a variable with this name
     if (data == nullptr)
     {
-        scopes.back()->identifiers.insert({name, {type, value, NON_CONST_VALUE}});
+        scopes.back()->identifiers.insert({name, {type, token, value, NON_CONST_VALUE}});
         return true;
     }
     else
@@ -80,14 +80,14 @@ bool SymbolTable::AddVariable(const string& name, const TypeInfo* type, AllocaIn
     }
 }
 
-bool SymbolTable::AddConstant(const string& name, const TypeInfo* type, unsigned constValueIndex)
+bool SymbolTable::AddConstant(const string& name, const Token* token, const TypeInfo* type, unsigned constValueIndex)
 {
     IdentifierData* data = GetIdentifierData(name);
 
     // only insert if there is not already an identifier with this name
     if (data == nullptr)
     {
-        scopes.back()->identifiers.insert({name, {type, nullptr, constValueIndex}});
+        scopes.back()->identifiers.insert({name, {type, token, nullptr, constValueIndex}});
         return true;
     }
     else

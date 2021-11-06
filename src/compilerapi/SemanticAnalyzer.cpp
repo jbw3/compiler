@@ -1471,11 +1471,11 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
     // add the variable name to the symbol table
     const string& varName = forLoop->variableName;
-    bool ok = symbolTable.AddVariable(varName, forLoop->variableType);
+    bool ok = symbolTable.AddVariable(varName, forLoop->variableNameToken, forLoop->variableType);
     if (!ok)
     {
         isError = true;
-        logger.LogError(*forLoop->variableNameToken, "Variable '{}' has already been declared", varName);
+        LogExistingIdentifierError(varName, forLoop->variableNameToken);
         return;
     }
 
@@ -1483,11 +1483,11 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     const string& indexVarName = forLoop->indexName;
     if (!indexVarName.empty())
     {
-        ok = symbolTable.AddVariable(indexVarName, forLoop->indexType);
+        ok = symbolTable.AddVariable(indexVarName, forLoop->indexNameToken, forLoop->indexType);
         if (!ok)
         {
             isError = true;
-            logger.LogError(*forLoop->variableNameToken, "Variable '{}' has already been declared", indexVarName);
+            LogExistingIdentifierError(indexVarName, forLoop->variableNameToken);
             return;
         }
     }
@@ -1649,12 +1649,12 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     for (const Parameter* param : funcDecl->parameters)
     {
         const string& paramName = param->name;
-        bool ok = symbolTable.AddVariable(paramName, param->type);
+        const Token* paramToken = param->nameToken;
+        bool ok = symbolTable.AddVariable(paramName, paramToken, param->type);
         if (!ok)
         {
             isError = true;
-            const Token* paramToken = param->nameToken;
-            logger.LogError(*paramToken, "Identifier '{}' has already been declared", paramName);
+            LogExistingIdentifierError(paramName, paramToken);
             return;
         }
     }
@@ -1844,6 +1844,18 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     }
 }
 
+void SemanticAnalyzer::LogExistingIdentifierError(const string& name, const Token* token)
+{
+    logger.LogError(*token, "Identifier '{}' has already been declared", name);
+
+    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
+    const Token* existingToken = data->token;
+    if (existingToken != nullptr)
+    {
+        logger.LogNote(*existingToken, "Identifier is declared here");
+    }
+}
+
 bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
 {
     vector<StructDefinition*> structDefs;
@@ -1969,11 +1981,11 @@ bool SemanticAnalyzer::ResolveDependencies(
     }
 
     unsigned idx = compilerContext.AddTypeConstantValue(newType);
-    bool ok = symbolTable.AddConstant(structName, TypeInfo::TypeType, idx);
+    bool ok = symbolTable.AddConstant(structName, structDef->nameToken, TypeInfo::TypeType, idx);
     if (!ok)
     {
         delete newType;
-        logger.LogError(*structDef->nameToken, "Identifier '{}' has already been declared", structName);
+        LogExistingIdentifierError(structName, structDef->nameToken);
         return false;
     }
 
@@ -2076,11 +2088,11 @@ void SemanticAnalyzer::Visit(Modules* modules)
             const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             externFunc->SetConstantValueIndex(idx);
-            bool ok = symbolTable.AddConstant(decl->name, funType, idx);
+            bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
             if (!ok)
             {
                 isError = true;
-                logger.LogError(*decl->nameToken, "Identifier '{}' has already been declared", decl->name);
+                LogExistingIdentifierError(decl->name, decl->nameToken);
                 return;
             }
         }
@@ -2099,11 +2111,11 @@ void SemanticAnalyzer::Visit(Modules* modules)
             const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             funcDef->SetConstantValueIndex(idx);
-            bool ok = symbolTable.AddConstant(decl->name, funType, idx);
+            bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
             if (!ok)
             {
                 isError = true;
-                logger.LogError(*decl->nameToken, "Identifier '{}' has already been declared", decl->name);
+                LogExistingIdentifierError(decl->name, decl->nameToken);
                 return;
             }
         }
@@ -2767,11 +2779,11 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 
     // add the constant name to the symbol table
     const string& constName = constantDeclaration->name;
-    bool ok = symbolTable.AddConstant(constName, constantDeclaration->constantType, constIdx);
+    bool ok = symbolTable.AddConstant(constName, constantDeclaration->nameToken, constantDeclaration->constantType, constIdx);
     if (!ok)
     {
         isError = true;
-        logger.LogError(*constantDeclaration->nameToken, "Identifier '{}' has already been declared", constName);
+        LogExistingIdentifierError(constName, constantDeclaration->nameToken);
         return;
     }
 
@@ -2814,11 +2826,11 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 
     // add the variable name to the symbol table
     const string& varName = variableDeclaration->name;
-    bool ok = symbolTable.AddVariable(varName, variableDeclaration->variableType);
+    bool ok = symbolTable.AddVariable(varName, variableDeclaration->nameToken, variableDeclaration->variableType);
     if (!ok)
     {
         isError = true;
-        logger.LogError(*variableDeclaration->nameToken, "Identifier '{}' has already been declared", varName);
+        LogExistingIdentifierError(varName, variableDeclaration->nameToken);
         return;
     }
 

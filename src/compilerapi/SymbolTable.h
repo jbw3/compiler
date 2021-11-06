@@ -10,6 +10,7 @@ class AllocaInst;
 } // namespace llvm
 
 class CompilerContext;
+class Token;
 class TypeInfo;
 
 class SymbolTable
@@ -18,6 +19,7 @@ public:
     struct IdentifierData
     {
         const TypeInfo* type;
+        const Token* token;
         llvm::AllocaInst* value;
         unsigned constValueIndex;
 
@@ -35,11 +37,11 @@ public:
 
     void Pop();
 
-    bool AddVariable(const std::string& name, const TypeInfo* type);
+    bool AddVariable(const std::string& name, const Token* token, const TypeInfo* type);
 
-    bool AddVariable(const std::string& name, const TypeInfo* type, llvm::AllocaInst* value);
+    bool AddVariable(const std::string& name, const Token* token, const TypeInfo* type, llvm::AllocaInst* value);
 
-    bool AddConstant(const std::string& name, const TypeInfo* type, unsigned constValueIndex);
+    bool AddConstant(const std::string& name, const Token* token, const TypeInfo* type, unsigned constValueIndex);
 
     IdentifierData* GetIdentifierData(const std::string& name) const;
 
