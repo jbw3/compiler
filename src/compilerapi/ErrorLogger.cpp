@@ -152,13 +152,15 @@ void ErrorLogger::WriteSourceLine(unsigned filenameId, unsigned line, unsigned c
     }
 
     CharBuffer buff = compilerContext.GetFileBuffer(filenameId);
+    size_t buffSize = buff.size;
+    const char* chars = buff.ptr;
 
-    // find the start of the line
+    // find the line
     size_t idx = 0;
     unsigned l = 1;
     while (l < line)
     {
-        while (idx < buff.size && buff.ptr[idx] != '\n')
+        while (idx < buffSize && chars[idx] != '\n')
         {
             ++idx;
         }
@@ -168,9 +170,9 @@ void ErrorLogger::WriteSourceLine(unsigned filenameId, unsigned line, unsigned c
     }
 
     // write the line
-    while (idx < buff.size && buff.ptr[idx] != '\n')
+    while (idx < buffSize && chars[idx] != '\n')
     {
-        *os << buff.ptr[idx];
+        *os << chars[idx];
         ++idx;
     }
     *os << '\n';
@@ -180,7 +182,6 @@ void ErrorLogger::WriteSourceLine(unsigned filenameId, unsigned line, unsigned c
     {
         *os << ' ';
     }
-
     if (printColors)
     {
         *os << "\x1B[1m\x1B[31m";
