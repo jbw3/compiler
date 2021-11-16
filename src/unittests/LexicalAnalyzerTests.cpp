@@ -116,10 +116,11 @@ bool LexicalAnalyzerTests::TestValidInputs()
         },
     };
 
-    CompilerContext compilerContext;
+    Config config;
+    config.color = Config::eFalse;
     stringstream errStream;
-    ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
-    LexicalAnalyzer analyzer(compilerContext, logger);
+    CompilerContext compilerContext(config, errStream);
+    LexicalAnalyzer analyzer(compilerContext, compilerContext.logger);
 
     TokenList actualTokens;
     bool ok = false;
@@ -224,10 +225,11 @@ bool LexicalAnalyzerTests::TestNumbers()
         make_tuple("_1", "_1", true, Token::eIdentifier, 0),
     };
 
-    CompilerContext compilerContext;
+    Config config;
+    config.color = Config::eFalse;
     stringstream errStream;
-    ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
-    LexicalAnalyzer analyzer(compilerContext, logger);
+    CompilerContext compilerContext(config, errStream);
+    LexicalAnalyzer analyzer(compilerContext, compilerContext.logger);
 
     TokenList tokens;
     bool ok = true;
@@ -300,10 +302,11 @@ bool LexicalAnalyzerTests::TestStrings()
         make_tuple(R"("abc"")", false),
     };
 
-    CompilerContext compilerContext;
+    Config config;
+    config.color = Config::eFalse;
     stringstream errStream;
-    ErrorLogger logger(compilerContext, &errStream, Config::eFalse);
-    LexicalAnalyzer analyzer(compilerContext, logger);
+    CompilerContext compilerContext(config, errStream);
+    LexicalAnalyzer analyzer(compilerContext, compilerContext.logger);
 
     TokenList tokens;
     bool ok = true;

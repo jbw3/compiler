@@ -1,3 +1,4 @@
+#include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include "SemanticAnalyzer.h"
 #include "SyntaxTree.h"

@@ -1,11 +1,12 @@
 #ifndef ERROR_LOGGER_H_
 #define ERROR_LOGGER_H_
 
-#include "CompilerContext.h"
 #include "Config.h"
 #include "Token.h"
 #include <cstring>
 #include <ostream>
+
+class CompilerContext;
 
 class ErrorLogger
 {

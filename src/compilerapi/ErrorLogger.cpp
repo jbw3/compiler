@@ -1,3 +1,4 @@
+#include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include <iostream>
 #include <stdio.h>

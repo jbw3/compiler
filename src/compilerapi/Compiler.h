@@ -22,9 +22,9 @@ public:
     bool Compile();
 
 private:
-    CompilerContext compilerContext;
     Config config;
-    ErrorLogger logger;
+    CompilerContext compilerContext;
+    ErrorLogger& logger;
 
     void PrintTokens(const TokenList& tokens) const;
 };

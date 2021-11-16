@@ -21,13 +21,15 @@ using namespace std;
 using namespace SyntaxTree;
 
 Compiler::Compiler() :
-    logger(compilerContext, &cerr, Config::eAuto)
+    compilerContext(config, cerr),
+    logger(compilerContext.logger)
 {
 }
 
 Compiler::Compiler(const Config& config) :
     config(config),
-    logger(compilerContext, &cerr, config.color)
+    compilerContext(config, cerr),
+    logger(compilerContext.logger)
 {
     // initialize types
     TypeInfo::InitTypes(config.targetMachine);

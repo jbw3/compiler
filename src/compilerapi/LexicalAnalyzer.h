@@ -1,6 +1,7 @@
 #ifndef LEXICAL_ANALYZER_H_
 #define LEXICAL_ANALYZER_H_
 
+#include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include "Token.h"
 #include "TokenList.h"

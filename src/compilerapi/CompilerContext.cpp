@@ -62,7 +62,9 @@ void TokenValues::AppendChar(char ch)
     ++end;
 }
 
-CompilerContext::CompilerContext() :
+CompilerContext::CompilerContext(Config config, ostream& logStream) :
+    config(config),
+    logger(*this, &logStream, config.color),
     basicTypeCount(0)
 {
 }

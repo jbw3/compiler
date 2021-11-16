@@ -1,6 +1,8 @@
 #ifndef COMPILER_CONTEXT_H_
 #define COMPILER_CONTEXT_H_
 
+#include "Config.h"
+#include "ErrorLogger.h"
 #include "TokenList.h"
 #include "TypeInfo.h"
 #include <string>
@@ -76,9 +78,11 @@ struct ArrayConstValue
 class CompilerContext
 {
 public:
+    Config config;
     TokenValues tokenValues;
+    ErrorLogger logger;
 
-    CompilerContext();
+    CompilerContext(Config config, std::ostream& logStream);
 
     ~CompilerContext();
 

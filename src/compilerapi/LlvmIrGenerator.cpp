@@ -6,6 +6,7 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
 #include "LlvmIrGenerator.h"
+#include "CompilerContext.h"
 #include "Config.h"
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
