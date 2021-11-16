@@ -50,13 +50,13 @@ LlvmIrGenerator::DebugScope::~DebugScope()
 
 Type* LlvmIrGenerator::strStructElements[STR_STRUCT_ELEMENTS_SIZE];
 
-LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext, const Config& config, ErrorLogger& logger) :
-    targetMachine(config.targetMachine),
-    optimizationLevel(config.optimizationLevel),
-    dbgInfo(config.debugInfo),
-    boundsCheck(config.boundsCheck),
+LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext) :
+    targetMachine(compilerContext.config.targetMachine),
+    optimizationLevel(compilerContext.config.optimizationLevel),
+    dbgInfo(compilerContext.config.debugInfo),
+    boundsCheck(compilerContext.config.boundsCheck),
     compilerContext(compilerContext),
-    logger(logger),
+    logger(compilerContext.logger),
     builder(context),
     diBuilder(nullptr),
     module(nullptr),

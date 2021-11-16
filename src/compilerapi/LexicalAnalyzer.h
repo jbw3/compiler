@@ -2,19 +2,15 @@
 #define LEXICAL_ANALYZER_H_
 
 #include "CompilerContext.h"
-#include "ErrorLogger.h"
 #include "Token.h"
-#include "TokenList.h"
 #include "utils.h"
 #include <unordered_map>
 #include <unordered_set>
 
-class CompilerContext;
-
 class LexicalAnalyzer
 {
 public:
-    LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
+    LexicalAnalyzer(CompilerContext& compilerContext);
 
     bool Process(const std::string& inFile);
 

@@ -61,7 +61,7 @@ namespace std
 class LlvmIrGenerator : public SyntaxTreeVisitor
 {
 public:
-    LlvmIrGenerator(CompilerContext& compilerContext, const Config& config, ErrorLogger& logger);
+    LlvmIrGenerator(CompilerContext& compilerContext);
 
     ~LlvmIrGenerator();
 

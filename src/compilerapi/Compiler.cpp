@@ -21,15 +21,13 @@ using namespace std;
 using namespace SyntaxTree;
 
 Compiler::Compiler() :
-    compilerContext(config, cerr),
-    logger(compilerContext.logger)
+    compilerContext(config, cerr)
 {
 }
 
 Compiler::Compiler(const Config& config) :
     config(config),
-    compilerContext(config, cerr),
-    logger(compilerContext.logger)
+    compilerContext(config, cerr)
 {
     // initialize types
     TypeInfo::InitTypes(config.targetMachine);
@@ -53,7 +51,7 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
 
         for (string filename : config.inFilenames)
         {
-            LexicalAnalyzer lexicalAnalyzer(compilerContext, logger);
+            LexicalAnalyzer lexicalAnalyzer(compilerContext);
             ok = lexicalAnalyzer.Process(filename);
 
             if (!ok)
@@ -82,7 +80,7 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
     {
         SW_START(Syntax);
 
-        SyntaxAnalyzer syntaxAnalyzer(compilerContext, logger);
+        SyntaxAnalyzer syntaxAnalyzer(compilerContext);
         ok = syntaxAnalyzer.Process(syntaxTree);
 
         SW_STOP(Syntax);
@@ -94,7 +92,7 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
     {
         SW_START(Semantic);
 
-        SemanticAnalyzer semanticAnalyzer(compilerContext, logger);
+        SemanticAnalyzer semanticAnalyzer(compilerContext);
         ok = semanticAnalyzer.Process(syntaxTree);
 
         SW_STOP(Semantic);
@@ -125,7 +123,7 @@ bool Compiler::Compile()
     // check if C header is the output
     if (ok && config.emitType == Config::eCHeader)
     {
-        CHeaderPrinter printer(logger);
+        CHeaderPrinter printer(compilerContext.logger);
         ok = printer.Print(config, syntaxTree);
         delete syntaxTree;
         return ok;
@@ -137,7 +135,7 @@ bool Compiler::Compile()
 
         SW_START(IrGen);
 
-        LlvmIrGenerator irGenerator(compilerContext, config, logger);
+        LlvmIrGenerator irGenerator(compilerContext);
         ok = irGenerator.Generate(syntaxTree, module);
 
         SW_STOP(IrGen);
@@ -158,7 +156,7 @@ bool Compiler::Compile()
         {
             SW_START(AsmGen);
 
-            AssemblyGenerator asmGenerator(config, logger);
+            AssemblyGenerator asmGenerator(compilerContext);
             ok = asmGenerator.Generate(module);
 
             SW_STOP(AsmGen);

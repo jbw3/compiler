@@ -1,7 +1,6 @@
 #ifndef SYNTAX_ANALYZER_H_
 #define SYNTAX_ANALYZER_H_
 
-#include "ErrorLogger.h"
 #include "SyntaxTree.h"
 #include "Token.h"
 #include "TokenList.h"
@@ -10,13 +9,14 @@
 #include <vector>
 
 class CompilerContext;
+class ErrorLogger;
 
 class SyntaxAnalyzer
 {
 public:
     typedef TokenList::const_iterator TokenIterator;
 
-    SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
+    SyntaxAnalyzer(CompilerContext& compilerContext);
 
     bool Process(SyntaxTree::Modules* syntaxTree);
 

@@ -8,9 +8,9 @@
 using namespace std;
 using namespace SyntaxTree;
 
-SyntaxAnalyzer::SyntaxAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
+SyntaxAnalyzer::SyntaxAnalyzer(CompilerContext& compilerContext) :
     compilerContext(compilerContext),
-    logger(logger)
+    logger(compilerContext.logger)
 {
 }
 

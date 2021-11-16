@@ -7,6 +7,7 @@
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
 #include "AssemblyGenerator.h"
+#include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/IR/LegacyPassManager.h"
@@ -25,12 +26,14 @@
 using namespace llvm;
 using namespace std;
 
-AssemblyGenerator::AssemblyGenerator(const Config& config, ErrorLogger& logger) :
-    targetMachine(config.targetMachine),
-    emitType(config.emitType),
-    assemblyType(config.assemblyType),
-    logger(logger)
+AssemblyGenerator::AssemblyGenerator(CompilerContext& compilerContext) :
+    targetMachine(compilerContext.config.targetMachine),
+    emitType(compilerContext.config.emitType),
+    assemblyType(compilerContext.config.assemblyType),
+    logger(compilerContext.logger)
 {
+    const Config& config = compilerContext.config;
+
     if (config.outFilename.empty())
     {
         // if there is no output filename specified, just pick the first input filename

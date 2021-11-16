@@ -120,7 +120,7 @@ bool LexicalAnalyzerTests::TestValidInputs()
     config.color = Config::eFalse;
     stringstream errStream;
     CompilerContext compilerContext(config, errStream);
-    LexicalAnalyzer analyzer(compilerContext, compilerContext.logger);
+    LexicalAnalyzer analyzer(compilerContext);
 
     TokenList actualTokens;
     bool ok = false;
@@ -229,7 +229,7 @@ bool LexicalAnalyzerTests::TestNumbers()
     config.color = Config::eFalse;
     stringstream errStream;
     CompilerContext compilerContext(config, errStream);
-    LexicalAnalyzer analyzer(compilerContext, compilerContext.logger);
+    LexicalAnalyzer analyzer(compilerContext);
 
     TokenList tokens;
     bool ok = true;
@@ -306,7 +306,7 @@ bool LexicalAnalyzerTests::TestStrings()
     config.color = Config::eFalse;
     stringstream errStream;
     CompilerContext compilerContext(config, errStream);
-    LexicalAnalyzer analyzer(compilerContext, compilerContext.logger);
+    LexicalAnalyzer analyzer(compilerContext);
 
     TokenList tokens;
     bool ok = true;

@@ -8,12 +8,13 @@ namespace llvm
 class Module;
 class TargetMachine;
 }
+class CompilerContext;
 class ErrorLogger;
 
 class AssemblyGenerator
 {
 public:
-    AssemblyGenerator(const Config& config, ErrorLogger& logger);
+    AssemblyGenerator(CompilerContext& compilerContext);
 
     bool Generate(llvm::Module* module);
 

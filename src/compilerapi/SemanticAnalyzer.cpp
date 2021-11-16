@@ -8,8 +8,8 @@
 using namespace std;
 using namespace SyntaxTree;
 
-SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
-    logger(logger),
+SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
+    logger(compilerContext.logger),
     isError(false),
     isConstDecl(false),
     compilerContext(compilerContext),

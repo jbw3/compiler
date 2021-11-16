@@ -13,7 +13,7 @@ class ErrorLogger;
 class SemanticAnalyzer : public SyntaxTreeVisitor
 {
 public:
-    SemanticAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger);
+    SemanticAnalyzer(CompilerContext& compilerContext);
 
     bool Process(SyntaxTree::SyntaxTreeNode* syntaxTree);
 

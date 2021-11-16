@@ -3,10 +3,7 @@
 
 #include "CompilerContext.h"
 #include "Config.h"
-#include "ErrorLogger.h"
 #include "SyntaxTree.h"
-#include "Token.h"
-#include <istream>
 
 class TokenList;
 
@@ -24,7 +21,6 @@ public:
 private:
     Config config;
     CompilerContext compilerContext;
-    ErrorLogger& logger;
 
     void PrintTokens(const TokenList& tokens) const;
 };

@@ -108,9 +108,9 @@ constexpr bool isWhitespace(char ch)
     return value;
 }
 
-LexicalAnalyzer::LexicalAnalyzer(CompilerContext& compilerContext, ErrorLogger& logger) :
+LexicalAnalyzer::LexicalAnalyzer(CompilerContext& compilerContext) :
     compilerContext(compilerContext),
-    logger(logger)
+    logger(compilerContext.logger)
 {
     buffIdx = 0;
     isMore = false;
