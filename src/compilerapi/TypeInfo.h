@@ -86,15 +86,6 @@ public:
     static const TypeInfo* UInt32Type;
     static const TypeInfo* UInt64Type;
     static const TypeInfo* TypeType;
-    static const TypeInfo* ImmutBoolType;
-    static const TypeInfo* ImmutInt8Type;
-    static const TypeInfo* ImmutInt16Type;
-    static const TypeInfo* ImmutInt32Type;
-    static const TypeInfo* ImmutInt64Type;
-    static const TypeInfo* ImmutUInt8Type;
-    static const TypeInfo* ImmutUInt16Type;
-    static const TypeInfo* ImmutUInt32Type;
-    static const TypeInfo* ImmutUInt64Type;
 
     static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
 
@@ -162,8 +153,6 @@ public:
     // TODO: rename (GetFriendlyName?)
     const std::string& GetShortName() const;
 
-    const TypeInfo* GetImmutableType() const;
-
     const MemberInfo* GetMember(const std::string& memberName) const;
 
     const std::vector<const MemberInfo*>& GetMembers() const;
@@ -182,7 +171,6 @@ public:
 
 private:
     static std::map<std::string, const TypeInfo*> types;
-    static std::unordered_map<std::string, const TypeInfo*> immutableTypes;
 
     unsigned numBits;
     uint16_t flags;

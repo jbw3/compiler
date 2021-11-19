@@ -35,16 +35,6 @@ PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KE
 PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD, UINT64_KEYWORD);
 PrimitiveType typeTypeInfo(0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, "type", "type"); // TODO: use constant for type name
 
-PrimitiveType immutBoolTypeInfo(1, TypeInfo::F_BOOL | TypeInfo::F_IMMUTABLE, TypeInfo::eNotApplicable, "immutable_"s + BOOL_KEYWORD, BOOL_KEYWORD);
-PrimitiveType immutInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT8_KEYWORD, INT8_KEYWORD);
-PrimitiveType immutInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT16_KEYWORD, INT16_KEYWORD);
-PrimitiveType immutInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT32_KEYWORD, INT32_KEYWORD);
-PrimitiveType immutInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT64_KEYWORD, INT64_KEYWORD);
-PrimitiveType immutUInt8TypeInfo(8, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT8_KEYWORD, UINT8_KEYWORD);
-PrimitiveType immutUInt16TypeInfo(16, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT16_KEYWORD, UINT16_KEYWORD);
-PrimitiveType immutUInt32TypeInfo(32, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT32_KEYWORD, UINT32_KEYWORD);
-PrimitiveType immutUInt64TypeInfo(64, TypeInfo::F_INT | TypeInfo::F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT64_KEYWORD, UINT64_KEYWORD);
-
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
     index(index),
@@ -90,15 +80,6 @@ const TypeInfo* TypeInfo::UInt16Type = &uInt16TypeInfo;
 const TypeInfo* TypeInfo::UInt32Type = &uInt32TypeInfo;
 const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
 const TypeInfo* TypeInfo::TypeType = &typeTypeInfo;
-const TypeInfo* TypeInfo::ImmutBoolType = &immutBoolTypeInfo;
-const TypeInfo* TypeInfo::ImmutInt8Type = &immutInt8TypeInfo;
-const TypeInfo* TypeInfo::ImmutInt16Type = &immutInt16TypeInfo;
-const TypeInfo* TypeInfo::ImmutInt32Type = &immutInt32TypeInfo;
-const TypeInfo* TypeInfo::ImmutInt64Type = &immutInt64TypeInfo;
-const TypeInfo* TypeInfo::ImmutUInt8Type = &immutUInt8TypeInfo;
-const TypeInfo* TypeInfo::ImmutUInt16Type = &immutUInt16TypeInfo;
-const TypeInfo* TypeInfo::ImmutUInt32Type = &immutUInt32TypeInfo;
-const TypeInfo* TypeInfo::ImmutUInt64Type = &immutUInt64TypeInfo;
 
 map<string, const TypeInfo*> TypeInfo::types =
 {
@@ -111,19 +92,6 @@ map<string, const TypeInfo*> TypeInfo::types =
     {UINT16_KEYWORD, UInt16Type},
     {UINT32_KEYWORD, UInt32Type},
     {UINT64_KEYWORD, UInt64Type},
-};
-
-unordered_map<string, const TypeInfo*> TypeInfo::immutableTypes =
-{
-    {BOOL_KEYWORD, ImmutBoolType},
-    {INT8_KEYWORD, ImmutInt8Type},
-    {INT16_KEYWORD, ImmutInt16Type},
-    {INT32_KEYWORD, ImmutInt32Type},
-    {INT64_KEYWORD, ImmutInt64Type},
-    {UINT8_KEYWORD, ImmutUInt8Type},
-    {UINT16_KEYWORD, ImmutUInt16Type},
-    {UINT32_KEYWORD, ImmutUInt32Type},
-    {UINT64_KEYWORD, ImmutUInt64Type},
 };
 
 const TypeInfo* TypeInfo::GetMinSignedIntTypeForSize(unsigned size)
@@ -329,18 +297,6 @@ const string& TypeInfo::GetUniqueName() const
 const string& TypeInfo::GetShortName() const
 {
     return shortName;
-}
-
-const TypeInfo* TypeInfo::GetImmutableType() const
-{
-    // TODO: immutableTypes does not have all types. Need a better way to do this
-    auto iter = immutableTypes.find(shortName);
-    if (iter == immutableTypes.cend())
-    {
-        return nullptr;
-    }
-
-    return iter->second;
 }
 
 const MemberInfo* TypeInfo::GetMember(const string& memberName) const
