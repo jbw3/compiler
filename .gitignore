@@ -2,6 +2,7 @@
 build
 debug
 release
+test_results.xml
 *.out.ll
 *.out.wip
 *.swp

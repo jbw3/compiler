@@ -8,7 +8,7 @@
 class LexicalAnalyzerTests : public TestClass
 {
 public:
-    LexicalAnalyzerTests();
+    LexicalAnalyzerTests(std::ostream& results);
 
 private:
     static bool TestValidInputs();

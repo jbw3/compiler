@@ -2,6 +2,11 @@
 
 using namespace std;
 
+TestClass::TestClass(ostream& results) :
+    results(results)
+{
+}
+
 bool TestClass::Run()
 {
     bool allPassed = true;

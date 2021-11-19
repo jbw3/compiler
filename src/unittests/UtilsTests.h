@@ -6,7 +6,7 @@
 class UtilsTests : public TestClass
 {
 public:
-    UtilsTests();
+    UtilsTests(std::ostream& results);
 
 private:
     static bool TestNumberConversion();

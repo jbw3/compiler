@@ -10,7 +10,8 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-SourceGeneratorTests::SourceGeneratorTests()
+SourceGeneratorTests::SourceGeneratorTests(ostream& results) :
+    TestClass(results)
 {
     AddTest(TestSourceGenerator);
 }

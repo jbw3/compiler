@@ -6,7 +6,7 @@
 class SourceGeneratorTests : public TestClass
 {
 public:
-    SourceGeneratorTests();
+    SourceGeneratorTests(std::ostream& results);
 
 private:
     static bool TestSourceGenerator();

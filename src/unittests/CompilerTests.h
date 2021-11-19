@@ -8,7 +8,7 @@
 class CompilerTests : public TestClass
 {
 public:
-    CompilerTests();
+    CompilerTests(std::ostream& results);
 
 private:
     static bool RunTest(const std::string& baseFilename, bool debugInfo);

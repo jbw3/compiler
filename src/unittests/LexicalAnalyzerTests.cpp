@@ -7,7 +7,8 @@
 
 using namespace std;
 
-LexicalAnalyzerTests::LexicalAnalyzerTests()
+LexicalAnalyzerTests::LexicalAnalyzerTests(ostream& results) :
+    TestClass(results)
 {
     AddTest(TestValidInputs);
     AddTest(TestNumbers);

@@ -7,7 +7,8 @@
 
 using namespace std;
 
-UtilsTests::UtilsTests()
+UtilsTests::UtilsTests(ostream& results) :
+    TestClass(results)
 {
     AddTest(TestNumberConversion);
 }

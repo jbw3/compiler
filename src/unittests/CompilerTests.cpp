@@ -8,7 +8,8 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-CompilerTests::CompilerTests()
+CompilerTests::CompilerTests(ostream& results) :
+    TestClass(results)
 {
     AddTest([](){ return RunTest("basic", false); });
     AddTest([](){ return RunTest("debug_info", true); });
