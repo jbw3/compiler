@@ -65,6 +65,7 @@ void TokenValues::AppendChar(char ch)
 CompilerContext::CompilerContext(Config config, ostream& logStream) :
     config(config),
     logger(*this, &logStream, config.color),
+    typeRegistry(config.targetMachine),
     basicTypeCount(0)
 {
 }
@@ -94,13 +95,13 @@ void CompilerContext::InitBasicTypes()
     AddTypeConstantValue(TypeInfo::Int16Type);
     AddTypeConstantValue(TypeInfo::Int32Type);
     AddTypeConstantValue(TypeInfo::Int64Type);
-    AddTypeConstantValue(TypeInfo::GetIntSizeType());
+    AddTypeConstantValue(typeRegistry.GetIntSizeType());
     AddTypeConstantValue(TypeInfo::UInt8Type);
     AddTypeConstantValue(TypeInfo::UInt16Type);
     AddTypeConstantValue(TypeInfo::UInt32Type);
     AddTypeConstantValue(TypeInfo::UInt64Type);
-    AddTypeConstantValue(TypeInfo::GetUIntSizeType());
-    AddTypeConstantValue(TypeInfo::GetStringType());
+    AddTypeConstantValue(typeRegistry.GetUIntSizeType());
+    AddTypeConstantValue(typeRegistry.GetStringType());
 
     basicTypeCount = static_cast<unsigned>(typeConstants.size());
 }

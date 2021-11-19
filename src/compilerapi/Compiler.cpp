@@ -29,9 +29,6 @@ Compiler::Compiler(const Config& config) :
     config(config),
     compilerContext(config, cerr)
 {
-    // initialize types
-    TypeInfo::InitTypes(config.targetMachine);
-
     compilerContext.InitBasicTypes();
 }
 

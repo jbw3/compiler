@@ -49,6 +49,8 @@ add_library(compilerapi
     TokenList.h
     TypeInfo.cpp
     TypeInfo.h
+    TypeRegistry.cpp
+    TypeRegistry.h
     utils.cpp
     utils.h
 )

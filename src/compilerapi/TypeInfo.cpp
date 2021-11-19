@@ -100,11 +100,6 @@ const TypeInfo* TypeInfo::ImmutUInt16Type = &immutUInt16TypeInfo;
 const TypeInfo* TypeInfo::ImmutUInt32Type = &immutUInt32TypeInfo;
 const TypeInfo* TypeInfo::ImmutUInt64Type = &immutUInt64TypeInfo;
 
-unsigned TypeInfo::pointerSize = 0;
-TypeInfo* TypeInfo::intSizeType = nullptr;
-TypeInfo* TypeInfo::uintSizeType = nullptr;
-TypeInfo* TypeInfo::stringType = nullptr;
-
 map<string, const TypeInfo*> TypeInfo::types =
 {
     {BOOL_KEYWORD, BoolType},
@@ -130,39 +125,6 @@ unordered_map<string, const TypeInfo*> TypeInfo::immutableTypes =
     {UINT32_KEYWORD, ImmutUInt32Type},
     {UINT64_KEYWORD, ImmutUInt64Type},
 };
-
-void TypeInfo::InitTypes(const TargetMachine* targetMachine)
-{
-    pointerSize = 8 * targetMachine->getAllocaPointerSize();
-
-    intSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
-    RegisterType(intSizeType);
-    PrimitiveType* immutIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eSigned, "immutable_"s + INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
-    immutableTypes.insert({INT_SIZE_KEYWORD, immutIntSizeType});
-
-    uintSizeType = new PrimitiveType(pointerSize, F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
-    RegisterType(uintSizeType);
-    PrimitiveType* immutUIntSizeType = new PrimitiveType(pointerSize, F_INT | F_IMMUTABLE, TypeInfo::eUnsigned, "immutable_"s + UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
-    immutableTypes.insert({UINT_SIZE_KEYWORD, immutUIntSizeType});
-
-    stringType = new StringType(pointerSize * 2);
-    RegisterType(stringType);
-}
-
-unsigned TypeInfo::GetPointerSize()
-{
-    return pointerSize;
-}
-
-const TypeInfo* TypeInfo::GetIntSizeType()
-{
-    return intSizeType;
-}
-
-const TypeInfo* TypeInfo::GetUIntSizeType()
-{
-    return uintSizeType;
-}
 
 const TypeInfo* TypeInfo::GetMinSignedIntTypeForSize(unsigned size)
 {
@@ -212,144 +174,6 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     return type;
 }
 
-const TypeInfo* TypeInfo::GetStringType()
-{
-    return stringType;
-}
-
-const TypeInfo* TypeInfo::GetRangeType(const TypeInfo* memberType, bool isHalfOpen)
-{
-    string uniqueName = "Range";
-    uniqueName += (isHalfOpen ? "HalfOpen" : "Closed");
-    uniqueName += "'" + memberType->GetUniqueName() + "'";
-    const TypeInfo* rangeType = GetType(uniqueName);
-    if (rangeType == nullptr)
-    {
-        unsigned size = memberType->GetNumBits() * 2;
-        uint16_t flags = F_RANGE | F_AGGREGATE | (isHalfOpen ? F_HALF_OPEN : F_NONE);
-
-        string name = "Range";
-        name += (isHalfOpen ? "HalfOpen" : "Closed");
-        name += "'" + memberType->GetShortName() + "'";
-
-        TypeInfo* newRangeType = new PrimitiveType(size, flags, TypeInfo::eNotApplicable, uniqueName, name);
-        newRangeType->innerType = memberType;
-        newRangeType->AddMember("Start", memberType, false, Token::None);
-        newRangeType->AddMember("End", memberType, false, Token::None);
-
-        rangeType = newRangeType;
-    }
-
-    return rangeType;
-}
-
-const TypeInfo* TypeInfo::GetFunctionType(const FunctionDeclaration* functionDeclaration)
-{
-    const Parameters& parameters = functionDeclaration->parameters;
-    string uniqueName = "fun(";
-    string name = "fun(";
-    if (parameters.size() > 0)
-    {
-        uniqueName += parameters[0]->type->GetUniqueName();
-        name += parameters[0]->type->GetShortName();
-
-        for (size_t i = 1; i < parameters.size(); ++i)
-        {
-            const TypeInfo* paramType = parameters[i]->type;
-
-            uniqueName += ", ";
-            uniqueName += paramType->GetUniqueName();
-
-            name += ", ";
-            name += paramType->GetShortName();
-        }
-    }
-
-    uniqueName += ")";
-    name += ")";
-
-    uniqueName += functionDeclaration->returnType->GetUniqueName();
-    if (!functionDeclaration->returnType->IsUnit())
-    {
-        name += ' ';
-        name += functionDeclaration->returnType->GetShortName();
-    }
-
-    const TypeInfo* funType = GetType(uniqueName);
-    if (funType == nullptr)
-    {
-        TypeInfo* newFunType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
-
-        // add param and return types
-        for (const Parameter* param : parameters)
-        {
-            newFunType->paramTypes.push_back(param->type);
-            newFunType->paramNames.push_back(param->name);
-        }
-        newFunType->returnType = functionDeclaration->returnType;
-
-        funType = newFunType;
-    }
-
-    return funType;
-}
-
-const TypeInfo* TypeInfo::GetFunctionType(
-        const vector<const TypeInfo*>& parameterTypes,
-        const vector<string>& parameterNames,
-        const TypeInfo* returnType
-)
-{
-    size_t paramSize = parameterTypes.size();
-    string uniqueName = "fun(";
-    string name = "fun(";
-    if (paramSize > 0)
-    {
-        uniqueName += parameterTypes[0]->GetUniqueName();
-        name += parameterTypes[0]->GetShortName();
-
-        for (size_t i = 1; i < paramSize; ++i)
-        {
-            const TypeInfo* paramType = parameterTypes[i];
-
-            uniqueName += ", ";
-            uniqueName += paramType->GetUniqueName();
-
-            name += ", ";
-            name += paramType->GetShortName();
-        }
-    }
-
-    uniqueName += ")";
-    name += ")";
-
-    uniqueName += returnType->GetUniqueName();
-    if (!returnType->IsUnit())
-    {
-        name += ' ';
-        name += returnType->GetShortName();
-    }
-
-    const TypeInfo* funType = GetType(uniqueName);
-    if (funType == nullptr)
-    {
-        TypeInfo* newFunType = new PrimitiveType(GetUIntSizeType()->GetNumBits(), F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
-
-        // add param and return types
-        for (size_t i = 0; i < paramSize; ++i)
-        {
-            newFunType->paramTypes.push_back(parameterTypes[i]);
-            newFunType->paramNames.push_back(parameterNames[i]);
-        }
-        newFunType->returnType = returnType;
-
-        funType = newFunType;
-    }
-
-    return funType;
-
-}
-
 const TypeInfo* TypeInfo::GetType(const string& typeName)
 {
     auto iter = types.find(typeName);
@@ -366,47 +190,26 @@ bool TypeInfo::RegisterType(const TypeInfo* typeInfo)
     return pair.second;
 }
 
-const TypeInfo* TypeInfo::GetPointerToType(const TypeInfo* type)
+const TypeInfo* TypeInfo::CreateFunctionType(
+    unsigned numBits,
+    const string& uniqueName,
+    const string& name,
+    const vector<const TypeInfo*>& parameterTypes,
+    const vector<string>& parameterNames,
+    const TypeInfo* returnType)
 {
-    string uniqueName = POINTER_TYPE_TOKEN + type->GetUniqueName();
-    const TypeInfo* ptrType = GetType(uniqueName);
-    if (ptrType == nullptr)
+    TypeInfo* newFunType = new PrimitiveType(numBits, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
+
+    // add param and return types
+    size_t paramSize = parameterTypes.size();
+    for (size_t i = 0; i < paramSize; ++i)
     {
-        string name = POINTER_TYPE_TOKEN + type->GetShortName();
-        TypeInfo* newPtrType = new PrimitiveType(pointerSize, F_POINTER, eNotApplicable, uniqueName, name);
-        newPtrType->innerType = type;
-        RegisterType(newPtrType);
-
-        ptrType = newPtrType;
+        newFunType->paramTypes.push_back(parameterTypes[i]);
+        newFunType->paramNames.push_back(parameterNames[i]);
     }
+    newFunType->returnType = returnType;
 
-    return ptrType;
-}
-
-const TypeInfo* TypeInfo::GetArrayOfType(const TypeInfo* type)
-{
-    string uniqueName;
-    uniqueName += ARRAY_TYPE_START_TOKEN;
-    uniqueName += ARRAY_TYPE_END_TOKEN;
-    uniqueName += type->GetUniqueName();
-    const TypeInfo* arrayType = GetType(uniqueName);
-    if (arrayType == nullptr)
-    {
-        string name;
-        name += ARRAY_TYPE_START_TOKEN;
-        name += ARRAY_TYPE_END_TOKEN;
-        name += type->GetShortName();
-
-        TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, F_ARRAY, eNotApplicable, uniqueName, name);
-        newArrayType->innerType = type;
-        newArrayType->AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
-        newArrayType->AddMember("Data", TypeInfo::GetPointerToType(type), false, Token::None);
-        RegisterType(newArrayType);
-
-        arrayType = newArrayType;
-    }
-
-    return arrayType;
+    return newFunType;
 }
 
 TypeInfo::TypeInfo(
@@ -414,14 +217,15 @@ TypeInfo::TypeInfo(
     uint16_t flags,
     ESign sign,
     const string& uniqueName,
-    const string& shortName
+    const string& shortName,
+    const TypeInfo* innerType
 ) :
     numBits(numBits),
     flags(flags),
     sign(sign),
     uniqueName(uniqueName),
     shortName(shortName),
-    innerType(nullptr),
+    innerType(innerType),
     returnType(nullptr)
 {
 }
@@ -450,6 +254,11 @@ bool TypeInfo::IsBool() const
 bool TypeInfo::IsInt() const
 {
     return (flags & F_INT) != 0;
+}
+
+bool TypeInfo::IsStr() const
+{
+    return (flags & F_STR) != 0;
 }
 
 bool TypeInfo::IsRange() const
@@ -609,9 +418,10 @@ PrimitiveType::PrimitiveType(
     uint16_t flags,
     ESign sign,
     const string& uniqueName,
-    const string& shortName
+    const string& shortName,
+    const TypeInfo* innerType
 ) :
-    TypeInfo(numBits, flags, sign, uniqueName, shortName)
+    TypeInfo(numBits, flags, sign, uniqueName, shortName, innerType)
 {
 }
 
@@ -813,11 +623,11 @@ const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
     return type;
 }
 
-StringType::StringType(unsigned numBits) :
-    TypeInfo(numBits, F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD)
+StringType::StringType(unsigned numBits, const TypeInfo* sizeType, const TypeInfo* pointerType) :
+    TypeInfo(numBits, F_STR | F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD)
 {
-    AddMember("Size", TypeInfo::GetUIntSizeType(), false, Token::None);
-    AddMember("Data", TypeInfo::GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
+    AddMember("Size", sizeType, false, Token::None);
+    AddMember("Data", pointerType, false, Token::None);
 }
 
 bool StringType::IsSameAs(const TypeInfo& other) const

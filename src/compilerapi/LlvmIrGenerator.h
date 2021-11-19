@@ -179,6 +179,7 @@ private:
     std::unordered_map<std::string, llvm::Type*> types;
     std::unordered_map<std::string, llvm::DICompositeType*> diStructTypes;
     std::stack<LoopInfo> loops;
+    const TypeInfo* uIntSizeType;
 
     llvm::Value* GenerateIntSubscriptIr(const SyntaxTree::BinaryExpression* binaryExpression, llvm::Value* leftValue, llvm::Value* rightValue);
 

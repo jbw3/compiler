@@ -82,7 +82,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                 if (subExpr->GetIsConstant())
                 {
                     const TypeInfo* subExprValue = compilerContext.GetTypeConstantValue(subExpr->GetConstantValueIndex());
-                    const TypeInfo* exprValue = TypeInfo::GetPointerToType(subExprValue);
+                    const TypeInfo* exprValue = compilerContext.typeRegistry.GetPointerToType(subExprValue);
                     unsigned idx = compilerContext.AddTypeConstantValue(exprValue);
                     unaryExpression->SetConstantValueIndex(idx);
 
@@ -95,7 +95,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
             {
                 ok = subExpr->GetIsStorage();
                 subExpr->SetAccessType(Expression::eAddress);
-                resultType = TypeInfo::GetPointerToType(subExprType);
+                resultType = compilerContext.typeRegistry.GetPointerToType(subExprType);
             }
             break;
         }
@@ -113,7 +113,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                 if (subExpr->GetIsConstant())
                 {
                     const TypeInfo* subExprValue = compilerContext.GetTypeConstantValue(subExpr->GetConstantValueIndex());
-                    const TypeInfo* exprValue = TypeInfo::GetArrayOfType(subExprValue);
+                    const TypeInfo* exprValue = compilerContext.typeRegistry.GetArrayOfType(subExprValue);
                     unsigned idx = compilerContext.AddTypeConstantValue(exprValue);
                     unaryExpression->SetConstantValueIndex(idx);
 
@@ -446,7 +446,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 binaryExpression->SetConstantValueIndex(idx);
             }
         }
-        else if (leftType->IsSameAs(*TypeInfo::GetStringType()) && op == BinaryExpression::eSubscript)
+        else if (leftType->IsStr() && op == BinaryExpression::eSubscript)
         {
             vector<char> strValue = compilerContext.GetStrConstantValue(binaryExpression->left->GetConstantValueIndex());
             size_t strSize = strValue.size();
@@ -857,7 +857,7 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
             const TypeInfo* rightType = binExpr->right->GetType();
 
             // fix left expression
-            if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+            if (leftType->IsStr())
             {
                 // nothing to do; the string should already have the correct type
             }
@@ -866,7 +866,7 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
                 const TypeInfo* newType = nullptr;
                 if (rightType->IsInt())
                 {
-                    newType = TypeInfo::GetArrayOfType(resultType);
+                    newType = compilerContext.typeRegistry.GetArrayOfType(resultType);
                 }
                 else if (rightType->IsRange())
                 {
@@ -887,11 +887,11 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
             // fix right expression
             if (rightType->IsInt())
             {
-                FixNumericLiteralExpression(binExpr->right, TypeInfo::GetUIntSizeType());
+                FixNumericLiteralExpression(binExpr->right, compilerContext.typeRegistry.GetUIntSizeType());
             }
             else if (rightType->IsRange())
             {
-                const TypeInfo* newType = TypeInfo::GetRangeType(TypeInfo::GetUIntSizeType(), rightType->IsHalfOpen());
+                const TypeInfo* newType = compilerContext.typeRegistry.GetRangeType(compilerContext.typeRegistry.GetUIntSizeType(), rightType->IsHalfOpen());
                 FixNumericLiteralExpression(binExpr->right, newType);
             }
             else
@@ -925,7 +925,7 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
         const TypeInfo* newSubExprType = resultType;
         if (currentSubExprType->IsRange())
         {
-            newSubExprType = TypeInfo::GetRangeType(resultType, currentSubExprType->IsHalfOpen());
+            newSubExprType = compilerContext.typeRegistry.GetRangeType(resultType, currentSubExprType->IsHalfOpen());
         }
 
         FixNumericLiteralExpression(memberExpr->subExpression, newSubExprType);
@@ -1095,7 +1095,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             (op == BinaryExpression::eAssign || op == BinaryExpression::eEqual || op == BinaryExpression::eNotEqual)
             && leftType->IsSameAs(*rightType);
     }
-    else if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+    else if (leftType->IsStr())
     {
         if (op == BinaryExpression::eAssign)
         {
@@ -1131,7 +1131,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             else if (rightSign == TypeInfo::eContextDependent)
             {
                 const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
-                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsHalfOpen());
+                const TypeInfo* newType = compilerContext.typeRegistry.GetRangeType(newInnerType, rightType->IsHalfOpen());
                 right->SetType(newType);
 
                 ok = true;
@@ -1200,7 +1200,7 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             else if (rightSign == TypeInfo::eContextDependent)
             {
                 const TypeInfo* newInnerType = TypeInfo::GetMinUnsignedIntTypeForSize(innerType->GetNumBits());
-                const TypeInfo* newType = TypeInfo::GetRangeType(newInnerType, rightType->IsHalfOpen());
+                const TypeInfo* newType = compilerContext.typeRegistry.GetRangeType(newInnerType, rightType->IsHalfOpen());
                 right->SetType(newType);
 
                 ok = true;
@@ -1317,13 +1317,13 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
         case BinaryExpression::eHalfOpenRange:
         {
             const TypeInfo* memberType = GetBiggestSizeType(leftType, rightType);
-            return TypeInfo::GetRangeType(memberType, op == BinaryExpression::eHalfOpenRange);
+            return compilerContext.typeRegistry.GetRangeType(memberType, op == BinaryExpression::eHalfOpenRange);
         }
         case BinaryExpression::eSubscript:
         {
             if (rightType->IsInt())
             {
-                if (leftType->IsSameAs(*TypeInfo::GetStringType()))
+                if (leftType->IsStr())
                 {
                     return TypeInfo::UInt8Type;
                 }
@@ -1427,12 +1427,13 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     forLoop->variableType = varType;
 
     // set index type if there is an index variable
-    const TypeInfo* indexVarType = GetVariableType(forLoop->indexTypeExpression, TypeInfo::GetUIntSizeType(), forLoop->indexNameToken);
+    const TypeInfo* uIntSizeType = compilerContext.typeRegistry.GetUIntSizeType();
+    const TypeInfo* indexVarType = GetVariableType(forLoop->indexTypeExpression, uIntSizeType, forLoop->indexNameToken);
     if (isError)
     {
         return;
     }
-    else if (!indexVarType->IsInt() || indexVarType->GetSign() != TypeInfo::eUnsigned || indexVarType->GetNumBits() < TypeInfo::GetUIntSizeType()->GetNumBits())
+    else if (!indexVarType->IsInt() || indexVarType->GetSign() != TypeInfo::eUnsigned || indexVarType->GetNumBits() < uIntSizeType->GetNumBits())
     {
         isError = true;
         logger.LogError(*forLoop->indexNameToken, "Index variable must be an unsigned integer at least as big as 'usize'");
@@ -1462,7 +1463,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
                 return;
             }
 
-            const TypeInfo* newType = TypeInfo::GetArrayOfType(inferType);
+            const TypeInfo* newType = compilerContext.typeRegistry.GetArrayOfType(inferType);
             iterExpression->SetType(newType);
         }
     }
@@ -1620,7 +1621,7 @@ void SemanticAnalyzer::Visit(FunctionTypeExpression* functionTypeExpression)
     }
 
     const TypeInfo* funType =
-        TypeInfo::GetFunctionType(
+        compilerContext.typeRegistry.GetFunctionType(
             paramTypes,
             functionTypeExpression->paramNames,
             returnType
@@ -1633,7 +1634,7 @@ void SemanticAnalyzer::Visit(ExternFunctionDeclaration* externFunctionDeclaratio
 {
     const FunctionDeclaration* funcDecl = externFunctionDeclaration->declaration;
 
-    const TypeInfo* type = TypeInfo::GetFunctionType(funcDecl);
+    const TypeInfo* type = compilerContext.typeRegistry.GetFunctionType(funcDecl);
     externFunctionDeclaration->SetType(type);
 }
 
@@ -1641,7 +1642,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 {
     const FunctionDeclaration* funcDecl = functionDefinition->declaration;
 
-    const TypeInfo* type = TypeInfo::GetFunctionType(funcDecl);
+    const TypeInfo* type = compilerContext.typeRegistry.GetFunctionType(funcDecl);
     functionDefinition->SetType(type);
 
     // create new scope for parameters and add them
@@ -2086,7 +2087,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
                 return;
             }
 
-            const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
+            const TypeInfo* funType = compilerContext.typeRegistry.GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             externFunc->SetConstantValueIndex(idx);
             bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
@@ -2109,7 +2110,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
                 return;
             }
 
-            const TypeInfo* funType = TypeInfo::GetFunctionType(decl);
+            const TypeInfo* funType = compilerContext.typeRegistry.GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             funcDef->SetConstantValueIndex(idx);
             bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
@@ -2163,7 +2164,7 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 
 void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    stringLiteralExpression->SetType(TypeInfo::GetStringType());
+    stringLiteralExpression->SetType(compilerContext.typeRegistry.GetStringType());
 
     const vector<char>& value = stringLiteralExpression->characters;
     unsigned idx = compilerContext.AddStrConstantValue(value);
@@ -2221,7 +2222,7 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
     }
 
     const TypeInfo* type = valueExpression->GetType();
-    const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
+    const TypeInfo* arrayType = compilerContext.typeRegistry.GetArrayOfType(type);
     arrayExpression->SetType(arrayType);
 
     if (valueExpression->GetIsConstant())
@@ -2297,7 +2298,7 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
         }
     }
 
-    const TypeInfo* arrayType = TypeInfo::GetArrayOfType(type);
+    const TypeInfo* arrayType = compilerContext.typeRegistry.GetArrayOfType(type);
     arrayExpression->SetType(arrayType);
 
     if (allExprsAreConst)
@@ -2571,7 +2572,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
 
     if (expr->GetIsConstant())
     {
-        if (type->IsSameAs(*TypeInfo::GetStringType()))
+        if (type->IsStr())
         {
             // check if it's the 'Size' member
             if (member->GetIndex() == 0)
@@ -2902,9 +2903,9 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     {
         const vector<Parameter*>& params = functionDeclaration->parameters;
         if (params.size() != 3
-        || !params[0]->type->IsSameAs(*TypeInfo::GetStringType())
+        || !params[0]->type->IsStr()
         || !params[1]->type->IsSameAs(*TypeInfo::UInt32Type)
-        || !params[2]->type->IsSameAs(*TypeInfo::GetStringType()))
+        || !params[2]->type->IsStr())
         {
             logger.LogError(*functionDeclaration->nameToken, "Function 'logError' must have the following parameter types: 'str', 'u32', 'str'");
             return false;

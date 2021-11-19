@@ -5,6 +5,7 @@
 #include "ErrorLogger.h"
 #include "TokenList.h"
 #include "TypeInfo.h"
+#include "TypeRegistry.h"
 #include <string>
 #include <vector>
 
@@ -81,6 +82,7 @@ public:
     Config config;
     TokenValues tokenValues;
     ErrorLogger logger;
+    TypeRegistry typeRegistry;
 
     CompilerContext(Config config, std::ostream& logStream);
 

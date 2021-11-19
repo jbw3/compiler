@@ -336,7 +336,7 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, const string&
 
         return true;
     }
-    else if (type->IsSameAs(*TypeInfo::GetStringType()))
+    else if (type->IsStr())
     {
         os << "struct str";
         printVarName(os, varName);

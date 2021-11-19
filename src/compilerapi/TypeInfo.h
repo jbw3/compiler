@@ -55,16 +55,17 @@ public:
     static constexpr uint16_t F_UNIT     = 1 << 0;
     static constexpr uint16_t F_BOOL     = 1 << 1;
     static constexpr uint16_t F_INT      = 1 << 2;
-    static constexpr uint16_t F_RANGE    = 1 << 3;
-    static constexpr uint16_t F_POINTER  = 1 << 4;
-    static constexpr uint16_t F_ARRAY    = 1 << 5;
-    static constexpr uint16_t F_FUNCTION = 1 << 6;
-    static constexpr uint16_t F_TYPE     = 1 << 7;
+    static constexpr uint16_t F_STR      = 1 << 3;
+    static constexpr uint16_t F_RANGE    = 1 << 4;
+    static constexpr uint16_t F_POINTER  = 1 << 5;
+    static constexpr uint16_t F_ARRAY    = 1 << 6;
+    static constexpr uint16_t F_FUNCTION = 1 << 7;
+    static constexpr uint16_t F_TYPE     = 1 << 8;
 
     // attributes
-    static constexpr uint16_t F_AGGREGATE = 1 <<  8;
-    static constexpr uint16_t F_HALF_OPEN = 1 <<  9;
-    static constexpr uint16_t F_IMMUTABLE = 1 << 10;
+    static constexpr uint16_t F_AGGREGATE = 1 << 12;
+    static constexpr uint16_t F_HALF_OPEN = 1 << 13;
+    static constexpr uint16_t F_IMMUTABLE = 1 << 14;
 
     enum ESign
     {
@@ -95,44 +96,29 @@ public:
     static const TypeInfo* ImmutUInt32Type;
     static const TypeInfo* ImmutUInt64Type;
 
-    static void InitTypes(const llvm::TargetMachine* targetMachine);
-
-    static unsigned GetPointerSize();
-
-    static const TypeInfo* GetIntSizeType();
-
-    static const TypeInfo* GetUIntSizeType();
-
     static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
-
-    static const TypeInfo* GetStringType();
-
-    static const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isHalfOpen);
-
-    static const TypeInfo* GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration);
-
-    static const TypeInfo* GetFunctionType(
-        const std::vector<const TypeInfo*>& parameterTypes,
-        const std::vector<std::string>& parameterNames,
-        const TypeInfo* returnType
-    );
 
     static const TypeInfo* GetType(const std::string& typeName);
 
     static bool RegisterType(const TypeInfo* typeInfo);
 
-    static const TypeInfo* GetPointerToType(const TypeInfo* type);
-
-    static const TypeInfo* GetArrayOfType(const TypeInfo* type);
+    static const TypeInfo* CreateFunctionType(
+        unsigned numBits,
+        const std::string& uniqueName,
+        const std::string& name,
+        const std::vector<const TypeInfo*>& parameterTypes,
+        const std::vector<std::string>& parameterNames,
+        const TypeInfo* returnType);
 
     TypeInfo(
         unsigned numBits,
         uint16_t flags,
         ESign sign,
         const std::string& uniqueName,
-        const std::string& shortName
+        const std::string& shortName,
+        const TypeInfo* innerType = nullptr
     );
 
     virtual ~TypeInfo();
@@ -146,6 +132,8 @@ public:
     bool IsBool() const;
 
     bool IsInt() const;
+
+    bool IsStr() const;
 
     bool IsRange() const;
 
@@ -193,10 +181,6 @@ public:
     const TypeInfo* GetReturnType() const;
 
 private:
-    static unsigned pointerSize;
-    static TypeInfo* intSizeType;
-    static TypeInfo* uintSizeType;
-    static TypeInfo* stringType;
     static std::map<std::string, const TypeInfo*> types;
     static std::unordered_map<std::string, const TypeInfo*> immutableTypes;
 
@@ -229,7 +213,8 @@ public:
         uint16_t flags,
         ESign sign,
         const std::string& uniqueName,
-        const std::string& shortName
+        const std::string& shortName,
+        const TypeInfo* innerType = nullptr
     );
 
     bool IsSameAs(const TypeInfo& other) const override;
@@ -299,7 +284,7 @@ namespace std
 class StringType : public TypeInfo
 {
 public:
-    StringType(unsigned numBits);
+    StringType(unsigned numBits, const TypeInfo* sizeType, const TypeInfo* pointerType);
 
     bool IsSameAs(const TypeInfo& other) const override;
 };

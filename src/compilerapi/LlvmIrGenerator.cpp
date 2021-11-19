@@ -68,6 +68,7 @@ LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext) :
     globalStringCounter(0),
     boolType(Type::getInt1Ty(context))
 {
+    uIntSizeType = compilerContext.typeRegistry.GetUIntSizeType();
 }
 
 LlvmIrGenerator::~LlvmIrGenerator()
@@ -336,12 +337,12 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 {
     const TypeInfo* rightType = binaryExpression->right->GetType();
 
-    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+    unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
 
     Value* indexValue = nullptr;
     if (rightType->GetNumBits() < uIntSizeNumBits)
     {
-        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        Type* extType = GetType(uIntSizeType);
         indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
     }
     else
@@ -428,7 +429,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 
 Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryExpression, Value* leftValue, Value* rightValue)
 {
-    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+    unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
     Expression* rightExpr = binaryExpression->right;
     const TypeInfo* rightType = rightExpr->GetType();
     const TypeInfo* innerType = rightType->GetInnerType();
@@ -444,7 +445,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     Value* start = builder.CreateExtractValue(rightValue, 0, "start");
     if (innerTypeNumBits < uIntSizeNumBits)
     {
-        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        Type* extType = GetType(uIntSizeType);
         start = builder.CreateZExt(start, extType, "zeroext");
     }
 
@@ -452,7 +453,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     Value* end = builder.CreateExtractValue(rightValue, 1, "end");
     if (innerTypeNumBits < uIntSizeNumBits)
     {
-        Type* extType = GetType(TypeInfo::GetUIntSizeType());
+        Type* extType = GetType(uIntSizeType);
         end = builder.CreateZExt(end, extType, "zeroext");
     }
 
@@ -620,10 +621,10 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     }
     else if (isArrayLoop)
     {
-        iterType = GetType(TypeInfo::GetUIntSizeType());
+        iterType = GetType(uIntSizeType);
 
         vector<unsigned> index(1);
-        unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+        unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
 
         // start index is 0
         startValue = ConstantInt::get(context, APInt(uIntSizeNumBits, 0));
@@ -721,7 +722,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 
             // zero extend if necessary
             Value* store = nullptr;
-            if (indexTypeInfo->GetNumBits() > TypeInfo::GetUIntSizeType()->GetNumBits())
+            if (indexTypeInfo->GetNumBits() > uIntSizeType->GetNumBits())
             {
                 store = builder.CreateZExt(iter, indexType, "zeroext");
             }
@@ -1292,8 +1293,6 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
     }
     else // create a new string constant
     {
-        const TypeInfo* sizeType = TypeInfo::GetUIntSizeType();
-
         size_t numChars = chars.size();
         Constant* charsArray = ConstantDataArray::getString(context, StringRef(chars.data(), numChars), false);
 
@@ -1313,7 +1312,7 @@ Constant* LlvmIrGenerator::CreateConstantString(const vector<char>& chars)
 
         vector<Constant*> initValues =
         {
-            ConstantInt::get(context, APInt(sizeType->GetNumBits(), numChars, false)),
+            ConstantInt::get(context, APInt(uIntSizeType->GetNumBits(), numChars, false)),
             strDataPointer,
         };
         Constant* initializer = ConstantStruct::get(strStructType, initValues);
@@ -1347,7 +1346,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
         bool isSigned = type->GetSign() == TypeInfo::eSigned;
         constValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
     }
-    else if (type->IsSameAs(*TypeInfo::GetStringType()))
+    else if (type->IsStr())
     {
         const vector<char>& value = compilerContext.GetStrConstantValue(constIdx);
         Constant* strPtr = CreateConstantString(value);
@@ -1432,7 +1431,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
             Type* llvmArrayType = ArrayType::get(innerType, arraySize);
             AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
-            unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+            unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
             for (uint64_t i = 0; i < arraySize; ++i)
             {
                 unsigned elementConstIdx = value.valueIndices[i];
@@ -1533,7 +1532,7 @@ void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 
 llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeInfo, uint64_t arraySize, Value* arrayValue)
 {
-    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+    unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
 
     const TypeInfo* innerTypeInfo = arrayTypeInfo->GetInnerType();
     Type* arrayType = GetType(arrayTypeInfo);
@@ -1611,7 +1610,7 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
     Type* llvmArrayType = ArrayType::get(innerType, arraySize);
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
-    unsigned uIntSizeNumBits = TypeInfo::GetUIntSizeType()->GetNumBits();
+    unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
     for (uint64_t i = 0; i < arraySize; ++i)
     {
         Expression* expr = expressions[i];
@@ -1852,7 +1851,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         }
 
         vector<Value*> indices;
-        indices.push_back(ConstantInt::get(context, APInt(TypeInfo::GetUIntSizeType()->GetNumBits(), 0)));
+        indices.push_back(ConstantInt::get(context, APInt(uIntSizeType->GetNumBits(), 0)));
         indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
 
         // calculate member address
@@ -1998,7 +1997,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     ArrayRef<Type*> emptyArray;
     unitType = StructType::create(context, emptyArray, "UnitType");
 
-    strStructElements[0] = GetType(TypeInfo::GetUIntSizeType());
+    strStructElements[0] = GetType(uIntSizeType);
     strStructElements[1] = PointerType::get(Type::getInt8Ty(context), 0);
 
     ArrayRef<Type*> strArrayRef(strStructElements, STR_STRUCT_ELEMENTS_SIZE);
@@ -2006,7 +2005,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 
     // register types
     types.insert({TypeInfo::BoolType->GetShortName(), boolType});
-    types.insert({TypeInfo::GetStringType()->GetShortName(), strStructType});
+    types.insert({compilerContext.typeRegistry.GetStringType()->GetShortName(), strStructType});
 
     if (dbgInfo)
     {
@@ -2156,7 +2155,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             if (innerType != nullptr)
             {
                 Type* arrayStructElements[2];
-                arrayStructElements[0] = GetType(TypeInfo::GetUIntSizeType());
+                arrayStructElements[0] = GetType(uIntSizeType);
                 arrayStructElements[1] = PointerType::get(innerType, 0);
 
                 ArrayRef<Type*> arrayRef(arrayStructElements, 2);
@@ -2210,15 +2209,15 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         {
             return nullptr;
         }
-        diType = diBuilder->createPointerType(innerDiType, TypeInfo::GetPointerSize(), 0, llvm::None, type->GetShortName());
+        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, type->GetShortName());
     }
     else if (type->IsSameAs(*TypeInfo::UnitType))
     {
         diType = diBuilder->createBasicType(TypeInfo::UnitType->GetShortName(), 0, dwarf::DW_ATE_unsigned);
     }
-    else if (type->IsSameAs(*TypeInfo::GetStringType()))
+    else if (type->IsStr())
     {
-        const TypeInfo* strType = TypeInfo::GetStringType();
+        const TypeInfo* strType = compilerContext.typeRegistry.GetStringType();
         const string& name = strType->GetShortName();
         unsigned numBits = strType->GetNumBits();
 
@@ -2325,7 +2324,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         }
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
-        diType = diBuilder->createPointerType(subroutine, TypeInfo::GetPointerSize(), 0, llvm::None, type->GetShortName());
+        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, type->GetShortName());
     }
     else
     {
