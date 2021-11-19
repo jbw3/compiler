@@ -81,19 +81,6 @@ const TypeInfo* TypeInfo::UInt32Type = &uInt32TypeInfo;
 const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
 const TypeInfo* TypeInfo::TypeType = &typeTypeInfo;
 
-map<string, const TypeInfo*> TypeInfo::types =
-{
-    {BOOL_KEYWORD, BoolType},
-    {INT8_KEYWORD, Int8Type},
-    {INT16_KEYWORD, Int16Type},
-    {INT32_KEYWORD, Int32Type},
-    {INT64_KEYWORD, Int64Type},
-    {UINT8_KEYWORD, UInt8Type},
-    {UINT16_KEYWORD, UInt16Type},
-    {UINT32_KEYWORD, UInt32Type},
-    {UINT64_KEYWORD, UInt64Type},
-};
-
 const TypeInfo* TypeInfo::GetMinSignedIntTypeForSize(unsigned size)
 {
     const TypeInfo* type = nullptr;
@@ -140,22 +127,6 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     }
 
     return type;
-}
-
-const TypeInfo* TypeInfo::GetType(const string& typeName)
-{
-    auto iter = types.find(typeName);
-    if (iter == types.cend())
-    {
-        return nullptr;
-    }
-    return iter->second;
-}
-
-bool TypeInfo::RegisterType(const TypeInfo* typeInfo)
-{
-    auto pair = types.insert({ typeInfo->GetUniqueName(), typeInfo });
-    return pair.second;
 }
 
 const TypeInfo* TypeInfo::CreateFunctionType(
@@ -267,11 +238,6 @@ bool TypeInfo::IsAggregate() const
 bool TypeInfo::IsHalfOpen() const
 {
     return (flags & F_HALF_OPEN) != 0;
-}
-
-bool TypeInfo::IsImmutable() const
-{
-    return (flags & F_IMMUTABLE) != 0;
 }
 
 bool TypeInfo::IsNumericLiteral() const

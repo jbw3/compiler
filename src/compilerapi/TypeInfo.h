@@ -65,7 +65,6 @@ public:
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 << 12;
     static constexpr uint16_t F_HALF_OPEN = 1 << 13;
-    static constexpr uint16_t F_IMMUTABLE = 1 << 14;
 
     enum ESign
     {
@@ -90,10 +89,6 @@ public:
     static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
-
-    static const TypeInfo* GetType(const std::string& typeName);
-
-    static bool RegisterType(const TypeInfo* typeInfo);
 
     static const TypeInfo* CreateFunctionType(
         unsigned numBits,
@@ -142,8 +137,6 @@ public:
 
     bool IsHalfOpen() const;
 
-    bool IsImmutable() const;
-
     virtual bool IsNumericLiteral() const;
 
     virtual unsigned GetNumBits() const;
@@ -170,8 +163,6 @@ public:
     const TypeInfo* GetReturnType() const;
 
 private:
-    static std::map<std::string, const TypeInfo*> types;
-
     unsigned numBits;
     uint16_t flags;
     ESign sign;

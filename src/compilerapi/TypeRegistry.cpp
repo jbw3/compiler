@@ -25,6 +25,16 @@ TypeRegistry::TypeRegistry(const TargetMachine* targetMachine)
 {
     pointerSize = 8 * targetMachine->getAllocaPointerSize();
 
+    types.insert({BOOL_KEYWORD, TypeInfo::BoolType});
+    types.insert({INT8_KEYWORD, TypeInfo::Int8Type});
+    types.insert({INT16_KEYWORD, TypeInfo::Int16Type});
+    types.insert({INT32_KEYWORD, TypeInfo::Int32Type});
+    types.insert({INT64_KEYWORD, TypeInfo::Int64Type});
+    types.insert({UINT8_KEYWORD, TypeInfo::UInt8Type});
+    types.insert({UINT16_KEYWORD, TypeInfo::UInt16Type});
+    types.insert({UINT32_KEYWORD, TypeInfo::UInt32Type});
+    types.insert({UINT64_KEYWORD, TypeInfo::UInt64Type});
+
     intSizeType = new PrimitiveType(pointerSize, TypeInfo::F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
 
@@ -218,12 +228,16 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 
 bool TypeRegistry::RegisterType(const TypeInfo* typeInfo)
 {
-    // TODO
-    return TypeInfo::RegisterType(typeInfo);
+    auto pair = types.insert({ typeInfo->GetUniqueName(), typeInfo });
+    return pair.second;
 }
 
 const TypeInfo* TypeRegistry::GetType(const string& typeName)
 {
-    // TODO
-    return TypeInfo::GetType(typeName);
+    auto iter = types.find(typeName);
+    if (iter == types.cend())
+    {
+        return nullptr;
+    }
+    return iter->second;
 }

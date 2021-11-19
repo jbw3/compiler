@@ -1737,7 +1737,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
 {
     const string& structName = structInitializationExpression->structName;
-    const TypeInfo* type = TypeInfo::GetType(structName);
+    const TypeInfo* type = compilerContext.typeRegistry.GetType(structName);
     if (type == nullptr)
     {
         isError = true;
@@ -1934,7 +1934,7 @@ bool SemanticAnalyzer::ResolveDependencies(
             const string& memberTypeName = typeExpr->name;
 
             // if we have not seen this member's type yet, resolve its dependencies
-            if (TypeInfo::GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
+            if (compilerContext.typeRegistry.GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
             {
                 // check for a recursive dependency
                 auto dependentsIter = dependents.find(memberTypeName);
@@ -1974,7 +1974,7 @@ bool SemanticAnalyzer::ResolveDependencies(
     partialStructTypes.insert({structName, newType});
 
     // TODO: Is this needed?
-    bool added = TypeInfo::RegisterType(newType);
+    bool added = compilerContext.typeRegistry.RegisterType(newType);
     if (!added)
     {
         delete newType;
@@ -2185,7 +2185,7 @@ void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
         bool isConst = data->IsConstant();
         const TypeInfo* type = data->type;
         identifierExpression->SetType(type);
-        identifierExpression->SetIsStorage(!type->IsImmutable() && !isConst);
+        identifierExpression->SetIsStorage(!isConst);
 
         if (isConst)
         {
