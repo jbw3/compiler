@@ -8,9 +8,9 @@
 using namespace std;
 
 UtilsTests::UtilsTests(ostream& results) :
-    TestClass(results)
+    TestClass("Utils", results)
 {
-    AddTest(TestNumberConversion);
+    ADD_TEST(TestNumberConversion);
 }
 
 bool UtilsTests::TestNumberConversion()

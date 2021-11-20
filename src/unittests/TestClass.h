@@ -4,21 +4,31 @@
 #include <ostream>
 #include <vector>
 
+#define ADD_TEST(test) AddTest(#test, test)
+
 class TestClass
 {
 public:
     typedef bool (*TestFunc)();
 
-    TestClass(std::ostream& results);
+    TestClass(const std::string& name, std::ostream& results);
 
     bool Run();
 
 protected:
-    void AddTest(TestFunc test);
+    void AddTest(const std::string& testName, TestFunc test);
 
 private:
-    std::vector<TestFunc> tests;
+    struct TestData
+    {
+        std::string name;
+        TestFunc test;
+        bool passed;
+    };
+
+    std::string name;
     std::ostream& results;
+    std::vector<TestData> tests;
 };
 
 #endif // TEST_CLASS_H_

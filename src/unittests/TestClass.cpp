@@ -2,24 +2,48 @@
 
 using namespace std;
 
-TestClass::TestClass(ostream& results) :
+TestClass::TestClass(const string& name, ostream& results) :
+    name(name),
     results(results)
 {
 }
 
 bool TestClass::Run()
 {
-    bool allPassed = true;
+    unsigned numFailed = 0;
 
-    for (TestFunc test : tests)
+    // run tests
+    for (TestData& testData : tests)
     {
-        allPassed &= test();
+        testData.passed = testData.test();
+        if (!testData.passed)
+        {
+            ++numFailed;
+        }
     }
 
-    return allPassed;
+    // print test results file
+    results << "    <testsuite name=\"" << name
+            << "\" tests=\"" << tests.size()
+            << "\" failures=\"" << numFailed << "\">\n";
+
+    for (const TestData& testData : tests)
+    {
+        results << "        <testcase name=\"" << testData.name << "\">\n";
+        if (!testData.passed)
+        {
+            // TODO: pass an error message back
+            results << "            <failure message=\"The test failed\"></failure>\n";
+        }
+        results << "        </testcase>\n";
+    }
+
+    results << "    </testsuite>\n";
+
+    return numFailed == 0;
 }
 
-void TestClass::AddTest(TestFunc test)
+void TestClass::AddTest(const string& testName, TestFunc test)
 {
-    tests.push_back(test);
+    tests.push_back({.name = testName, .test = test, .passed = false});
 }

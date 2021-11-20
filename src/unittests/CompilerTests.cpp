@@ -9,11 +9,11 @@ namespace fs = std::filesystem;
 using namespace std;
 
 CompilerTests::CompilerTests(ostream& results) :
-    TestClass(results)
+    TestClass("Compiler", results)
 {
-    AddTest([](){ return RunTest("basic", false); });
-    AddTest([](){ return RunTest("debug_info", true); });
-    AddTest([]()
+    AddTest("basic", [](){ return RunTest("basic", false); });
+    AddTest("debug_info", [](){ return RunTest("debug_info", true); });
+    AddTest("multi_file", []()
     {
         vector<string> multiFiles = { "multi_file1", "multi_file2" };
         return RunTest(multiFiles, true);

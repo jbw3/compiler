@@ -8,11 +8,11 @@
 using namespace std;
 
 LexicalAnalyzerTests::LexicalAnalyzerTests(ostream& results) :
-    TestClass(results)
+    TestClass("LexicalAnalyzer", results)
 {
-    AddTest(TestValidInputs);
-    AddTest(TestNumbers);
-    AddTest(TestStrings);
+    ADD_TEST(TestValidInputs);
+    ADD_TEST(TestNumbers);
+    ADD_TEST(TestStrings);
 }
 
 bool LexicalAnalyzerTests::TestValidInputs()
