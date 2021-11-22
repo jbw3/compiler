@@ -1,6 +1,5 @@
 #include "UtilsTests.h"
 #include "utils.h"
-#include <iostream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -13,7 +12,7 @@ UtilsTests::UtilsTests(ostream& results) :
     ADD_TEST(TestNumberConversion);
 }
 
-bool UtilsTests::TestNumberConversion()
+bool UtilsTests::TestNumberConversion(string& failMsg)
 {
     vector<tuple<string, bool, bool, int64_t>> tests =
     {
@@ -83,14 +82,14 @@ bool UtilsTests::TestNumberConversion()
 
         if (resultConversion != expectedIsValid)
         {
-            cerr << "'" << testStr << "' was "
-                 << (resultConversion ? "incorrectly converted" : "not converted") << '\n';
+            failMsg = "'"s + testStr + "' was "
+                    + (resultConversion ? "incorrectly converted" : "not converted") + '\n';
             ok = false;
         }
 
         if (num != get<3>(test))
         {
-            cerr << "'" << testStr << "' was incorrectly converted to '" << num << "'\n";
+            failMsg = "'"s + testStr + "' was incorrectly converted to '" + to_string(num) + "'\n";
             ok = false;
         }
 

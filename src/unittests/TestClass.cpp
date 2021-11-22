@@ -1,4 +1,5 @@
 #include "TestClass.h"
+#include <iostream>
 
 using namespace std;
 
@@ -15,10 +16,11 @@ bool TestClass::Run()
     // run tests
     for (TestData& testData : tests)
     {
-        testData.passed = testData.test();
+        testData.passed = testData.test(testData.failMsg);
         if (!testData.passed)
         {
             ++numFailed;
+            cerr << testData.failMsg;
         }
     }
 
@@ -32,8 +34,7 @@ bool TestClass::Run()
         results << "        <testcase name=\"" << testData.name << "\">\n";
         if (!testData.passed)
         {
-            // TODO: pass an error message back
-            results << "            <failure message=\"The test failed\"></failure>\n";
+            results << "            <failure message=\"" << testData.failMsg << "\"></failure>\n";
         }
         results << "        </testcase>\n";
     }

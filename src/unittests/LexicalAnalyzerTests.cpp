@@ -2,7 +2,6 @@
 #include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include "LexicalAnalyzer.h"
-#include <iostream>
 #include <sstream>
 
 using namespace std;
@@ -15,7 +14,7 @@ LexicalAnalyzerTests::LexicalAnalyzerTests(ostream& results) :
     ADD_TEST(TestStrings);
 }
 
-bool LexicalAnalyzerTests::TestValidInputs()
+bool LexicalAnalyzerTests::TestValidInputs(string& failMsg)
 {
     vector<pair<string, TokenList>> tests =
     {
@@ -140,14 +139,14 @@ bool LexicalAnalyzerTests::TestValidInputs()
         ok = analyzer.Process(buff, actualTokens);
         if (ok)
         {
-            ok = TokenSequencesAreEqual(expectedTokens, actualTokens);
+            ok = TokenSequencesAreEqual(expectedTokens, actualTokens, failMsg);
         }
         if (ok)
         {
             ok = (errStream.str().size() == 0);
             if (!ok)
             {
-                cerr << errStream.str();
+                failMsg = errStream.str();
             }
         }
 
@@ -160,7 +159,7 @@ bool LexicalAnalyzerTests::TestValidInputs()
     return ok;
 }
 
-bool LexicalAnalyzerTests::TestNumbers()
+bool LexicalAnalyzerTests::TestNumbers(string& failMsg)
 {
     vector<tuple<const char*, const char*, bool, Token::EType, int64_t>> tests =
     {
@@ -256,12 +255,11 @@ bool LexicalAnalyzerTests::TestNumbers()
             ok = false;
             if (expectedIsValid)
             {
-                cerr << "Expected input '" << input << "' to be valid\n";
-                cerr << errStream.str();
+                failMsg = "Expected input '"s + input + "' to be valid\n" + errStream.str();
             }
             else
             {
-                cerr << "Expected input '" << input << "' to be invalid\n";
+                failMsg = "Expected input '"s + input + "' to be invalid\n";
             }
         }
 
@@ -270,7 +268,7 @@ bool LexicalAnalyzerTests::TestNumbers()
             if (ok && tokens.GetSize() != 1)
             {
                 ok = false;
-                cerr << "Expected 1 token but got " << tokens.GetSize() << "\n";
+                failMsg = "Expected 1 token but got "s + to_string(tokens.GetSize()) + "\n";
             }
 
             if (ok)
@@ -278,7 +276,7 @@ bool LexicalAnalyzerTests::TestNumbers()
                 Token expectedToken(expectedOutput, 0, 1, 1, expectedTokenType);
                 const Token& actualToken = tokens[0];
 
-                ok = TokensAreEqual(expectedToken, actualToken);
+                ok = TokensAreEqual(expectedToken, actualToken, failMsg);
             }
         }
     }
@@ -286,7 +284,7 @@ bool LexicalAnalyzerTests::TestNumbers()
     return ok;
 }
 
-bool LexicalAnalyzerTests::TestStrings()
+bool LexicalAnalyzerTests::TestStrings(string& failMsg)
 {
     vector<tuple<const char*, bool>> tests =
     {
@@ -331,12 +329,11 @@ bool LexicalAnalyzerTests::TestStrings()
             ok = false;
             if (expectedIsValid)
             {
-                cerr << "Expected input '" << input << "' to be valid\n";
-                cerr << errStream.str();
+                failMsg = "Expected input '"s + input + "' to be valid\n" + errStream.str();
             }
             else
             {
-                cerr << "Expected input '" << input << "' to be invalid\n";
+                failMsg = "Expected input '"s + input + "' to be invalid\n";
             }
         }
 
@@ -345,7 +342,7 @@ bool LexicalAnalyzerTests::TestStrings()
             if (ok && tokens.GetSize() != 1)
             {
                 ok = false;
-                cerr << "Expected 1 token but got " << tokens.GetSize() << "\n";
+                failMsg = "Expected 1 token but got "s + to_string(tokens.GetSize()) + "\n";
             }
 
             if (ok)
@@ -353,7 +350,7 @@ bool LexicalAnalyzerTests::TestStrings()
                 Token expectedToken(input, 0, 1, 1, Token::eStrLit);
                 const Token& actualToken = tokens[0];
 
-                ok = TokensAreEqual(expectedToken, actualToken);
+                ok = TokensAreEqual(expectedToken, actualToken, failMsg);
             }
         }
     }
@@ -361,7 +358,7 @@ bool LexicalAnalyzerTests::TestStrings()
     return ok;
 }
 
-bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Token& actualToken)
+bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Token& actualToken, string& failMsg)
 {
     bool areEqual = true;
 
@@ -369,7 +366,7 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
     const string& actualValue = actualToken.value;
     if (expectedValue != actualValue)
     {
-        cerr << "Token values are not equal: expected: " << expectedValue << ", actual: " << actualValue << "\n";
+        failMsg = "Token values are not equal: expected: "s + expectedValue + ", actual: " + actualValue + "\n";
         areEqual = false;
     }
 
@@ -377,7 +374,7 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
     unsigned actualLine = actualToken.line;
     if (expectedLine != actualLine)
     {
-        cerr << "Token line numbers are not equal: expected: " << expectedLine << ", actual: " << actualLine << "\n";
+        failMsg = "Token line numbers are not equal: expected: "s + to_string(expectedLine) + ", actual: " + to_string(actualLine) + "\n";
         areEqual = false;
     }
 
@@ -385,7 +382,7 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
     unsigned actualColumn = actualToken.column;
     if (expectedColumn != actualColumn)
     {
-        cerr << "Token column numbers are not equal: expected: " << expectedColumn << ", actual: " << actualColumn << "\n";
+        failMsg = "Token column numbers are not equal: expected: "s + to_string(expectedColumn) + ", actual: " + to_string(actualColumn) + "\n";
         areEqual = false;
     }
 
@@ -393,7 +390,7 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
     Token::EType actualType = actualToken.type;
     if (expectedType != actualType)
     {
-        cerr << "Token types are not equal: expected: " << expectedType << ", actual: " << actualType << "\n";
+        failMsg = "Token types are not equal: expected: "s + to_string(expectedType) + ", actual: " + to_string(actualType) + "\n";
         areEqual = false;
     }
 
@@ -401,22 +398,22 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
 }
 
 bool LexicalAnalyzerTests::TokenSequencesAreEqual(const TokenList& expectedTokens,
-                                                  const TokenList& actualTokens)
+                                                  const TokenList& actualTokens,
+                                                  string& failMsg)
 {
     size_t expectedSize = expectedTokens.GetSize();
     size_t actualSize = actualTokens.GetSize();
     if (expectedSize != actualSize)
     {
-        cerr << "Unexpected number of tokens: expected: " << expectedSize << ", actual: " << actualSize << "\n";
+        failMsg = "Unexpected number of tokens: expected: "s + to_string(expectedSize) + ", actual: " + to_string(actualSize) + "\n";
         return false;
     }
 
     for (size_t i = 0; i < expectedSize; ++i)
     {
-        bool areEqual = TokensAreEqual(expectedTokens[i], actualTokens[i]);
+        bool areEqual = TokensAreEqual(expectedTokens[i], actualTokens[i], failMsg);
         if (!areEqual)
         {
-            cerr << "Tokens are not equal\n";
             return false;
         }
     }

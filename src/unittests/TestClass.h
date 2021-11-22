@@ -9,7 +9,7 @@
 class TestClass
 {
 public:
-    typedef bool (*TestFunc)();
+    typedef bool (*TestFunc)(std::string& failMsg);
 
     TestClass(const std::string& name, std::ostream& results);
 
@@ -23,6 +23,7 @@ private:
     {
         std::string name;
         TestFunc test;
+        std::string failMsg;
         bool passed;
     };
 

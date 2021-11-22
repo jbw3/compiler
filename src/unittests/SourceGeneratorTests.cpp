@@ -4,7 +4,6 @@
 #include "SyntaxTree.h"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <string>
 
 namespace fs = std::filesystem;
@@ -16,8 +15,10 @@ SourceGeneratorTests::SourceGeneratorTests(ostream& results) :
     ADD_TEST(TestSourceGenerator);
 }
 
-bool SourceGeneratorTests::TestSourceGenerator()
+bool SourceGeneratorTests::TestSourceGenerator(string& failMsg)
 {
+    stringstream err;
+
     fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
     string inFilename = (testFilesDir / "source_gen.wip").string();
     string outFilename = (testFilesDir / "source_gen.out.wip").string();
@@ -42,13 +43,15 @@ bool SourceGeneratorTests::TestSourceGenerator()
     bool ok = compiler.CompileSyntaxTree(syntaxTree);
     if (!ok)
     {
-        cerr << "Error: " << inFilename << ": Failed to compile\n";
+        err << "Error: " << inFilename << ": Failed to compile\n";
+        failMsg = err.str();
         return false;
     }
 
     if (syntaxTree == nullptr)
     {
-        cerr << "Error: " << inFilename << ": syntax tree pointer was null\n";
+        err << "Error: " << inFilename << ": syntax tree pointer was null\n";
+        failMsg = err.str();
         return false;
     }
 
@@ -69,9 +72,10 @@ bool SourceGeneratorTests::TestSourceGenerator()
 
         if (expectedLine != outLine)
         {
-            cerr << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n"
-                 << expectedLine << '\n'
-                 << outLine << '\n';
+            err << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n"
+                << expectedLine << '\n'
+                << outLine << '\n';
+            failMsg = err.str();
             return false;
         }
 
@@ -80,7 +84,8 @@ bool SourceGeneratorTests::TestSourceGenerator()
 
     if (expectedFile.eof() != outFile.eof())
     {
-        cerr << "Error: " << outFilename << ": Unexpected number of lines\n";
+        err << "Error: " << outFilename << ": Unexpected number of lines\n";
+        failMsg = err.str();
         return false;
     }
 

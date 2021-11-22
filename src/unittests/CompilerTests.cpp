@@ -2,7 +2,6 @@
 #include "Compiler.h"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <unordered_map>
 
 namespace fs = std::filesystem;
@@ -11,23 +10,23 @@ using namespace std;
 CompilerTests::CompilerTests(ostream& results) :
     TestClass("Compiler", results)
 {
-    AddTest("basic", [](){ return RunTest("basic", false); });
-    AddTest("debug_info", [](){ return RunTest("debug_info", true); });
-    AddTest("multi_file", []()
+    AddTest("basic", [](string& failMsg){ return RunTest("basic", false, failMsg); });
+    AddTest("debug_info", [](string& failMsg){ return RunTest("debug_info", true, failMsg); });
+    AddTest("multi_file", [](string& failMsg)
     {
         vector<string> multiFiles = { "multi_file1", "multi_file2" };
-        return RunTest(multiFiles, true);
+        return RunTest(multiFiles, true, failMsg);
     });
 }
 
-bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo)
+bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo, string& failMsg)
 {
     vector<string> baseFilenames;
     baseFilenames.push_back(baseFilename);
-    return RunTest(baseFilenames, debugInfo);
+    return RunTest(baseFilenames, debugInfo, failMsg);
 }
 
-bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
+bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo, string& failMsg)
 {
     string firstBaseFilename = baseFilenames.front();
 
@@ -83,7 +82,7 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
     bool ok = compiler.Compile();
     if (!ok)
     {
-        cerr << "Error: Failed to compile\n";
+        failMsg = "Error: Failed to compile\n";
         return false;
     }
 
@@ -110,9 +109,9 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
 
         if (expectedLine != outLine)
         {
-            cerr << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n"
-                 << expectedLine << '\n'
-                 << outLine << '\n';
+            failMsg = "Error: "s + outFilename + ": Line " + to_string(lineNum) + " is not correct\n"
+                    + expectedLine + '\n'
+                    + outLine + '\n';
             return false;
         }
 
@@ -121,7 +120,7 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo)
 
     if (expectedFile.eof() != outFile.eof())
     {
-        cerr << "Error: " << outFilename << ": Unexpected number of lines\n";
+        failMsg = "Error: " + outFilename + ": Unexpected number of lines\n";
         return false;
     }
 

@@ -11,9 +11,9 @@ public:
     CompilerTests(std::ostream& results);
 
 private:
-    static bool RunTest(const std::string& baseFilename, bool debugInfo);
+    static bool RunTest(const std::string& baseFilename, bool debugInfo, std::string& failMsg);
 
-    static bool RunTest(const std::vector<std::string>& baseFilenames, bool debugInfo);
+    static bool RunTest(const std::vector<std::string>& baseFilenames, bool debugInfo, std::string& failMsg);
 };
 
 #endif // COMPILER_TESTS_H_
