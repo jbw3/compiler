@@ -3,6 +3,25 @@
 
 using namespace std;
 
+string xmlEscape(const string& str)
+{
+    string newStr;
+    for (char ch : str)
+    {
+        switch (ch)
+        {
+            case '\n':
+                newStr += "\\n";
+                break;
+            default:
+                newStr += ch;
+                break;
+        }
+    }
+
+    return newStr;
+}
+
 TestClass::TestClass(const string& name, ostream& results) :
     name(name),
     results(results)
@@ -34,7 +53,8 @@ bool TestClass::Run()
         results << "        <testcase name=\"" << testData.name << "\">\n";
         if (!testData.passed)
         {
-            results << "            <failure message=\"" << testData.failMsg << "\"></failure>\n";
+            string escapedFailMsg = xmlEscape(testData.failMsg);
+            results << "            <failure message=\"" << escapedFailMsg << "\"></failure>\n";
         }
         results << "        </testcase>\n";
     }
