@@ -13,6 +13,15 @@ string xmlEscape(const string& str)
             case '\n':
                 newStr += "&#10;";
                 break;
+            case '\r':
+                newStr += "&#13;";
+                break;
+            case '"':
+                newStr += "&quot;";
+                break;
+            case '&':
+                newStr += "&amp;";
+                break;
             default:
                 newStr += ch;
                 break;
