@@ -11,7 +11,7 @@ string xmlEscape(const string& str)
         switch (ch)
         {
             case '\n':
-                newStr += "\\n";
+                newStr += "&#10;";
                 break;
             default:
                 newStr += ch;
