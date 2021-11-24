@@ -154,7 +154,7 @@ bool LexicalAnalyzer::Process(const string& inFile)
     else
     {
         filename = inFile;
-        fstream file(inFile, ios_base::in);
+        fstream file(inFile, ios_base::in | ios_base::binary);
         if (file.fail())
         {
             logger.LogError("Could not open file '{}'", inFile);
