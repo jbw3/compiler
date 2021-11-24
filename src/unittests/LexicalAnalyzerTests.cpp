@@ -131,11 +131,9 @@ bool LexicalAnalyzerTests::TestValidInputs(string& failMsg)
 
         const TokenList& expectedTokens = test.second;
 
-        CharBuffer buff
-        {
-            .size = test.first.size(),
-            .ptr = test.first.c_str(),
-        };
+        CharBuffer buff;
+        buff.size = test.first.size();
+        buff.ptr = test.first.c_str();
         ok = analyzer.Process(buff, actualTokens);
         if (ok)
         {
@@ -243,11 +241,9 @@ bool LexicalAnalyzerTests::TestNumbers(string& failMsg)
         errStream.clear();
         errStream.str("");
 
-        CharBuffer buff
-        {
-            .size = strlen(input),
-            .ptr = input,
-        };
+        CharBuffer buff;
+        buff.size = strlen(input);
+        buff.ptr = input;
         bool actualIsValid = analyzer.Process(buff, tokens);
 
         if (expectedIsValid != actualIsValid)
@@ -317,11 +313,9 @@ bool LexicalAnalyzerTests::TestStrings(string& failMsg)
         errStream.clear();
         errStream.str("");
 
-        CharBuffer buff
-        {
-            .size = strlen(input),
-            .ptr = input,
-        };
+        CharBuffer buff;
+        buff.size = strlen(input);
+        buff.ptr = input;
         bool actualIsValid = analyzer.Process(buff, tokens);
 
         if (expectedIsValid != actualIsValid)

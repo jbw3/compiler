@@ -75,5 +75,10 @@ bool TestClass::Run()
 
 void TestClass::AddTest(const string& testName, TestFunc test)
 {
-    tests.push_back({.name = testName, .test = test, .passed = false});
+    TestData data;
+    data.name = testName;
+    data.test = test;
+    data.passed = false;
+
+    tests.push_back(data);
 }
