@@ -1,5 +1,6 @@
 #include "CompilerContext.h"
 #include "ErrorLogger.h"
+#include "keywords.h"
 #include "SemanticAnalyzer.h"
 #include "SyntaxTree.h"
 #include "utils.h"
@@ -2005,8 +2006,7 @@ const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpressio
     if (!typeExpression->GetType()->IsType())
     {
         // TODO: need a way to get the type expression tokens
-        // TODO: use constant for type name
-        logger.LogError(*errorToken, "Expected expression to be of type '{}'", "type");
+        logger.LogError(*errorToken, "Expected expression to be of type '{}'", TYPE_KEYWORD);
         return nullptr;
     }
     if (!typeExpression->GetIsConstant())

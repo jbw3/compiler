@@ -23,6 +23,7 @@ const char* const RETURN_KEYWORD = "return";
 const char* const STR_KEYWORD = "str";
 const char* const STRUCT_KEYWORD = "struct";
 const char* const TRUE_KEYWORD = "true";
+const char* const TYPE_KEYWORD = "type";
 const char* const UINT8_KEYWORD = "u8";
 const char* const UINT16_KEYWORD = "u16";
 const char* const UINT32_KEYWORD = "u32";

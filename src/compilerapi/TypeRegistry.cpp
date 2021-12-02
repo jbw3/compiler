@@ -34,6 +34,7 @@ TypeRegistry::TypeRegistry(const TargetMachine* targetMachine)
     types.insert({UINT16_KEYWORD, TypeInfo::UInt16Type});
     types.insert({UINT32_KEYWORD, TypeInfo::UInt32Type});
     types.insert({UINT64_KEYWORD, TypeInfo::UInt64Type});
+    types.insert({TYPE_KEYWORD, TypeInfo::TypeType});
 
     intSizeType = new PrimitiveType(pointerSize, TypeInfo::F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);

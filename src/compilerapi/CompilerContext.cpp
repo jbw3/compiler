@@ -102,6 +102,7 @@ void CompilerContext::InitBasicTypes()
     AddTypeConstantValue(TypeInfo::UInt64Type);
     AddTypeConstantValue(typeRegistry.GetUIntSizeType());
     AddTypeConstantValue(typeRegistry.GetStringType());
+    AddTypeConstantValue(TypeInfo::TypeType);
 
     basicTypeCount = static_cast<unsigned>(typeConstants.size());
 }

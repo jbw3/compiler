@@ -90,6 +90,7 @@ const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> Lexica
     { STR_KEYWORD, Token::eStr },
     { STRUCT_KEYWORD, Token::eStruct },
     { TRUE_KEYWORD, Token::eTrueLit },
+    { TYPE_KEYWORD, Token::eType },
     { UINT8_KEYWORD, Token::eU8 },
     { UINT16_KEYWORD, Token::eU16 },
     { UINT32_KEYWORD, Token::eU32 },
