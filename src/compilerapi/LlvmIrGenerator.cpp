@@ -1945,13 +1945,6 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 {
     const string& constName = constantDeclaration->name;
     const TypeInfo* constType = constantDeclaration->constantType;
-    Type* type = GetType(constType);
-    if (type == nullptr)
-    {
-        resultValue = nullptr;
-        logger.LogInternalError("Unknown constant declaration type");
-        return;
-    }
 
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
     symbolTable.AddConstant(constName, constantDeclaration->nameToken, constType, constIdx);
