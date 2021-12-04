@@ -2820,8 +2820,9 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 
     // set the variable type
     const TypeInfo* type = GetVariableType(variableDeclaration->typeExpression, rightExpr->GetType(), variableDeclaration->nameToken);
-    if (isError)
+    if (type == nullptr)
     {
+        isError = true;
         return;
     }
     variableDeclaration->variableType = type;
