@@ -1084,3 +1084,16 @@ fun shift()
     x <<= 1_000_000_000_000;
     x = x >>> 1_000_000_000_000;
 }
+
+struct TypesTest { }
+
+fun types()
+{
+    const T0 type = TypesTest;
+    const T1 = &TypesTest;
+    const T2 = []TypesTest;
+
+    var t0 T0 = TypesTest { };
+    var t1 T1 = &t0;
+    var t2 T2 = [t0, TypesTest { }];
+}

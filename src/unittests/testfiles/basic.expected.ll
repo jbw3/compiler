@@ -18,6 +18,8 @@ $target_triple
 %"[][]i32" = type { i64, %"[]i32"* }
 %"[]u8" = type { i64, i8* }
 %Range16 = type { i16, i16 }
+%TypesTest = type {}
+%"[]TypesTest" = type { i64, %TypesTest* }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, i8* getelementptr inbounds ([0 x i8], [0 x i8]* @strData0, i32 0, i32 0) }
@@ -3393,6 +3395,26 @@ entry:
   %ashr55 = ashr i64 %signext54, 1000000000000
   %trunc56 = trunc i64 %ashr55 to i32
   store i32 %trunc56, i32* %x, align 4
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @types() #0 {
+entry:
+  %array = alloca [2 x %TypesTest], align 8
+  %t2 = alloca %"[]TypesTest", align 8
+  %t1 = alloca %TypesTest*, align 8
+  %t0 = alloca %TypesTest, align 8
+  store %TypesTest undef, %TypesTest* %t0, align 1
+  store %TypesTest* %t0, %TypesTest** %t1, align 8
+  %t01 = load %TypesTest, %TypesTest* %t0, align 1
+  %ptr = getelementptr inbounds [2 x %TypesTest], [2 x %TypesTest]* %array, i64 0, i64 0
+  store %TypesTest %t01, %TypesTest* %ptr, align 1
+  %ptr2 = getelementptr inbounds [2 x %TypesTest], [2 x %TypesTest]* %array, i64 0, i64 1
+  store %TypesTest undef, %TypesTest* %ptr2, align 1
+  %arrptr = bitcast [2 x %TypesTest]* %array to %TypesTest*
+  %agg = insertvalue %"[]TypesTest" { i64 2, %TypesTest* undef }, %TypesTest* %arrptr, 1
+  store %"[]TypesTest" %agg, %"[]TypesTest"* %t2, align 8
   ret %UnitType zeroinitializer
 }
 

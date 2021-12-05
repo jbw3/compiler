@@ -1371,6 +1371,12 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 unaryOperators.push({&*iter, static_cast<UnaryExpression::EOperator>(tokenType)});
                 expectTerm = true;
             }
+            else if (tokenType == Token::eOpenBracket && nextIter != endIter && nextIter->type == Token::eCloseBracket)
+            {
+                unaryOperators.push({&*iter, UnaryExpression::eArrayOf});
+                expectTerm = true;
+                ++iter;
+            }
             else
             {
                 Expression* expr = ProcessTerm(iter, endIter, isPotentialEnd);
