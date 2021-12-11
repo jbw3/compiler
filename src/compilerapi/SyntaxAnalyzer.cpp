@@ -1185,6 +1185,10 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator endIt
             expr = new IdentifierExpression(iter->value, &*iter);
         }
     }
+    else if (Token::IsTypeName(type))
+    {
+        expr = new IdentifierExpression(iter->value, &*iter);
+    }
     else if (type == Token::eOpenBracket)
     {
         const Token* startToken = &*iter;

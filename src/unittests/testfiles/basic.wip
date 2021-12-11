@@ -1092,8 +1092,12 @@ fun types()
     const T0 type = TypesTest;
     const T1 = &TypesTest;
     const T2 = []TypesTest;
+    const T3 = i32;
+    const T4 = &i32;
 
     var t0 T0 = TypesTest { };
     var t1 T1 = &t0;
     var t2 T2 = [t0, TypesTest { }];
+    var t3 T3 = 10;
+    var t4 T4 = &t3;
 }

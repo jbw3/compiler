@@ -3401,6 +3401,8 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @types() #0 {
 entry:
+  %t4 = alloca i32*, align 8
+  %t3 = alloca i32, align 4
   %array = alloca [2 x %TypesTest], align 8
   %t2 = alloca %"[]TypesTest", align 8
   %t1 = alloca %TypesTest*, align 8
@@ -3415,6 +3417,8 @@ entry:
   %arrptr = bitcast [2 x %TypesTest]* %array to %TypesTest*
   %agg = insertvalue %"[]TypesTest" { i64 2, %TypesTest* undef }, %TypesTest* %arrptr, 1
   store %"[]TypesTest" %agg, %"[]TypesTest"* %t2, align 8
+  store i32 10, i32* %t3, align 4
+  store i32* %t3, i32** %t4, align 8
   ret %UnitType zeroinitializer
 }
 
