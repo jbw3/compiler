@@ -83,7 +83,11 @@ private:
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<UnaryOpData>& unaryOperators);
 
-    SyntaxTree::Expression* ProcessTerm(TokenIterator& iter, TokenIterator endIter, bool& isPotentialEnd);
+    SyntaxTree::Expression* ProcessTerm(TokenIterator& iter, TokenIterator endIter,
+                                        bool& isPotentialEnd,
+                                        Token::EType endTokenType1 = Token::eInvalid,
+                                        Token::EType endTokenType2 = Token::eInvalid,
+                                        Token::EType endTokenType3 = Token::eInvalid);
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               Token::EType endTokenType1 = Token::eInvalid,

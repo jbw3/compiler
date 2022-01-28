@@ -162,6 +162,7 @@ bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const Token
     return ok;
 }
 
+// TODO: remove this function
 bool SyntaxAnalyzer::ProcessType(TokenIterator& iter, const TokenIterator& endIter,
                                  Expression*& typeExpression,
                                  Token::EType endTokenType1, Token::EType endTokenType2)
@@ -1111,7 +1112,13 @@ Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<Unar
     return result;
 }
 
-Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator endIter, bool& isPotentialEnd)
+Expression* SyntaxAnalyzer::ProcessTerm(
+    TokenIterator& iter,
+    TokenIterator endIter,
+    bool& isPotentialEnd,
+    Token::EType endTokenType1,
+    Token::EType endTokenType2,
+    Token::EType endTokenType3)
 {
     Token::EType type = iter->type;
     Token::EMainType mainType = Token::GetMainType(type);
@@ -1334,6 +1341,104 @@ Expression* SyntaxAnalyzer::ProcessTerm(TokenIterator& iter, TokenIterator endIt
 
         expr = new CastExpression(typeExpr, subExpression, castToken);
     }
+    else if (type == Token::eFun)
+    {
+        const Token* funToken = &*iter;
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return nullptr;
+        }
+        if (iter->type != Token::eOpenPar)
+        {
+            logger.LogError(*iter, "Expected '('");
+            return nullptr;
+        }
+
+        // parse parameters
+        vector<string> paramNames;
+        vector<const Token*> paramNameTokens;
+        vector<Expression*> paramTypes;
+
+        // increment past '('
+        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        {
+            return nullptr;
+        }
+
+        while (iter != endIter && iter->type != Token::eClosePar)
+        {
+            if (iter->type != Token::eIdentifier)
+            {
+                logger.LogError(*iter, "Invalid parameter name: '{}'", iter->value);
+                return nullptr;
+            }
+
+            paramNames.push_back(iter->value);
+            paramNameTokens.push_back(&*iter);
+
+            if (!IncrementIterator(iter, endIter, "Expected a type"))
+            {
+                return nullptr;
+            }
+
+            Expression* paramTypeExpr = nullptr;
+            bool ok = ProcessType(iter, endIter, paramTypeExpr, Token::eComma, Token::eClosePar);
+            if (!ok)
+            {
+                return nullptr;
+            }
+
+            // make sure there was a type
+            if (paramTypeExpr == nullptr)
+            {
+                logger.LogError(*iter, "Expected a parameter type");
+                return nullptr;
+            }
+
+            paramTypes.push_back(paramTypeExpr);
+
+            if (iter->type != Token::eClosePar)
+            {
+                ++iter;
+            }
+        }
+
+        if (iter == endIter)
+        {
+            logger.LogError("Expected ')'");
+            return nullptr;
+        }
+
+        // parse return type
+        Expression* returnType = nullptr;
+        TokenIterator nextIter = iter + 1;
+        if (nextIter != endIter
+        && nextIter->type != Token::eCloseBracket // TODO: fix this 'cause it's a bit hacky
+        && nextIter->type != endTokenType1
+        && nextIter->type != endTokenType2
+        && nextIter->type != endTokenType3)
+        {
+            ++iter;
+            returnType = ProcessExpression(iter, endIter, endTokenType1, endTokenType2, endTokenType3);
+            if (returnType == nullptr)
+            {
+                return nullptr;
+            }
+
+            if (iter != endIter)
+            {
+                Token::EType tokenType = iter->type;
+                if (tokenType == endTokenType1 || tokenType == endTokenType2 || tokenType == endTokenType3)
+                {
+                    // need to move back to the previous token because it will be incremented
+                    // after processing this term
+                    --iter;
+                }
+            }
+        }
+
+        expr = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, paramNameTokens);
+    }
     else
     {
         logger.LogError(*iter, "Unexpected term '{}'", iter->value);
@@ -1383,7 +1488,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             }
             else
             {
-                Expression* expr = ProcessTerm(iter, endIter, isPotentialEnd);
+                Expression* expr = ProcessTerm(iter, endIter, isPotentialEnd, endTokenType1, endTokenType2, endTokenType3);
                 if (expr == nullptr)
                 {
                     deletePointerContainer(terms);
