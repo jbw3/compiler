@@ -1095,9 +1095,16 @@ fun types()
     const T3 = i32;
     const T4 = &i32;
 
+    const Types []type = [i32];
+
     var t0 T0 = TypesTest { };
     var t1 T1 = &t0;
     var t2 T2 = [t0, TypesTest { }];
     var t3 T3 = 10;
     var t4 T4 = &t3;
+
+    const F0 = fun();
+    const F1 = fun() Types[0];
+
+    var f0 F0 = ftype1;
 }
