@@ -1716,8 +1716,14 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
         const TypeInfo* memberType = TypeExpressionToType(member->typeExpression, member->nameToken);
         if (memberType == nullptr)
         {
-            delete newType;
             isError = true;
+            return;
+        }
+
+        if (memberType->IsType())
+        {
+            isError = true;
+            logger.LogError(*member->nameToken, "Member cannot be of type 'type'");
             return;
         }
 
@@ -1725,7 +1731,6 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
         bool added = newType->AddMember(memberName, memberType, true, member->nameToken);
         if (!added)
         {
-            delete newType;
             isError = true;
             logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, structName);
             return;
@@ -2818,22 +2823,32 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
         return;
     }
 
+    const Token* nameToken = variableDeclaration->nameToken;
+
     // set the variable type
-    const TypeInfo* type = GetVariableType(variableDeclaration->typeExpression, rightExpr->GetType(), variableDeclaration->nameToken);
+    const TypeInfo* type = GetVariableType(variableDeclaration->typeExpression, rightExpr->GetType(), nameToken);
     if (type == nullptr)
     {
         isError = true;
         return;
     }
+
+    if (type->IsType())
+    {
+        isError = true;
+        logger.LogError(*nameToken, "Variable cannot be of type 'type'");
+        return;
+    }
+
     variableDeclaration->variableType = type;
 
     // add the variable name to the symbol table
     const string& varName = variableDeclaration->name;
-    bool ok = symbolTable.AddVariable(varName, variableDeclaration->nameToken, variableDeclaration->variableType);
+    bool ok = symbolTable.AddVariable(varName, nameToken, variableDeclaration->variableType);
     if (!ok)
     {
         isError = true;
-        LogExistingIdentifierError(varName, variableDeclaration->nameToken);
+        LogExistingIdentifierError(varName, nameToken);
         return;
     }
 
@@ -2865,6 +2880,12 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
+        if (paramType->IsType())
+        {
+            logger.LogError(*param->nameToken, "Parameter cannot be of type 'type'");
+            return false;
+        }
+
         param->type = paramType;
         processedParams.insert(paramName);
     }
@@ -2881,6 +2902,12 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         returnType = TypeExpressionToType(returnTypeExpr, functionDeclaration->nameToken);
         if (returnType == nullptr)
         {
+            return false;
+        }
+
+        if (returnType->IsType())
+        {
+            logger.LogError(*functionDeclaration->nameToken, "Return type cannot be of type 'type'");
             return false;
         }
     }
