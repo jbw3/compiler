@@ -1105,6 +1105,7 @@ fun types()
 
     const F0 = fun();
     const F1 = fun() Types[0];
+    const F2 = fun(a Types[0]) Types[0];
 
     var f0 F0 = ftype1;
 }

@@ -1381,17 +1381,9 @@ Expression* SyntaxAnalyzer::ProcessTerm(
                 return nullptr;
             }
 
-            Expression* paramTypeExpr = nullptr;
-            bool ok = ProcessType(iter, endIter, paramTypeExpr, Token::eComma, Token::eClosePar);
-            if (!ok)
-            {
-                return nullptr;
-            }
-
-            // make sure there was a type
+            Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
             if (paramTypeExpr == nullptr)
             {
-                logger.LogError(*iter, "Expected a parameter type");
                 return nullptr;
             }
 
