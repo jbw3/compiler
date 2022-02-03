@@ -529,12 +529,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        Expression* paramTypeExpr = nullptr;
-        bool ok = ProcessType(iter, endIter, paramTypeExpr, Token::eComma, Token::eClosePar);
-        if (!ok)
-        {
-            return false;
-        }
+        Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
 
         // make sure there was a type
         if (paramTypeExpr == nullptr)
