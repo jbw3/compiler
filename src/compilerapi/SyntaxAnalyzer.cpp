@@ -815,10 +815,13 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     }
 
     Expression* typeExpr = nullptr;
-    bool ok = ProcessType(iter, endIter, typeExpr, Token::eEqual);
-    if (!ok)
+    if (iter->type != Token::eEqual)
     {
-        return nullptr;
+        typeExpr = ProcessExpression(iter, endIter, Token::eEqual);
+        if (typeExpr == nullptr)
+        {
+            return nullptr;
+        }
     }
 
     const Token* opToken = &*iter;
@@ -887,10 +890,13 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     Expression* typeExpr = nullptr;
-    bool ok = ProcessType(iter, endIter, typeExpr, Token::eEqual);
-    if (!ok)
+    if (iter->type != Token::eEqual)
     {
-        return nullptr;
+        typeExpr = ProcessExpression(iter, endIter, Token::eEqual);
+        if (typeExpr == nullptr)
+        {
+            return nullptr;
+        }
     }
 
     const Token* opToken = &*iter;
@@ -1470,6 +1476,30 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
             if (Token::IsUnaryOp(tokenType))
             {
                 unaryOperators.push({&*iter, static_cast<UnaryExpression::EOperator>(tokenType)});
+                expectTerm = true;
+            }
+            // the lexer will give us two characters together as one token
+            else if (tokenType == Token::eAmpersandAmpersand)
+            {
+                // create two tokens from one
+                const Token* originalToken = &*iter;
+
+                // TODO: Memory leak. Someday, I should fix this...
+                Token* token1 =
+                    new Token(POINTER_TYPE_TOKEN,
+                            originalToken->filenameId,
+                            originalToken->line,
+                            originalToken->column,
+                            Token::eAmpersand);
+                Token* token2 =
+                    new Token(POINTER_TYPE_TOKEN,
+                            originalToken->filenameId,
+                            originalToken->line,
+                            originalToken->column + 1,
+                            Token::eAmpersand);
+
+                unaryOperators.push({token1, UnaryExpression::eAddressOf});
+                unaryOperators.push({token2, UnaryExpression::eAddressOf});
                 expectTerm = true;
             }
             else if (tokenType == Token::eOpenBracket && nextIter != endIter && nextIter->type == Token::eCloseBracket)
