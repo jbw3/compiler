@@ -495,11 +495,14 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
 
     // if a return type is specified, parse it
     Expression* returnTypeExpr = nullptr;
-    ok = ProcessType(iter, endIter, returnTypeExpr, endTokenType);
-    if (!ok)
+    if (iter->type != endTokenType)
     {
-        deletePointerContainer(parameters);
-        return nullptr;
+        returnTypeExpr = ProcessExpression(iter, endIter, endTokenType);
+        if (returnTypeExpr == nullptr)
+        {
+            deletePointerContainer(parameters);
+            return nullptr;
+        }
     }
 
     FunctionDeclaration* functionDeclaration = new FunctionDeclaration(
