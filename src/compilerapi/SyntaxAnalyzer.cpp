@@ -616,17 +616,12 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             return nullptr;
         }
 
-        Expression* memberTypeExpr = nullptr;
-        bool ok = ProcessType(iter, endIter, memberTypeExpr, Token::eComma, Token::eCloseBrace);
-        if (!ok)
-        {
-            deletePointerContainer(members);
-            return nullptr;
-        }
+        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
 
         // make sure there was a type
         if (memberTypeExpr == nullptr)
         {
+            deletePointerContainer(members);
             logger.LogError(*iter, "Expected a member type");
             return nullptr;
         }
