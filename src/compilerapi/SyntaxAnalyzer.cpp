@@ -1285,12 +1285,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         }
 
         // parse the cast type name
-        Expression* typeExpr = nullptr;
-        bool ok = ProcessType(iter, endIter, typeExpr, Token::eComma);
-        if (!ok)
-        {
-            return nullptr;
-        }
+        Expression* typeExpr = ProcessExpression(iter, endIter, Token::eComma);
 
         // make sure there was a type
         if (typeExpr == nullptr)
