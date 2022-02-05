@@ -1425,6 +1425,20 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     {
         return;
     }
+
+    // make sure the type is not 'type', '[]type', '&type', etc.
+    const TypeInfo* innerMostType = varType;
+    while (innerMostType->GetInnerType() != nullptr)
+    {
+        innerMostType = innerMostType->GetInnerType();
+    }
+    if (innerMostType->IsType())
+    {
+        isError = true;
+        logger.LogError(*forLoop->variableNameToken, "Parameter cannot be of type '{}'", varType->GetShortName());
+        return;
+    }
+
     forLoop->variableType = varType;
 
     // set index type if there is an index variable
