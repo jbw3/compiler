@@ -1720,10 +1720,16 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
             return;
         }
 
-        if (memberType->IsType())
+        // make sure the type is not 'type', '[]type', '&type', etc.
+        const TypeInfo* innerMostType = memberType;
+        while (innerMostType->GetInnerType() != nullptr)
+        {
+            innerMostType = innerMostType->GetInnerType();
+        }
+        if (innerMostType->IsType())
         {
             isError = true;
-            logger.LogError(*member->nameToken, "Member cannot be of type 'type'");
+            logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetShortName());
             return;
         }
 
@@ -2833,10 +2839,16 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
         return;
     }
 
-    if (type->IsType())
+    // make sure the type is not 'type', '[]type', '&type', etc.
+    const TypeInfo* innerMostType = type;
+    while (innerMostType->GetInnerType() != nullptr)
+    {
+        innerMostType = innerMostType->GetInnerType();
+    }
+    if (innerMostType->IsType())
     {
         isError = true;
-        logger.LogError(*nameToken, "Variable cannot be of type 'type'");
+        logger.LogError(*nameToken, "Variable cannot be of type '{}'", type->GetShortName());
         return;
     }
 
@@ -2880,9 +2892,15 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
-        if (paramType->IsType())
+        // make sure the type is not 'type', '[]type', '&type', etc.
+        const TypeInfo* innerMostType = paramType;
+        while (innerMostType->GetInnerType() != nullptr)
         {
-            logger.LogError(*param->nameToken, "Parameter cannot be of type 'type'");
+            innerMostType = innerMostType->GetInnerType();
+        }
+        if (innerMostType->IsType())
+        {
+            logger.LogError(*param->nameToken, "Parameter cannot be of type '{}'", paramType->GetShortName());
             return false;
         }
 
@@ -2905,9 +2923,15 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
-        if (returnType->IsType())
+        // make sure the type is not 'type', '[]type', '&type', etc.
+        const TypeInfo* innerMostType = returnType;
+        while (innerMostType->GetInnerType() != nullptr)
         {
-            logger.LogError(*functionDeclaration->nameToken, "Return type cannot be of type 'type'");
+            innerMostType = innerMostType->GetInnerType();
+        }
+        if (innerMostType->IsType())
+        {
+            logger.LogError(*functionDeclaration->nameToken, "Return type cannot be of type '{}'", returnType->GetShortName());
             return false;
         }
     }
