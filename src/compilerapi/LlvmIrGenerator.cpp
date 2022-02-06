@@ -2103,6 +2103,18 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
         unsigned numBits = type->GetNumBits();
         llvmType = Type::getIntNTy(context, numBits);
     }
+    else if (type->IsFloat())
+    {
+        unsigned numBits = type->GetNumBits();
+        if (numBits == 32)
+        {
+            llvmType = Type::getFloatTy(context);
+        }
+        else if (numBits == 64)
+        {
+            llvmType = Type::getDoubleTy(context);
+        }
+    }
     else if (type->IsPointer())
     {
         Type* innerType = GetType(type->GetInnerType());
@@ -2188,6 +2200,13 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         const string& name = type->GetShortName();
         unsigned numBits = type->GetNumBits();
         unsigned encoding = (type->GetSign() == TypeInfo::eSigned) ? dwarf::DW_ATE_signed : dwarf::DW_ATE_unsigned;
+        diType = diBuilder->createBasicType(name, numBits, encoding);
+    }
+    else if (type->IsFloat())
+    {
+        const string& name = type->GetShortName();
+        unsigned numBits = type->GetNumBits();
+        unsigned encoding = dwarf::DW_ATE_float;
         diType = diBuilder->createBasicType(name, numBits, encoding);
     }
     else if (type->IsBool())

@@ -55,12 +55,13 @@ public:
     static constexpr uint16_t F_UNIT     = 1 << 0;
     static constexpr uint16_t F_BOOL     = 1 << 1;
     static constexpr uint16_t F_INT      = 1 << 2;
-    static constexpr uint16_t F_STR      = 1 << 3;
-    static constexpr uint16_t F_RANGE    = 1 << 4;
-    static constexpr uint16_t F_POINTER  = 1 << 5;
-    static constexpr uint16_t F_ARRAY    = 1 << 6;
-    static constexpr uint16_t F_FUNCTION = 1 << 7;
-    static constexpr uint16_t F_TYPE     = 1 << 8;
+    static constexpr uint16_t F_FLOAT    = 1 << 3;
+    static constexpr uint16_t F_STR      = 1 << 4;
+    static constexpr uint16_t F_RANGE    = 1 << 5;
+    static constexpr uint16_t F_POINTER  = 1 << 6;
+    static constexpr uint16_t F_ARRAY    = 1 << 7;
+    static constexpr uint16_t F_FUNCTION = 1 << 8;
+    static constexpr uint16_t F_TYPE     = 1 << 9;
 
     // attributes
     static constexpr uint16_t F_AGGREGATE = 1 << 12;
@@ -84,6 +85,8 @@ public:
     static const TypeInfo* UInt16Type;
     static const TypeInfo* UInt32Type;
     static const TypeInfo* UInt64Type;
+    static const TypeInfo* Float32Type;
+    static const TypeInfo* Float64Type;
     static const TypeInfo* TypeType;
 
     static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
@@ -118,6 +121,8 @@ public:
     bool IsBool() const;
 
     bool IsInt() const;
+
+    bool IsFloat() const;
 
     bool IsStr() const;
 
