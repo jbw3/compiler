@@ -303,6 +303,31 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, const string&
         printVarName(os, varName);
         return true;
     }
+    else if (type->IsFloat())
+    {
+        bool ok = false;
+        if (type->GetNumBits() == 32)
+        {
+            os << "float";
+            ok = true;
+        }
+        else if (type->GetNumBits() == 64)
+        {
+            os << "double";
+            ok = true;
+        }
+
+        if (ok)
+        {
+            printVarName(os, varName);
+        }
+        else
+        {
+            logger.LogInternalError("Unknown size '{}' for floating-point type", type->GetNumBits());
+        }
+
+        return ok;
+    }
     else if (type->IsPointer())
     {
         unsigned pointerCount = 1;
