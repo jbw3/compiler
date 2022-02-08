@@ -92,8 +92,17 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
     switch (unaryExpression->op)
     {
         case UnaryExpression::eNegative:
-            resultValue = builder.CreateNeg(subExprValue, "neg");
+        {
+            if (subExpr->GetType()->IsInt())
+            {
+                resultValue = builder.CreateNeg(subExprValue, "neg");
+            }
+            else
+            {
+                resultValue = builder.CreateFNeg(subExprValue, "neg");
+            }
             break;
+        }
         case UnaryExpression::eComplement:
             resultValue = builder.CreateNot(subExprValue, "not");
             break;

@@ -37,6 +37,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
     const TypeInfo* subExprType = subExpr->GetType();
     bool isInt = subExprType->IsInt();
+    bool isFloat = subExprType->IsFloat();
 
     UnaryExpression::EOperator op = unaryExpression->op;
 
@@ -67,6 +68,11 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                     resultType = NumericLiteralType::CreateSigned(subExprLiteralType->GetSignedNumBits());
                     ok = true;
                 }
+            }
+            else if (isFloat)
+            {
+                ok = true;
+                resultType = subExpr->GetType();
             }
             break;
         }
