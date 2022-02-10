@@ -1096,6 +1096,23 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             }
         }
     }
+    else if (leftType->IsFloat() && rightType->IsFloat())
+    {
+        switch (op)
+        {
+            case BinaryExpression::eAdd:
+            case BinaryExpression::eSubtract:
+            case BinaryExpression::eMultiply:
+            case BinaryExpression::eDivide:
+            case BinaryExpression::eRemainder:
+            case BinaryExpression::eAssign:
+                ok = leftType->GetNumBits() == rightType->GetNumBits();
+                break;
+            default:
+                ok = false;
+                break;
+        }
+    }
     else if (leftType->IsPointer() && rightType->IsPointer())
     {
         ok =
@@ -1296,6 +1313,11 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             else if (leftType->IsInt() && rightType->IsInt())
             {
                 return GetBiggestSizeType(leftType, rightType);
+            }
+            else if (leftType->IsFloat() && rightType->IsFloat())
+            {
+                // TODO: get biggest size when adding different sized floats is supported
+                return leftType;
             }
             else
             {

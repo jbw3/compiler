@@ -180,6 +180,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             }
         }
 
+        bool isInt = leftType->IsInt();
         bool isSigned = leftType->GetSign() == TypeInfo::eSigned;
 
         switch (op)
@@ -204,24 +205,42 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
                 break;
             case BinaryExpression::eAdd:
             case BinaryExpression::eAddAssign:
-                resultValue = builder.CreateAdd(leftValue, rightValue, "add");
+                resultValue = isInt ? builder.CreateAdd(leftValue, rightValue, "add") : builder.CreateFAdd(leftValue, rightValue, "add");
                 break;
             case BinaryExpression::eSubtract:
             case BinaryExpression::eSubtractAssign:
-                resultValue = builder.CreateSub(leftValue, rightValue, "sub");
+                resultValue = isInt ? builder.CreateSub(leftValue, rightValue, "sub") : builder.CreateFSub(leftValue, rightValue, "sub");
                 break;
             case BinaryExpression::eMultiply:
             case BinaryExpression::eMultiplyAssign:
-                resultValue = builder.CreateMul(leftValue, rightValue, "mul");
+                resultValue = isInt ? builder.CreateMul(leftValue, rightValue, "mul") : builder.CreateFMul(leftValue, rightValue, "mul");
                 break;
             case BinaryExpression::eDivide:
             case BinaryExpression::eDivideAssign:
-                resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
+            {
+                if (isInt)
+                {
+                    resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
+                }
+                else
+                {
+                    resultValue = builder.CreateFDiv(leftValue, rightValue, "div");
+                }
                 break;
+            }
             case BinaryExpression::eRemainder:
             case BinaryExpression::eRemainderAssign:
-                resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "rem") : builder.CreateURem(leftValue, rightValue, "rem");
+            {
+                if (isInt)
+                {
+                    resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "rem") : builder.CreateURem(leftValue, rightValue, "rem");
+                }
+                else
+                {
+                    resultValue = builder.CreateFRem(leftValue, rightValue, "rem");
+                }
                 break;
+            }
             case BinaryExpression::eShiftLeft:
             case BinaryExpression::eShiftLeftAssign:
             case BinaryExpression::eShiftRightLogical:
