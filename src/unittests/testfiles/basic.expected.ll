@@ -3430,6 +3430,27 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define float @fOpOrder1(float %a, float %b, float %c, float %d) #0 {
+entry:
+  %d4 = alloca float, align 4
+  %c3 = alloca float, align 4
+  %b2 = alloca float, align 4
+  %a1 = alloca float, align 4
+  store float %a, float* %a1, align 4
+  store float %b, float* %b2, align 4
+  store float %c, float* %c3, align 4
+  store float %d, float* %d4, align 4
+  %a5 = load float, float* %a1, align 4
+  %b6 = load float, float* %b2, align 4
+  %c7 = load float, float* %c3, align 4
+  %mul = fmul float %b6, %c7
+  %add = fadd float %a5, %mul
+  %d8 = load float, float* %d4, align 4
+  %sub = fsub float %add, %d8
+  ret float %sub
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }

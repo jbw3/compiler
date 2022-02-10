@@ -1114,3 +1114,8 @@ fun types()
     const c Types[0] = 1_234;
     var v Types[0] = c;
 }
+
+fun fOpOrder1(a f32, b f32, c f32, d f32) f32
+{
+    a + b * c - d
+}
