@@ -180,64 +180,118 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             }
         }
 
-        bool isInt = leftType->IsInt();
+        bool isFloat = leftType->IsFloat();
         bool isSigned = leftType->GetSign() == TypeInfo::eSigned;
 
         switch (op)
         {
             case BinaryExpression::eEqual:
-                resultValue = builder.CreateICmpEQ(leftValue, rightValue, "cmpeq");
+            {
+                if (isFloat)
+                {
+                    resultValue = builder.CreateFCmpOEQ(leftValue, rightValue, "cmpeq");
+                }
+                else
+                {
+                    resultValue = builder.CreateICmpEQ(leftValue, rightValue, "cmpeq");
+                }
                 break;
+            }
             case BinaryExpression::eNotEqual:
-                resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
+            {
+                if (isFloat)
+                {
+                    resultValue = builder.CreateFCmpONE(leftValue, rightValue, "cmpne");
+                }
+                else
+                {
+                    resultValue = builder.CreateICmpNE(leftValue, rightValue, "cmpne");
+                }
                 break;
+            }
             case BinaryExpression::eLessThan:
-                resultValue = isSigned ? builder.CreateICmpSLT(leftValue, rightValue, "cmplt") : builder.CreateICmpULT(leftValue, rightValue, "cmplt");
+            {
+                if (isFloat)
+                {
+                    resultValue = builder.CreateFCmpOLT(leftValue, rightValue, "cmplt");
+                }
+                else
+                {
+                    resultValue = isSigned ? builder.CreateICmpSLT(leftValue, rightValue, "cmplt") : builder.CreateICmpULT(leftValue, rightValue, "cmplt");
+                }
                 break;
+            }
             case BinaryExpression::eLessThanOrEqual:
-                resultValue = isSigned ? builder.CreateICmpSLE(leftValue, rightValue, "cmple") : builder.CreateICmpULE(leftValue, rightValue, "cmple");
+            {
+                if (isFloat)
+                {
+                    resultValue = builder.CreateFCmpOLE(leftValue, rightValue, "cmple");
+                }
+                else
+                {
+                    resultValue = isSigned ? builder.CreateICmpSLE(leftValue, rightValue, "cmple") : builder.CreateICmpULE(leftValue, rightValue, "cmple");
+                }
                 break;
+            }
             case BinaryExpression::eGreaterThan:
-                resultValue = isSigned ? builder.CreateICmpSGT(leftValue, rightValue, "cmpgt") : builder.CreateICmpUGT(leftValue, rightValue, "cmpgt");
+            {
+                if (isFloat)
+                {
+                    resultValue = builder.CreateFCmpOGT(leftValue, rightValue, "cmpgt");
+                }
+                else
+                {
+                    resultValue = isSigned ? builder.CreateICmpSGT(leftValue, rightValue, "cmpgt") : builder.CreateICmpUGT(leftValue, rightValue, "cmpgt");
+                }
                 break;
+            }
             case BinaryExpression::eGreaterThanOrEqual:
-                resultValue = isSigned ? builder.CreateICmpSGE(leftValue, rightValue, "cmpge") : builder.CreateICmpUGE(leftValue, rightValue, "cmpge");
+            {
+                if (isFloat)
+                {
+                    resultValue = builder.CreateFCmpOGE(leftValue, rightValue, "cmpge");
+                }
+                else
+                {
+                    resultValue = isSigned ? builder.CreateICmpSGE(leftValue, rightValue, "cmpge") : builder.CreateICmpUGE(leftValue, rightValue, "cmpge");
+                }
                 break;
+            }
             case BinaryExpression::eAdd:
             case BinaryExpression::eAddAssign:
-                resultValue = isInt ? builder.CreateAdd(leftValue, rightValue, "add") : builder.CreateFAdd(leftValue, rightValue, "add");
+                resultValue = isFloat ? builder.CreateFAdd(leftValue, rightValue, "add") : builder.CreateAdd(leftValue, rightValue, "add");
                 break;
             case BinaryExpression::eSubtract:
             case BinaryExpression::eSubtractAssign:
-                resultValue = isInt ? builder.CreateSub(leftValue, rightValue, "sub") : builder.CreateFSub(leftValue, rightValue, "sub");
+                resultValue = isFloat ? builder.CreateFSub(leftValue, rightValue, "sub") : builder.CreateSub(leftValue, rightValue, "sub");
                 break;
             case BinaryExpression::eMultiply:
             case BinaryExpression::eMultiplyAssign:
-                resultValue = isInt ? builder.CreateMul(leftValue, rightValue, "mul") : builder.CreateFMul(leftValue, rightValue, "mul");
+                resultValue = isFloat ? builder.CreateFMul(leftValue, rightValue, "mul") : builder.CreateMul(leftValue, rightValue, "mul");
                 break;
             case BinaryExpression::eDivide:
             case BinaryExpression::eDivideAssign:
             {
-                if (isInt)
+                if (isFloat)
                 {
-                    resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
+                    resultValue = builder.CreateFDiv(leftValue, rightValue, "div");
                 }
                 else
                 {
-                    resultValue = builder.CreateFDiv(leftValue, rightValue, "div");
+                    resultValue = isSigned ? builder.CreateSDiv(leftValue, rightValue, "div") : builder.CreateUDiv(leftValue, rightValue, "div");
                 }
                 break;
             }
             case BinaryExpression::eRemainder:
             case BinaryExpression::eRemainderAssign:
             {
-                if (isInt)
+                if (isFloat)
                 {
-                    resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "rem") : builder.CreateURem(leftValue, rightValue, "rem");
+                    resultValue = builder.CreateFRem(leftValue, rightValue, "rem");
                 }
                 else
                 {
-                    resultValue = builder.CreateFRem(leftValue, rightValue, "rem");
+                    resultValue = isSigned ? builder.CreateSRem(leftValue, rightValue, "rem") : builder.CreateURem(leftValue, rightValue, "rem");
                 }
                 break;
             }

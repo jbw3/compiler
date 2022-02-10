@@ -3451,6 +3451,80 @@ entry:
   ret float %sub
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @fCmp(float %a, float %b, double %c, double %d) #0 {
+entry:
+  %b12 = alloca i1, align 1
+  %b1132 = alloca i1, align 1
+  %b10 = alloca i1, align 1
+  %b925 = alloca i1, align 1
+  %b8 = alloca i1, align 1
+  %b7 = alloca i1, align 1
+  %b616 = alloca i1, align 1
+  %b5 = alloca i1, align 1
+  %b4 = alloca i1, align 1
+  %b3 = alloca i1, align 1
+  %b27 = alloca i1, align 1
+  %b1 = alloca i1, align 1
+  %d4 = alloca double, align 8
+  %c3 = alloca double, align 8
+  %b2 = alloca float, align 4
+  %a1 = alloca float, align 4
+  store float %a, float* %a1, align 4
+  store float %b, float* %b2, align 4
+  store double %c, double* %c3, align 8
+  store double %d, double* %d4, align 8
+  %a5 = load float, float* %a1, align 4
+  %b6 = load float, float* %b2, align 4
+  %cmpeq = fcmp oeq float %a5, %b6
+  store i1 %cmpeq, i1* %b1, align 1
+  %a8 = load float, float* %a1, align 4
+  %b9 = load float, float* %b2, align 4
+  %cmpne = fcmp one float %a8, %b9
+  store i1 %cmpne, i1* %b27, align 1
+  %a10 = load float, float* %a1, align 4
+  %b11 = load float, float* %b2, align 4
+  %cmplt = fcmp olt float %a10, %b11
+  store i1 %cmplt, i1* %b3, align 1
+  %a12 = load float, float* %a1, align 4
+  %b13 = load float, float* %b2, align 4
+  %cmple = fcmp ole float %a12, %b13
+  store i1 %cmple, i1* %b4, align 1
+  %a14 = load float, float* %a1, align 4
+  %b15 = load float, float* %b2, align 4
+  %cmpgt = fcmp ogt float %a14, %b15
+  store i1 %cmpgt, i1* %b5, align 1
+  %a17 = load float, float* %a1, align 4
+  %b18 = load float, float* %b2, align 4
+  %cmpge = fcmp oge float %a17, %b18
+  store i1 %cmpge, i1* %b616, align 1
+  %c19 = load double, double* %c3, align 8
+  %d20 = load double, double* %d4, align 8
+  %cmpeq21 = fcmp oeq double %c19, %d20
+  store i1 %cmpeq21, i1* %b7, align 1
+  %c22 = load double, double* %c3, align 8
+  %d23 = load double, double* %d4, align 8
+  %cmpne24 = fcmp one double %c22, %d23
+  store i1 %cmpne24, i1* %b8, align 1
+  %c26 = load double, double* %c3, align 8
+  %d27 = load double, double* %d4, align 8
+  %cmplt28 = fcmp olt double %c26, %d27
+  store i1 %cmplt28, i1* %b925, align 1
+  %c29 = load double, double* %c3, align 8
+  %d30 = load double, double* %d4, align 8
+  %cmple31 = fcmp ole double %c29, %d30
+  store i1 %cmple31, i1* %b10, align 1
+  %c33 = load double, double* %c3, align 8
+  %d34 = load double, double* %d4, align 8
+  %cmpgt35 = fcmp ogt double %c33, %d34
+  store i1 %cmpgt35, i1* %b1132, align 1
+  %c36 = load double, double* %c3, align 8
+  %d37 = load double, double* %d4, align 8
+  %cmpge38 = fcmp oge double %c36, %d37
+  store i1 %cmpge38, i1* %b12, align 1
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }

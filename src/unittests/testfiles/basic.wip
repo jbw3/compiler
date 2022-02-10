@@ -1119,3 +1119,20 @@ fun fOpOrder1(a f32, b f32, c f32, d f32) f32
 {
     a + b * c - d
 }
+
+fun fCmp(a f32, b f32, c f64, d f64)
+{
+    var b1 = a == b;
+    var b2 = a != b;
+    var b3 = a < b;
+    var b4 = a <= b;
+    var b5 = a > b;
+    var b6 = a >= b;
+
+    var b7 = c == d;
+    var b8 = c != d;
+    var b9 = c < d;
+    var b10 = c <= d;
+    var b11 = c > d;
+    var b12 = c >= d;
+}
