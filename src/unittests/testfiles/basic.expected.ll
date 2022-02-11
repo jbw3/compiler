@@ -3009,8 +3009,11 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
-define %UnitType @casts(i16 %x, i16 %y, i1 %b) #0 {
+define %UnitType @casts(i16 %x, i16 %y, i1 %b, float %z) #0 {
 entry:
+  %c15 = alloca double, align 8
+  %c14 = alloca double, align 8
+  %c13 = alloca double, align 8
   %c12 = alloca i8, align 1
   %c11 = alloca i8, align 1
   %c10 = alloca i8, align 1
@@ -3023,47 +3026,58 @@ entry:
   %c3 = alloca i32, align 4
   %c2 = alloca i32, align 4
   %c1 = alloca i32, align 4
+  %z4 = alloca float, align 4
   %b3 = alloca i1, align 1
   %y2 = alloca i16, align 2
   %x1 = alloca i16, align 2
   store i16 %x, i16* %x1, align 2
   store i16 %y, i16* %y2, align 2
   store i1 %b, i1* %b3, align 1
-  %x4 = load i16, i16* %x1, align 2
-  %cast = sext i16 %x4 to i32
+  store float %z, float* %z4, align 4
+  %x5 = load i16, i16* %x1, align 2
+  %cast = sext i16 %x5 to i32
   store i32 %cast, i32* %c1, align 4
-  %y5 = load i16, i16* %y2, align 2
-  %cast6 = zext i16 %y5 to i32
-  store i32 %cast6, i32* %c2, align 4
-  %b7 = load i1, i1* %b3, align 1
-  %cast8 = zext i1 %b7 to i32
-  store i32 %cast8, i32* %c3, align 4
-  %x9 = load i16, i16* %x1, align 2
-  %cast10 = sext i16 %x9 to i32
-  store i32 %cast10, i32* %c4, align 4
-  %y11 = load i16, i16* %y2, align 2
-  %cast12 = zext i16 %y11 to i32
-  store i32 %cast12, i32* %c5, align 4
-  %b13 = load i1, i1* %b3, align 1
-  %cast14 = zext i1 %b13 to i32
-  store i32 %cast14, i32* %c6, align 4
-  %x15 = load i16, i16* %x1, align 2
-  %cast16 = icmp ne i16 %x15, 0
-  store i1 %cast16, i1* %c7, align 1
-  %y17 = load i16, i16* %y2, align 2
-  %cast18 = icmp ne i16 %y17, 0
-  store i1 %cast18, i1* %c8, align 1
-  %b19 = load i1, i1* %b3, align 1
-  store i1 %b19, i1* %c9, align 1
-  %x20 = load i16, i16* %x1, align 2
-  %cast21 = trunc i16 %x20 to i8
-  store i8 %cast21, i8* %c10, align 1
-  %y22 = load i16, i16* %y2, align 2
-  %cast23 = trunc i16 %y22 to i8
-  store i8 %cast23, i8* %c11, align 1
-  %b24 = load i1, i1* %b3, align 1
-  %cast25 = zext i1 %b24 to i8
-  store i8 %cast25, i8* %c12, align 1
+  %y6 = load i16, i16* %y2, align 2
+  %cast7 = zext i16 %y6 to i32
+  store i32 %cast7, i32* %c2, align 4
+  %b8 = load i1, i1* %b3, align 1
+  %cast9 = zext i1 %b8 to i32
+  store i32 %cast9, i32* %c3, align 4
+  %x10 = load i16, i16* %x1, align 2
+  %cast11 = sext i16 %x10 to i32
+  store i32 %cast11, i32* %c4, align 4
+  %y12 = load i16, i16* %y2, align 2
+  %cast13 = zext i16 %y12 to i32
+  store i32 %cast13, i32* %c5, align 4
+  %b14 = load i1, i1* %b3, align 1
+  %cast15 = zext i1 %b14 to i32
+  store i32 %cast15, i32* %c6, align 4
+  %x16 = load i16, i16* %x1, align 2
+  %cast17 = icmp ne i16 %x16, 0
+  store i1 %cast17, i1* %c7, align 1
+  %y18 = load i16, i16* %y2, align 2
+  %cast19 = icmp ne i16 %y18, 0
+  store i1 %cast19, i1* %c8, align 1
+  %b20 = load i1, i1* %b3, align 1
+  store i1 %b20, i1* %c9, align 1
+  %x21 = load i16, i16* %x1, align 2
+  %cast22 = trunc i16 %x21 to i8
+  store i8 %cast22, i8* %c10, align 1
+  %y23 = load i16, i16* %y2, align 2
+  %cast24 = trunc i16 %y23 to i8
+  store i8 %cast24, i8* %c11, align 1
+  %b25 = load i1, i1* %b3, align 1
+  %cast26 = zext i1 %b25 to i8
+  store i8 %cast26, i8* %c12, align 1
+  %x27 = load i16, i16* %x1, align 2
+  %cast28 = sitofp i16 %x27 to double
+  store double %cast28, double* %c13, align 8
+  %y29 = load i16, i16* %y2, align 2
+  %cast30 = uitofp i16 %y29 to double
+  store double %cast30, double* %c14, align 8
+  %b31 = load i1, i1* %b3, align 1
+  %cast32 = uitofp i1 %b31 to double
+  store double %cast32, double* %c15, align 8
   ret %UnitType zeroinitializer
 }
 
