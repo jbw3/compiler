@@ -1780,6 +1780,11 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
             Type* dstType = GetType(castType);
             resultValue = builder.CreateZExt(resultValue, dstType, "cast");
         }
+        else if (castType->IsFloat())
+        {
+            Type* dstType = GetType(castType);
+            resultValue = builder.CreateUIToFP(resultValue, dstType, "cast");
+        }
         else if (castType->IsBool())
         {
             // nothing to do in this case
@@ -1818,6 +1823,13 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
             {
                 // nothing to do if the sizes are equal
             }
+        }
+        else if (castType->IsFloat())
+        {
+            Type* dstType = GetType(castType);
+            TypeInfo::ESign exprSign = exprType->GetSign();
+            Instruction::CastOps castOp = (exprSign == TypeInfo::eSigned) ? Instruction::CastOps::SIToFP : Instruction::CastOps::UIToFP;
+            resultValue = builder.CreateCast(castOp, resultValue, dstType, "cast");
         }
         else if (castType->IsBool())
         {
