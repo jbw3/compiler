@@ -3525,6 +3525,62 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @fOpAssign(float %a, double %b) #0 {
+entry:
+  %y = alloca double, align 8
+  %x = alloca float, align 4
+  %b2 = alloca double, align 8
+  %a1 = alloca float, align 4
+  store float %a, float* %a1, align 4
+  store double %b, double* %b2, align 8
+  %a3 = load float, float* %a1, align 4
+  store float %a3, float* %x, align 4
+  %b4 = load double, double* %b2, align 8
+  store double %b4, double* %y, align 8
+  %a5 = load float, float* %a1, align 4
+  %load = load float, float* %x, align 4
+  %add = fadd float %load, %a5
+  store float %add, float* %x, align 4
+  %a6 = load float, float* %a1, align 4
+  %load7 = load float, float* %x, align 4
+  %sub = fsub float %load7, %a6
+  store float %sub, float* %x, align 4
+  %a8 = load float, float* %a1, align 4
+  %load9 = load float, float* %x, align 4
+  %mul = fmul float %load9, %a8
+  store float %mul, float* %x, align 4
+  %a10 = load float, float* %a1, align 4
+  %load11 = load float, float* %x, align 4
+  %div = fdiv float %load11, %a10
+  store float %div, float* %x, align 4
+  %a12 = load float, float* %a1, align 4
+  %load13 = load float, float* %x, align 4
+  %rem = frem float %load13, %a12
+  store float %rem, float* %x, align 4
+  %b14 = load double, double* %b2, align 8
+  %load15 = load double, double* %y, align 8
+  %add16 = fadd double %load15, %b14
+  store double %add16, double* %y, align 8
+  %b17 = load double, double* %b2, align 8
+  %load18 = load double, double* %y, align 8
+  %sub19 = fsub double %load18, %b17
+  store double %sub19, double* %y, align 8
+  %b20 = load double, double* %b2, align 8
+  %load21 = load double, double* %y, align 8
+  %mul22 = fmul double %load21, %b20
+  store double %mul22, double* %y, align 8
+  %b23 = load double, double* %b2, align 8
+  %load24 = load double, double* %y, align 8
+  %div25 = fdiv double %load24, %b23
+  store double %div25, double* %y, align 8
+  %b26 = load double, double* %b2, align 8
+  %load27 = load double, double* %y, align 8
+  %rem28 = frem double %load27, %b26
+  store double %rem28, double* %y, align 8
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }

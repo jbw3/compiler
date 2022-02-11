@@ -1136,3 +1136,21 @@ fun fCmp(a f32, b f32, c f64, d f64)
     var b11 = c > d;
     var b12 = c >= d;
 }
+
+fun fOpAssign(a f32, b f64)
+{
+    var x f32 = a;
+    var y f64 = b;
+
+    x += a;
+    x -= a;
+    x *= a;
+    x /= a;
+    x %= a;
+
+    y += b;
+    y -= b;
+    y *= b;
+    y /= b;
+    y %= b;
+}

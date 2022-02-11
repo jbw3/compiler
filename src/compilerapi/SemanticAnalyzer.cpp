@@ -1112,6 +1112,11 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
             case BinaryExpression::eDivide:
             case BinaryExpression::eRemainder:
             case BinaryExpression::eAssign:
+            case BinaryExpression::eAddAssign:
+            case BinaryExpression::eSubtractAssign:
+            case BinaryExpression::eMultiplyAssign:
+            case BinaryExpression::eDivideAssign:
+            case BinaryExpression::eRemainderAssign:
                 ok = leftType->GetNumBits() == rightType->GetNumBits();
                 break;
             default:
