@@ -916,22 +916,27 @@ fun casts(x i16, y u16, b bool, z f32)
     var c1 = cast(i32, x);
     var c2 = cast(i32, y);
     var c3 = cast(i32, b);
+    var c4 = cast(i32, z);
 
-    var c4 = cast(u32, x);
-    var c5 = cast(u32, y);
-    var c6 = cast(u32, b);
+    var c5 = cast(u32, x);
+    var c6 = cast(u32, y);
+    var c7 = cast(u32, b);
+    var c8 = cast(u32, z);
 
-    var c7 = cast(bool, x);
-    var c8 = cast(bool, y);
-    var c9 = cast(bool, b);
+    var c9 = cast(bool, x);
+    var c10 = cast(bool, y);
+    var c11 = cast(bool, b);
+    var c12 = cast(bool, z);
 
-    var c10 = cast(i8, x);
-    var c11 = cast(i8, y);
-    var c12 = cast(i8, b);
+    var c13 = cast(i8, x);
+    var c14 = cast(i8, y);
+    var c15 = cast(i8, b);
+    var c16 = cast(i8, z);
 
-    var c13 = cast(f64, x);
-    var c14 = cast(f64, y);
-    var c15 = cast(f64, b);
+    var c17 = cast(f64, x);
+    var c18 = cast(f64, y);
+    var c19 = cast(f64, b);
+    var c20 = cast(f64, z);
 }
 
 const global_constant1 i8 = 9;

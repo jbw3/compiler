@@ -2448,6 +2448,10 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     {
         canCast = castType->IsBool() | castType->IsInt() | castType->IsFloat();
     }
+    else if (exprType->IsFloat())
+    {
+        canCast = castType->IsBool() | castType->IsInt() | castType->IsFloat();
+    }
 
     if (!canCast)
     {
