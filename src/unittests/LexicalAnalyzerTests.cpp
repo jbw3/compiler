@@ -189,6 +189,15 @@ bool LexicalAnalyzerTests::TestNumbers(string& failMsg)
         make_tuple("0xE", "0xE", true, Token::eHexIntLit),
         make_tuple("0x10Ea5C", "0x10Ea5C", true, Token::eHexIntLit),
         make_tuple("0x10ea_5C7a_39c8_", "0x10ea_5C7a_39c8_", true, Token::eHexIntLit),
+        make_tuple("1.2", "1.2", true, Token::eFloatLit),
+        make_tuple("1.23", "1.23", true, Token::eFloatLit),
+        make_tuple("50.9", "50.9", true, Token::eFloatLit),
+        make_tuple("123.456", "123.456", true, Token::eFloatLit),
+        make_tuple("0.0", "0.0", true, Token::eFloatLit),
+        make_tuple("0.8", "0.8", true, Token::eFloatLit),
+        make_tuple("9.0", "9.0", true, Token::eFloatLit),
+        make_tuple("1_234.567_890", "1_234.567_890", true, Token::eFloatLit),
+        make_tuple("1_234_._567_890", "1_234_._567_890", true, Token::eFloatLit),
 
         // invalid numbers
         make_tuple("0b", "", false, Token::eInvalid),

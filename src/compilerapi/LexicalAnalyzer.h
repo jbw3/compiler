@@ -40,6 +40,8 @@ private:
 
     char Read(CharBuffer buff);
 
+    char Peek(CharBuffer buff);
+
     void ParseLineComment(CharBuffer buff);
 
     bool ParseBlockComment(CharBuffer buff);

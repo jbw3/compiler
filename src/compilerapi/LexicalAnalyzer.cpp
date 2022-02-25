@@ -322,13 +322,31 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                 if (isMore)
                 {
-                    if ((ch >= '0' && ch <= '9') || ch == '_')
+                    if ((ch >= '0' && ch <= '9') || ch == '_' || ch == '.')
                     {
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
                             tokenValues.AppendChar(ch);
                             ch = Read(buff);
                             ++column;
+                        }
+
+                        // check if it's a floating-point literal
+                        char nextCh = Peek(buff);
+                        if ( isMore && ch == '.' && ((nextCh >= '0' && nextCh <= '9') || nextCh == '_') )
+                        {
+                            tokenType = Token::eFloatLit;
+
+                            tokenValues.AppendChar(ch);
+                            ch = Read(buff);
+                            ++column;
+
+                            while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
+                            {
+                                tokenValues.AppendChar(ch);
+                                ch = Read(buff);
+                                ++column;
+                            }
                         }
 
                         if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
@@ -522,6 +540,21 @@ char LexicalAnalyzer::Read(CharBuffer buff)
     {
         ch = buff.ptr[buffIdx];
         ++buffIdx;
+    }
+    else
+    {
+        ch = '\0';
+    }
+
+    return ch;
+}
+
+char LexicalAnalyzer::Peek(CharBuffer buff)
+{
+    char ch;
+    if (buffIdx < buff.size)
+    {
+        ch = buff.ptr[buffIdx];
     }
     else
     {

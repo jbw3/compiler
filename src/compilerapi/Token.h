@@ -11,12 +11,13 @@ public:
     // types
     enum EMainType : uint16_t
     {
-        eIdentifierType  = 0x1000,
-        eKeywordType     = 0x2000,
-        eBoolLiteralType = 0x3000,
-        eIntLiteralType  = 0x4000,
-        eStrLiteralType  = 0x5000,
-        eSymbolType      = 0x6000,
+        eIdentifierType   = 0x1000,
+        eKeywordType      = 0x2000,
+        eBoolLiteralType  = 0x3000,
+        eIntLiteralType   = 0x4000,
+        eFloatLiteralType = 0x5000,
+        eStrLiteralType   = 0x6000,
+        eSymbolType       = 0x7000,
     };
 
     enum ESymbolFlags : uint16_t
@@ -76,6 +77,9 @@ public:
         eOctIntLit    = eIntLiteralType | 1,
         eDecIntLit    = eIntLiteralType | 2,
         eHexIntLit    = eIntLiteralType | 3,
+
+        // float literal
+        eFloatLit     = eFloatLiteralType,
 
         // string literal
         eStrLit       = eStrLiteralType,
