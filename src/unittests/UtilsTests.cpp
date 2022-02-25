@@ -9,10 +9,11 @@ using namespace std;
 UtilsTests::UtilsTests(ostream& results) :
     TestClass("Utils", results)
 {
-    ADD_TEST(TestNumberConversion);
+    ADD_TEST(TestIntConversion);
+    ADD_TEST(TestFloatConversion);
 }
 
-bool UtilsTests::TestNumberConversion(string& failMsg)
+bool UtilsTests::TestIntConversion(string& failMsg)
 {
     vector<tuple<string, bool, bool, int64_t>> tests =
     {
@@ -88,6 +89,41 @@ bool UtilsTests::TestNumberConversion(string& failMsg)
         }
 
         if (num != get<3>(test))
+        {
+            failMsg = "'"s + testStr + "' was incorrectly converted to '" + to_string(num) + "'\n";
+            ok = false;
+        }
+
+        if (!ok)
+        {
+            break;
+        }
+    }
+
+    return ok;
+}
+
+bool UtilsTests::TestFloatConversion(string& failMsg)
+{
+    vector<tuple<string, double>> tests =
+    {
+        make_tuple("0.0", 0.0),
+        make_tuple("1.0", 1.0),
+        make_tuple("1.5", 1.5),
+        make_tuple("123.0", 123.0),
+        make_tuple("123.00", 123.0),
+        make_tuple("0.59987", 0.59987),
+        make_tuple("00.59987", 0.59987),
+        make_tuple("1_234.567_89", 1234.56789),
+    };
+
+    bool ok = true;
+    for (tuple<string, double> test : tests)
+    {
+        string& testStr = get<0>(test);
+
+        double num = stringToFloat(testStr);
+        if (num != get<1>(test))
         {
             failMsg = "'"s + testStr + "' was incorrectly converted to '" + to_string(num) + "'\n";
             ok = false;

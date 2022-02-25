@@ -9,7 +9,9 @@ public:
     UtilsTests(std::ostream& results);
 
 private:
-    static bool TestNumberConversion(std::string& failMsg);
+    static bool TestIntConversion(std::string& failMsg);
+
+    static bool TestFloatConversion(std::string& failMsg);
 };
 
 #endif // UTILS_TEST_H_
