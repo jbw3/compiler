@@ -227,7 +227,7 @@ double stringToFloat(const string& str)
                 fractionalPart /= 10.0;
             }
 
-            ++idx;
+            --idx;
         }
     }
 
