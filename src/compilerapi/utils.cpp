@@ -183,3 +183,54 @@ bool stringToInteger(const string& str, int64_t& num)
 
     return ok;
 }
+
+double stringToFloat(const string& str)
+{
+    size_t strSize = str.size();
+    size_t idx = 0;
+
+    // process number before decimal point
+    double wholePart = 0.0;
+    while (idx < strSize)
+    {
+        char ch = str[idx];
+
+        if (ch == '.')
+        {
+            break;
+        }
+        else if (ch != '_')
+        {
+            wholePart *= 10.0;
+            wholePart += ch - '0';
+        }
+
+        ++idx;
+    }
+
+    // process number after decimal point
+    double fractionalPart = 0.0;
+    if (idx < strSize)
+    {
+        idx = strSize - 1; // reset index to last char in string
+        while (idx > 0)
+        {
+            char ch = str[idx];
+
+            if (ch == '.')
+            {
+                break;
+            }
+            else if (ch != '_')
+            {
+                fractionalPart += ch - '0';
+                fractionalPart /= 10.0;
+            }
+
+            ++idx;
+        }
+    }
+
+    double num = wholePart + fractionalPart;
+    return num;
+}

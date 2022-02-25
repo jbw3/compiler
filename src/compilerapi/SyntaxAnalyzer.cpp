@@ -925,6 +925,11 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         stringToInteger(iter->value, intValue);
         expr = new NumericExpression(intValue, &*iter);
     }
+    else if (mainType == Token::eFloatLiteralType)
+    {
+        double floatValue = stringToFloat(iter->value);
+        expr = new FloatLiteralExpression(floatValue, &*iter);
+    }
     else if (mainType == Token::eBoolLiteralType)
     {
         expr = new BoolLiteralExpression(&*iter);

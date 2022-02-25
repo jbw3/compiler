@@ -56,6 +56,8 @@ constexpr bool hexDigitToNum(char ch, char& num)
 
 bool stringToInteger(const std::string& str, int64_t& num);
 
+double stringToFloat(const std::string& str);
+
 constexpr int64_t getBitMask(unsigned size)
 {
     int64_t mask = 0;

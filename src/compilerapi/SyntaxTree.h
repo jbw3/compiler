@@ -94,6 +94,19 @@ public:
     int64_t value;
 };
 
+class FloatLiteralExpression : public Expression
+{
+public:
+    FloatLiteralExpression(double value, const Token* token);
+
+    virtual ~FloatLiteralExpression() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* token;
+    double value;
+};
+
 class BoolLiteralExpression : public Expression
 {
 public:

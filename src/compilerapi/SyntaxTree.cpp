@@ -142,6 +142,17 @@ unsigned NumericExpression::GetMinUnsignedSize() const
     return numBits;
 }
 
+FloatLiteralExpression::FloatLiteralExpression(double value, const Token* token) :
+    token(token),
+    value(value)
+{
+}
+
+void FloatLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO
+}
+
 BoolLiteralExpression::BoolLiteralExpression(const Token* token) :
     token(token)
 {
