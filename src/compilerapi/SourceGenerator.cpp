@@ -300,7 +300,7 @@ void SourceGenerator::Visit(NumericExpression* numericExpression)
 
 void SourceGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
-    // TODO
+    *os << floatLiteralExpression->token->value;
 }
 
 void SourceGenerator::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpression*/)

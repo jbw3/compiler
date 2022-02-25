@@ -65,6 +65,13 @@ fun operator_precedence(x i32, y i32, z i32, p Person)
     var h = (&p).name;
 }
 
+fun floats() f64
+{
+    var f1 f64 = 1.23;
+    var f2 f64 = -72.092;
+    return f1 + f2;
+}
+
 fun strings()
 {
     var s1 str = "";

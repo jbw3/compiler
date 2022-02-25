@@ -1337,7 +1337,10 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
-    // TODO
+    SetDebugLocation(floatLiteralExpression->token);
+
+    double value = floatLiteralExpression->value;
+    resultValue = ConstantFP::get(context, APFloat(value));
 }
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)

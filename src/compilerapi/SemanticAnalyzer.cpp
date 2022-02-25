@@ -2219,7 +2219,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 
 void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
-    // TODO
+    floatLiteralExpression->SetType(TypeInfo::Float64Type);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
