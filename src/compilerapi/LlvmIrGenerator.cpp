@@ -1335,6 +1335,11 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
     resultValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
 }
 
+void LlvmIrGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
+{
+    // TODO
+}
+
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     const Token* token = boolLiteralExpression->token;

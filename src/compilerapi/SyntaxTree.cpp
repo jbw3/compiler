@@ -150,7 +150,7 @@ FloatLiteralExpression::FloatLiteralExpression(double value, const Token* token)
 
 void FloatLiteralExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO
+    visitor->Visit(this);
 }
 
 BoolLiteralExpression::BoolLiteralExpression(const Token* token) :

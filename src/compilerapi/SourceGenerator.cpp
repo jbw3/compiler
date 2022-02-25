@@ -298,6 +298,11 @@ void SourceGenerator::Visit(NumericExpression* numericExpression)
     *os << numericExpression->token->value;
 }
 
+void SourceGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
+{
+    // TODO
+}
+
 void SourceGenerator::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpression*/)
 {
 }

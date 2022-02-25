@@ -2217,6 +2217,11 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
     numericExpression->SetConstantValueIndex(idx);
 }
 
+void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
+{
+    // TODO
+}
+
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     boolLiteralExpression->SetType(TypeInfo::BoolType);

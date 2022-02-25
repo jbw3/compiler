@@ -12,6 +12,7 @@ class BranchExpression;
 class CastExpression;
 class ConstantDeclaration;
 class ExternFunctionDeclaration;
+class FloatLiteralExpression;
 class ForLoop;
 class FunctionDefinition;
 class FunctionCallExpression;
@@ -65,6 +66,8 @@ public:
     virtual void Visit(SyntaxTree::UnitTypeLiteralExpression* unitTypeLiteralExpression) = 0;
 
     virtual void Visit(SyntaxTree::NumericExpression* numericExpression) = 0;
+
+    virtual void Visit(SyntaxTree::FloatLiteralExpression* floatLiteralExpression) = 0;
 
     virtual void Visit(SyntaxTree::BoolLiteralExpression* boolLiteralExpression) = 0;
 

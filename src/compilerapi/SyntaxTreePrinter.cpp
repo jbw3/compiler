@@ -200,6 +200,11 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     PrintProperty("value", numericExpression->token->value);
 }
 
+void SyntaxTreePrinter::Visit(FloatLiteralExpression* floatLiteralExpression)
+{
+    // TODO
+}
+
 void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     BracePrinter printer(*this, "{", "}");
