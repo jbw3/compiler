@@ -333,7 +333,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                         // check if it's a floating-point literal
                         char nextCh = Peek(buff);
-                        if ( isMore && ch == '.' && ((nextCh >= '0' && nextCh <= '9') || nextCh == '_') )
+                        if (isMore && ch == '.' && nextCh != '.')
                         {
                             tokenType = Token::eFloatLit;
 
@@ -341,15 +341,27 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                             ch = Read(buff);
                             ++column;
 
+                            bool hasDigitAfterPoint = false;
                             while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                             {
+                                if (ch >= '0' && ch <= '9')
+                                {
+                                    hasDigitAfterPoint = true;
+                                }
+
                                 tokenValues.AppendChar(ch);
                                 ch = Read(buff);
                                 ++column;
                             }
+
+                            if (!hasDigitAfterPoint)
+                            {
+                                logger.LogError(filenameId, line, column, "No digit after decimal point");
+                                ok = false;
+                            }
                         }
 
-                        if ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') )
+                        if ( ok && ( (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ) )
                         {
                             logger.LogError(filenameId, line, column, "Invalid character in numeric literal");
                             ok = false;

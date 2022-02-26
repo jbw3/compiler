@@ -222,6 +222,9 @@ bool LexicalAnalyzerTests::TestNumbers(string& failMsg)
         make_tuple("0_b", "", false, Token::eInvalid),
         make_tuple("0_o", "", false, Token::eInvalid),
         make_tuple("0_X", "", false, Token::eInvalid),
+        make_tuple("1.", "", false, Token::eInvalid),
+        make_tuple("1._", "", false, Token::eInvalid),
+        make_tuple("1.___", "", false, Token::eInvalid),
 
         // valid non-number tokens
         make_tuple("_", "_", true, Token::eIdentifier),
