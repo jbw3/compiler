@@ -198,6 +198,11 @@ bool LexicalAnalyzerTests::TestNumbers(string& failMsg)
         make_tuple("9.0", "9.0", true, Token::eFloatLit),
         make_tuple("1_234.567_890", "1_234.567_890", true, Token::eFloatLit),
         make_tuple("1_234_._567_890", "1_234_._567_890", true, Token::eFloatLit),
+        make_tuple("1e3", "1e3", true, Token::eFloatLit),
+        make_tuple("1.2e7", "1.2e7", true, Token::eFloatLit),
+        make_tuple("9843.32e987", "9843.32e987", true, Token::eFloatLit),
+        make_tuple("1_234e3", "1_234e3", true, Token::eFloatLit),
+        make_tuple("1_2_3_4_._5_6_e_7_8", "1_2_3_4_._5_6_e_7_8", true, Token::eFloatLit),
 
         // invalid numbers
         make_tuple("0b", "", false, Token::eInvalid),

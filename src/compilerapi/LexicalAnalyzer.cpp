@@ -322,7 +322,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                 if (isMore)
                 {
-                    if ((ch >= '0' && ch <= '9') || ch == '_' || ch == '.')
+                    if ((ch >= '0' && ch <= '9') || ch == '_' || ch == '.' || ch == 'e')
                     {
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
@@ -333,31 +333,67 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                         // check if it's a floating-point literal
                         char nextCh = Peek(buff);
-                        if (isMore && ch == '.' && nextCh != '.')
+                        if (isMore && ( (ch == '.' && nextCh != '.') || ch == 'e') )
                         {
                             tokenType = Token::eFloatLit;
 
-                            tokenValues.AppendChar(ch);
-                            ch = Read(buff);
-                            ++column;
-
-                            bool hasDigitAfterPoint = false;
-                            while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
+                            if (ch == '.')
                             {
-                                if (ch >= '0' && ch <= '9')
-                                {
-                                    hasDigitAfterPoint = true;
-                                }
-
                                 tokenValues.AppendChar(ch);
                                 ch = Read(buff);
                                 ++column;
+
+                                bool hasDigitAfterPoint = false;
+                                while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
+                                {
+                                    if (ch >= '0' && ch <= '9')
+                                    {
+                                        hasDigitAfterPoint = true;
+                                    }
+
+                                    tokenValues.AppendChar(ch);
+                                    ch = Read(buff);
+                                    ++column;
+                                }
+
+                                if (!hasDigitAfterPoint)
+                                {
+                                    logger.LogError(filenameId, line, column, "No digit after decimal point");
+                                    ok = false;
+                                }
                             }
 
-                            if (!hasDigitAfterPoint)
+                            if (ok && isMore && ch == 'e')
                             {
-                                logger.LogError(filenameId, line, column, "No digit after decimal point");
-                                ok = false;
+                                tokenValues.AppendChar(ch);
+                                ch = Read(buff);
+                                ++column;
+
+                                if (isMore && ch == '-')
+                                {
+                                    tokenValues.AppendChar(ch);
+                                    ch = Read(buff);
+                                    ++column;
+                                }
+
+                                bool hasDigitAfterE = false;
+                                while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
+                                {
+                                    if (ch >= '0' && ch <= '9')
+                                    {
+                                        hasDigitAfterE = true;
+                                    }
+
+                                    tokenValues.AppendChar(ch);
+                                    ch = Read(buff);
+                                    ++column;
+                                }
+
+                                if (!hasDigitAfterE)
+                                {
+                                    logger.LogError(filenameId, line, column, "No digit in exponent");
+                                    ok = false;
+                                }
                             }
                         }
 
