@@ -115,6 +115,10 @@ bool UtilsTests::TestFloatConversion(string& failMsg)
         make_tuple("0.59987", 0.59987),
         make_tuple("00.59987", 0.59987),
         make_tuple("1_234.567_89", 1234.56789),
+        make_tuple("1e3", 1e3),
+        make_tuple("1e-9", 1e-9),
+        make_tuple("1.2345e3", 1234.5),
+        make_tuple("1_2_3_4_._5_e_1_0_7", 1234.5e107),
     };
 
     bool ok = true;

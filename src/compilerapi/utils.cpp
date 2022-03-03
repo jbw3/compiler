@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <cmath>
 #include <tuple>
 #include <vector>
 
@@ -187,6 +188,8 @@ bool stringToInteger(const string& str, int64_t& num)
 double stringToFloat(const string& str)
 {
     size_t strSize = str.size();
+    size_t fractionStartIdx = strSize;
+    size_t exponentStartIdx = strSize;
     size_t idx = 0;
 
     // process number before decimal point
@@ -197,6 +200,25 @@ double stringToFloat(const string& str)
 
         if (ch == '.')
         {
+            fractionStartIdx = idx + 1;
+
+            // find exponent start
+            while (idx < strSize)
+            {
+                ++idx;
+                ch = str[idx];
+
+                if (ch == 'e')
+                {
+                    exponentStartIdx = idx + 1;
+                    break;
+                }
+            }
+            break;
+        }
+        else if (ch == 'e')
+        {
+            exponentStartIdx = idx + 1;
             break;
         }
         else if (ch != '_')
@@ -210,18 +232,23 @@ double stringToFloat(const string& str)
 
     // process number after decimal point
     double fractionalPart = 0.0;
-    if (idx < strSize)
+    if (fractionStartIdx < strSize)
     {
-        idx = strSize - 1; // reset index to last char in string
-        while (idx > 0)
+        // reset index to last fraction digit
+        if (exponentStartIdx < strSize)
+        {
+            idx = exponentStartIdx - 2;
+        }
+        else
+        {
+            idx = strSize - 1;
+        }
+
+        while (idx >= fractionStartIdx)
         {
             char ch = str[idx];
 
-            if (ch == '.')
-            {
-                break;
-            }
-            else if (ch != '_')
+            if (ch != '_')
             {
                 fractionalPart += ch - '0';
                 fractionalPart /= 10.0;
@@ -232,5 +259,38 @@ double stringToFloat(const string& str)
     }
 
     double num = wholePart + fractionalPart;
+
+    if (exponentStartIdx < strSize)
+    {
+        int neg = 1;
+        if (str[exponentStartIdx] == '-')
+        {
+            neg = -1;
+            idx = exponentStartIdx + 1;
+        }
+        else
+        {
+            idx = exponentStartIdx;
+        }
+
+        int exp = 0;
+        while (idx < strSize)
+        {
+            char ch = str[idx];
+
+            if (ch != '_')
+            {
+                exp *= 10;
+                exp += ch - '0';
+            }
+
+            ++idx;
+        }
+
+        exp *= neg;
+
+        num *= pow(10.0, exp);
+    }
+
     return num;
 }
