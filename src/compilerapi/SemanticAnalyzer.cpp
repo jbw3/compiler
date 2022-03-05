@@ -206,7 +206,8 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     bool isAssignment = BinaryExpression::IsAssignment(op);
 
     // implicit cast if necessary
-    if (binaryExpression->left->GetType()->IsInt() && binaryExpression->right->GetType()->IsInt())
+    if ( (binaryExpression->left->GetType()->IsInt() && binaryExpression->right->GetType()->IsInt())
+      || (binaryExpression->left->GetType()->IsFloat() && binaryExpression->right->GetType()->IsFloat()) )
     {
         unsigned leftSize = binaryExpression->left->GetType()->GetNumBits();
         unsigned rightSize = binaryExpression->right->GetType()->GetNumBits();

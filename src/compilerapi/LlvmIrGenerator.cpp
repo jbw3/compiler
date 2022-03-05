@@ -1932,6 +1932,20 @@ void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
             assert(false && "Invalid implicit cast");
         }
     }
+    else if (exprType->IsFloat())
+    {
+        if (castType->IsFloat())
+        {
+            assert(exprType->GetNumBits() < castType->GetNumBits());
+
+            Type* dstType = GetType(castType);
+            resultValue = builder.CreateFPExt(resultValue, dstType, "fpext");
+        }
+        else
+        {
+            assert(false && "Invalid implicit cast");
+        }
+    }
     else
     {
         assert(false && "Invalid implicit cast");
