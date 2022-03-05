@@ -204,6 +204,11 @@ bool TypeInfo::IsFloat() const
     return (flags & F_FLOAT) != 0;
 }
 
+bool TypeInfo::IsNumeric() const
+{
+    return (flags & (F_INT | F_FLOAT)) != 0;
+}
+
 bool TypeInfo::IsStr() const
 {
     return (flags & F_STR) != 0;

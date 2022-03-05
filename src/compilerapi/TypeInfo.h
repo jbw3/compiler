@@ -124,6 +124,8 @@ public:
 
     bool IsFloat() const;
 
+    bool IsNumeric() const;
+
     bool IsStr() const;
 
     bool IsRange() const;

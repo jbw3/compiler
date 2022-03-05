@@ -2345,6 +2345,13 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
             {
                 type = GetBiggestSizeType(exprType, type);
             }
+            else if (exprType->IsFloat() && type->IsFloat())
+            {
+                if (exprType->GetNumBits() > type->GetNumBits())
+                {
+                    type = exprType;
+                }
+            }
             else
             {
                 isError = true;
@@ -2362,7 +2369,7 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
     }
 
     // add implicit casts if necessary
-    if (type->IsInt())
+    if (type->IsNumeric())
     {
         for (size_t i = 0; i < exprsSize; ++i)
         {
