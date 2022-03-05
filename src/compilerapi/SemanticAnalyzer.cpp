@@ -721,6 +721,12 @@ bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, 
         return true;
     }
 
+    if (assignType->IsFloat() && exprType->IsFloat() && assignType->GetNumBits() > exprType->GetNumBits())
+    {
+        needsCast = true;
+        return true;
+    }
+
     const TypeInfo* assignInnerType = assignType;
     const TypeInfo* exprInnerType = exprType;
     while (assignInnerType->IsArray() && exprInnerType->IsArray())
@@ -2781,6 +2787,25 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
             {
                 resultType = ifType;
             }
+        }
+    }
+    else if (ifType->IsFloat() && elseType->IsFloat())
+    {
+        unsigned ifSize = ifType->GetNumBits();
+        unsigned elseSize = elseType->GetNumBits();
+        if (ifSize > elseSize)
+        {
+            branchExpression->elseExpression = ImplicitCast(branchExpression->elseExpression, ifType);
+            resultType = ifType;
+        }
+        else if (ifSize < elseSize)
+        {
+            branchExpression->ifExpression = ImplicitCast(branchExpression->ifExpression, elseType);
+            resultType = elseType;
+        }
+        else // both sizes are the same
+        {
+            resultType = ifType;
         }
     }
     else if (AreCompatibleRanges(ifType, elseType, /*out*/ resultType))
