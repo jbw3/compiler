@@ -144,7 +144,7 @@ public:
 
     bool IsHalfOpen() const;
 
-    virtual bool IsNumericLiteral() const;
+    virtual bool IsOrContainsNumericLiteral() const;
 
     virtual unsigned GetNumBits() const;
 
@@ -217,7 +217,7 @@ public:
 
     bool IsSameAs(const TypeInfo& other) const override;
 
-    bool IsNumericLiteral() const override;
+    bool IsOrContainsNumericLiteral() const override;
 
     unsigned GetNumBits() const override;
 

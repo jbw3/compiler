@@ -741,7 +741,7 @@ bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, 
         exprInnerType = exprInnerType->GetInnerType();
     }
 
-    if (assignInnerType->IsInt() && exprInnerType->IsNumericLiteral()
+    if (assignInnerType->IsInt() && exprInnerType->IsOrContainsNumericLiteral()
         && HaveCompatibleSigns(assignInnerType, exprInnerType)
         && HaveCompatibleAssignmentSizes(assignInnerType, exprInnerType))
     {
@@ -3152,7 +3152,7 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
 
 Expression* SemanticAnalyzer::ImplicitCast(Expression* expression, const TypeInfo* type)
 {
-    if (expression->GetType()->IsNumericLiteral())
+    if (expression->GetType()->IsOrContainsNumericLiteral())
     {
         FixNumericLiteralExpression(expression, type);
 

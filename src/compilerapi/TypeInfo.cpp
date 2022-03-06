@@ -254,11 +254,11 @@ bool TypeInfo::IsHalfOpen() const
     return (flags & F_HALF_OPEN) != 0;
 }
 
-bool TypeInfo::IsNumericLiteral() const
+bool TypeInfo::IsOrContainsNumericLiteral() const
 {
     if (IsArray() || IsRange())
     {
-        return innerType->IsNumericLiteral();
+        return innerType->IsOrContainsNumericLiteral();
     }
 
     return false;
@@ -510,7 +510,7 @@ bool NumericLiteralType::IsSameAs(const TypeInfo& other) const
         && unsignedNumBits == otherLiteralType.unsignedNumBits;
 }
 
-bool NumericLiteralType::IsNumericLiteral() const
+bool NumericLiteralType::IsOrContainsNumericLiteral() const
 {
     return true;
 }
