@@ -2226,7 +2226,20 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 
 void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
-    floatLiteralExpression->SetType(TypeInfo::Float64Type);
+    const int64_t* bits = reinterpret_cast<const int64_t*>(&floatLiteralExpression->value);
+    int64_t exp = ((*bits & 0x7ff00000'00000000) >> 52) - 1023;
+
+    const TypeInfo* type = nullptr;
+    if (exp >= -126 && exp <= 127)
+    {
+        type = TypeInfo::Float32Type;
+    }
+    else
+    {
+        type = TypeInfo::Float64Type;
+    }
+
+    floatLiteralExpression->SetType(type);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)

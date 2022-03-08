@@ -1339,8 +1339,22 @@ void LlvmIrGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
     SetDebugLocation(floatLiteralExpression->token);
 
-    double value = floatLiteralExpression->value;
-    resultValue = ConstantFP::get(context, APFloat(value));
+    double doubleValue = floatLiteralExpression->value;
+
+    unsigned numBits = floatLiteralExpression->GetType()->GetNumBits();
+    if (numBits == 32)
+    {
+        float singleValue = static_cast<float>(doubleValue);
+        resultValue = ConstantFP::get(context, APFloat(singleValue));
+    }
+    else if (numBits == 64)
+    {
+        resultValue = ConstantFP::get(context, APFloat(doubleValue));
+    }
+    else
+    {
+        logger.LogInternalError("Unexpected float size");
+    }
 }
 
 void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
