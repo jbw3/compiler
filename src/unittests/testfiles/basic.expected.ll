@@ -3615,6 +3615,24 @@ entry:
   ret %UnitType zeroinitializer
 }
 
+; Function Attrs: noinline nounwind optnone
+define %UnitType @fLiterals() #0 {
+entry:
+  %d = alloca double, align 8
+  %c = alloca double, align 8
+  %b = alloca double, align 8
+  %a = alloca float, align 4
+  store float 0x3FF3C08320000000, float* %a, align 4
+  store double 0x3E112E0BE0000000, double* %b, align 8
+  store double 0x40FE26F340000000, double* %c, align 8
+  %b1 = load double, double* %b, align 8
+  %c2 = load double, double* %c, align 8
+  %add = fadd double %b1, %c2
+  %add3 = fadd double %add, 1.000000e+00
+  store double %add3, double* %d, align 8
+  ret %UnitType zeroinitializer
+}
+
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }

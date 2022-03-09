@@ -539,6 +539,27 @@ entry:
   ret %UnitType zeroinitializer, !dbg !346
 }
 
+; Function Attrs: noinline nounwind optnone
+define double @floats(double %a) #0 !dbg !347 {
+entry:
+  %y = alloca double, align 8
+  %x = alloca float, align 4
+  %a1 = alloca double, align 8
+  store double %a, double* %a1, align 8
+  call void @llvm.dbg.declare(metadata double* %a1, metadata !352, metadata !DIExpression()), !dbg !357
+  call void @llvm.dbg.declare(metadata float* %x, metadata !353, metadata !DIExpression()), !dbg !358
+  store float 0x3F8945B6C0000000, float* %x, align 4, !dbg !359
+  call void @llvm.dbg.declare(metadata double* %y, metadata !356, metadata !DIExpression()), !dbg !360
+  store double 0x400921FA00000000, double* %y, align 8, !dbg !361
+  %a2 = load double, double* %a1, align 8, !dbg !362
+  %x3 = load float, float* %x, align 4, !dbg !363
+  %fpext = fpext float %x3 to double, !dbg !363
+  %y4 = load double, double* %y, align 8, !dbg !364
+  %mul = fmul double %fpext, %y4, !dbg !365
+  %add = fadd double %a2, %mul, !dbg !366
+  ret double %add, !dbg !366
+}
+
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
@@ -896,3 +917,23 @@ $filename
 !344 = !DILocation(line: 175, column: 9, scope: !335)
 !345 = !DILocation(line: 175, column: 12, scope: !335)
 !346 = !DILocation(line: 176, column: 5, scope: !335)
+!347 = distinct !DISubprogram(name: "floats", scope: !1, file: !1, line: 179, type: !348, spFlags: DISPFlagDefinition, unit: !0, retainedNodes: !351)
+!348 = !DISubroutineType(flags: DIFlagPrototyped, types: !349)
+!349 = !{!350, !350}
+!350 = !DIBasicType(name: "f64", size: 64, encoding: DW_ATE_float)
+!351 = !{!352, !353, !356}
+!352 = !DILocalVariable(name: "a", arg: 1, scope: !347, file: !1, line: 179, type: !350)
+!353 = !DILocalVariable(name: "x", scope: !354, file: !1, line: 181, type: !355)
+!354 = distinct !DILexicalBlock(scope: !347, file: !1, line: 180, column: 1)
+!355 = !DIBasicType(name: "f32", size: 32, encoding: DW_ATE_float)
+!356 = !DILocalVariable(name: "y", scope: !354, file: !1, line: 182, type: !350)
+!357 = !DILocation(line: 179, scope: !347)
+!358 = !DILocation(line: 181, column: 9, scope: !354)
+!359 = !DILocation(line: 181, column: 15, scope: !354)
+!360 = !DILocation(line: 182, column: 9, scope: !354)
+!361 = !DILocation(line: 182, column: 15, scope: !354)
+!362 = !DILocation(line: 183, column: 12, scope: !354)
+!363 = !DILocation(line: 183, column: 16, scope: !354)
+!364 = !DILocation(line: 183, column: 20, scope: !354)
+!365 = !DILocation(line: 183, column: 18, scope: !354)
+!366 = !DILocation(line: 183, column: 14, scope: !354)

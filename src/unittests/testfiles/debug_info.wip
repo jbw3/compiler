@@ -175,3 +175,10 @@ fun function_type()
     var f2 = ftype2;
     f2();
 }
+
+fun floats(a f64) f64
+{
+    var x f32 = 1.234e-2;
+    var y f64 = 3.14159;
+    return a + x * y;
+}
