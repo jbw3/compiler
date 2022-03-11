@@ -35,6 +35,8 @@ PrimitiveType uInt32TypeInfo(32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KE
 PrimitiveType uInt64TypeInfo(64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD, UINT64_KEYWORD);
 PrimitiveType float32TypeInfo(32, TypeInfo::F_FLOAT, TypeInfo::eSigned, FLOAT32_KEYWORD, FLOAT32_KEYWORD);
 PrimitiveType float64TypeInfo(64, TypeInfo::F_FLOAT, TypeInfo::eSigned, FLOAT64_KEYWORD, FLOAT64_KEYWORD);
+PrimitiveType float32LiteralTypeInfo(32, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float32-literal}", "{float-literal}");
+PrimitiveType float64LiteralTypeInfo(64, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float64-literal}", "{float-literal}");
 PrimitiveType typeTypeInfo(0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, TYPE_KEYWORD, TYPE_KEYWORD);
 
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
@@ -83,6 +85,8 @@ const TypeInfo* TypeInfo::UInt32Type = &uInt32TypeInfo;
 const TypeInfo* TypeInfo::UInt64Type = &uInt64TypeInfo;
 const TypeInfo* TypeInfo::Float32Type = &float32TypeInfo;
 const TypeInfo* TypeInfo::Float64Type = &float64TypeInfo;
+const TypeInfo* TypeInfo::Float32LiteralType = &float32LiteralTypeInfo;
+const TypeInfo* TypeInfo::Float64LiteralType = &float64LiteralTypeInfo;
 const TypeInfo* TypeInfo::TypeType = &typeTypeInfo;
 
 const TypeInfo* TypeInfo::GetMinSignedIntTypeForSize(unsigned size)
@@ -244,6 +248,11 @@ TypeInfo::ESign TypeInfo::GetSign() const
     return sign;
 }
 
+bool TypeInfo::IsLiteral() const
+{
+    return (flags & F_LITERAL) != 0;
+}
+
 bool TypeInfo::IsAggregate() const
 {
     return (flags & F_AGGREGATE) != 0;
@@ -252,6 +261,16 @@ bool TypeInfo::IsAggregate() const
 bool TypeInfo::IsHalfOpen() const
 {
     return (flags & F_HALF_OPEN) != 0;
+}
+
+bool TypeInfo::IsOrContainsLiteral() const
+{
+    if (IsArray() || IsRange())
+    {
+        return innerType->IsOrContainsLiteral();
+    }
+
+    return IsLiteral();
 }
 
 bool TypeInfo::IsOrContainsNumericLiteral() const

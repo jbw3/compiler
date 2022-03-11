@@ -64,8 +64,9 @@ public:
     static constexpr uint16_t F_TYPE     = 1 << 9;
 
     // attributes
-    static constexpr uint16_t F_AGGREGATE = 1 << 12;
-    static constexpr uint16_t F_HALF_OPEN = 1 << 13;
+    static constexpr uint16_t F_LITERAL   = 1 << 12;
+    static constexpr uint16_t F_AGGREGATE = 1 << 13;
+    static constexpr uint16_t F_HALF_OPEN = 1 << 14;
 
     enum ESign
     {
@@ -87,6 +88,8 @@ public:
     static const TypeInfo* UInt64Type;
     static const TypeInfo* Float32Type;
     static const TypeInfo* Float64Type;
+    static const TypeInfo* Float32LiteralType;
+    static const TypeInfo* Float64LiteralType;
     static const TypeInfo* TypeType;
 
     static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
@@ -140,9 +143,13 @@ public:
 
     ESign GetSign() const;
 
+    bool IsLiteral() const;
+
     bool IsAggregate() const;
 
     bool IsHalfOpen() const;
+
+    bool IsOrContainsLiteral() const;
 
     virtual bool IsOrContainsNumericLiteral() const;
 

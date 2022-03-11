@@ -707,7 +707,7 @@ bool SemanticAnalyzer::AreCompatibleRanges(const TypeInfo* type1, const TypeInfo
 
 bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, const TypeInfo* exprType, bool& needsCast)
 {
-    if (assignType->IsSameAs(*exprType))
+    if (!assignType->IsOrContainsLiteral() && !exprType->IsOrContainsLiteral() && assignType->IsSameAs(*exprType))
     {
         needsCast = false;
         return true;
@@ -721,7 +721,7 @@ bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, 
         return true;
     }
 
-    if (assignType->IsFloat() && exprType->IsFloat() && assignType->GetNumBits() > exprType->GetNumBits())
+    if (assignType->IsFloat() && exprType->IsFloat() && assignType->GetNumBits() >= exprType->GetNumBits())
     {
         needsCast = true;
         return true;
@@ -744,6 +744,13 @@ bool SemanticAnalyzer::AreCompatibleAssignmentTypes(const TypeInfo* assignType, 
     if (assignInnerType->IsInt() && exprInnerType->IsOrContainsNumericLiteral()
         && HaveCompatibleSigns(assignInnerType, exprInnerType)
         && HaveCompatibleAssignmentSizes(assignInnerType, exprInnerType))
+    {
+        needsCast = true;
+        return true;
+    }
+
+    if (assignInnerType->IsFloat() && exprInnerType->IsFloat() && exprInnerType->IsLiteral()
+        && assignInnerType->GetNumBits() >= exprInnerType->GetNumBits())
     {
         needsCast = true;
         return true;
@@ -819,7 +826,33 @@ const TypeInfo* SemanticAnalyzer::GetBiggestSizeType(const TypeInfo* type1, cons
         unsigned type1Size, type2Size;
         resultType = GetBiggestSizeType(literalType2, type1, type1Size, type2Size);
     }
-    else // neither types are NumericLiteralType
+    else if (type1->IsFloat() && type2->IsFloat() && (type1->IsLiteral() || type2->IsLiteral()))
+    {
+        if (type1->IsLiteral() && type2->IsLiteral())
+        {
+            if (type1->GetNumBits() >= type2->GetNumBits())
+            {
+                resultType = type1;
+            }
+            else
+            {
+                resultType = type2;
+            }
+        }
+        else
+        {
+            unsigned numBits = max(type1->GetNumBits(), type2->GetNumBits());
+            if (numBits == 32)
+            {
+                resultType = TypeInfo::Float32Type;
+            }
+            else
+            {
+                resultType = TypeInfo::Float64Type;
+            }
+        }
+    }
+    else // neither types are NumericLiteralType or float literals
     {
         if (type1->GetNumBits() >= type2->GetNumBits())
         {
@@ -839,6 +872,10 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
     if (NumericExpression* numExpr = dynamic_cast<NumericExpression*>(expr); numExpr != nullptr)
     {
         numExpr->SetType(resultType);
+    }
+    else if (FloatLiteralExpression* floatExpr = dynamic_cast<FloatLiteralExpression*>(expr); floatExpr != nullptr)
+    {
+        floatExpr->SetType(resultType);
     }
     else if (UnaryExpression* unaryExpr = dynamic_cast<UnaryExpression*>(expr); unaryExpr != nullptr)
     {
@@ -1130,6 +1167,28 @@ bool SemanticAnalyzer::CheckBinaryOperatorTypes(BinaryExpression* binExpr)
                 ok = false;
                 break;
         }
+
+        if (ok)
+        {
+            if (leftType->IsLiteral() && !rightType->IsLiteral())
+            {
+                const TypeInfo* resultType = GetBiggestSizeType(leftType, rightType);
+                FixNumericLiteralExpression(left, resultType);
+                if (right->GetType()->GetNumBits() != resultType->GetNumBits())
+                {
+                    binExpr->right = ImplicitCast(right, resultType);
+                }
+            }
+            else if (!leftType->IsLiteral() && rightType->IsLiteral())
+            {
+                const TypeInfo* resultType = GetBiggestSizeType(leftType, rightType);
+                FixNumericLiteralExpression(right, resultType);
+                if (left->GetType()->GetNumBits() != resultType->GetNumBits())
+                {
+                    binExpr->left = ImplicitCast(left, resultType);
+                }
+            }
+        }
     }
     else if (leftType->IsPointer() && rightType->IsPointer())
     {
@@ -1334,8 +1393,7 @@ const TypeInfo* SemanticAnalyzer::GetBinaryOperatorResultType(BinaryExpression::
             }
             else if (leftType->IsFloat() && rightType->IsFloat())
             {
-                // TODO: get biggest size when adding different sized floats is supported
-                return leftType;
+                return GetBiggestSizeType(leftType, rightType);
             }
             else
             {
@@ -2232,11 +2290,11 @@ void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
     const TypeInfo* type = nullptr;
     if (exp >= -126 && exp <= 127)
     {
-        type = TypeInfo::Float32Type;
+        type = TypeInfo::Float32LiteralType;
     }
     else
     {
-        type = TypeInfo::Float64Type;
+        type = TypeInfo::Float64LiteralType;
     }
 
     floatLiteralExpression->SetType(type);
@@ -2771,8 +2829,6 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         }
         else if (ifIsNumLit && !elseIsNumLit)
         {
-            unsigned ifSize = 0;
-            unsigned elseSize = 0;
             resultType = GetBiggestSizeType(ifNumLit, elseType, ifSize, elseSize);
             FixNumericLiteralExpression(branchExpression->ifExpression, resultType);
             if (ifSize > elseSize)
@@ -2782,8 +2838,6 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
         }
         else if (!ifIsNumLit && elseIsNumLit)
         {
-            unsigned ifSize = 0;
-            unsigned elseSize = 0;
             resultType = GetBiggestSizeType(elseNumLit, ifType, elseSize, ifSize);
             FixNumericLiteralExpression(branchExpression->elseExpression, resultType);
             if (elseSize > ifSize)
@@ -2813,19 +2867,47 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     {
         unsigned ifSize = ifType->GetNumBits();
         unsigned elseSize = elseType->GetNumBits();
-        if (ifSize > elseSize)
+        bool ifIsLit = ifType->IsLiteral();
+        bool elseIsLit = elseType->IsLiteral();
+
+        if (ifIsLit && elseIsLit)
         {
-            branchExpression->elseExpression = ImplicitCast(branchExpression->elseExpression, ifType);
-            resultType = ifType;
+            resultType = GetBiggestSizeType(ifType, elseType);
         }
-        else if (ifSize < elseSize)
+        else if (ifIsLit && !elseIsLit)
         {
-            branchExpression->ifExpression = ImplicitCast(branchExpression->ifExpression, elseType);
-            resultType = elseType;
+            resultType = GetBiggestSizeType(ifType, elseType);
+            FixNumericLiteralExpression(branchExpression->ifExpression, resultType);
+            if (ifSize > elseSize)
+            {
+                branchExpression->elseExpression = ImplicitCast(branchExpression->elseExpression, resultType);
+            }
         }
-        else // both sizes are the same
+        else if (!ifIsLit && elseIsLit)
         {
-            resultType = ifType;
+            resultType = GetBiggestSizeType(ifType, elseType);
+            FixNumericLiteralExpression(branchExpression->elseExpression, resultType);
+            if (elseSize > ifSize)
+            {
+                branchExpression->ifExpression = ImplicitCast(branchExpression->ifExpression, resultType);
+            }
+        }
+        else // if (!ifIsLit && !elseIsLit)
+        {
+            if (ifSize > elseSize)
+            {
+                branchExpression->elseExpression = ImplicitCast(branchExpression->elseExpression, ifType);
+                resultType = ifType;
+            }
+            else if (ifSize < elseSize)
+            {
+                branchExpression->ifExpression = ImplicitCast(branchExpression->ifExpression, elseType);
+                resultType = elseType;
+            }
+            else // both sizes are the same
+            {
+                resultType = ifType;
+            }
         }
     }
     else if (AreCompatibleRanges(ifType, elseType, /*out*/ resultType))
@@ -3094,7 +3176,7 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType, const Tok
     }
 
     const NumericLiteralType* literalType = dynamic_cast<const NumericLiteralType*>(checkType);
-    if (literalType != nullptr)
+    if (literalType != nullptr || checkType->IsLiteral())
     {
         const char* typeMsg = nullptr;
         if (isArray)
@@ -3102,6 +3184,10 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType, const Tok
             if (isRange)
             {
                 typeMsg = "array of range literals";
+            }
+            else if (checkType->IsFloat())
+            {
+                typeMsg = "array of float literals";
             }
             else
             {
@@ -3111,6 +3197,10 @@ const TypeInfo* SemanticAnalyzer::InferType(const TypeInfo* inferType, const Tok
         else if (isRange)
         {
             typeMsg = "range literals";
+        }
+        else if (checkType->IsFloat())
+        {
+            typeMsg = "float literals";
         }
         else
         {
@@ -3165,7 +3255,8 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
 
 Expression* SemanticAnalyzer::ImplicitCast(Expression* expression, const TypeInfo* type)
 {
-    if (expression->GetType()->IsOrContainsNumericLiteral())
+    const TypeInfo* exprType = expression->GetType();
+    if (exprType->IsOrContainsNumericLiteral() || exprType->IsOrContainsLiteral())
     {
         FixNumericLiteralExpression(expression, type);
 

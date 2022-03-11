@@ -550,7 +550,7 @@ entry:
   call void @llvm.dbg.declare(metadata float* %x, metadata !353, metadata !DIExpression()), !dbg !358
   store float 0x3F8945B6C0000000, float* %x, align 4, !dbg !359
   call void @llvm.dbg.declare(metadata double* %y, metadata !356, metadata !DIExpression()), !dbg !360
-  store double 0x400921FA00000000, double* %y, align 8, !dbg !361
+  store double 3.141590e+00, double* %y, align 8, !dbg !361
   %a2 = load double, double* %a1, align 8, !dbg !362
   %x3 = load float, float* %x, align 4, !dbg !363
   %fpext = fpext float %x3 to double, !dbg !363

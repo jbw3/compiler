@@ -1337,6 +1337,8 @@ void LlvmIrGenerator::Visit(NumericExpression* numericExpression)
 
 void LlvmIrGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
+    assert(!floatLiteralExpression->GetType()->IsLiteral());
+
     SetDebugLocation(floatLiteralExpression->token);
 
     double doubleValue = floatLiteralExpression->value;
@@ -1354,6 +1356,7 @@ void LlvmIrGenerator::Visit(FloatLiteralExpression* floatLiteralExpression)
     else
     {
         logger.LogInternalError("Unexpected float size");
+        resultValue = nullptr;
     }
 }
 

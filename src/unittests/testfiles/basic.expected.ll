@@ -3623,8 +3623,8 @@ entry:
   %b = alloca double, align 8
   %a = alloca float, align 4
   store float 0x3FF3C08320000000, float* %a, align 4
-  store double 0x3E112E0BE0000000, double* %b, align 8
-  store double 0x40FE26F340000000, double* %c, align 8
+  store double 1.000000e-09, double* %b, align 8
+  store double 0x40FE26F333333333, double* %c, align 8
   %b1 = load double, double* %b, align 8
   %c2 = load double, double* %c, align 8
   %add = fadd double %b1, %c2
