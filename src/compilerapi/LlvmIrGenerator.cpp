@@ -1453,6 +1453,25 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
         bool isSigned = type->GetSign() == TypeInfo::eSigned;
         constValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
     }
+    else if (type->IsFloat())
+    {
+        double doubleValue = compilerContext.GetFloatConstantValue(constIdx);
+        unsigned numBits = type->GetNumBits();
+        if (numBits == 32)
+        {
+            float singleValue = static_cast<float>(doubleValue);
+            constValue = ConstantFP::get(context, APFloat(singleValue));
+        }
+        else if (numBits == 64)
+        {
+            constValue = ConstantFP::get(context, APFloat(doubleValue));
+        }
+        else
+        {
+            logger.LogInternalError("Unexpected float size");
+            return nullptr;
+        }
+    }
     else if (type->IsStr())
     {
         const vector<char>& value = compilerContext.GetStrConstantValue(constIdx);

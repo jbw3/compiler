@@ -2284,7 +2284,8 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 
 void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
-    const int64_t* bits = reinterpret_cast<const int64_t*>(&floatLiteralExpression->value);
+    double value = floatLiteralExpression->value;
+    const int64_t* bits = reinterpret_cast<const int64_t*>(&value);
     int64_t exp = ((*bits & 0x7ff00000'00000000) >> 52) - 1023;
 
     const TypeInfo* type = nullptr;
@@ -2298,6 +2299,9 @@ void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
     }
 
     floatLiteralExpression->SetType(type);
+
+    unsigned idx = compilerContext.AddFloatConstantValue(value);
+    floatLiteralExpression->SetConstantValueIndex(idx);
 }
 
 void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)

@@ -140,6 +140,14 @@ int64_t CompilerContext::GetIntConstantValue(unsigned id) const
     }
 }
 
+unsigned CompilerContext::AddFloatConstantValue(double value)
+{
+    unsigned id = static_cast<unsigned>(floatConstants.size());
+    floatConstants.push_back(value);
+
+    return id;
+}
+
 unsigned CompilerContext::AddStrConstantValue(vector<char> value)
 {
     unsigned id = static_cast<unsigned>(strConstants.size());

@@ -133,6 +133,13 @@ public:
 
     int64_t GetIntConstantValue(unsigned id) const;
 
+    unsigned AddFloatConstantValue(double value);
+
+    double GetFloatConstantValue(unsigned id) const
+    {
+        return floatConstants[id];
+    }
+
     unsigned AddStrConstantValue(std::vector<char> value);
 
     std::vector<char> GetStrConstantValue(unsigned id) const
@@ -185,6 +192,7 @@ private:
     std::vector<TokenList> fileTokens;
     unsigned basicTypeCount;
     std::vector<int64_t> intConstants;
+    std::vector<double> floatConstants;
     std::vector<std::vector<char>> strConstants;
     std::vector<RangeConstValue> rangeConstants;
     std::vector<StructConstValue> structConstants;
