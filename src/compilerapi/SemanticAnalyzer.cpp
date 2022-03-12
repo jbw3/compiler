@@ -5,6 +5,7 @@
 #include "SyntaxTree.h"
 #include "utils.h"
 #include <cassert>
+#include <cmath>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -458,6 +459,69 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 else if (resultType->IsRange())
                 {
                     idx = compilerContext.AddRangeConstantValue(rangeValue);
+                }
+
+                binaryExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (leftType->IsFloat() && rightType->IsFloat())
+        {
+            double leftValue = compilerContext.GetFloatConstantValue(binaryExpression->left->GetConstantValueIndex());
+            double rightValue = compilerContext.GetFloatConstantValue(binaryExpression->right->GetConstantValueIndex());
+
+            bool isConst = true;
+            bool boolValue = false;
+            double doubleValue = 0.0;
+            switch (op)
+            {
+                case BinaryExpression::eEqual:
+                    boolValue = leftValue == rightValue;
+                    break;
+                case BinaryExpression::eNotEqual:
+                    boolValue = leftValue != rightValue;
+                    break;
+                case BinaryExpression::eLessThan:
+                    boolValue = leftValue < rightValue;
+                    break;
+                case BinaryExpression::eLessThanOrEqual:
+                    boolValue = leftValue <= rightValue;
+                    break;
+                case BinaryExpression::eGreaterThan:
+                    boolValue = leftValue > rightValue;
+                    break;
+                case BinaryExpression::eGreaterThanOrEqual:
+                    boolValue = leftValue >= rightValue;
+                    break;
+                case BinaryExpression::eAdd:
+                    doubleValue = leftValue + rightValue;
+                    break;
+                case BinaryExpression::eSubtract:
+                    doubleValue = leftValue - rightValue;
+                    break;
+                case BinaryExpression::eMultiply:
+                    doubleValue = leftValue * rightValue;
+                    break;
+                case BinaryExpression::eDivide:
+                    doubleValue = leftValue / rightValue;
+                    break;
+                case BinaryExpression::eRemainder:
+                    doubleValue = fmod(leftValue, rightValue);
+                    break;
+                default:
+                    isConst = false;
+                    break;
+            }
+
+            if (isConst)
+            {
+                unsigned idx = 0;
+                if (resultType->IsBool())
+                {
+                    idx = compilerContext.AddBoolConstantValue(boolValue);
+                }
+                else if (resultType->IsFloat())
+                {
+                    idx = compilerContext.AddFloatConstantValue(doubleValue);
                 }
 
                 binaryExpression->SetConstantValueIndex(idx);
