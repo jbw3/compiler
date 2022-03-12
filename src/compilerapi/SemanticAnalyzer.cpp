@@ -2296,9 +2296,10 @@ void SemanticAnalyzer::Visit(FloatLiteralExpression* floatLiteralExpression)
     double value = floatLiteralExpression->value;
     const int64_t* bits = reinterpret_cast<const int64_t*>(&value);
     int64_t exp = ((*bits & 0x7ff00000'00000000) >> 52) - 1023;
+    bool isZero = (*bits & 0x7fffffff'ffffffff) == 0;
 
     const TypeInfo* type = nullptr;
-    if (exp >= -126 && exp <= 127)
+    if ( isZero || (exp >= -126 && exp <= 127) )
     {
         type = TypeInfo::Float32LiteralType;
     }
