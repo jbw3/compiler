@@ -179,6 +179,15 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                 unaryExpression->SetConstantValueIndex(idx);
             }
         }
+        else if (subExprType->IsFloat())
+        {
+            if (op == UnaryExpression::eNegative)
+            {
+                double subValue = compilerContext.GetFloatConstantValue(subExpr->GetConstantValueIndex());
+                unsigned idx = compilerContext.AddFloatConstantValue(-subValue);
+                unaryExpression->SetConstantValueIndex(idx);
+            }
+        }
     }
 }
 
