@@ -3106,6 +3106,9 @@ define %UnitType @consts() #0 {
 entry:
   %array29 = alloca [13 x i32], align 4
   %a1 = alloca %"[]i32", align 8
+  %v44 = alloca i64, align 8
+  %v43 = alloca i8, align 1
+  %v42 = alloca i32, align 4
   %v41 = alloca float, align 4
   %v40 = alloca double, align 8
   %v39 = alloca double, align 8
@@ -3243,6 +3246,9 @@ fillExit26:                                       ; preds = %fillBody20
   store double 1.200000e+01, double* %v39, align 8
   store double 0x426D1A94A2002000, double* %v40, align 8
   store float 0x426D1A94A0000000, float* %v41, align 4
+  store i32 -2, i32* %v42, align 4
+  store i8 -46, i8* %v43, align 1
+  store i64 -8446744073709551616, i64* %v44, align 8
   %startPtr31 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 0
   %endPtr32 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 13
   br label %fillBody30
