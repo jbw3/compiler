@@ -2649,6 +2649,14 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                 unsigned idx = compilerContext.AddIntConstantValue(value);
                 castExpression->SetConstantValueIndex(idx);
             }
+            else if (castType->IsFloat())
+            {
+                bool subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
+                double value = subValue ? 1.0 : 0.0;
+                unsigned idx = compilerContext.AddFloatConstantValue(value);
+                castExpression->SetConstantValueIndex(idx);
+            }
         }
         else if (exprType->IsInt())
         {
@@ -2707,6 +2715,23 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                 }
 
                 unsigned idx = compilerContext.AddIntConstantValue(value);
+                castExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsFloat())
+            {
+                unsigned castSize = castType->GetNumBits();
+                double value = 0.0;
+                if (castSize == 32)
+                {
+                    float floatValue = static_cast<float>(subValue);
+                    value = static_cast<double>(floatValue);
+                }
+                else
+                {
+                    value = static_cast<double>(subValue);
+                }
+
+                unsigned idx = compilerContext.AddFloatConstantValue(value);
                 castExpression->SetConstantValueIndex(idx);
             }
         }

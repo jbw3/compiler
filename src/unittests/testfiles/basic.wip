@@ -987,6 +987,11 @@ fun consts()
     const c31 = c23[1..2];
     const c32 = c24[1..<4];
     const c33 = ftype1;
+    const c34 f32 = 1.0 / 2.0;
+    const c35 = c34 + -3.25;
+    const c36 f64 = cast(f64, c1);
+    const c37 f64 = cast(f64, 1_000_000_000_000) + 1.0;
+    const c38 f32 = cast(f32, 1_000_000_000_000) + 1.0;
 
     var v1 = c1;
     var v2 = c2;
@@ -1024,6 +1029,11 @@ fun consts()
     var v34 = c31;
     var v35 = c32;
     var v36 = c33;
+    var v37 = c34;
+    var v38 = c35;
+    var v39 = c36;
+    var v40 = c37;
+    var v41 = c38;
 
     var a1 []i32 = [c5; 0];
 }

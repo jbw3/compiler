@@ -3106,6 +3106,11 @@ define %UnitType @consts() #0 {
 entry:
   %array29 = alloca [13 x i32], align 4
   %a1 = alloca %"[]i32", align 8
+  %v41 = alloca float, align 4
+  %v40 = alloca double, align 8
+  %v39 = alloca double, align 8
+  %v38 = alloca float, align 4
+  %v37 = alloca float, align 4
   %v36 = alloca %UnitType ()*, align 8
   %array19 = alloca [3 x i16], align 2
   %v35 = alloca %"[]i16", align 8
@@ -3233,6 +3238,11 @@ fillExit26:                                       ; preds = %fillBody20
   %agg28 = insertvalue %"[]i16" { i64 3, i16* undef }, i16* %arrptr27, 1
   store %"[]i16" %agg28, %"[]i16"* %v35, align 8
   store %UnitType ()* @ftype1, %UnitType ()** %v36, align 8
+  store float 5.000000e-01, float* %v37, align 4
+  store float -2.750000e+00, float* %v38, align 4
+  store double 1.200000e+01, double* %v39, align 8
+  store double 0x426D1A94A2002000, double* %v40, align 8
+  store float 0x426D1A94A0000000, float* %v41, align 4
   %startPtr31 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 0
   %endPtr32 = getelementptr inbounds [13 x i32], [13 x i32]* %array29, i64 0, i64 13
   br label %fillBody30
