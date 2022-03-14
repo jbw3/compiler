@@ -41,9 +41,9 @@ public:
 private:
     std::string name;
     unsigned index;
+    bool isStorage;
     const TypeInfo* type;
     const Token* token;
-    bool isStorage;
 };
 
 class TypeInfo

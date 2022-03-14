@@ -42,9 +42,9 @@ PrimitiveType typeTypeInfo(0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, TYPE_K
 MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
     index(index),
+    isStorage(isStorage),
     type(type),
-    token(token),
-    isStorage(isStorage)
+    token(token)
 {
 }
 
