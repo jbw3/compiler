@@ -1896,7 +1896,7 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
         }
         else if (castType->IsBool())
         {
-            APFloat::Semantics semantics;
+            APFloat::Semantics semantics = APFloat::S_IEEEdouble;
             switch (exprType->GetNumBits())
             {
                 case 32:
