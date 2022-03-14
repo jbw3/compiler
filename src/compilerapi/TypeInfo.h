@@ -28,15 +28,30 @@ class MemberInfo
 public:
     MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token);
 
-    const std::string& GetName() const;
+    const std::string& GetName() const
+    {
+        return name;
+    }
 
-    unsigned GetIndex() const;
+    unsigned GetIndex() const
+    {
+        return index;
+    }
 
-    const TypeInfo* GetType() const;
+    const TypeInfo* GetType() const
+    {
+        return type;
+    }
 
-    bool GetIsStorage() const;
+    bool GetIsStorage() const
+    {
+        return isStorage;
+    }
 
-    const Token* GetToken() const;
+    const Token* GetToken() const
+    {
+        return token;
+    }
 
 private:
     std::string name;
@@ -117,64 +132,139 @@ public:
 
     virtual bool IsSameAs(const TypeInfo& other) const = 0;
 
-    uint16_t GetFlags() const;
+    uint16_t GetFlags() const
+    {
+        return flags;
+    }
 
-    bool IsUnit() const;
+    bool IsUnit() const
+    {
+        return (flags & F_UNIT) != 0;
+    }
 
-    bool IsBool() const;
+    bool IsBool() const
+    {
+        return (flags & F_BOOL) != 0;
+    }
 
-    bool IsInt() const;
+    bool IsInt() const
+    {
+        return (flags & F_INT) != 0;
+    }
 
-    bool IsFloat() const;
+    bool IsFloat() const
+    {
+        return (flags & F_FLOAT) != 0;
+    }
 
-    bool IsNumeric() const;
+    bool IsNumeric() const
+    {
+        return (flags & (F_INT | F_FLOAT)) != 0;
+    }
 
-    bool IsStr() const;
+    bool IsStr() const
+    {
+        return (flags & F_STR) != 0;
+    }
 
-    bool IsRange() const;
+    bool IsRange() const
+    {
+        return (flags & F_RANGE) != 0;
+    }
 
-    bool IsPointer() const;
+    bool IsPointer() const
+    {
+        return (flags & F_POINTER) != 0;
+    }
 
-    bool IsArray() const;
+    bool IsArray() const
+    {
+        return (flags & F_ARRAY) != 0;
+    }
 
-    bool IsFunction() const;
+    bool IsFunction() const
+    {
+        return (flags & F_FUNCTION) != 0;
+    }
 
-    bool IsType() const;
+    bool IsType() const
+    {
+        return (flags & F_TYPE) != 0;
+    }
 
-    ESign GetSign() const;
+    ESign GetSign() const
+    {
+        return sign;
+    }
 
-    bool IsLiteral() const;
+    bool IsLiteral() const
+    {
+        return (flags & F_LITERAL) != 0;
+    }
 
-    bool IsAggregate() const;
+    bool IsAggregate() const
+    {
+        return (flags & F_AGGREGATE) != 0;
+    }
 
-    bool IsHalfOpen() const;
+    bool IsHalfOpen() const
+    {
+        return (flags & F_HALF_OPEN) != 0;
+    }
 
     bool IsOrContainsLiteral() const;
 
     virtual bool IsOrContainsNumericLiteral() const;
 
-    virtual unsigned GetNumBits() const;
+    virtual unsigned GetNumBits() const
+    {
+        return numBits;
+    }
 
-    const std::string& GetUniqueName() const;
+    const std::string& GetUniqueName() const
+    {
+        return uniqueName;
+    }
 
     // TODO: rename (GetFriendlyName?)
-    const std::string& GetShortName() const;
+    const std::string& GetShortName() const
+    {
+        return shortName;
+    }
 
     const MemberInfo* GetMember(const std::string& memberName) const;
 
-    const std::vector<const MemberInfo*>& GetMembers() const;
+    const std::vector<const MemberInfo*>& GetMembers() const
+    {
+        return members;
+    }
 
-    size_t GetMemberCount() const;
+    size_t GetMemberCount() const
+    {
+        return members.size();
+    }
 
     bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable, const Token* token);
 
-    const TypeInfo* GetInnerType() const;
+    const TypeInfo* GetInnerType() const
+    {
+        return innerType;
+    }
 
-    const std::vector<const TypeInfo*>& GetParamTypes() const;
+    const std::vector<const TypeInfo*>& GetParamTypes() const
+    {
+        return paramTypes;
+    }
 
-    const std::vector<std::string>& GetParamNames() const;
+    const std::vector<std::string>& GetParamNames() const
+    {
+        return paramNames;
+    }
 
-    const TypeInfo* GetReturnType() const;
+    const TypeInfo* GetReturnType() const
+    {
+        return returnType;
+    }
 
 private:
     unsigned numBits;

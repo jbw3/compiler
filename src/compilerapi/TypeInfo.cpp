@@ -48,31 +48,6 @@ MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type,
 {
 }
 
-const string& MemberInfo::GetName() const
-{
-    return name;
-}
-
-unsigned MemberInfo::GetIndex() const
-{
-    return index;
-}
-
-const TypeInfo* MemberInfo::GetType() const
-{
-    return type;
-}
-
-bool MemberInfo::GetIsStorage() const
-{
-    return isStorage;
-}
-
-const Token* MemberInfo::GetToken() const
-{
-    return token;
-}
-
 const UnitTypeInfo* TypeInfo::UnitType = &unitType;
 const TypeInfo* TypeInfo::BoolType = &boolTypeInfo;
 const TypeInfo* TypeInfo::Int8Type = &int8TypeInfo;
@@ -183,86 +158,6 @@ TypeInfo::~TypeInfo()
     memberMap.clear();
 }
 
-uint16_t TypeInfo::GetFlags() const
-{
-    return flags;
-}
-
-bool TypeInfo::IsUnit() const
-{
-    return (flags & F_UNIT) != 0;
-}
-
-bool TypeInfo::IsBool() const
-{
-    return (flags & F_BOOL) != 0;
-}
-
-bool TypeInfo::IsInt() const
-{
-    return (flags & F_INT) != 0;
-}
-
-bool TypeInfo::IsFloat() const
-{
-    return (flags & F_FLOAT) != 0;
-}
-
-bool TypeInfo::IsNumeric() const
-{
-    return (flags & (F_INT | F_FLOAT)) != 0;
-}
-
-bool TypeInfo::IsStr() const
-{
-    return (flags & F_STR) != 0;
-}
-
-bool TypeInfo::IsRange() const
-{
-    return (flags & F_RANGE) != 0;
-}
-
-bool TypeInfo::IsPointer() const
-{
-    return (flags & F_POINTER) != 0;
-}
-
-bool TypeInfo::IsArray() const
-{
-    return (flags & F_ARRAY) != 0;
-}
-
-bool TypeInfo::IsFunction() const
-{
-    return (flags & F_FUNCTION) != 0;
-}
-
-bool TypeInfo::IsType() const
-{
-    return (flags & F_TYPE) != 0;
-}
-
-TypeInfo::ESign TypeInfo::GetSign() const
-{
-    return sign;
-}
-
-bool TypeInfo::IsLiteral() const
-{
-    return (flags & F_LITERAL) != 0;
-}
-
-bool TypeInfo::IsAggregate() const
-{
-    return (flags & F_AGGREGATE) != 0;
-}
-
-bool TypeInfo::IsHalfOpen() const
-{
-    return (flags & F_HALF_OPEN) != 0;
-}
-
 bool TypeInfo::IsOrContainsLiteral() const
 {
     if (IsArray() || IsRange())
@@ -283,21 +178,6 @@ bool TypeInfo::IsOrContainsNumericLiteral() const
     return false;
 }
 
-unsigned TypeInfo::GetNumBits() const
-{
-    return numBits;
-}
-
-const string& TypeInfo::GetUniqueName() const
-{
-    return uniqueName;
-}
-
-const string& TypeInfo::GetShortName() const
-{
-    return shortName;
-}
-
 const MemberInfo* TypeInfo::GetMember(const string& memberName) const
 {
     auto iter = memberMap.find(memberName);
@@ -307,16 +187,6 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     }
 
     return iter->second;
-}
-
-const vector<const MemberInfo*>& TypeInfo::GetMembers() const
-{
-    return members;
-}
-
-size_t TypeInfo::GetMemberCount() const
-{
-    return members.size();
 }
 
 bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable, const Token* token)
@@ -335,26 +205,6 @@ bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssign
     }
 
     return inserted;
-}
-
-const TypeInfo* TypeInfo::GetInnerType() const
-{
-    return innerType;
-}
-
-const vector<const TypeInfo*>& TypeInfo::GetParamTypes() const
-{
-    return paramTypes;
-}
-
-const vector<string>& TypeInfo::GetParamNames() const
-{
-    return paramNames;
-}
-
-const TypeInfo* TypeInfo::GetReturnType() const
-{
-    return returnType;
 }
 
 UnitTypeInfo::UnitTypeInfo() :
