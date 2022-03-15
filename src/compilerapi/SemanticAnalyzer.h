@@ -79,7 +79,7 @@ private:
     ErrorLogger& logger;
     bool isError;
     bool isConstDecl;
-    std::unordered_map<std::string, AggregateType*> partialStructTypes;
+    std::unordered_map<std::string, TypeInfo*> partialStructTypes;
     CompilerContext& compilerContext;
     SymbolTable symbolTable;
     unsigned loopLevel;

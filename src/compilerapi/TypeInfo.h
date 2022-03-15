@@ -13,10 +13,8 @@ namespace SyntaxTree
 {
 class FunctionDeclaration;
 }
-class RangeType;
 class Token;
 class TypeInfo;
-class UnitTypeInfo;
 
 const char* const POINTER_TYPE_TOKEN = "&";
 const char* const DOUBLE_POINTER_TYPE_TOKEN = "&&";
@@ -91,7 +89,7 @@ public:
         eContextDependent,
     };
 
-    static const UnitTypeInfo* UnitType;
+    static const TypeInfo* UnitType;
     static const TypeInfo* BoolType;
     static const TypeInfo* Int8Type;
     static const TypeInfo* Int16Type;
@@ -111,6 +109,8 @@ public:
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
 
+    static TypeInfo* CreateAggregateType(const std::string& name, const Token* token);
+
     static const TypeInfo* CreateFunctionType(
         unsigned numBits,
         const std::string& uniqueName,
@@ -125,12 +125,13 @@ public:
         ESign sign,
         const std::string& uniqueName,
         const std::string& shortName,
-        const TypeInfo* innerType = nullptr
+        const TypeInfo* innerType = nullptr,
+        const Token* token = nullptr
     );
 
     virtual ~TypeInfo();
 
-    virtual bool IsSameAs(const TypeInfo& other) const = 0;
+    virtual bool IsSameAs(const TypeInfo& other) const;
 
     uint16_t GetFlags() const
     {
@@ -246,6 +247,11 @@ public:
 
     bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable, const Token* token);
 
+    const Token* GetToken() const
+    {
+        return token;
+    }
+
     const TypeInfo* GetInnerType() const
     {
         return innerType;
@@ -274,33 +280,11 @@ private:
     std::string shortName;
     std::map<std::string, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
+    const Token* token;
     const TypeInfo* innerType;
     std::vector<const TypeInfo*> paramTypes;
     std::vector<std::string> paramNames;
     const TypeInfo* returnType;
-};
-
-class UnitTypeInfo : public TypeInfo
-{
-public:
-    UnitTypeInfo();
-
-    bool IsSameAs(const TypeInfo& other) const override;
-};
-
-class PrimitiveType : public TypeInfo
-{
-public:
-    PrimitiveType(
-        unsigned numBits,
-        uint16_t flags,
-        ESign sign,
-        const std::string& uniqueName,
-        const std::string& shortName,
-        const TypeInfo* innerType = nullptr
-    );
-
-    bool IsSameAs(const TypeInfo& other) const override;
 };
 
 class NumericLiteralType : public TypeInfo
@@ -363,26 +347,5 @@ namespace std
         }
     };
 }
-
-class StringType : public TypeInfo
-{
-public:
-    StringType(unsigned numBits, const TypeInfo* sizeType, const TypeInfo* pointerType);
-
-    bool IsSameAs(const TypeInfo& other) const override;
-};
-
-class AggregateType : public TypeInfo
-{
-public:
-    AggregateType(const std::string& name, const Token* token);
-
-    bool IsSameAs(const TypeInfo& other) const override;
-
-    const Token* GetToken() const;
-
-private:
-    const Token* token;
-};
 
 #endif // TYPE_INFO_H_

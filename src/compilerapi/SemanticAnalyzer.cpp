@@ -1900,7 +1900,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
     auto iter = partialStructTypes.find(structName);
     assert(iter != partialStructTypes.cend());
-    AggregateType* newType = iter->second;
+    TypeInfo* newType = iter->second;
 
     for (const MemberDefinition* member : structDefinition->members)
     {
@@ -2173,7 +2173,7 @@ bool SemanticAnalyzer::ResolveDependencies(
     resolved.insert(structName);
 
     // register the type name. we'll add its members later
-    AggregateType* newType = new AggregateType(structName, structDef->nameToken);
+    TypeInfo* newType = TypeInfo::CreateAggregateType(structName, structDef->nameToken);
     partialStructTypes.insert({structName, newType});
 
     // TODO: Is this needed?

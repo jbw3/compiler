@@ -1103,14 +1103,12 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
 
     if (dbgInfo)
     {
-        const AggregateType* aggType = dynamic_cast<const AggregateType*>(typeInfo);
-
         DIFile* file = diFiles[structDefinition->fileId];
 
         SmallVector<Metadata*, 8> elements;
 
         uint64_t offset = 0;
-        for (const MemberInfo* member : aggType->GetMembers())
+        for (const MemberInfo* member : typeInfo->GetMembers())
         {
             const TypeInfo* memberType = member->GetType();
             DIType* memberDiType = GetDebugType(memberType);
@@ -1219,12 +1217,12 @@ void LlvmIrGenerator::Visit(Modules* modules)
         {
             DIFile* diFile = diFiles[structDef->fileId];
 
-            const AggregateType* aggType = dynamic_cast<const AggregateType*>(structDef->type);
+            const TypeInfo* structDefType = structDef->type;
 
-            const string& name = aggType->GetShortName();
-            unsigned numBits = aggType->GetNumBits();
+            const string& name = structDefType->GetShortName();
+            unsigned numBits = structDefType->GetNumBits();
 
-            unsigned line = aggType->GetToken()->line;
+            unsigned line = structDefType->GetToken()->line;
             // TODO: set alignment
             SmallVector<Metadata*, 0> elements;
             DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);

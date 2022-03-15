@@ -38,13 +38,15 @@ TypeRegistry::TypeRegistry(const TargetMachine* targetMachine)
     types.insert({FLOAT64_KEYWORD, TypeInfo::Float64Type});
     types.insert({TYPE_KEYWORD, TypeInfo::TypeType});
 
-    intSizeType = new PrimitiveType(pointerSize, TypeInfo::F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
+    intSizeType = new TypeInfo(pointerSize, TypeInfo::F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
     RegisterType(intSizeType);
 
-    uintSizeType = new PrimitiveType(pointerSize, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
+    uintSizeType = new TypeInfo(pointerSize, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
 
-    stringType = new StringType(pointerSize * 2, uintSizeType, GetPointerToType(TypeInfo::UInt8Type));
+    stringType = new TypeInfo(pointerSize * 2, TypeInfo::F_STR | TypeInfo::F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD);
+    stringType->AddMember("Size", uintSizeType, false, Token::None);
+    stringType->AddMember("Data", GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
     RegisterType(stringType);
 }
 
@@ -83,7 +85,7 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
         name += (isHalfOpen ? "HalfOpen" : "Closed");
         name += "'" + memberType->GetShortName() + "'";
 
-        TypeInfo* newRangeType = new PrimitiveType(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
+        TypeInfo* newRangeType = new TypeInfo(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
         newRangeType->AddMember("Start", memberType, false, Token::None);
         newRangeType->AddMember("End", memberType, false, Token::None);
 
@@ -195,7 +197,7 @@ const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
     if (ptrType == nullptr)
     {
         string name = POINTER_TYPE_TOKEN + type->GetShortName();
-        TypeInfo* newPtrType = new PrimitiveType(pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, uniqueName, name, type);
+        TypeInfo* newPtrType = new TypeInfo(pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, uniqueName, name, type);
         RegisterType(newPtrType);
 
         ptrType = newPtrType;
@@ -218,7 +220,7 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
         name += ARRAY_TYPE_END_TOKEN;
         name += type->GetShortName();
 
-        TypeInfo* newArrayType = new PrimitiveType(pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, uniqueName, name, type);
+        TypeInfo* newArrayType = new TypeInfo(pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, uniqueName, name, type);
         newArrayType->AddMember("Size", GetUIntSizeType(), false, Token::None);
         newArrayType->AddMember("Data", GetPointerToType(type), false, Token::None);
         RegisterType(newArrayType);
