@@ -11,5 +11,5 @@ target_link_libraries(wip compilerapi ${llvm_libs})
 
 if(WIN32)
 else()
-    target_compile_options(compilerapi PRIVATE -Wall -Wextra)
+    target_compile_options(wip PRIVATE -Wall -Wextra)
 endif()

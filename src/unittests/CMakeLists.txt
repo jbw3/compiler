@@ -23,5 +23,5 @@ target_link_libraries(unittests compilerapi ${llvm_libs})
 
 if(WIN32)
 else()
-    target_compile_options(compilerapi PRIVATE -Wall -Wextra)
+    target_compile_options(unittests PRIVATE -Wall -Wextra)
 endif()
