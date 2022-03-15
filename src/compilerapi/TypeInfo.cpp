@@ -181,8 +181,8 @@ bool TypeInfo::IsSameAs(const TypeInfo& other) const
 {
     const uint16_t CHECK_FLAGS = F_UNIT | F_BOOL | F_INT | F_FLOAT | F_STR | F_RANGE | F_POINTER | F_ARRAY | F_FUNCTION | F_TYPE | F_AGGREGATE | F_HALF_OPEN;
     bool isSame = numBits == other.numBits;
-    isSame &= (GetFlags() & CHECK_FLAGS) == (other.GetFlags() & CHECK_FLAGS);
-    isSame &= GetSign() == other.GetSign();
+    isSame &= (flags & CHECK_FLAGS) == (other.flags & CHECK_FLAGS);
+    isSame &= sign == other.sign;
 
     if (isSame)
     {
@@ -192,24 +192,22 @@ bool TypeInfo::IsSameAs(const TypeInfo& other) const
     // compare inner types
     if (isSame)
     {
-        isSame = pointersIsSameAs(GetInnerType(), other.GetInnerType());
+        isSame = pointersIsSameAs(innerType, other.innerType);
     }
 
     // compare param types
     if (isSame)
     {
-        const vector<const TypeInfo*>& myParamTypes = GetParamTypes();
-        const vector<const TypeInfo*>& otherParamTypes = other.GetParamTypes();
-        if (myParamTypes.size() != otherParamTypes.size())
+        if (paramTypes.size() != other.paramTypes.size())
         {
             isSame = false;
         }
         else
         {
-            size_t size = myParamTypes.size();
+            size_t size = paramTypes.size();
             for (size_t i = 0; i < size; ++i)
             {
-                if (!myParamTypes[i]->IsSameAs(*otherParamTypes[i]))
+                if (!paramTypes[i]->IsSameAs(*other.paramTypes[i]))
                 {
                     isSame = false;
                     break;
@@ -221,7 +219,7 @@ bool TypeInfo::IsSameAs(const TypeInfo& other) const
     // compare return types
     if (isSame)
     {
-        isSame = pointersIsSameAs(GetReturnType(), other.GetReturnType());
+        isSame = pointersIsSameAs(returnType, other.returnType);
     }
 
     return isSame;
