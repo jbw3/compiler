@@ -165,7 +165,7 @@ void ErrorLogger::WriteHeader(const char* tag, unsigned filenameId, unsigned lin
     *os << ' ';
 }
 
-void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned line, unsigned column, unsigned width)
+void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned startLine, unsigned startColumn, unsigned endLine, unsigned endColumn)
 {
     if (filenameId >= compilerContext.GetFileIdCount())
     {
@@ -179,7 +179,7 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
     // find the line
     size_t idx = 0;
     unsigned l = 1;
-    while (l < line)
+    while (l < startLine)
     {
         while (idx < buffSize && chars[idx] != '\n')
         {
@@ -199,13 +199,14 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
     *os << '\n';
 
     // underline token
-    for (unsigned i = 1; i < column; ++i)
+    unsigned c = 1;
+    for (; c < startColumn; ++c)
     {
         *os << ' ';
     }
     SetBold();
     SetColor(tag);
-    for (unsigned i = 0; i < width; ++i)
+    for (; c < endColumn; ++c)
     {
         *os << '~';
     }

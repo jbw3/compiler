@@ -10,6 +10,169 @@
 using namespace std;
 using namespace SyntaxTree;
 
+void StartEndTokenFinder::Visit(UnaryExpression* unaryExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(BinaryExpression* binaryExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(WhileLoop* whileLoop)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(ForLoop* forLoop)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(LoopControl* loopControl)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(Return* ret)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(FunctionTypeExpression* functionTypeExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(FunctionDefinition* functionDefinition)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(StructDefinition* structDefinition)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(StructInitializationExpression* structInitializationExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(ModuleDefinition* moduleDefinition)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(Modules* modules)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(NumericExpression* numericExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(FloatLiteralExpression* floatLiteralExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(BoolLiteralExpression* boolLiteralExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(StringLiteralExpression* stringLiteralExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(IdentifierExpression* identifierExpression)
+{
+    const Token* token = identifierExpression->token;
+    UpdateStart(token);
+    UpdateEnd(token);
+}
+
+void StartEndTokenFinder::Visit(ArraySizeValueExpression* arrayExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(ArrayMultiValueExpression* arrayExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(BlockExpression* blockExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(CastExpression* castExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(ImplicitCastExpression* castExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(FunctionCallExpression* functionCallExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(MemberExpression* memberExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(BranchExpression* branchExpression)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(ConstantDeclaration* constantDeclaration)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::Visit(VariableDeclaration* variableDeclaration)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
+void StartEndTokenFinder::UpdateStart(const Token* newStart)
+{
+    if (start == nullptr || newStart->line < start->line || (newStart->line == start->line && newStart->column < start->column))
+    {
+        start = newStart;
+    }
+}
+
+void StartEndTokenFinder::UpdateEnd(const Token* newEnd)
+{
+    if (end == nullptr || newEnd->line > end->line || (newEnd->line == end->line && newEnd->column > end->column))
+    {
+        end = newEnd;
+    }
+}
+
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     logger(compilerContext.logger),
     isError(false),
@@ -2820,7 +2983,12 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
         {
-            logger.LogError(*functionCallExpression->openParToken, "Argument type does not match parameter type. Argument: '{}', parameter: '{}'", argType->GetShortName(), paramType->GetShortName());
+            logger.LogError(
+                *functionCallExpression->openParToken,
+                "Argument type does not match parameter type. Argument: '{}', parameter: '{}'",
+                argType->GetShortName(),
+                paramType->GetShortName()
+            );
             isError = true;
             return;
         }
