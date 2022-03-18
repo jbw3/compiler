@@ -190,29 +190,72 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
         ++l;
     }
 
-    // write the line
-    while (idx < buffSize && chars[idx] != '\n')
+    while (l <= endLine)
     {
-        *os << chars[idx];
+        // write the line
+        bool foundNonWhitespace = false;
+        unsigned lineStart = 1;
+        unsigned lineEnd = 1;
+        while (idx < buffSize && chars[idx] != '\n')
+        {
+            char ch = chars[idx];
+            *os << ch;
+
+            if (!foundNonWhitespace)
+            {
+                if (isspace(ch))
+                {
+                    ++lineStart;
+                }
+                else
+                {
+                    foundNonWhitespace = true;
+                }
+            }
+
+            ++idx;
+            ++lineEnd;
+        }
         ++idx;
-    }
-    *os << '\n';
+        *os << '\n';
 
-    // underline token
-    unsigned c = 1;
-    for (; c < startColumn; ++c)
-    {
-        *os << ' ';
-    }
-    SetBold();
-    SetColor(tag);
-    for (; c < endColumn; ++c)
-    {
-        *os << '~';
-    }
-    ResetFormat();
+        // calculate where the underline should start and end
+        unsigned underlineStartColumn = 0;
+        unsigned underlineEndColumn = 0;
+        if (l == startLine)
+        {
+            underlineStartColumn = startColumn;
+            underlineEndColumn = lineEnd;
+        }
+        else if (l == endLine)
+        {
+            underlineStartColumn = lineStart;
+            underlineEndColumn = endColumn;
+        }
+        else
+        {
+            underlineStartColumn = lineStart;
+            underlineEndColumn = lineEnd;
+        }
 
-    *os << '\n';
+        // underline token
+        unsigned c = 1;
+        for (; c < underlineStartColumn; ++c)
+        {
+            *os << ' ';
+        }
+        SetBold();
+        SetColor(tag);
+        for (; c < underlineEndColumn; ++c)
+        {
+            *os << '~';
+        }
+        ResetFormat();
+
+        *os << '\n';
+
+        ++l;
+    }
 }
 
 void ErrorLogger::Write(const char* format)
