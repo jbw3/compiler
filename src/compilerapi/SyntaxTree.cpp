@@ -524,10 +524,15 @@ void IdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-CastExpression::CastExpression(Expression* typeExpression, Expression* subExpression, const Token* castToken) :
+CastExpression::CastExpression(Expression* typeExpression, Expression* subExpression,
+                               const Token* castToken,
+                               const Token* openParToken,
+                               const Token* closeParToken) :
     typeExpression(typeExpression),
     subExpression(subExpression),
-    castToken(castToken)
+    castToken(castToken),
+    openParToken(openParToken),
+    closeParToken(closeParToken)
 {
 }
 
@@ -790,9 +795,13 @@ FunctionTypeExpression::FunctionTypeExpression(
     const vector<string>& paramNames,
     Expression* returnTypeExpression,
     const Token* funToken,
+    const Token* openParToken,
+    const Token* closeParToken,
     const vector<const Token*> paramNameTokens
 ) :
     funToken(funToken),
+    openParToken(openParToken),
+    closeParToken(closeParToken),
     paramNameTokens(paramNameTokens),
     paramTypeExpressions(paramTypeExpressions),
     paramNames(paramNames),
@@ -892,10 +901,14 @@ MemberInitialization::~MemberInitialization()
 }
 
 StructInitializationExpression::StructInitializationExpression(const string& structName, const vector<MemberInitialization*>& memberInitializations,
-                                                               const Token* structNameToken) :
+                                                               const Token* structNameToken,
+                                                               const Token* openBraceToken,
+                                                               const Token* closeBraceToken) :
     structName(structName),
     memberInitializations(memberInitializations),
-    structNameToken(structNameToken)
+    structNameToken(structNameToken),
+    openBraceToken(openBraceToken),
+    closeBraceToken(closeBraceToken)
 {
 }
 

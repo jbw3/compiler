@@ -280,7 +280,10 @@ public:
 class CastExpression : public Expression
 {
 public:
-    CastExpression(Expression* typeExpression, Expression* subExpression, const Token* castToken);
+    CastExpression(Expression* typeExpression, Expression* subExpression,
+                   const Token* castToken,
+                   const Token* openParToken,
+                   const Token* closeParToken);
 
     virtual ~CastExpression();
 
@@ -289,6 +292,8 @@ public:
     Expression* typeExpression;
     Expression* subExpression;
     const Token* castToken;
+    const Token* openParToken;
+    const Token* closeParToken;
 };
 
 class ImplicitCastExpression : public Expression
@@ -506,6 +511,8 @@ public:
         const std::vector<std::string>& paramNames,
         Expression* returnTypeExpression,
         const Token* funToken,
+        const Token* openParToken,
+        const Token* closeParToken,
         const std::vector<const Token*> paramNameTokens
     );
 
@@ -514,6 +521,8 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* funToken;
+    const Token* openParToken;
+    const Token* closeParToken;
     std::vector<const Token*> paramNameTokens;
     Expressions paramTypeExpressions;
     std::vector<std::string> paramNames;
@@ -594,7 +603,9 @@ class StructInitializationExpression : public Expression
 {
 public:
     StructInitializationExpression(const std::string& structName, const std::vector<MemberInitialization*>& memberInitializations,
-                                   const Token* structNameToken);
+                                   const Token* structNameToken,
+                                   const Token* openBraceToken,
+                                   const Token* closeBraceToken);
 
     virtual ~StructInitializationExpression();
 
@@ -603,6 +614,8 @@ public:
     std::string structName;
     std::vector<MemberInitialization*> memberInitializations;
     const Token* structNameToken;
+    const Token* openBraceToken;
+    const Token* closeBraceToken;
 };
 
 class ModuleDefinition : public SyntaxTreeNode

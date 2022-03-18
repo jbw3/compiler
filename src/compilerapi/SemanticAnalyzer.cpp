@@ -45,7 +45,17 @@ void StartEndTokenFinder::Visit(Return* ret)
 
 void StartEndTokenFinder::Visit(FunctionTypeExpression* functionTypeExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(functionTypeExpression->funToken);
+
+    Expression* retTypeExpr = functionTypeExpression->returnTypeExpression;
+    if (retTypeExpr == nullptr)
+    {
+        UpdateEnd(functionTypeExpression->closeParToken);
+    }
+    else
+    {
+        retTypeExpr->Accept(this);
+    }
 }
 
 void StartEndTokenFinder::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
@@ -65,17 +75,18 @@ void StartEndTokenFinder::Visit(StructDefinition* structDefinition)
 
 void StartEndTokenFinder::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(structInitializationExpression->structNameToken);
+    UpdateEnd(structInitializationExpression->closeBraceToken);
 }
 
-void StartEndTokenFinder::Visit(ModuleDefinition* moduleDefinition)
+void StartEndTokenFinder::Visit(ModuleDefinition* /*moduleDefinition*/)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    assert(false && "StartEndTokenFinder does not support ModuleDefinition");
 }
 
-void StartEndTokenFinder::Visit(Modules* modules)
+void StartEndTokenFinder::Visit(Modules* /*modules*/)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    assert(false && "StartEndTokenFinder does not support Modules");
 }
 
 void StartEndTokenFinder::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpression*/)
@@ -119,42 +130,49 @@ void StartEndTokenFinder::Visit(IdentifierExpression* identifierExpression)
 
 void StartEndTokenFinder::Visit(ArraySizeValueExpression* arrayExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(arrayExpression->startToken);
+    UpdateEnd(arrayExpression->endToken);
 }
 
 void StartEndTokenFinder::Visit(ArrayMultiValueExpression* arrayExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(arrayExpression->startToken);
+    UpdateEnd(arrayExpression->endToken);
 }
 
 void StartEndTokenFinder::Visit(BlockExpression* blockExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(blockExpression->startToken);
+    UpdateEnd(blockExpression->endToken);
 }
 
 void StartEndTokenFinder::Visit(CastExpression* castExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(castExpression->castToken);
+    UpdateEnd(castExpression->closeParToken);
 }
 
 void StartEndTokenFinder::Visit(ImplicitCastExpression* castExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    castExpression->Accept(this);
 }
 
 void StartEndTokenFinder::Visit(FunctionCallExpression* functionCallExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    functionCallExpression->functionExpression->Accept(this);
+    UpdateEnd(functionCallExpression->closeParToken);
 }
 
 void StartEndTokenFinder::Visit(MemberExpression* memberExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    memberExpression->subExpression->Accept(this);
+    UpdateEnd(memberExpression->memberNameToken);
 }
 
 void StartEndTokenFinder::Visit(BranchExpression* branchExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(branchExpression->ifToken);
+    branchExpression->elseExpression->Accept(this);
 }
 
 void StartEndTokenFinder::Visit(ConstantDeclaration* constantDeclaration)

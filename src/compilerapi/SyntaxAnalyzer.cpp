@@ -498,8 +498,13 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
     const Token* structNameToken = &*iter;
     const string& structName = iter->value;
 
-    // skip struct name and '{'
-    iter += 2;
+    // skip struct name
+    ++iter;
+
+    const Token* openBraceToken = &*iter;
+
+    // skip '{'
+    ++iter;
     if (iter == endIter)
     {
         logger.LogError("Unexpected end of file in the middle of a struct initialization");
@@ -567,7 +572,9 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
         return nullptr;
     }
 
-    StructInitializationExpression* structInit = new StructInitializationExpression(structName, members, structNameToken);
+    const Token* closeBraceToken = &*iter;
+
+    StructInitializationExpression* structInit = new StructInitializationExpression(structName, members, structNameToken, openBraceToken, closeBraceToken);
     return structInit;
 }
 
@@ -1081,6 +1088,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
 
+        const Token* openParToken = &*iter;
+
         ++iter;
         if (iter == endIter)
         {
@@ -1134,7 +1143,9 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
 
-        expr = new CastExpression(typeExpr, subExpression, castToken);
+        const Token* closeParToken = &*iter;
+
+        expr = new CastExpression(typeExpr, subExpression, castToken, openParToken, closeParToken);
     }
     else if (type == Token::eFun)
     {
@@ -1148,6 +1159,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             logger.LogError(*iter, "Expected '('");
             return nullptr;
         }
+
+        const Token* openParToken = &*iter;
 
         // parse parameters
         vector<string> paramNames;
@@ -1196,6 +1209,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
 
+        const Token* closeParToken = &*iter;
+
         // parse return type
         Expression* returnType = nullptr;
         TokenIterator nextIter = iter + 1;
@@ -1224,7 +1239,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             }
         }
 
-        expr = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, paramNameTokens);
+        expr = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, openParToken, closeParToken, paramNameTokens);
     }
     else
     {
