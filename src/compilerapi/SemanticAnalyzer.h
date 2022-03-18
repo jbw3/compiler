@@ -166,7 +166,7 @@ private:
         std::unordered_set<std::string>& resolved,
         std::unordered_set<std::string>& dependents);
 
-    const TypeInfo* TypeExpressionToType(SyntaxTree::Expression* typeExpression, const Token* errorToken);
+    const TypeInfo* TypeExpressionToType(SyntaxTree::Expression* typeExpression);
 
     bool HaveCompatibleSigns(const TypeInfo* leftType, const TypeInfo* rightType);
 

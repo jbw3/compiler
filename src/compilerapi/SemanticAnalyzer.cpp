@@ -23,22 +23,22 @@ void StartEndTokenFinder::Visit(BinaryExpression* binaryExpression)
     binaryExpression->right->Accept(this);
 }
 
-void StartEndTokenFinder::Visit(WhileLoop* whileLoop)
+void StartEndTokenFinder::Visit(WhileLoop* /*whileLoop*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(ForLoop* forLoop)
+void StartEndTokenFinder::Visit(ForLoop* /*forLoop*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(LoopControl* loopControl)
+void StartEndTokenFinder::Visit(LoopControl* /*loopControl*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(Return* ret)
+void StartEndTokenFinder::Visit(Return* /*ret*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
@@ -58,17 +58,17 @@ void StartEndTokenFinder::Visit(FunctionTypeExpression* functionTypeExpression)
     }
 }
 
-void StartEndTokenFinder::Visit(ExternFunctionDeclaration* externFunctionDeclaration)
+void StartEndTokenFinder::Visit(ExternFunctionDeclaration* /*externFunctionDeclaration*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(FunctionDefinition* functionDefinition)
+void StartEndTokenFinder::Visit(FunctionDefinition* /*functionDefinition*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(StructDefinition* structDefinition)
+void StartEndTokenFinder::Visit(StructDefinition* /*structDefinition*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
@@ -175,12 +175,12 @@ void StartEndTokenFinder::Visit(BranchExpression* branchExpression)
     branchExpression->elseExpression->Accept(this);
 }
 
-void StartEndTokenFinder::Visit(ConstantDeclaration* constantDeclaration)
+void StartEndTokenFinder::Visit(ConstantDeclaration* /*constantDeclaration*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(VariableDeclaration* variableDeclaration)
+void StartEndTokenFinder::Visit(VariableDeclaration* /*variableDeclaration*/)
 {
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
@@ -1982,7 +1982,7 @@ void SemanticAnalyzer::Visit(FunctionTypeExpression* functionTypeExpression)
             return;
         }
 
-        const TypeInfo* paramType = TypeExpressionToType(paramTypeExpr, functionTypeExpression->paramNameTokens[i]);
+        const TypeInfo* paramType = TypeExpressionToType(paramTypeExpr);
         if (paramType == nullptr)
         {
             isError = true;
@@ -2007,7 +2007,7 @@ void SemanticAnalyzer::Visit(FunctionTypeExpression* functionTypeExpression)
             return;
         }
 
-        returnType = TypeExpressionToType(functionTypeExpression->returnTypeExpression, functionTypeExpression->funToken);
+        returnType = TypeExpressionToType(functionTypeExpression->returnTypeExpression);
         if (returnType == nullptr)
         {
             isError = true;
@@ -2107,7 +2107,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
     for (const MemberDefinition* member : structDefinition->members)
     {
-        const TypeInfo* memberType = TypeExpressionToType(member->typeExpression, member->nameToken);
+        const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
         if (memberType == nullptr)
         {
             isError = true;
@@ -2404,7 +2404,7 @@ bool SemanticAnalyzer::ResolveDependencies(
     return true;
 }
 
-const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpression, const Token* errorToken)
+const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpression)
 {
     typeExpression->Accept(this);
     if (isError)
@@ -2414,14 +2414,18 @@ const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpressio
 
     if (!typeExpression->GetType()->IsType())
     {
-        // TODO: need a way to get the type expression tokens
-        logger.LogError(*errorToken, "Expected expression to be of type '{}'", TYPE_KEYWORD);
+        StartEndTokenFinder finder;
+        typeExpression->Accept(&finder);
+
+        logger.LogError(*finder.start, *finder.end, "Expected expression to be of type '{}'", TYPE_KEYWORD);
         return nullptr;
     }
     if (!typeExpression->GetIsConstant())
     {
-        // TODO: need a way to get the type expression tokens
-        logger.LogError(*errorToken, "Type must be a constant expression");
+        StartEndTokenFinder finder;
+        typeExpression->Accept(&finder);
+
+        logger.LogError(*finder.start, *finder.end, "Type must be a constant expression");
         return nullptr;
     }
 
@@ -2816,7 +2820,7 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     }
     const TypeInfo* exprType = subExpression->GetType();
 
-    const TypeInfo* castType = TypeExpressionToType(castExpression->typeExpression, castExpression->castToken);
+    const TypeInfo* castType = TypeExpressionToType(castExpression->typeExpression);
     if (castType == nullptr)
     {
         isError = true;
@@ -3454,7 +3458,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             return false;
         }
 
-        const TypeInfo* paramType = TypeExpressionToType(param->typeExpression, param->nameToken);
+        const TypeInfo* paramType = TypeExpressionToType(param->typeExpression);
         if (paramType == nullptr)
         {
             return false;
@@ -3485,7 +3489,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
     }
     else
     {
-        returnType = TypeExpressionToType(returnTypeExpr, functionDeclaration->nameToken);
+        returnType = TypeExpressionToType(returnTypeExpr);
         if (returnType == nullptr)
         {
             return false;
@@ -3604,7 +3608,7 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(Expression* typeExpression, co
     }
     else // get the type from the name given
     {
-        type = TypeExpressionToType(typeExpression, errorToken);
+        type = TypeExpressionToType(typeExpression);
     }
 
     return type;
