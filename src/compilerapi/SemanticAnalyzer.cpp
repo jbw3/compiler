@@ -731,8 +731,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 // check index
                 if (strIdx >= strSize)
                 {
+                    StartEndTokenFinder finder;
+                    binaryExpression->right->Accept(&finder);
+
                     logger.LogError(
-                        *binaryExpression->opToken,
+                        *finder.start, *finder.end,
                         "Index out-of-bounds. Index: {}, string size: {}",
                         strIdx,
                         strSize
@@ -791,8 +794,11 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 // check index
                 if (arrayIdx >= arraySize)
                 {
+                    StartEndTokenFinder finder;
+                    binaryExpression->right->Accept(&finder);
+
                     logger.LogError(
-                        *binaryExpression->opToken,
+                        *finder.start, *finder.end,
                         "Index out-of-bounds. Index: {}, array size: {}",
                         arrayIdx,
                         arraySize
@@ -2635,8 +2641,14 @@ void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
 
     if ( !sizeExpression->GetIsConstant() || (sign != TypeInfo::eUnsigned && sign != TypeInfo::eContextDependent) )
     {
+        StartEndTokenFinder finder;
+        sizeExpression->Accept(&finder);
+
         isError = true;
-        logger.LogError(*arrayExpression->startToken, "Invalid array size. Array sizes must be unsigned constant expressions");
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Invalid array size. Array sizes must be unsigned constant expressions"
+        );
         return;
     }
 
@@ -2704,8 +2716,12 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
             }
             else
             {
+                StartEndTokenFinder finder;
+                expr->Accept(&finder);
+
                 isError = true;
-                logger.LogError(*arrayExpression->startToken,
+                logger.LogError(
+                    *finder.start, *finder.end,
                     "Array item at index {} with type '{}' does not match previous item type '{}'",
                     i,
                     exprType->GetShortName(),
