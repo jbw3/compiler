@@ -38,6 +38,13 @@ public:
     }
 
     template<typename... Ts>
+    void LogNote(const Token& startToken, const Token& endToken, const char* format, Ts... args)
+    {
+        unsigned endTokenWidth = strlen(endToken.value);
+        LogSourceMessage(NOTE_TAG, startToken.filenameId, startToken.line, startToken.column, endToken.line, endToken.column + endTokenWidth, format, args...);
+    }
+
+    template<typename... Ts>
     void LogWarning(const char* format, Ts... args)
     {
         LogMessage(WARNING_TAG, format, args...);
@@ -54,6 +61,13 @@ public:
     {
         unsigned width = strlen(token.value);
         LogSourceMessage(WARNING_TAG, token.filenameId, token.line, token.column, token.line, token.column + width, format, args...);
+    }
+
+    template<typename... Ts>
+    void LogWarning(const Token& startToken, const Token& endToken, const char* format, Ts... args)
+    {
+        unsigned endTokenWidth = strlen(endToken.value);
+        LogSourceMessage(WARNING_TAG, startToken.filenameId, startToken.line, startToken.column, endToken.line, endToken.column + endTokenWidth, format, args...);
     }
 
     template<typename... Ts>
