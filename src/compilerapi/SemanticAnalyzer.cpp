@@ -1735,8 +1735,14 @@ void SemanticAnalyzer::Visit(WhileLoop* whileLoop)
     // ensure condition is a boolean expression
     if (!condition->GetType()->IsBool())
     {
+        StartEndTokenFinder finder;
+        condition->Accept(&finder);
+
         isError = true;
-        logger.LogError(*whileLoop->whileToken, "While loop condition must be a boolean expression");
+        logger.LogError(
+            *finder.start, *finder.end,
+            "While loop condition must be a boolean expression"
+        );
         return;
     }
 
@@ -2187,10 +2193,14 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(memberType, exprType, needsCast))
         {
+            StartEndTokenFinder finder;
+            expr->Accept(&finder);
+
             isError = true;
-            const Token* token = member->nameToken;
-            logger.LogError(*token, "Cannot assign expression of type '{}' to member '{}' of type '{}'",
-                            exprType->GetShortName(), memberName, memberType->GetShortName());
+            logger.LogError(
+                *finder.start, *finder.end,
+                "Cannot assign expression of type '{}' to member '{}' of type '{}'",
+                exprType->GetShortName(), memberName, memberType->GetShortName());
             return;
         }
 
@@ -2814,8 +2824,14 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
 
     if (!canCast)
     {
-        logger.LogError(*castExpression->castToken, "Cannot cast expression of type '{}' to type '{}'",
-            exprType->GetShortName(), castType->GetShortName());
+        StartEndTokenFinder finder;
+        subExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Cannot cast expression of type '{}' to type '{}'",
+            exprType->GetShortName(), castType->GetShortName()
+        );
         isError = true;
         return;
     }
@@ -3131,8 +3147,14 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     // ensure if condition is a boolean expression
     if (!ifCondition->GetType()->IsBool())
     {
+        StartEndTokenFinder finder;
+        ifCondition->Accept(&finder);
+
         isError = true;
-        logger.LogError(*branchExpression->ifToken, "If condition must be a boolean expression");
+        logger.LogError(
+            *finder.start, *finder.end,
+            "If condition must be a boolean expression"
+        );
         return;
     }
 
