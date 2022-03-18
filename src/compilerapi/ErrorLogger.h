@@ -76,6 +76,13 @@ public:
     }
 
     template<typename... Ts>
+    void LogError(const Token& startToken, const Token& endToken, const char* format, Ts... args)
+    {
+        unsigned endTokenWidth = strlen(endToken.value);
+        LogSourceMessage(ERROR_TAG, startToken.filenameId, startToken.line, startToken.column, endToken.line, endToken.column + endTokenWidth, format, args...);
+    }
+
+    template<typename... Ts>
     void LogInternalError(const char* format, Ts... args)
     {
         LogMessage(INTERNAL_ERROR_TAG, format, args...);

@@ -12,12 +12,15 @@ using namespace SyntaxTree;
 
 void StartEndTokenFinder::Visit(UnaryExpression* unaryExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(unaryExpression->opToken);
+    unaryExpression->subExpression->Accept(this);
 }
 
 void StartEndTokenFinder::Visit(BinaryExpression* binaryExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    // TODO: operator [] needs to be handled differently
+    binaryExpression->left->Accept(this);
+    binaryExpression->right->Accept(this);
 }
 
 void StartEndTokenFinder::Visit(WhileLoop* whileLoop)
@@ -75,29 +78,36 @@ void StartEndTokenFinder::Visit(Modules* modules)
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
+void StartEndTokenFinder::Visit(UnitTypeLiteralExpression* /*unitTypeLiteralExpression*/)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
 void StartEndTokenFinder::Visit(NumericExpression* numericExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    const Token* token = numericExpression->token;
+    UpdateStart(token);
+    UpdateEnd(token);
 }
 
 void StartEndTokenFinder::Visit(FloatLiteralExpression* floatLiteralExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    const Token* token = floatLiteralExpression->token;
+    UpdateStart(token);
+    UpdateEnd(token);
 }
 
 void StartEndTokenFinder::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    const Token* token = boolLiteralExpression->token;
+    UpdateStart(token);
+    UpdateEnd(token);
 }
 
 void StartEndTokenFinder::Visit(StringLiteralExpression* stringLiteralExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    const Token* token = stringLiteralExpression->token;
+    UpdateStart(token);
+    UpdateEnd(token);
 }
 
 void StartEndTokenFinder::Visit(IdentifierExpression* identifierExpression)
@@ -2983,8 +2993,11 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
         {
+            StartEndTokenFinder finder;
+            arg->Accept(&finder);
+
             logger.LogError(
-                *functionCallExpression->openParToken,
+                *finder.start, *finder.end,
                 "Argument type does not match parameter type. Argument: '{}', parameter: '{}'",
                 argType->GetShortName(),
                 paramType->GetShortName()
