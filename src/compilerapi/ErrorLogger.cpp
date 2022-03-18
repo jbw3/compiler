@@ -194,12 +194,23 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
     {
         // write the line
         bool foundNonWhitespace = false;
+        unsigned tabCount = 0;
         unsigned lineStart = 1;
         unsigned lineEnd = 1;
         while (idx < buffSize && chars[idx] != '\n')
         {
             char ch = chars[idx];
-            *os << ch;
+
+            if (ch == '\t')
+            {
+                // print 4 spaces instead of a tab
+                *os << "    ";
+                ++tabCount;
+            }
+            else
+            {
+                *os << ch;
+            }
 
             if (!foundNonWhitespace)
             {
@@ -243,7 +254,13 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
             underlineEndColumn = lineEnd;
         }
 
-        // underline token
+        // underline token(s)
+        for (unsigned i = 0; i < tabCount; ++i)
+        {
+            // Print 3 spaces for each tab. The 4th space will be printed
+            // below when spaces are printed before the underline start
+            *os << "   ";
+        }
         unsigned c = 1;
         for (; c < underlineStartColumn; ++c)
         {
