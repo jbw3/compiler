@@ -18,9 +18,16 @@ void StartEndTokenFinder::Visit(UnaryExpression* unaryExpression)
 
 void StartEndTokenFinder::Visit(BinaryExpression* binaryExpression)
 {
-    // TODO: operator [] needs to be handled differently
     binaryExpression->left->Accept(this);
-    binaryExpression->right->Accept(this);
+
+    if (binaryExpression->op == BinaryExpression::eSubscript)
+    {
+        UpdateEnd(binaryExpression->opToken2);
+    }
+    else
+    {
+        binaryExpression->right->Accept(this);
+    }
 }
 
 void StartEndTokenFinder::Visit(WhileLoop* /*whileLoop*/)

@@ -227,13 +227,14 @@ public:
 
     static bool IsComputationAssignment(EOperator op);
 
-    BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken);
+    BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken, const Token* opToken2 = nullptr);
 
     virtual ~BinaryExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* opToken;
+    const Token* opToken2;
     Expression* left;
     Expression* right;
     EOperator op;

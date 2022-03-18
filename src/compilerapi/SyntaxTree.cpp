@@ -457,8 +457,9 @@ bool BinaryExpression::IsComputationAssignment(EOperator op)
     return false;
 }
 
-BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken) :
+BinaryExpression::BinaryExpression(EOperator op, Expression* left, Expression* right, const Token* opToken, const Token* opToken2) :
     opToken(opToken),
+    opToken2(opToken2),
     left(left),
     right(right),
     op(op)

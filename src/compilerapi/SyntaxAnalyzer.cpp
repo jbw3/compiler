@@ -2107,7 +2107,9 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
                 return nullptr;
             }
 
-            expr = new BinaryExpression(BinaryExpression::eSubscript, expr, subscriptExpr, opToken);
+            const Token* opToken2 = &*iter;
+
+            expr = new BinaryExpression(BinaryExpression::eSubscript, expr, subscriptExpr, opToken, opToken2);
 
             nextIter = iter + 1;
         }
