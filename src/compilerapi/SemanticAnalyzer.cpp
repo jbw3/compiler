@@ -1794,8 +1794,11 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
     else
     {
+        StartEndTokenFinder finder;
+        iterExpression->Accept(&finder);
+
         isError = true;
-        logger.LogError(*forLoop->forToken, "For loop expression is not iterable");
+        logger.LogError(*finder.start, *finder.end, "For loop expression is not iterable");
         return;
     }
 
@@ -1815,7 +1818,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     if (innerMostType->IsType())
     {
         isError = true;
-        logger.LogError(*forLoop->variableNameToken, "Parameter cannot be of type '{}'", varType->GetShortName());
+        logger.LogError(*forLoop->variableNameToken, "Variable cannot be of type '{}'", varType->GetShortName());
         return;
     }
 
