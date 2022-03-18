@@ -222,7 +222,12 @@ void ErrorLogger::WriteSourceLine(const char* tag, unsigned filenameId, unsigned
         // calculate where the underline should start and end
         unsigned underlineStartColumn = 0;
         unsigned underlineEndColumn = 0;
-        if (l == startLine)
+        if (l == startLine && l == endLine)
+        {
+            underlineStartColumn = startColumn;
+            underlineEndColumn = endColumn;
+        }
+        else if (l == startLine)
         {
             underlineStartColumn = startColumn;
             underlineEndColumn = lineEnd;
