@@ -122,19 +122,20 @@ unsigned NumericExpression::GetMinSignedSize() const
 unsigned NumericExpression::GetMinUnsignedSize() const
 {
     unsigned numBits = 0;
-    if (value <= numeric_limits<uint8_t>::max())
+    uint64_t unsignedValue = static_cast<uint64_t>(value);
+    if (unsignedValue <= numeric_limits<uint8_t>::max())
     {
         numBits = 8;
     }
-    else if (value <= numeric_limits<uint16_t>::max())
+    else if (unsignedValue <= numeric_limits<uint16_t>::max())
     {
         numBits = 16;
     }
-    else if (value <= numeric_limits<uint32_t>::max())
+    else if (unsignedValue <= numeric_limits<uint32_t>::max())
     {
         numBits = 32;
     }
-    else if (value <= numeric_limits<uint64_t>::max())
+    else if (unsignedValue <= numeric_limits<uint64_t>::max())
     {
         numBits = 64;
     }

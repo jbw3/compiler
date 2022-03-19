@@ -33,14 +33,14 @@ public:
     template<typename... Ts>
     void LogNote(const Token& token, const char* format, Ts... args)
     {
-        unsigned width = strlen(token.value);
+        unsigned width = static_cast<unsigned>(strlen(token.value));
         LogSourceMessage(NOTE_TAG, token.filenameId, token.line, token.column, token.line, token.column + width, format, args...);
     }
 
     template<typename... Ts>
     void LogNote(const Token& startToken, const Token& endToken, const char* format, Ts... args)
     {
-        unsigned endTokenWidth = strlen(endToken.value);
+        unsigned endTokenWidth = static_cast<unsigned>(strlen(endToken.value));
         LogSourceMessage(NOTE_TAG, startToken.filenameId, startToken.line, startToken.column, endToken.line, endToken.column + endTokenWidth, format, args...);
     }
 
@@ -59,14 +59,14 @@ public:
     template<typename... Ts>
     void LogWarning(const Token& token, const char* format, Ts... args)
     {
-        unsigned width = strlen(token.value);
+        unsigned width = static_cast<unsigned>(strlen(token.value));
         LogSourceMessage(WARNING_TAG, token.filenameId, token.line, token.column, token.line, token.column + width, format, args...);
     }
 
     template<typename... Ts>
     void LogWarning(const Token& startToken, const Token& endToken, const char* format, Ts... args)
     {
-        unsigned endTokenWidth = strlen(endToken.value);
+        unsigned endTokenWidth = static_cast<unsigned>(strlen(endToken.value));
         LogSourceMessage(WARNING_TAG, startToken.filenameId, startToken.line, startToken.column, endToken.line, endToken.column + endTokenWidth, format, args...);
     }
 
@@ -85,14 +85,14 @@ public:
     template<typename... Ts>
     void LogError(const Token& token, const char* format, Ts... args)
     {
-        unsigned width = strlen(token.value);
+        unsigned width = static_cast<unsigned>(strlen(token.value));
         LogSourceMessage(ERROR_TAG, token.filenameId, token.line, token.column, token.line, token.column + width, format, args...);
     }
 
     template<typename... Ts>
     void LogError(const Token& startToken, const Token& endToken, const char* format, Ts... args)
     {
-        unsigned endTokenWidth = strlen(endToken.value);
+        unsigned endTokenWidth = static_cast<unsigned>(strlen(endToken.value));
         LogSourceMessage(ERROR_TAG, startToken.filenameId, startToken.line, startToken.column, endToken.line, endToken.column + endTokenWidth, format, args...);
     }
 
