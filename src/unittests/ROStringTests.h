@@ -9,4 +9,6 @@ public:
 
 private:
     static bool TestEquality(std::string& failMsg);
+
+    static bool TestOStream(std::string& failMsg);
 };

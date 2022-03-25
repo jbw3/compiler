@@ -1,5 +1,6 @@
 #include "ROStringTests.h"
 #include "ROString.h"
+#include <sstream>
 
 #define TEST_EQUAL(a, b, expected) \
     do \
@@ -27,6 +28,7 @@ ROStringTests::ROStringTests(ostream& results) :
     TestClass("ROString", results)
 {
     ADD_TEST(TestEquality);
+    ADD_TEST(TestOStream);
 }
 
 bool ROStringTests::TestEquality(string& failMsg)
@@ -47,6 +49,36 @@ bool ROStringTests::TestEquality(string& failMsg)
     TEST_NOT_EQUAL(s1, s3, true);
     TEST_NOT_EQUAL(s1, s4, false);
     TEST_NOT_EQUAL(s1, s1, false);
+
+    return true;
+}
+
+bool ROStringTests::TestOStream(string& failMsg)
+{
+    stringstream ss;
+
+    vector<const char*> tests =
+    {
+        "",
+        "Hello!",
+        "test",
+        "ABCDEFabcdef0123456789!@#[]\"",
+    };
+
+    for (const char* test : tests)
+    {
+        ROString roStr(test, strlen(test));
+        string stdStr(test);
+
+        ss.str("");
+        ss << roStr;
+
+        if (ss.str() != stdStr)
+        {
+            failMsg = "Expected: \""s + stdStr + "\", Actual: \""s + ss.str() + "\""s;
+            return false;
+        }
+    }
 
     return true;
 }

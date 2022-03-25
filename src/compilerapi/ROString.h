@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <ostream>
 
 class ROString
 {
@@ -15,6 +16,11 @@ public:
     {
         this->ptr = ptr;
         this->size = size;
+    }
+
+    const char* GetPtr() const
+    {
+        return ptr;
     }
 
     size_t GetSize() const
@@ -44,3 +50,9 @@ private:
     const char* ptr;
     size_t size;
 };
+
+std::ostream& operator <<(std::ostream& os, const ROString& str)
+{
+    os.write(str.GetPtr(), str.GetSize());
+    return os;
+}
