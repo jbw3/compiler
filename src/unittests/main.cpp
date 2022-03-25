@@ -1,5 +1,6 @@
 #include "CompilerTests.h"
 #include "LexicalAnalyzerTests.h"
+#include "ROStringTests.h"
 #include "SourceGeneratorTests.h"
 #include "UtilsTests.h"
 #include <fstream>
@@ -17,6 +18,7 @@ int main()
     {
         shared_ptr<TestClass>(new LexicalAnalyzerTests(resultsFile)),
         shared_ptr<TestClass>(new CompilerTests(resultsFile)),
+        shared_ptr<TestClass>(new ROStringTests(resultsFile)),
         shared_ptr<TestClass>(new SourceGeneratorTests(resultsFile)),
         shared_ptr<TestClass>(new UtilsTests(resultsFile)),
     };

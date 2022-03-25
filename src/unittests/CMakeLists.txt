@@ -11,6 +11,8 @@ add_executable(unittests
     LexicalAnalyzerTests.cpp
     LexicalAnalyzerTests.h
     main.cpp
+    ROStringTests.cpp
+    ROStringTests.h
     SourceGeneratorTests.cpp
     SourceGeneratorTests.h
     TestClass.cpp

@@ -28,6 +28,7 @@ add_library(compilerapi
     LlvmIrGenerator.h
     LlvmIrOptimizer.cpp
     LlvmIrOptimizer.h
+    ROString.h
     SemanticAnalyzer.cpp
     SemanticAnalyzer.h
     SourceGenerator.cpp
