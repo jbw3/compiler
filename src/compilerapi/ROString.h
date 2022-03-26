@@ -76,7 +76,7 @@ namespace std
     {
         std::size_t operator()(const ROString& str) const
         {
-            size_t hash = 3'508'572'349; // large prime
+            size_t hash = 0;
 
             const char* strPtr = str.GetPtr();
             size_t strSize = str.GetSize();
