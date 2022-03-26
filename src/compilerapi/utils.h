@@ -90,31 +90,4 @@ void deletePointerContainer(T& container)
     container.clear();
 }
 
-struct CStringHash
-{
-    std::size_t operator()(const char* str) const
-    {
-        std::size_t hash = 0;
-
-        const char* ptr = str;
-        while (*ptr != '\0')
-        {
-            hash ^= *ptr;
-            hash *= 31;
-
-            ++ptr;
-        }
-
-        return hash;
-    }
-};
-
-struct CStringEqual
-{
-    bool operator()(const char* str1, const char* str2) const
-    {
-        return std::strcmp(str1, str2) == 0;
-    }
-};
-
 #endif // UTILS_H_
