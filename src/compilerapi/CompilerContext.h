@@ -20,42 +20,6 @@ struct CharBuffer
     const char* ptr;
 };
 
-// TODO: remove
-class TokenValues
-{
-public:
-    TokenValues();
-
-    ~TokenValues();
-
-    void AppendChar(char ch);
-
-    const char* EndValue()
-    {
-        AppendChar('\0');
-        return current;
-    }
-
-    void StartNew()
-    {
-        current = end;
-    }
-
-    void ClearCurrent()
-    {
-        end = current;
-    }
-
-private:
-    char* head;
-
-    size_t buffCapacity;
-    char* buffEnd;
-
-    char* current;
-    char* end;
-};
-
 struct RangeConstValue
 {
     int64_t start;
@@ -81,7 +45,6 @@ class CompilerContext
 {
 public:
     Config config;
-    TokenValues tokenValues;
     ErrorLogger logger;
     TypeRegistry typeRegistry;
 
