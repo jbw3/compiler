@@ -18,7 +18,7 @@ const unordered_set<char> LexicalAnalyzer::SYMBOL_START_CHAR =
     '=', '!', '<', '>', '+', '-', '*', '/', '%', '&', '|', '^', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}',
 };
 
-const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> LexicalAnalyzer::SYMBOLS =
+const unordered_map<ROString, Token::EType> LexicalAnalyzer::SYMBOLS =
 {
     { "==", Token::eEqualEqual },
     { "!=", Token::eExclaimEqual },
@@ -66,7 +66,7 @@ const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> Lexica
     { "..<", Token::ePeriodPeriodLess },
 };
 
-const unordered_map<const char*, Token::EType, CStringHash, CStringEqual> LexicalAnalyzer::KEYWORDS =
+const unordered_map<ROString, Token::EType> LexicalAnalyzer::KEYWORDS =
 {
     { BOOL_KEYWORD, Token::eBool },
     { BREAK_KEYWORD, Token::eBreak },
@@ -178,8 +178,6 @@ bool LexicalAnalyzer::Process(const string& inFile)
 
 bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 {
-    TokenValues& tokenValues = compilerContext.tokenValues;
-    tokenValues.ClearCurrent();
     tokens.Clear();
     buffIdx = 0;
     isMore = true;
@@ -232,37 +230,34 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
         if (isMore)
         {
+            const char* valuePtr = buff.ptr + (buffIdx - 1);
+            size_t valueSize = 1;
+
             // parse identifiers and keywords
             if (std::isalpha(ch) || ch == '_')
             {
                 unsigned startColumn = column;
-                tokenValues.AppendChar(ch);
                 ch = Read(buff);
                 ++column;
                 while (isMore && (std::isalnum(ch) || ch == '_'))
                 {
-                    tokenValues.AppendChar(ch);
+                    ++valueSize;
                     ch = Read(buff);
                     ++column;
                 }
 
-                const char* value = tokenValues.EndValue();
+                ROString value(valuePtr, valueSize);
 
                 // get token type
                 Token::EType tokenType = Token::eInvalid;
                 auto iter = KEYWORDS.find(value);
                 if (iter != KEYWORDS.end())
                 {
-                    value = iter->first;
                     tokenType = iter->second;
-
-                    tokenValues.ClearCurrent();
                 }
                 else
                 {
                     tokenType = Token::eIdentifier;
-
-                    tokenValues.StartNew();
                 }
 
                 tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
@@ -271,30 +266,22 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
             else if (SYMBOL_START_CHAR.find(ch) != SYMBOL_START_CHAR.end())
             {
                 unsigned startColumn = column;
-                tokenValues.AppendChar(ch);
-
-                char temp[8];
-                size_t tempIdx = 0;
-                temp[tempIdx++] = ch;
 
                 ch = Read(buff);
                 ++column;
 
-                temp[tempIdx++] = ch;
-                temp[tempIdx] = '\0';
-                while (isMore && SYMBOLS.find(temp) != SYMBOLS.end())
+                size_t tempSize = 2;
+                while (isMore && SYMBOLS.find(ROString(valuePtr, tempSize)) != SYMBOLS.end())
                 {
-                    tokenValues.AppendChar(ch);
+                    ++valueSize;
+                    ++tempSize;
+
                     ch = Read(buff);
                     ++column;
-
-                    temp[tempIdx++] = ch;
-                    temp[tempIdx] = '\0';
                 }
 
-                const char* symbolValue = tokenValues.EndValue();
-
-                auto iter = SYMBOLS.find(symbolValue);
+                ROString symbolStr(valuePtr, valueSize);
+                auto iter = SYMBOLS.find(symbolStr);
                 if (iter == SYMBOLS.end())
                 {
                     logger.LogError(filenameId, line, column, "Invalid symbol");
@@ -302,12 +289,9 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 }
                 else
                 {
-                    const char* value = iter->first;
                     Token::EType tokenType = iter->second;
 
-                    tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
-
-                    tokenValues.ClearCurrent();
+                    tokens.Append(Token(ROString(valuePtr, valueSize), filenameId, line, startColumn, tokenType));
                 }
             }
             // parse numeric literals
@@ -316,7 +300,6 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 char firstCh = ch;
                 Token::EType tokenType = Token::eDecIntLit;
                 unsigned startColumn = column;
-                tokenValues.AppendChar(ch);
                 ch = Read(buff);
                 ++column;
 
@@ -326,7 +309,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                     {
                         while ( isMore && ((ch >= '0' && ch <= '9') || ch == '_') )
                         {
-                            tokenValues.AppendChar(ch);
+                            ++valueSize;
                             ch = Read(buff);
                             ++column;
                         }
@@ -339,7 +322,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                             if (ch == '.')
                             {
-                                tokenValues.AppendChar(ch);
+                                ++valueSize;
                                 ch = Read(buff);
                                 ++column;
 
@@ -351,7 +334,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                                         hasDigitAfterPoint = true;
                                     }
 
-                                    tokenValues.AppendChar(ch);
+                                    ++valueSize;
                                     ch = Read(buff);
                                     ++column;
                                 }
@@ -365,13 +348,13 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                             if (ok && isMore && ch == 'e')
                             {
-                                tokenValues.AppendChar(ch);
+                                ++valueSize;
                                 ch = Read(buff);
                                 ++column;
 
                                 if (isMore && ch == '-')
                                 {
-                                    tokenValues.AppendChar(ch);
+                                    ++valueSize;
                                     ch = Read(buff);
                                     ++column;
                                 }
@@ -384,7 +367,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                                         hasDigitAfterE = true;
                                     }
 
-                                    tokenValues.AppendChar(ch);
+                                    ++valueSize;
                                     ch = Read(buff);
                                     ++column;
                                 }
@@ -409,7 +392,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         if (ch == 'x')
                         {
                             tokenType = Token::eHexIntLit;
-                            tokenValues.AppendChar(ch);
+                            ++valueSize;
                             ch = Read(buff);
                             ++column;
 
@@ -424,7 +407,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                                     break;
                                 }
 
-                                tokenValues.AppendChar(ch);
+                                ++valueSize;
                                 ch = Read(buff);
                                 ++column;
                             }
@@ -443,7 +426,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         else if (ch == 'b')
                         {
                             tokenType = Token::eBinIntLit;
-                            tokenValues.AppendChar(ch);
+                            ++valueSize;
                             ch = Read(buff);
                             ++column;
 
@@ -458,7 +441,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                                     break;
                                 }
 
-                                tokenValues.AppendChar(ch);
+                                ++valueSize;
                                 ch = Read(buff);
                                 ++column;
                             }
@@ -477,7 +460,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         else if (ch == 'o')
                         {
                             tokenType = Token::eOctIntLit;
-                            tokenValues.AppendChar(ch);
+                            ++valueSize;
                             ch = Read(buff);
                             ++column;
 
@@ -492,7 +475,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                                     break;
                                 }
 
-                                tokenValues.AppendChar(ch);
+                                ++valueSize;
                                 ch = Read(buff);
                                 ++column;
                             }
@@ -523,16 +506,14 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                 if (ok)
                 {
-                    const char* value = tokenValues.EndValue();
+                    ROString value(valuePtr, valueSize);
                     tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
-                    tokenValues.StartNew();
                 }
             }
             // parse string literals
             else if (ch == '"')
             {
                 unsigned startColumn = column;
-                tokenValues.AppendChar(ch);
                 ch = Read(buff);
                 ++column;
                 char prevChar = ch;
@@ -544,7 +525,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         ok = false;
                         break;
                     }
-                    tokenValues.AppendChar(ch);
+                    ++valueSize;
 
                     prevChar = ch;
                     ch = Read(buff);
@@ -559,11 +540,10 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
 
                 if (ok)
                 {
-                    tokenValues.AppendChar(ch); // add last '"'
-                    const char* value = tokenValues.EndValue();
+                    ++valueSize; // increment for last '"'
+                    ROString value(valuePtr, valueSize);
 
                     tokens.Append(Token(value, filenameId, line, startColumn, Token::eStrLit));
-                    tokenValues.StartNew();
 
                     ch = Read(buff);
                     ++column;

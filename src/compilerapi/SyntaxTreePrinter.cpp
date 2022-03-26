@@ -86,7 +86,7 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
     PrintProperty("variableName", forLoop->variableName);
@@ -102,7 +102,7 @@ void SyntaxTreePrinter::Visit(LoopControl* loopControl)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "LoopControl");
-    PrintProperty("value", loopControl->token->value);
+    PrintProperty("value", loopControl->token->value.ToStdString());
 }
 
 void SyntaxTreePrinter::Visit(Return* ret)
@@ -197,7 +197,7 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "NumericExpression");
-    PrintProperty("value", numericExpression->token->value);
+    PrintProperty("value", numericExpression->token->value.ToStdString());
 }
 
 void SyntaxTreePrinter::Visit(FloatLiteralExpression* floatLiteralExpression)
@@ -205,7 +205,7 @@ void SyntaxTreePrinter::Visit(FloatLiteralExpression* floatLiteralExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "FloatLiteralExpression");
-    PrintProperty("value", floatLiteralExpression->token->value);
+    PrintProperty("value", floatLiteralExpression->token->value.ToStdString());
 }
 
 void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
@@ -213,7 +213,7 @@ void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "BoolLiteralExpression");
-    PrintProperty("value", boolLiteralExpression->token->value);
+    PrintProperty("value", boolLiteralExpression->token->value.ToStdString());
 }
 
 void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
@@ -342,7 +342,7 @@ void SyntaxTreePrinter::Visit(CastExpression* castExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "CastExpression");
     PrintProperty("typeExpression", castExpression->typeExpression);
@@ -389,7 +389,7 @@ void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "ConstantDeclaration");
     PrintProperty("name", constantDeclaration->name);
@@ -401,7 +401,7 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->name);
@@ -425,7 +425,7 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->name);
@@ -448,7 +448,7 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->name);

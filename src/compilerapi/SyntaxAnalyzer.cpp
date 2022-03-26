@@ -255,7 +255,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    string functionName = iter->value;
+    string functionName = iter->value.ToStdString();
     const Token* nameToken = &*iter;
 
     if (!IncrementIterator(iter, endIter, "Expected '('"))
@@ -309,7 +309,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     const Token* paramNameToken = nullptr;
     while (iter != endIter && iter->type != Token::eClosePar)
     {
-        paramName = iter->value;
+        paramName = iter->value.ToStdString();
         paramNameToken = &*iter;
         if (paramNameToken->type != Token::eIdentifier)
         {
@@ -373,7 +373,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     }
 
     const Token* structNameToken = &*iter;
-    string structName = iter->value;
+    string structName = iter->value.ToStdString();
 
     if (!IncrementIterator(iter, endIter, "Expected '{'"))
     {
@@ -400,7 +400,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             return nullptr;
         }
         const Token* memberNameToken = &*iter;
-        const string& memberName = iter->value;
+        const string& memberName = iter->value.ToStdString();
 
         // get member type
         if (!IncrementIterator(iter, endIter, "Expected member type"))
@@ -496,7 +496,7 @@ bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator en
 StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(TokenIterator& iter, TokenIterator endIter)
 {
     const Token* structNameToken = &*iter;
-    const string& structName = iter->value;
+    const string& structName = iter->value.ToStdString();
 
     // skip struct name
     ++iter;
@@ -523,7 +523,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
             return nullptr;
         }
         const Token* memberNameToken = &*iter;
-        const string& memberName = iter->value;
+        const string& memberName = iter->value.ToStdString();
 
         // make sure member name is followed by ':'
         if (!IncrementIteratorCheckType(iter, endIter, Token::eColon, "Expected ':' after member"))
@@ -647,7 +647,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     // increment past semicolon
     ++iter;
 
-    const string& constName = constNameToken->value;
+    const string& constName = constNameToken->value.ToStdString();
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(constName, constNameToken), expression, opToken);
     ConstantDeclaration* constDecl = new ConstantDeclaration(constName, assignment, typeExpr, constNameToken);
     return constDecl;
@@ -722,7 +722,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     // increment past semicolon
     ++iter;
 
-    const string& varName = varNameToken->value;
+    const string& varName = varNameToken->value.ToStdString();
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(varName, varNameToken), expression, opToken);
     VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, typeExpr, varNameToken);
     return varDecl;
@@ -864,8 +864,8 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     // increment iter past end brace
     ++iter;
 
-    ForLoop* forLoop = new ForLoop(varNameToken->value, varTypeExpr,
-                                   indexVarNameToken->value, indexVarTypeExpr,
+    ForLoop* forLoop = new ForLoop(varNameToken->value.ToStdString(), varTypeExpr,
+                                   indexVarNameToken->value.ToStdString(), indexVarTypeExpr,
                                    iterExpression.release(), expression.release(),
                                    forToken, inToken,
                                    varNameToken, indexVarNameToken);
@@ -929,12 +929,12 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     if (mainType == Token::eIntLiteralType)
     {
         int64_t intValue = 0;
-        stringToInteger(iter->value, intValue);
+        stringToInteger(iter->value.ToStdString(), intValue);
         expr = new NumericExpression(intValue, &*iter);
     }
     else if (mainType == Token::eFloatLiteralType)
     {
-        double floatValue = stringToFloat(iter->value);
+        double floatValue = stringToFloat(iter->value.ToStdString());
         expr = new FloatLiteralExpression(floatValue, &*iter);
     }
     else if (mainType == Token::eBoolLiteralType)
@@ -996,12 +996,12 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         }
         else // it's an identifier
         {
-            expr = new IdentifierExpression(iter->value, &*iter);
+            expr = new IdentifierExpression(iter->value.ToStdString(), &*iter);
         }
     }
     else if (Token::IsTypeName(type))
     {
-        expr = new IdentifierExpression(iter->value, &*iter);
+        expr = new IdentifierExpression(iter->value.ToStdString(), &*iter);
     }
     else if (type == Token::eOpenBracket)
     {
@@ -1181,7 +1181,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
                 return nullptr;
             }
 
-            paramNames.push_back(iter->value);
+            paramNames.push_back(iter->value.ToStdString());
             paramNameTokens.push_back(&*iter);
 
             if (!IncrementIterator(iter, endIter, "Expected a type"))
@@ -1469,7 +1469,7 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
 
 StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator iter)
 {
-    const string& value = iter->value;
+    const string& value = iter->value.ToStdString();
 
     size_t idx = 0;
     if (value.size() < 1 || value[idx] != '"')
@@ -1610,7 +1610,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
 
 bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
 {
-    const string& value = iter->value;
+    const string& value = iter->value.ToStdString();
     size_t endCharsIdx = value.size() - 1;
 
     char ch = '\0';
@@ -1652,7 +1652,7 @@ bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t
 
 bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
 {
-    const string& value = iter->value;
+    const string& value = iter->value.ToStdString();
     size_t endCharsIdx = value.size() - 1;
 
     ++idx;
@@ -2050,7 +2050,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
                 return nullptr;
             }
 
-            expr = new MemberExpression(expr, iter->value, opToken, &*iter);
+            expr = new MemberExpression(expr, iter->value.ToStdString(), opToken, &*iter);
 
             nextIter = iter + 1;
         }

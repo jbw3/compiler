@@ -25,11 +25,10 @@ private:
 
     static const std::unordered_set<char> SYMBOL_START_CHAR;
 
-    static const std::unordered_map<const char*, Token::EType, CStringHash, CStringEqual> SYMBOLS;
+    static const std::unordered_map<ROString, Token::EType> SYMBOLS;
 
-    static const std::unordered_map<const char*, Token::EType, CStringHash, CStringEqual> KEYWORDS;
+    static const std::unordered_map<ROString, Token::EType> KEYWORDS;
 
-    static constexpr size_t MAX_BUFF_CAPACITY = 1024;
     CompilerContext& compilerContext;
     size_t buffIdx;
     bool isMore;

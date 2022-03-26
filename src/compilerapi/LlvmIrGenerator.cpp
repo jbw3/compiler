@@ -2692,8 +2692,9 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
             resultValue = nullptr;
             return;
         }
+        ROString value = token->value;
         DIScope* diScope = diScopes.top();
-        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, token->value, currentDiFile, line, varDebugType, true);
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, StringRef(value.GetPtr(), value.GetSize()), currentDiFile, line, varDebugType, true);
         diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DILocation::get(context, line, column, diScope), builder.GetInsertBlock());
     }
 }

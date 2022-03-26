@@ -12,6 +12,12 @@ public:
         size = 0;
     }
 
+    ROString(const char* cStr)
+    {
+        ptr = cStr;
+        size = strlen(cStr);
+    }
+
     ROString(const char* ptr, size_t size)
     {
         this->ptr = ptr;
@@ -26,6 +32,12 @@ public:
     size_t GetSize() const
     {
         return size;
+    }
+
+    // TODO: remove this
+    std::string ToStdString() const
+    {
+        return std::string(ptr, size);
     }
 
     bool operator ==(const ROString& other) const
@@ -51,7 +63,7 @@ private:
     size_t size;
 };
 
-std::ostream& operator <<(std::ostream& os, const ROString& str)
+inline std::ostream& operator <<(std::ostream& os, const ROString& str)
 {
     os.write(str.GetPtr(), str.GetSize());
     return os;

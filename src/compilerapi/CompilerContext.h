@@ -20,6 +20,7 @@ struct CharBuffer
     const char* ptr;
 };
 
+// TODO: remove
 class TokenValues
 {
 public:

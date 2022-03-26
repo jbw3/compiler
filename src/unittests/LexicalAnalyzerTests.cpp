@@ -373,11 +373,11 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
 {
     bool areEqual = true;
 
-    const string& expectedValue = expectedToken.value;
-    const string& actualValue = actualToken.value;
+    ROString expectedValue = expectedToken.value;
+    ROString actualValue = actualToken.value;
     if (expectedValue != actualValue)
     {
-        failMsg = "Token values are not equal: expected: "s + expectedValue + ", actual: " + actualValue + "\n";
+        failMsg = "Token values are not equal: expected: "s + expectedValue.ToStdString() + ", actual: " + actualValue.ToStdString() + "\n";
         areEqual = false;
     }
 

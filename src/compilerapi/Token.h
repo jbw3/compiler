@@ -1,6 +1,7 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+#include "ROString.h"
 #include <stdint.h>
 
 class Token
@@ -160,9 +161,9 @@ public:
         return isKeyword & isTypeName;
     }
 
-    Token(const char* value, unsigned filenameId, unsigned line, unsigned column, EType type);
+    Token(ROString value, unsigned filenameId, unsigned line, unsigned column, EType type);
 
-    const char* value;
+    ROString value;
     unsigned filenameId;
     unsigned line;
     unsigned column;
