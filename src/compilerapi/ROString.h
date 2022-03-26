@@ -56,3 +56,25 @@ std::ostream& operator <<(std::ostream& os, const ROString& str)
     os.write(str.GetPtr(), str.GetSize());
     return os;
 }
+
+namespace std
+{
+    template<>
+    struct hash<ROString>
+    {
+        std::size_t operator()(const ROString& str) const
+        {
+            size_t hash = 3'508'572'349; // large prime
+
+            const char* strPtr = str.GetPtr();
+            size_t strSize = str.GetSize();
+            for (size_t i = 0; i < strSize; ++i)
+            {
+                hash ^= strPtr[i];
+                hash *= 31;
+            }
+
+            return hash;
+        }
+    };
+}

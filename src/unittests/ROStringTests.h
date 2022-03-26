@@ -11,4 +11,6 @@ private:
     static bool TestEquality(std::string& failMsg);
 
     static bool TestOStream(std::string& failMsg);
+
+    static bool TestHash(std::string& failMsg);
 };

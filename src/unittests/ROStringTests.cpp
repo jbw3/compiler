@@ -29,6 +29,7 @@ ROStringTests::ROStringTests(ostream& results) :
 {
     ADD_TEST(TestEquality);
     ADD_TEST(TestOStream);
+    ADD_TEST(TestHash);
 }
 
 bool ROStringTests::TestEquality(string& failMsg)
@@ -78,6 +79,25 @@ bool ROStringTests::TestOStream(string& failMsg)
             failMsg = "Expected: \""s + stdStr + "\", Actual: \""s + ss.str() + "\""s;
             return false;
         }
+    }
+
+    return true;
+}
+
+bool ROStringTests::TestHash(string& failMsg)
+{
+    const char* testStr = "testing123testing123";
+
+    ROString s1(testStr, 10);
+    ROString s2(testStr + 10, 10);
+
+    hash<ROString> hasher;
+    size_t hash1 = hasher(s1);
+    size_t hash2 = hasher(s2);
+    if (hash1 != hash2)
+    {
+        failMsg = "Hashes are not equal";
+        return false;
     }
 
     return true;
