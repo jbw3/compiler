@@ -18,88 +18,6 @@ const unordered_set<char> LexicalAnalyzer::SYMBOL_START_CHAR =
     '=', '!', '<', '>', '+', '-', '*', '/', '%', '&', '|', '^', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}',
 };
 
-const unordered_map<ROString, Token::EType> LexicalAnalyzer::SYMBOLS =
-{
-    { "==", Token::eEqualEqual },
-    { "!=", Token::eExclaimEqual },
-    { "<", Token::eLess },
-    { "<=", Token::eLessEqual },
-    { ">", Token::eGreater },
-    { ">=", Token::eGreaterEqual },
-    { "+", Token::ePlus },
-    { "-", Token::eMinus },
-    { "*", Token::eTimes },
-    { "/", Token::eDivide },
-    { "%", Token::eRemainder },
-    { "<<", Token::eLessLess },
-    { ">>", Token::eGreaterGreater },
-    { ">>>", Token::eGreaterGreaterGreater },
-    { "!", Token::eExclaim },
-    { "&", Token::eAmpersand },
-    { "^", Token::eCaret },
-    { "|", Token::eBar },
-    { "&&", Token::eAmpersandAmpersand },
-    { "||", Token::eBarBar },
-    { "(", Token::eOpenPar },
-    { ")", Token::eClosePar },
-    { "[", Token::eOpenBracket },
-    { "]", Token::eCloseBracket },
-    { "{", Token::eOpenBrace },
-    { "}", Token::eCloseBrace },
-    { ",", Token::eComma },
-    { ".", Token::ePeriod },
-    { ";", Token::eSemiColon },
-    { ":", Token::eColon },
-    { "=", Token::eEqual },
-    { "+=", Token::ePlusEqual },
-    { "-=", Token::eMinusEqual },
-    { "*=", Token::eTimesEqual },
-    { "/=", Token::eDivideEqual },
-    { "%=", Token::eRemainderEqual },
-    { "<<=", Token::eLessLessEqual },
-    { ">>=", Token::eGreaterGreaterEqual },
-    { ">>>=", Token::eGreaterGreaterGreaterEqual },
-    { "&=", Token::eAmpersandEqual },
-    { "^=", Token::eCaretEqual },
-    { "|=", Token::eBarEqual },
-    { "..", Token::ePeriodPeriod },
-    { "..<", Token::ePeriodPeriodLess },
-};
-
-const unordered_map<ROString, Token::EType> LexicalAnalyzer::KEYWORDS =
-{
-    { BOOL_KEYWORD, Token::eBool },
-    { BREAK_KEYWORD, Token::eBreak },
-    { CAST_KEYWORD, Token::eCast },
-    { CONST_KEYWORD, Token::eConst },
-    { CONTINUE_KEYWORD, Token::eContinue },
-    { ELIF_KEYWORD, Token::eElif },
-    { ELSE_KEYWORD, Token::eElse },
-    { EXTERN_KEYWORD, Token::eExtern },
-    { FALSE_KEYWORD, Token::eFalseLit },
-    { FOR_KEYWORD, Token::eFor },
-    { FUNCTION_KEYWORD, Token::eFun },
-    { IF_KEYWORD, Token::eIf },
-    { INT8_KEYWORD, Token::eI8 },
-    { INT16_KEYWORD, Token::eI16 },
-    { INT32_KEYWORD, Token::eI32 },
-    { INT64_KEYWORD, Token::eI64 },
-    { IN_KEYWORD, Token::eIn },
-    { INT_SIZE_KEYWORD, Token::eISize },
-    { RETURN_KEYWORD, Token::eReturn },
-    { STR_KEYWORD, Token::eStr },
-    { STRUCT_KEYWORD, Token::eStruct },
-    { TRUE_KEYWORD, Token::eTrueLit },
-    { TYPE_KEYWORD, Token::eType },
-    { UINT8_KEYWORD, Token::eU8 },
-    { UINT16_KEYWORD, Token::eU16 },
-    { UINT32_KEYWORD, Token::eU32 },
-    { UINT64_KEYWORD, Token::eU64 },
-    { UINT_SIZE_KEYWORD, Token::eUSize },
-    { VARIABLE_KEYWORD, Token::eVar },
-    { WHILE_KEYWORD, Token::eWhile },
-};
-
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES1[] =
 {
     LexicalAnalyzer::TokenValue{ROString("!="), Token::eExclaimEqual},
@@ -207,7 +125,6 @@ const LexicalAnalyzer::TokenValue SYMBOL_VALUES30[] =
     LexicalAnalyzer::TokenValue{ROString(">>>="), Token::eGreaterGreaterGreaterEqual},
     LexicalAnalyzer::TokenValue{ROString("^="), Token::eCaretEqual},
 };
-
 
 const LexicalAnalyzer::Bucket LexicalAnalyzer::SYMBOLS_HASH_TABLE[SYMBOLS_HASH_TABLE_SIZE] =
 {

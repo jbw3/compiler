@@ -4,7 +4,6 @@
 #include "CompilerContext.h"
 #include "Token.h"
 #include "utils.h"
-#include <unordered_map>
 #include <unordered_set>
 
 class LexicalAnalyzer
@@ -36,12 +35,6 @@ private:
     static const char LINE_COMMENT_END;
 
     static const std::unordered_set<char> SYMBOL_START_CHAR;
-
-    // TODO: remove
-    static const std::unordered_map<ROString, Token::EType> SYMBOLS;
-
-    // TODO: remove
-    static const std::unordered_map<ROString, Token::EType> KEYWORDS;
 
     static constexpr size_t SYMBOLS_HASH_TABLE_SIZE = 32;
     static const Bucket SYMBOLS_HASH_TABLE[SYMBOLS_HASH_TABLE_SIZE];
