@@ -10,6 +10,18 @@
 class LexicalAnalyzer
 {
 public:
+    struct TokenValue
+    {
+        ROString str;
+        Token::EType type;
+    };
+
+    struct Bucket
+    {
+        const TokenValue* values;
+        size_t size;
+    };
+
     LexicalAnalyzer(CompilerContext& compilerContext);
 
     bool Process(const std::string& inFile);
@@ -25,9 +37,21 @@ private:
 
     static const std::unordered_set<char> SYMBOL_START_CHAR;
 
+    // TODO: remove
     static const std::unordered_map<ROString, Token::EType> SYMBOLS;
 
+    // TODO: remove
     static const std::unordered_map<ROString, Token::EType> KEYWORDS;
+
+    static constexpr size_t SYMBOLS_HASH_TABLE_SIZE = 32;
+    static const Bucket SYMBOLS_HASH_TABLE[SYMBOLS_HASH_TABLE_SIZE];
+
+    static constexpr size_t KEYWORDS_HASH_TABLE_SIZE = 26;
+    static const Bucket KEYWORDS_HASH_TABLE[KEYWORDS_HASH_TABLE_SIZE];
+
+    static Token::EType GetSymbolType(ROString str);
+
+    static Token::EType GetKeywordType(ROString str);
 
     CompilerContext& compilerContext;
     size_t buffIdx;
