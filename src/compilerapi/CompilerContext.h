@@ -41,12 +41,55 @@ struct ArrayConstValue
     } type;
 };
 
+class StringBuilder
+{
+public:
+    static constexpr size_t STRING_MEM_BLOCK_SIZE = 1024;
+
+    StringBuilder();
+
+    ~StringBuilder();
+
+    template<typename... Ts>
+    ROString CreateString(Ts... strings)
+    {
+        Append(strings...);
+        return ROString(current, end - current);
+    }
+
+private:
+    char* head;
+    char* buffEnd;
+    char* current;
+    char* end;
+
+    template<typename T, typename... Ts>
+    void Append(T s, Ts... strings)
+    {
+        Append(s);
+        Append(strings...);
+    }
+
+    void Append(const char* ptr, size_t size);
+
+    void Append(const char* cStr)
+    {
+        Append(cStr, strlen(cStr));
+    }
+
+    void Append(ROString str)
+    {
+        Append(str.GetPtr(), str.GetSize());
+    }
+};
+
 class CompilerContext
 {
 public:
     Config config;
     ErrorLogger logger;
     TypeRegistry typeRegistry;
+    StringBuilder stringBuilder;
 
     CompilerContext(Config config, std::ostream& logStream);
 

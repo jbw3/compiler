@@ -5,6 +5,62 @@
 
 using namespace std;
 
+StringBuilder::StringBuilder()
+{
+    head = new char[STRING_MEM_BLOCK_SIZE];
+    buffEnd = head + STRING_MEM_BLOCK_SIZE;
+
+    // reserve the first few bytes as a pointer to the next buffer
+    memset(head, 0, sizeof(char*));
+
+    current = head + sizeof(char*);
+    end = current;
+}
+
+StringBuilder::~StringBuilder()
+{
+    while (head != nullptr)
+    {
+        char* temp = head;
+
+        // the first bytes in each block of memory point to the next block
+        char** next = reinterpret_cast<char**>(head);
+        head = *next;
+
+        delete [] temp;
+    }
+}
+
+void StringBuilder::Append(const char* ptr, size_t size)
+{
+    size_t freeSize = buffEnd - current;
+    if (size > freeSize)
+    {
+        char* oldHead = head;
+
+        // allocate new buffer
+        head = new char[STRING_MEM_BLOCK_SIZE];
+        buffEnd = head + STRING_MEM_BLOCK_SIZE;
+
+        // point this block of memory to the next block
+        char** next = reinterpret_cast<char**>(head);
+        *next = oldHead;
+
+        // calculate size of current value
+        size_t currentSize = end - current;
+
+        // copy current data from last buffer
+        char* newCurrent = head + sizeof(char*);
+        memcpy(newCurrent, current, currentSize);
+
+        current = newCurrent;
+        end = current + currentSize;
+    }
+
+    memcpy(current, ptr, size);
+    current += size;
+}
+
 CompilerContext::CompilerContext(Config config, ostream& logStream) :
     config(config),
     logger(*this, &logStream, config.color),
