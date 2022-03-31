@@ -132,7 +132,7 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
     {
         // add param and return types
         vector<const TypeInfo*> parameterTypes;
-        vector<string> parameterNames;
+        vector<ROString> parameterNames;
         for (const Parameter* param : parameters)
         {
             parameterTypes.push_back(param->type);
@@ -147,7 +147,7 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
 
 const TypeInfo* TypeRegistry::GetFunctionType(
         const vector<const TypeInfo*>& parameterTypes,
-        const vector<string>& parameterNames,
+        const vector<ROString>& parameterNames,
         const TypeInfo* returnType
 )
 {

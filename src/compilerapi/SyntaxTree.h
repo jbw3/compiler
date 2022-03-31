@@ -219,7 +219,7 @@ public:
         eSubscript                  = Token::eOpenBracket,
     };
 
-    static std::string GetOperatorString(EOperator op);
+    static const char* GetOperatorString(EOperator op);
 
     static unsigned GetPrecedence(EOperator op);
 
@@ -252,7 +252,7 @@ public:
         eArrayOf     = Token::eOpenBracket,
     };
 
-    static std::string GetOperatorString(EOperator op);
+    static const char* GetOperatorString(EOperator op);
 
     UnaryExpression(EOperator op, Expression* subExpr, const Token* opToken);
 
@@ -268,14 +268,14 @@ public:
 class IdentifierExpression : public Expression
 {
 public:
-    IdentifierExpression(const std::string& name, const Token* token);
+    IdentifierExpression(ROString name, const Token* token);
 
     virtual ~IdentifierExpression() = default;
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* token;
-    std::string name;
+    ROString name;
 };
 
 class CastExpression : public Expression
@@ -329,7 +329,7 @@ public:
 class MemberExpression : public Expression
 {
 public:
-    MemberExpression(Expression* subExpr, const std::string& memberName,
+    MemberExpression(Expression* subExpr, ROString memberName,
                      const Token* opToken, const Token* memberNameToken);
 
     virtual ~MemberExpression();
@@ -341,7 +341,7 @@ public:
     const Token* opToken;
     const Token* memberNameToken;
     Expression* subExpression;
-    std::string memberName;
+    ROString memberName;
 };
 
 class BranchExpression : public Expression
@@ -368,7 +368,7 @@ public:
 class ConstantDeclaration : public SyntaxTreeNode
 {
 public:
-    ConstantDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
+    ConstantDeclaration(ROString name, BinaryExpression* assignmentExpression,
                         Expression* typeExpression, const Token* nameToken);
 
     virtual ~ConstantDeclaration();
@@ -376,7 +376,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* nameToken;
-    std::string name;
+    ROString name;
     const TypeInfo* constantType;
     BinaryExpression* assignmentExpression;
     Expression* typeExpression;
@@ -385,7 +385,7 @@ public:
 class VariableDeclaration : public SyntaxTreeNode
 {
 public:
-    VariableDeclaration(const std::string& name, BinaryExpression* assignmentExpression,
+    VariableDeclaration(ROString name, BinaryExpression* assignmentExpression,
                         Expression* typeExpression, const Token* nameToken);
 
     virtual ~VariableDeclaration();
@@ -393,7 +393,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* nameToken;
-    std::string name;
+    ROString name;
     const TypeInfo* variableType;
     BinaryExpression* assignmentExpression;
     Expression* typeExpression;
@@ -418,9 +418,9 @@ public:
 class ForLoop : public SyntaxTreeNode
 {
 public:
-    ForLoop(const std::string& variableName,
+    ForLoop(ROString variableName,
             Expression* varTypeExpression,
-            const std::string& indexName,
+            ROString indexName,
             Expression* indexTypeExpression,
             Expression* iterExpression,
             BlockExpression* expression, const Token* forToken,
@@ -431,10 +431,10 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    std::string variableName;
+    ROString variableName;
     Expression* varTypeExpression;
     const TypeInfo* variableType;
-    std::string indexName;
+    ROString indexName;
     Expression* indexTypeExpression;
     const TypeInfo* indexType;
     Expression* iterExpression;
@@ -473,14 +473,14 @@ public:
 class Parameter
 {
 public:
-    Parameter(const std::string& name,
+    Parameter(ROString name,
               Expression* typeExpression,
               const Token* nameToken);
 
     ~Parameter();
 
     const Token* nameToken;
-    std::string name;
+    ROString name;
     Expression* typeExpression;
     const TypeInfo* type;
 };
@@ -490,7 +490,7 @@ typedef std::vector<Parameter*> Parameters;
 class FunctionDeclaration
 {
 public:
-    FunctionDeclaration(const std::string& name,
+    FunctionDeclaration(ROString name,
                         const Parameters& parameters,
                         Expression* returnTypeExpression,
                         const Token* nameToken);
@@ -498,7 +498,7 @@ public:
     virtual ~FunctionDeclaration();
 
     const Token* nameToken;
-    std::string name;
+    ROString name;
     Parameters parameters;
     Expression* returnTypeExpression;
     const TypeInfo* returnType;
@@ -509,7 +509,7 @@ class FunctionTypeExpression : public Expression
 public:
     FunctionTypeExpression(
         const Expressions& paramTypeExpressions,
-        const std::vector<std::string>& paramNames,
+        const std::vector<ROString>& paramNames,
         Expression* returnTypeExpression,
         const Token* funToken,
         const Token* openParToken,
@@ -526,7 +526,7 @@ public:
     const Token* closeParToken;
     std::vector<const Token*> paramNameTokens;
     Expressions paramTypeExpressions;
-    std::vector<std::string> paramNames;
+    std::vector<ROString> paramNames;
     Expression* returnTypeExpression;
 };
 
@@ -560,20 +560,20 @@ public:
 class MemberDefinition
 {
 public:
-    MemberDefinition(const std::string& name, Expression* typeExpression,
+    MemberDefinition(ROString name, Expression* typeExpression,
                      const Token* nameToken);
 
     ~MemberDefinition();
 
     const Token* nameToken;
     Expression* typeExpression;
-    std::string name;
+    ROString name;
 };
 
 class StructDefinition : public SyntaxTreeNode
 {
 public:
-    StructDefinition(const std::string& name, const std::vector<MemberDefinition*>& members,
+    StructDefinition(ROString name, const std::vector<MemberDefinition*>& members,
                      const Token* nameToken, unsigned fileId);
 
     virtual ~StructDefinition();
@@ -581,7 +581,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     const Token* nameToken;
-    std::string name;
+    ROString name;
     std::vector<MemberDefinition*> members;
     const TypeInfo* type;
     unsigned fileId;
@@ -590,12 +590,12 @@ public:
 class MemberInitialization
 {
 public:
-    MemberInitialization(const std::string& name, Expression* expression,
+    MemberInitialization(ROString name, Expression* expression,
                          const Token* nameToken);
 
     virtual ~MemberInitialization();
 
-    std::string name;
+    ROString name;
     Expression* expression;
     const Token* nameToken;
 };
@@ -603,7 +603,7 @@ public:
 class StructInitializationExpression : public Expression
 {
 public:
-    StructInitializationExpression(const std::string& structName, const std::vector<MemberInitialization*>& memberInitializations,
+    StructInitializationExpression(ROString structName, const std::vector<MemberInitialization*>& memberInitializations,
                                    const Token* structNameToken,
                                    const Token* openBraceToken,
                                    const Token* closeBraceToken);
@@ -612,7 +612,7 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    std::string structName;
+    ROString structName;
     std::vector<MemberInitialization*> memberInitializations;
     const Token* structNameToken;
     const Token* openBraceToken;

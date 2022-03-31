@@ -233,7 +233,7 @@ void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-std::string BinaryExpression::GetOperatorString(EOperator op)
+const char* BinaryExpression::GetOperatorString(EOperator op)
 {
     switch (op)
     {
@@ -478,7 +478,7 @@ void BinaryExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-string UnaryExpression::GetOperatorString(EOperator op)
+const char* UnaryExpression::GetOperatorString(EOperator op)
 {
     switch (op)
     {
@@ -515,7 +515,7 @@ void UnaryExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-IdentifierExpression::IdentifierExpression(const string& name, const Token* token) :
+IdentifierExpression::IdentifierExpression(ROString name, const Token* token) :
     token(token),
     name(name)
 {
@@ -589,7 +589,7 @@ void FunctionCallExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-MemberExpression::MemberExpression(Expression* subExpr, const std::string& memberName,
+MemberExpression::MemberExpression(Expression* subExpr, ROString memberName,
                                    const Token* opToken, const Token* memberNameToken) :
     opToken(opToken),
     memberNameToken(memberNameToken),
@@ -639,7 +639,7 @@ void BranchExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-ConstantDeclaration::ConstantDeclaration(const string& name, BinaryExpression* assignmentExpression,
+ConstantDeclaration::ConstantDeclaration(ROString name, BinaryExpression* assignmentExpression,
                                          Expression* typeExpression, const Token* nameToken) :
     nameToken(nameToken),
     name(name),
@@ -660,7 +660,7 @@ void ConstantDeclaration::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-VariableDeclaration::VariableDeclaration(const string& name, BinaryExpression* assignmentExpression,
+VariableDeclaration::VariableDeclaration(ROString name, BinaryExpression* assignmentExpression,
                                          Expression* typeExpression, const Token* nameToken) :
     nameToken(nameToken),
     name(name),
@@ -699,9 +699,9 @@ void WhileLoop::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-ForLoop::ForLoop(const string& variableName,
+ForLoop::ForLoop(ROString variableName,
                  Expression* varTypeExpression,
-                 const string& indexName,
+                 ROString indexName,
                  Expression* indexTypeExpression,
                  Expression* iterExpression,
                  BlockExpression* expression, const Token* forToken,
@@ -759,7 +759,7 @@ void Return::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-Parameter::Parameter(const string& name,
+Parameter::Parameter(ROString name,
                      Expression* typeExpression,
                      const Token* nameToken) :
     nameToken(nameToken),
@@ -774,7 +774,7 @@ Parameter::~Parameter()
     delete typeExpression;
 }
 
-FunctionDeclaration::FunctionDeclaration(const string& name,
+FunctionDeclaration::FunctionDeclaration(ROString name,
                                          const Parameters& parameters,
                                          Expression* returnTypeExpression,
                                          const Token* nameToken) :
@@ -794,7 +794,7 @@ FunctionDeclaration::~FunctionDeclaration()
 
 FunctionTypeExpression::FunctionTypeExpression(
     const Expressions& paramTypeExpressions,
-    const vector<string>& paramNames,
+    const vector<ROString>& paramNames,
     Expression* returnTypeExpression,
     const Token* funToken,
     const Token* openParToken,
@@ -856,7 +856,7 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-MemberDefinition::MemberDefinition(const string& name, Expression* typeExpression,
+MemberDefinition::MemberDefinition(ROString name, Expression* typeExpression,
                                    const Token* nameToken) :
     nameToken(nameToken),
     typeExpression(typeExpression),
@@ -869,7 +869,7 @@ MemberDefinition::~MemberDefinition()
     delete typeExpression;
 }
 
-StructDefinition::StructDefinition(const string& name, const vector<MemberDefinition*>& members,
+StructDefinition::StructDefinition(ROString name, const vector<MemberDefinition*>& members,
                                    const Token* nameToken, unsigned fileId) :
     nameToken(nameToken),
     name(name),
@@ -889,7 +889,7 @@ void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-MemberInitialization::MemberInitialization(const string& name, Expression* expression,
+MemberInitialization::MemberInitialization(ROString name, Expression* expression,
                                            const Token* nameToken) :
     name(name),
     expression(expression),
@@ -902,7 +902,7 @@ MemberInitialization::~MemberInitialization()
     delete expression;
 }
 
-StructInitializationExpression::StructInitializationExpression(const string& structName, const vector<MemberInitialization*>& memberInitializations,
+StructInitializationExpression::StructInitializationExpression(ROString structName, const vector<MemberInitialization*>& memberInitializations,
                                                                const Token* structNameToken,
                                                                const Token* openBraceToken,
                                                                const Token* closeBraceToken) :

@@ -155,7 +155,7 @@ private:
     unsigned loopLevel;
     const SyntaxTree::FunctionDefinition* currentFunction;
 
-    void LogExistingIdentifierError(const std::string& name, const Token* token);
+    void LogExistingIdentifierError(ROString name, const Token* token);
 
     bool SortTypeDefinitions(SyntaxTree::Modules* modules);
 

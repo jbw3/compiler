@@ -10,7 +10,7 @@
 using namespace std;
 using namespace SyntaxTree;
 
-const string SyntaxTreePrinter::NODE_TYPE_PROPERTY = "nodeType";
+const char* SyntaxTreePrinter::NODE_TYPE_PROPERTY = "nodeType";
 
 SyntaxTreePrinter::BracePrinter::BracePrinter(SyntaxTreePrinter& printer, string start,
                                               string end) :
@@ -54,7 +54,7 @@ void SyntaxTreePrinter::Visit(UnaryExpression* unaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    string op = UnaryExpression::GetOperatorString(unaryExpression->op);
+    const char* op = UnaryExpression::GetOperatorString(unaryExpression->op);
 
     PrintProperty(NODE_TYPE_PROPERTY, "UnaryExpression");
     PrintProperty("operator", op);
@@ -65,7 +65,7 @@ void SyntaxTreePrinter::Visit(BinaryExpression* binaryExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    string op = BinaryExpression::GetOperatorString(binaryExpression->op);
+    const char* op = BinaryExpression::GetOperatorString(binaryExpression->op);
 
     PrintProperty(NODE_TYPE_PROPERTY, "BinaryExpression");
     PrintProperty("operator", op);
@@ -86,7 +86,7 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
     PrintProperty("variableName", forLoop->variableName);
@@ -102,7 +102,7 @@ void SyntaxTreePrinter::Visit(LoopControl* loopControl)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "LoopControl");
-    PrintProperty("value", loopControl->token->value.ToStdString());
+    PrintProperty("value", loopControl->token->value);
 }
 
 void SyntaxTreePrinter::Visit(Return* ret)
@@ -197,7 +197,7 @@ void SyntaxTreePrinter::Visit(NumericExpression* numericExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "NumericExpression");
-    PrintProperty("value", numericExpression->token->value.ToStdString());
+    PrintProperty("value", numericExpression->token->value);
 }
 
 void SyntaxTreePrinter::Visit(FloatLiteralExpression* floatLiteralExpression)
@@ -205,7 +205,7 @@ void SyntaxTreePrinter::Visit(FloatLiteralExpression* floatLiteralExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "FloatLiteralExpression");
-    PrintProperty("value", floatLiteralExpression->token->value.ToStdString());
+    PrintProperty("value", floatLiteralExpression->token->value);
 }
 
 void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
@@ -213,7 +213,7 @@ void SyntaxTreePrinter::Visit(BoolLiteralExpression* boolLiteralExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "BoolLiteralExpression");
-    PrintProperty("value", boolLiteralExpression->token->value.ToStdString());
+    PrintProperty("value", boolLiteralExpression->token->value);
 }
 
 void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
@@ -302,7 +302,7 @@ void SyntaxTreePrinter::Visit(StringLiteralExpression* stringLiteralExpression)
     }
 
     PrintProperty(NODE_TYPE_PROPERTY, "StringLiteralExpression");
-    PrintProperty("value", ss.str());
+    PrintProperty("value", ss.str().c_str());
 }
 
 void SyntaxTreePrinter::Visit(IdentifierExpression* identifierExpression)
@@ -342,7 +342,7 @@ void SyntaxTreePrinter::Visit(CastExpression* castExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "CastExpression");
     PrintProperty("typeExpression", castExpression->typeExpression);
@@ -389,7 +389,7 @@ void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "ConstantDeclaration");
     PrintProperty("name", constantDeclaration->name);
@@ -401,7 +401,7 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->name);
@@ -409,7 +409,7 @@ void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
     PrintProperty("assignmentExpression", variableDeclaration->assignmentExpression);
 }
 
-void SyntaxTreePrinter::PrintString(const string& str)
+void SyntaxTreePrinter::PrintString(ROString str)
 {
     Print("\"");
     Print(str);
@@ -425,7 +425,7 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->name);
@@ -448,7 +448,7 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value.ToStdString()); };
+    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->name);
@@ -464,7 +464,7 @@ void SyntaxTreePrinter::PrintMemberInitialization(const MemberInitialization* me
     PrintProperty("expression", memberInitialization->expression);
 }
 
-void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)
+void SyntaxTreePrinter::PrintProperty(ROString name, ROString value)
 {
     if (firstItem)
     {
@@ -480,7 +480,7 @@ void SyntaxTreePrinter::PrintProperty(const string& name, const string& value)
     PrintString(value);
 }
 
-void SyntaxTreePrinter::PrintProperty(const string& name, SyntaxTreeNode* value)
+void SyntaxTreePrinter::PrintProperty(ROString name, SyntaxTreeNode* value)
 {
     if (firstItem)
     {
@@ -503,10 +503,46 @@ void SyntaxTreePrinter::PrintProperty(const string& name, SyntaxTreeNode* value)
     }
 }
 
-void SyntaxTreePrinter::PrintProperty(const string& name, const vector<string>& values)
+void SyntaxTreePrinter::PrintProperty(ROString name, const vector<ROString>& values)
 {
-    function<void (string)> fun = [this](string s){ PrintString(s); };
+    function<void (ROString)> fun = [this](ROString s){ PrintString(s); };
     PrintProperty(name, values, fun);
+}
+
+void SyntaxTreePrinter::Print(const char* str)
+{
+    for (const char* ptr = str; *ptr != '\0'; ++ptr)
+    {
+        char ch = *ptr;
+        os->put(ch);
+
+        if (ch == '\n')
+        {
+            for (unsigned i = 0; i < level * 4; ++i)
+            {
+                os->put(' ');
+            }
+        }
+    }
+}
+
+void SyntaxTreePrinter::Print(ROString str)
+{
+    const char* ptr = str.GetPtr();
+    size_t size = str.GetSize();
+    for (size_t i = 0; i < size; ++i)
+    {
+        char ch = ptr[i];
+        os->put(ch);
+
+        if (ch == '\n')
+        {
+            for (unsigned i = 0; i < level * 4; ++i)
+            {
+                os->put(' ');
+            }
+        }
+    }
 }
 
 void SyntaxTreePrinter::Print(const string& str)

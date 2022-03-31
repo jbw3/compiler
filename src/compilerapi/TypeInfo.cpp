@@ -122,7 +122,7 @@ const TypeInfo* TypeInfo::CreateFunctionType(
     const string& uniqueName,
     const string& name,
     const vector<const TypeInfo*>& parameterTypes,
-    const vector<string>& parameterNames,
+    const vector<ROString>& parameterNames,
     const TypeInfo* returnType)
 {
     TypeInfo* newFunType = new TypeInfo(numBits, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);

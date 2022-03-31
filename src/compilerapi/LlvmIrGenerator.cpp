@@ -26,6 +26,11 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
+static StringRef toStringRef(ROString str)
+{
+    return StringRef(str.GetPtr(), str.GetSize());
+}
+
 LlvmIrGenerator::DebugScope::DebugScope(
     bool dbgInfoEnabled,
     stack<DIScope*>& scopes,
@@ -657,7 +662,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
     // create iterator
-    const string& varName = forLoop->variableName;
+    const string& varName = forLoop->variableName.ToStdString();
     const TypeInfo* varType = forLoop->variableType;
     bool isSigned = varType->GetSign() == TypeInfo::eSigned;
     Type* type = GetType(varType);
@@ -667,7 +672,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     CreateDebugVariable(varNameToken, varType, alloca);
 
     // create index
-    const string& indexName = forLoop->indexName;
+    const string& indexName = forLoop->indexName.ToStdString();
     bool hasIndex = !indexName.empty();
     const TypeInfo* indexTypeInfo = forLoop->indexType;
     Type* indexType = nullptr;
@@ -935,8 +940,8 @@ void LlvmIrGenerator::Visit(ExternFunctionDeclaration* /*externFunctionDeclarati
 void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 {
     const FunctionDeclaration* declaration = functionDefinition->declaration;
-    const string& funcName = declaration->name;
-    Function* func = module->getFunction(funcName);
+    ROString funcName = declaration->name;
+    Function* func = module->getFunction(toStringRef(funcName));
     if (func == nullptr)
     {
         logger.LogInternalError("Function '{}' was not declared", funcName);
@@ -996,7 +1001,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes), DINode::FlagPrototyped);
 
         unsigned line = declaration->nameToken->line;
-        diSubprogram = diBuilder->createFunction(currentDiFile, funcName, "", currentDiFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
+        diSubprogram = diBuilder->createFunction(currentDiFile, toStringRef(funcName), "", currentDiFile, line, subroutine, 0, DINode::FlagZero, DISubprogram::SPFlagDefinition);
         func->setSubprogram(diSubprogram);
 
         // unset debug location for function prolog
@@ -1009,7 +1014,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     for (Argument& arg : func->args())
     {
         const Parameter* param = params[idx];
-        const string& paramName = param->name;
+        const string& paramName = param->name.ToStdString();
         arg.setName(paramName);
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
@@ -1078,13 +1083,13 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
 {
-    const string& structName = structDefinition->name;
+    const string& structName = structDefinition->name.ToStdString();
     const TypeInfo* typeInfo = structDefinition->type;
 
     vector<Type*> members;
     for (const MemberDefinition* memberDef : structDefinition->members)
     {
-        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->name);
+        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->name.ToStdString());
         Type* memberType = GetType(memberInfo->GetType());
         if (memberType == nullptr)
         {
@@ -1160,7 +1165,7 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
         SetDebugLocation(member->nameToken);
 
-        const MemberInfo* memberInfo = typeInfo->GetMember(member->name);
+        const MemberInfo* memberInfo = typeInfo->GetMember(member->name.ToStdString());
 
         index[0] = memberInfo->GetIndex();
         initValue = builder.CreateInsertValue(initValue, resultValue, index, "agg");
@@ -1208,7 +1213,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
     // add all struct names to types map
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
-        const string& structName = structDef->name;
+        const string& structName = structDef->name.ToStdString();
         StructType* structType = StructType::create(context, structName);
         types.insert({structName, structType});
 
@@ -1227,7 +1232,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
             SmallVector<Metadata*, 0> elements;
             DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
             DICompositeType* diType = diBuilder->createStructType(diFile, name, diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-            diStructTypes.insert({structDef->name, diType});
+            diStructTypes.insert({structDef->name.ToStdString(), diType});
         }
     }
 
@@ -1251,7 +1256,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 return;
             }
 
-            symbolTable.AddConstant(decl->name, decl->nameToken, externFunc->GetType(), externFunc->GetConstantValueIndex());
+            symbolTable.AddConstant(decl->name.ToStdString(), decl->nameToken, externFunc->GetType(), externFunc->GetConstantValueIndex());
         }
 
         for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
@@ -1264,7 +1269,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 return;
             }
 
-            symbolTable.AddConstant(decl->name, decl->nameToken, funcDef->GetType(), funcDef->GetConstantValueIndex());
+            symbolTable.AddConstant(decl->name.ToStdString(), decl->nameToken, funcDef->GetType(), funcDef->GetConstantValueIndex());
         }
     }
 
@@ -1584,7 +1589,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     else if (type->IsFunction())
     {
         const FunctionDeclaration* decl = compilerContext.GetFunctionConstantValue(constIdx);
-        Function* func = module->getFunction(decl->name);
+        Function* func = module->getFunction(toStringRef(decl->name));
         constValue = func;
     }
     else
@@ -1597,7 +1602,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
 
 void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
 {
-    const string& name = identifierExpression->name;
+    const string& name = identifierExpression->name.ToStdString();
     const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
     if (data == nullptr)
     {
@@ -2031,7 +2036,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         type = type->GetInnerType();
     }
 
-    const string& memberName = memberExpression->memberName;
+    const string& memberName = memberExpression->memberName.ToStdString();
     const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
@@ -2143,7 +2148,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 
 void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 {
-    const string& constName = constantDeclaration->name;
+    const string& constName = constantDeclaration->name.ToStdString();
     const TypeInfo* constType = constantDeclaration->constantType;
 
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
@@ -2154,7 +2159,7 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
-    const string& varName = variableDeclaration->name;
+    const string& varName = variableDeclaration->name.ToStdString();
     const TypeInfo* varType = variableDeclaration->variableType;
     Type* type = GetType(varType);
     if (type == nullptr)
@@ -2576,7 +2581,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     }
 
     FunctionType* funcType = FunctionType::get(returnType, parameters, false);
-    Function::Create(funcType, Function::ExternalLinkage, funcDecl->name, module);
+    Function::Create(funcType, Function::ExternalLinkage, toStringRef(funcDecl->name), module);
 
     return true;
 }
@@ -2694,7 +2699,7 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
         }
         ROString value = token->value;
         DIScope* diScope = diScopes.top();
-        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, StringRef(value.GetPtr(), value.GetSize()), currentDiFile, line, varDebugType, true);
+        DILocalVariable* diVar = diBuilder->createAutoVariable(diScope, toStringRef(value), currentDiFile, line, varDebugType, true);
         diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DILocation::get(context, line, column, diScope), builder.GetInsertBlock());
     }
 }

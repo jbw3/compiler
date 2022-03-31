@@ -116,7 +116,7 @@ public:
         const std::string& uniqueName,
         const std::string& name,
         const std::vector<const TypeInfo*>& parameterTypes,
-        const std::vector<std::string>& parameterNames,
+        const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType);
 
     TypeInfo(
@@ -262,7 +262,7 @@ public:
         return paramTypes;
     }
 
-    const std::vector<std::string>& GetParamNames() const
+    const std::vector<ROString>& GetParamNames() const
     {
         return paramNames;
     }
@@ -283,7 +283,7 @@ private:
     const Token* token;
     const TypeInfo* innerType;
     std::vector<const TypeInfo*> paramTypes;
-    std::vector<std::string> paramNames;
+    std::vector<ROString> paramNames;
     const TypeInfo* returnType;
 };
 

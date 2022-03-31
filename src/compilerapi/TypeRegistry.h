@@ -1,6 +1,7 @@
 #ifndef TYPE_REGISTRY_H_
 #define TYPE_REGISTRY_H_
 
+#include "ROString.h"
 #include <unordered_map>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
 
     const TypeInfo* GetFunctionType(
         const std::vector<const TypeInfo*>& parameterTypes,
-        const std::vector<std::string>& parameterNames,
+        const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType
     );
 

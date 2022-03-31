@@ -121,7 +121,7 @@ void SourceGenerator::Visit(ForLoop* forLoop)
         forLoop->varTypeExpression->Accept(this);
     }
 
-    if (!forLoop->indexName.empty())
+    if (forLoop->indexName.GetSize() > 0)
     {
         *os << ", " << forLoop->indexName;
         if (forLoop->indexTypeExpression != nullptr)
@@ -195,7 +195,7 @@ void SourceGenerator::Visit(StructDefinition* structDefinition)
 
     for (const MemberDefinition* member : structDefinition->members)
     {
-        const string& memberName = member->name;
+        ROString memberName = member->name;
         *os << indentStr << memberName << ' ';
         member->typeExpression->Accept(this);
         *os << ",\n";

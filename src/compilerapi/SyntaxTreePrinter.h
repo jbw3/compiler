@@ -9,7 +9,7 @@
 class SyntaxTreePrinter : public SyntaxTreeVisitor
 {
 public:
-    static const std::string NODE_TYPE_PROPERTY;
+    static const char* NODE_TYPE_PROPERTY;
 
     SyntaxTreePrinter(const std::string& outFilename);
 
@@ -91,7 +91,7 @@ private:
     unsigned int level;
     bool firstItem;
 
-    void PrintString(const std::string& str);
+    void PrintString(ROString str);
 
     void PrintValueSeparator();
 
@@ -103,12 +103,12 @@ private:
 
     void PrintMemberInitialization(const SyntaxTree::MemberInitialization* memberInitialization);
 
-    void PrintProperty(const std::string& name, const std::string& value);
+    void PrintProperty(ROString name, ROString value);
 
-    void PrintProperty(const std::string& name, SyntaxTree::SyntaxTreeNode* value);
+    void PrintProperty(ROString name, SyntaxTree::SyntaxTreeNode* value);
 
     template<typename T>
-    void PrintProperty(const std::string& name, T value, std::function<void (T)> printValue)
+    void PrintProperty(ROString name, T value, std::function<void (T)> printValue)
     {
         if (firstItem)
         {
@@ -125,7 +125,7 @@ private:
     }
 
     template<typename T>
-    void PrintProperty(const std::string& name, const std::vector<T>& values, std::function<void (T)> printValue)
+    void PrintProperty(ROString name, const std::vector<T>& values, std::function<void (T)> printValue)
     {
         if (firstItem)
         {
@@ -160,13 +160,17 @@ private:
     }
 
     template<typename T>
-    void PrintProperty(const std::string& name, const std::vector<T>& values)
+    void PrintProperty(ROString name, const std::vector<T>& values)
     {
         std::function<void (T)> fun = [this](T v){ v->Accept(this); };
         PrintProperty(name, values, fun);
     }
 
-    void PrintProperty(const std::string& name, const std::vector<std::string>& values);
+    void PrintProperty(ROString name, const std::vector<ROString>& values);
+
+    void Print(const char* str);
+
+    void Print(ROString str);
 
     void Print(const std::string& str);
 };

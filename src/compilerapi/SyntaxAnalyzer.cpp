@@ -255,7 +255,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    string functionName = iter->value.ToStdString();
+    ROString functionName = iter->value;
     const Token* nameToken = &*iter;
 
     if (!IncrementIterator(iter, endIter, "Expected '('"))
@@ -305,11 +305,11 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 {
     parameters.clear();
 
-    string paramName;
+    ROString paramName;
     const Token* paramNameToken = nullptr;
     while (iter != endIter && iter->type != Token::eClosePar)
     {
-        paramName = iter->value.ToStdString();
+        paramName = iter->value;
         paramNameToken = &*iter;
         if (paramNameToken->type != Token::eIdentifier)
         {
@@ -373,7 +373,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     }
 
     const Token* structNameToken = &*iter;
-    string structName = iter->value.ToStdString();
+    ROString structName = iter->value;
 
     if (!IncrementIterator(iter, endIter, "Expected '{'"))
     {
@@ -400,7 +400,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
             return nullptr;
         }
         const Token* memberNameToken = &*iter;
-        const string& memberName = iter->value.ToStdString();
+        ROString memberName = iter->value;
 
         // get member type
         if (!IncrementIterator(iter, endIter, "Expected member type"))
@@ -496,7 +496,7 @@ bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator en
 StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(TokenIterator& iter, TokenIterator endIter)
 {
     const Token* structNameToken = &*iter;
-    const string& structName = iter->value.ToStdString();
+    ROString structName = iter->value;
 
     // skip struct name
     ++iter;
@@ -523,7 +523,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
             return nullptr;
         }
         const Token* memberNameToken = &*iter;
-        const string& memberName = iter->value.ToStdString();
+        ROString memberName = iter->value;
 
         // make sure member name is followed by ':'
         if (!IncrementIteratorCheckType(iter, endIter, Token::eColon, "Expected ':' after member"))
@@ -647,7 +647,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     // increment past semicolon
     ++iter;
 
-    const string& constName = constNameToken->value.ToStdString();
+    ROString constName = constNameToken->value;
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(constName, constNameToken), expression, opToken);
     ConstantDeclaration* constDecl = new ConstantDeclaration(constName, assignment, typeExpr, constNameToken);
     return constDecl;
@@ -722,7 +722,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     // increment past semicolon
     ++iter;
 
-    const string& varName = varNameToken->value.ToStdString();
+    ROString varName = varNameToken->value;
     BinaryExpression* assignment = new BinaryExpression(BinaryExpression::eAssign, new IdentifierExpression(varName, varNameToken), expression, opToken);
     VariableDeclaration* varDecl = new VariableDeclaration(varName, assignment, typeExpr, varNameToken);
     return varDecl;
@@ -864,8 +864,8 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     // increment iter past end brace
     ++iter;
 
-    ForLoop* forLoop = new ForLoop(varNameToken->value.ToStdString(), varTypeExpr,
-                                   indexVarNameToken->value.ToStdString(), indexVarTypeExpr,
+    ForLoop* forLoop = new ForLoop(varNameToken->value, varTypeExpr,
+                                   indexVarNameToken->value, indexVarTypeExpr,
                                    iterExpression.release(), expression.release(),
                                    forToken, inToken,
                                    varNameToken, indexVarNameToken);
@@ -996,12 +996,12 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         }
         else // it's an identifier
         {
-            expr = new IdentifierExpression(iter->value.ToStdString(), &*iter);
+            expr = new IdentifierExpression(iter->value, &*iter);
         }
     }
     else if (Token::IsTypeName(type))
     {
-        expr = new IdentifierExpression(iter->value.ToStdString(), &*iter);
+        expr = new IdentifierExpression(iter->value, &*iter);
     }
     else if (type == Token::eOpenBracket)
     {
@@ -1163,7 +1163,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         const Token* openParToken = &*iter;
 
         // parse parameters
-        vector<string> paramNames;
+        vector<ROString> paramNames;
         vector<const Token*> paramNameTokens;
         vector<Expression*> paramTypes;
 
@@ -1181,7 +1181,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
                 return nullptr;
             }
 
-            paramNames.push_back(iter->value.ToStdString());
+            paramNames.push_back(iter->value);
             paramNameTokens.push_back(&*iter);
 
             if (!IncrementIterator(iter, endIter, "Expected a type"))
@@ -1469,25 +1469,27 @@ void SyntaxAnalyzer::ProcessExpressionOperators(vector<Expression*>& terms,
 
 StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator iter)
 {
-    const string& value = iter->value.ToStdString();
+    ROString value = iter->value;
+    const char* valuePtr = value.GetPtr();
+    size_t valueSize = value.GetSize();
 
     size_t idx = 0;
-    if (value.size() < 1 || value[idx] != '"')
+    if (valueSize < 1 || valuePtr[idx] != '"')
     {
         logger.LogError(*iter, "String doesn't start with '\"'");
         return nullptr;
     }
 
     vector<char> chars;
-    chars.reserve(value.size());
+    chars.reserve(valueSize);
 
     ++idx;
-    size_t endCharsIdx = value.size() - 1;
+    size_t endCharsIdx = valueSize - 1;
     while (idx < endCharsIdx)
     {
         unsigned continuingByteCount = 0;
 
-        char ch = value[idx];
+        char ch = valuePtr[idx];
         if (ch == '\\')
         {
             // make sure we're not at the end of the string
@@ -1498,7 +1500,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             }
 
             ++idx;
-            ch = value[idx];
+            ch = valuePtr[idx];
 
             if (ch == '\\')
             {
@@ -1583,7 +1585,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
             }
 
             ++idx;
-            ch = value[idx];
+            ch = valuePtr[idx];
 
             // make sure the continuing byte is valid
             if (!isUtf8Continuation(ch))
@@ -1598,7 +1600,7 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
         ++idx;
     }
 
-    if (value[value.size() - 1] != '"')
+    if (valuePtr[valueSize - 1] != '"')
     {
         logger.LogError(*iter, "String doesn't end with '\"'");
         return nullptr;
@@ -1652,8 +1654,9 @@ bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t
 
 bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
 {
-    const string& value = iter->value.ToStdString();
-    size_t endCharsIdx = value.size() - 1;
+    ROString value = iter->value;
+    const char* valuePtr = value.GetPtr();
+    size_t endCharsIdx = value.GetSize() - 1;
 
     ++idx;
     if (idx >= endCharsIdx)
@@ -1662,7 +1665,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
         return false;
     }
 
-    char ch = value[idx];
+    char ch = valuePtr[idx];
     if (ch != '{')
     {
         logger.LogError(*iter, "Expected '{' after '\\u'");
@@ -1676,7 +1679,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
         return false;
     }
 
-    ch = value[idx];
+    ch = valuePtr[idx];
     if (ch == '}')
     {
         logger.LogError(*iter, "Unexpected '}' after '{'");
@@ -1714,7 +1717,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
             return false;
         }
 
-        ch = value[idx];
+        ch = valuePtr[idx];
     }
 
     // check if we can encode in a 1-byte UTF-8 sequence
@@ -2050,7 +2053,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
                 return nullptr;
             }
 
-            expr = new MemberExpression(expr, iter->value.ToStdString(), opToken, &*iter);
+            expr = new MemberExpression(expr, iter->value, opToken, &*iter);
 
             nextIter = iter + 1;
         }
