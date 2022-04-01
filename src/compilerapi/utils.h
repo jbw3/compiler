@@ -3,7 +3,7 @@
 
 #include <cctype>
 #include <cstring>
-#include <string>
+#include "ROString.h"
 
 constexpr bool is1ByteUtf8(char ch)
 {
@@ -54,9 +54,9 @@ constexpr bool hexDigitToNum(char ch, char& num)
     }
 }
 
-bool stringToInteger(const std::string& str, int64_t& num);
+bool stringToInteger(ROString str, int64_t& num);
 
-double stringToFloat(const std::string& str);
+double stringToFloat(ROString str);
 
 constexpr int64_t getBitMask(unsigned size)
 {

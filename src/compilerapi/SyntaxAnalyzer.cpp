@@ -929,12 +929,12 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     if (mainType == Token::eIntLiteralType)
     {
         int64_t intValue = 0;
-        stringToInteger(iter->value.ToStdString(), intValue);
+        stringToInteger(iter->value, intValue);
         expr = new NumericExpression(intValue, &*iter);
     }
     else if (mainType == Token::eFloatLiteralType)
     {
-        double floatValue = stringToFloat(iter->value.ToStdString());
+        double floatValue = stringToFloat(iter->value);
         expr = new FloatLiteralExpression(floatValue, &*iter);
     }
     else if (mainType == Token::eBoolLiteralType)
@@ -1610,10 +1610,10 @@ StringLiteralExpression* SyntaxAnalyzer::ProcessStringExpression(TokenIterator i
     return expr;
 }
 
-bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
+bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t& idx, vector<char>& chars)
 {
-    const string& value = iter->value.ToStdString();
-    size_t endCharsIdx = value.size() - 1;
+    ROString value = iter->value;
+    size_t endCharsIdx = value.GetSize() - 1;
 
     char ch = '\0';
     uint8_t byte = 0;
@@ -1655,7 +1655,6 @@ bool SyntaxAnalyzer::ProcessByteEscapeSequence(const TokenIterator& iter, size_t
 bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, size_t& idx, std::vector<char>& chars)
 {
     ROString value = iter->value;
-    const char* valuePtr = value.GetPtr();
     size_t endCharsIdx = value.GetSize() - 1;
 
     ++idx;
@@ -1665,7 +1664,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
         return false;
     }
 
-    char ch = valuePtr[idx];
+    char ch = value[idx];
     if (ch != '{')
     {
         logger.LogError(*iter, "Expected '{' after '\\u'");
@@ -1679,7 +1678,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
         return false;
     }
 
-    ch = valuePtr[idx];
+    ch = value[idx];
     if (ch == '}')
     {
         logger.LogError(*iter, "Unexpected '}' after '{'");
@@ -1717,7 +1716,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
             return false;
         }
 
-        ch = valuePtr[idx];
+        ch = value[idx];
     }
 
     // check if we can encode in a 1-byte UTF-8 sequence

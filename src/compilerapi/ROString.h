@@ -34,10 +34,9 @@ public:
         return size;
     }
 
-    // TODO: remove this
-    std::string ToStdString() const
+    char operator [](size_t index) const
     {
-        return std::string(ptr, size);
+        return ptr[index];
     }
 
     bool operator ==(const ROString& other) const

@@ -1,19 +1,17 @@
 #include "utils.h"
 #include <cmath>
-#include <tuple>
-#include <vector>
 
 using namespace std;
 
 constexpr char NUMERIC_LITERAL_SEPERATOR = '_';
 
-bool binStringToInteger(const string& str, int64_t& num)
+bool binStringToInteger(ROString str, int64_t& num)
 {
     num = 0;
     bool hasDigit = false;
 
     // start at 2 to skip leading '0b'
-    for (size_t i = 2; i < str.size(); ++i)
+    for (size_t i = 2; i < str.GetSize(); ++i)
     {
         char ch = str[i];
         if (ch != NUMERIC_LITERAL_SEPERATOR)
@@ -37,13 +35,13 @@ bool binStringToInteger(const string& str, int64_t& num)
     return hasDigit;
 }
 
-bool octStringToInteger(const string& str, int64_t& num)
+bool octStringToInteger(ROString str, int64_t& num)
 {
     num = 0;
     bool hasDigit = false;
 
     // start at 2 to skip leading '0o'
-    for (size_t i = 2; i < str.size(); ++i)
+    for (size_t i = 2; i < str.GetSize(); ++i)
     {
         char ch = str[i];
         if (ch != NUMERIC_LITERAL_SEPERATOR)
@@ -67,13 +65,14 @@ bool octStringToInteger(const string& str, int64_t& num)
     return hasDigit;
 }
 
-bool decStringToInteger(const string& str, int64_t& num)
+bool decStringToInteger(ROString str, int64_t& num)
 {
     num = 0;
     bool hasDigit = false;
 
-    for (char ch : str)
+    for (size_t i = 0; i < str.GetSize(); ++i)
     {
+        char ch = str[i];
         if (ch != NUMERIC_LITERAL_SEPERATOR)
         {
             hasDigit = true;
@@ -94,13 +93,13 @@ bool decStringToInteger(const string& str, int64_t& num)
     return hasDigit;
 }
 
-bool hexStringToInteger(const string& str, int64_t& num)
+bool hexStringToInteger(ROString str, int64_t& num)
 {
     num = 0;
     bool hasDigit = false;
 
     // start at 2 to skip leading '0x'
-    for (size_t i = 2; i < str.size(); ++i)
+    for (size_t i = 2; i < str.GetSize(); ++i)
     {
         char ch = str[i];
         if (ch != NUMERIC_LITERAL_SEPERATOR)
@@ -125,11 +124,11 @@ bool hexStringToInteger(const string& str, int64_t& num)
     return hasDigit;
 }
 
-bool stringToInteger(const string& str, int64_t& num)
+bool stringToInteger(ROString str, int64_t& num)
 {
     bool ok = false;
 
-    if (str.size() == 0 || str[0] == NUMERIC_LITERAL_SEPERATOR)
+    if (str.GetSize() == 0 || str[0] == NUMERIC_LITERAL_SEPERATOR)
     {
         num = 0;
         ok = false;
@@ -138,7 +137,7 @@ bool stringToInteger(const string& str, int64_t& num)
     {
         // determine base
         int base = 10;
-        if (str.size() > 2 && str[0] == '0')
+        if (str.GetSize() > 2 && str[0] == '0')
         {
             switch (str[1])
             {
@@ -185,9 +184,9 @@ bool stringToInteger(const string& str, int64_t& num)
     return ok;
 }
 
-double stringToFloat(const string& str)
+double stringToFloat(ROString str)
 {
-    size_t strSize = str.size();
+    size_t strSize = str.GetSize();
     size_t fractionStartIdx = strSize;
     size_t exponentStartIdx = strSize;
     size_t idx = 0;

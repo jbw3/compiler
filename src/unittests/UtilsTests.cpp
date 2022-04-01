@@ -1,5 +1,6 @@
 #include "UtilsTests.h"
 #include "utils.h"
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -15,7 +16,7 @@ UtilsTests::UtilsTests(ostream& results) :
 
 bool UtilsTests::TestIntConversion(string& failMsg)
 {
-    vector<tuple<string, bool, bool, int64_t>> tests =
+    vector<tuple<ROString, bool, bool, int64_t>> tests =
     {
         make_tuple("0", true, true, 0),
         make_tuple("5", true, true, 5),
@@ -73,9 +74,9 @@ bool UtilsTests::TestIntConversion(string& failMsg)
     };
 
     bool ok = true;
-    for (tuple<string, bool, bool, int64_t> test : tests)
+    for (tuple<ROString, bool, bool, int64_t> test : tests)
     {
-        string& testStr = get<0>(test);
+        ROString testStr = get<0>(test);
 
         int64_t num = -1;
         bool resultConversion = stringToInteger(testStr, num);
@@ -83,14 +84,17 @@ bool UtilsTests::TestIntConversion(string& failMsg)
 
         if (resultConversion != expectedIsValid)
         {
-            failMsg = "'"s + testStr + "' was "
-                    + (resultConversion ? "incorrectly converted" : "not converted") + '\n';
+            stringstream ss;
+            ss << "'" << testStr << "' was " << (resultConversion ? "incorrectly converted" : "not converted") << '\n';
+            failMsg = ss.str();
             ok = false;
         }
 
         if (num != get<3>(test))
         {
-            failMsg = "'"s + testStr + "' was incorrectly converted to '" + to_string(num) + "'\n";
+            stringstream ss;
+            ss << "'" << testStr << "' was incorrectly converted to '" << num << "'\n";
+            failMsg = ss.str();
             ok = false;
         }
 
@@ -105,7 +109,7 @@ bool UtilsTests::TestIntConversion(string& failMsg)
 
 bool UtilsTests::TestFloatConversion(string& failMsg)
 {
-    vector<tuple<string, double>> tests =
+    vector<tuple<ROString, double>> tests =
     {
         make_tuple("0.0", 0.0),
         make_tuple("1.0", 1.0),
@@ -122,14 +126,16 @@ bool UtilsTests::TestFloatConversion(string& failMsg)
     };
 
     bool ok = true;
-    for (tuple<string, double> test : tests)
+    for (tuple<ROString, double> test : tests)
     {
-        string& testStr = get<0>(test);
+        ROString testStr = get<0>(test);
 
         double num = stringToFloat(testStr);
         if (num != get<1>(test))
         {
-            failMsg = "'"s + testStr + "' was incorrectly converted to '" + to_string(num) + "'\n";
+            stringstream ss;
+            ss << "'" << testStr << "' was incorrectly converted to '" << num << "'\n";
+            failMsg = ss.str();
             ok = false;
         }
 

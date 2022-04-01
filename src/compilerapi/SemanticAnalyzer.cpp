@@ -335,7 +335,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
     if (!ok)
     {
-        string opString = UnaryExpression::GetOperatorString(op);
+        ROString opString = UnaryExpression::GetOperatorString(op);
         logger.LogError(*unaryExpression->opToken, "Unary operator '{}' does not support type '{}'", opString, subExprType->GetShortName());
         isError = true;
         return;
@@ -485,7 +485,7 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
     {
         // TODO: Need better error message when integer is too big for assignment: var err u8 = 256;
         const Token* opToken = binaryExpression->opToken;
-        string opString = BinaryExpression::GetOperatorString(op);
+        ROString opString = BinaryExpression::GetOperatorString(op);
         logger.LogError(
             *opToken,
             "Binary operator '{}' does not support types '{}' and '{}'",
@@ -2361,7 +2361,7 @@ bool SemanticAnalyzer::ResolveDependencies(
                 auto dependentsIter = dependents.find(memberTypeName);
                 if (dependentsIter != dependents.end())
                 {
-                    const string& memberName = member->name.ToStdString();
+                    ROString memberName = member->name;
                     logger.LogError(*member->nameToken, "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
                     return false;
                 }
@@ -3456,12 +3456,12 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 
 bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* functionDeclaration)
 {
-    unordered_set<string> processedParams;
+    unordered_set<ROString> processedParams;
 
     // set parameter types
     for (Parameter* param : functionDeclaration->parameters)
     {
-        const string& paramName = param->name.ToStdString();
+        ROString paramName = param->name;
         if (processedParams.find(paramName) != processedParams.end())
         {
             const Token* paramToken = param->nameToken;

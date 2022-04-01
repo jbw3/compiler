@@ -2,7 +2,6 @@
 #define SYNTAX_TREE_H_
 
 #include <functional>
-#include <string>
 #include <vector>
 #include "Token.h"
 #include "TypeInfo.h"

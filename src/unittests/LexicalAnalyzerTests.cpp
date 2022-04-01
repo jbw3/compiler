@@ -377,7 +377,9 @@ bool LexicalAnalyzerTests::TokensAreEqual(const Token& expectedToken, const Toke
     ROString actualValue = actualToken.value;
     if (expectedValue != actualValue)
     {
-        failMsg = "Token values are not equal: expected: "s + expectedValue.ToStdString() + ", actual: " + actualValue.ToStdString() + "\n";
+        stringstream ss;
+        ss << "Token values are not equal: expected: " << expectedValue << ", actual: " << actualValue << "\n";
+        failMsg = ss.str();
         areEqual = false;
     }
 

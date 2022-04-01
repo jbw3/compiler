@@ -6,10 +6,10 @@
 using namespace std;
 using namespace SyntaxTree;
 
-SourceGenerator::SourceGenerator(const string& outFilename)
+SourceGenerator::SourceGenerator(const string& outFilename) :
+    indentStr("    ")
 {
     os = outFilename.empty() ? &cout : new fstream(outFilename, ios_base::out);
-    indentStr = "    ";
     indentLevel = 0;
 }
 

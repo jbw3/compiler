@@ -1,8 +1,9 @@
 #ifndef SOURCE_GENERATOR_H_
 #define SOURCE_GENERATOR_H_
 
+#include "ROString.h"
 #include "SyntaxTreeVisitor.h"
-#include <string>
+#include <ostream>
 
 namespace SyntaxTree
 {
@@ -78,7 +79,7 @@ public:
 
 private:
     std::ostream* os;
-    std::string indentStr;
+    ROString indentStr;
     unsigned indentLevel;
 
     void Indent();
