@@ -662,7 +662,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
     // create iterator
-    const string& varName = forLoop->variableName.ToStdString();
+    ROString varName = forLoop->variableName;
     const TypeInfo* varType = forLoop->variableType;
     bool isSigned = varType->GetSign() == TypeInfo::eSigned;
     Type* type = GetType(varType);
@@ -672,8 +672,8 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     CreateDebugVariable(varNameToken, varType, alloca);
 
     // create index
-    const string& indexName = forLoop->indexName.ToStdString();
-    bool hasIndex = !indexName.empty();
+    ROString indexName = forLoop->indexName;
+    bool hasIndex = indexName.GetSize() > 0;
     const TypeInfo* indexTypeInfo = forLoop->indexType;
     Type* indexType = nullptr;
     AllocaInst* indexAlloca = nullptr;
@@ -1014,8 +1014,8 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     for (Argument& arg : func->args())
     {
         const Parameter* param = params[idx];
-        const string& paramName = param->name.ToStdString();
-        arg.setName(paramName);
+        ROString paramName = param->name;
+        arg.setName(toStringRef(paramName));
         AllocaInst* alloca = CreateVariableAlloc(func, arg.getType(), paramName);
         builder.CreateStore(&arg, alloca);
         const TypeInfo* paramType = param->type;
@@ -1031,7 +1031,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
                 resultValue = nullptr;
                 return;
             }
-            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, paramName, idx + 1, currentDiFile, line, paramDebugType, true);
+            DILocalVariable* diVar = diBuilder->createParameterVariable(diSubprogram, toStringRef(paramName), idx + 1, currentDiFile, line, paramDebugType, true);
             diBuilder->insertDeclare(alloca, diVar, diBuilder->createExpression(), DILocation::get(context, line, 0, diSubprogram), builder.GetInsertBlock());
         }
 
@@ -1083,13 +1083,13 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
 void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
 {
-    const string& structName = structDefinition->name.ToStdString();
+    ROString structName = structDefinition->name;
     const TypeInfo* typeInfo = structDefinition->type;
 
     vector<Type*> members;
     for (const MemberDefinition* memberDef : structDefinition->members)
     {
-        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->name.ToStdString());
+        const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->name);
         Type* memberType = GetType(memberInfo->GetType());
         if (memberType == nullptr)
         {
@@ -1123,12 +1123,12 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
                 return;
             }
 
-            const string& memberName = member->GetName();
+            ROString memberName = member->GetName();
             uint64_t memberSize = memberDiType->getSizeInBits();
             // TODO: better way to get alignment?
             uint32_t alignment = (memberSize > 32) ? 32 : static_cast<uint32_t>(memberSize);
             unsigned memberLine = member->GetToken()->line;
-            elements.push_back(diBuilder->createMemberType(file, memberName, file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
+            elements.push_back(diBuilder->createMemberType(file, toStringRef(memberName), file, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
 
             offset += memberSize;
         }
@@ -1165,7 +1165,7 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
         SetDebugLocation(member->nameToken);
 
-        const MemberInfo* memberInfo = typeInfo->GetMember(member->name.ToStdString());
+        const MemberInfo* memberInfo = typeInfo->GetMember(member->name);
 
         index[0] = memberInfo->GetIndex();
         initValue = builder.CreateInsertValue(initValue, resultValue, index, "agg");
@@ -1213,8 +1213,8 @@ void LlvmIrGenerator::Visit(Modules* modules)
     // add all struct names to types map
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
-        const string& structName = structDef->name.ToStdString();
-        StructType* structType = StructType::create(context, structName);
+        ROString structName = structDef->name;
+        StructType* structType = StructType::create(context, toStringRef(structName));
         types.insert({structName, structType});
 
         // add debug info for structs
@@ -1224,15 +1224,15 @@ void LlvmIrGenerator::Visit(Modules* modules)
 
             const TypeInfo* structDefType = structDef->type;
 
-            const string& name = structDefType->GetShortName();
+            ROString name = structDefType->GetShortName();
             unsigned numBits = structDefType->GetNumBits();
 
             unsigned line = structDefType->GetToken()->line;
             // TODO: set alignment
             SmallVector<Metadata*, 0> elements;
             DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-            DICompositeType* diType = diBuilder->createStructType(diFile, name, diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-            diStructTypes.insert({structDef->name.ToStdString(), diType});
+            DICompositeType* diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+            diStructTypes.insert({structDef->name, diType});
         }
     }
 
@@ -1256,7 +1256,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 return;
             }
 
-            symbolTable.AddConstant(decl->name.ToStdString(), decl->nameToken, externFunc->GetType(), externFunc->GetConstantValueIndex());
+            symbolTable.AddConstant(decl->name, decl->nameToken, externFunc->GetType(), externFunc->GetConstantValueIndex());
         }
 
         for (FunctionDefinition* funcDef : moduleDefinition->functionDefinitions)
@@ -1269,7 +1269,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 return;
             }
 
-            symbolTable.AddConstant(decl->name.ToStdString(), decl->nameToken, funcDef->GetType(), funcDef->GetConstantValueIndex());
+            symbolTable.AddConstant(decl->name, decl->nameToken, funcDef->GetType(), funcDef->GetConstantValueIndex());
         }
     }
 
@@ -1602,7 +1602,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
 
 void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
 {
-    const string& name = identifierExpression->name.ToStdString();
+    ROString name = identifierExpression->name;
     const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
     if (data == nullptr)
     {
@@ -1630,7 +1630,7 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
         switch (accessType)
         {
             case Expression::eValue:
-                resultValue = builder.CreateLoad(alloca, name);
+                resultValue = builder.CreateLoad(alloca, toStringRef(name));
                 break;
             case Expression::eAddress:
                 resultValue = alloca;
@@ -2036,7 +2036,7 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         type = type->GetInnerType();
     }
 
-    const string& memberName = memberExpression->memberName.ToStdString();
+    ROString memberName = memberExpression->memberName;
     const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
@@ -2148,7 +2148,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
 
 void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 {
-    const string& constName = constantDeclaration->name.ToStdString();
+    ROString constName = constantDeclaration->name;
     const TypeInfo* constType = constantDeclaration->constantType;
 
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
@@ -2159,7 +2159,7 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 
 void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
-    const string& varName = variableDeclaration->name.ToStdString();
+    ROString varName = variableDeclaration->name;
     const TypeInfo* varType = variableDeclaration->variableType;
     Type* type = GetType(varType);
     if (type == nullptr)
@@ -2234,39 +2234,39 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     return true;
 }
 
-string createTypeName(const TypeInfo* type)
+ROString LlvmIrGenerator::CreateTypeName(const TypeInfo* type)
 {
-    string name;
+    StringBuilder& sb = compilerContext.stringBuilder;
 
     while (type->IsArray())
     {
         type = type->GetInnerType();
-        name += "[]";
+        sb.Append("[]");
     }
 
     if (type->IsRange())
     {
         unsigned memberNumBits = type->GetInnerType()->GetNumBits();
-        name += "Range" + to_string(memberNumBits);
+        sb.Append("Range", to_string(memberNumBits));
     }
     else if (type->IsInt())
     {
         if (type->GetSign() == TypeInfo::eSigned)
         {
-            name += "i";
+            sb.Append("i");
         }
         else
         {
-            name += "u";
+            sb.Append("u");
         }
-        name += to_string(type->GetNumBits());
+        sb.Append(to_string(type->GetNumBits()));
     }
     else
     {
-        name += type->GetShortName();
+        sb.Append(type->GetShortName());
     }
 
-    return name;
+    return sb.CreateString();
 }
 
 FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
@@ -2331,7 +2331,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     else
     {
         // get the LLVM type name
-        string llvmName = createTypeName(type);
+        ROString llvmName = CreateTypeName(type);
 
         // try to lookup this type to see if it's already been created
         auto iter = types.find(llvmName);
@@ -2354,7 +2354,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
                 members.push_back(memberType);
             }
 
-            llvmType = StructType::create(context, members, llvmName);
+            llvmType = StructType::create(context, members, toStringRef(llvmName));
 
             // register type so we don't have to create it again
             types.insert({llvmName, llvmType});
@@ -2369,7 +2369,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
                 arrayStructElements[1] = PointerType::get(innerType, 0);
 
                 ArrayRef<Type*> arrayRef(arrayStructElements, 2);
-                llvmType = StructType::create(context, arrayRef, llvmName);
+                llvmType = StructType::create(context, arrayRef, toStringRef(llvmName));
 
                 // register type so we don't have to create it again
                 types.insert({llvmName, llvmType});
@@ -2402,22 +2402,22 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     DIType* diType = nullptr;
     if (type->IsInt())
     {
-        const string& name = type->GetShortName();
+        ROString name = type->GetShortName();
         unsigned numBits = type->GetNumBits();
         unsigned encoding = (type->GetSign() == TypeInfo::eSigned) ? dwarf::DW_ATE_signed : dwarf::DW_ATE_unsigned;
-        diType = diBuilder->createBasicType(name, numBits, encoding);
+        diType = diBuilder->createBasicType(toStringRef(name), numBits, encoding);
     }
     else if (type->IsFloat())
     {
-        const string& name = type->GetShortName();
+        ROString name = type->GetShortName();
         unsigned numBits = type->GetNumBits();
         unsigned encoding = dwarf::DW_ATE_float;
-        diType = diBuilder->createBasicType(name, numBits, encoding);
+        diType = diBuilder->createBasicType(toStringRef(name), numBits, encoding);
     }
     else if (type->IsBool())
     {
-        const string& name = type->GetShortName();
-        diType = diBuilder->createBasicType(name, 8, dwarf::DW_ATE_boolean);
+        ROString name = type->GetShortName();
+        diType = diBuilder->createBasicType(toStringRef(name), 8, dwarf::DW_ATE_boolean);
     }
     else if (type->IsPointer())
     {
@@ -2426,16 +2426,16 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         {
             return nullptr;
         }
-        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, type->GetShortName());
+        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, toStringRef(type->GetShortName()));
     }
     else if (type->IsSameAs(*TypeInfo::UnitType))
     {
-        diType = diBuilder->createBasicType(TypeInfo::UnitType->GetShortName(), 0, dwarf::DW_ATE_unsigned);
+        diType = diBuilder->createBasicType(toStringRef(TypeInfo::UnitType->GetShortName()), 0, dwarf::DW_ATE_unsigned);
     }
     else if (type->IsStr())
     {
         const TypeInfo* strType = compilerContext.typeRegistry.GetStringType();
-        const string& name = strType->GetShortName();
+        ROString name = strType->GetShortName();
         unsigned numBits = strType->GetNumBits();
 
         SmallVector<Metadata*, 2> elements;
@@ -2450,20 +2450,20 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
                 return nullptr;
             }
 
-            const string& memberName = member->GetName();
+            ROString memberName = member->GetName();
             unsigned size = memberType->GetNumBits();
             // TODO: don't hard-code alignment
-            elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
+            elements.push_back(diBuilder->createMemberType(nullptr, toStringRef(memberName), nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
 
             offset += size;
         }
 
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-        diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+        diType = diBuilder->createStructType(nullptr, toStringRef(name), nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
     else if (type->IsArray())
     {
-        const string& name = type->GetShortName();
+        ROString name = type->GetShortName();
         unsigned numBits = type->GetNumBits();
 
         SmallVector<Metadata*, 2> elements;
@@ -2478,20 +2478,20 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
                 return nullptr;
             }
 
-            const string& memberName = member->GetName();
+            ROString memberName = member->GetName();
             unsigned size = memberType->GetNumBits();
             // TODO: don't hard-code alignment
-            elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
+            elements.push_back(diBuilder->createMemberType(nullptr, toStringRef(memberName), nullptr, 0, size, 4, offset, DINode::FlagZero, memberDiType));
 
             offset += size;
         }
 
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-        diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+        diType = diBuilder->createStructType(nullptr, toStringRef(name), nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
     else if (type->IsRange())
     {
-        const string& name = type->GetShortName();
+        ROString name = type->GetShortName();
         unsigned numBits = type->GetNumBits();
 
         SmallVector<Metadata*, 2> elements;
@@ -2506,11 +2506,11 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
                 return nullptr;
             }
 
-            const string& memberName = member->GetName();
+            ROString memberName = member->GetName();
             uint64_t memberSize = memberDiType->getSizeInBits();
             // TODO: better way to get alignment?
             uint32_t alignment = (memberSize > 32) ? 32 : static_cast<uint32_t>(memberSize);
-            elements.push_back(diBuilder->createMemberType(nullptr, memberName, nullptr, 0, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
+            elements.push_back(diBuilder->createMemberType(nullptr, toStringRef(memberName), nullptr, 0, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
 
             offset += memberSize;
         }
@@ -2518,7 +2518,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
 
         // TODO: set alignment
-        diType = diBuilder->createStructType(nullptr, name, nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+        diType = diBuilder->createStructType(nullptr, toStringRef(name), nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
     else if (type->IsFunction())
     {
@@ -2541,11 +2541,11 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         }
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
-        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, type->GetShortName());
+        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, toStringRef(type->GetShortName()));
     }
     else
     {
-        const string& name = type->GetShortName();
+        ROString name = type->GetShortName();
         auto iter = diStructTypes.find(name);
         if (iter != diStructTypes.end())
         {
@@ -2586,13 +2586,13 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     return true;
 }
 
-AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, Type* type, const string& paramName)
+AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, Type* type, ROString paramName)
 {
     // create builder to insert alloca at beginning of function
     BasicBlock& entryBlock = function->getEntryBlock();
     IRBuilder<> tempBuilder(&entryBlock, entryBlock.begin());
 
-    AllocaInst* alloca = tempBuilder.CreateAlloca(type, nullptr, paramName);
+    AllocaInst* alloca = tempBuilder.CreateAlloca(type, nullptr, toStringRef(paramName));
     return alloca;
 }
 

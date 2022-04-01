@@ -7,8 +7,9 @@ using namespace std;
 
 StringBuilder::StringBuilder()
 {
-    head = new char[STRING_MEM_BLOCK_SIZE];
-    buffEnd = head + STRING_MEM_BLOCK_SIZE;
+    buffSize = 1024;
+    head = new char[buffSize];
+    buffEnd = head + buffSize;
 
     // reserve the first few bytes as a pointer to the next buffer
     memset(head, 0, sizeof(char*));
@@ -31,16 +32,17 @@ StringBuilder::~StringBuilder()
     }
 }
 
-void StringBuilder::Append(const char* ptr, size_t size)
+void StringBuilder::AppendBuff(const char* ptr, size_t size)
 {
-    size_t freeSize = buffEnd - current;
+    size_t freeSize = buffEnd - end;
     if (size > freeSize)
     {
         char* oldHead = head;
 
         // allocate new buffer
-        head = new char[STRING_MEM_BLOCK_SIZE];
-        buffEnd = head + STRING_MEM_BLOCK_SIZE;
+        buffSize *= 2;
+        head = new char[buffSize];
+        buffEnd = head + buffSize;
 
         // point this block of memory to the next block
         char** next = reinterpret_cast<char**>(head);
@@ -57,14 +59,14 @@ void StringBuilder::Append(const char* ptr, size_t size)
         end = current + currentSize;
     }
 
-    memcpy(current, ptr, size);
-    current += size;
+    memcpy(end, ptr, size);
+    end += size;
 }
 
 CompilerContext::CompilerContext(Config config, ostream& logStream) :
     config(config),
     logger(*this, &logStream, config.color),
-    typeRegistry(config.targetMachine),
+    typeRegistry(*this),
     basicTypeCount(0)
 {
 }
@@ -214,7 +216,7 @@ unsigned CompilerContext::AddFunctionConstantValue(const SyntaxTree::FunctionDec
 unsigned CompilerContext::AddTypeConstantValue(const TypeInfo* value)
 {
     unsigned id = 0;
-    const string& uniqueName = value->GetUniqueName();
+    ROString uniqueName = value->GetUniqueName();
     auto iter = typeConstantsIdMap.find(uniqueName);
     if (iter != typeConstantsIdMap.cend())
     {

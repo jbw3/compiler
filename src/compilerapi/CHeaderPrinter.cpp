@@ -71,7 +71,7 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
         // print array structs
         for (const MemberDefinition* member : structDef->members)
         {
-            const string& memberName = member->name.ToStdString();
+            ROString memberName = member->name;
             const MemberInfo* memberInfo = structType->GetMember(memberName);
             const TypeInfo* memberType = memberInfo->GetType();
             if (memberType->IsArray())
@@ -87,7 +87,7 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
 
         for (const MemberDefinition* member : structDef->members)
         {
-            const MemberInfo* memberInfo = structType->GetMember(member->name.ToStdString());
+            const MemberInfo* memberInfo = structType->GetMember(member->name);
             const TypeInfo* memberType = memberInfo->GetType();
 
             outFile << "    ";
@@ -281,7 +281,7 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, ROString varN
     }
     else if (type->IsInt())
     {
-        const string shortName = type->GetShortName();
+        ROString shortName = type->GetShortName();
 
         if (shortName == INT_SIZE_KEYWORD)
         {
@@ -425,7 +425,7 @@ bool CHeaderPrinter::PrintCFunctionType(std::ostream& os, const TypeInfo* type, 
 
 bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
 {
-    const string& typeName = arrayType->GetShortName();
+    ROString typeName = arrayType->GetShortName();
     if (arrayTypeNames.find(typeName) == arrayTypeNames.end())
     {
         const TypeInfo* innerType = arrayType->GetInnerType();

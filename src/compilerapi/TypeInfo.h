@@ -1,7 +1,7 @@
 #ifndef TYPE_INFO_H_
 #define TYPE_INFO_H_
 
-#include <map>
+#include "ROString.h"
 #include <unordered_map>
 #include <vector>
 
@@ -24,9 +24,9 @@ const char* const ARRAY_TYPE_END_TOKEN = "]";
 class MemberInfo
 {
 public:
-    MemberInfo(const std::string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token);
+    MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token);
 
-    const std::string& GetName() const
+    const ROString GetName() const
     {
         return name;
     }
@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    std::string name;
+    ROString name;
     unsigned index;
     bool isStorage;
     const TypeInfo* type;
@@ -109,12 +109,12 @@ public:
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
 
-    static TypeInfo* CreateAggregateType(const std::string& name, const Token* token);
+    static TypeInfo* CreateAggregateType(ROString name, const Token* token);
 
     static const TypeInfo* CreateFunctionType(
         unsigned numBits,
-        const std::string& uniqueName,
-        const std::string& name,
+        ROString uniqueName,
+        ROString name,
         const std::vector<const TypeInfo*>& parameterTypes,
         const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType);
@@ -123,8 +123,8 @@ public:
         unsigned numBits,
         uint16_t flags,
         ESign sign,
-        const std::string& uniqueName,
-        const std::string& shortName,
+        ROString uniqueName,
+        ROString shortName,
         const TypeInfo* innerType = nullptr,
         const Token* token = nullptr
     );
@@ -222,18 +222,18 @@ public:
         return numBits;
     }
 
-    const std::string& GetUniqueName() const
+    ROString GetUniqueName() const
     {
         return uniqueName;
     }
 
     // TODO: rename (GetFriendlyName?)
-    const std::string& GetShortName() const
+    ROString GetShortName() const
     {
         return shortName;
     }
 
-    const MemberInfo* GetMember(const std::string& memberName) const;
+    const MemberInfo* GetMember(ROString memberName) const;
 
     const std::vector<const MemberInfo*>& GetMembers() const
     {
@@ -245,7 +245,7 @@ public:
         return members.size();
     }
 
-    bool AddMember(const std::string& name, const TypeInfo* type, bool isAssignable, const Token* token);
+    bool AddMember(ROString name, const TypeInfo* type, bool isAssignable, const Token* token);
 
     const Token* GetToken() const
     {
@@ -276,9 +276,9 @@ private:
     unsigned numBits;
     uint16_t flags;
     ESign sign;
-    std::string uniqueName;
-    std::string shortName;
-    std::map<std::string, const MemberInfo*> memberMap;
+    ROString uniqueName;
+    ROString shortName;
+    std::unordered_map<ROString, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
     const Token* token;
     const TypeInfo* innerType;
@@ -290,11 +290,13 @@ private:
 class NumericLiteralType : public TypeInfo
 {
 public:
-    static const NumericLiteralType* Create(unsigned signedNumBits, unsigned unsignedNumBits);
-
-    static const NumericLiteralType* CreateSigned(unsigned numBits);
-
-    static const NumericLiteralType* CreateUnsigned(unsigned numBits);
+    NumericLiteralType(
+        ESign sign,
+        unsigned signedNumBits,
+        unsigned unsignedNumBits,
+        ROString uniqueName,
+        ROString name
+    );
 
     bool IsSameAs(const TypeInfo& other) const override;
 
@@ -306,26 +308,9 @@ public:
 
     unsigned GetUnsignedNumBits() const;
 
-    const TypeInfo* GetMinSizeType(ESign sign) const;
-
 private:
-    static std::unordered_map
-    <
-        std::tuple<ESign, unsigned, unsigned>,
-        const NumericLiteralType*
-    > instances;
-
     unsigned signedNumBits;
     unsigned unsignedNumBits;
-
-    static const NumericLiteralType* Create(ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, const char* name);
-
-    NumericLiteralType(
-        ESign sign,
-        unsigned signedNumBits,
-        unsigned unsignedNumBits,
-        const std::string& name
-    );
 };
 
 namespace std

@@ -16,7 +16,7 @@ public:
 
 private:
     ErrorLogger& logger;
-    std::unordered_set<std::string> arrayTypeNames;
+    std::unordered_set<ROString> arrayTypeNames;
 
     bool WriteFile(const std::string& tempFilename, const std::string& outFilename, const SyntaxTree::Modules* modules);
 

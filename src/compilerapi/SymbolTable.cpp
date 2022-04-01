@@ -59,12 +59,12 @@ void SymbolTable::Pop()
     }
 }
 
-bool SymbolTable::AddVariable(const string& name, const Token* token, const TypeInfo* type)
+bool SymbolTable::AddVariable(ROString name, const Token* token, const TypeInfo* type)
 {
     return AddVariable(name, token, type, nullptr);
 }
 
-bool SymbolTable::AddVariable(const string& name, const Token* token, const TypeInfo* type, AllocaInst* value)
+bool SymbolTable::AddVariable(ROString name, const Token* token, const TypeInfo* type, AllocaInst* value)
 {
     IdentifierData* data = GetIdentifierData(name);
 
@@ -80,7 +80,7 @@ bool SymbolTable::AddVariable(const string& name, const Token* token, const Type
     }
 }
 
-bool SymbolTable::AddConstant(const string& name, const Token* token, const TypeInfo* type, unsigned constValueIndex)
+bool SymbolTable::AddConstant(ROString name, const Token* token, const TypeInfo* type, unsigned constValueIndex)
 {
     IdentifierData* data = GetIdentifierData(name);
 
@@ -96,11 +96,11 @@ bool SymbolTable::AddConstant(const string& name, const Token* token, const Type
     }
 }
 
-SymbolTable::IdentifierData* SymbolTable::GetIdentifierData(const string& name) const
+SymbolTable::IdentifierData* SymbolTable::GetIdentifierData(ROString name) const
 {
     for (auto iter = scopes.rbegin(); iter != scopes.rend(); ++iter)
     {
-        unordered_map<string, IdentifierData>& identifiers = (*iter)->identifiers;
+        unordered_map<ROString, IdentifierData>& identifiers = (*iter)->identifiers;
         auto identifierIter = identifiers.find(name);
         if (identifierIter != identifiers.cend())
         {

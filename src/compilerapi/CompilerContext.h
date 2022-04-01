@@ -44,17 +44,47 @@ struct ArrayConstValue
 class StringBuilder
 {
 public:
-    static constexpr size_t STRING_MEM_BLOCK_SIZE = 1024;
-
     StringBuilder();
 
     ~StringBuilder();
 
-    template<typename... Ts>
-    ROString CreateString(Ts... strings)
+    StringBuilder& Append(char ch)
     {
+        AppendBuff(&ch, 1);
+        return *this;
+    }
+
+    StringBuilder& Append(const char* cStr)
+    {
+        AppendBuff(cStr, strlen(cStr));
+        return *this;
+    }
+
+    StringBuilder& Append(const std::string& str)
+    {
+        AppendBuff(str.c_str(), str.size());
+        return *this;
+    }
+
+    StringBuilder& Append(ROString str)
+    {
+        AppendBuff(str.GetPtr(), str.GetSize());
+        return *this;
+    }
+
+    template<typename T, typename... Ts>
+    StringBuilder& Append(T s, Ts... strings)
+    {
+        Append(s);
         Append(strings...);
-        return ROString(current, end - current);
+        return *this;
+    }
+
+    ROString CreateString()
+    {
+        char* start = current;
+        current = end;
+        return ROString(start, end - start);
     }
 
 private:
@@ -62,25 +92,9 @@ private:
     char* buffEnd;
     char* current;
     char* end;
+    size_t buffSize;
 
-    template<typename T, typename... Ts>
-    void Append(T s, Ts... strings)
-    {
-        Append(s);
-        Append(strings...);
-    }
-
-    void Append(const char* ptr, size_t size);
-
-    void Append(const char* cStr)
-    {
-        Append(cStr, strlen(cStr));
-    }
-
-    void Append(ROString str)
-    {
-        Append(str.GetPtr(), str.GetSize());
-    }
+    void AppendBuff(const char* ptr, size_t size);
 };
 
 class CompilerContext
@@ -88,8 +102,8 @@ class CompilerContext
 public:
     Config config;
     ErrorLogger logger;
-    TypeRegistry typeRegistry;
     StringBuilder stringBuilder;
+    TypeRegistry typeRegistry;
 
     CompilerContext(Config config, std::ostream& logStream);
 
@@ -206,7 +220,7 @@ private:
     std::vector<ArrayConstValue> arrayConstants;
     std::vector<const SyntaxTree::FunctionDeclaration*> functionConstants;
 
-    std::unordered_map<std::string, unsigned> typeConstantsIdMap;
+    std::unordered_map<ROString, unsigned> typeConstantsIdMap;
     std::vector<const TypeInfo*> typeConstants;
 };
 

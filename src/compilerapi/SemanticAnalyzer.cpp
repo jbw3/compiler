@@ -6,6 +6,7 @@
 #include "utils.h"
 #include <cassert>
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -264,7 +265,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
                         return;
                     }
 
-                    resultType = NumericLiteralType::CreateSigned(subExprLiteralType->GetSignedNumBits());
+                    resultType = compilerContext.typeRegistry.CreateSignedNumericLiteralType(subExprLiteralType->GetSignedNumBits());
                     ok = true;
                 }
             }
@@ -1044,7 +1045,7 @@ const NumericLiteralType* SemanticAnalyzer::GetBiggestNumLitSizeType(const Numer
     if (type1->GetSign() == TypeInfo::eSigned || type2->GetSign() == TypeInfo::eSigned)
     {
         unsigned signedNumBits = max(type1->GetSignedNumBits(), type2->GetSignedNumBits());
-        resultType = NumericLiteralType::CreateSigned(signedNumBits);
+        resultType = compilerContext.typeRegistry.CreateSignedNumericLiteralType(signedNumBits);
     }
     else
     {
@@ -1860,7 +1861,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
                 return;
             }
 
-            inferType = arrayInnerLiteralType->GetMinSizeType(varType->GetSign());
+            inferType = compilerContext.typeRegistry.GetMinSizeNumericLiteralType(arrayInnerLiteralType, varType->GetSign());
             if (inferType == nullptr)
             {
                 logger.LogInternalError("Could not determine expression result type");
@@ -1878,7 +1879,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
     // add the variable name to the symbol table
     ROString varName = forLoop->variableName;
-    bool ok = symbolTable.AddVariable(varName.ToStdString(), forLoop->variableNameToken, forLoop->variableType);
+    bool ok = symbolTable.AddVariable(varName, forLoop->variableNameToken, forLoop->variableType);
     if (!ok)
     {
         isError = true;
@@ -1890,7 +1891,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     ROString indexVarName = forLoop->indexName;
     if (indexVarName.GetSize() > 0)
     {
-        ok = symbolTable.AddVariable(indexVarName.ToStdString(), forLoop->indexNameToken, forLoop->indexType);
+        ok = symbolTable.AddVariable(indexVarName, forLoop->indexNameToken, forLoop->indexType);
         if (!ok)
         {
             isError = true;
@@ -2057,7 +2058,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     {
         ROString paramName = param->name;
         const Token* paramToken = param->nameToken;
-        bool ok = symbolTable.AddVariable(paramName.ToStdString(), paramToken, param->type);
+        bool ok = symbolTable.AddVariable(paramName, paramToken, param->type);
         if (!ok)
         {
             isError = true;
@@ -2109,7 +2110,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
 
 void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 {
-    const string& structName = structDefinition->name.ToStdString();
+    ROString structName = structDefinition->name;
 
     auto iter = partialStructTypes.find(structName);
     assert(iter != partialStructTypes.cend());
@@ -2137,7 +2138,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
             return;
         }
 
-        const string& memberName = member->name.ToStdString();
+        ROString memberName = member->name;
         bool added = newType->AddMember(memberName, memberType, true, member->nameToken);
         if (!added)
         {
@@ -2152,7 +2153,7 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    const string& structName = structInitializationExpression->structName.ToStdString();
+    ROString structName = structInitializationExpression->structName;
     const TypeInfo* type = compilerContext.typeRegistry.GetType(structName);
     if (type == nullptr)
     {
@@ -2164,7 +2165,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
 
     structInitializationExpression->SetType(type);
 
-    unordered_set<string> membersToInit;
+    unordered_set<ROString> membersToInit;
     for (const MemberInfo* member : type->GetMembers())
     {
         membersToInit.insert(member->GetName());
@@ -2173,7 +2174,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     bool allMembersAreConst = true;
     for (MemberInitialization* member : structInitializationExpression->memberInitializations)
     {
-        const string& memberName = member->name.ToStdString();
+        ROString memberName = member->name;
 
         // get member info
         const MemberInfo* memberInfo = type->GetMember(memberName);
@@ -2230,26 +2231,26 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     size_t membersNotInit = membersToInit.size();
     if (membersNotInit > 0)
     {
-        string errorMsg;
+        stringstream errorMsg;
         if (membersNotInit == 1)
         {
-            errorMsg = "Struct member '" + *membersToInit.cbegin() + "' was not initialized";
+            errorMsg << "Struct member '" << *membersToInit.cbegin() << "' was not initialized";
         }
         else
         {
             auto iter = membersToInit.cbegin();
-            errorMsg = "The following struct members were not initialized: " + *iter;
+            errorMsg << "The following struct members were not initialized: " << *iter;
             ++iter;
             for (; iter != membersToInit.cend(); ++iter)
             {
-                errorMsg += ", ";
-                errorMsg += *iter;
+                errorMsg << ", ";
+                errorMsg << *iter;
             }
         }
 
         isError = true;
         const Token* token = structInitializationExpression->structNameToken;
-        logger.LogError(*token, errorMsg.c_str());
+        logger.LogError(*token, errorMsg.str().c_str());
         return;
     }
 
@@ -2270,7 +2271,7 @@ void SemanticAnalyzer::LogExistingIdentifierError(ROString name, const Token* to
 {
     logger.LogError(*token, "Identifier '{}' has already been declared", name);
 
-    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name.ToStdString());
+    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
     const Token* existingToken = data->token;
     if (existingToken != nullptr)
     {
@@ -2290,13 +2291,13 @@ bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
     }
     size_t numStructDefs = structDefs.size();
 
-    unordered_map<string, StructDefinition*> nameMap;
+    unordered_map<ROString, StructDefinition*> nameMap;
     nameMap.reserve(numStructDefs);
 
     // build map for fast lookup
     for (StructDefinition* structDef : structDefs)
     {
-        const string& structName = structDef->name.ToStdString();
+        ROString structName = structDef->name;
         auto rv = nameMap.insert({structName, structDef});
         if (!rv.second)
         {
@@ -2308,15 +2309,15 @@ bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
     vector<StructDefinition*> ordered;
     ordered.reserve(numStructDefs);
 
-    unordered_set<string> resolved;
+    unordered_set<ROString> resolved;
     resolved.reserve(numStructDefs);
 
-    unordered_set<string> dependents;
+    unordered_set<ROString> dependents;
 
     // resolve dependencies
     for (StructDefinition* structDef : structDefs)
     {
-        const string& structName = structDef->name.ToStdString();
+        ROString structName = structDef->name;
 
         // resolve this struct's dependencies if we have not done so already
         if (resolved.find(structName) == resolved.end())
@@ -2336,12 +2337,12 @@ bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
 
 bool SemanticAnalyzer::ResolveDependencies(
     StructDefinition* structDef,
-    const unordered_map<string, StructDefinition*>& nameMap,
+    const unordered_map<ROString, StructDefinition*>& nameMap,
     vector<StructDefinition*>& ordered,
-    unordered_set<string>& resolved,
-    unordered_set<string>& dependents)
+    unordered_set<ROString>& resolved,
+    unordered_set<ROString>& dependents)
 {
-    const string& structName = structDef->name.ToStdString();
+    ROString structName = structDef->name;
 
     for (const MemberDefinition* member : structDef->members)
     {
@@ -2351,7 +2352,7 @@ bool SemanticAnalyzer::ResolveDependencies(
         // (which will be an IdentifierExpression)
         if (typeExpr != nullptr)
         {
-            const string& memberTypeName = typeExpr->name.ToStdString();
+            ROString memberTypeName = typeExpr->name;
 
             // if we have not seen this member's type yet, resolve its dependencies
             if (compilerContext.typeRegistry.GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
@@ -2513,7 +2514,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
             const TypeInfo* funType = compilerContext.typeRegistry.GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             externFunc->SetConstantValueIndex(idx);
-            bool ok = symbolTable.AddConstant(decl->name.ToStdString(), decl->nameToken, funType, idx);
+            bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
             if (!ok)
             {
                 isError = true;
@@ -2536,7 +2537,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
             const TypeInfo* funType = compilerContext.typeRegistry.GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             funcDef->SetConstantValueIndex(idx);
-            bool ok = symbolTable.AddConstant(decl->name.ToStdString(), decl->nameToken, funType, idx);
+            bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
             if (!ok)
             {
                 isError = true;
@@ -2568,7 +2569,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
         return;
     }
 
-    const NumericLiteralType* type = NumericLiteralType::Create(minSignedNumBits, minUnsignedNumBits);
+    const NumericLiteralType* type = compilerContext.typeRegistry.CreateNumericLiteralType(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
 
     int64_t value = numericExpression->value;
@@ -2619,7 +2620,7 @@ void SemanticAnalyzer::Visit(StringLiteralExpression* stringLiteralExpression)
 
 void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
 {
-    const string& name = identifierExpression->name.ToStdString();
+    ROString name = identifierExpression->name;
     const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
     if (data == nullptr)
     {
@@ -3101,7 +3102,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
     }
 
     // check if member is available for this type
-    const string& memberName = memberExpression->memberName.ToStdString();
+    ROString memberName = memberExpression->memberName;
     const MemberInfo* member = type->GetMember(memberName);
     if (member == nullptr)
     {
@@ -3374,7 +3375,7 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 
     // add the constant name to the symbol table
     ROString constName = constantDeclaration->name;
-    bool ok = symbolTable.AddConstant(constName.ToStdString(), constantDeclaration->nameToken, constantDeclaration->constantType, constIdx);
+    bool ok = symbolTable.AddConstant(constName, constantDeclaration->nameToken, constantDeclaration->constantType, constIdx);
     if (!ok)
     {
         isError = true;
@@ -3438,7 +3439,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
 
     // add the variable name to the symbol table
     ROString varName = variableDeclaration->name;
-    bool ok = symbolTable.AddVariable(varName.ToStdString(), nameToken, variableDeclaration->variableType);
+    bool ok = symbolTable.AddVariable(varName, nameToken, variableDeclaration->variableType);
     if (!ok)
     {
         isError = true;

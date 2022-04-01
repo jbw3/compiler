@@ -2,19 +2,20 @@
 #define TYPE_REGISTRY_H_
 
 #include "ROString.h"
+#include "TypeInfo.h"
 #include <unordered_map>
 #include <vector>
 
-namespace llvm
+namespace SyntaxTree
 {
-class TargetMachine;
+class FunctionDeclaration;
 }
-class TypeInfo;
+class CompilerContext;
 
 class TypeRegistry
 {
 public:
-    TypeRegistry(const llvm::TargetMachine* targetMachine);
+    TypeRegistry(CompilerContext& compilerContext);
 
     unsigned GetPointerSize() const;
 
@@ -40,14 +41,32 @@ public:
 
     bool RegisterType(const TypeInfo* typeInfo);
 
-    const TypeInfo* GetType(const std::string& typeName);
+    const TypeInfo* GetType(ROString typeName);
+
+    const NumericLiteralType* CreateNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits);
+
+    const NumericLiteralType* CreateSignedNumericLiteralType(unsigned numBits);
+
+    const NumericLiteralType* CreateUnsignedNumericLiteralType(unsigned numBits);
+
+    const TypeInfo* GetMinSizeNumericLiteralType(const NumericLiteralType* numLitType, TypeInfo::ESign sign);
 
 private:
-    unsigned pointerSize;
+    CompilerContext& compilerContext;
     TypeInfo* intSizeType;
     TypeInfo* uintSizeType;
     TypeInfo* stringType;
-    std::unordered_map<std::string, const TypeInfo*> types;
+    std::unordered_map<ROString, const TypeInfo*> types;
+    unsigned pointerSize;
+    std::unordered_map
+    <
+        std::tuple<TypeInfo::ESign, unsigned, unsigned>,
+        const NumericLiteralType*
+    > numericLiteralTypes;
+
+    ROString GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits);
+
+    const NumericLiteralType* CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, ROString name);
 };
 
 #endif // TYPE_REGISTRY_H_

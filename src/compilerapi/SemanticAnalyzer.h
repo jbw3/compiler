@@ -149,7 +149,7 @@ private:
     ErrorLogger& logger;
     bool isError;
     bool isConstDecl;
-    std::unordered_map<std::string, TypeInfo*> partialStructTypes;
+    std::unordered_map<ROString, TypeInfo*> partialStructTypes;
     CompilerContext& compilerContext;
     SymbolTable symbolTable;
     unsigned loopLevel;
@@ -161,10 +161,10 @@ private:
 
     bool ResolveDependencies(
         SyntaxTree::StructDefinition* structDef,
-        const std::unordered_map<std::string, SyntaxTree::StructDefinition*>& nameMap,
+        const std::unordered_map<ROString, SyntaxTree::StructDefinition*>& nameMap,
         std::vector<SyntaxTree::StructDefinition*>& ordered,
-        std::unordered_set<std::string>& resolved,
-        std::unordered_set<std::string>& dependents);
+        std::unordered_set<ROString>& resolved,
+        std::unordered_set<ROString>& dependents);
 
     const TypeInfo* TypeExpressionToType(SyntaxTree::Expression* typeExpression);
 

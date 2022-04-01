@@ -39,7 +39,7 @@ TypeInfo float32LiteralTypeInfo(32, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, Typ
 TypeInfo float64LiteralTypeInfo(64, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float64-literal}", "{float-literal}");
 TypeInfo typeTypeInfo(0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, TYPE_KEYWORD, TYPE_KEYWORD);
 
-MemberInfo::MemberInfo(const string& name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
+MemberInfo::MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
     index(index),
     isStorage(isStorage),
@@ -112,15 +112,15 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     return type;
 }
 
-TypeInfo* TypeInfo::CreateAggregateType(const string& name, const Token* token)
+TypeInfo* TypeInfo::CreateAggregateType(ROString name, const Token* token)
 {
     return new TypeInfo(0, F_AGGREGATE, TypeInfo::eNotApplicable, name, name, nullptr, token);
 }
 
 const TypeInfo* TypeInfo::CreateFunctionType(
     unsigned numBits,
-    const string& uniqueName,
-    const string& name,
+    ROString uniqueName,
+    ROString name,
     const vector<const TypeInfo*>& parameterTypes,
     const vector<ROString>& parameterNames,
     const TypeInfo* returnType)
@@ -143,8 +143,8 @@ TypeInfo::TypeInfo(
     unsigned numBits,
     uint16_t flags,
     ESign sign,
-    const string& uniqueName,
-    const string& shortName,
+    ROString uniqueName,
+    ROString shortName,
     const TypeInfo* innerType,
     const Token* token
 ) :
@@ -245,7 +245,7 @@ bool TypeInfo::IsOrContainsNumericLiteral() const
     return false;
 }
 
-const MemberInfo* TypeInfo::GetMember(const string& memberName) const
+const MemberInfo* TypeInfo::GetMember(ROString memberName) const
 {
     auto iter = memberMap.find(memberName);
     if (iter == memberMap.cend())
@@ -256,7 +256,7 @@ const MemberInfo* TypeInfo::GetMember(const string& memberName) const
     return iter->second;
 }
 
-bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssignable, const Token* token)
+bool TypeInfo::AddMember(ROString name, const TypeInfo* type, bool isAssignable, const Token* token)
 {
     MemberInfo* member = new MemberInfo(name, static_cast<unsigned>(members.size()), type, isAssignable, token);
     auto rv = memberMap.insert({name, member});
@@ -274,70 +274,14 @@ bool TypeInfo::AddMember(const string& name, const TypeInfo* type, bool isAssign
     return inserted;
 }
 
-unordered_map
-<
-    tuple<TypeInfo::ESign, unsigned, unsigned>,
-    const NumericLiteralType*
-> NumericLiteralType::instances;
-
-const NumericLiteralType* NumericLiteralType::Create(ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, const char* name)
-{
-    const NumericLiteralType* type = nullptr;
-    auto key = make_tuple(sign, signedNumBits, unsignedNumBits);
-
-    auto iter = instances.find(key);
-    if (iter == instances.end())
-    {
-        type = new NumericLiteralType(
-            sign,
-            signedNumBits,
-            unsignedNumBits,
-            name
-        );
-        instances.insert({key, type});
-    }
-    else
-    {
-        type = iter->second;
-    }
-
-    return type;
-}
-
-const NumericLiteralType* NumericLiteralType::Create(unsigned signedNumBits, unsigned unsignedNumBits)
-{
-    return Create(TypeInfo::eContextDependent, signedNumBits, unsignedNumBits, "{integer}");
-}
-
-const NumericLiteralType* NumericLiteralType::CreateSigned(unsigned numBits)
-{
-    return Create(TypeInfo::eSigned, numBits, 0, "{signed-integer}");
-}
-
-const NumericLiteralType* NumericLiteralType::CreateUnsigned(unsigned numBits)
-{
-    return Create(TypeInfo::eUnsigned, 0, numBits, "{unsigned-integer}");
-}
-
-string GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits)
-{
-    string name;
-    name += "{integer-";
-    name += to_string(signedNumBits);
-    name += "-";
-    name += to_string(unsignedNumBits);
-    name += "}";
-
-    return name;
-}
-
 NumericLiteralType::NumericLiteralType(
     ESign sign,
     unsigned signedNumBits,
     unsigned unsignedNumBits,
-    const string& name
+    ROString uniqueName,
+    ROString name
 ) :
-    TypeInfo(0, F_INT, sign, GetNumericLiteralTypeUniqueName(signedNumBits, unsignedNumBits), name),
+    TypeInfo(0, F_INT, sign, uniqueName, name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
@@ -381,26 +325,4 @@ unsigned NumericLiteralType::GetSignedNumBits() const
 unsigned NumericLiteralType::GetUnsignedNumBits() const
 {
     return unsignedNumBits;
-}
-
-const TypeInfo* NumericLiteralType::GetMinSizeType(ESign sign) const
-{
-    const TypeInfo* type = nullptr;
-    switch (sign)
-    {
-        case TypeInfo::eNotApplicable:
-            type = nullptr;
-            break;
-        case TypeInfo::eSigned:
-            type = CreateSigned(signedNumBits);
-            break;
-        case TypeInfo::eUnsigned:
-            type = CreateUnsigned(unsignedNumBits);
-            break;
-        case TypeInfo::eContextDependent:
-            type = this;
-            break;
-    }
-
-    return type;
 }

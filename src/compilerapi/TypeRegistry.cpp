@@ -6,8 +6,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
+#include "CompilerContext.h"
 #include "SyntaxTree.h"
-#include "TypeInfo.h"
 #include "keywords.h"
 #include "TypeRegistry.h"
 #include "llvm/Target/TargetMachine.h"
@@ -21,9 +21,10 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
-TypeRegistry::TypeRegistry(const TargetMachine* targetMachine)
+TypeRegistry::TypeRegistry(CompilerContext& compilerContext) :
+    compilerContext(compilerContext)
 {
-    pointerSize = 8 * targetMachine->getAllocaPointerSize();
+    pointerSize = 8 * compilerContext.config.targetMachine->getAllocaPointerSize();
 
     types.insert({BOOL_KEYWORD, TypeInfo::BoolType});
     types.insert({INT8_KEYWORD, TypeInfo::Int8Type});
@@ -72,18 +73,26 @@ const TypeInfo* TypeRegistry::GetStringType() const
 
 const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHalfOpen)
 {
-    string uniqueName = "Range";
-    uniqueName += (isHalfOpen ? "HalfOpen" : "Closed");
-    uniqueName += "'" + memberType->GetUniqueName() + "'";
+    ROString uniqueName = compilerContext.stringBuilder
+        .Append("Range")
+        .Append(isHalfOpen ? "HalfOpen" : "Closed")
+        .Append("'")
+        .Append(memberType->GetUniqueName())
+        .Append("'")
+        .CreateString();
     const TypeInfo* rangeType = GetType(uniqueName);
     if (rangeType == nullptr)
     {
         unsigned size = memberType->GetNumBits() * 2;
         uint16_t flags = TypeInfo::F_RANGE | TypeInfo::F_AGGREGATE | (isHalfOpen ? TypeInfo::F_HALF_OPEN : TypeInfo::F_NONE);
 
-        string name = "Range";
-        name += (isHalfOpen ? "HalfOpen" : "Closed");
-        name += "'" + memberType->GetShortName() + "'";
+        ROString name = compilerContext.stringBuilder
+            .Append("Range")
+            .Append(isHalfOpen ? "HalfOpen" : "Closed")
+            .Append("'")
+            .Append(memberType->GetShortName())
+            .Append("'")
+            .CreateString();
 
         TypeInfo* newRangeType = new TypeInfo(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
         newRangeType->AddMember("Start", memberType, false, Token::None);
@@ -95,51 +104,84 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
     return rangeType;
 }
 
-const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functionDeclaration)
+static ROString getFunctionUniqueName(
+    StringBuilder& sb,
+    const vector<const TypeInfo*>& parameterTypes,
+    const TypeInfo* returnType)
 {
-    const Parameters& parameters = functionDeclaration->parameters;
-    string uniqueName = "fun(";
-    string name = "fun(";
-    if (parameters.size() > 0)
+    size_t paramSize = parameterTypes.size();
+    sb.Append("fun(");
+    if (paramSize > 0)
     {
-        uniqueName += parameters[0]->type->GetUniqueName();
-        name += parameters[0]->type->GetShortName();
+        sb.Append(parameterTypes[0]->GetUniqueName());
 
-        for (size_t i = 1; i < parameters.size(); ++i)
+        for (size_t i = 1; i < paramSize; ++i)
         {
-            const TypeInfo* paramType = parameters[i]->type;
+            const TypeInfo* paramType = parameterTypes[i];
 
-            uniqueName += ", ";
-            uniqueName += paramType->GetUniqueName();
-
-            name += ", ";
-            name += paramType->GetShortName();
+            sb.Append(", ");
+            sb.Append(paramType->GetUniqueName());
         }
     }
 
-    uniqueName += ")";
-    name += ")";
+    sb.Append(")");
+    sb.Append(returnType->GetUniqueName());
 
-    uniqueName += functionDeclaration->returnType->GetUniqueName();
-    if (!functionDeclaration->returnType->IsUnit())
+    return sb.CreateString();
+}
+
+static ROString getFunctionName(
+    StringBuilder& sb,
+    const vector<const TypeInfo*>& parameterTypes,
+    const TypeInfo* returnType)
+{
+    size_t paramSize = parameterTypes.size();
+    sb.Append("fun(");
+    if (paramSize > 0)
     {
-        name += ' ';
-        name += functionDeclaration->returnType->GetShortName();
+        sb.Append(parameterTypes[0]->GetShortName());
+
+        for (size_t i = 1; i < paramSize; ++i)
+        {
+            const TypeInfo* paramType = parameterTypes[i];
+
+            sb.Append(", ");
+            sb.Append(paramType->GetShortName());
+        }
     }
+
+    sb.Append(")");
+
+    if (!returnType->IsUnit())
+    {
+        sb.Append(' ');
+        sb.Append(returnType->GetShortName());
+    }
+
+    return sb.CreateString();
+}
+
+const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functionDeclaration)
+{
+    const Parameters& parameters = functionDeclaration->parameters;
+    vector<const TypeInfo*> parameterTypes;
+    vector<ROString> parameterNames;
+    for (const Parameter* param : parameters)
+    {
+        parameterTypes.push_back(param->type);
+        parameterNames.push_back(param->name);
+    }
+    const TypeInfo* returnType = functionDeclaration->returnType;
+
+    ROString uniqueName = getFunctionUniqueName(compilerContext.stringBuilder, parameterTypes, returnType);
 
     const TypeInfo* funType = GetType(uniqueName);
     if (funType == nullptr)
     {
-        // add param and return types
-        vector<const TypeInfo*> parameterTypes;
-        vector<ROString> parameterNames;
-        for (const Parameter* param : parameters)
-        {
-            parameterTypes.push_back(param->type);
-            parameterNames.push_back(param->name);
-        }
+        ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
 
-        funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, functionDeclaration->returnType);
+        // add param and return types
+        funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
     }
 
     return funType;
@@ -151,39 +193,12 @@ const TypeInfo* TypeRegistry::GetFunctionType(
         const TypeInfo* returnType
 )
 {
-    size_t paramSize = parameterTypes.size();
-    string uniqueName = "fun(";
-    string name = "fun(";
-    if (paramSize > 0)
-    {
-        uniqueName += parameterTypes[0]->GetUniqueName();
-        name += parameterTypes[0]->GetShortName();
-
-        for (size_t i = 1; i < paramSize; ++i)
-        {
-            const TypeInfo* paramType = parameterTypes[i];
-
-            uniqueName += ", ";
-            uniqueName += paramType->GetUniqueName();
-
-            name += ", ";
-            name += paramType->GetShortName();
-        }
-    }
-
-    uniqueName += ")";
-    name += ")";
-
-    uniqueName += returnType->GetUniqueName();
-    if (!returnType->IsUnit())
-    {
-        name += ' ';
-        name += returnType->GetShortName();
-    }
+    ROString uniqueName = getFunctionUniqueName(compilerContext.stringBuilder, parameterTypes, returnType);
 
     const TypeInfo* funType = GetType(uniqueName);
     if (funType == nullptr)
     {
+        ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
         funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
     }
 
@@ -192,11 +207,17 @@ const TypeInfo* TypeRegistry::GetFunctionType(
 
 const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
 {
-    string uniqueName = POINTER_TYPE_TOKEN + type->GetUniqueName();
+    ROString uniqueName = compilerContext.stringBuilder
+        .Append(POINTER_TYPE_TOKEN)
+        .Append(type->GetUniqueName())
+        .CreateString();
     const TypeInfo* ptrType = GetType(uniqueName);
     if (ptrType == nullptr)
     {
-        string name = POINTER_TYPE_TOKEN + type->GetShortName();
+        ROString name = compilerContext.stringBuilder
+            .Append(POINTER_TYPE_TOKEN)
+            .Append(type->GetShortName())
+            .CreateString();
         TypeInfo* newPtrType = new TypeInfo(pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, uniqueName, name, type);
         RegisterType(newPtrType);
 
@@ -208,17 +229,17 @@ const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
 
 const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 {
-    string uniqueName;
-    uniqueName += ARRAY_TYPE_START_TOKEN;
-    uniqueName += ARRAY_TYPE_END_TOKEN;
-    uniqueName += type->GetUniqueName();
+    ROString uniqueName = compilerContext.stringBuilder
+        .Append(ARRAY_TYPE_START_TOKEN)
+        .Append(ARRAY_TYPE_END_TOKEN)
+        .Append(type->GetUniqueName())
+        .CreateString();
     const TypeInfo* arrayType = GetType(uniqueName);
     if (arrayType == nullptr)
     {
-        string name;
-        name += ARRAY_TYPE_START_TOKEN;
-        name += ARRAY_TYPE_END_TOKEN;
-        name += type->GetShortName();
+        ROString name = compilerContext.stringBuilder
+            .Append(ARRAY_TYPE_START_TOKEN, ARRAY_TYPE_END_TOKEN, type->GetShortName())
+            .CreateString();
 
         TypeInfo* newArrayType = new TypeInfo(pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, uniqueName, name, type);
         newArrayType->AddMember("Size", GetUIntSizeType(), false, Token::None);
@@ -237,7 +258,7 @@ bool TypeRegistry::RegisterType(const TypeInfo* typeInfo)
     return pair.second;
 }
 
-const TypeInfo* TypeRegistry::GetType(const string& typeName)
+const TypeInfo* TypeRegistry::GetType(ROString typeName)
 {
     auto iter = types.find(typeName);
     if (iter == types.cend())
@@ -245,4 +266,78 @@ const TypeInfo* TypeRegistry::GetType(const string& typeName)
         return nullptr;
     }
     return iter->second;
+}
+
+const NumericLiteralType* TypeRegistry::CreateNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits)
+{
+    return CreateNumericLiteralType(TypeInfo::eContextDependent, signedNumBits, unsignedNumBits, "{integer}");
+}
+
+const NumericLiteralType* TypeRegistry::CreateSignedNumericLiteralType(unsigned numBits)
+{
+    return CreateNumericLiteralType(TypeInfo::eSigned, numBits, 0, "{signed-integer}");
+}
+
+const NumericLiteralType* TypeRegistry::CreateUnsignedNumericLiteralType(unsigned numBits)
+{
+    return CreateNumericLiteralType(TypeInfo::eUnsigned, 0, numBits, "{unsigned-integer}");
+}
+
+const TypeInfo* TypeRegistry::GetMinSizeNumericLiteralType(const NumericLiteralType* numLitType, TypeInfo::ESign sign)
+{
+    const TypeInfo* type = nullptr;
+    switch (sign)
+    {
+        case TypeInfo::eNotApplicable:
+            type = nullptr;
+            break;
+        case TypeInfo::eSigned:
+            type = CreateSignedNumericLiteralType(numLitType->GetSignedNumBits());
+            break;
+        case TypeInfo::eUnsigned:
+            type = CreateUnsignedNumericLiteralType(numLitType->GetUnsignedNumBits());
+            break;
+        case TypeInfo::eContextDependent:
+            type = numLitType;
+            break;
+    }
+
+    return type;
+}
+
+ROString TypeRegistry::GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits)
+{
+    StringBuilder& sb = compilerContext.stringBuilder;
+    sb.Append("{integer-");
+    sb.Append(to_string(signedNumBits));
+    sb.Append("-");
+    sb.Append(to_string(unsignedNumBits));
+    sb.Append("}");
+
+    return sb.CreateString();
+}
+
+const NumericLiteralType* TypeRegistry::CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, ROString name)
+{
+    const NumericLiteralType* type = nullptr;
+    auto key = make_tuple(sign, signedNumBits, unsignedNumBits);
+
+    auto iter = numericLiteralTypes.find(key);
+    if (iter == numericLiteralTypes.end())
+    {
+        type = new NumericLiteralType(
+            sign,
+            signedNumBits,
+            unsignedNumBits,
+            GetNumericLiteralTypeUniqueName(signedNumBits, unsignedNumBits),
+            name
+        );
+        numericLiteralTypes.insert({key, type});
+    }
+    else
+    {
+        type = iter->second;
+    }
+
+    return type;
 }

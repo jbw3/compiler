@@ -178,8 +178,8 @@ private:
     unsigned int globalStringCounter;
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     llvm::Type* boolType;
-    std::unordered_map<std::string, llvm::Type*> types;
-    std::unordered_map<std::string, llvm::DICompositeType*> diStructTypes;
+    std::unordered_map<ROString, llvm::Type*> types;
+    std::unordered_map<ROString, llvm::DICompositeType*> diStructTypes;
     std::stack<LoopInfo> loops;
     const TypeInfo* uIntSizeType;
 
@@ -195,6 +195,8 @@ private:
 
     llvm::Value* CreateSizeValueArrayIr(const TypeInfo* arrayTypeInfo, uint64_t arraySize, llvm::Value* arrayValue);
 
+    ROString CreateTypeName(const TypeInfo* type);
+
     llvm::FunctionType* CreateLlvmFunctionType(const TypeInfo* type);
 
     llvm::Type* GetType(const TypeInfo* type);
@@ -203,7 +205,7 @@ private:
 
     bool CreateFunctionDeclaration(const SyntaxTree::FunctionDeclaration* funcDecl);
 
-    llvm::AllocaInst* CreateVariableAlloc(llvm::Function* function, llvm::Type* type, const std::string& paramName);
+    llvm::AllocaInst* CreateVariableAlloc(llvm::Function* function, llvm::Type* type, ROString paramName);
 
     llvm::Value* CreateExt(llvm::Value* value, const TypeInfo* valueType, const TypeInfo* dstType);
 
