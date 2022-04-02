@@ -51,6 +51,36 @@ TypeRegistry::TypeRegistry(CompilerContext& compilerContext) :
     RegisterType(stringType);
 }
 
+TypeRegistry::~TypeRegistry()
+{
+    // remove types that are not dynamically allocated
+    types.erase(BOOL_KEYWORD);
+    types.erase(INT8_KEYWORD);
+    types.erase(INT16_KEYWORD);
+    types.erase(INT32_KEYWORD);
+    types.erase(INT64_KEYWORD);
+    types.erase(UINT8_KEYWORD);
+    types.erase(UINT16_KEYWORD);
+    types.erase(UINT32_KEYWORD);
+    types.erase(UINT64_KEYWORD);
+    types.erase(FLOAT32_KEYWORD);
+    types.erase(FLOAT64_KEYWORD);
+    types.erase(TYPE_KEYWORD);
+
+    // delete dynamically allocated types
+    for (auto pair : types)
+    {
+        delete pair.second;
+    }
+    types.clear();
+
+    for (auto pair : numericLiteralTypes)
+    {
+        delete pair.second;
+    }
+    numericLiteralTypes.clear();
+}
+
 unsigned TypeRegistry::GetPointerSize() const
 {
     return pointerSize;
@@ -182,6 +212,7 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
 
         // add param and return types
         funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
+        RegisterType(funType);
     }
 
     return funType;
@@ -200,6 +231,7 @@ const TypeInfo* TypeRegistry::GetFunctionType(
     {
         ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
         funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
+        RegisterType(funType);
     }
 
     return funType;

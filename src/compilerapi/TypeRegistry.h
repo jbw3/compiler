@@ -17,6 +17,8 @@ class TypeRegistry
 public:
     TypeRegistry(CompilerContext& compilerContext);
 
+    ~TypeRegistry();
+
     unsigned GetPointerSize() const;
 
     const TypeInfo* GetIntSizeType() const;
