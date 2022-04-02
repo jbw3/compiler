@@ -1250,6 +1250,30 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     return expr;
 }
 
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS1 = {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eRemainder};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS2 = {BinaryExpression::eAdd, BinaryExpression::eSubtract};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS3 = {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightLogical, BinaryExpression::eShiftRightArithmetic};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS4 = {BinaryExpression::eBitwiseAnd};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS5 = {BinaryExpression::eBitwiseXor};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS6 = {BinaryExpression::eBitwiseOr};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS7 = {BinaryExpression::eClosedRange, BinaryExpression::eHalfOpenRange};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS8 = {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS9 = {BinaryExpression::eLogicalAnd, BinaryExpression::eLogicalOr};
+const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS10 = {
+            BinaryExpression::eAssign,
+            BinaryExpression::eAddAssign,
+            BinaryExpression::eSubtractAssign,
+            BinaryExpression::eMultiplyAssign,
+            BinaryExpression::eDivideAssign,
+            BinaryExpression::eRemainderAssign,
+            BinaryExpression::eShiftLeftAssign,
+            BinaryExpression::eShiftRightLogicalAssign,
+            BinaryExpression::eShiftRightArithmeticAssign,
+            BinaryExpression::eBitwiseAndAssign,
+            BinaryExpression::eBitwiseXorAssign,
+            BinaryExpression::eBitwiseOrAssign,
+};
+
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
                                               Token::EType endTokenType1,
                                               Token::EType endTokenType2,
@@ -1384,29 +1408,16 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
         return nullptr;
     }
 
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eMultiply, BinaryExpression::eDivide, BinaryExpression::eRemainder});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eAdd, BinaryExpression::eSubtract});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eShiftLeft, BinaryExpression::eShiftRightLogical, BinaryExpression::eShiftRightArithmetic});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseAnd});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseXor});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eBitwiseOr});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eClosedRange, BinaryExpression::eHalfOpenRange});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eEqual, BinaryExpression::eNotEqual, BinaryExpression::eLessThan, BinaryExpression::eLessThanOrEqual, BinaryExpression::eGreaterThan, BinaryExpression::eGreaterThanOrEqual});
-    ProcessExpressionOperators(terms, binOperators, {BinaryExpression::eLogicalAnd, BinaryExpression::eLogicalOr});
-    ProcessExpressionOperators(terms, binOperators, {
-            BinaryExpression::eAssign,
-            BinaryExpression::eAddAssign,
-            BinaryExpression::eSubtractAssign,
-            BinaryExpression::eMultiplyAssign,
-            BinaryExpression::eDivideAssign,
-            BinaryExpression::eRemainderAssign,
-            BinaryExpression::eShiftLeftAssign,
-            BinaryExpression::eShiftRightLogicalAssign,
-            BinaryExpression::eShiftRightArithmeticAssign,
-            BinaryExpression::eBitwiseAndAssign,
-            BinaryExpression::eBitwiseXorAssign,
-            BinaryExpression::eBitwiseOrAssign,
-        });
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS1);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS2);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS3);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS4);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS5);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS6);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS7);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS8);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS9);
+    ProcessExpressionOperators(terms, binOperators, BIN_OPERATORS10);
 
     return terms.front();
 }
