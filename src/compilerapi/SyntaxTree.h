@@ -586,6 +586,18 @@ public:
     unsigned fileId;
 };
 
+class StructDefinitionExpression : public Expression
+{
+public:
+    StructDefinitionExpression(const std::vector<MemberDefinition*>& members);
+
+    virtual ~StructDefinitionExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    std::vector<MemberDefinition*> members;
+};
+
 class MemberInitialization
 {
 public:

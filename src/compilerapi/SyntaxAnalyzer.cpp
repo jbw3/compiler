@@ -457,6 +457,58 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     return structDef;
 }
 
+StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
+    TokenIterator& iter,
+    TokenIterator endIter
+)
+{
+    if (!EndIteratorCheck(iter, endIter, "Expected struct keyword"))
+    {
+        return nullptr;
+    }
+
+    if (iter->type != Token::eStruct)
+    {
+        logger.LogError("Expected struct keyword");
+    }
+
+    if (!IncrementIterator(iter, endIter, "Expected '{'"))
+    {
+        return nullptr;
+    }
+
+    if (iter->type != Token::eOpenBrace)
+    {
+        logger.LogError(*iter, "Expected '{'");
+        return nullptr;
+    }
+
+    // increment past "{"
+    ++iter;
+
+    vector<MemberDefinition*> members;
+    // TODO: parse members
+
+    if (iter == endIter)
+    {
+        deletePointerContainer(members);
+        logger.LogError("Expected '}'");
+        return nullptr;
+    }
+    else if (iter->type != Token::eCloseBrace)
+    {
+        deletePointerContainer(members);
+        logger.LogError(*iter, "Expected '}'");
+        return nullptr;
+    }
+
+    // increment past "}"
+    ++iter;
+
+    StructDefinitionExpression* structDef = new StructDefinitionExpression(members);
+    return structDef;
+}
+
 bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator endIter)
 {
     if (iter == endIter)
@@ -1146,6 +1198,14 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         const Token* closeParToken = &*iter;
 
         expr = new CastExpression(typeExpr, subExpression, castToken, openParToken, closeParToken);
+    }
+    else if (type == Token::eStruct)
+    {
+        expr = ProcessStructDefinitionExpression(iter, endIter);
+        if (expr == nullptr)
+        {
+            return nullptr;
+        }
     }
     else if (type == Token::eFun)
     {

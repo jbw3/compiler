@@ -61,6 +61,11 @@ private:
                                                           TokenIterator endIter,
                                                           unsigned fileId);
 
+    SyntaxTree::StructDefinitionExpression* ProcessStructDefinitionExpression(
+        TokenIterator& iter,
+        TokenIterator endIter
+    );
+
     bool IsStructInitialization(TokenIterator iter, TokenIterator endIter);
 
     SyntaxTree::StructInitializationExpression* ProcessStructInitialization(TokenIterator& iter,

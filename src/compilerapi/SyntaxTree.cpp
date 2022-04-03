@@ -889,6 +889,21 @@ void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+StructDefinitionExpression::StructDefinitionExpression(const vector<MemberDefinition*>& members) :
+    members(members)
+{
+}
+
+StructDefinitionExpression::~StructDefinitionExpression()
+{
+    deletePointerContainer(members);
+}
+
+void StructDefinitionExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO
+}
+
 MemberInitialization::MemberInitialization(ROString name, Expression* expression,
                                            const Token* nameToken) :
     name(name),
