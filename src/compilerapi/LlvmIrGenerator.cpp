@@ -1141,6 +1141,11 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
     }
 }
 
+void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpression)
+{
+    // TODO
+}
+
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
     const TypeInfo* typeInfo = structInitializationExpression->GetType();

@@ -81,6 +81,11 @@ void StartEndTokenFinder::Visit(StructDefinition* /*structDefinition*/)
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
+void StartEndTokenFinder::Visit(StructDefinitionExpression* /*structDefinitionExpression*/)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
 void StartEndTokenFinder::Visit(StructInitializationExpression* structInitializationExpression)
 {
     UpdateStart(structInitializationExpression->structNameToken);
@@ -2149,6 +2154,11 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
     }
 
     structDefinition->type = newType;
+}
+
+void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpression)
+{
+    // TODO
 }
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)

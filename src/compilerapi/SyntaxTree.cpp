@@ -901,7 +901,7 @@ StructDefinitionExpression::~StructDefinitionExpression()
 
 void StructDefinitionExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO
+    visitor->Visit(this);
 }
 
 MemberInitialization::MemberInitialization(ROString name, Expression* expression,

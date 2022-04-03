@@ -155,6 +155,11 @@ void SyntaxTreePrinter::Visit(StructDefinition* structDefinition)
     PrintProperty("members", structDefinition->members, printMemberDef);
 }
 
+void SyntaxTreePrinter::Visit(StructDefinitionExpression* structDefinitionExpression)
+{
+    // TODO
+}
+
 void SyntaxTreePrinter::Visit(StructInitializationExpression* structInitializationExpression)
 {
     BracePrinter printer(*this, "{", "}");

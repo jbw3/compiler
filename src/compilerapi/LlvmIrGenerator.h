@@ -85,6 +85,8 @@ public:
 
     void Visit(SyntaxTree::StructDefinition* structDefinition) override;
 
+    void Visit(SyntaxTree::StructDefinitionExpression* structDefinitionExpression) override;
+
     void Visit(SyntaxTree::StructInitializationExpression* structInitializationExpression) override;
 
     void Visit(SyntaxTree::ModuleDefinition* moduleDefinition) override;

@@ -204,6 +204,11 @@ void SourceGenerator::Visit(StructDefinition* structDefinition)
     *os << "}\n";
 }
 
+void SourceGenerator::Visit(StructDefinitionExpression* structDefinitionExpression)
+{
+    // TODO
+}
+
 void SourceGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
     *os << structInitializationExpression->structName << '\n';
