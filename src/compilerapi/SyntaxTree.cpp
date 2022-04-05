@@ -889,8 +889,16 @@ void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-StructDefinitionExpression::StructDefinitionExpression(const vector<MemberDefinition*>& members) :
-    members(members)
+StructDefinitionExpression::StructDefinitionExpression(
+    const vector<MemberDefinition*>& members,
+    const Token* structToken,
+    const Token* openBraceToken,
+    const Token* closeBraceToken
+) :
+    members(members),
+    structToken(structToken),
+    openBraceToken(openBraceToken),
+    closeBraceToken(closeBraceToken)
 {
 }
 

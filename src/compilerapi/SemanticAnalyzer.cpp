@@ -81,9 +81,10 @@ void StartEndTokenFinder::Visit(StructDefinition* /*structDefinition*/)
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(StructDefinitionExpression* /*structDefinitionExpression*/)
+void StartEndTokenFinder::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
-    assert(false && "StartEndTokenFinder member function is not implemented");
+    UpdateStart(structDefinitionExpression->structToken);
+    UpdateEnd(structDefinitionExpression->closeBraceToken);
 }
 
 void StartEndTokenFinder::Visit(StructInitializationExpression* structInitializationExpression)
@@ -3367,8 +3368,11 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 
     if (!rightExpr->GetIsConstant())
     {
+        StartEndTokenFinder finder;
+        rightExpr->Accept(&finder);
+
         isError = true;
-        logger.LogError(*assignmentExpression->opToken, "Assigned expression is not a constant value");
+        logger.LogError(*finder.start, *finder.end, "Assigned expression is not a constant value");
         return;
     }
 

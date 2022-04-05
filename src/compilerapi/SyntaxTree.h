@@ -589,13 +589,19 @@ public:
 class StructDefinitionExpression : public Expression
 {
 public:
-    StructDefinitionExpression(const std::vector<MemberDefinition*>& members);
+    StructDefinitionExpression(const std::vector<MemberDefinition*>& members,
+                               const Token* structToken,
+                               const Token* openBraceToken,
+                               const Token* closeBraceToken);
 
     virtual ~StructDefinitionExpression();
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     std::vector<MemberDefinition*> members;
+    const Token* structToken;
+    const Token* openBraceToken;
+    const Token* closeBraceToken;
 };
 
 class MemberInitialization

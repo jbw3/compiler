@@ -472,6 +472,8 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         logger.LogError("Expected struct keyword");
     }
 
+    const Token* structToken = &*iter;
+
     if (!IncrementIterator(iter, endIter, "Expected '{'"))
     {
         return nullptr;
@@ -482,6 +484,8 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
+
+    const Token* openBraceToken = &*iter;
 
     // increment past "{"
     ++iter;
@@ -502,10 +506,14 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         return nullptr;
     }
 
-    // increment past "}"
-    ++iter;
+    const Token* closeBraceToken = &*iter;
 
-    StructDefinitionExpression* structDef = new StructDefinitionExpression(members);
+    StructDefinitionExpression* structDef = new StructDefinitionExpression(
+        members,
+        structToken,
+        openBraceToken,
+        closeBraceToken
+    );
     return structDef;
 }
 
