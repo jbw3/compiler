@@ -119,6 +119,9 @@ public:
         const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType);
 
+    ROString uniqueName;
+    ROString shortName;
+
     TypeInfo(
         unsigned numBits,
         uint16_t flags,
@@ -128,6 +131,8 @@ public:
         const TypeInfo* innerType = nullptr,
         const Token* token = nullptr
     );
+
+    TypeInfo(const TypeInfo& other);
 
     virtual ~TypeInfo();
 
@@ -276,8 +281,6 @@ private:
     unsigned numBits;
     uint16_t flags;
     ESign sign;
-    ROString uniqueName;
-    ROString shortName;
     std::unordered_map<ROString, const MemberInfo*> memberMap;
     std::vector<const MemberInfo*> members;
     const Token* token;

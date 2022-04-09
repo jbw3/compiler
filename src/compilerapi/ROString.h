@@ -34,6 +34,11 @@ public:
         return size;
     }
 
+    bool IsEmpty() const
+    {
+        return size == 0;
+    }
+
     char operator [](size_t index) const
     {
         return ptr[index];

@@ -1241,6 +1241,55 @@ void LlvmIrGenerator::Visit(Modules* modules)
         }
     }
 
+    // add all struct names to types map
+    for (const ModuleDefinition* moduleDefinition : modules->modules)
+    {
+        for (const ConstantDeclaration* constDecl : moduleDefinition->constantDeclarations)
+        {
+            const Expression* expr = constDecl->assignmentExpression->right;
+            const StructDefinitionExpression* structDef = dynamic_cast<const StructDefinitionExpression*>(expr);
+            if (structDef != nullptr)
+            {
+                unsigned typeIdx = structDef->GetConstantValueIndex();
+                const TypeInfo* exprType = compilerContext.GetTypeConstantValue(typeIdx);
+                ROString structName = exprType->GetShortName();
+
+                if (exprType->IsAggregate())
+                {
+                    StructType* structType = StructType::create(context, toStringRef(structName));
+                    types.insert({structName, structType});
+
+                    vector<Type*> members;
+                    structType->setBody(members);
+
+                    // TODO: add debug info for structs
+                    if (dbgInfo)
+                    {
+                        DIFile* diFile = diFiles[moduleDefinition->fileId];
+
+                        ROString name = exprType->GetShortName();
+                        unsigned numBits = exprType->GetNumBits();
+
+                        unsigned line = constDecl->nameToken->line;
+                        // TODO: set alignment
+                        SmallVector<Metadata*, 0> elements;
+                        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+                        DICompositeType* diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+                        diStructTypes.insert({structName, diType});
+                    }
+                }
+            }
+            else if (constDecl->constantType->IsType())
+            {
+                unsigned typeIdx = expr->GetConstantValueIndex();
+                const TypeInfo* exprType = compilerContext.GetTypeConstantValue(typeIdx);
+                Type* llvmType = GetType(exprType);
+                assert(llvmType != nullptr && "Could not find LLVM type");
+                types.insert({constDecl->name, llvmType});
+            }
+        }
+    }
+
     // generate struct declarations
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {

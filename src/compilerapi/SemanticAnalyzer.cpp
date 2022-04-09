@@ -222,6 +222,7 @@ SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     compilerContext(compilerContext),
     symbolTable(compilerContext),
     loopLevel(0),
+    structDefCount(0),
     currentFunction(nullptr)
 {
 }
@@ -2159,7 +2160,25 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
 void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
-    // TODO
+    structDefinitionExpression->SetType(TypeInfo::TypeType);
+
+    ROString name;
+    if (constDeclName.IsEmpty())
+    {
+        name = compilerContext.stringBuilder
+            .Append("<struct", to_string(structDefCount), ">")
+            .CreateString();
+    }
+    else
+    {
+        name = constDeclName;
+    }
+    ++structDefCount;
+
+    TypeInfo* newType = TypeInfo::CreateAggregateType(name, nullptr);
+
+    unsigned idx = compilerContext.AddTypeConstantValue(newType);
+    structDefinitionExpression->SetConstantValueIndex(idx);
 }
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
@@ -2173,6 +2192,8 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         logger.LogError(*token, "'{}' is not a known type", structName);
         return;
     }
+
+    // TODO: check if this is a struct type?
 
     structInitializationExpression->SetType(type);
 
@@ -3357,10 +3378,14 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
         return;
     }
 
+    ROString constName = constantDeclaration->name;
+
     // process right of assignment expression before adding constant to symbol
     // table in order to detect if the constant is referenced before it is assigned
+    constDeclName = constName; // TODO: This is a bit hacky. Find a better way to do this
     Expression* rightExpr = assignmentExpression->right;
     rightExpr->Accept(this);
+    constDeclName = "";
     if (isError)
     {
         return;
@@ -3388,7 +3413,6 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     unsigned constIdx = rightExpr->GetConstantValueIndex();
 
     // add the constant name to the symbol table
-    ROString constName = constantDeclaration->name;
     bool ok = symbolTable.AddConstant(constName, constantDeclaration->nameToken, constantDeclaration->constantType, constIdx);
     if (!ok)
     {
@@ -3404,6 +3428,20 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     if (isError)
     {
         return;
+    }
+
+    // if this is a new type, register it
+    if (type->IsType())
+    {
+        const TypeInfo* expr = compilerContext.GetTypeConstantValue(constIdx);
+
+        // copy type and give it a new name
+        TypeInfo* newType = new TypeInfo(*expr);
+        newType->shortName = constName;
+        newType->uniqueName = constName;
+
+        bool added = compilerContext.typeRegistry.RegisterType(newType);
+        assert(added && "Could not register new constant type");
     }
 }
 

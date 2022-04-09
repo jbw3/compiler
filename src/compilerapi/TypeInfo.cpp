@@ -112,6 +112,7 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     return type;
 }
 
+// TODO: Does token need to be saved?
 TypeInfo* TypeInfo::CreateAggregateType(ROString name, const Token* token)
 {
     return new TypeInfo(0, F_AGGREGATE, TypeInfo::eNotApplicable, name, name, nullptr, token);
@@ -148,15 +149,36 @@ TypeInfo::TypeInfo(
     const TypeInfo* innerType,
     const Token* token
 ) :
+    uniqueName(uniqueName),
+    shortName(shortName),
     numBits(numBits),
     flags(flags),
     sign(sign),
-    uniqueName(uniqueName),
-    shortName(shortName),
     token(token),
     innerType(innerType),
     returnType(nullptr)
 {
+}
+
+TypeInfo::TypeInfo(const TypeInfo& other)
+{
+    shortName = other.shortName;
+    uniqueName = other.uniqueName;
+    numBits = other.numBits;
+    flags = other.flags;
+    sign = other.sign;
+    token = other.token;
+    innerType = other.innerType;
+    paramTypes = other.paramTypes;
+    paramNames = other.paramNames;
+    returnType = other.returnType;
+
+    for (auto member : other.members)
+    {
+        MemberInfo* newMember = new MemberInfo(*member);
+        members.push_back(newMember);
+        memberMap.insert({ newMember->GetName(), newMember });
+    }
 }
 
 TypeInfo::~TypeInfo()

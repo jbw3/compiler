@@ -153,10 +153,12 @@ private:
     ErrorLogger& logger;
     bool isError;
     bool isConstDecl;
+    ROString constDeclName;
     std::unordered_map<ROString, TypeInfo*> partialStructTypes;
     CompilerContext& compilerContext;
     SymbolTable symbolTable;
     unsigned loopLevel;
+    uint32_t structDefCount;
     const SyntaxTree::FunctionDefinition* currentFunction;
 
     void LogExistingIdentifierError(ROString name, const Token* token);
