@@ -491,7 +491,52 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
     ++iter;
 
     vector<MemberDefinition*> members;
-    // TODO: parse members
+    while (iter != endIter && iter->type != Token::eCloseBrace)
+    {
+        // get member name
+        if (iter->type != Token::eIdentifier)
+        {
+            deletePointerContainer(members);
+            logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
+            return nullptr;
+        }
+        const Token* memberNameToken = &*iter;
+        ROString memberName = iter->value;
+
+        // get member type
+        if (!IncrementIterator(iter, endIter, "Expected member type"))
+        {
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
+
+        // make sure there was a type
+        if (memberTypeExpr == nullptr)
+        {
+            deletePointerContainer(members);
+            logger.LogError(*iter, "Expected a member type");
+            return nullptr;
+        }
+
+        MemberDefinition* member = new MemberDefinition(memberName, memberTypeExpr, memberNameToken);
+        members.push_back(member);
+
+        Token::EType delimiter = iter->type;
+        if (delimiter == Token::eCloseBrace)
+        {
+            break;
+        }
+        else if (delimiter != Token::eComma)
+        {
+            logger.LogError(*iter, "Expected ',' or '}'");
+            deletePointerContainer(members);
+            return nullptr;
+        }
+
+        ++iter;
+    }
 
     if (iter == endIter)
     {

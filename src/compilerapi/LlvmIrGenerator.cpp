@@ -1260,6 +1260,20 @@ void LlvmIrGenerator::Visit(Modules* modules)
                     types.insert({structName, structType});
 
                     vector<Type*> members;
+                    for (const MemberDefinition* memberDef : structDef->members)
+                    {
+                        const MemberInfo* memberInfo = exprType->GetMember(memberDef->name);
+                        Type* memberType = GetType(memberInfo->GetType());
+                        if (memberType == nullptr)
+                        {
+                            resultValue = nullptr;
+                            logger.LogInternalError("Unknown member definition type");
+                            return;
+                        }
+
+                        members.push_back(memberType);
+                    }
+
                     structType->setBody(members);
 
                     // TODO: add debug info for structs

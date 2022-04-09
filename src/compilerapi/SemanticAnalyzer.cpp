@@ -2160,22 +2160,54 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
 void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
-    structDefinitionExpression->SetType(TypeInfo::TypeType);
-
     ROString name;
     if (constDeclName.IsEmpty())
     {
         name = compilerContext.stringBuilder
             .Append("<struct", to_string(structDefCount), ">")
             .CreateString();
+        ++structDefCount;
     }
     else
     {
         name = constDeclName;
     }
-    ++structDefCount;
 
     TypeInfo* newType = TypeInfo::CreateAggregateType(name, nullptr);
+
+    for (const MemberDefinition* member : structDefinitionExpression->members)
+    {
+        const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
+        if (memberType == nullptr)
+        {
+            isError = true;
+            return;
+        }
+
+        // make sure the type is not 'type', '[]type', '&type', etc.
+        const TypeInfo* innerMostType = memberType;
+        while (innerMostType->GetInnerType() != nullptr)
+        {
+            innerMostType = innerMostType->GetInnerType();
+        }
+        if (innerMostType->IsType())
+        {
+            isError = true;
+            logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetShortName());
+            return;
+        }
+
+        ROString memberName = member->name;
+        bool added = newType->AddMember(memberName, memberType, true, member->nameToken);
+        if (!added)
+        {
+            isError = true;
+            logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, name);
+            return;
+        }
+    }
+
+    structDefinitionExpression->SetType(TypeInfo::TypeType);
 
     unsigned idx = compilerContext.AddTypeConstantValue(newType);
     structDefinitionExpression->SetConstantValueIndex(idx);
