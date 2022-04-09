@@ -1,12 +1,11 @@
 const GLOBAL_CONST1 = true;
 const GLOBAL_CONST2 bool = false;
 const GLOBAL_CONST3 i32 = 1_234;
-
-struct Person
+const Person = struct
 {
     name str,
     age u32,
-}
+};
 
 extern fun extern_function(x i16, asdf bool, string str) i32;
 
