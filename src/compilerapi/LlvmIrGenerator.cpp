@@ -1143,7 +1143,47 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
 
 void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
-    // TODO
+    unsigned typeIdx = structDefinitionExpression->GetConstantValueIndex();
+    const TypeInfo* structType = compilerContext.GetTypeConstantValue(typeIdx);
+    ROString structName = structType->GetShortName();
+
+    auto iter = types.find(structName);
+    StructType* llvmType = static_cast<StructType*>(iter->second);
+
+    vector<Type*> members;
+    for (const MemberDefinition* memberDef : structDefinitionExpression->members)
+    {
+        const MemberInfo* memberInfo = structType->GetMember(memberDef->name);
+        Type* memberType = GetType(memberInfo->GetType());
+        if (memberType == nullptr)
+        {
+            resultValue = nullptr;
+            logger.LogInternalError("Unknown member definition type");
+            return;
+        }
+
+        members.push_back(memberType);
+    }
+
+    llvmType->setBody(members);
+
+    // TODO: add debug info for structs
+#if 0
+    if (dbgInfo)
+    {
+        DIFile* diFile = diFiles[fileId];
+
+        ROString name = structType->GetShortName();
+        unsigned numBits = structType->GetNumBits();
+
+        unsigned line = structDefinitionExpression->structToken->line;
+        // TODO: set alignment
+        SmallVector<Metadata*, 0> elements;
+        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+        DICompositeType* diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+        diStructTypes.insert({structName, diType});
+    }
+#endif
 }
 
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
@@ -1206,15 +1246,6 @@ void LlvmIrGenerator::Visit(Modules* modules)
         }
     }
 
-    // add global constants to symbol table
-    for (ModuleDefinition* moduleDefinition : modules->modules)
-    {
-        for (ConstantDeclaration* constDecl : moduleDefinition->constantDeclarations)
-        {
-            constDecl->Accept(this);
-        }
-    }
-
     // add all struct names to types map
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
@@ -1258,39 +1289,6 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 {
                     StructType* structType = StructType::create(context, toStringRef(structName));
                     types.insert({structName, structType});
-
-                    vector<Type*> members;
-                    for (const MemberDefinition* memberDef : structDef->members)
-                    {
-                        const MemberInfo* memberInfo = exprType->GetMember(memberDef->name);
-                        Type* memberType = GetType(memberInfo->GetType());
-                        if (memberType == nullptr)
-                        {
-                            resultValue = nullptr;
-                            logger.LogInternalError("Unknown member definition type");
-                            return;
-                        }
-
-                        members.push_back(memberType);
-                    }
-
-                    structType->setBody(members);
-
-                    // TODO: add debug info for structs
-                    if (dbgInfo)
-                    {
-                        DIFile* diFile = diFiles[moduleDefinition->fileId];
-
-                        ROString name = exprType->GetShortName();
-                        unsigned numBits = exprType->GetNumBits();
-
-                        unsigned line = constDecl->nameToken->line;
-                        // TODO: set alignment
-                        SmallVector<Metadata*, 0> elements;
-                        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-                        DICompositeType* diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-                        diStructTypes.insert({structName, diType});
-                    }
                 }
             }
             else if (constDecl->constantType->IsType())
@@ -1302,6 +1300,12 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 types.insert({constDecl->name, llvmType});
             }
         }
+    }
+
+    // add global constants to symbol table
+    for (ConstantDeclaration* constDecl : modules->orderedConstants)
+    {
+        constDecl->Accept(this);
     }
 
     // generate struct declarations
@@ -2221,6 +2225,12 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
 
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
     symbolTable.AddConstant(constName, constantDeclaration->nameToken, constType, constIdx);
+
+    StructDefinitionExpression* structDef = dynamic_cast<StructDefinitionExpression*>(constantDeclaration->assignmentExpression->right);
+    if (structDef != nullptr)
+    {
+        structDef->Accept(this);
+    }
 
     resultValue = ConstantStruct::get(unitType);
 }

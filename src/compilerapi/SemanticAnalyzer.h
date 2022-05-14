@@ -161,6 +161,10 @@ private:
     uint32_t structDefCount;
     const SyntaxTree::FunctionDefinition* currentFunction;
 
+    std::unordered_map<ROString, SyntaxTree::ConstantDeclaration*> constNameMap;
+    std::vector<SyntaxTree::ConstantDeclaration*> orderedConsts;
+    std::unordered_set<ROString> resolvedConstNames;
+
     void LogExistingIdentifierError(ROString name, const Token* token);
 
     bool SortTypeDefinitions(SyntaxTree::Modules* modules);

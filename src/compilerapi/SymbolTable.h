@@ -46,6 +46,11 @@ public:
 
     IdentifierData* GetIdentifierData(ROString name) const;
 
+    bool IsAtGlobalScope() const
+    {
+        return scopes.size() == 1;
+    }
+
 private:
     static constexpr unsigned NON_CONST_VALUE = static_cast<unsigned>(-1);
 

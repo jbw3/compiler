@@ -665,6 +665,7 @@ public:
 
     std::vector<ModuleDefinition*> modules;
     std::vector<StructDefinition*> orderedStructDefinitions;
+    std::vector<ConstantDeclaration*> orderedConstants;
 };
 } // namespace SyntaxTree
 

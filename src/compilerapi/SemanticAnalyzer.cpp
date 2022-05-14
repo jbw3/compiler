@@ -2524,6 +2524,24 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
 void SemanticAnalyzer::Visit(Modules* modules)
 {
+    // build constant name map
+    for (ModuleDefinition* moduleDefinition : modules->modules)
+    {
+        const vector<ConstantDeclaration*>& constantDeclarations = moduleDefinition->constantDeclarations;
+
+        for (ConstantDeclaration* constDecl : constantDeclarations)
+        {
+            ROString constName = constDecl->name;
+            auto rv = constNameMap.insert({constName, constDecl});
+            if (!rv.second)
+            {
+                isError = true;
+                LogExistingIdentifierError(constName, constDecl->nameToken);
+                return;
+            }
+        }
+    }
+
     // process constants
     for (ModuleDefinition* moduleDefinition : modules->modules)
     {
@@ -2615,6 +2633,8 @@ void SemanticAnalyzer::Visit(Modules* modules)
     {
         module->Accept(this);
     }
+
+    modules->orderedConstants = orderedConsts;
 }
 
 void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
@@ -2686,23 +2706,39 @@ void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
 {
     ROString name = identifierExpression->name;
     const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
+
     if (data == nullptr)
     {
-        logger.LogError(*identifierExpression->token, "Identifier '{}' is not declared in the current scope", name);
-        isError = true;
-    }
-    else
-    {
-        bool isConst = data->IsConstant();
-        const TypeInfo* type = data->type;
-        identifierExpression->SetType(type);
-        identifierExpression->SetIsStorage(!isConst);
-
-        if (isConst)
+        // check if this is a constant that has not been resolved yet
+        auto iter = constNameMap.find(name);
+        if (iter == constNameMap.end())
         {
-            unsigned constIdx = data->constValueIndex;
-            identifierExpression->SetConstantValueIndex(constIdx);
+            logger.LogError(*identifierExpression->token, "Identifier '{}' is not declared in the current scope", name);
+            isError = true;
+            return;
         }
+
+        // process constant
+        ConstantDeclaration* constDecl = iter->second;
+        constDecl->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        data = symbolTable.GetIdentifierData(name);
+        assert(data != nullptr && "Could not find identifier data");
+    }
+
+    bool isConst = data->IsConstant();
+    const TypeInfo* type = data->type;
+    identifierExpression->SetType(type);
+    identifierExpression->SetIsStorage(!isConst);
+
+    if (isConst)
+    {
+        unsigned constIdx = data->constValueIndex;
+        identifierExpression->SetConstantValueIndex(constIdx);
     }
 }
 
@@ -3402,6 +3438,15 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 
 void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 {
+    ROString constName = constantDeclaration->name;
+    bool isGlobalScope = symbolTable.IsAtGlobalScope();
+
+    // if we've already processed this constant, then we don't need to do anything
+    if (isGlobalScope && resolvedConstNames.find(constName) != resolvedConstNames.end())
+    {
+        return;
+    }
+
     BinaryExpression* assignmentExpression = constantDeclaration->assignmentExpression;
     if (assignmentExpression->op != BinaryExpression::eAssign)
     {
@@ -3409,8 +3454,6 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
         logger.LogInternalError("Binary expression in constant declaration is not an assignment");
         return;
     }
-
-    ROString constName = constantDeclaration->name;
 
     // process right of assignment expression before adding constant to symbol
     // table in order to detect if the constant is referenced before it is assigned
@@ -3474,6 +3517,12 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 
         bool added = compilerContext.typeRegistry.RegisterType(newType);
         assert(added && "Could not register new constant type");
+    }
+
+    if (isGlobalScope)
+    {
+        resolvedConstNames.insert(constName);
+        orderedConsts.push_back(constantDeclaration);
     }
 }
 
