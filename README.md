@@ -10,18 +10,18 @@ Check the [Wiki](https://github.com/jbw3/compiler/wiki) for more information on 
 
 #### Dependencies
 
-LLVM 12 is required to build the compiler.
+LLVM 18 is required to build the compiler.
 LLVM's website has [instructions](https://apt.llvm.org) for installing on several popular Linux distributions.
-For example, run the following commands to install LLVM 12 on Ubuntu 20.04:
+For example, run the following commands to install LLVM 18 on Ubuntu 22.04:
 
 ```bash
 # add repository to package manager
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key 2>/dev/null | apt-key add -
-apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
+apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
 
 # install
 sudo apt-get update
-sudo apt-get install -y clang-12
+sudo apt-get install -y clang-18
 ```
 
 #### Building
@@ -39,7 +39,7 @@ Debug:
 ```
 mkdir debug
 cd debug
-cmake ../src -DCMAKE_CXX_COMPILER=clang++-12 -DLLVM_DIR=/usr/lib/llvm-12/cmake -DCMAKE_BUILD_TYPE=Debug
+cmake ../src -DCMAKE_CXX_COMPILER=clang++-18 -DLLVM_DIR=/usr/lib/llvm-18/cmake -DCMAKE_BUILD_TYPE=Debug
 make
 ```
 
@@ -47,7 +47,7 @@ Release:
 ```
 mkdir release
 cd release
-cmake ../src -DCMAKE_CXX_COMPILER=clang++-12 -DLLVM_DIR=/usr/lib/llvm-12/cmake -DCMAKE_BUILD_TYPE=Release
+cmake ../src -DCMAKE_CXX_COMPILER=clang++-18 -DLLVM_DIR=/usr/lib/llvm-18/cmake -DCMAKE_BUILD_TYPE=Release
 make
 ```
 

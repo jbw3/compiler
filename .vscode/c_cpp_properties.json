@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/lib/llvm-12/include"
+                "/usr/lib/llvm-18/include"
             ],
             "defines": ["DEBUG"],
             "cStandard": "c11",

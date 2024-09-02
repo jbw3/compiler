@@ -8,12 +8,8 @@
 #endif
 #include "Config.h"
 #include "LlvmIrOptimizer.h"
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
-#include "llvm/Transforms/InstCombine/InstCombine.h"
-#include "llvm/Transforms/IPO.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/Utils.h"
+#include "llvm/Passes/PassBuilder.h"
 #ifdef _MSC_VER
 #pragma warning(pop)
 #else
@@ -29,31 +25,40 @@ LlvmOptimizer::LlvmOptimizer(const Config& config) :
 
 bool LlvmOptimizer::Optimize(Module* module)
 {
-    if (optimizationLevel >= 1)
+    // create the analysis managers (they must be declared in this order,
+    // see https://llvm.org/docs/NewPassManager.html)
+    LoopAnalysisManager loopAnalysisMgr;
+    FunctionAnalysisManager functionAnalysisMgr;
+    CGSCCAnalysisManager cgsccAnalysisMgr;
+    ModuleAnalysisManager moduleAnalysisMgr;
+
+    PassBuilder passBuilder;
+
+    passBuilder.registerModuleAnalyses(moduleAnalysisMgr);
+    passBuilder.registerCGSCCAnalyses(cgsccAnalysisMgr);
+    passBuilder.registerFunctionAnalyses(functionAnalysisMgr);
+    passBuilder.registerLoopAnalyses(loopAnalysisMgr);
+    passBuilder.crossRegisterProxies(loopAnalysisMgr, functionAnalysisMgr, cgsccAnalysisMgr, moduleAnalysisMgr);
+
+    OptimizationLevel llvmOptimizationLevel = OptimizationLevel::O0;
+    switch (optimizationLevel)
     {
-        legacy::PassManager passMgr;
-
-        passMgr.add(createPromoteMemoryToRegisterPass());
-        passMgr.add(createInstructionCombiningPass());
-
-        if (optimizationLevel >= 2)
-        {
-            passMgr.add(createTailCallEliminationPass());
-            passMgr.add(createFunctionInliningPass());
-
-            // loop optimization
-            passMgr.add(createIndVarSimplifyPass());
-            passMgr.add(createLoopRotatePass());
-            passMgr.add(createLoopUnrollPass());
-            passMgr.add(createLoopDeletionPass());
-
-            passMgr.add(createPromoteMemoryToRegisterPass());
-            passMgr.add(createInstructionCombiningPass());
-            passMgr.add(createCFGSimplificationPass());
-        }
-
-        passMgr.run(*module);
+    case 0:
+    default:
+        llvmOptimizationLevel = OptimizationLevel::O0;
+        break;
+    case 1:
+        llvmOptimizationLevel = OptimizationLevel::O1;
+        break;
+    case 2:
+        llvmOptimizationLevel = OptimizationLevel::O2;
+        break;
     }
+
+    ModulePassManager modulePassMgr;
+    passBuilder.buildPerModuleDefaultPipeline(llvmOptimizationLevel);
+
+    modulePassMgr.run(*module, moduleAnalysisMgr);
 
     return true;
 }
