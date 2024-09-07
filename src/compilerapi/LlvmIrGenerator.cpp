@@ -122,7 +122,7 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             }
             else
             {
-                Type* type = subExprValue->getType()->getNonOpaquePointerElementType();
+                Type* type = GetType(unaryExpression->GetType());
                 resultValue = builder.CreateLoad(type, subExprValue, "load");
             }
             break;
@@ -504,7 +504,8 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 
     vector<Value*> valueIndices;
     valueIndices.push_back(indexValue);
-    Value* valuePtr = builder.CreateInBoundsGEP(data->getType()->getNonOpaquePointerElementType(), data, valueIndices, "value");
+    Type* llvmType = GetType(binaryExpression->GetType());
+    Value* valuePtr = builder.CreateInBoundsGEP(llvmType, data, valueIndices, "value");
     Value* result = nullptr;
     if (binaryExpression->GetAccessType() == Expression::eAddress)
     {
@@ -512,7 +513,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
     }
     else
     {
-        result = builder.CreateLoad(valuePtr->getType()->getNonOpaquePointerElementType(), valuePtr, "load");
+        result = builder.CreateLoad(llvmType, valuePtr, "load");
     }
 
     return result;
@@ -568,7 +569,8 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
 
     vector<Value*> indices;
     indices.push_back(checkStart);
-    Value* newData = builder.CreateInBoundsGEP(data->getType()->getNonOpaquePointerElementType(), data, indices, "ptr");
+    Type* llvmNewDataType = GetType(binaryExpression->GetType()->GetInnerType());
+    Value* newData = builder.CreateInBoundsGEP(llvmNewDataType, data, indices, "ptr");
 
     // create array struct
     Value* structValue = UndefValue::get(leftValue->getType());
@@ -802,8 +804,9 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
         // get the array value and store it in the iterator variable
         vector<Value*> valueIndices;
         valueIndices.push_back(iter);
-        Value* valuePtr = builder.CreateInBoundsGEP(data->getType()->getNonOpaquePointerElementType(), data, valueIndices, "value");
-        Value* value = builder.CreateLoad(valuePtr->getType()->getNonOpaquePointerElementType(), valuePtr, "load");
+        Type* llvmIterableInnerType = GetType(iterableInnerType);
+        Value* valuePtr = builder.CreateInBoundsGEP(llvmIterableInnerType, data, valueIndices, "value");
+        Value* value = builder.CreateLoad(llvmIterableInnerType, valuePtr, "load");
         value = CreateExt(value, iterableInnerType, varType);
         builder.CreateStore(value, alloca);
 
@@ -1574,7 +1577,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
                 indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
                 indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
 
-                Value* ptr = builder.CreateInBoundsGEP(alloca->getType()->getNonOpaquePointerElementType(), alloca, indices, "ptr");
+                Value* ptr = builder.CreateInBoundsGEP(alloca->getAllocatedType(), alloca, indices, "ptr");
                 builder.CreateStore(elementValue, ptr);
             }
 
@@ -1636,7 +1639,7 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
         switch (accessType)
         {
             case Expression::eValue:
-                resultValue = builder.CreateLoad(alloca->getType()->getNonOpaquePointerElementType(), alloca, toStringRef(name));
+                resultValue = builder.CreateLoad(alloca->getAllocatedType(), alloca, toStringRef(name));
                 break;
             case Expression::eAddress:
                 resultValue = alloca;
@@ -1690,11 +1693,11 @@ llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeIn
 
         // get address of first element
         indices[1] = zero;
-        Value* startPtr = builder.CreateInBoundsGEP(alloca->getType()->getNonOpaquePointerElementType(), alloca, indices, "startPtr");
+        Value* startPtr = builder.CreateInBoundsGEP(llvmArrayType, alloca, indices, "startPtr");
 
         // get address of end (1 past the last element)
         indices[1] = sizeValue;
-        Value* endPtr = builder.CreateInBoundsGEP(alloca->getType()->getNonOpaquePointerElementType(), alloca, indices, "endPtr");
+        Value* endPtr = builder.CreateInBoundsGEP(llvmArrayType, alloca, indices, "endPtr");
 
         // branch to loop body block
         builder.CreateBr(loopBodyBlock);
@@ -1709,7 +1712,7 @@ llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeIn
         builder.CreateStore(arrayValue, phi);
 
         // increment the address
-        Value* nextPtr = builder.CreateInBoundsGEP(phi->getType()->getNonOpaquePointerElementType(), phi, one, "nextPtr");
+        Value* nextPtr = builder.CreateInBoundsGEP(llvmArrayType, phi, one, "nextPtr");
         phi->addIncoming(nextPtr, loopBodyBlock);
 
         // check if we've reached the end
@@ -1757,7 +1760,7 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
         indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
         indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
 
-        Value* ptr = builder.CreateInBoundsGEP(alloca->getType()->getNonOpaquePointerElementType(), alloca, indices, "ptr");
+        Value* ptr = builder.CreateInBoundsGEP(alloca->getAllocatedType(), alloca, indices, "ptr");
         builder.CreateStore(resultValue, ptr);
     }
 
@@ -2056,9 +2059,13 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     if (accessType == Expression::eAddress || isPointer)
     {
+        Type* llvmStructType = GetType(type);
+        Type* llvmMemberType = GetType(member->GetType());
+
         if (accessType == Expression::eAddress && isPointer)
         {
-            resultValue = builder.CreateLoad(resultValue->getType()->getNonOpaquePointerElementType(), resultValue, "load");
+            Type* llvmStructPointerType = GetType(expr->GetType());
+            resultValue = builder.CreateLoad(llvmStructPointerType, resultValue, "load");
         }
 
         vector<Value*> indices;
@@ -2066,12 +2073,12 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
 
         // calculate member address
-        Value* memberPointer = builder.CreateInBoundsGEP(resultValue->getType()->getNonOpaquePointerElementType(), resultValue, indices, "mber");
+        Value* memberPointer = builder.CreateInBoundsGEP(llvmStructType, resultValue, indices, "mber");
 
         if (accessType == Expression::eValue)
         {
             // load member
-            resultValue = builder.CreateLoad(memberPointer->getType()->getNonOpaquePointerElementType(), memberPointer, "load");
+            resultValue = builder.CreateLoad(llvmMemberType, memberPointer, "load");
         }
         else
         {
