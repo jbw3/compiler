@@ -567,9 +567,22 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     // calculate new size
     Value* newSize = builder.CreateSub(checkEnd, checkStart, "sub");
 
+    const TypeInfo* resultType = binaryExpression->GetType();
+    Type* llvmNewDataType = nullptr;
+    if (resultType->IsArray())
+    {
+        llvmNewDataType = GetType(resultType->GetInnerType());
+    }
+    else if (resultType->IsStr())
+    {
+        llvmNewDataType = Type::getInt8Ty(context);
+    }
+    else
+    {
+        assert(false && "Unexpected subscript type");
+    }
     vector<Value*> indices;
     indices.push_back(checkStart);
-    Type* llvmNewDataType = GetType(binaryExpression->GetType()->GetInnerType());
     Value* newData = builder.CreateInBoundsGEP(llvmNewDataType, data, indices, "ptr");
 
     // create array struct
