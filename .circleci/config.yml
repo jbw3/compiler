@@ -4,7 +4,7 @@ jobs:
     working_directory: ~/compiler
 
     docker:
-      - image: jbw3/compiler:0.5.0
+      - image: jbw3/compiler:0.6.0
 
     resource_class: medium
 
@@ -13,7 +13,7 @@ jobs:
       - run: |
           mkdir release
           cd release
-          cmake ../src -DCMAKE_CXX_COMPILER=clang++-12 -DLLVM_DIR=/usr/lib/llvm-12/cmake -DCMAKE_BUILD_TYPE=Release
+          cmake ../src -DCMAKE_CXX_COMPILER=clang++-18 -DLLVM_DIR=/usr/lib/llvm-18/cmake -DCMAKE_BUILD_TYPE=Release
           make -j2
           ctest --output-on-failure
       - store_test_results:
