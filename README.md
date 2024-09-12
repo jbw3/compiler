@@ -55,17 +55,17 @@ make
 
 #### Dependencies
 
-LLVM 12 is required to build the compiler.
+LLVM 18 is required to build the compiler.
 The standard LLVM Windows install is not sufficient to be able to build against LLVM.
 Instead, the LLVM source must be downloaded and built from scratch.
-Download `llvm-12.0.1.src.tar.xz` from [here](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1).
+Download the source code (Source code (tar.gz)) from [here](https://github.com/llvm/llvm-project/releases/tag/llvmorg-18.1.8).
 
 Configure the LLVM project.
-The following assumes the LLVM source has been extracted into a directory named `llvm-12.0.1.src`.
+The following assumes the LLVM source has been extracted into a directory named `llvm-project-llvmorg-18.1.8`.
 ```
-mkdir llvm-build
-cd llvm-build
-cmake ..\llvm-12.0.1.src -Thost=x64
+mkdir llvm-project-llvmorg-18.1.8\llvm\llvm-debug
+cd llvm-project-llvmorg-18.1.8\llvm\llvm-debug
+cmake ..\llvm-18.1.8.src -Thost=x64
 ```
 
 Build and install debug:
