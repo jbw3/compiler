@@ -55,9 +55,7 @@ bool LlvmOptimizer::Optimize(Module* module)
         break;
     }
 
-    ModulePassManager modulePassMgr;
-    passBuilder.buildPerModuleDefaultPipeline(llvmOptimizationLevel);
-
+    ModulePassManager modulePassMgr = passBuilder.buildPerModuleDefaultPipeline(llvmOptimizationLevel);
     modulePassMgr.run(*module, moduleAnalysisMgr);
 
     return true;
