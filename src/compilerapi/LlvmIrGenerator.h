@@ -4,7 +4,6 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4141 4146 4244 4267 4624 6001 6011 6297 26439 26450 26451 26495 26812)
-#define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 #else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
