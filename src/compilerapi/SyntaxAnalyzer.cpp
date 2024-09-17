@@ -773,7 +773,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     ++iter;
 
     // read variable name
-    if (!EndIteratorCheck(iter, endIter, "Expected a vairable name"))
+    if (!EndIteratorCheck(iter, endIter, "Expected a variable name"))
     {
         return nullptr;
     }
