@@ -1,7 +1,6 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4141 4146 4244 4267 4624 6001 6011 6297 26439 26450 26451 26495 26812)
-#define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 #else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -14,7 +13,6 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Target/TargetMachine.h"
 #ifdef _MSC_VER
@@ -92,7 +90,7 @@ AssemblyGenerator::AssemblyGenerator(CompilerContext& compilerContext) :
 bool AssemblyGenerator::Generate(Module* module)
 {
     error_code ec;
-    raw_fd_ostream outFile(outFilename, ec, sys::fs::F_None);
+    raw_fd_ostream outFile(outFilename, ec);
     if (ec)
     {
         logger.LogError("Could not open output file");
@@ -119,8 +117,8 @@ bool AssemblyGenerator::Generate(Module* module)
 
         legacy::PassManager passManager;
         CodeGenFileType fileType = (assemblyType == Config::eBinary)
-                                    ? CGFT_ObjectFile
-                                    : CGFT_AssemblyFile;
+                                    ? CodeGenFileType::ObjectFile
+                                    : CodeGenFileType::AssemblyFile;
         if (targetMachine->addPassesToEmitFile(passManager, outFile, nullptr, fileType))
         {
             logger.LogError("Target machine cannot emit a file of this type");

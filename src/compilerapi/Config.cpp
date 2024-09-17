@@ -1,18 +1,20 @@
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4141 4146 4244 4267 4624 6001 6011 6297 26439 26450 26451 26495 26812)
-#define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 #else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
 #include "Config.h"
-#include "llvm/Support/Host.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
+#include "llvm/Support/CodeGen.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/Triple.h"
 #include <cstring>
 #include <iostream>
+#include <optional>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #else
@@ -93,23 +95,23 @@ TargetMachine* Config::CreateTargetMachine(const std::string& architecture, unsi
     }
 
     TargetOptions options;
-    auto relocModel = Optional<Reloc::Model>();
-    CodeGenOpt::Level codeGenOptLevel = CodeGenOpt::Default;
+    auto relocModel = optional<Reloc::Model>();
+    CodeGenOptLevel codeGenOptLevel = CodeGenOptLevel::Default;
     switch (optimization)
     {
         case 0:
-            codeGenOptLevel = CodeGenOpt::None;
+            codeGenOptLevel = CodeGenOptLevel::None;
             break;
         case 1:
-            codeGenOptLevel = CodeGenOpt::Less;
+            codeGenOptLevel = CodeGenOptLevel::Less;
             break;
         case 2:
         default:
-            codeGenOptLevel = CodeGenOpt::Default;
+            codeGenOptLevel = CodeGenOptLevel::Default;
             break;
     }
 
-    TargetMachine* targetMachine = target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel, llvm::None, codeGenOptLevel);
+    TargetMachine* targetMachine = target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel, {}, codeGenOptLevel);
 
     return targetMachine;
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.3)
+cmake_minimum_required(VERSION 3.5.0)
 
 enable_testing()
 
@@ -46,27 +46,34 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMBPFInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCFGuard.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCodeGen.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMCodeGenTypes.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCore.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCoroutines.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoCodeView.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoDWARF.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDemangle.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMFrontendOffloading.lib
         ${LLVM_LIBRARY_DIRS}/LLVMFrontendOpenMP.lib
         ${LLVM_LIBRARY_DIRS}/LLVMGlobalISel.lib
-        ${LLVM_LIBRARY_DIRS}/LLVMHelloNew.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMHexagonInfo.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMHipStdPar.lib
         ${LLVM_LIBRARY_DIRS}/LLVMInstCombine.lib
         ${LLVM_LIBRARY_DIRS}/LLVMInstrumentation.lib
         ${LLVM_LIBRARY_DIRS}/LLVMipo.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMIRPrinter.lib
         ${LLVM_LIBRARY_DIRS}/LLVMIRReader.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLanaiInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMLinker.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMLoongArchAsmParser.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMLoongArchCodeGen.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMLoongArchDesc.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMLoongArchInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMC.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMCDisassembler.lib
         ${LLVM_LIBRARY_DIRS}/LLVMMCParser.lib
@@ -107,13 +114,19 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMTarget.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMTargetParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMTextAPI.lib
         ${LLVM_LIBRARY_DIRS}/LLVMTransformUtils.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMVEAsmParser.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMVECodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMVectorize.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMVEDesc.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMVEInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyInfo.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMWebAssemblyUtils.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86AsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86CodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMX86Desc.lib
@@ -121,12 +134,13 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreInfo.lib
+        ws2_32.lib
     )
 else()
-    execute_process(COMMAND llvm-config-12 --libs all
+    execute_process(COMMAND llvm-config-18 --libs all
                     OUTPUT_VARIABLE llvm_all_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND llvm-config-12 --system-libs
+    execute_process(COMMAND llvm-config-18 --system-libs
                     OUTPUT_VARIABLE llvm_system_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(llvm_libs "${llvm_all_libs} ${llvm_system_libs}")

@@ -122,7 +122,8 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             }
             else
             {
-                resultValue = builder.CreateLoad(subExprValue, "load");
+                Type* type = GetType(unaryExpression->GetType());
+                resultValue = builder.CreateLoad(type, subExprValue, "load");
             }
             break;
         }
@@ -181,7 +182,8 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             // if we are also doing a computation (e.g. +=), we need to load the left value
             if (BinaryExpression::IsComputationAssignment(op))
             {
-                leftValue = builder.CreateLoad(leftValue, "load");
+                Type* type = GetType(leftType);
+                leftValue = builder.CreateLoad(type, leftValue, "load");
             }
         }
 
@@ -459,13 +461,15 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
         {
             const Token* opToken = binaryExpression->opToken;
 
+            Type* llvmStrType = GetType(compilerContext.typeRegistry.GetStringType());
+
             const string& filename = compilerContext.GetFilename(opToken->filenameId);
             Constant* fileStrPtr = CreateConstantString(filename);
-            Value* fileStr = builder.CreateLoad(fileStrPtr, "filestr");
+            Value* fileStr = builder.CreateLoad(llvmStrType, fileStrPtr, "filestr");
             uint64_t line = static_cast<uint64_t>(opToken->line);
             Constant* lineNum = ConstantInt::get(context, APInt(32, line, false));
             Constant* msgStrPtr = CreateConstantString("Index is out of bounds");
-            Value* msgStr = builder.CreateLoad(msgStrPtr, "msgstr");
+            Value* msgStr = builder.CreateLoad(llvmStrType, msgStrPtr, "msgstr");
 
             vector<Value*> logErrorArgs;
             logErrorArgs.push_back(fileStr);
@@ -500,7 +504,8 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 
     vector<Value*> valueIndices;
     valueIndices.push_back(indexValue);
-    Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
+    Type* llvmType = GetType(binaryExpression->GetType());
+    Value* valuePtr = builder.CreateInBoundsGEP(llvmType, data, valueIndices, "value");
     Value* result = nullptr;
     if (binaryExpression->GetAccessType() == Expression::eAddress)
     {
@@ -508,7 +513,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
     }
     else
     {
-        result = builder.CreateLoad(valuePtr, "load");
+        result = builder.CreateLoad(llvmType, valuePtr, "load");
     }
 
     return result;
@@ -562,9 +567,23 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     // calculate new size
     Value* newSize = builder.CreateSub(checkEnd, checkStart, "sub");
 
+    const TypeInfo* resultType = binaryExpression->GetType();
+    Type* llvmNewDataType = nullptr;
+    if (resultType->IsArray())
+    {
+        llvmNewDataType = GetType(resultType->GetInnerType());
+    }
+    else if (resultType->IsStr())
+    {
+        llvmNewDataType = Type::getInt8Ty(context);
+    }
+    else
+    {
+        assert(false && "Unexpected subscript type");
+    }
     vector<Value*> indices;
     indices.push_back(checkStart);
-    Value* newData = builder.CreateInBoundsGEP(data, indices, "ptr");
+    Value* newData = builder.CreateInBoundsGEP(llvmNewDataType, data, indices, "ptr");
 
     // create array struct
     Value* structValue = UndefValue::get(leftValue->getType());
@@ -798,8 +817,9 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
         // get the array value and store it in the iterator variable
         vector<Value*> valueIndices;
         valueIndices.push_back(iter);
-        Value* valuePtr = builder.CreateInBoundsGEP(data, valueIndices, "value");
-        Value* value = builder.CreateLoad(valuePtr, "load");
+        Type* llvmIterableInnerType = GetType(iterableInnerType);
+        Value* valuePtr = builder.CreateInBoundsGEP(llvmIterableInnerType, data, valueIndices, "value");
+        Value* value = builder.CreateLoad(llvmIterableInnerType, valuePtr, "load");
         value = CreateExt(value, iterableInnerType, varType);
         builder.CreateStore(value, alloca);
 
@@ -1447,7 +1467,8 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     const vector<char>& chars = stringLiteralExpression->characters;
     Constant* strPtr = CreateConstantString(chars);
-    resultValue = builder.CreateLoad(strPtr, "load");
+    Type* type = GetType(compilerContext.typeRegistry.GetStringType());
+    resultValue = builder.CreateLoad(type, strPtr, "load");
 }
 
 Constant* LlvmIrGenerator::CreateConstantString(const string& str)
@@ -1549,7 +1570,8 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     {
         const vector<char>& value = compilerContext.GetStrConstantValue(constIdx);
         Constant* strPtr = CreateConstantString(value);
-        constValue = builder.CreateLoad(strPtr, "load");
+        Type* llvmStrType = GetType(compilerContext.typeRegistry.GetStringType());
+        constValue = builder.CreateLoad(llvmStrType, strPtr, "load");
     }
     else if (type->IsRange())
     {
@@ -1640,7 +1662,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
                 indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
                 indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
 
-                Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
+                Value* ptr = builder.CreateInBoundsGEP(alloca->getAllocatedType(), alloca, indices, "ptr");
                 builder.CreateStore(elementValue, ptr);
             }
 
@@ -1702,7 +1724,7 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
         switch (accessType)
         {
             case Expression::eValue:
-                resultValue = builder.CreateLoad(alloca, toStringRef(name));
+                resultValue = builder.CreateLoad(alloca->getAllocatedType(), alloca, toStringRef(name));
                 break;
             case Expression::eAddress:
                 resultValue = alloca;
@@ -1756,11 +1778,11 @@ llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeIn
 
         // get address of first element
         indices[1] = zero;
-        Value* startPtr = builder.CreateInBoundsGEP(alloca, indices, "startPtr");
+        Value* startPtr = builder.CreateInBoundsGEP(llvmArrayType, alloca, indices, "startPtr");
 
         // get address of end (1 past the last element)
         indices[1] = sizeValue;
-        Value* endPtr = builder.CreateInBoundsGEP(alloca, indices, "endPtr");
+        Value* endPtr = builder.CreateInBoundsGEP(llvmArrayType, alloca, indices, "endPtr");
 
         // branch to loop body block
         builder.CreateBr(loopBodyBlock);
@@ -1775,7 +1797,7 @@ llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeIn
         builder.CreateStore(arrayValue, phi);
 
         // increment the address
-        Value* nextPtr = builder.CreateInBoundsGEP(phi, one, "nextPtr");
+        Value* nextPtr = builder.CreateInBoundsGEP(llvmArrayType, phi, one, "nextPtr");
         phi->addIncoming(nextPtr, loopBodyBlock);
 
         // check if we've reached the end
@@ -1823,7 +1845,7 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
         indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, 0)));
         indices.push_back(ConstantInt::get(context, APInt(uIntSizeNumBits, i)));
 
-        Value* ptr = builder.CreateInBoundsGEP(alloca, indices, "ptr");
+        Value* ptr = builder.CreateInBoundsGEP(alloca->getAllocatedType(), alloca, indices, "ptr");
         builder.CreateStore(resultValue, ptr);
     }
 
@@ -2122,9 +2144,13 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     if (accessType == Expression::eAddress || isPointer)
     {
+        Type* llvmStructType = GetType(type);
+        Type* llvmMemberType = GetType(member->GetType());
+
         if (accessType == Expression::eAddress && isPointer)
         {
-            resultValue = builder.CreateLoad(resultValue, "load");
+            Type* llvmStructPointerType = GetType(expr->GetType());
+            resultValue = builder.CreateLoad(llvmStructPointerType, resultValue, "load");
         }
 
         vector<Value*> indices;
@@ -2132,12 +2158,12 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
         indices.push_back(ConstantInt::get(context, APInt(32, memberIndex)));
 
         // calculate member address
-        Value* memberPointer = builder.CreateInBoundsGEP(resultValue, indices, "mber");
+        Value* memberPointer = builder.CreateInBoundsGEP(llvmStructType, resultValue, indices, "mber");
 
         if (accessType == Expression::eValue)
         {
             // load member
-            resultValue = builder.CreateLoad(memberPointer, "load");
+            resultValue = builder.CreateLoad(llvmMemberType, memberPointer, "load");
         }
         else
         {
@@ -2190,7 +2216,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     trueBlock = builder.GetInsertBlock();
 
     // generate "false" block IR
-    function->getBasicBlockList().push_back(falseBlock);
+    function->insert(function->end(), falseBlock);
     builder.SetInsertPoint(falseBlock);
 
     Expression* elseExpr = branchExpression->elseExpression;
@@ -2207,7 +2233,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     falseBlock = builder.GetInsertBlock();
 
     // generate merge block IR
-    function->getBasicBlockList().push_back(mergeBlock);
+    function->insert(function->end(), mergeBlock);
     builder.SetInsertPoint(mergeBlock);
 
     Type* phiType = GetType(resultType);
@@ -2504,7 +2530,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         {
             return nullptr;
         }
-        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, toStringRef(type->GetShortName()));
+        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetShortName()));
     }
     else if (type->IsSameAs(*TypeInfo::UnitType))
     {
@@ -2619,7 +2645,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         }
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
-        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, llvm::None, toStringRef(type->GetShortName()));
+        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetShortName()));
     }
     else
     {
@@ -2743,7 +2769,7 @@ Value* LlvmIrGenerator::CreateLogicalBranch(Expression* conditionExpr, Expressio
     branchBlock = builder.GetInsertBlock();
 
     // generate merge block IR
-    function->getBasicBlockList().push_back(mergeBlock);
+    function->insert(function->end(), mergeBlock);
     builder.SetInsertPoint(mergeBlock);
 
     PHINode* phiNode = builder.CreatePHI(boolType, 2, phiName);

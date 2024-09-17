@@ -1902,7 +1902,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         if (!ok)
         {
             isError = true;
-            LogExistingIdentifierError(indexVarName, forLoop->variableNameToken);
+            LogExistingIdentifierError(indexVarName, forLoop->indexNameToken);
             return;
         }
     }
@@ -2942,15 +2942,15 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
     bool canCast = false;
     if (exprType->IsBool())
     {
-        canCast = castType->IsBool() | castType->IsInt() | castType->IsFloat();
+        canCast = castType->IsBool() || castType->IsInt() || castType->IsFloat();
     }
     else if (exprType->IsInt())
     {
-        canCast = castType->IsBool() | castType->IsInt() | castType->IsFloat();
+        canCast = castType->IsBool() || castType->IsInt() || castType->IsFloat();
     }
     else if (exprType->IsFloat())
     {
-        canCast = castType->IsBool() | castType->IsInt() | castType->IsFloat();
+        canCast = castType->IsBool() || castType->IsInt() || castType->IsFloat();
     }
 
     if (!canCast)
