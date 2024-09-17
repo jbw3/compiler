@@ -1895,7 +1895,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         if (!ok)
         {
             isError = true;
-            LogExistingIdentifierError(indexVarName, forLoop->variableNameToken);
+            LogExistingIdentifierError(indexVarName, forLoop->indexNameToken);
             return;
         }
     }
