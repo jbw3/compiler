@@ -1187,23 +1187,40 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
 
     llvmType->setBody(members);
 
-    // TODO: add debug info for structs
-#if 0
+    // add debug info for struct members
     if (dbgInfo)
     {
-        DIFile* diFile = diFiles[fileId];
+        DIFile* diFile = diFiles[structDefinitionExpression->fileId];
 
-        ROString name = structType->GetShortName();
-        unsigned numBits = structType->GetNumBits();
+        SmallVector<Metadata*, 8> elements;
 
-        unsigned line = structDefinitionExpression->structToken->line;
-        // TODO: set alignment
-        SmallVector<Metadata*, 0> elements;
+        uint64_t offset = 0;
+        for (const MemberInfo* member : structType->GetMembers())
+        {
+            const TypeInfo* memberType = member->GetType();
+            DIType* memberDiType = GetDebugType(memberType);
+            if (memberDiType == nullptr)
+            {
+                resultValue = nullptr;
+                return;
+            }
+
+            ROString memberName = member->GetName();
+            uint64_t memberSize = memberDiType->getSizeInBits();
+            // TODO: fix alignment
+            uint32_t alignment = (memberSize > 32) ? 32 : static_cast<uint32_t>(memberSize);
+            unsigned memberLine = member->GetToken()->line;
+            elements.push_back(diBuilder->createMemberType(diFile, toStringRef(memberName), diFile, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
+
+            offset += memberSize;
+        }
+
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-        DICompositeType* diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
-        diStructTypes.insert({structName, diType});
+        auto iter = diStructTypes.find(structName);
+        assert(iter != diStructTypes.end());
+        DICompositeType* diType = iter->second;
+        diType->replaceElements(elementsArray);
     }
-#endif
 }
 
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
@@ -1309,6 +1326,22 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 {
                     StructType* structType = StructType::create(context, toStringRef(structName));
                     types.insert({structName, structType});
+
+                    // add debug info for structs
+                    if (dbgInfo)
+                    {
+                        DIFile* diFile = diFiles[structDef->fileId];
+
+                        ROString name = exprType->GetShortName();
+                        unsigned numBits = exprType->GetNumBits();
+
+                        unsigned line = constDecl->nameToken->line;
+                        // TODO: set alignment
+                        SmallVector<Metadata*, 0> elements;
+                        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+                        DICompositeType* diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+                        diStructTypes.insert({structName, diType});
+                    }
                 }
             }
             else if (constDecl->constantType->IsType())

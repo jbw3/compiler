@@ -10,7 +10,8 @@ using namespace SyntaxTree;
 
 SyntaxAnalyzer::SyntaxAnalyzer(CompilerContext& compilerContext) :
     compilerContext(compilerContext),
-    logger(compilerContext.logger)
+    logger(compilerContext.logger),
+    currentFileId(-1)
 {
 }
 
@@ -22,10 +23,10 @@ bool SyntaxAnalyzer::Process(Modules* syntaxTree)
     deletePointerContainer(syntaxTree->modules);
     syntaxTree->modules.reserve(fileCount);
 
-    for (unsigned fileId = 0; fileId < fileCount; ++fileId)
+    for (currentFileId = 0; currentFileId < fileCount; ++currentFileId)
     {
         ModuleDefinition* module = nullptr;
-        ok = ProcessModule(fileId, compilerContext.GetFileTokens(fileId), module);
+        ok = ProcessModule(compilerContext.GetFileTokens(currentFileId), module);
         if (!ok)
         {
             break;
@@ -37,7 +38,7 @@ bool SyntaxAnalyzer::Process(Modules* syntaxTree)
     return ok;
 }
 
-bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, ModuleDefinition*& syntaxTree)
+bool SyntaxAnalyzer::ProcessModule(const TokenList& tokens, ModuleDefinition*& syntaxTree)
 {
     TokenIterator iter = tokens.begin();
     TokenIterator endIter = tokens.end();
@@ -77,7 +78,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
         }
         else if (iter->type == Token::eStruct)
         {
-            StructDefinition* structDefinition = ProcessStructDefinition(iter, endIter, fileId);
+            StructDefinition* structDefinition = ProcessStructDefinition(iter, endIter);
             if (structDefinition == nullptr)
             {
                 ok = false;
@@ -108,7 +109,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(fileId, constantDeclarations, structs, externFunctions, functions);
+        syntaxTree = new ModuleDefinition(currentFileId, constantDeclarations, structs, externFunctions, functions);
     }
     else
     {
@@ -349,7 +350,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     return true;
 }
 
-StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, TokenIterator endIter, unsigned fileId)
+StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, TokenIterator endIter)
 {
     if (!EndIteratorCheck(iter, endIter, "Expected struct keyword"))
     {
@@ -453,7 +454,7 @@ StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, T
     // increment past "}"
     ++iter;
 
-    StructDefinition* structDef = new StructDefinition(structName, members, structNameToken, fileId);
+    StructDefinition* structDef = new StructDefinition(structName, members, structNameToken, currentFileId);
     return structDef;
 }
 
@@ -555,6 +556,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
 
     StructDefinitionExpression* structDef = new StructDefinitionExpression(
         members,
+        currentFileId,
         structToken,
         openBraceToken,
         closeBraceToken

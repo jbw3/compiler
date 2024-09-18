@@ -35,8 +35,9 @@ private:
 
     CompilerContext& compilerContext;
     ErrorLogger& logger;
+    unsigned currentFileId;
 
-    bool ProcessModule(unsigned fileId, const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
+    bool ProcessModule(const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
@@ -58,8 +59,7 @@ private:
                            SyntaxTree::Parameters& parameters);
 
     SyntaxTree::StructDefinition* ProcessStructDefinition(TokenIterator& iter,
-                                                          TokenIterator endIter,
-                                                          unsigned fileId);
+                                                          TokenIterator endIter);
 
     SyntaxTree::StructDefinitionExpression* ProcessStructDefinitionExpression(
         TokenIterator& iter,

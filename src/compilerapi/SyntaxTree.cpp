@@ -891,11 +891,13 @@ void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
 
 StructDefinitionExpression::StructDefinitionExpression(
     const vector<MemberDefinition*>& members,
+    unsigned fileId,
     const Token* structToken,
     const Token* openBraceToken,
     const Token* closeBraceToken
 ) :
     members(members),
+    fileId(fileId),
     structToken(structToken),
     openBraceToken(openBraceToken),
     closeBraceToken(closeBraceToken)

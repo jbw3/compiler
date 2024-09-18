@@ -590,6 +590,7 @@ class StructDefinitionExpression : public Expression
 {
 public:
     StructDefinitionExpression(const std::vector<MemberDefinition*>& members,
+                               unsigned fileId,
                                const Token* structToken,
                                const Token* openBraceToken,
                                const Token* closeBraceToken);
@@ -599,6 +600,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     std::vector<MemberDefinition*> members;
+    unsigned fileId;
     const Token* structToken;
     const Token* openBraceToken;
     const Token* closeBraceToken;
