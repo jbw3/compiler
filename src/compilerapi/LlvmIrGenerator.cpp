@@ -1205,10 +1205,19 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
                 return;
             }
 
-            ROString memberName = member->GetName();
             uint64_t memberSize = memberDiType->getSizeInBits();
-            // TODO: fix alignment
-            uint32_t alignment = (memberSize > 32) ? 32 : static_cast<uint32_t>(memberSize);
+            unsigned pointerSize = compilerContext.typeRegistry.GetPointerSize();
+            uint32_t alignment = (memberSize > pointerSize) ? pointerSize : static_cast<uint32_t>(memberSize);
+            if (alignment > 0)
+            {
+                uint32_t rem = offset % alignment;
+                if (rem > 0)
+                {
+                    offset += alignment - rem;
+                }
+            }
+
+            ROString memberName = member->GetName();
             unsigned memberLine = member->GetToken()->line;
             elements.push_back(diBuilder->createMemberType(diFile, toStringRef(memberName), diFile, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
 
