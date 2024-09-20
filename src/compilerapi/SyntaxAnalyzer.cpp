@@ -1908,6 +1908,7 @@ bool SyntaxAnalyzer::ProcessUnicodeEscapeSequence(const TokenIterator& iter, siz
 BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, TokenIterator endIter)
 {
     bool needsUnitType = true;
+    ConstantDeclarations constantDeclarations;
     SyntaxTreeNodes statements;
 
     const Token* startToken = &*iter;
@@ -1927,7 +1928,10 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         }
         else if (tokenType == Token::eConst)
         {
-            statement = ProcessConstantDeclaration(iter, endIter);
+            ConstantDeclaration* constDecl = ProcessConstantDeclaration(iter, endIter);
+            constantDeclarations.push_back(constDecl);
+
+            statement = constDecl;
             needsUnitType = true;
         }
         else if (tokenType == Token::eIf)
@@ -1951,7 +1955,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             ++iter; // increment past end brace
             needsUnitType = false;
         }
-        else if (tokenType  == Token::eWhile)
+        else if (tokenType == Token::eWhile)
         {
             statement = ProcessWhileLoop(iter, endIter);
             needsUnitType = true;
@@ -2031,7 +2035,10 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             return nullptr;
         }
 
-        statements.push_back(statement);
+        if (tokenType != Token::eConst)
+        {
+            statements.push_back(statement);
+        }
 
         // if we reached the end, log an error and return null
         if (!EndIteratorCheck(iter, endIter, "Expected block end"))
@@ -2053,7 +2060,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         statements.push_back(new UnitTypeLiteralExpression());
     }
 
-    BlockExpression* blockExpression = new BlockExpression(statements, startToken, endToken);
+    BlockExpression* blockExpression = new BlockExpression(constantDeclarations, statements, startToken, endToken);
     return blockExpression;
 }
 

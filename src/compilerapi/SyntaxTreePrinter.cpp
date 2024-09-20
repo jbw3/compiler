@@ -345,6 +345,7 @@ void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
     BracePrinter printer(*this, "{", "}");
 
     PrintProperty(NODE_TYPE_PROPERTY, "BlockExpression");
+    PrintProperty("constantDeclarations", blockExpression->constantDeclarations);
     PrintProperty("statements", blockExpression->statements);
 }
 

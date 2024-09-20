@@ -11,7 +11,10 @@ class SyntaxTreeVisitor;
 namespace SyntaxTree
 {
 
+class ConstantDeclaration;
 class FunctionDeclaration;
+
+typedef std::vector<ConstantDeclaration*> ConstantDeclarations;
 
 class SyntaxTreeNode
 {
@@ -165,7 +168,8 @@ public:
 class BlockExpression : public Expression
 {
 public:
-    BlockExpression(const SyntaxTreeNodes& statements,
+    BlockExpression(const ConstantDeclarations& constantDeclarations,
+                    const SyntaxTreeNodes& statements,
                     const Token* startToken, const Token* endToken);
 
     virtual ~BlockExpression();
@@ -174,6 +178,7 @@ public:
 
     const Token* startToken;
     const Token* endToken;
+    ConstantDeclarations constantDeclarations;
     SyntaxTreeNodes statements;
 };
 

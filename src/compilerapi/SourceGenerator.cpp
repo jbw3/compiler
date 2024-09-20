@@ -377,6 +377,14 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
     *os << "{\n";
     ++indentLevel;
 
+    for (ConstantDeclaration* constantDeclaration : blockExpression->constantDeclarations)
+    {
+        Indent();
+        constantDeclaration->Accept(this);
+
+        *os << ";\n";
+    }
+
     const SyntaxTreeNodes& statements = blockExpression->statements;
     size_t numStatements = statements.size();
     for (size_t i = 0; i < numStatements - 1; ++i)

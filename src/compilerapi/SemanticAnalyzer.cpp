@@ -2884,6 +2884,15 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
     // create new scope for block
     Scope scope(symbolTable);
 
+    for (ConstantDeclaration* constantDeclaration : blockExpression->constantDeclarations)
+    {
+        constantDeclaration->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+    }
+
     const SyntaxTreeNodes& statements = blockExpression->statements;
     size_t size = statements.size();
 

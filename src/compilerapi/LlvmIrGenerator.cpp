@@ -1917,6 +1917,15 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     }
     DebugScope dbgScope(dbgInfo, diScopes, diBlock);
 
+    for (ConstantDeclaration* constantDeclaration : blockExpression->constantDeclarations)
+    {
+        constantDeclaration->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+    }
+
     const SyntaxTreeNodes& statements = blockExpression->statements;
     size_t size = statements.size();
 

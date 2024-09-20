@@ -215,10 +215,12 @@ void ArrayMultiValueExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-BlockExpression::BlockExpression(const SyntaxTreeNodes& statements,
+BlockExpression::BlockExpression(const ConstantDeclarations& constantDeclarations,
+                                 const SyntaxTreeNodes& statements,
                                  const Token* startToken, const Token* endToken) :
     startToken(startToken),
     endToken(endToken),
+    constantDeclarations(constantDeclarations),
     statements(statements)
 {
 }
