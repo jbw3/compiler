@@ -2331,15 +2331,60 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     }
 }
 
-void SemanticAnalyzer::LogExistingIdentifierError(ROString name, const Token* token)
+void SemanticAnalyzer::LogExistingIdentifierError(ROString name, const Token* token, const Token* existingToken)
 {
     logger.LogError(*token, "Identifier '{}' has already been declared", name);
 
-    const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
-    const Token* existingToken = data->token;
+    // attempt to look up existing token if it is not specified
+    if (existingToken == nullptr)
+    {
+        const SymbolTable::IdentifierData* data = symbolTable.GetIdentifierData(name);
+        if (data != nullptr)
+        {
+            existingToken = data->token;
+        }
+    }
+
     if (existingToken != nullptr)
     {
         logger.LogNote(*existingToken, "Identifier is declared here");
+    }
+}
+
+void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>& constantDeclarations)
+{
+    // build constant name map
+    for (ConstantDeclarations* inner : constantDeclarations)
+    {
+        for (ConstantDeclaration* constDecl : *inner)
+        {
+            ROString constName = constDecl->name;
+            auto iter = unresolvedConsts.insert({constName, constDecl});
+            if (!iter.second)
+            {
+                const Token* existingToken = iter.first->second->nameToken;
+                isError = true;
+                LogExistingIdentifierError(constName, constDecl->nameToken, existingToken);
+                return;
+            }
+        }
+    }
+
+    // process constants
+    for (ConstantDeclarations* inner : constantDeclarations)
+    {
+        for (ConstantDeclaration* constDecl : *inner)
+        {
+            // process the constant declaration if it has not already been resolved
+            if (unresolvedConsts.find(constDecl->name) != unresolvedConsts.end())
+            {
+                constDecl->Accept(this);
+                if (isError)
+                {
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -2524,37 +2569,17 @@ void SemanticAnalyzer::Visit(ModuleDefinition* moduleDefinition)
 
 void SemanticAnalyzer::Visit(Modules* modules)
 {
-    // build constant name map
+    vector<ConstantDeclarations*> allConstDecls;
     for (ModuleDefinition* moduleDefinition : modules->modules)
     {
-        const vector<ConstantDeclaration*>& constantDeclarations = moduleDefinition->constantDeclarations;
-
-        for (ConstantDeclaration* constDecl : constantDeclarations)
-        {
-            ROString constName = constDecl->name;
-            auto rv = constNameMap.insert({constName, constDecl});
-            if (!rv.second)
-            {
-                isError = true;
-                LogExistingIdentifierError(constName, constDecl->nameToken);
-                return;
-            }
-        }
+        allConstDecls.push_back(&moduleDefinition->constantDeclarations);
     }
 
-    // process constants
-    for (ModuleDefinition* moduleDefinition : modules->modules)
+    // resolve constant declarations
+    ProcessConstantDeclarations(allConstDecls);
+    if (isError)
     {
-        const vector<ConstantDeclaration*>& constantDeclarations = moduleDefinition->constantDeclarations;
-
-        for (ConstantDeclaration* constDecl : constantDeclarations)
-        {
-            constDecl->Accept(this);
-            if (isError)
-            {
-                return;
-            }
-        }
+        return;
     }
 
     // sort struct definitions so each comes after any struct definitions it depends on
@@ -2634,7 +2659,8 @@ void SemanticAnalyzer::Visit(Modules* modules)
         module->Accept(this);
     }
 
-    modules->orderedConstants = orderedConsts;
+    modules->orderedGlobalConstants.swap(orderedGlobalConsts);
+    orderedGlobalConsts.clear();
 }
 
 void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpression)
@@ -2710,15 +2736,17 @@ void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
     if (data == nullptr)
     {
         // check if this is a constant that has not been resolved yet
-        auto iter = constNameMap.find(name);
-        if (iter == constNameMap.end())
+        auto iter = unresolvedConsts.find(name);
+
+        // if it is not in the unresolved list, it is an unknown identifier
+        if (iter == unresolvedConsts.end())
         {
             logger.LogError(*identifierExpression->token, "Identifier '{}' is not declared in the current scope", name);
             isError = true;
             return;
         }
 
-        // process constant
+        // this constant is in the unresolved list, so resolve it now
         ConstantDeclaration* constDecl = iter->second;
         constDecl->Accept(this);
         if (isError)
@@ -2884,14 +2912,9 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
     // create new scope for block
     Scope scope(symbolTable);
 
-    for (ConstantDeclaration* constantDeclaration : blockExpression->constantDeclarations)
-    {
-        constantDeclaration->Accept(this);
-        if (isError)
-        {
-            return;
-        }
-    }
+    vector<ConstantDeclarations*> constDecls;
+    constDecls.push_back(&blockExpression->constantDeclarations);
+    ProcessConstantDeclarations(constDecls);
 
     const SyntaxTreeNodes& statements = blockExpression->statements;
     size_t size = statements.size();
@@ -3448,10 +3471,9 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
 void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 {
     ROString constName = constantDeclaration->name;
-    bool isGlobalScope = symbolTable.IsAtGlobalScope();
 
-    // if we've already processed this constant, then we don't need to do anything
-    if (isGlobalScope && resolvedConstNames.find(constName) != resolvedConstNames.end())
+    // if this constant has already been processed, then we don't need to do anything
+    if (unresolvedConsts.find(constName) == unresolvedConsts.end())
     {
         return;
     }
@@ -3464,12 +3486,23 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
         return;
     }
 
+    // if the current const is already in the list of consts being processed,
+    // then we've found a recursive dependency
+    if (processingConsts.find(constName) != processingConsts.end())
+    {
+        isError = true;
+        logger.LogError(*constantDeclaration->nameToken, "Constant '{}' has a recursive dependency on itself", constName);
+        return;
+    }
+
     // process right of assignment expression before adding constant to symbol
     // table in order to detect if the constant is referenced before it is assigned
     constDeclName = constName; // TODO: This is a bit hacky. Find a better way to do this
+    processingConsts.insert(constName);
     Expression* rightExpr = assignmentExpression->right;
     rightExpr->Accept(this);
     constDeclName = "";
+    processingConsts.erase(constName);
     if (isError)
     {
         return;
@@ -3528,10 +3561,13 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
         assert(added && "Could not register new constant type");
     }
 
+    // we've resolved this constant so remove it from the unresolved list
+    unresolvedConsts.erase(constName);
+
+    bool isGlobalScope = symbolTable.IsAtGlobalScope();
     if (isGlobalScope)
     {
-        resolvedConstNames.insert(constName);
-        orderedConsts.push_back(constantDeclaration);
+        orderedGlobalConsts.push_back(constantDeclaration);
     }
 }
 

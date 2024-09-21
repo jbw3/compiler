@@ -647,7 +647,7 @@ class ModuleDefinition : public SyntaxTreeNode
 {
 public:
     ModuleDefinition(unsigned fileId,
-                     const std::vector<ConstantDeclaration*> constantDeclarations,
+                     const ConstantDeclarations& constantDeclarations,
                      const std::vector<StructDefinition*>& structDefinitions,
                      const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                      const std::vector<FunctionDefinition*>& functionDefinitions);
@@ -657,7 +657,7 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     unsigned fileId;
-    std::vector<ConstantDeclaration*> constantDeclarations;
+    ConstantDeclarations constantDeclarations;
     std::vector<StructDefinition*> structDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
     std::vector<FunctionDefinition*> functionDefinitions;
@@ -672,7 +672,7 @@ public:
 
     std::vector<ModuleDefinition*> modules;
     std::vector<StructDefinition*> orderedStructDefinitions;
-    std::vector<ConstantDeclaration*> orderedConstants;
+    std::vector<ConstantDeclaration*> orderedGlobalConstants;
 };
 } // namespace SyntaxTree
 

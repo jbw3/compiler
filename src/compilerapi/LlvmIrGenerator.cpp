@@ -1365,7 +1365,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
     }
 
     // add global constants to symbol table
-    for (ConstantDeclaration* constDecl : modules->orderedConstants)
+    for (ConstantDeclaration* constDecl : modules->orderedGlobalConstants)
     {
         constDecl->Accept(this);
     }

@@ -952,7 +952,7 @@ void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
 }
 
 ModuleDefinition::ModuleDefinition(unsigned fileId,
-                                   const vector<ConstantDeclaration*> constantDeclarations,
+                                   const ConstantDeclarations& constantDeclarations,
                                    const vector<StructDefinition*>& structDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
