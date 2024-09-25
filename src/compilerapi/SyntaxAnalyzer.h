@@ -20,6 +20,8 @@ public:
 
     bool Process(SyntaxTree::Modules* syntaxTree);
 
+    bool ProcessModule(unsigned fileId, const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
+
 private:
     struct UnaryOpData
     {
@@ -36,8 +38,6 @@ private:
     CompilerContext& compilerContext;
     ErrorLogger& logger;
     unsigned currentFileId;
-
-    bool ProcessModule(const TokenList& tokens, SyntaxTree::ModuleDefinition*& syntaxTree);
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 

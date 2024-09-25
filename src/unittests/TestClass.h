@@ -15,6 +15,11 @@ public:
 
     bool Run();
 
+    const std::string& GetName() const
+    {
+        return name;
+    }
+
 protected:
     void AddTest(const std::string& testName, TestFunc test);
 

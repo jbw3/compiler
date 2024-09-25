@@ -13,6 +13,8 @@ add_executable(unittests
     main.cpp
     ROStringTests.cpp
     ROStringTests.h
+    SemanticAnalyzerTests.cpp
+    SemanticAnalyzerTests.h
     SourceGeneratorTests.cpp
     SourceGeneratorTests.h
     TestClass.cpp

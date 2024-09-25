@@ -23,10 +23,10 @@ bool SyntaxAnalyzer::Process(Modules* syntaxTree)
     deletePointerContainer(syntaxTree->modules);
     syntaxTree->modules.reserve(fileCount);
 
-    for (currentFileId = 0; currentFileId < fileCount; ++currentFileId)
+    for (unsigned fileId = 0; fileId < fileCount; ++fileId)
     {
         ModuleDefinition* module = nullptr;
-        ok = ProcessModule(compilerContext.GetFileTokens(currentFileId), module);
+        ok = ProcessModule(fileId, compilerContext.GetFileTokens(fileId), module);
         if (!ok)
         {
             break;
@@ -38,8 +38,10 @@ bool SyntaxAnalyzer::Process(Modules* syntaxTree)
     return ok;
 }
 
-bool SyntaxAnalyzer::ProcessModule(const TokenList& tokens, ModuleDefinition*& syntaxTree)
+bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, ModuleDefinition*& syntaxTree)
 {
+    currentFileId = fileId;
+
     TokenIterator iter = tokens.begin();
     TokenIterator endIter = tokens.end();
 
