@@ -131,10 +131,10 @@ const TypeInfo* TypeInfo::CreateFunctionType(
     size_t paramSize = parameterTypes.size();
     for (size_t i = 0; i < paramSize; ++i)
     {
-        newFunType->paramTypes.push_back(parameterTypes[i]);
-        newFunType->paramNames.push_back(parameterNames[i]);
+        newFunType->data->paramTypes.push_back(parameterTypes[i]);
+        newFunType->data->paramNames.push_back(parameterNames[i]);
     }
-    newFunType->returnType = returnType;
+    newFunType->data->returnType = returnType;
 
     return newFunType;
 }
@@ -150,40 +150,33 @@ TypeInfo::TypeInfo(
 ) :
     uniqueName(uniqueName),
     shortName(shortName),
-    numBits(numBits),
-    flags(flags),
-    sign(sign),
-    token(token),
-    innerType(innerType),
-    returnType(nullptr)
+    token(token)
 {
+    // TODO: fix this memory leak
+    data = new TypeInfoData;
+    data->numBits = numBits;
+    data->flags = flags;
+    data->sign = sign;
+    data->innerType = innerType;
+    data->returnType = nullptr;
 }
 
-TypeInfo::TypeInfo(const TypeInfo& other)
+TypeInfo::TypeInfo(
+    ROString uniqueName,
+    ROString shortName,
+    TypeInfoData* data
+) :
+    uniqueName(uniqueName),
+    shortName(shortName),
+    data(data)
 {
-    shortName = other.shortName;
-    uniqueName = other.uniqueName;
-    numBits = other.numBits;
-    flags = other.flags;
-    sign = other.sign;
-    token = other.token;
-    innerType = other.innerType;
-    paramTypes = other.paramTypes;
-    paramNames = other.paramNames;
-    returnType = other.returnType;
-
-    for (auto member : other.members)
-    {
-        MemberInfo* newMember = new MemberInfo(*member);
-        members.push_back(newMember);
-        memberMap.insert({ newMember->GetName(), newMember });
-    }
 }
 
 TypeInfo::~TypeInfo()
 {
-    deletePointerContainer(members);
-    memberMap.clear();
+    // TODO: delete data
+    // deletePointerContainer(members);
+    // memberMap.clear();
 }
 
 bool pointersIsSameAs(const TypeInfo* type1, const TypeInfo* type2)
@@ -201,9 +194,9 @@ bool pointersIsSameAs(const TypeInfo* type1, const TypeInfo* type2)
 bool TypeInfo::IsSameAs(const TypeInfo& other) const
 {
     const uint16_t CHECK_FLAGS = F_UNIT | F_BOOL | F_INT | F_FLOAT | F_STR | F_RANGE | F_POINTER | F_ARRAY | F_FUNCTION | F_TYPE | F_AGGREGATE | F_HALF_OPEN;
-    bool isSame = numBits == other.numBits;
-    isSame &= (flags & CHECK_FLAGS) == (other.flags & CHECK_FLAGS);
-    isSame &= sign == other.sign;
+    bool isSame = data->numBits == other.data->numBits;
+    isSame &= (data->flags & CHECK_FLAGS) == (other.data->flags & CHECK_FLAGS);
+    isSame &= data->sign == other.data->sign;
 
     if (isSame)
     {
@@ -213,22 +206,22 @@ bool TypeInfo::IsSameAs(const TypeInfo& other) const
     // compare inner types
     if (isSame)
     {
-        isSame = pointersIsSameAs(innerType, other.innerType);
+        isSame = pointersIsSameAs(data->innerType, other.data->innerType);
     }
 
     // compare param types
     if (isSame)
     {
-        if (paramTypes.size() != other.paramTypes.size())
+        if (data->paramTypes.size() != other.data->paramTypes.size())
         {
             isSame = false;
         }
         else
         {
-            size_t size = paramTypes.size();
+            size_t size = data->paramTypes.size();
             for (size_t i = 0; i < size; ++i)
             {
-                if (!paramTypes[i]->IsSameAs(*other.paramTypes[i]))
+                if (!data->paramTypes[i]->IsSameAs(*other.data->paramTypes[i]))
                 {
                     isSame = false;
                     break;
@@ -240,7 +233,7 @@ bool TypeInfo::IsSameAs(const TypeInfo& other) const
     // compare return types
     if (isSame)
     {
-        isSame = pointersIsSameAs(returnType, other.returnType);
+        isSame = pointersIsSameAs(data->returnType, other.data->returnType);
     }
 
     return isSame;
@@ -250,7 +243,7 @@ bool TypeInfo::IsOrContainsLiteral() const
 {
     if (IsArray() || IsRange())
     {
-        return innerType->IsOrContainsLiteral();
+        return data->innerType->IsOrContainsLiteral();
     }
 
     return IsLiteral();
@@ -260,7 +253,7 @@ bool TypeInfo::IsOrContainsNumericLiteral() const
 {
     if (IsArray() || IsRange())
     {
-        return innerType->IsOrContainsNumericLiteral();
+        return data->innerType->IsOrContainsNumericLiteral();
     }
 
     return false;
@@ -268,8 +261,8 @@ bool TypeInfo::IsOrContainsNumericLiteral() const
 
 const MemberInfo* TypeInfo::GetMember(ROString memberName) const
 {
-    auto iter = memberMap.find(memberName);
-    if (iter == memberMap.cend())
+    auto iter = data->memberMap.find(memberName);
+    if (iter == data->memberMap.cend())
     {
         return nullptr;
     }
@@ -279,13 +272,13 @@ const MemberInfo* TypeInfo::GetMember(ROString memberName) const
 
 bool TypeInfo::AddMember(ROString name, const TypeInfo* type, bool isAssignable, const Token* token)
 {
-    MemberInfo* member = new MemberInfo(name, static_cast<unsigned>(members.size()), type, isAssignable, token);
-    auto rv = memberMap.insert({name, member});
+    MemberInfo* member = new MemberInfo(name, static_cast<unsigned>(data->members.size()), type, isAssignable, token);
+    auto rv = data->memberMap.insert({name, member});
 
     bool inserted = rv.second;
     if (inserted)
     {
-        members.push_back(member);
+        data->members.push_back(member);
     }
     else
     {

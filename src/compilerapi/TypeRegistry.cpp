@@ -283,6 +283,13 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
     return arrayType;
 }
 
+const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const TypeInfo *typeInfo)
+{
+    TypeInfo* newTypeInfo = new TypeInfo(newName, newName, typeInfo->data);
+    RegisterType(newTypeInfo);
+    return newTypeInfo;
+}
+
 bool TypeRegistry::RegisterType(const TypeInfo* typeInfo)
 {
     auto pair = types.insert({ typeInfo->GetUniqueName(), typeInfo });

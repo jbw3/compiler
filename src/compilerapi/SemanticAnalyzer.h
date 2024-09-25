@@ -153,7 +153,7 @@ private:
     ErrorLogger& logger;
     bool isError;
     bool isConstDecl;
-    ROString constDeclName;
+    bool structDeclOnly;
     std::unordered_map<ROString, TypeInfo*> partialStructTypes;
     CompilerContext& compilerContext;
     SymbolTable symbolTable;
@@ -163,6 +163,8 @@ private:
 
     std::unordered_map<ROString, SyntaxTree::ConstantDeclaration*> unresolvedConsts;
     std::unordered_set<ROString> processingConsts;
+    std::unordered_map<unsigned, TypeInfo*> incompleteStructTypes;
+    std::vector<SyntaxTree::StructDefinitionExpression*> incompleteStructExpressions;
     std::vector<SyntaxTree::ConstantDeclaration*> orderedGlobalConsts;
 
     void LogExistingIdentifierError(ROString name, const Token* token, const Token* existingToken = nullptr);

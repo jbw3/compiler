@@ -119,8 +119,29 @@ public:
         const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType);
 
+private:
+    // TODO: is this needed?
+    const Token* token;
+
+    struct TypeInfoData
+    {
+        unsigned numBits;
+        uint16_t flags;
+        ESign sign;
+        std::unordered_map<ROString, const MemberInfo*> memberMap;
+        std::vector<const MemberInfo*> members;
+        const TypeInfo* innerType;
+        std::vector<const TypeInfo*> paramTypes;
+        std::vector<ROString> paramNames;
+        const TypeInfo* returnType;
+    };
+
+public:
     ROString uniqueName;
     ROString shortName;
+
+    // TODO: should this be private?
+    TypeInfoData* data;
 
     TypeInfo(
         unsigned numBits,
@@ -132,7 +153,14 @@ public:
         const Token* token = nullptr
     );
 
-    TypeInfo(const TypeInfo& other);
+    TypeInfo(
+        ROString uniqueName,
+        ROString shortName,
+        TypeInfoData* data
+    );
+
+    // TODO: remove this
+    TypeInfo(const TypeInfo& other) = delete;
 
     virtual ~TypeInfo();
 
@@ -140,82 +168,82 @@ public:
 
     uint16_t GetFlags() const
     {
-        return flags;
+        return data->flags;
     }
 
     bool IsUnit() const
     {
-        return (flags & F_UNIT) != 0;
+        return (data->flags & F_UNIT) != 0;
     }
 
     bool IsBool() const
     {
-        return (flags & F_BOOL) != 0;
+        return (data->flags & F_BOOL) != 0;
     }
 
     bool IsInt() const
     {
-        return (flags & F_INT) != 0;
+        return (data->flags & F_INT) != 0;
     }
 
     bool IsFloat() const
     {
-        return (flags & F_FLOAT) != 0;
+        return (data->flags & F_FLOAT) != 0;
     }
 
     bool IsNumeric() const
     {
-        return (flags & (F_INT | F_FLOAT)) != 0;
+        return (data->flags & (F_INT | F_FLOAT)) != 0;
     }
 
     bool IsStr() const
     {
-        return (flags & F_STR) != 0;
+        return (data->flags & F_STR) != 0;
     }
 
     bool IsRange() const
     {
-        return (flags & F_RANGE) != 0;
+        return (data->flags & F_RANGE) != 0;
     }
 
     bool IsPointer() const
     {
-        return (flags & F_POINTER) != 0;
+        return (data->flags & F_POINTER) != 0;
     }
 
     bool IsArray() const
     {
-        return (flags & F_ARRAY) != 0;
+        return (data->flags & F_ARRAY) != 0;
     }
 
     bool IsFunction() const
     {
-        return (flags & F_FUNCTION) != 0;
+        return (data->flags & F_FUNCTION) != 0;
     }
 
     bool IsType() const
     {
-        return (flags & F_TYPE) != 0;
+        return (data->flags & F_TYPE) != 0;
     }
 
     ESign GetSign() const
     {
-        return sign;
+        return data->sign;
     }
 
     bool IsLiteral() const
     {
-        return (flags & F_LITERAL) != 0;
+        return (data->flags & F_LITERAL) != 0;
     }
 
     bool IsAggregate() const
     {
-        return (flags & F_AGGREGATE) != 0;
+        return (data->flags & F_AGGREGATE) != 0;
     }
 
     bool IsHalfOpen() const
     {
-        return (flags & F_HALF_OPEN) != 0;
+        return (data->flags & F_HALF_OPEN) != 0;
     }
 
     bool IsOrContainsLiteral() const;
@@ -224,7 +252,7 @@ public:
 
     virtual unsigned GetNumBits() const
     {
-        return numBits;
+        return data->numBits;
     }
 
     ROString GetUniqueName() const
@@ -242,12 +270,12 @@ public:
 
     const std::vector<const MemberInfo*>& GetMembers() const
     {
-        return members;
+        return data->members;
     }
 
     size_t GetMemberCount() const
     {
-        return members.size();
+        return data->members.size();
     }
 
     bool AddMember(ROString name, const TypeInfo* type, bool isAssignable, const Token* token);
@@ -259,35 +287,23 @@ public:
 
     const TypeInfo* GetInnerType() const
     {
-        return innerType;
+        return data->innerType;
     }
 
     const std::vector<const TypeInfo*>& GetParamTypes() const
     {
-        return paramTypes;
+        return data->paramTypes;
     }
 
     const std::vector<ROString>& GetParamNames() const
     {
-        return paramNames;
+        return data->paramNames;
     }
 
     const TypeInfo* GetReturnType() const
     {
-        return returnType;
+        return data->returnType;
     }
-
-private:
-    unsigned numBits;
-    uint16_t flags;
-    ESign sign;
-    std::unordered_map<ROString, const MemberInfo*> memberMap;
-    std::vector<const MemberInfo*> members;
-    const Token* token;
-    const TypeInfo* innerType;
-    std::vector<const TypeInfo*> paramTypes;
-    std::vector<ROString> paramNames;
-    const TypeInfo* returnType;
 };
 
 class NumericLiteralType : public TypeInfo

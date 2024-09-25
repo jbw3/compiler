@@ -219,6 +219,7 @@ SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     logger(compilerContext.logger),
     isError(false),
     isConstDecl(false),
+    structDeclOnly(false),
     compilerContext(compilerContext),
     symbolTable(compilerContext),
     loopLevel(0),
@@ -2160,57 +2161,76 @@ void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
 
 void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
-    ROString name;
-    if (constDeclName.IsEmpty())
+    TypeInfo* structType = nullptr;
+    unsigned constIdx = -1;
+
+    // if the constant index is set, this struct already has a declaration, so get it
+    if (structDefinitionExpression->GetIsConstant())
     {
-        name = compilerContext.stringBuilder
+        constIdx = structDefinitionExpression->GetConstantValueIndex();
+        auto iter = incompleteStructTypes.find(constIdx);
+        assert(iter != incompleteStructTypes.end() && "could not find incomplete struct");
+        structType = iter->second;
+    }
+    // otherwise, this is a new struct
+    else
+    {
+        ROString name = compilerContext.stringBuilder
             .Append("<struct", to_string(structDefCount), ">")
             .CreateString();
         ++structDefCount;
+
+        structType = TypeInfo::CreateAggregateType(name, nullptr);
+
+        structDefinitionExpression->SetType(TypeInfo::TypeType);
+
+        constIdx = compilerContext.AddTypeConstantValue(structType);
+        structDefinitionExpression->SetConstantValueIndex(constIdx);
+
+        if (structDeclOnly)
+        {
+            incompleteStructTypes.insert({constIdx, structType});
+            incompleteStructExpressions.push_back(structDefinitionExpression);
+        }
     }
-    else
+
+    // process the members if this is not a declaration only
+    if (!structDeclOnly)
     {
-        name = constDeclName;
+        for (const MemberDefinition* member : structDefinitionExpression->members)
+        {
+            const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
+            if (memberType == nullptr)
+            {
+                isError = true;
+                return;
+            }
+
+            // make sure the type is not 'type', '[]type', '&type', etc.
+            const TypeInfo* innerMostType = memberType;
+            while (innerMostType->GetInnerType() != nullptr)
+            {
+                innerMostType = innerMostType->GetInnerType();
+            }
+            if (innerMostType->IsType())
+            {
+                isError = true;
+                logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetShortName());
+                return;
+            }
+
+            ROString memberName = member->name;
+            bool added = structType->AddMember(memberName, memberType, true, member->nameToken);
+            if (!added)
+            {
+                isError = true;
+                logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, structType->GetShortName());
+                return;
+            }
+        }
+
+        incompleteStructTypes.erase(constIdx);
     }
-
-    TypeInfo* newType = TypeInfo::CreateAggregateType(name, nullptr);
-
-    for (const MemberDefinition* member : structDefinitionExpression->members)
-    {
-        const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
-        if (memberType == nullptr)
-        {
-            isError = true;
-            return;
-        }
-
-        // make sure the type is not 'type', '[]type', '&type', etc.
-        const TypeInfo* innerMostType = memberType;
-        while (innerMostType->GetInnerType() != nullptr)
-        {
-            innerMostType = innerMostType->GetInnerType();
-        }
-        if (innerMostType->IsType())
-        {
-            isError = true;
-            logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetShortName());
-            return;
-        }
-
-        ROString memberName = member->name;
-        bool added = newType->AddMember(memberName, memberType, true, member->nameToken);
-        if (!added)
-        {
-            isError = true;
-            logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, name);
-            return;
-        }
-    }
-
-    structDefinitionExpression->SetType(TypeInfo::TypeType);
-
-    unsigned idx = compilerContext.AddTypeConstantValue(newType);
-    structDefinitionExpression->SetConstantValueIndex(idx);
 }
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
@@ -2370,7 +2390,8 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
         }
     }
 
-    // process constants
+    // process constants, but don't process struct members yet
+    structDeclOnly = true;
     for (ConstantDeclarations* inner : constantDeclarations)
     {
         for (ConstantDeclaration* constDecl : *inner)
@@ -2386,6 +2407,22 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
             }
         }
     }
+    structDeclOnly = false;
+
+    // process incomplete structs
+    for (StructDefinitionExpression* structExpr : incompleteStructExpressions)
+    {
+        unsigned idx = structExpr->GetConstantValueIndex();
+        if (incompleteStructTypes.find(idx) != incompleteStructTypes.end())
+        {
+            structExpr->Accept(this);
+            if (isError)
+            {
+                return;
+            }
+        }
+    }
+    incompleteStructExpressions.clear();
 }
 
 bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
@@ -3497,11 +3534,9 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 
     // process right of assignment expression before adding constant to symbol
     // table in order to detect if the constant is referenced before it is assigned
-    constDeclName = constName; // TODO: This is a bit hacky. Find a better way to do this
     processingConsts.insert(constName);
     Expression* rightExpr = assignmentExpression->right;
     rightExpr->Accept(this);
-    constDeclName = "";
     processingConsts.erase(constName);
     if (isError)
     {
@@ -3529,6 +3564,16 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     // calculate value of assignment expression
     unsigned constIdx = rightExpr->GetConstantValueIndex();
 
+    // if this is a new type, register it
+    if (type->IsType())
+    {
+        const TypeInfo* exprType = compilerContext.GetTypeConstantValue(constIdx);
+
+        // create a new name for this type
+        const TypeInfo* newType = compilerContext.typeRegistry.GetTypeAlias(constName, exprType);
+        constIdx = compilerContext.AddTypeConstantValue(newType);
+    }
+
     // add the constant name to the symbol table
     bool ok = symbolTable.AddConstant(constName, constantDeclaration->nameToken, constantDeclaration->constantType, constIdx);
     if (!ok)
@@ -3545,20 +3590,6 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     if (isError)
     {
         return;
-    }
-
-    // if this is a new type, register it
-    if (type->IsType())
-    {
-        const TypeInfo* expr = compilerContext.GetTypeConstantValue(constIdx);
-
-        // copy type and give it a new name
-        TypeInfo* newType = new TypeInfo(*expr);
-        newType->shortName = constName;
-        newType->uniqueName = constName;
-
-        bool added = compilerContext.typeRegistry.RegisterType(newType);
-        assert(added && "Could not register new constant type");
     }
 
     // we've resolved this constant so remove it from the unresolved list
