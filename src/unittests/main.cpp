@@ -17,12 +17,12 @@ int main(int argc, const char* const argv[])
 
     vector<shared_ptr<TestClass>> testClasses =
     {
+        shared_ptr<TestClass>(new UtilsTests(resultsFile)),
+        shared_ptr<TestClass>(new ROStringTests(resultsFile)),
         shared_ptr<TestClass>(new LexicalAnalyzerTests(resultsFile)),
         shared_ptr<TestClass>(new SemanticAnalyzerTests(resultsFile)),
-        shared_ptr<TestClass>(new CompilerTests(resultsFile)),
-        shared_ptr<TestClass>(new ROStringTests(resultsFile)),
         shared_ptr<TestClass>(new SourceGeneratorTests(resultsFile)),
-        shared_ptr<TestClass>(new UtilsTests(resultsFile)),
+        shared_ptr<TestClass>(new CompilerTests(resultsFile)),
     };
 
     bool passed = true;

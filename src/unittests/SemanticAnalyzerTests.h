@@ -9,6 +9,8 @@ public:
     SemanticAnalyzerTests(std::ostream& results);
 
 private:
+    static bool RunSemanticAnalysis(const std::string& input, std::string& failMsg);
+
     static bool TestValidConstants(std::string& failMsg);
 };
 
