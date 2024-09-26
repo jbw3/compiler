@@ -20,7 +20,8 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
     config.color = Config::eFalse;
     stringstream errStream;
     CompilerContext compilerContext(config, errStream);
-    TokenList tokens;
+    compilerContext.InitBasicTypes();
+
     Modules* syntaxTree = new Modules;
 
     char* input_copy = new char[input.size()]; // this will be freed by CompilerContext
@@ -30,15 +31,19 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
     buff.size = input.size();
 
     compilerContext.AddFile("test", buff);
-
-    errStream.clear();
-    errStream.str("");
+    TokenList& tokens = compilerContext.GetFileTokens(0);
 
     LexicalAnalyzer lexicalAnalyzer(compilerContext);
     bool ok = lexicalAnalyzer.Process(buff, tokens);
     if (!ok)
     {
         failMsg = errStream.str();
+    }
+
+    if (ok && tokens.GetSize() == 0)
+    {
+        ok = false;
+        failMsg = "No tokens were generated";
     }
 
     if (ok)
@@ -48,6 +53,18 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
         if (!ok)
         {
             failMsg = errStream.str();
+        }
+
+        if (ok && syntaxTree->modules.size() == 0)
+        {
+            ok = false;
+            failMsg = "No modules were generated";
+        }
+
+        if (ok && syntaxTree->modules[0]->constantDeclarations.size() == 0)
+        {
+            ok = false;
+            failMsg = "No constant declarations were generated";
         }
     }
 
@@ -86,6 +103,26 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         "const NUM1 i32 = NUM2 - 1;\n"
         "const NUM2 i32 = NUM3 - 1;\n"
         "const NUM3 i32 = 3;\n",
+
+        // test defining structs in an array
+        R"(
+        const STRUCTS []type = [
+            struct { n i64 },
+            struct { f f64 },
+        ];
+        const Struct0 type = STRUCTS[0];
+        const Wrapper = struct
+        {
+            s Struct0
+        };
+        const w = Wrapper
+        {
+            s: Struct 0
+            {
+                n: 123
+            }
+        };
+        )",
     };
 
     bool ok = false;
