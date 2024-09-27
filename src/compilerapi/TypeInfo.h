@@ -59,6 +59,8 @@ private:
     const Token* token;
 };
 
+typedef uint32_t TypeId;
+
 class TypeInfo
 {
 public:
@@ -120,11 +122,15 @@ public:
         const TypeInfo* returnType);
 
 private:
+    static TypeId nextTypeId;
+    static TypeId GetNextTypeId();
+
     // TODO: is this needed?
     const Token* token;
 
     struct TypeInfoData
     {
+        TypeId id;
         unsigned numBits;
         uint16_t flags;
         ESign sign;

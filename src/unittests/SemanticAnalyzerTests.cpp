@@ -140,6 +140,11 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
             }
         };
         )",
+
+        // same struct can have different names
+        "const A = struct { x i32, };\n"
+        "const B type = A;\n"
+        "const AInst A = B { x: 123, };\n",
     };
 
     bool ok = false;

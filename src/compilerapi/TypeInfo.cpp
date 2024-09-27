@@ -63,6 +63,13 @@ const TypeInfo* TypeInfo::Float32LiteralType = &float32LiteralTypeInfo;
 const TypeInfo* TypeInfo::Float64LiteralType = &float64LiteralTypeInfo;
 const TypeInfo* TypeInfo::TypeType = &typeTypeInfo;
 
+TypeId TypeInfo::nextTypeId = 0;
+
+TypeId TypeInfo::GetNextTypeId()
+{
+    return nextTypeId++;
+}
+
 const TypeInfo* TypeInfo::GetMinSignedIntTypeForSize(unsigned size)
 {
     const TypeInfo* type = nullptr;
@@ -154,6 +161,7 @@ TypeInfo::TypeInfo(
 {
     // TODO: fix this memory leak
     data = new TypeInfoData;
+    data->id = GetNextTypeId();
     data->numBits = numBits;
     data->flags = flags;
     data->sign = sign;
@@ -191,52 +199,54 @@ bool pointersIsSameAs(const TypeInfo* type1, const TypeInfo* type2)
     }
 }
 
+// TODO: replace this function by overloading the == and != operators
 bool TypeInfo::IsSameAs(const TypeInfo& other) const
 {
-    const uint16_t CHECK_FLAGS = F_UNIT | F_BOOL | F_INT | F_FLOAT | F_STR | F_RANGE | F_POINTER | F_ARRAY | F_FUNCTION | F_TYPE | F_AGGREGATE | F_HALF_OPEN;
-    bool isSame = data->numBits == other.data->numBits;
-    isSame &= (data->flags & CHECK_FLAGS) == (other.data->flags & CHECK_FLAGS);
-    isSame &= data->sign == other.data->sign;
+    return data->id == other.data->id;
+    // const uint16_t CHECK_FLAGS = F_UNIT | F_BOOL | F_INT | F_FLOAT | F_STR | F_RANGE | F_POINTER | F_ARRAY | F_FUNCTION | F_TYPE | F_AGGREGATE | F_HALF_OPEN;
+    // bool isSame = data->numBits == other.data->numBits;
+    // isSame &= (data->flags & CHECK_FLAGS) == (other.data->flags & CHECK_FLAGS);
+    // isSame &= data->sign == other.data->sign;
 
-    if (isSame)
-    {
-        isSame = shortName == other.shortName;
-    }
+    // if (isSame)
+    // {
+    //     isSame = shortName == other.shortName;
+    // }
 
-    // compare inner types
-    if (isSame)
-    {
-        isSame = pointersIsSameAs(data->innerType, other.data->innerType);
-    }
+    // // compare inner types
+    // if (isSame)
+    // {
+    //     isSame = pointersIsSameAs(data->innerType, other.data->innerType);
+    // }
 
-    // compare param types
-    if (isSame)
-    {
-        if (data->paramTypes.size() != other.data->paramTypes.size())
-        {
-            isSame = false;
-        }
-        else
-        {
-            size_t size = data->paramTypes.size();
-            for (size_t i = 0; i < size; ++i)
-            {
-                if (!data->paramTypes[i]->IsSameAs(*other.data->paramTypes[i]))
-                {
-                    isSame = false;
-                    break;
-                }
-            }
-        }
-    }
+    // // compare param types
+    // if (isSame)
+    // {
+    //     if (data->paramTypes.size() != other.data->paramTypes.size())
+    //     {
+    //         isSame = false;
+    //     }
+    //     else
+    //     {
+    //         size_t size = data->paramTypes.size();
+    //         for (size_t i = 0; i < size; ++i)
+    //         {
+    //             if (!data->paramTypes[i]->IsSameAs(*other.data->paramTypes[i]))
+    //             {
+    //                 isSame = false;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
-    // compare return types
-    if (isSame)
-    {
-        isSame = pointersIsSameAs(data->returnType, other.data->returnType);
-    }
+    // // compare return types
+    // if (isSame)
+    // {
+    //     isSame = pointersIsSameAs(data->returnType, other.data->returnType);
+    // }
 
-    return isSame;
+    // return isSame;
 }
 
 bool TypeInfo::IsOrContainsLiteral() const

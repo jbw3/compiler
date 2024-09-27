@@ -61,6 +61,8 @@ private:
     TypeInfo* uintSizeType;
     TypeInfo* stringType;
     std::unordered_map<ROString, const TypeInfo*> types;
+    std::unordered_map<TypeId, const TypeInfo*> pointerTypes; // maps type IDs to a pointer to that type
+    std::unordered_map<TypeId, const TypeInfo*> arrayTypes; // maps type IDs to an array of that type
     unsigned pointerSize;
     std::unordered_map
     <

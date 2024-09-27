@@ -126,6 +126,7 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
         TypeInfo* newRangeType = new TypeInfo(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
         newRangeType->AddMember("Start", memberType, false, Token::None);
         newRangeType->AddMember("End", memberType, false, Token::None);
+        RegisterType(newRangeType);
 
         rangeType = newRangeType;
     }
@@ -238,49 +239,55 @@ const TypeInfo* TypeRegistry::GetFunctionType(
 
 const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
 {
+    TypeId typeId = type->data->id;
+
+    auto iter = pointerTypes.find(typeId);
+    if (iter != pointerTypes.end())
+    {
+        return iter->second;
+    }
+
     ROString uniqueName = compilerContext.stringBuilder
         .Append(POINTER_TYPE_TOKEN)
         .Append(type->GetUniqueName())
         .CreateString();
-    const TypeInfo* ptrType = GetType(uniqueName);
-    if (ptrType == nullptr)
-    {
-        ROString name = compilerContext.stringBuilder
-            .Append(POINTER_TYPE_TOKEN)
-            .Append(type->GetShortName())
-            .CreateString();
-        TypeInfo* newPtrType = new TypeInfo(pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, uniqueName, name, type);
-        RegisterType(newPtrType);
+    ROString name = compilerContext.stringBuilder
+        .Append(POINTER_TYPE_TOKEN)
+        .Append(type->GetShortName())
+        .CreateString();
+    TypeInfo* newPtrType = new TypeInfo(pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, uniqueName, name, type);
+    RegisterType(newPtrType);
+    pointerTypes.insert({typeId, newPtrType});
 
-        ptrType = newPtrType;
-    }
-
-    return ptrType;
+    return newPtrType;
 }
 
 const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 {
+    TypeId typeId = type->data->id;
+
+    auto iter = arrayTypes.find(typeId);
+    if (iter != arrayTypes.end())
+    {
+        return iter->second;
+    }
+
     ROString uniqueName = compilerContext.stringBuilder
         .Append(ARRAY_TYPE_START_TOKEN)
         .Append(ARRAY_TYPE_END_TOKEN)
         .Append(type->GetUniqueName())
         .CreateString();
-    const TypeInfo* arrayType = GetType(uniqueName);
-    if (arrayType == nullptr)
-    {
-        ROString name = compilerContext.stringBuilder
-            .Append(ARRAY_TYPE_START_TOKEN, ARRAY_TYPE_END_TOKEN, type->GetShortName())
-            .CreateString();
+    ROString name = compilerContext.stringBuilder
+        .Append(ARRAY_TYPE_START_TOKEN, ARRAY_TYPE_END_TOKEN, type->GetShortName())
+        .CreateString();
 
-        TypeInfo* newArrayType = new TypeInfo(pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, uniqueName, name, type);
-        newArrayType->AddMember("Size", GetUIntSizeType(), false, Token::None);
-        newArrayType->AddMember("Data", GetPointerToType(type), false, Token::None);
-        RegisterType(newArrayType);
+    TypeInfo* newArrayType = new TypeInfo(pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, uniqueName, name, type);
+    newArrayType->AddMember("Size", GetUIntSizeType(), false, Token::None);
+    newArrayType->AddMember("Data", GetPointerToType(type), false, Token::None);
+    RegisterType(newArrayType);
+    arrayTypes.insert({typeId, newArrayType});
 
-        arrayType = newArrayType;
-    }
-
-    return arrayType;
+    return newArrayType;
 }
 
 const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const TypeInfo *typeInfo)
