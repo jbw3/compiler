@@ -61,10 +61,20 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
             failMsg = "No modules were generated";
         }
 
-        if (ok && syntaxTree->modules[0]->constantDeclarations.size() == 0)
+        if (ok)
         {
-            ok = false;
-            failMsg = "No constant declarations were generated";
+            size_t totalConstDecls = syntaxTree->modules[0]->constantDeclarations.size();
+            for (const FunctionDefinition* funcDef : syntaxTree->modules[0]->functionDefinitions)
+            {
+                const BlockExpression* blockExpr = dynamic_cast<const BlockExpression*>(funcDef->expression);
+                totalConstDecls += blockExpr->constantDeclarations.size();
+            }
+
+            if (totalConstDecls == 0)
+            {
+                ok = false;
+                failMsg = "No constant declarations were generated";
+            }
         }
     }
 
@@ -117,7 +127,7 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         };
         const w = Wrapper
         {
-            s: Struct 0
+            s: Struct0
             {
                 n: 123
             }

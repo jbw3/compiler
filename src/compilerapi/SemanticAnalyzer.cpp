@@ -219,7 +219,6 @@ SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     logger(compilerContext.logger),
     isError(false),
     isConstDecl(false),
-    structDeclOnly(false),
     compilerContext(compilerContext),
     symbolTable(compilerContext),
     loopLevel(0),
@@ -236,6 +235,13 @@ bool SemanticAnalyzer::Process(SyntaxTreeNode* syntaxTree)
 
 void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 {
+    UnaryExpression::EOperator op = unaryExpression->op;
+
+    if (op == UnaryExpression::eAddressOf && needsStructImplStack.size() > 0)
+    {
+        needsStructImplStack.top() = false;
+    }
+
     Expression* subExpr = unaryExpression->subExpression;
     subExpr->Accept(this);
     if (isError)
@@ -246,8 +252,6 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     const TypeInfo* subExprType = subExpr->GetType();
     bool isInt = subExprType->IsInt();
     bool isFloat = subExprType->IsFloat();
-
-    UnaryExpression::EOperator op = unaryExpression->op;
 
     bool ok = false;
     const TypeInfo* resultType = nullptr;
@@ -2164,6 +2168,12 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     TypeInfo* structType = nullptr;
     unsigned constIdx = -1;
 
+    bool needsStructImpl = true;
+    if (needsStructImplStack.size() > 0)
+    {
+        needsStructImpl = needsStructImplStack.top();
+    }
+
     // if the constant index is set, this struct already has a declaration, so get it
     if (structDefinitionExpression->GetIsConstant())
     {
@@ -2187,18 +2197,24 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
         constIdx = compilerContext.AddTypeConstantValue(structType);
         structDefinitionExpression->SetConstantValueIndex(constIdx);
 
-        if (structDeclOnly)
+        if (!needsStructImpl)
         {
             incompleteStructTypes.insert({constIdx, structType});
             incompleteStructExpressions.push_back(structDefinitionExpression);
         }
     }
 
-    // process the members if this is not a declaration only
-    if (!structDeclOnly)
+    // only process the members if this is not a declaration
+    if (needsStructImpl)
     {
+        // TODO: check if currently processing this struct and push to stack if not
+
+        needsStructImplStack.push(true);
+
         for (const MemberDefinition* member : structDefinitionExpression->members)
         {
+            needsStructImplStack.top() = true;
+
             const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
             if (memberType == nullptr)
             {
@@ -2229,6 +2245,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
             }
         }
 
+        needsStructImplStack.pop();
         incompleteStructTypes.erase(constIdx);
     }
 }
@@ -2391,7 +2408,6 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
     }
 
     // process constants, but don't process struct members yet
-    structDeclOnly = true;
     for (ConstantDeclarations* inner : constantDeclarations)
     {
         for (ConstantDeclaration* constDecl : *inner)
@@ -2407,7 +2423,6 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
             }
         }
     }
-    structDeclOnly = false;
 
     // process incomplete structs
     for (StructDefinitionExpression* structExpr : incompleteStructExpressions)
