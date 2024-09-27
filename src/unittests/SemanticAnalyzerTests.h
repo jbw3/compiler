@@ -12,6 +12,8 @@ private:
     static bool RunSemanticAnalysis(const std::string& input, std::string& failMsg);
 
     static bool TestValidConstants(std::string& failMsg);
+
+    static bool TestInvalidConstants(std::string& failMsg);
 };
 
 #endif // SEMANTIC_ANALYSIS_TESTS_H_

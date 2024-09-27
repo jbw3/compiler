@@ -8,10 +8,17 @@
 using namespace std;
 using namespace SyntaxTree;
 
+struct InvalidTest
+{
+    string input;
+    string expectedErrMsg;
+};
+
 SemanticAnalyzerTests::SemanticAnalyzerTests(ostream &results) :
     TestClass("SemanticAnalyzer", results)
 {
     ADD_TEST(TestValidConstants);
+    ADD_TEST(TestInvalidConstants);
 }
 
 bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& failMsg)
@@ -150,6 +157,59 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         ok = RunSemanticAnalysis(test2, failMsg);
         if (!ok)
         {
+            break;
+        }
+    }
+
+    return ok;
+}
+
+bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
+{
+    vector<InvalidTest> tests =
+    {
+        // recursive dependency
+        {
+            "const NUM1 i32 = NUM2 - 1;\n"
+            "const NUM2 i32 = NUM3 - 1;\n"
+            "const NUM3 i32 = NUM1 + 2;\n",
+            "error: Constant 'NUM1' has a recursive dependency on itself",
+        },
+    };
+
+    bool ok = true;
+    bool valid = true;
+    string errMsg;
+    for (InvalidTest test : tests)
+    {
+        // check if tests fail in the global scope
+        valid = RunSemanticAnalysis(test.input, errMsg);
+        if (valid)
+        {
+            ok = false;
+            failMsg = "Expected semantic analysis to fail";
+            break;
+        }
+        if (errMsg.find(test.expectedErrMsg) == string::npos)
+        {
+            ok = false;
+            failMsg = "Unexpected error message: " + errMsg;
+            break;
+        }
+
+        // check if tests fail in a function
+        string test2 = "fun f()\n{\n" + test.input + "}\n";
+        valid = RunSemanticAnalysis(test2, errMsg);
+        if (valid)
+        {
+            ok = false;
+            failMsg = "Expected semantic analysis to fail";
+            break;
+        }
+        if (errMsg.find(test.expectedErrMsg) == string::npos)
+        {
+            ok = false;
+            failMsg = "Unexpected error message: " + errMsg;
             break;
         }
     }
