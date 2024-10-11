@@ -179,7 +179,7 @@ private:
     unsigned int globalStringCounter;
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     llvm::Type* boolType;
-    std::unordered_map<ROString, llvm::Type*> types;
+    std::unordered_map<TypeId, llvm::Type*> types;
     std::unordered_map<ROString, llvm::DICompositeType*> diStructTypes;
     std::stack<LoopInfo> loops;
     const TypeInfo* uIntSizeType;

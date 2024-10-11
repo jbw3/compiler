@@ -147,6 +147,7 @@ public:
     ROString shortName;
 
     // TODO: should this be private?
+    // TODO: should this be const?
     TypeInfoData* data;
 
     TypeInfo(

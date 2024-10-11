@@ -1121,7 +1121,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
         members.push_back(memberType);
     }
 
-    auto iter = types.find(structName);
+    auto iter = types.find(typeInfo->data->id);
     assert(iter != types.end());
     StructType* structType = static_cast<StructType*>(iter->second);
     structType->setBody(members);
@@ -1167,7 +1167,7 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
     const TypeInfo* structType = compilerContext.GetTypeConstantValue(typeIdx);
     ROString structName = structType->GetShortName();
 
-    auto iter = types.find(structName);
+    auto iter = types.find(structType->data->id);
     StructType* llvmType = static_cast<StructType*>(iter->second);
 
     vector<Type*> members;
@@ -1297,7 +1297,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
     {
         ROString structName = structDef->name;
         StructType* structType = StructType::create(context, toStringRef(structName));
-        types.insert({structName, structType});
+        types.insert({structDef->type->data->id, structType});
 
         // add debug info for structs
         if (dbgInfo)
@@ -1334,7 +1334,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 if (exprType->IsAggregate())
                 {
                     StructType* structType = StructType::create(context, toStringRef(structName));
-                    types.insert({structName, structType});
+                    types.insert({exprType->data->id, structType});
 
                     // add debug info for structs
                     if (dbgInfo)
@@ -1355,11 +1355,12 @@ void LlvmIrGenerator::Visit(Modules* modules)
             }
             else if (constDecl->constantType->IsType())
             {
-                unsigned typeIdx = expr->GetConstantValueIndex();
-                const TypeInfo* exprType = compilerContext.GetTypeConstantValue(typeIdx);
-                Type* llvmType = GetType(exprType);
-                assert(llvmType != nullptr && "Could not find LLVM type");
-                types.insert({constDecl->name, llvmType});
+                // TODO: add debug type info for struct alias
+                // unsigned typeIdx = expr->GetConstantValueIndex();
+                // const TypeInfo* exprType = compilerContext.GetTypeConstantValue(typeIdx);
+                // Type* llvmType = GetType(exprType);
+                // assert(llvmType != nullptr && "Could not find LLVM type");
+                // types.insert({constDecl->name, llvmType});
             }
         }
     }
@@ -2357,8 +2358,8 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     strStructType = StructType::create(context, strArrayRef, "str");
 
     // register types
-    types.insert({TypeInfo::BoolType->GetShortName(), boolType});
-    types.insert({compilerContext.typeRegistry.GetStringType()->GetShortName(), strStructType});
+    types.insert({TypeInfo::BoolType->data->id, boolType});
+    types.insert({compilerContext.typeRegistry.GetStringType()->data->id, strStructType});
 
     if (dbgInfo)
     {
@@ -2453,6 +2454,13 @@ FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
 
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
+    // try to lookup this type to see if it's already been created
+    auto iter = types.find(type->data->id);
+    if (iter != types.end())
+    {
+        return iter->second;
+    }
+
     Type* llvmType = nullptr;
     if (type->IsSameAs(*TypeInfo::UnitType))
     {
@@ -2488,14 +2496,8 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
         // get the LLVM type name
         ROString llvmName = CreateTypeName(type);
 
-        // try to lookup this type to see if it's already been created
-        auto iter = types.find(llvmName);
-        if (iter != types.end())
-        {
-            llvmType = iter->second;
-        }
         // if this is a range type, create the LLVM type
-        else if (type->IsRange())
+        if (type->IsRange())
         {
             vector<Type*> members;
             for (const MemberInfo* memberInfo : type->GetMembers())
@@ -2510,9 +2512,6 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             }
 
             llvmType = StructType::create(context, members, toStringRef(llvmName));
-
-            // register type so we don't have to create it again
-            types.insert({llvmName, llvmType});
         }
         else if (type->IsArray())
         {
@@ -2525,9 +2524,6 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 
                 ArrayRef<Type*> arrayRef(arrayStructElements, 2);
                 llvmType = StructType::create(context, arrayRef, toStringRef(llvmName));
-
-                // register type so we don't have to create it again
-                types.insert({llvmName, llvmType});
             }
         }
         else if (type->IsFunction())
@@ -2539,14 +2535,17 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             }
 
             llvmType = funType->getPointerTo();
-
-            // register type so we don't have to create it again
-            types.insert({llvmName, llvmType});
         }
         else // could not determine the type
         {
             llvmType = nullptr;
         }
+    }
+
+    if (llvmType != nullptr)
+    {
+        // register type so we don't have to create it again
+        types.insert({type->data->id, llvmType});
     }
 
     return llvmType;
