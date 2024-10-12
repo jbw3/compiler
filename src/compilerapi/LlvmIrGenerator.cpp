@@ -2390,41 +2390,6 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     return true;
 }
 
-ROString LlvmIrGenerator::CreateTypeName(const TypeInfo* type)
-{
-    StringBuilder& sb = compilerContext.stringBuilder;
-
-    while (type->IsArray())
-    {
-        type = type->GetInnerType();
-        sb.Append("[]");
-    }
-
-    if (type->IsRange())
-    {
-        unsigned memberNumBits = type->GetInnerType()->GetNumBits();
-        sb.Append("Range", to_string(memberNumBits));
-    }
-    else if (type->IsInt())
-    {
-        if (type->GetSign() == TypeInfo::eSigned)
-        {
-            sb.Append("i");
-        }
-        else
-        {
-            sb.Append("u");
-        }
-        sb.Append(to_string(type->GetNumBits()));
-    }
-    else
-    {
-        sb.Append(type->GetShortName());
-    }
-
-    return sb.CreateString();
-}
-
 FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
 {
     // get the return type
@@ -2493,9 +2458,6 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
     else
     {
-        // get the LLVM type name
-        ROString llvmName = CreateTypeName(type);
-
         // if this is a range type, create the LLVM type
         if (type->IsRange())
         {
@@ -2511,7 +2473,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
                 members.push_back(memberType);
             }
 
-            llvmType = StructType::create(context, members, toStringRef(llvmName));
+            llvmType = StructType::create(context, members, toStringRef(type->GetShortName()));
         }
         else if (type->IsArray())
         {
@@ -2523,7 +2485,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
                 arrayStructElements[1] = PointerType::get(innerType, 0);
 
                 ArrayRef<Type*> arrayRef(arrayStructElements, 2);
-                llvmType = StructType::create(context, arrayRef, toStringRef(llvmName));
+                llvmType = StructType::create(context, arrayRef, toStringRef(type->GetShortName()));
             }
         }
         else if (type->IsFunction())
