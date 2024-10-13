@@ -6,7 +6,8 @@ $target_triple
 %str = type { i64, ptr }
 %UnitType = type {}
 %TestStruct = type { i32, i64, i1 }
-%Range32 = type { i32, i32 }
+%"RangeHalfOpen'i32'" = type { i32, i32 }
+%"RangeClosed'i32'" = type { i32, i32 }
 %A = type { i32, %B }
 %B = type { i32, %C }
 %C = type { i32, ptr }
@@ -150,23 +151,23 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @ranges(i32 %n) #0 !dbg !122 {
 entry:
-  %r2 = alloca %Range32, align 8
-  %r1 = alloca %Range32, align 8
+  %r2 = alloca %"RangeHalfOpen'i32'", align 8
+  %r1 = alloca %"RangeClosed'i32'", align 8
   %n1 = alloca i32, align 4
   store i32 %n, ptr %n1, align 4
   call void @llvm.dbg.declare(metadata ptr %n1, metadata !126, metadata !DIExpression()), !dbg !135
   call void @llvm.dbg.declare(metadata ptr %r1, metadata !127, metadata !DIExpression()), !dbg !136
   %n2 = load i32, ptr %n1, align 4, !dbg !137
-  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !138
-  store %Range32 %rng, ptr %r1, align 4, !dbg !139
+  %rng = insertvalue %"RangeClosed'i32'" { i32 0, i32 undef }, i32 %n2, 1, !dbg !138
+  store %"RangeClosed'i32'" %rng, ptr %r1, align 4, !dbg !139
   call void @llvm.dbg.declare(metadata ptr %r2, metadata !133, metadata !DIExpression()), !dbg !140
   %n3 = load i32, ptr %n1, align 4, !dbg !141
   %neg = sub i32 0, %n3, !dbg !142
   %n4 = load i32, ptr %n1, align 4, !dbg !143
   %mul = mul i32 %n4, 3, !dbg !144
-  %rng5 = insertvalue %Range32 undef, i32 %neg, 0, !dbg !145
-  %rng6 = insertvalue %Range32 %rng5, i32 %mul, 1, !dbg !145
-  store %Range32 %rng6, ptr %r2, align 4, !dbg !146
+  %rng5 = insertvalue %"RangeHalfOpen'i32'" undef, i32 %neg, 0, !dbg !145
+  %rng6 = insertvalue %"RangeHalfOpen'i32'" %rng5, i32 %mul, 1, !dbg !145
+  store %"RangeHalfOpen'i32'" %rng6, ptr %r2, align 4, !dbg !146
   ret %UnitType zeroinitializer, !dbg !146
 }
 
@@ -182,10 +183,10 @@ entry:
   call void @llvm.dbg.declare(metadata ptr %a, metadata !152, metadata !DIExpression()), !dbg !160
   store i32 0, ptr %a, align 4, !dbg !161
   %n2 = load i32, ptr %n1, align 4, !dbg !162
-  %rng = insertvalue %Range32 { i32 0, i32 undef }, i32 %n2, 1, !dbg !163
+  %rng = insertvalue %"RangeClosed'i32'" { i32 0, i32 undef }, i32 %n2, 1, !dbg !163
   call void @llvm.dbg.declare(metadata ptr %i, metadata !154, metadata !DIExpression()), !dbg !164
-  %start = extractvalue %Range32 %rng, 0, !dbg !163
-  %end = extractvalue %Range32 %rng, 1, !dbg !163
+  %start = extractvalue %"RangeClosed'i32'" %rng, 0, !dbg !163
+  %end = extractvalue %"RangeClosed'i32'" %rng, 1, !dbg !163
   br label %forCond, !dbg !163
 
 forCond:                                          ; preds = %forIter14, %entry
@@ -196,11 +197,11 @@ forCond:                                          ; preds = %forIter14, %entry
 forBody:                                          ; preds = %forCond
   store i32 %iter, ptr %i, align 4, !dbg !164
   %n3 = load i32, ptr %n1, align 4, !dbg !165
-  %rng4 = insertvalue %Range32 undef, i32 %n3, 0, !dbg !166
-  %rng5 = insertvalue %Range32 %rng4, i32 10, 1, !dbg !166
+  %rng4 = insertvalue %"RangeClosed'i32'" undef, i32 %n3, 0, !dbg !166
+  %rng5 = insertvalue %"RangeClosed'i32'" %rng4, i32 10, 1, !dbg !166
   call void @llvm.dbg.declare(metadata ptr %j, metadata !156, metadata !DIExpression()), !dbg !167
-  %start6 = extractvalue %Range32 %rng5, 0, !dbg !166
-  %end7 = extractvalue %Range32 %rng5, 1, !dbg !166
+  %start6 = extractvalue %"RangeClosed'i32'" %rng5, 0, !dbg !166
+  %end7 = extractvalue %"RangeClosed'i32'" %rng5, 1, !dbg !166
   br label %forCond8, !dbg !166
 
 forCond8:                                         ; preds = %forIter, %forBody
