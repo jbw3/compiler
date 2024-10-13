@@ -1913,7 +1913,8 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     }
 
     // check variable type and iterable type
-    if (!varType->IsSameAs(*inferType) && (!HaveCompatibleSigns(varType, inferType) || !HaveCompatibleAssignmentSizes(varType, inferType)))
+    bool needsCast = false;
+    if (!AreCompatibleAssignmentTypes(varType, inferType, needsCast))
     {
         isError = true;
         logger.LogError(
@@ -1924,6 +1925,23 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
             varType->GetShortName()
         );
         return;
+    }
+
+    if (needsCast)
+    {
+        const TypeInfo* newType = nullptr;
+        if (iterExprType->IsRange())
+        {
+            newType = compilerContext.typeRegistry.GetRangeType(varType, iterExprType->IsHalfOpen());
+        }
+        else if (iterExprType->IsArray())
+        {
+            newType = compilerContext.typeRegistry.GetArrayOfType(varType);
+        }
+
+        assert(newType != nullptr && "Unable to cast for loop iter expression");
+
+        forLoop->iterExpression = ImplicitCast(iterExpression, newType);
     }
 
     // process body expression
