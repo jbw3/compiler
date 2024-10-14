@@ -606,6 +606,7 @@ public:
 
     std::vector<MemberDefinition*> members;
     unsigned fileId;
+    ROString name;
     const Token* structToken;
     const Token* openBraceToken;
     const Token* closeBraceToken;

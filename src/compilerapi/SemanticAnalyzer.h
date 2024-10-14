@@ -152,13 +152,12 @@ public:
 
 private:
     ErrorLogger& logger;
+    unsigned loopLevel;
     bool isError;
     bool isConstDecl;
     std::unordered_map<ROString, TypeInfo*> partialStructTypes;
     CompilerContext& compilerContext;
     SymbolTable symbolTable;
-    unsigned loopLevel;
-    uint32_t structDefCount;
     const SyntaxTree::FunctionDefinition* currentFunction;
 
     std::unordered_map<ROString, SyntaxTree::ConstantDeclaration*> unresolvedConsts;

@@ -217,12 +217,11 @@ void StartEndTokenFinder::UpdateEnd(const Token* newEnd)
 
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     logger(compilerContext.logger),
+    loopLevel(0),
     isError(false),
     isConstDecl(false),
     compilerContext(compilerContext),
     symbolTable(compilerContext),
-    loopLevel(0),
-    structDefCount(0),
     currentFunction(nullptr)
 {
 }
@@ -2203,12 +2202,19 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     // otherwise, this is a new struct
     else
     {
-        ROString name = compilerContext.stringBuilder
-            .Append("<struct", to_string(structDefCount), ">")
-            .CreateString();
-        ++structDefCount;
+        structType = TypeInfo::CreateAggregateType("", nullptr);
 
-        structType = TypeInfo::CreateAggregateType(name, nullptr);
+        // set the struct's name if it does not already have one
+        if (structDefinitionExpression->name.IsEmpty())
+        {
+            structDefinitionExpression->name = compilerContext.stringBuilder
+                .Append("<struct", to_string(structType->data->id), ">")
+                .CreateString();
+        }
+
+        // set the type's name
+        structType->shortName = structDefinitionExpression->name;
+        structType->uniqueName = structDefinitionExpression->name;
 
         structDefinitionExpression->SetType(TypeInfo::TypeType);
 
@@ -3565,10 +3571,18 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
         return;
     }
 
+    Expression* rightExpr = assignmentExpression->right;
+
+    // if this is a struct definition expression, set its name
+    StructDefinitionExpression* structDefExpr = dynamic_cast<StructDefinitionExpression*>(rightExpr);
+    if (structDefExpr != nullptr)
+    {
+        structDefExpr->name = constantDeclaration->name;
+    }
+
     // process right of assignment expression before adding constant to symbol
     // table in order to detect if the constant is referenced before it is assigned
     processingConsts.insert(constName);
-    Expression* rightExpr = assignmentExpression->right;
     rightExpr->Accept(this);
     processingConsts.erase(constName);
     if (isError)
