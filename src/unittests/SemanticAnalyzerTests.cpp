@@ -19,9 +19,10 @@ SemanticAnalyzerTests::SemanticAnalyzerTests(ostream &results) :
 {
     ADD_TEST(TestValidConstants);
     ADD_TEST(TestInvalidConstants);
+    ADD_TEST(TestInvalidVariables);
 }
 
-bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& failMsg)
+bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& failMsg, bool check_const_decls)
 {
     Config config;
     config.color = Config::eFalse;
@@ -77,7 +78,7 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
                 totalConstDecls += blockExpr->constantDeclarations.size();
             }
 
-            if (totalConstDecls == 0)
+            if (check_const_decls && totalConstDecls == 0)
             {
                 ok = false;
                 failMsg = "No constant declarations were generated";
@@ -116,10 +117,18 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         "const StructA = A { a: 12, b: 1.5, c: true, };\n"
         "const StructB = B { x: StructA, s: STR };\n",
 
-        // structs can be evaluated out-of-order
+        // consts can be evaluated out-of-order
         "const NUM1 i32 = NUM2 - 1;\n"
         "const NUM2 i32 = NUM3 - 1;\n"
         "const NUM3 i32 = 3;\n",
+
+        // structs can be defined out-of-order
+        "const C = struct { b B };\n"
+        "const A = struct { x i32 };\n"
+        "const B = struct { a A };\n",
+
+        // empty struct definition
+        "const Empty = struct { };",
 
         // test defining structs in an array
         R"(
@@ -205,6 +214,42 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
         // check if tests fail in a function
         string test2 = "fun f()\n{\n" + test.input + "}\n";
         valid = RunSemanticAnalysis(test2, errMsg);
+        if (valid)
+        {
+            ok = false;
+            failMsg = "Expected semantic analysis to fail";
+            break;
+        }
+        if (errMsg.find(test.expectedErrMsg) == string::npos)
+        {
+            ok = false;
+            failMsg = "Unexpected error message: " + errMsg;
+            break;
+        }
+    }
+
+    return ok;
+}
+
+bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
+{
+    vector<InvalidTest> tests =
+    {
+        // can't assign struct definition to var
+        {
+            "var s = struct { a i32, b i32 };",
+            "error: Variable cannot be of type 'type'",
+        },
+    };
+
+    bool ok = true;
+    bool valid = true;
+    string errMsg;
+    for (InvalidTest test : tests)
+    {
+        // create function for test
+        string test2 = "fun f()\n{\n" + test.input + "}\n";
+        valid = RunSemanticAnalysis(test2, errMsg, /*check_const_decls =*/false);
         if (valid)
         {
             ok = false;
