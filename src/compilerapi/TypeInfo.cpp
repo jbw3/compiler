@@ -155,11 +155,11 @@ TypeInfo::TypeInfo(
     const TypeInfo* innerType,
     const Token* token
 ) :
+    token(token),
+    deleteData(true),
     uniqueName(uniqueName),
-    shortName(shortName),
-    token(token)
+    shortName(shortName)
 {
-    // TODO: fix this memory leak
     data = new TypeInfoData;
     data->id = GetNextTypeId();
     data->numBits = numBits;
@@ -174,6 +174,7 @@ TypeInfo::TypeInfo(
     ROString shortName,
     TypeInfoData* data
 ) :
+    deleteData(false),
     uniqueName(uniqueName),
     shortName(shortName),
     data(data)
@@ -182,9 +183,11 @@ TypeInfo::TypeInfo(
 
 TypeInfo::~TypeInfo()
 {
-    // TODO: delete data
-    // deletePointerContainer(members);
-    // memberMap.clear();
+    if (deleteData)
+    {
+        deletePointerContainer(data->members);
+        delete data;
+    }
 }
 
 bool pointersIsSameAs(const TypeInfo* type1, const TypeInfo* type2)

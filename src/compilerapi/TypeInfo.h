@@ -127,6 +127,7 @@ private:
 
     // TODO: is this needed?
     const Token* token;
+    bool deleteData;
 
     struct TypeInfoData
     {
