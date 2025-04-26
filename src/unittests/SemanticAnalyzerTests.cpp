@@ -130,7 +130,7 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         // empty struct definition
         "const Empty = struct { };",
 
-        // test defining structs in an array
+        // defining structs in an array
         R"(
         const STRUCTS []type = [
             struct { n i64 },
@@ -188,6 +188,13 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
             "const NUM2 i32 = NUM3 - 1;\n"
             "const NUM3 i32 = NUM1 + 2;\n",
             "error: Constant 'NUM1' has a recursive dependency on itself",
+        },
+
+        // invalid struct type
+        {
+            "const I32 = i32;\n"
+            "const Bad = I32 { a: 2 };\n",
+            "error: Expression value is not a struct type",
         },
     };
 
