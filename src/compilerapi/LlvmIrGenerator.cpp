@@ -1167,26 +1167,6 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
     const TypeInfo* structType = compilerContext.GetTypeConstantValue(typeIdx);
     ROString structName = structType->GetShortName();
 
-    auto iter = types.find(structType->data->id);
-    StructType* llvmType = static_cast<StructType*>(iter->second);
-
-    vector<Type*> members;
-    for (const MemberDefinition* memberDef : structDefinitionExpression->members)
-    {
-        const MemberInfo* memberInfo = structType->GetMember(memberDef->name);
-        Type* memberType = GetType(memberInfo->GetType());
-        if (memberType == nullptr)
-        {
-            resultValue = nullptr;
-            logger.LogInternalError("Unknown member definition type");
-            return;
-        }
-
-        members.push_back(memberType);
-    }
-
-    llvmType->setBody(members);
-
     // add debug info for struct members
     if (dbgInfo)
     {
@@ -1318,6 +1298,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
         }
     }
 
+    // TODO: is this needed?
     // add all struct names to types map
     for (const ModuleDefinition* moduleDefinition : modules->modules)
     {
@@ -2361,6 +2342,34 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     types.insert({TypeInfo::BoolType->data->id, boolType});
     types.insert({compilerContext.typeRegistry.GetStringType()->data->id, strStructType});
 
+    // create LLVM types
+    for (const TypeInfo* type : compilerContext.typeRegistry)
+    {
+        // TODO: Factor out logic into CreateLlvmType() function
+        GetType(type);
+    }
+
+    // add struct members
+    vector<Type*> structMembers;
+    for (const TypeInfo* type : compilerContext.typeRegistry)
+    {
+        if (type->IsAggregate())
+        {
+            structMembers.clear();
+            for (const MemberInfo* member : type->GetMembers())
+            {
+                Type* llvmMemberType = GetType(member->GetType());
+                assert(llvmMemberType != nullptr && "Unkown member definition type");
+                structMembers.push_back(llvmMemberType);
+            }
+
+            auto iter = types.find(type->data->id);
+            assert(iter != types.end() && "Could not find struct LLVM type");
+            StructType* structType = static_cast<StructType*>(iter->second);
+            structType->setBody(structMembers);
+        }
+    }
+
     if (dbgInfo)
     {
         // initialize debug info builder
@@ -2425,6 +2434,8 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     {
         return iter->second;
     }
+
+    // TODO: split the code below into a CreateLlvmType() function
 
     Type* llvmType = nullptr;
     if (type->IsSameAs(*TypeInfo::UnitType))
@@ -2497,6 +2508,10 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             }
 
             llvmType = funType->getPointerTo();
+        }
+        else if (type->IsAggregate())
+        {
+            llvmType = StructType::create(context, toStringRef(type->GetShortName()));
         }
         else // could not determine the type
         {

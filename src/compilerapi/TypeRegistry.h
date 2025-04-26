@@ -73,6 +73,59 @@ private:
     ROString GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits);
 
     const NumericLiteralType* CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, ROString name);
+
+public:
+    class TypeIterator
+    {
+    public:
+        typedef std::unordered_map<ROString, const TypeInfo*>::const_iterator InnerIter;
+
+        TypeIterator(InnerIter mapIter)
+        {
+            this->mapIter = mapIter;
+        }
+
+        bool operator ==(const TypeIterator& other) const
+        {
+            return mapIter == other.mapIter;
+        }
+
+        bool operator !=(const TypeIterator& other) const
+        {
+            return mapIter != other.mapIter;
+        }
+
+        TypeIterator& operator ++()
+        {
+            ++mapIter;
+            return *this;
+        }
+
+        TypeIterator operator ++(int)
+        {
+            TypeIterator copy = *this;
+            ++mapIter;
+            return copy;
+        }
+
+        const TypeInfo* operator *() const
+        {
+            return mapIter->second;
+        }
+
+    private:
+        InnerIter mapIter;
+    };
+
+    TypeIterator begin() const
+    {
+        return TypeIterator(types.begin());
+    }
+
+    TypeIterator end() const
+    {
+        return TypeIterator(types.end());
+    }
 };
 
 #endif // TYPE_REGISTRY_H_
