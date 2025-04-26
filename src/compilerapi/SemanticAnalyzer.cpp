@@ -89,7 +89,7 @@ void StartEndTokenFinder::Visit(StructDefinitionExpression* structDefinitionExpr
 
 void StartEndTokenFinder::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    UpdateStart(structInitializationExpression->structNameToken);
+    structInitializationExpression->structTypeExpression->Accept(this);
     UpdateEnd(structInitializationExpression->closeBraceToken);
 }
 
@@ -2276,17 +2276,47 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
 
 void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    ROString structName = structInitializationExpression->structName;
-    const TypeInfo* type = compilerContext.typeRegistry.GetType(structName);
-    if (type == nullptr)
+    Expression* structTypeExpr = structInitializationExpression->structTypeExpression;
+
+    structTypeExpr->Accept(this);
+    if (isError)
     {
-        isError = true;
-        const Token* token = structInitializationExpression->structNameToken;
-        logger.LogError(*token, "'{}' is not a known type", structName);
         return;
     }
 
-    // TODO: check if this is a struct type?
+    // check if type expression is a constant
+    if (!structTypeExpr->GetIsConstant())
+    {
+        StartEndTokenFinder finder;
+        structTypeExpr->Accept(&finder);
+
+        isError = true;
+        logger.LogError(*finder.start, *finder.end, "Struct type must be a constant expression");
+        return;
+    }
+
+    // check if type expression is a type
+    if (!structTypeExpr->GetType()->IsType())
+    {
+        StartEndTokenFinder finder;
+        structTypeExpr->Accept(&finder);
+
+        isError = true;
+        logger.LogError(*finder.start, *finder.end, "Expression is not a type");
+        return;
+    }
+
+    // check if type is a struct
+    const TypeInfo* type = compilerContext.GetTypeConstantValue(structTypeExpr->GetConstantValueIndex());
+    if (!type->IsAggregate())
+    {
+        StartEndTokenFinder finder;
+        structTypeExpr->Accept(&finder);
+
+        isError = true;
+        logger.LogError(*finder.start, *finder.end, "Expression value is not a struct type");
+        return;
+    }
 
     structInitializationExpression->SetType(type);
 
@@ -2306,6 +2336,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (memberInfo == nullptr)
         {
             isError = true;
+            ROString structName = type->GetShortName();
             const Token* token = member->nameToken;
             logger.LogError(*token, "Struct '{}' does not have a member named '{}'", structName, memberName);
             return;
@@ -2374,8 +2405,9 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         }
 
         isError = true;
-        const Token* token = structInitializationExpression->structNameToken;
-        logger.LogError(*token, errorMsg.str().c_str());
+        const Token* startToken = structInitializationExpression->openBraceToken;
+        const Token* closeToken = structInitializationExpression->closeBraceToken;
+        logger.LogError(*startToken, *closeToken, errorMsg.str().c_str());
         return;
     }
 

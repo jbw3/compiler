@@ -683,7 +683,8 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
 
     const Token* closeBraceToken = &*iter;
 
-    StructInitializationExpression* structInit = new StructInitializationExpression(structName, members, structNameToken, openBraceToken, closeBraceToken);
+    IdentifierExpression* structNameExpression = new IdentifierExpression(structName, structNameToken);
+    StructInitializationExpression* structInit = new StructInitializationExpression(structNameExpression, members, openBraceToken, closeBraceToken);
     return structInit;
 }
 

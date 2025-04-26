@@ -628,8 +628,8 @@ public:
 class StructInitializationExpression : public Expression
 {
 public:
-    StructInitializationExpression(ROString structName, const std::vector<MemberInitialization*>& memberInitializations,
-                                   const Token* structNameToken,
+    StructInitializationExpression(Expression* structTypeExpression,
+                                   const std::vector<MemberInitialization*>& memberInitializations,
                                    const Token* openBraceToken,
                                    const Token* closeBraceToken);
 
@@ -637,9 +637,8 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    ROString structName;
+    Expression* structTypeExpression;
     std::vector<MemberInitialization*> memberInitializations;
-    const Token* structNameToken;
     const Token* openBraceToken;
     const Token* closeBraceToken;
 };

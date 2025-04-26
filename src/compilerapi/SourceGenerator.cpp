@@ -226,7 +226,8 @@ void SourceGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
 
 void SourceGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
-    *os << structInitializationExpression->structName << '\n';
+    structInitializationExpression->structTypeExpression->Accept(this);
+    *os << '\n';
     Indent();
     *os << "{\n";
     ++indentLevel;

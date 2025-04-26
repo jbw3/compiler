@@ -929,13 +929,12 @@ MemberInitialization::~MemberInitialization()
     delete expression;
 }
 
-StructInitializationExpression::StructInitializationExpression(ROString structName, const vector<MemberInitialization*>& memberInitializations,
-                                                               const Token* structNameToken,
+StructInitializationExpression::StructInitializationExpression(Expression* structTypeExpression,
+                                                               const vector<MemberInitialization*>& memberInitializations,
                                                                const Token* openBraceToken,
                                                                const Token* closeBraceToken) :
-    structName(structName),
+    structTypeExpression(structTypeExpression),
     memberInitializations(memberInitializations),
-    structNameToken(structNameToken),
     openBraceToken(openBraceToken),
     closeBraceToken(closeBraceToken)
 {
@@ -943,6 +942,7 @@ StructInitializationExpression::StructInitializationExpression(ROString structNa
 
 StructInitializationExpression::~StructInitializationExpression()
 {
+    delete structTypeExpression;
     deletePointerContainer(memberInitializations);
 }
 

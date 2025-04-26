@@ -172,7 +172,7 @@ void SyntaxTreePrinter::Visit(StructInitializationExpression* structInitializati
     function<void (MemberInitialization*)> printMemberInit = [this](MemberInitialization* member){ PrintMemberInitialization(member); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "StructInitializationExpression");
-    PrintProperty("structName", structInitializationExpression->structName);
+    PrintProperty("structTypeExpression", structInitializationExpression->structTypeExpression);
     PrintProperty("memberInitializations", structInitializationExpression->memberInitializations, printMemberInit);
 }
 
