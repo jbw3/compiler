@@ -2208,7 +2208,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
         if (structDefinitionExpression->name.IsEmpty())
         {
             structDefinitionExpression->name = compilerContext.stringBuilder
-                .Append("<struct", to_string(structType->data->id), ">")
+                .Append("<struct", to_string(structType->GetId()), ">")
                 .CreateString();
         }
 

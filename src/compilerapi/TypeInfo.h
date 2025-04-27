@@ -121,6 +121,8 @@ public:
         const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType);
 
+    static const TypeInfo* CreateTypeAlias(ROString newName, const TypeInfo* typeInfo);
+
 private:
     static TypeId nextTypeId;
     static TypeId GetNextTypeId();
@@ -143,13 +145,17 @@ private:
         const TypeInfo* returnType;
     };
 
+    TypeInfoData* data;
+
+    TypeInfo(
+        ROString uniqueName,
+        ROString shortName,
+        TypeInfoData* data
+    );
+
 public:
     ROString uniqueName;
     ROString shortName;
-
-    // TODO: should this be private?
-    // TODO: should this be const?
-    TypeInfoData* data;
 
     TypeInfo(
         unsigned numBits,
@@ -161,18 +167,19 @@ public:
         const Token* token = nullptr
     );
 
-    TypeInfo(
-        ROString uniqueName,
-        ROString shortName,
-        TypeInfoData* data
-    );
-
-    // TODO: remove this
     TypeInfo(const TypeInfo& other) = delete;
 
     virtual ~TypeInfo();
 
-    virtual bool IsSameAs(const TypeInfo& other) const;
+    TypeId GetId() const
+    {
+        return data->id;
+    }
+
+    bool IsSameAs(const TypeInfo& other) const
+    {
+        return data->id == other.data->id;
+    }
 
     uint16_t GetFlags() const
     {
@@ -324,8 +331,6 @@ public:
         ROString uniqueName,
         ROString name
     );
-
-    bool IsSameAs(const TypeInfo& other) const override;
 
     bool IsOrContainsNumericLiteral() const override;
 

@@ -239,7 +239,7 @@ const TypeInfo* TypeRegistry::GetFunctionType(
 
 const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
 {
-    TypeId typeId = type->data->id;
+    TypeId typeId = type->GetId();
 
     auto iter = pointerTypes.find(typeId);
     if (iter != pointerTypes.end())
@@ -264,7 +264,7 @@ const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
 
 const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 {
-    TypeId typeId = type->data->id;
+    TypeId typeId = type->GetId();
 
     auto iter = arrayTypes.find(typeId);
     if (iter != arrayTypes.end())
@@ -292,7 +292,7 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 
 const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const TypeInfo *typeInfo)
 {
-    TypeInfo* newTypeInfo = new TypeInfo(newName, newName, typeInfo->data);
+    const TypeInfo* newTypeInfo = TypeInfo::CreateTypeAlias(newName, typeInfo);
     RegisterType(newTypeInfo);
     return newTypeInfo;
 }

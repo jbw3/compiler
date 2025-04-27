@@ -1121,7 +1121,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
         members.push_back(memberType);
     }
 
-    auto iter = types.find(typeInfo->data->id);
+    auto iter = types.find(typeInfo->GetId());
     assert(iter != types.end());
     StructType* structType = static_cast<StructType*>(iter->second);
     structType->setBody(members);
@@ -1277,7 +1277,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
     {
         ROString structName = structDef->name;
         StructType* structType = StructType::create(context, toStringRef(structName));
-        types.insert({structDef->type->data->id, structType});
+        types.insert({structDef->type->GetId(), structType});
 
         // add debug info for structs
         if (dbgInfo)
@@ -1315,7 +1315,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
                 if (exprType->IsAggregate())
                 {
                     StructType* structType = StructType::create(context, toStringRef(structName));
-                    types.insert({exprType->data->id, structType});
+                    types.insert({exprType->GetId(), structType});
 
                     // add debug info for structs
                     if (dbgInfo)
@@ -2339,8 +2339,8 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     strStructType = StructType::create(context, strArrayRef, "str");
 
     // register types
-    types.insert({TypeInfo::BoolType->data->id, boolType});
-    types.insert({compilerContext.typeRegistry.GetStringType()->data->id, strStructType});
+    types.insert({TypeInfo::BoolType->GetId(), boolType});
+    types.insert({compilerContext.typeRegistry.GetStringType()->GetId(), strStructType});
 
     // create LLVM types
     for (const TypeInfo* type : compilerContext.typeRegistry)
@@ -2363,7 +2363,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
                 structMembers.push_back(llvmMemberType);
             }
 
-            auto iter = types.find(type->data->id);
+            auto iter = types.find(type->GetId());
             assert(iter != types.end() && "Could not find struct LLVM type");
             StructType* structType = static_cast<StructType*>(iter->second);
             structType->setBody(structMembers);
@@ -2429,7 +2429,7 @@ FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
 Type* LlvmIrGenerator::GetType(const TypeInfo* type)
 {
     // try to lookup this type to see if it's already been created
-    auto iter = types.find(type->data->id);
+    auto iter = types.find(type->GetId());
     if (iter != types.end())
     {
         return iter->second;
@@ -2522,7 +2522,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     if (llvmType != nullptr)
     {
         // register type so we don't have to create it again
-        types.insert({type->data->id, llvmType});
+        types.insert({type->GetId(), llvmType});
     }
 
     return llvmType;
