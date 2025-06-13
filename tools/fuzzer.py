@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import hashlib
-from io import StringIO
 import os
 import pathlib
 import random
@@ -15,8 +14,34 @@ class TypeInfo:
     def __init__(self, name: str):
         self.name = name
 
+TYPE_FUN = TypeInfo('fun')
 TYPE_BOOL = TypeInfo('bool')
 TYPE_I32 = TypeInfo('i32')
+
+INVALID_IDENTIFIERS = {
+    'bool',
+    'cast',
+    'const',
+    'elif',
+    'else',
+    'for',
+    'fun',
+    'i8',
+    'i16',
+    'i32',
+    'i64',
+    'if',
+    'in',
+    'isize',
+    'type',
+    'u8',
+    'u16',
+    'u32',
+    'u64',
+    'usize',
+    'var',
+    'while',
+}
 
 class ParamInfo:
     def __init__(self, name: str, type: TypeInfo):
@@ -47,6 +72,8 @@ class Context:
 
     def get_function_with_return_type(self, return_type: TypeInfo) -> FunctionInfo|None:
         functions = [f for f in self.functions if f.return_type.name == return_type.name]
+        if len(functions) == 0:
+            return None
         return random.choice(functions)
 
 def md5(filename: pathlib.Path) -> str:
@@ -168,15 +195,20 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     else:
         assert False, f"Unexpected type '{type.name}'"
 
-def write_identifier(io: IO[str]) -> None:
-    io.write(random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'))
-    for _ in range(random.randint(0, 14)):
-        io.write(random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789'))
+def get_identifier(context: Context) -> str:
+    invalid: set[str] = {i.name for i in context.identifiers}
+    invalid |= {f.name for f in context.functions}
+    invalid |= INVALID_IDENTIFIERS
 
-def get_identifier() -> str:
-    identifier = StringIO()
-    write_identifier(identifier)
-    return identifier.getvalue()
+    valid = False
+    while not valid:
+        identifier = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
+        for _ in range(random.randint(0, 14)):
+            identifier += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
+
+        valid = identifier not in invalid
+
+    return identifier
 
 def write_function(io: IO[str], context: Context, function: FunctionInfo) -> None:
     io.write('fun ')
@@ -200,17 +232,21 @@ def write_function(io: IO[str], context: Context, function: FunctionInfo) -> Non
 def write_code(io: IO[str]) -> None:
     context = Context()
     for _ in range(random.randint(2, 10)):
-        name = get_identifier()
+        name = get_identifier(context)
+        context.identifiers.append(IdentifierInfo(name, TYPE_FUN))
         return_type = random.choice([TYPE_BOOL, TYPE_I32])
 
         params: list[ParamInfo] = []
         for _ in range(random.randint(0, 3)):
-            param_name = get_identifier()
+            param_name = get_identifier(context)
             param_type = random.choice([TYPE_BOOL, TYPE_I32])
+            context.identifiers.append(IdentifierInfo(param_name, param_type))
             params.append(ParamInfo(param_name, param_type))
 
         function = FunctionInfo(name, params, return_type)
         context.functions.append(function)
+
+    context.identifiers.clear()
 
     for function in context.functions:
         write_function(io, context, function)
@@ -220,7 +256,7 @@ def main() -> None:
     out_filename = pathlib.Path('fuzzer.o')
 
     error_count = 0
-    for _ in range(10):
+    for _ in range(1000):
         with open(src_filename, 'w') as f:
             write_code(f)
 
@@ -229,10 +265,10 @@ def main() -> None:
             error_count += 1
             print(f'Error: rc={rc}')
             h = md5(src_filename)
-            src_filename.rename(f'fuzzer-{h}.wip')
+            # src_filename.rename(f'fuzzer-{h}.wip')
 
-    if src_filename.exists():
-        os.remove(src_filename)
+    # if src_filename.exists():
+        # os.remove(src_filename)
     if out_filename.exists():
         os.remove(out_filename)
 
