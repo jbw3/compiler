@@ -45,6 +45,10 @@ class Context:
             return None
         return random.choice(ids)
 
+    def get_function_with_return_type(self, return_type: TypeInfo) -> FunctionInfo|None:
+        functions = [f for f in self.functions if f.return_type.name == return_type.name]
+        return random.choice(functions)
+
 def md5(filename: pathlib.Path) -> str:
     m = hashlib.md5()
     with open(filename, 'rb') as f:
@@ -55,21 +59,37 @@ def md5(filename: pathlib.Path) -> str:
 
     return m.hexdigest()
 
-def run_compiler(src_filename: pathlib.Path) -> int:
+def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
     cmd = [
         compiler_path,
         src_filename,
+        '-o',
+        out_filename,
     ]
     proc = subprocess.run(cmd)
     return proc.returncode
 
 def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> bool:
     identifier = context.get_identifier_of_type(type)
-    if identifier is not None:
-        io.write(identifier.name)
-        return True
-    return False
+    if identifier is None:
+        return False
+
+    io.write(identifier.name)
+    return True
+
+def write_function_call_expression(io: IO[str], context: Context, return_type: TypeInfo) -> bool:
+    function = context.get_function_with_return_type(return_type)
+    if function is None:
+        return False
+
+    io.write(function.name)
+    io.write('(')
+    for param in function.params:
+        write_expression(io, context, param.type)
+        io.write(',')
+    io.write(')')
+    return True
 
 def write_bool_literal(io: IO[str]) -> None:
     if random.randint(0, 1) == 0:
@@ -87,11 +107,15 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
     write_bool_expression(io, context)
 
 def write_bool_expression(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 2)
-    if r == 0:
+    r = random.randint(0, 9)
+    if 0 <= r <= 1:
         write_bool_binary_expression(io, context)
-    elif r == 1:
+    elif 2 <= r <= 4:
         ok = write_identifier_expression(io, context, TYPE_BOOL)
+        if not ok:
+            write_bool_literal(io)
+    elif 5 <= r <= 5:
+        ok = write_function_call_expression(io, context, TYPE_BOOL)
         if not ok:
             write_bool_literal(io)
     else:
@@ -122,11 +146,15 @@ def write_int_binary_expression(io: IO[str], context: Context) -> None:
     write_int_expression(io, context)
 
 def write_int_expression(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 2)
-    if r == 0:
+    r = random.randint(0, 9)
+    if 0 <= r <= 1:
         write_int_binary_expression(io, context)
-    elif r == 1:
+    elif 2 <= r <= 4:
         ok = write_identifier_expression(io, context, TYPE_I32)
+        if not ok:
+            write_int_literal(io)
+    elif 5 <= r <= 5:
+        ok = write_function_call_expression(io, context, TYPE_I32)
         if not ok:
             write_int_literal(io)
     else:
@@ -189,21 +217,24 @@ def write_code(io: IO[str]) -> None:
 
 def main() -> None:
     src_filename = pathlib.Path('fuzzer.wip')
+    out_filename = pathlib.Path('fuzzer.o')
 
     error_count = 0
     for _ in range(10):
         with open(src_filename, 'w') as f:
             write_code(f)
 
-        rc = run_compiler(src_filename)
+        rc = run_compiler(src_filename, out_filename)
         if rc != 0:
             error_count += 1
             print(f'Error: rc={rc}')
             h = md5(src_filename)
             src_filename.rename(f'fuzzer-{h}.wip')
 
-    # if src_filename.exists():
-        # os.remove(src_filename)
+    if src_filename.exists():
+        os.remove(src_filename)
+    if out_filename.exists():
+        os.remove(out_filename)
 
 if __name__ == '__main__':
     main()
