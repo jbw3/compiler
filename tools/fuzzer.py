@@ -292,11 +292,7 @@ def write_variable_declaration(io: IO[str], context: Context) -> None:
 
     context.add_identifier(IdentifierInfo(name, type))
 
-def write_if_statement(io: IO[str], context: Context) -> None:
-    io.write(get_indent_str(context))
-    io.write('if ')
-    write_bool_expression(io, context)
-    io.write('\n')
+def write_block(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('{\n')
     context.indent_level += 1
@@ -310,11 +306,30 @@ def write_if_statement(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('}\n')
 
+def write_if_statement(io: IO[str], context: Context) -> None:
+    io.write(get_indent_str(context))
+    io.write('if ')
+    write_bool_expression(io, context)
+    io.write('\n')
+    write_block(io, context)
+
+    for _ in range(random.randint(0, 3)):
+        io.write(get_indent_str(context))
+        io.write('elif ')
+        write_bool_expression(io, context)
+        io.write('\n')
+        write_block(io, context)
+
+    if random.randint(0, 1) == 0:
+        io.write(get_indent_str(context))
+        io.write('else\n')
+        write_block(io, context)
+
 def write_statement(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 6)
+    r = random.randint(0, 12)
     if r == 0:
         write_if_statement(io, context)
-    elif 1 <= r <= 3:
+    elif 1 <= r <= 6:
         write_variable_declaration(io, context)
     else:
         io.write(get_indent_str(context))
