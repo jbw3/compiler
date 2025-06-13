@@ -71,10 +71,26 @@ class IdentifierInfo:
 class Context:
     def __init__(self):
         self.functions: list[FunctionInfo] = []
-        self.identifiers: list[IdentifierInfo] = []
+        self.identifier_stack: list[list[IdentifierInfo]] = [[]]
+        self.indent_level = 0
+
+    def add_identifier(self, identifier: IdentifierInfo) -> None:
+        self.identifier_stack[-1].append(identifier)
+
+    def clear_current_identifier_scope(self) -> None:
+        self.identifier_stack[-1].clear()
+
+    def get_current_identifier_scope(self) -> list[IdentifierInfo]:
+        return self.identifier_stack[-1]
+
+    def push_scope(self) -> None:
+        self.identifier_stack.append(self.identifier_stack[-1][:])
+
+    def pop_scope(self) -> None:
+        self.identifier_stack.pop()
 
     def get_identifier_of_type(self, type: TypeInfo) -> IdentifierInfo|None:
-        ids = [i for i in self.identifiers if i.type.name == type.name]
+        ids = [i for i in self.identifier_stack[-1] if i.type.name == type.name]
         if len(ids) == 0:
             return None
         return random.choice(ids)
@@ -110,8 +126,11 @@ def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     proc = subprocess.run(cmd)
     return proc.returncode
 
+def get_indent_str(context: Context) -> str:
+    return ' ' * (context.indent_level * 4)
+
 def get_identifier(context: Context) -> str:
-    invalid: set[str] = {i.name for i in context.identifiers}
+    invalid: set[str] = {i.name for i in context.get_current_identifier_scope()}
     invalid |= {f.name for f in context.functions}
     invalid |= INVALID_IDENTIFIERS
 
@@ -142,7 +161,7 @@ def write_function_call_expression(io: IO[str], context: Context, return_type: T
     io.write('(')
     for param in function.params:
         write_expression(io, context, param.type)
-        io.write(',')
+        io.write(', ')
     io.write(')')
     return True
 
@@ -262,7 +281,8 @@ def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
     type = random.choice(EXPRESSION_TYPES)
 
-    io.write('    var ')
+    io.write(get_indent_str(context))
+    io.write('var ')
     io.write(name)
     io.write(' ')
     io.write(type.name)
@@ -270,18 +290,40 @@ def write_variable_declaration(io: IO[str], context: Context) -> None:
     write_expression(io, context, type)
     io.write(';\n')
 
-    context.identifiers.append(IdentifierInfo(name, type))
+    context.add_identifier(IdentifierInfo(name, type))
+
+def write_if_statement(io: IO[str], context: Context) -> None:
+    io.write(get_indent_str(context))
+    io.write('if ')
+    write_bool_expression(io, context)
+    io.write('\n')
+    io.write(get_indent_str(context))
+    io.write('{\n')
+    context.indent_level += 1
+
+    context.push_scope()
+    for _ in range(random.randint(1, 5)): # TODO: use range 0-5 when compiler bug is fixed
+        write_statement(io, context)
+    context.pop_scope()
+
+    context.indent_level -= 1
+    io.write(get_indent_str(context))
+    io.write('}\n')
 
 def write_statement(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 1)
+    r = random.randint(0, 6)
     if r == 0:
+        write_if_statement(io, context)
+    elif 1 <= r <= 3:
         write_variable_declaration(io, context)
     else:
-        io.write('    ')
+        io.write(get_indent_str(context))
         write_function_call_expression(io, context, None)
         io.write(';\n')
 
 def write_function(io: IO[str], context: Context, function: FunctionInfo) -> None:
+    context.push_scope()
+
     io.write('fun ')
     io.write(function.name)
     io.write('(')
@@ -290,38 +332,43 @@ def write_function(io: IO[str], context: Context, function: FunctionInfo) -> Non
         io.write(' ')
         io.write(param.type.name)
         io.write(', ')
-        context.identifiers.append(IdentifierInfo(param.name, param.type))
+        context.add_identifier(IdentifierInfo(param.name, param.type))
     io.write(') ')
     io.write(function.return_type.name)
     io.write('\n{\n')
+    context.indent_level += 1
 
     for _ in range(random.randint(0, 10)):
         write_statement(io, context)
 
-    io.write('    return ')
+    io.write(get_indent_str(context))
+    io.write('return ')
     write_expression(io, context, function.return_type)
     io.write(';\n}\n')
+    context.indent_level -= 1
 
-    context.identifiers.clear()
+    context.pop_scope()
 
 def write_code(io: IO[str]) -> None:
     context = Context()
     for _ in range(random.randint(2, 10)):
         name = get_identifier(context)
-        context.identifiers.append(IdentifierInfo(name, TYPE_FUN))
+        context.add_identifier(IdentifierInfo(name, TYPE_FUN))
         return_type = random.choice(EXPRESSION_TYPES)
 
         params: list[ParamInfo] = []
         for _ in range(random.randint(0, 3)):
             param_name = get_identifier(context)
             param_type = random.choice(EXPRESSION_TYPES)
-            context.identifiers.append(IdentifierInfo(param_name, param_type))
+            context.add_identifier(IdentifierInfo(param_name, param_type))
             params.append(ParamInfo(param_name, param_type))
 
         function = FunctionInfo(name, params, return_type)
         context.functions.append(function)
 
-    context.identifiers.clear()
+    context.clear_current_identifier_scope()
+    for function in context.functions:
+        context.add_identifier(IdentifierInfo(function.name, TYPE_FUN))
 
     for function in context.functions:
         write_function(io, context, function)
