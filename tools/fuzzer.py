@@ -64,6 +64,13 @@ def run_compiler(src_filename: pathlib.Path) -> int:
     proc = subprocess.run(cmd)
     return proc.returncode
 
+def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> bool:
+    identifier = context.get_identifier_of_type(type)
+    if identifier is not None:
+        io.write(identifier.name)
+        return True
+    return False
+
 def write_bool_literal(io: IO[str]) -> None:
     if random.randint(0, 1) == 0:
         value = 'false'
@@ -84,10 +91,8 @@ def write_bool_expression(io: IO[str], context: Context) -> None:
     if r == 0:
         write_bool_binary_expression(io, context)
     elif r == 1:
-        identifier = context.get_identifier_of_type(TYPE_BOOL)
-        if identifier is not None:
-            io.write(identifier.name)
-        else:
+        ok = write_identifier_expression(io, context, TYPE_BOOL)
+        if not ok:
             write_bool_literal(io)
     else:
         write_bool_literal(io)
@@ -121,10 +126,8 @@ def write_int_expression(io: IO[str], context: Context) -> None:
     if r == 0:
         write_int_binary_expression(io, context)
     elif r == 1:
-        identifier = context.get_identifier_of_type(TYPE_I32)
-        if identifier is not None:
-            io.write(identifier.name)
-        else:
+        ok = write_identifier_expression(io, context, TYPE_I32)
+        if not ok:
             write_int_literal(io)
     else:
         write_int_literal(io)
