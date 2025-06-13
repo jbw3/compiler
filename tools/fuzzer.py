@@ -5,6 +5,7 @@ import os
 import pathlib
 import random
 import subprocess
+import sys
 from typing import IO
 
 SCRIPT_PATH = pathlib.Path(__file__)
@@ -283,11 +284,16 @@ def write_code(io: IO[str]) -> None:
         write_function(io, context, function)
 
 def main() -> None:
+    if len(sys.argv) >= 2:
+        num_runs = int(sys.argv[1])
+    else:
+        num_runs = 1
+
     src_filename = pathlib.Path('fuzzer.wip')
     out_filename = pathlib.Path('fuzzer.o')
 
     error_count = 0
-    for _ in range(1000):
+    for _ in range(num_runs):
         with open(src_filename, 'w') as f:
             write_code(f)
 
@@ -298,8 +304,8 @@ def main() -> None:
             h = md5(src_filename)
             # src_filename.rename(f'fuzzer-{h}.wip')
 
-    # if src_filename.exists():
-        # os.remove(src_filename)
+    if src_filename.exists():
+        os.remove(src_filename)
     if out_filename.exists():
         os.remove(out_filename)
 
