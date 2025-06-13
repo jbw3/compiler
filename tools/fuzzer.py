@@ -18,6 +18,13 @@ class TypeInfo:
 TYPE_FUN = TypeInfo('fun')
 TYPE_BOOL = TypeInfo('bool')
 TYPE_I32 = TypeInfo('i32')
+TYPE_STR = TypeInfo('str')
+
+EXPRESSION_TYPES = [
+    TYPE_BOOL,
+    TYPE_I32,
+    TYPE_STR,
+]
 
 INVALID_IDENTIFIERS = {
     'bool',
@@ -34,6 +41,7 @@ INVALID_IDENTIFIERS = {
     'if',
     'in',
     'isize',
+    'str',
     'type',
     'u8',
     'u16',
@@ -207,17 +215,52 @@ def write_int_expression(io: IO[str], context: Context) -> None:
     else:
         write_int_literal(io)
 
+REALLY_LONG_STRING = 'This is a ' + ('really, ' * 20) + 'long string.'
+
+def write_str_literal(io: IO[str]) -> None:
+    io.write('"')
+
+    r = random.randint(0, 4)
+    if r == 0:
+        io.write(random.choice([
+            '',
+            ' ',
+            '\t',
+            'café',
+            REALLY_LONG_STRING,
+        ] + list(INVALID_IDENTIFIERS)))
+    else:
+        for _ in range(random.randint(1, 12)):
+            io.write(random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-=_+πé'))
+
+    io.write('"')
+
+def write_str_expression(io: IO[str], context: Context) -> None:
+    r = random.randint(0, 9)
+    if 0 <= r <= 3:
+        ok = write_identifier_expression(io, context, TYPE_STR)
+        if not ok:
+            write_str_literal(io)
+    elif 4 <= r <= 4:
+        ok = write_function_call_expression(io, context, TYPE_STR)
+        if not ok:
+            write_str_literal(io)
+    else:
+        write_str_literal(io)
+
 def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     if type.name == 'bool':
         write_bool_expression(io, context)
     elif type.name == 'i32':
         write_int_expression(io, context)
+    elif type.name == 'str':
+        write_str_expression(io, context)
     else:
         assert False, f"Unexpected type '{type.name}'"
 
 def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
-    type = random.choice([TYPE_BOOL, TYPE_I32])
+    type = random.choice(EXPRESSION_TYPES)
 
     io.write('    var ')
     io.write(name)
@@ -266,12 +309,12 @@ def write_code(io: IO[str]) -> None:
     for _ in range(random.randint(2, 10)):
         name = get_identifier(context)
         context.identifiers.append(IdentifierInfo(name, TYPE_FUN))
-        return_type = random.choice([TYPE_BOOL, TYPE_I32])
+        return_type = random.choice(EXPRESSION_TYPES)
 
         params: list[ParamInfo] = []
         for _ in range(random.randint(0, 3)):
             param_name = get_identifier(context)
-            param_type = random.choice([TYPE_BOOL, TYPE_I32])
+            param_type = random.choice(EXPRESSION_TYPES)
             context.identifiers.append(IdentifierInfo(param_name, param_type))
             params.append(ParamInfo(param_name, param_type))
 
