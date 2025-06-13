@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+import argparse
 import hashlib
 import os
 import pathlib
 import random
 import subprocess
-import sys
 from typing import IO
 
 SCRIPT_PATH = pathlib.Path(__file__)
@@ -283,17 +283,22 @@ def write_code(io: IO[str]) -> None:
     for function in context.functions:
         write_function(io, context, function)
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--runs', type=int, default=1, help='number of runs')
+    parser.add_argument('--keep-source', action='store_true', help="keep the fuzzer's generated source code")
+
+    args = parser.parse_args()
+    return args
+
 def main() -> None:
-    if len(sys.argv) >= 2:
-        num_runs = int(sys.argv[1])
-    else:
-        num_runs = 1
+    args = parse_args()
 
     src_filename = pathlib.Path('fuzzer.wip')
     out_filename = pathlib.Path('fuzzer.o')
 
     error_count = 0
-    for _ in range(num_runs):
+    for _ in range(args.runs):
         with open(src_filename, 'w') as f:
             write_code(f)
 
@@ -304,7 +309,7 @@ def main() -> None:
             h = md5(src_filename)
             # src_filename.rename(f'fuzzer-{h}.wip')
 
-    if src_filename.exists():
+    if not args.keep_source and src_filename.exists():
         os.remove(src_filename)
     if out_filename.exists():
         os.remove(out_filename)
