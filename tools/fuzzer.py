@@ -70,8 +70,12 @@ class Context:
             return None
         return random.choice(ids)
 
-    def get_function_with_return_type(self, return_type: TypeInfo) -> FunctionInfo|None:
-        functions = [f for f in self.functions if f.return_type.name == return_type.name]
+    def get_function_with_return_type(self, return_type: TypeInfo|None=None) -> FunctionInfo|None:
+        if return_type is None:
+            functions = self.functions
+        else:
+            functions = [f for f in self.functions if f.return_type.name == return_type.name]
+
         if len(functions) == 0:
             return None
         return random.choice(functions)
@@ -120,7 +124,7 @@ def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -
     io.write(identifier.name)
     return True
 
-def write_function_call_expression(io: IO[str], context: Context, return_type: TypeInfo) -> bool:
+def write_function_call_expression(io: IO[str], context: Context, return_type: TypeInfo|None) -> bool:
     function = context.get_function_with_return_type(return_type)
     if function is None:
         return False
@@ -210,6 +214,29 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     else:
         assert False, f"Unexpected type '{type.name}'"
 
+def write_variable_declaration(io: IO[str], context: Context) -> None:
+    name = get_identifier(context)
+    type = random.choice([TYPE_BOOL, TYPE_I32])
+
+    io.write('    var ')
+    io.write(name)
+    io.write(' ')
+    io.write(type.name)
+    io.write(' = ')
+    write_expression(io, context, type)
+    io.write(';\n')
+
+    context.identifiers.append(IdentifierInfo(name, type))
+
+def write_statement(io: IO[str], context: Context) -> None:
+    r = random.randint(0, 1)
+    if r == 0:
+        write_variable_declaration(io, context)
+    else:
+        io.write('    ')
+        write_function_call_expression(io, context, None)
+        io.write(';\n')
+
 def write_function(io: IO[str], context: Context, function: FunctionInfo) -> None:
     io.write('fun ')
     io.write(function.name)
@@ -222,12 +249,16 @@ def write_function(io: IO[str], context: Context, function: FunctionInfo) -> Non
         context.identifiers.append(IdentifierInfo(param.name, param.type))
     io.write(') ')
     io.write(function.return_type.name)
-    io.write('\n{\n    return ')
+    io.write('\n{\n')
 
+    for _ in range(random.randint(0, 10)):
+        write_statement(io, context)
+
+    io.write('    return ')
     write_expression(io, context, function.return_type)
-    context.identifiers.clear()
-
     io.write(';\n}\n')
+
+    context.identifiers.clear()
 
 def write_code(io: IO[str]) -> None:
     context = Context()
