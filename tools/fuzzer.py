@@ -97,6 +97,21 @@ def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     proc = subprocess.run(cmd)
     return proc.returncode
 
+def get_identifier(context: Context) -> str:
+    invalid: set[str] = {i.name for i in context.identifiers}
+    invalid |= {f.name for f in context.functions}
+    invalid |= INVALID_IDENTIFIERS
+
+    valid = False
+    while not valid:
+        identifier = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
+        for _ in range(random.randint(0, 14)):
+            identifier += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
+
+        valid = identifier not in invalid
+
+    return identifier
+
 def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> bool:
     identifier = context.get_identifier_of_type(type)
     if identifier is None:
@@ -194,21 +209,6 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         write_int_expression(io, context)
     else:
         assert False, f"Unexpected type '{type.name}'"
-
-def get_identifier(context: Context) -> str:
-    invalid: set[str] = {i.name for i in context.identifiers}
-    invalid |= {f.name for f in context.functions}
-    invalid |= INVALID_IDENTIFIERS
-
-    valid = False
-    while not valid:
-        identifier = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
-        for _ in range(random.randint(0, 14)):
-            identifier += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
-
-        valid = identifier not in invalid
-
-    return identifier
 
 def write_function(io: IO[str], context: Context, function: FunctionInfo) -> None:
     io.write('fun ')
