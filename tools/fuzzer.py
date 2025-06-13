@@ -18,14 +18,32 @@ class TypeInfo:
 TYPE_BOOL = TypeInfo('bool')
 TYPE_I32 = TypeInfo('i32')
 
-class FunctionInfo:
-    def __init__(self, name: str, return_type: TypeInfo):
+class ParamInfo:
+    def __init__(self, name: str, type: TypeInfo):
         self.name = name
+        self.type = type
+
+class FunctionInfo:
+    def __init__(self, name: str, params: list[ParamInfo], return_type: TypeInfo):
+        self.name = name
+        self.params = params
         self.return_type = return_type
+
+class IdentifierInfo:
+    def __init__(self, name: str, type: TypeInfo):
+        self.name = name
+        self.type = type
 
 class Context:
     def __init__(self):
         self.functions: list[FunctionInfo] = []
+        self.identifiers: list[IdentifierInfo] = []
+
+    def get_identifier_of_type(self, type: TypeInfo) -> IdentifierInfo|None:
+        ids = [i for i in self.identifiers if i.type.name == type.name]
+        if len(ids) == 0:
+            return None
+        return random.choice(ids)
 
 def md5(filename: pathlib.Path) -> str:
     m = hashlib.md5()
@@ -53,18 +71,24 @@ def write_bool_literal(io: IO[str]) -> None:
         value = 'true'
     io.write(value)
 
-def write_bool_binary_expression(io: IO[str]) -> None:
-    write_bool_expression(io)
+def write_bool_binary_expression(io: IO[str], context: Context) -> None:
+    write_bool_expression(io, context)
 
     op = random.choice(['&', '|'])
     io.write(f' {op} ')
 
-    write_bool_expression(io)
+    write_bool_expression(io, context)
 
-def write_bool_expression(io: IO[str]) -> None:
+def write_bool_expression(io: IO[str], context: Context) -> None:
     r = random.randint(0, 2)
     if r == 0:
-        write_bool_binary_expression(io)
+        write_bool_binary_expression(io, context)
+    elif r == 1:
+        identifier = context.get_identifier_of_type(TYPE_BOOL)
+        if identifier is not None:
+            io.write(identifier.name)
+        else:
+            write_bool_literal(io)
     else:
         write_bool_literal(io)
 
@@ -84,25 +108,32 @@ def write_int_literal(io: IO[str]) -> None:
 
     io.write(i)
 
-def write_int_binary_expression(io: IO[str]) -> None:
-    write_int_expression(io)
+def write_int_binary_expression(io: IO[str], context: Context) -> None:
+    write_int_expression(io, context)
 
     op = random.choice(['+', '-', '*', '&', '|', '^'])
     io.write(f' {op} ')
 
-    write_int_expression(io)
+    write_int_expression(io, context)
 
-def write_int_expression(io: IO[str]) -> None:
-    if random.randint(0, 2) == 0:
-        write_int_binary_expression(io)
+def write_int_expression(io: IO[str], context: Context) -> None:
+    r = random.randint(0, 2)
+    if r == 0:
+        write_int_binary_expression(io, context)
+    elif r == 1:
+        identifier = context.get_identifier_of_type(TYPE_I32)
+        if identifier is not None:
+            io.write(identifier.name)
+        else:
+            write_int_literal(io)
     else:
         write_int_literal(io)
 
-def write_expression(io: IO[str], type: TypeInfo) -> None:
+def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     if type.name == 'bool':
-        write_bool_expression(io)
+        write_bool_expression(io, context)
     elif type.name == 'i32':
-        write_int_expression(io)
+        write_int_expression(io, context)
     else:
         assert False, f"Unexpected type '{type.name}'"
 
@@ -111,22 +142,43 @@ def write_identifier(io: IO[str]) -> None:
     for _ in range(random.randint(0, 14)):
         io.write(random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789'))
 
+def get_identifier() -> str:
+    identifier = StringIO()
+    write_identifier(identifier)
+    return identifier.getvalue()
+
 def write_function(io: IO[str], context: Context, function: FunctionInfo) -> None:
     io.write('fun ')
     io.write(function.name)
-    io.write('() ')
+    io.write('(')
+    for param in function.params:
+        io.write(param.name)
+        io.write(' ')
+        io.write(param.type.name)
+        io.write(', ')
+        context.identifiers.append(IdentifierInfo(param.name, param.type))
+    io.write(') ')
     io.write(function.return_type.name)
     io.write('\n{\n    return ')
-    write_expression(io, function.return_type)
+
+    write_expression(io, context, function.return_type)
+    context.identifiers.clear()
+
     io.write(';\n}\n')
 
 def write_code(io: IO[str]) -> None:
     context = Context()
     for _ in range(random.randint(2, 10)):
-        name = StringIO()
-        write_identifier(name)
-        type = random.choice([TYPE_BOOL, TYPE_I32])
-        function = FunctionInfo(name.getvalue(), type)
+        name = get_identifier()
+        return_type = random.choice([TYPE_BOOL, TYPE_I32])
+
+        params: list[ParamInfo] = []
+        for _ in range(random.randint(0, 3)):
+            param_name = get_identifier()
+            param_type = random.choice([TYPE_BOOL, TYPE_I32])
+            params.append(ParamInfo(param_name, param_type))
+
+        function = FunctionInfo(name, params, return_type)
         context.functions.append(function)
 
     for function in context.functions:
@@ -147,8 +199,8 @@ def main() -> None:
             h = md5(src_filename)
             src_filename.rename(f'fuzzer-{h}.wip')
 
-    if src_filename.exists():
-        os.remove(src_filename)
+    # if src_filename.exists():
+        # os.remove(src_filename)
 
 if __name__ == '__main__':
     main()
