@@ -50,6 +50,8 @@ INVALID_IDENTIFIERS = {
     'const',
     'elif',
     'else',
+    'f32',
+    'f64',
     'for',
     'fun',
     'i8',
@@ -419,19 +421,30 @@ def write_code(io: IO[str]) -> None:
         function = TypeInfo(name, is_fun=True, params=params, return_type=return_type)
         context.functions.append(function)
 
-    context.clear_current_identifier_scope()
-    for function in context.functions:
-        context.add_identifier(IdentifierInfo(function.name, function))
-
+    structs: list[IdentifierInfo] = []
     for _ in range(random.randint(2, 5)):
         name = get_identifier(context)
+        context.push_scope()
         members: list[IdentifierInfo] = []
         for _ in range(int(random.normalvariate(5, 2))):
             member_name = get_identifier(context)
             member_type = random.choice(EXPRESSION_TYPES)
+            context.add_identifier(IdentifierInfo(member_name, member_type))
             member = IdentifierInfo(member_name, member_type)
             members.append(member)
-        context.add_identifier(IdentifierInfo(name, TypeInfo(name, is_struct=True, members=members)))
+        context.pop_scope()
+        struct = IdentifierInfo(name, TypeInfo(name, is_struct=True, members=members))
+        context.add_identifier(struct)
+        structs.append(struct)
+
+    # clear identifiers to get rid of functions params
+    context.clear_current_identifier_scope()
+
+    # add back functions and structs
+    for function in context.functions:
+        context.add_identifier(IdentifierInfo(function.name, function))
+    for struct in structs:
+        context.add_identifier(struct)
 
     items = context.get_current_identifier_scope()[:]
     random.shuffle(items)
