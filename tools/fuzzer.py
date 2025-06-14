@@ -11,9 +11,27 @@ from typing import IO
 SCRIPT_PATH = pathlib.Path(__file__)
 ROOT_DIR = SCRIPT_PATH.parent.parent
 
-class TypeInfo:
-    def __init__(self, name: str):
+class IdentifierInfo:
+    def __init__(self, name: str, type: 'TypeInfo'):
         self.name = name
+        self.type = type
+
+class TypeInfo:
+    def __init__(
+            self,
+            name: str,
+            is_struct: bool=False,
+            members: list[IdentifierInfo]|None=None,
+            is_fun: bool=False,
+            params: list[IdentifierInfo]|None=None,
+            return_type: 'TypeInfo|None'=None,
+    ):
+        self.name = name
+        self.is_struct = is_struct
+        self.members = [] if members is None else members
+        self.is_fun = is_fun
+        self.params = [] if params is None else params
+        self.return_type = return_type
 
 TYPE_FUN = TypeInfo('fun')
 TYPE_BOOL = TypeInfo('bool')
@@ -52,25 +70,9 @@ INVALID_IDENTIFIERS = {
     'while',
 }
 
-class ParamInfo:
-    def __init__(self, name: str, type: TypeInfo):
-        self.name = name
-        self.type = type
-
-class FunctionInfo:
-    def __init__(self, name: str, params: list[ParamInfo], return_type: TypeInfo):
-        self.name = name
-        self.params = params
-        self.return_type = return_type
-
-class IdentifierInfo:
-    def __init__(self, name: str, type: TypeInfo):
-        self.name = name
-        self.type = type
-
 class Context:
     def __init__(self):
-        self.functions: list[FunctionInfo] = []
+        self.functions: list[TypeInfo] = []
         self.identifier_stack: list[list[IdentifierInfo]] = [[]]
         self.indent_level = 0
 
@@ -95,11 +97,11 @@ class Context:
             return None
         return random.choice(ids)
 
-    def get_function_with_return_type(self, return_type: TypeInfo|None=None) -> FunctionInfo|None:
+    def get_function_with_return_type(self, return_type: TypeInfo|None=None) -> TypeInfo|None:
         if return_type is None:
             functions = self.functions
         else:
-            functions = [f for f in self.functions if f.return_type.name == return_type.name]
+            functions = [f for f in self.functions if f.return_type is not None and f.return_type.name == return_type.name]
 
         if len(functions) == 0:
             return None
@@ -336,7 +338,9 @@ def write_statement(io: IO[str], context: Context) -> None:
         write_function_call_expression(io, context, None)
         io.write(';\n')
 
-def write_function(io: IO[str], context: Context, function: FunctionInfo) -> None:
+def write_function(io: IO[str], context: Context, function: TypeInfo) -> None:
+    assert function.return_type is not None
+
     context.push_scope()
 
     io.write('fun ')
@@ -364,6 +368,22 @@ def write_function(io: IO[str], context: Context, function: FunctionInfo) -> Non
 
     context.pop_scope()
 
+def write_struct_definition(io: IO[str], context: Context, struct: TypeInfo) -> None:
+    io.write('struct ')
+    io.write(struct.name)
+    io.write('\n{\n')
+    context.indent_level += 1
+
+    for member in struct.members:
+        io.write(get_indent_str(context))
+        io.write(member.name)
+        io.write(' ')
+        io.write(member.type.name)
+        io.write(',\n')
+
+    context.indent_level -= 1
+    io.write('}\n')
+
 def write_code(io: IO[str]) -> None:
     context = Context()
     for _ in range(random.randint(2, 10)):
@@ -371,22 +391,41 @@ def write_code(io: IO[str]) -> None:
         context.add_identifier(IdentifierInfo(name, TYPE_FUN))
         return_type = random.choice(EXPRESSION_TYPES)
 
-        params: list[ParamInfo] = []
+        params: list[IdentifierInfo] = []
         for _ in range(random.randint(0, 3)):
             param_name = get_identifier(context)
             param_type = random.choice(EXPRESSION_TYPES)
-            context.add_identifier(IdentifierInfo(param_name, param_type))
-            params.append(ParamInfo(param_name, param_type))
+            param = IdentifierInfo(param_name, param_type)
+            context.add_identifier(param)
+            params.append(param)
 
-        function = FunctionInfo(name, params, return_type)
+        function = TypeInfo(name, is_fun=True, params=params, return_type=return_type)
         context.functions.append(function)
 
     context.clear_current_identifier_scope()
     for function in context.functions:
-        context.add_identifier(IdentifierInfo(function.name, TYPE_FUN))
+        context.add_identifier(IdentifierInfo(function.name, function))
 
-    for function in context.functions:
-        write_function(io, context, function)
+    for _ in range(random.randint(2, 5)):
+        name = get_identifier(context)
+        members: list[IdentifierInfo] = []
+        for _ in range(int(random.normalvariate(5, 2))):
+            member_name = get_identifier(context)
+            member_type = random.choice(EXPRESSION_TYPES)
+            member = IdentifierInfo(member_name, member_type)
+            members.append(member)
+        context.add_identifier(IdentifierInfo(name, TypeInfo(name, is_struct=True, members=members)))
+
+    items = context.get_current_identifier_scope()[:]
+    random.shuffle(items)
+    for i, item in enumerate(items):
+        if item.type.is_struct:
+            write_struct_definition(io, context, item.type)
+        elif item.type.is_fun:
+            write_function(io, context, item.type)
+
+        if i != len(items) - 1:
+            io.write('\n')
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
