@@ -176,12 +176,23 @@ def write_bool_literal(io: IO[str]) -> None:
     io.write(value)
 
 def write_bool_binary_expression(io: IO[str], context: Context) -> None:
-    write_bool_expression(io, context)
+    r = random.randint(0, 1)
+    if r == 0:
+        write_expression(io, context, TYPE_BOOL)
+        op = random.choice(['&', '|'])
+        io.write(f' {op} ')
+        write_expression(io, context, TYPE_BOOL)
+    else:
+        if context.expression_level > 1:
+            io.write('(')
 
-    op = random.choice(['&', '|'])
-    io.write(f' {op} ')
+        write_expression(io, context, TYPE_I32)
+        op = random.choice(['==', '!=', '<', '<=', '>', '>='])
+        io.write(f' {op} ')
+        write_expression(io, context, TYPE_I32)
 
-    write_bool_expression(io, context)
+        if context.expression_level > 1:
+            io.write(')')
 
 def write_bool_expression(io: IO[str], context: Context) -> None:
     r = random.randint(0, 9)
@@ -216,12 +227,12 @@ def write_int_literal(io: IO[str]) -> None:
     io.write(i)
 
 def write_int_binary_expression(io: IO[str], context: Context) -> None:
-    write_int_expression(io, context)
+    write_expression(io, context, TYPE_I32)
 
     op = random.choice(['+', '-', '*', '&', '|', '^'])
     io.write(f' {op} ')
 
-    write_int_expression(io, context)
+    write_expression(io, context, TYPE_I32)
 
 def write_int_expression(io: IO[str], context: Context) -> None:
     r = random.randint(0, 9)
@@ -272,6 +283,8 @@ def write_str_expression(io: IO[str], context: Context) -> None:
         write_str_literal(io)
 
 def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    context.expression_level += 1
+
     if type.name == 'bool':
         write_bool_expression(io, context)
     elif type.name == 'i32':
@@ -280,6 +293,8 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         write_str_expression(io, context)
     else:
         assert False, f"Unexpected type '{type.name}'"
+
+    context.expression_level -= 1
 
 def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
@@ -313,14 +328,14 @@ def write_block(io: IO[str], context: Context) -> None:
 def write_if_statement(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('if ')
-    write_bool_expression(io, context)
+    write_expression(io, context, TYPE_BOOL)
     io.write('\n')
     write_block(io, context)
 
     for _ in range(random.randint(0, 3)):
         io.write(get_indent_str(context))
         io.write('elif ')
-        write_bool_expression(io, context)
+        write_expression(io, context, TYPE_BOOL)
         io.write('\n')
         write_block(io, context)
 
