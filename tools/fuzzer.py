@@ -75,6 +75,7 @@ class Context:
         self.functions: list[TypeInfo] = []
         self.identifier_stack: list[list[IdentifierInfo]] = [[]]
         self.indent_level = 0
+        self.expression_level = 0
 
     def add_identifier(self, identifier: IdentifierInfo) -> None:
         self.identifier_stack[-1].append(identifier)
@@ -204,12 +205,13 @@ def write_int_literal(io: IO[str]) -> None:
             '0b0',
             '0o0',
             '0',
-            '123',
             '0x0',
             # '0xfeedface',
         ])
     else:
-        i = str(random.randint(-1_000_000, 1_000_000))
+        n = random.randint(-1_000_000, 1_000_000)
+        f = random.choice([bin, oct, str, hex])
+        i = f(n)
 
     io.write(i)
 
