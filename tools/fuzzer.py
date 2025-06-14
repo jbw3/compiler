@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-import hashlib
+import datetime
 import os
 import pathlib
 import random
 import subprocess
+import sys
 from typing import IO
 
 SCRIPT_PATH = pathlib.Path(__file__)
@@ -109,16 +110,6 @@ class Context:
         if len(functions) == 0:
             return None
         return random.choice(functions)
-
-def md5(filename: pathlib.Path) -> str:
-    m = hashlib.md5()
-    with open(filename, 'rb') as f:
-        buff = f.read(4096)
-        while buff != b'':
-            m.update(buff)
-            buff = f.read(4096)
-
-    return m.hexdigest()
 
 def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
@@ -465,9 +456,11 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     return args
 
-def main() -> None:
+def main() -> int:
     args = parse_args()
 
+    out_dir = pathlib.Path(datetime.datetime.now().strftime('fuzzer_%Y-%m-%d_%H-%M-%S'))
+    os.makedirs(out_dir, exist_ok=True)
     src_filename = pathlib.Path('fuzzer.wip')
     out_filename = pathlib.Path('fuzzer.o')
 
@@ -480,13 +473,17 @@ def main() -> None:
         if rc != 0:
             error_count += 1
             print(f'Error: rc={rc}')
-            h = md5(src_filename)
-            # src_filename.rename(f'fuzzer-{h}.wip')
+            src_filename.rename(out_dir / f'fuzzer-{error_count}.wip')
 
+    if error_count == 0 and out_dir.exists():
+        os.removedirs(out_dir)
     if not args.keep_source and src_filename.exists():
         os.remove(src_filename)
     if out_filename.exists():
         os.remove(out_filename)
 
+    return 0 if error_count == 0 else 1
+
 if __name__ == '__main__':
-    main()
+    rc = main()
+    sys.exit(rc)
