@@ -460,6 +460,7 @@ def write_struct_definition(io: IO[str], context: Context, struct: TypeInfo) -> 
 def write_code(io: IO[str]) -> None:
     context = Context()
 
+    all_types_weights: list[float] = [5.0] * len(context.all_types)
     structs: list[IdentifierInfo] = []
     for _ in range(random.randint(2, 5)):
         name = get_identifier(context)
@@ -467,7 +468,7 @@ def write_code(io: IO[str]) -> None:
         members: list[IdentifierInfo] = []
         for _ in range(int(random.normalvariate(5, 2))):
             member_name = get_identifier(context)
-            member_type = random.choice(context.basic_types) # TODO: use all types
+            member_type = random.choices(context.all_types, all_types_weights)[0]
             context.add_identifier(IdentifierInfo(member_name, member_type))
             member = IdentifierInfo(member_name, member_type)
             members.append(member)
@@ -476,12 +477,9 @@ def write_code(io: IO[str]) -> None:
         struct = IdentifierInfo(name, struct_type)
         context.add_identifier(struct)
         context.all_types.append(struct_type)
+        all_types_weights.append(1.0)
         structs.append(struct)
 
-    all_types_weights: list[float] = [
-        1.0 if t.is_struct else 2.5
-        for t in context.all_types
-    ]
     for _ in range(random.randint(2, 10)):
         name = get_identifier(context)
         context.add_identifier(IdentifierInfo(name, TYPE_FUN))
