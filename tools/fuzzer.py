@@ -188,19 +188,29 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
             io.write(')')
 
 def write_bool_expression(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 9)
-    if 0 <= r <= 1:
-        write_bool_binary_expression(io, context)
-    elif 2 <= r <= 4:
-        ok = write_identifier_expression(io, context, TYPE_BOOL)
-        if not ok:
+    weights: list[float] = [
+        3 / context.expression_level,
+        1,
+        2 / context.expression_level,
+        1,
+    ]
+    r = random.choices([0, 1, 2, 3], weights)[0]
+
+    match r:
+        case 0:
+            write_bool_binary_expression(io, context)
+        case 1:
+            ok = write_identifier_expression(io, context, TYPE_BOOL)
+            if not ok:
+                write_bool_literal(io)
+        case 2:
+            ok = write_function_call_expression(io, context, TYPE_BOOL)
+            if not ok:
+                write_bool_literal(io)
+        case 3:
             write_bool_literal(io)
-    elif 5 <= r <= 5:
-        ok = write_function_call_expression(io, context, TYPE_BOOL)
-        if not ok:
-            write_bool_literal(io)
-    else:
-        write_bool_literal(io)
+        case _:
+            assert False, f'Unexpected value: {r}'
 
 def write_int_literal(io: IO[str]) -> None:
     r = random.randrange(0, 2)
@@ -228,19 +238,29 @@ def write_int_binary_expression(io: IO[str], context: Context) -> None:
     write_expression(io, context, TYPE_I32)
 
 def write_int_expression(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 9)
-    if 0 <= r <= 1:
-        write_int_binary_expression(io, context)
-    elif 2 <= r <= 4:
-        ok = write_identifier_expression(io, context, TYPE_I32)
-        if not ok:
+    weights: list[float] = [
+        3 / context.expression_level,
+        1,
+        2 / context.expression_level,
+        1,
+    ]
+    r = random.choices([0, 1, 2, 3], weights)[0]
+
+    match r:
+        case 0:
+            write_int_binary_expression(io, context)
+        case 1:
+            ok = write_identifier_expression(io, context, TYPE_I32)
+            if not ok:
+                write_int_literal(io)
+        case 2:
+            ok = write_function_call_expression(io, context, TYPE_I32)
+            if not ok:
+                write_int_literal(io)
+        case 3:
             write_int_literal(io)
-    elif 5 <= r <= 5:
-        ok = write_function_call_expression(io, context, TYPE_I32)
-        if not ok:
-            write_int_literal(io)
-    else:
-        write_int_literal(io)
+        case _:
+            assert False, f'Unexpected value: {r}'
 
 REALLY_LONG_STRING = 'This is a ' + ('really, ' * 20) + 'long string.'
 
@@ -296,6 +316,25 @@ def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) 
 
     io.write(get_indent_str(context))
     io.write('}')
+
+def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    assert type.is_struct, f"Type '{type.name}' is not a struct"
+
+    weights: list[float] = [
+        1,
+        2 / context.expression_level,
+    ]
+    r = random.choices([0, 1], weights)[0]
+
+    match r:
+        case 0:
+            ok = write_identifier_expression(io, context, type)
+            if not ok:
+                write_struct_init_expression(io, context, type)
+        case 1:
+            write_struct_init_expression(io, context, type)
+        case _:
+            assert False, f'Unexpected value: {r}'
 
 def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     context.expression_level += 1
@@ -420,21 +459,6 @@ def write_struct_definition(io: IO[str], context: Context, struct: TypeInfo) -> 
 
 def write_code(io: IO[str]) -> None:
     context = Context()
-    for _ in range(random.randint(2, 10)):
-        name = get_identifier(context)
-        context.add_identifier(IdentifierInfo(name, TYPE_FUN))
-        return_type = random.choice(context.basic_types) # TODO: use all types
-
-        params: list[IdentifierInfo] = []
-        for _ in range(random.randint(0, 3)):
-            param_name = get_identifier(context)
-            param_type = random.choice(context.basic_types) # TODO: use all types
-            param = IdentifierInfo(param_name, param_type)
-            context.add_identifier(param)
-            params.append(param)
-
-        function = TypeInfo(name, is_fun=True, params=params, return_type=return_type)
-        context.functions.append(function)
 
     structs: list[IdentifierInfo] = []
     for _ in range(random.randint(2, 5)):
@@ -453,6 +477,26 @@ def write_code(io: IO[str]) -> None:
         context.add_identifier(struct)
         context.all_types.append(struct_type)
         structs.append(struct)
+
+    all_types_weights: list[float] = [
+        1.0 if t.is_struct else 2.5
+        for t in context.all_types
+    ]
+    for _ in range(random.randint(2, 10)):
+        name = get_identifier(context)
+        context.add_identifier(IdentifierInfo(name, TYPE_FUN))
+        return_type = random.choices(context.all_types, all_types_weights)[0]
+
+        params: list[IdentifierInfo] = []
+        for _ in range(random.randint(0, 3)):
+            param_name = get_identifier(context)
+            param_type = random.choices(context.all_types, all_types_weights)[0]
+            param = IdentifierInfo(param_name, param_type)
+            context.add_identifier(param)
+            params.append(param)
+
+        function = TypeInfo(name, is_fun=True, params=params, return_type=return_type)
+        context.functions.append(function)
 
     # clear identifiers to get rid of functions params
     context.clear_current_identifier_scope()
