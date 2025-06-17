@@ -39,12 +39,6 @@ TYPE_BOOL = TypeInfo('bool')
 TYPE_I32 = TypeInfo('i32')
 TYPE_STR = TypeInfo('str')
 
-EXPRESSION_TYPES = [
-    TYPE_BOOL,
-    TYPE_I32,
-    TYPE_STR,
-]
-
 INVALID_IDENTIFIERS = {
     'bool',
     'cast',
@@ -79,6 +73,12 @@ class Context:
         self.identifier_stack: list[list[IdentifierInfo]] = [[]]
         self.indent_level = 0
         self.expression_level = 0
+        self.basic_types = [
+            TYPE_BOOL,
+            TYPE_I32,
+            TYPE_STR,
+        ]
+        self.all_types = self.basic_types[:]
 
     def add_identifier(self, identifier: IdentifierInfo) -> None:
         self.identifier_stack[-1].append(identifier)
@@ -275,6 +275,28 @@ def write_str_expression(io: IO[str], context: Context) -> None:
     else:
         write_str_literal(io)
 
+def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    assert type.is_struct, f"Type '{type.name}' is not a struct"
+
+    io.write(type.name)
+    io.write('\n')
+    io.write(get_indent_str(context))
+    io.write('{\n')
+
+    context.indent_level += 1
+
+    for member in type.members:
+        io.write(get_indent_str(context))
+        io.write(member.name)
+        io.write(': ')
+        write_expression(io, context, member.type)
+        io.write(',\n')
+
+    context.indent_level -= 1
+
+    io.write(get_indent_str(context))
+    io.write('}')
+
 def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     context.expression_level += 1
 
@@ -284,6 +306,8 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         write_int_expression(io, context)
     elif type.name == 'str':
         write_str_expression(io, context)
+    elif type.is_struct:
+        write_struct_init_expression(io, context, type)
     else:
         assert False, f"Unexpected type '{type.name}'"
 
@@ -291,7 +315,7 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
 
 def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
-    type = random.choice(EXPRESSION_TYPES)
+    type = random.choice(context.all_types)
 
     io.write(get_indent_str(context))
     io.write('var ')
@@ -399,12 +423,12 @@ def write_code(io: IO[str]) -> None:
     for _ in range(random.randint(2, 10)):
         name = get_identifier(context)
         context.add_identifier(IdentifierInfo(name, TYPE_FUN))
-        return_type = random.choice(EXPRESSION_TYPES)
+        return_type = random.choice(context.basic_types) # TODO: use all types
 
         params: list[IdentifierInfo] = []
         for _ in range(random.randint(0, 3)):
             param_name = get_identifier(context)
-            param_type = random.choice(EXPRESSION_TYPES)
+            param_type = random.choice(context.basic_types) # TODO: use all types
             param = IdentifierInfo(param_name, param_type)
             context.add_identifier(param)
             params.append(param)
@@ -419,13 +443,15 @@ def write_code(io: IO[str]) -> None:
         members: list[IdentifierInfo] = []
         for _ in range(int(random.normalvariate(5, 2))):
             member_name = get_identifier(context)
-            member_type = random.choice(EXPRESSION_TYPES)
+            member_type = random.choice(context.basic_types) # TODO: use all types
             context.add_identifier(IdentifierInfo(member_name, member_type))
             member = IdentifierInfo(member_name, member_type)
             members.append(member)
         context.pop_scope()
-        struct = IdentifierInfo(name, TypeInfo(name, is_struct=True, members=members))
+        struct_type = TypeInfo(name, is_struct=True, members=members)
+        struct = IdentifierInfo(name, struct_type)
         context.add_identifier(struct)
+        context.all_types.append(struct_type)
         structs.append(struct)
 
     # clear identifiers to get rid of functions params
