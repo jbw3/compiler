@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import math
 import os
 import pathlib
 import random
@@ -322,7 +323,7 @@ def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> No
 
     weights: list[float] = [
         1,
-        2 / context.expression_level,
+        1 * math.exp(-context.expression_level),
     ]
     r = random.choices([0, 1], weights)[0]
 
@@ -400,16 +401,35 @@ def write_if_statement(io: IO[str], context: Context) -> None:
         io.write('else\n')
         write_block(io, context)
 
+def write_while_statement(io: IO[str], context: Context) -> None:
+    io.write(get_indent_str(context))
+    io.write('while ')
+    write_expression(io, context, TYPE_BOOL)
+    io.write('\n')
+    write_block(io, context)
+
 def write_statement(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 12)
-    if r == 0:
-        write_if_statement(io, context)
-    elif 1 <= r <= 6:
-        write_variable_declaration(io, context)
-    else:
-        io.write(get_indent_str(context))
-        write_function_call_expression(io, context, None)
-        io.write(';\n')
+    weights: list[float] = [
+        1 * math.exp(-0.3 * context.expression_level),
+        1 * math.exp(-0.3 * context.expression_level),
+        6,
+        6 * math.exp(-0.4 * context.expression_level),
+    ]
+    r = random.choices([0, 1, 2, 3], weights)[0]
+
+    match r:
+        case 0:
+            write_if_statement(io, context)
+        case 1:
+            write_while_statement(io, context)
+        case 2:
+            write_variable_declaration(io, context)
+        case 3:
+            io.write(get_indent_str(context))
+            write_function_call_expression(io, context, None)
+            io.write(';\n')
+        case _:
+            assert False, f'Unexpected value: {r}'
 
 def write_function(io: IO[str], context: Context, function: TypeInfo) -> None:
     assert function.return_type is not None
