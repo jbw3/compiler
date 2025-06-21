@@ -35,10 +35,11 @@ class TypeInfo:
         self.params = [] if params is None else params
         self.return_type = return_type
 
-TYPE_FUN = TypeInfo('fun')
+TYPE_FUN = TypeInfo('fun') # TODO: generate type for each function
 TYPE_BOOL = TypeInfo('bool')
 TYPE_I32 = TypeInfo('i32')
 TYPE_STR = TypeInfo('str')
+TYPE_TYPE = TypeInfo('type')
 
 INVALID_IDENTIFIERS = {
     'bool',
@@ -111,6 +112,12 @@ class Context:
         if len(functions) == 0:
             return None
         return random.choice(functions)
+
+    def get_type_by_name(self, name: str) -> TypeInfo|None:
+        for type in self.all_types:
+            if type.name == name:
+                return type
+        return None
 
 def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
@@ -347,7 +354,7 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     elif type.name == 'str':
         write_str_expression(io, context)
     elif type.is_struct:
-        write_struct_init_expression(io, context, type)
+        write_struct_expression(io, context, type)
     else:
         assert False, f"Unexpected type '{type.name}'"
 
@@ -355,7 +362,9 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
 
 def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
-    type = random.choice(context.all_types)
+
+    all_types_weights: list[float] = [1.0 if t.is_struct else 5.0 for t in context.all_types]
+    type = random.choices(context.all_types, all_types_weights)[0]
 
     io.write(get_indent_str(context))
     io.write('var ')
@@ -494,7 +503,7 @@ def write_code(io: IO[str]) -> None:
             members.append(member)
         context.pop_scope()
         struct_type = TypeInfo(name, is_struct=True, members=members)
-        struct = IdentifierInfo(name, struct_type)
+        struct = IdentifierInfo(name, TYPE_TYPE)
         context.add_identifier(struct)
         context.all_types.append(struct_type)
         all_types_weights.append(1.0)
@@ -528,8 +537,9 @@ def write_code(io: IO[str]) -> None:
     items = context.get_current_identifier_scope()[:]
     random.shuffle(items)
     for i, item in enumerate(items):
-        if item.type.is_struct:
-            write_struct_definition(io, context, item.type)
+        type = context.get_type_by_name(item.name)
+        if type is not None and type.is_struct:
+            write_struct_definition(io, context, type)
         elif item.type.is_fun:
             write_function(io, context, item.type)
 
