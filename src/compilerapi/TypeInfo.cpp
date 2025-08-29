@@ -146,9 +146,9 @@ const TypeInfo* TypeInfo::CreateFunctionType(
     return newFunType;
 }
 
-const TypeInfo* TypeInfo::CreateTypeAlias(ROString newName, const TypeInfo* typeInfo)
+const TypeInfo* TypeInfo::CreateTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo)
 {
-    TypeInfo* typeAlias = new TypeInfo(newName, newName, typeInfo->data);
+    TypeInfo* typeAlias = new TypeInfo(newName, newName, typeInfo->data, newToken);
     return typeAlias;
 }
 
@@ -178,8 +178,10 @@ TypeInfo::TypeInfo(
 TypeInfo::TypeInfo(
     ROString uniqueName,
     ROString shortName,
-    TypeInfoData* data
+    TypeInfoData* data,
+    const Token* token
 ) :
+    token(token),
     deleteData(false),
     data(data),
     uniqueName(uniqueName),

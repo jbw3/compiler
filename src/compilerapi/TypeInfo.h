@@ -121,7 +121,7 @@ public:
         const std::vector<ROString>& parameterNames,
         const TypeInfo* returnType);
 
-    static const TypeInfo* CreateTypeAlias(ROString newName, const TypeInfo* typeInfo);
+    static const TypeInfo* CreateTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo);
 
 private:
     static TypeId nextTypeId;
@@ -150,7 +150,8 @@ private:
     TypeInfo(
         ROString uniqueName,
         ROString shortName,
-        TypeInfoData* data
+        TypeInfoData* data,
+        const Token* token
     );
 
 public:

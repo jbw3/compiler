@@ -122,7 +122,7 @@ void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
             }
             else
             {
-                Type* type = GetType(unaryExpression->GetType());
+                Type* type = CreateLlvmType(unaryExpression->GetType());
                 resultValue = builder.CreateLoad(type, subExprValue, "load");
             }
             break;
@@ -182,7 +182,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             // if we are also doing a computation (e.g. +=), we need to load the left value
             if (BinaryExpression::IsComputationAssignment(op))
             {
-                Type* type = GetType(leftType);
+                Type* type = CreateLlvmType(leftType);
                 leftValue = builder.CreateLoad(type, leftValue, "load");
             }
         }
@@ -372,7 +372,7 @@ void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
             case BinaryExpression::eClosedRange:
             case BinaryExpression::eHalfOpenRange:
             {
-                Type* rangeType = GetType(binaryExpression->GetType());
+                Type* rangeType = CreateLlvmType(binaryExpression->GetType());
                 if (rangeType == nullptr)
                 {
                     resultValue = nullptr;
@@ -431,7 +431,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
     Value* indexValue = nullptr;
     if (rightType->GetNumBits() < uIntSizeNumBits)
     {
-        Type* extType = GetType(uIntSizeType);
+        Type* extType = CreateLlvmType(uIntSizeType);
         indexValue = builder.CreateZExt(rightValue, extType, "zeroext");
     }
     else
@@ -461,7 +461,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
         {
             const Token* opToken = binaryExpression->opToken;
 
-            Type* llvmStrType = GetType(compilerContext.typeRegistry.GetStringType());
+            Type* llvmStrType = CreateLlvmType(compilerContext.typeRegistry.GetStringType());
 
             const string& filename = compilerContext.GetFilename(opToken->filenameId);
             Constant* fileStrPtr = CreateConstantString(filename);
@@ -504,7 +504,7 @@ Value* LlvmIrGenerator::GenerateIntSubscriptIr(const BinaryExpression* binaryExp
 
     vector<Value*> valueIndices;
     valueIndices.push_back(indexValue);
-    Type* llvmType = GetType(binaryExpression->GetType());
+    Type* llvmType = CreateLlvmType(binaryExpression->GetType());
     Value* valuePtr = builder.CreateInBoundsGEP(llvmType, data, valueIndices, "value");
     Value* result = nullptr;
     if (binaryExpression->GetAccessType() == Expression::eAddress)
@@ -537,7 +537,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     Value* start = builder.CreateExtractValue(rightValue, 0, "start");
     if (innerTypeNumBits < uIntSizeNumBits)
     {
-        Type* extType = GetType(uIntSizeType);
+        Type* extType = CreateLlvmType(uIntSizeType);
         start = builder.CreateZExt(start, extType, "zeroext");
     }
 
@@ -545,7 +545,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     Value* end = builder.CreateExtractValue(rightValue, 1, "end");
     if (innerTypeNumBits < uIntSizeNumBits)
     {
-        Type* extType = GetType(uIntSizeType);
+        Type* extType = CreateLlvmType(uIntSizeType);
         end = builder.CreateZExt(end, extType, "zeroext");
     }
 
@@ -571,7 +571,7 @@ Value* LlvmIrGenerator::GenerateRangeSubscriptIr(const BinaryExpression* binaryE
     Type* llvmNewDataType = nullptr;
     if (resultType->IsArray())
     {
-        llvmNewDataType = GetType(resultType->GetInnerType());
+        llvmNewDataType = CreateLlvmType(resultType->GetInnerType());
     }
     else if (resultType->IsStr())
     {
@@ -684,7 +684,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     ROString varName = forLoop->variableName;
     const TypeInfo* varType = forLoop->variableType;
     bool isSigned = varType->GetSign() == TypeInfo::eSigned;
-    Type* type = GetType(varType);
+    Type* type = CreateLlvmType(varType);
     assert(type != nullptr && "Unknown variable declaration type");
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, type, varName);
     symbolTable.AddVariable(varName, forLoop->variableNameToken, varType, alloca);
@@ -698,7 +698,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     AllocaInst* indexAlloca = nullptr;
     if (hasIndex)
     {
-        indexType = GetType(indexTypeInfo);
+        indexType = CreateLlvmType(indexTypeInfo);
         assert(indexType != nullptr && "Unknown variable declaration type");
         indexAlloca = CreateVariableAlloc(currentFunction, indexType, indexName);
         symbolTable.AddVariable(indexName, forLoop->indexNameToken, indexTypeInfo, indexAlloca);
@@ -727,7 +727,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
     }
     else if (isArrayLoop)
     {
-        iterType = GetType(uIntSizeType);
+        iterType = CreateLlvmType(uIntSizeType);
 
         vector<unsigned> index(1);
         unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
@@ -817,7 +817,7 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
         // get the array value and store it in the iterator variable
         vector<Value*> valueIndices;
         valueIndices.push_back(iter);
-        Type* llvmIterableInnerType = GetType(iterableInnerType);
+        Type* llvmIterableInnerType = CreateLlvmType(iterableInnerType);
         Value* valuePtr = builder.CreateInBoundsGEP(llvmIterableInnerType, data, valueIndices, "value");
         Value* value = builder.CreateLoad(llvmIterableInnerType, valuePtr, "load");
         value = CreateExt(value, iterableInnerType, varType);
@@ -999,7 +999,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     if (dbgInfo)
     {
         SmallVector<Metadata*, 8> funTypes;
-        DIType* retDebugType = GetDebugType(declaration->returnType);
+        DIType* retDebugType = CreateLlvmDebugType(declaration->returnType);
         if (retDebugType == nullptr)
         {
             resultValue = nullptr;
@@ -1009,7 +1009,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 
         for (const Parameter* param : params)
         {
-            DIType* paramDebugType = GetDebugType(param->type);
+            DIType* paramDebugType = CreateLlvmDebugType(param->type);
             if (paramDebugType == nullptr)
             {
                 resultValue = nullptr;
@@ -1045,7 +1045,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
         if (dbgInfo)
         {
             unsigned line = token->line;
-            DIType* paramDebugType = GetDebugType(paramType);
+            DIType* paramDebugType = CreateLlvmDebugType(paramType);
             if (paramDebugType == nullptr)
             {
                 resultValue = nullptr;
@@ -1110,7 +1110,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
     for (const MemberDefinition* memberDef : structDefinition->members)
     {
         const MemberInfo* memberInfo = typeInfo->GetMember(memberDef->name);
-        Type* memberType = GetType(memberInfo->GetType());
+        Type* memberType = CreateLlvmType(memberInfo->GetType());
         if (memberType == nullptr)
         {
             resultValue = nullptr;
@@ -1136,7 +1136,7 @@ void LlvmIrGenerator::Visit(StructDefinition* structDefinition)
         for (const MemberInfo* member : typeInfo->GetMembers())
         {
             const TypeInfo* memberType = member->GetType();
-            DIType* memberDiType = GetDebugType(memberType);
+            DIType* memberDiType = CreateLlvmDebugType(memberType);
             if (memberDiType == nullptr)
             {
                 resultValue = nullptr;
@@ -1167,6 +1167,8 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
     const TypeInfo* structType = compilerContext.GetTypeConstantValue(typeIdx);
     ROString structName = structType->GetShortName();
 
+    // TODO: delete this?
+#if 0
     // add debug info for struct members
     if (dbgInfo)
     {
@@ -1178,7 +1180,7 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
         for (const MemberInfo* member : structType->GetMembers())
         {
             const TypeInfo* memberType = member->GetType();
-            DIType* memberDiType = GetDebugType(memberType);
+            DIType* memberDiType = CreateLlvmDebugType(memberType);
             if (memberDiType == nullptr)
             {
                 resultValue = nullptr;
@@ -1210,12 +1212,13 @@ void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
         DICompositeType* diType = iter->second;
         diType->replaceElements(elementsArray);
     }
+#endif
 }
 
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
     const TypeInfo* typeInfo = structInitializationExpression->GetType();
-    Type* type = GetType(typeInfo);
+    Type* type = CreateLlvmType(typeInfo);
     if (type == nullptr)
     {
         resultValue = nullptr;
@@ -1260,18 +1263,6 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
 
 void LlvmIrGenerator::Visit(Modules* modules)
 {
-    // create file debug info
-    if (dbgInfo)
-    {
-        for (ModuleDefinition* moduleDefinition : modules->modules)
-        {
-            unsigned fileId = moduleDefinition->fileId;
-            const string& filename = compilerContext.GetFilename(fileId);
-
-            diFiles[fileId] = diBuilder->createFile(filename, fs::current_path().string());
-        }
-    }
-
     // add all struct names to types map
     for (StructDefinition* structDef : modules->orderedStructDefinitions)
     {
@@ -1299,6 +1290,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
     }
 
     // TODO: is this needed?
+#if 0
     // add all struct names to types map
     for (const ModuleDefinition* moduleDefinition : modules->modules)
     {
@@ -1345,6 +1337,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
             }
         }
     }
+#endif
 
     // add global constants to symbol table
     for (ConstantDeclaration* constDecl : modules->orderedGlobalConstants)
@@ -1491,7 +1484,7 @@ void LlvmIrGenerator::Visit(StringLiteralExpression* stringLiteralExpression)
 {
     const vector<char>& chars = stringLiteralExpression->characters;
     Constant* strPtr = CreateConstantString(chars);
-    Type* type = GetType(compilerContext.typeRegistry.GetStringType());
+    Type* type = CreateLlvmType(compilerContext.typeRegistry.GetStringType());
     resultValue = builder.CreateLoad(type, strPtr, "load");
 }
 
@@ -1594,12 +1587,12 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     {
         const vector<char>& value = compilerContext.GetStrConstantValue(constIdx);
         Constant* strPtr = CreateConstantString(value);
-        Type* llvmStrType = GetType(compilerContext.typeRegistry.GetStringType());
+        Type* llvmStrType = CreateLlvmType(compilerContext.typeRegistry.GetStringType());
         constValue = builder.CreateLoad(llvmStrType, strPtr, "load");
     }
     else if (type->IsRange())
     {
-        StructType* rangeType = static_cast<StructType*>(GetType(type));
+        StructType* rangeType = static_cast<StructType*>(CreateLlvmType(type));
         if (rangeType == nullptr)
         {
             logger.LogInternalError("Unknown range type");
@@ -1620,7 +1613,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     }
     else if (type->IsAggregate())
     {
-        Type* llvmType = GetType(type);
+        Type* llvmType = CreateLlvmType(type);
         if (llvmType == nullptr)
         {
             logger.LogInternalError("Unknown const struct definition type");
@@ -1671,8 +1664,8 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
             uint64_t arraySize = value.valueIndices.size();
             const TypeInfo* elementType = type->GetInnerType();
 
-            Type* arrayType = GetType(type);
-            Type* innerType = GetType(elementType);
+            Type* arrayType = CreateLlvmType(type);
+            Type* innerType = CreateLlvmType(elementType);
             Type* llvmArrayType = ArrayType::get(innerType, arraySize);
             AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
@@ -1780,8 +1773,8 @@ llvm::Value* LlvmIrGenerator::CreateSizeValueArrayIr(const TypeInfo* arrayTypeIn
     unsigned uIntSizeNumBits = uIntSizeType->GetNumBits();
 
     const TypeInfo* innerTypeInfo = arrayTypeInfo->GetInnerType();
-    Type* arrayType = GetType(arrayTypeInfo);
-    Type* innerType = GetType(innerTypeInfo);
+    Type* arrayType = CreateLlvmType(arrayTypeInfo);
+    Type* innerType = CreateLlvmType(innerTypeInfo);
     Type* llvmArrayType = ArrayType::get(innerType, arraySize);
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
@@ -1850,8 +1843,8 @@ void LlvmIrGenerator::Visit(ArrayMultiValueExpression* arrayExpression)
     uint64_t arraySize = expressions.size();
 
     const TypeInfo* typeInfo = arrayExpression->GetType();
-    Type* arrayType = GetType(typeInfo);
-    Type* innerType = GetType(typeInfo->GetInnerType());
+    Type* arrayType = CreateLlvmType(typeInfo);
+    Type* innerType = CreateLlvmType(typeInfo->GetInnerType());
     Type* llvmArrayType = ArrayType::get(innerType, arraySize);
     AllocaInst* alloca = CreateVariableAlloc(currentFunction, llvmArrayType, "array");
 
@@ -1949,12 +1942,12 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
     {
         if (castType->IsInt())
         {
-            Type* dstType = GetType(castType);
+            Type* dstType = CreateLlvmType(castType);
             resultValue = builder.CreateZExt(resultValue, dstType, "cast");
         }
         else if (castType->IsFloat())
         {
-            Type* dstType = GetType(castType);
+            Type* dstType = CreateLlvmType(castType);
             resultValue = builder.CreateUIToFP(resultValue, dstType, "cast");
         }
         else if (castType->IsBool())
@@ -1974,12 +1967,12 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
             unsigned castSize = castType->GetNumBits();
             if (castSize < exprSize)
             {
-                Type* dstType = GetType(castType);
+                Type* dstType = CreateLlvmType(castType);
                 resultValue = builder.CreateTrunc(resultValue, dstType, "cast");
             }
             else if (castSize > exprSize)
             {
-                Type* dstType = GetType(castType);
+                Type* dstType = CreateLlvmType(castType);
 
                 TypeInfo::ESign exprSign = exprType->GetSign();
                 if (exprSign == TypeInfo::eSigned)
@@ -1998,7 +1991,7 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
         }
         else if (castType->IsFloat())
         {
-            Type* dstType = GetType(castType);
+            Type* dstType = CreateLlvmType(castType);
             TypeInfo::ESign exprSign = exprType->GetSign();
             Instruction::CastOps castOp = (exprSign == TypeInfo::eSigned) ? Instruction::CastOps::SIToFP : Instruction::CastOps::UIToFP;
             resultValue = builder.CreateCast(castOp, resultValue, dstType, "cast");
@@ -2019,7 +2012,7 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
     {
         if (castType->IsInt())
         {
-            Type* dstType = GetType(castType);
+            Type* dstType = CreateLlvmType(castType);
             TypeInfo::ESign exprSign = castType->GetSign();
             Instruction::CastOps castOp = (exprSign == TypeInfo::eSigned) ? Instruction::CastOps::FPToSI : Instruction::CastOps::FPToUI;
             resultValue = builder.CreateCast(castOp, resultValue, dstType, "cast");
@@ -2049,12 +2042,12 @@ void LlvmIrGenerator::Visit(CastExpression* castExpression)
             unsigned castSize = castType->GetNumBits();
             if (castSize < exprSize)
             {
-                Type* dstType = GetType(castType);
+                Type* dstType = CreateLlvmType(castType);
                 resultValue = builder.CreateFPTrunc(resultValue, dstType, "cast");
             }
             else if (castSize > exprSize)
             {
-                Type* dstType = GetType(castType);
+                Type* dstType = CreateLlvmType(castType);
                 resultValue = builder.CreateFPExt(resultValue, dstType, "cast");
             }
             else // sizes are equal
@@ -2102,7 +2095,7 @@ void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
         {
             assert(exprType->GetNumBits() < castType->GetNumBits());
 
-            Type* dstType = GetType(castType);
+            Type* dstType = CreateLlvmType(castType);
             resultValue = builder.CreateFPExt(resultValue, dstType, "fpext");
         }
         else
@@ -2177,12 +2170,12 @@ void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
 
     if (accessType == Expression::eAddress || isPointer)
     {
-        Type* llvmStructType = GetType(type);
-        Type* llvmMemberType = GetType(member->GetType());
+        Type* llvmStructType = CreateLlvmType(type);
+        Type* llvmMemberType = CreateLlvmType(member->GetType());
 
         if (accessType == Expression::eAddress && isPointer)
         {
-            Type* llvmStructPointerType = GetType(expr->GetType());
+            Type* llvmStructPointerType = CreateLlvmType(expr->GetType());
             resultValue = builder.CreateLoad(llvmStructPointerType, resultValue, "load");
         }
 
@@ -2269,7 +2262,7 @@ void LlvmIrGenerator::Visit(BranchExpression* branchExpression)
     function->insert(function->end(), mergeBlock);
     builder.SetInsertPoint(mergeBlock);
 
-    Type* phiType = GetType(resultType);
+    Type* phiType = CreateLlvmType(resultType);
     PHINode* phiNode = builder.CreatePHI(phiType, 2, "phi");
     phiNode->addIncoming(ifExprValue, trueBlock);
     phiNode->addIncoming(elseExprValue, falseBlock);
@@ -2298,7 +2291,7 @@ void LlvmIrGenerator::Visit(VariableDeclaration* variableDeclaration)
 {
     ROString varName = variableDeclaration->name;
     const TypeInfo* varType = variableDeclaration->variableType;
-    Type* type = GetType(varType);
+    Type* type = CreateLlvmType(varType);
     if (type == nullptr)
     {
         resultValue = nullptr;
@@ -2329,10 +2322,26 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     module->setDataLayout(targetMachine->createDataLayout());
     module->setTargetTriple(targetMachine->getTargetTriple().str());
 
+    if (dbgInfo)
+    {
+        // initialize debug info builder
+        diBuilder = new DIBuilder(*module);
+
+        // create file debug info
+        diFiles = new DIFile*[syntaxTree->modules.size()];
+        for (ModuleDefinition* moduleDefinition : syntaxTree->modules)
+        {
+            unsigned fileId = moduleDefinition->fileId;
+            const string& filename = compilerContext.GetFilename(fileId);
+
+            diFiles[fileId] = diBuilder->createFile(filename, fs::current_path().string());
+        }
+    }
+
     ArrayRef<Type*> emptyArray;
     unitType = StructType::create(context, emptyArray, "UnitType");
 
-    strStructElements[0] = GetType(uIntSizeType);
+    strStructElements[0] = CreateLlvmType(uIntSizeType);
     strStructElements[1] = PointerType::get(Type::getInt8Ty(context), 0);
 
     ArrayRef<Type*> strArrayRef(strStructElements, STR_STRUCT_ELEMENTS_SIZE);
@@ -2345,8 +2354,12 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     // create LLVM types
     for (const TypeInfo* type : compilerContext.typeRegistry)
     {
-        // TODO: Factor out logic into CreateLlvmType() function
-        GetType(type);
+        CreateLlvmType(type);
+
+        if (dbgInfo)
+        {
+            CreateLlvmDebugType(type);
+        }
     }
 
     // add struct members
@@ -2358,7 +2371,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
             structMembers.clear();
             for (const MemberInfo* member : type->GetMembers())
             {
-                Type* llvmMemberType = GetType(member->GetType());
+                Type* llvmMemberType = CreateLlvmType(member->GetType());
                 assert(llvmMemberType != nullptr && "Unkown member definition type");
                 structMembers.push_back(llvmMemberType);
             }
@@ -2367,15 +2380,50 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
             assert(iter != types.end() && "Could not find struct LLVM type");
             StructType* structType = static_cast<StructType*>(iter->second);
             structType->setBody(structMembers);
+
+            // add debug info for struct members
+            if (dbgInfo)
+            {
+                if (type->GetToken() != nullptr)
+                {
+                    DIFile* diFile = diFiles[type->GetToken()->filenameId];
+
+                    SmallVector<Metadata*, 8> elements;
+
+                    uint64_t offset = 0;
+                    for (const MemberInfo* member : type->GetMembers())
+                    {
+                        const TypeInfo* memberType = member->GetType();
+                        DIType* memberDiType = CreateLlvmDebugType(memberType);
+                        assert(memberDiType != nullptr && "Unknown debug member definition type");
+
+                        uint64_t memberSize = memberDiType->getSizeInBits();
+                        unsigned pointerSize = compilerContext.typeRegistry.GetPointerSize();
+                        uint32_t alignment = (memberSize > pointerSize) ? pointerSize : static_cast<uint32_t>(memberSize);
+                        if (alignment > 0)
+                        {
+                            uint32_t rem = offset % alignment;
+                            if (rem > 0)
+                            {
+                                offset += alignment - rem;
+                            }
+                        }
+
+                        ROString memberName = member->GetName();
+                        unsigned memberLine = member->GetToken()->line;
+                        elements.push_back(diBuilder->createMemberType(diFile, toStringRef(memberName), diFile, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
+
+                        offset += memberSize;
+                    }
+
+                    DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+                    auto iter = diTypes.find(type->GetId());
+                    assert(iter != diTypes.end());
+                    DICompositeType* diType = static_cast<DICompositeType*>(iter->second);
+                    diType->replaceElements(elementsArray);
+                }
+            }
         }
-    }
-
-    if (dbgInfo)
-    {
-        // initialize debug info builder
-        diBuilder = new DIBuilder(*module);
-
-        diFiles = new DIFile*[syntaxTree->modules.size()];
     }
 
     // generate LLVM IR from syntax tree
@@ -2402,7 +2450,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
 {
     // get the return type
-    Type* returnType = GetType(type->GetReturnType());
+    Type* returnType = CreateLlvmType(type->GetReturnType());
     if (returnType == nullptr)
     {
         logger.LogInternalError("Invalid function return type");
@@ -2413,7 +2461,7 @@ FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
     vector<Type*> paramTypes;
     for (const TypeInfo* paramTypeInfo : type->GetParamTypes())
     {
-        Type* paramType = GetType(paramTypeInfo);
+        Type* paramType = CreateLlvmType(paramTypeInfo);
         if (paramType == nullptr)
         {
             logger.LogInternalError("Invalid function param type");
@@ -2426,7 +2474,7 @@ FunctionType* LlvmIrGenerator::CreateLlvmFunctionType(const TypeInfo* type)
     return funType;
 }
 
-Type* LlvmIrGenerator::GetType(const TypeInfo* type)
+Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
 {
     // try to lookup this type to see if it's already been created
     auto iter = types.find(type->GetId());
@@ -2434,8 +2482,6 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     {
         return iter->second;
     }
-
-    // TODO: split the code below into a CreateLlvmType() function
 
     Type* llvmType = nullptr;
     if (type->IsSameAs(*TypeInfo::UnitType))
@@ -2461,7 +2507,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     }
     else if (type->IsPointer())
     {
-        Type* innerType = GetType(type->GetInnerType());
+        Type* innerType = CreateLlvmType(type->GetInnerType());
         if (innerType != nullptr)
         {
             llvmType = innerType->getPointerTo();
@@ -2475,7 +2521,7 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
             vector<Type*> members;
             for (const MemberInfo* memberInfo : type->GetMembers())
             {
-                Type* memberType = GetType(memberInfo->GetType());
+                Type* memberType = CreateLlvmType(memberInfo->GetType());
                 if (memberType == nullptr)
                 {
                     return nullptr;
@@ -2488,11 +2534,11 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
         }
         else if (type->IsArray())
         {
-            Type* innerType = GetType(type->GetInnerType());
+            Type* innerType = CreateLlvmType(type->GetInnerType());
             if (innerType != nullptr)
             {
                 Type* arrayStructElements[2];
-                arrayStructElements[0] = GetType(uIntSizeType);
+                arrayStructElements[0] = CreateLlvmType(uIntSizeType);
                 arrayStructElements[1] = PointerType::get(innerType, 0);
 
                 ArrayRef<Type*> arrayRef(arrayStructElements, 2);
@@ -2528,8 +2574,15 @@ Type* LlvmIrGenerator::GetType(const TypeInfo* type)
     return llvmType;
 }
 
-DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
+DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
 {
+    // try to lookup this type to see if it's already been created
+    auto iter = diTypes.find(type->GetId());
+    if (iter != diTypes.end())
+    {
+        return iter->second;
+    }
+
     DIType* diType = nullptr;
     if (type->IsInt())
     {
@@ -2552,7 +2605,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     }
     else if (type->IsPointer())
     {
-        DIType* innerDiType = GetDebugType(type->GetInnerType());
+        DIType* innerDiType = CreateLlvmDebugType(type->GetInnerType());
         if (innerDiType == nullptr)
         {
             return nullptr;
@@ -2575,7 +2628,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         for (const MemberInfo* member : strType->GetMembers())
         {
             const TypeInfo* memberType = member->GetType();
-            DIType* memberDiType = GetDebugType(memberType);
+            DIType* memberDiType = CreateLlvmDebugType(memberType);
             if (memberDiType == nullptr)
             {
                 return nullptr;
@@ -2603,7 +2656,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         for (const MemberInfo* member : type->GetMembers())
         {
             const TypeInfo* memberType = member->GetType();
-            DIType* memberDiType = GetDebugType(memberType);
+            DIType* memberDiType = CreateLlvmDebugType(memberType);
             if (memberDiType == nullptr)
             {
                 return nullptr;
@@ -2631,7 +2684,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         for (const MemberInfo* member : type->GetMembers())
         {
             const TypeInfo* memberType = member->GetType();
-            DIType* memberDiType = GetDebugType(memberType);
+            DIType* memberDiType = CreateLlvmDebugType(memberType);
             if (memberDiType == nullptr)
             {
                 return nullptr;
@@ -2654,7 +2707,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
     else if (type->IsFunction())
     {
         SmallVector<Metadata*, 8> funTypes;
-        DIType* retDebugType = GetDebugType(type->GetReturnType());
+        DIType* retDebugType = CreateLlvmDebugType(type->GetReturnType());
         if (retDebugType == nullptr)
         {
             return nullptr;
@@ -2663,7 +2716,7 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
 
         for (const TypeInfo* paramType : type->GetParamTypes())
         {
-            DIType* paramDebugType = GetDebugType(paramType);
+            DIType* paramDebugType = CreateLlvmDebugType(paramType);
             if (paramDebugType == nullptr)
             {
                 return nullptr;
@@ -2674,8 +2727,29 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
         diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetShortName()));
     }
+    else if (type->IsAggregate())
+    {
+        DIFile* diFile = nullptr;
+        unsigned line = 0;
+
+        const Token* token = type->GetToken();
+        if (token->type != Token::eInvalid)
+        {
+            diFile = diFiles[token->filenameId];
+            line = token->line;
+        }
+
+        ROString name = type->GetShortName();
+        unsigned numBits = type->GetNumBits();
+
+        // TODO: set alignment
+        SmallVector<Metadata*, 0> elements;
+        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
+        diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
+    }
     else
     {
+        // TODO: delete this?
         ROString name = type->GetShortName();
         auto iter = diStructTypes.find(name);
         if (iter != diStructTypes.end())
@@ -2688,13 +2762,19 @@ DIType* LlvmIrGenerator::GetDebugType(const TypeInfo* type)
         }
     }
 
+    if (diType != nullptr)
+    {
+        // register type so we don't have to create it again
+        diTypes.insert({type->GetId(), diType});
+    }
+
     return diType;
 }
 
 bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcDecl)
 {
     // get the return type
-    Type* returnType = GetType(funcDecl->returnType);
+    Type* returnType = CreateLlvmType(funcDecl->returnType);
     if (returnType == nullptr)
     {
         logger.LogInternalError("Invalid function return type");
@@ -2707,7 +2787,7 @@ bool LlvmIrGenerator::CreateFunctionDeclaration(const FunctionDeclaration* funcD
     parameters.reserve(declParams.size());
     for (const Parameter* declParam : declParams)
     {
-        Type* varType = GetType(declParam->type);
+        Type* varType = CreateLlvmType(declParam->type);
         parameters.push_back(varType);
     }
 
@@ -2729,7 +2809,7 @@ AllocaInst* LlvmIrGenerator::CreateVariableAlloc(Function* function, Type* type,
 
 Value* LlvmIrGenerator::CreateExt(llvm::Value* value, const TypeInfo* valueType, const TypeInfo* dstType)
 {
-    Type* llvmType = GetType(dstType);
+    Type* llvmType = CreateLlvmType(dstType);
 
     if (valueType->GetSign() == TypeInfo::eContextDependent)
     {
@@ -2822,7 +2902,7 @@ void LlvmIrGenerator::CreateDebugVariable(const Token* token, const TypeInfo* ty
     {
         unsigned line = token->line;
         unsigned column = token->column;
-        DIType* varDebugType = GetDebugType(type);
+        DIType* varDebugType = CreateLlvmDebugType(type);
         if (varDebugType == nullptr)
         {
             resultValue = nullptr;

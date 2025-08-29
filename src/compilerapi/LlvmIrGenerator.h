@@ -180,7 +180,8 @@ private:
     std::unordered_map<std::vector<char>, llvm::Constant*> strings;
     llvm::Type* boolType;
     std::unordered_map<TypeId, llvm::Type*> types;
-    std::unordered_map<ROString, llvm::DICompositeType*> diStructTypes;
+    std::unordered_map<TypeId, llvm::DIType*> diTypes;
+    std::unordered_map<ROString, llvm::DICompositeType*> diStructTypes; // TODO: delete this?
     std::stack<LoopInfo> loops;
     const TypeInfo* uIntSizeType;
 
@@ -198,9 +199,11 @@ private:
 
     llvm::FunctionType* CreateLlvmFunctionType(const TypeInfo* type);
 
-    llvm::Type* GetType(const TypeInfo* type);
+    // TODO: Create GetLlvmType()
+    llvm::Type* CreateLlvmType(const TypeInfo* type);
 
-    llvm::DIType* GetDebugType(const TypeInfo* type);
+    // TODO: Create GetLlvmDebugType()
+    llvm::DIType* CreateLlvmDebugType(const TypeInfo* type);
 
     bool CreateFunctionDeclaration(const SyntaxTree::FunctionDeclaration* funcDecl);
 

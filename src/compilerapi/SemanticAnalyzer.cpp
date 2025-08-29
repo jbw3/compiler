@@ -3649,7 +3649,7 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
         const TypeInfo* exprType = compilerContext.GetTypeConstantValue(constIdx);
 
         // create a new name for this type
-        const TypeInfo* newType = compilerContext.typeRegistry.GetTypeAlias(constName, exprType);
+        const TypeInfo* newType = compilerContext.typeRegistry.GetTypeAlias(constName, constantDeclaration->nameToken, exprType);
         constIdx = compilerContext.AddTypeConstantValue(newType);
     }
 

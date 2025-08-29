@@ -41,7 +41,7 @@ public:
 
     const TypeInfo* GetArrayOfType(const TypeInfo* type);
 
-    const TypeInfo* GetTypeAlias(ROString newName, const TypeInfo* typeInfo);
+    const TypeInfo* GetTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo);
 
     bool RegisterType(const TypeInfo* typeInfo);
 

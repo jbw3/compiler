@@ -290,9 +290,9 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
     return newArrayType;
 }
 
-const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const TypeInfo *typeInfo)
+const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const Token* newToken, const TypeInfo *typeInfo)
 {
-    const TypeInfo* newTypeInfo = TypeInfo::CreateTypeAlias(newName, typeInfo);
+    const TypeInfo* newTypeInfo = TypeInfo::CreateTypeAlias(newName, newToken, typeInfo);
     RegisterType(newTypeInfo);
     return newTypeInfo;
 }
