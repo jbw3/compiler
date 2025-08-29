@@ -79,7 +79,7 @@ $filename2
 !22 = !{!23, !24}
 !23 = !DIDerivedType(tag: DW_TAG_member, name: "x", scope: !1, file: !1, line: 23, baseType: !5, size: 32, align: 32)
 !24 = !DIDerivedType(tag: DW_TAG_member, name: "y", scope: !1, file: !1, line: 24, baseType: !5, size: 32, align: 32, offset: 32)
-!25 = !DIDerivedType(tag: DW_TAG_member, name: "string", scope: !18, file: !18, line: 9, baseType: !26, size: 128, align: 32)
+!25 = !DIDerivedType(tag: DW_TAG_member, name: "string", scope: !18, file: !18, line: 9, baseType: !26, size: 128, align: 64)
 !26 = !DICompositeType(tag: DW_TAG_structure_type, name: "str", size: 128, elements: !27)
 !27 = !{!28, !30}
 !28 = !DIDerivedType(tag: DW_TAG_member, name: "Size", baseType: !29, size: 64, align: 4)

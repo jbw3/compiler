@@ -685,8 +685,8 @@ $filename
 !111 = !DICompositeType(tag: DW_TAG_structure_type, name: "TestStruct", scope: !1, file: !1, line: 53, elements: !112)
 !112 = !{!113, !114, !115}
 !113 = !DIDerivedType(tag: DW_TAG_member, name: "num1", scope: !1, file: !1, line: 55, baseType: !5, size: 32, align: 32)
-!114 = !DIDerivedType(tag: DW_TAG_member, name: "num2", scope: !1, file: !1, line: 56, baseType: !21, size: 64, align: 32, offset: 32)
-!115 = !DIDerivedType(tag: DW_TAG_member, name: "flag", scope: !1, file: !1, line: 57, baseType: !58, size: 8, align: 8, offset: 96)
+!114 = !DIDerivedType(tag: DW_TAG_member, name: "num2", scope: !1, file: !1, line: 56, baseType: !21, size: 64, align: 64, offset: 64)
+!115 = !DIDerivedType(tag: DW_TAG_member, name: "flag", scope: !1, file: !1, line: 57, baseType: !58, size: 8, align: 8, offset: 128)
 !116 = !DILocation(line: 43, scope: !104)
 !117 = !DILocation(line: 45, column: 9, scope: !110)
 !118 = !DILocation(line: 48, column: 15, scope: !110)
@@ -759,7 +759,7 @@ $filename
 !185 = !DICompositeType(tag: DW_TAG_structure_type, name: "C", scope: !1, file: !1, line: 83, elements: !186)
 !186 = !{!187, !188}
 !187 = !DIDerivedType(tag: DW_TAG_member, name: "n", scope: !1, file: !1, line: 83, baseType: !5, size: 32, align: 32)
-!188 = !DIDerivedType(tag: DW_TAG_member, name: "a", scope: !1, file: !1, line: 83, baseType: !189, size: 64, align: 32, offset: 32)
+!188 = !DIDerivedType(tag: DW_TAG_member, name: "a", scope: !1, file: !1, line: 83, baseType: !189, size: 64, align: 64, offset: 64)
 !189 = !DIDerivedType(tag: DW_TAG_pointer_type, name: "&A", baseType: !177, size: 64)
 !190 = !{!191}
 !191 = !DILocalVariable(name: "a", arg: 1, scope: !174, file: !1, line: 85, type: !177)
