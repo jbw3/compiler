@@ -2645,6 +2645,10 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
         diType = diBuilder->createStructType(nullptr, toStringRef(name), nullptr, 0, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
+    else if (type->IsType())
+    {
+        diType = diBuilder->createBasicType(toStringRef(TypeInfo::TypeType->GetShortName()), 0, dwarf::DW_ATE_unsigned);
+    }
     else if (type->IsArray())
     {
         ROString name = type->GetShortName();
