@@ -261,6 +261,13 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
             "var s = struct { a i32, b i32 };",
             "error: Variable cannot be of type 'type'",
         },
+
+        // str can't be initialized like a struct
+        {
+            "const S = str;\n"
+            "var s = S { };\n",
+            "error: Expression value is not a struct type",
+        }
     };
 
     bool ok = true;

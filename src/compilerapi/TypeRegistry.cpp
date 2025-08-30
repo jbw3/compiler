@@ -44,7 +44,7 @@ TypeRegistry::TypeRegistry(CompilerContext& compilerContext) :
     uintSizeType = new TypeInfo(pointerSize, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
     RegisterType(uintSizeType);
 
-    stringType = new TypeInfo(pointerSize * 2, TypeInfo::F_STR | TypeInfo::F_AGGREGATE, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD);
+    stringType = new TypeInfo(pointerSize * 2, TypeInfo::F_STR, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD);
     stringType->AddMember("Size", uintSizeType, false, Token::None);
     stringType->AddMember("Data", GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
     RegisterType(stringType);
@@ -113,7 +113,7 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
     if (rangeType == nullptr)
     {
         unsigned size = memberType->GetNumBits() * 2;
-        uint16_t flags = TypeInfo::F_RANGE | TypeInfo::F_AGGREGATE | (isHalfOpen ? TypeInfo::F_HALF_OPEN : TypeInfo::F_NONE);
+        uint16_t flags = TypeInfo::F_RANGE | (isHalfOpen ? TypeInfo::F_HALF_OPEN : TypeInfo::F_NONE);
 
         ROString name = compilerContext.stringBuilder
             .Append("Range")
