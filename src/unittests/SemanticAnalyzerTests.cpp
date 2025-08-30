@@ -190,6 +190,20 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
             "error: Constant 'NUM1' has a recursive dependency on itself",
         },
 
+        // struct dependency on self
+        {
+            "const B = struct { b B };\n",
+            "error: Constant 'B' has a recursive dependency on itself",
+        },
+
+        // struct recursive dependency
+        {
+            "const A = struct { b B };\n"
+            "const B = struct { c C };\n"
+            "const C = struct { a A };\n",
+            "error: Constant 'A' has a recursive dependency on itself",
+        },
+
         // invalid struct type
         {
             "const I32 = i32;\n"
