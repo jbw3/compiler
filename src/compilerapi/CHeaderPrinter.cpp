@@ -1,16 +1,19 @@
 #include "CHeaderPrinter.h"
+#include "CompilerContext.h"
 #include "ErrorLogger.h"
 #include "keywords.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 namespace fs = std::filesystem;
 using namespace std;
 using namespace SyntaxTree;
 
-CHeaderPrinter::CHeaderPrinter(ErrorLogger& logger) :
-    logger(logger)
+CHeaderPrinter::CHeaderPrinter(CompilerContext& compilerContext) :
+    logger(compilerContext.logger),
+    compilerContext(compilerContext)
 {
 }
 
@@ -100,6 +103,66 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
         }
 
         outFile << "};\n\n";
+    }
+
+    unordered_map<TypeId, ROString> printedTypeIds;
+    for (const ConstantDeclaration* constDecl : modules->orderedGlobalConstants)
+    {
+        if (constDecl->constantType->IsType())
+        {
+            unsigned constIdx = constDecl->assignmentExpression->right->GetConstantValueIndex();
+            const TypeInfo* type = compilerContext.GetTypeConstantValue(constIdx);
+            if (type->IsAggregate())
+            {
+                TypeId id = type->GetId();
+                auto iter = printedTypeIds.find(id);
+                if (iter != printedTypeIds.cend())
+                {
+                    // if we have already printed this struct, make a typedef
+                    outFile << "typedef struct " << iter->second << " " << constDecl->name << ";\n\n";
+                }
+                else
+                {
+                    for (const MemberInfo* memberInfo : type->GetMembers())
+                    {
+                        const TypeInfo* memberType = memberInfo->GetType();
+
+                        // print array structs if needed
+                        if (memberType->IsArray())
+                        {
+                            if (!PrintArrayStruct(outFile, memberType))
+                            {
+                                return false;
+                            }
+                        }
+                        // forward declare structs if needed
+                        else if (memberType->IsPointer() && memberType->GetInnerType()->IsAggregate())
+                        {
+                            outFile << "struct " << memberType->GetInnerType()->GetShortName() << ";\n\n";
+                        }
+                    }
+
+                    outFile << "struct " << constDecl->name << "\n{\n";
+
+                    for (const MemberInfo* memberInfo : type->GetMembers())
+                    {
+                        const TypeInfo* memberType = memberInfo->GetType();
+
+                        outFile << "    ";
+                        if (!PrintCType(outFile, memberType, memberInfo->GetName()))
+                        {
+                            return false;
+                        }
+
+                        outFile << ";\n";
+                    }
+
+                    outFile << "};\n\n";
+
+                    printedTypeIds.insert({id, constDecl->name});
+                }
+            }
+        }
     }
 
     for (const ModuleDefinition* module : modules->modules)

@@ -5,17 +5,19 @@
 #include "SyntaxTree.h"
 #include <unordered_set>
 
+class CompilerContext;
 class ErrorLogger;
 
 class CHeaderPrinter
 {
 public:
-    CHeaderPrinter(ErrorLogger& logger);
+    CHeaderPrinter(CompilerContext& compilerContext);
 
     bool Print(const Config& config, const SyntaxTree::Modules* modules);
 
 private:
     ErrorLogger& logger;
+    CompilerContext& compilerContext;
     std::unordered_set<ROString> arrayTypeNames;
 
     bool WriteFile(const std::string& tempFilename, const std::string& outFilename, const SyntaxTree::Modules* modules);

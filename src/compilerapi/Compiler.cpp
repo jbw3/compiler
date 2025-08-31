@@ -116,7 +116,7 @@ bool Compiler::Compile()
     // check if C header is the output
     if (ok && config.emitType == Config::eCHeader)
     {
-        CHeaderPrinter printer(compilerContext.logger);
+        CHeaderPrinter printer(compilerContext);
         ok = printer.Print(config, syntaxTree);
         delete syntaxTree;
         return ok;
