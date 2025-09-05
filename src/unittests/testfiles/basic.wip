@@ -685,20 +685,20 @@ fun initTypes()
     test2.test.a += 7;
 }
 
-struct EmptyType {}
+const EmptyType = struct {};
 
-struct Test2
+const Test2 = struct
 {
     test Test1,
     n i32,
-}
+};
 
-struct Test1
+const Test1 = struct
 {
     a i32,
     b bool,
     c str
-}
+};
 
 # int literal types sign/zero extension
 fun sign_zero_extension(b bool, x8 i8, y8 u8, x32 i32)
@@ -784,8 +784,8 @@ fun subscript(s str, t SubscriptTest1)
     var y u8 = t.s.s[5];
 }
 
-struct SubscriptTest1 { s SubscriptTest2, }
-struct SubscriptTest2 { s str, }
+const SubscriptTest1 = struct { s SubscriptTest2, };
+const SubscriptTest2 = struct { s str, };
 
 fun break_and_continue()
 {
@@ -859,7 +859,7 @@ fun arrays1(a1 []i32)
     a1[1] = 17;
 }
 
-struct ArrayTest { arr []i32 }
+const ArrayTest = struct { arr []i32 };
 
 fun arrays2()
 {
