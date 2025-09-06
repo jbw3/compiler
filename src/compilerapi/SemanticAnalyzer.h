@@ -167,6 +167,7 @@ private:
     std::stack<bool> needsStructImplStack;
     std::vector<SyntaxTree::StructDefinitionExpression*> incompleteStructExpressions;
     std::vector<SyntaxTree::ConstantDeclaration*> orderedGlobalConsts;
+    std::vector<const Token*> constIdentifierStack;
 
     void LogExistingIdentifierError(ROString name, const Token* token, const Token* existingToken = nullptr);
 

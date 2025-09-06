@@ -2855,8 +2855,10 @@ void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
         }
 
         // this constant is in the unresolved list, so resolve it now
+        constIdentifierStack.push_back(identifierExpression->token);
         ConstantDeclaration* constDecl = iter->second;
         constDecl->Accept(this);
+        constIdentifierStack.pop_back();
         if (isError)
         {
             return;
@@ -3600,6 +3602,13 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     {
         isError = true;
         logger.LogError(*constantDeclaration->nameToken, "Constant '{}' has a recursive dependency on itself", constName);
+
+        for (auto iter = constIdentifierStack.crbegin(); iter != constIdentifierStack.crend(); ++iter)
+        {
+            const Token* token = *iter;
+            logger.LogNote(*token, "Dependency on '{}'", token->value);
+        }
+
         return;
     }
 
