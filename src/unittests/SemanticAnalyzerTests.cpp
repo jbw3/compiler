@@ -210,6 +210,14 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
             "const Bad = I32 { a: 2 };\n",
             "error: Expression value is not a struct type",
         },
+
+        // assigning a struct of the wrong type
+        {
+            "const A = struct { a i32, b f64, c bool };\n"
+            "const B = struct { a i32, b f64, c bool };\n"
+            "const AInst A = B { a: 123, b: 1.23, c: false };\n",
+            "error: Binary operator '=' does not support types 'A' and 'B'",
+        }
     };
 
     bool ok = true;
