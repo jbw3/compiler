@@ -15,6 +15,8 @@ private:
 
     static bool TestInvalidConstants(std::string& failMsg);
 
+    static bool TestValidVariables(std::string& failMsg);
+
     static bool TestInvalidVariables(std::string& failMsg);
 };
 

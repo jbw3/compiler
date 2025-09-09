@@ -220,7 +220,7 @@ private:
     std::vector<ArrayConstValue> arrayConstants;
     std::vector<const SyntaxTree::FunctionDeclaration*> functionConstants;
 
-    std::unordered_map<ROString, unsigned> typeConstantsIdMap;
+    std::unordered_map<TypeId, unsigned> typeConstantsIdMap;
     std::vector<const TypeInfo*> typeConstants;
 };
 

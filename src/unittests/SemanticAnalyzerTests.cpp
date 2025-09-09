@@ -19,6 +19,7 @@ SemanticAnalyzerTests::SemanticAnalyzerTests(ostream &results) :
 {
     ADD_TEST(TestValidConstants);
     ADD_TEST(TestInvalidConstants);
+    ADD_TEST(TestValidVariables);
     ADD_TEST(TestInvalidVariables);
 }
 
@@ -178,7 +179,7 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
     return ok;
 }
 
-bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
+bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
 {
     vector<InvalidTest> tests =
     {
@@ -260,6 +261,29 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string &failMsg)
     return ok;
 }
 
+bool SemanticAnalyzerTests::TestValidVariables(string& failMsg)
+{
+    vector<string> tests =
+    {
+        // constants in different scopes can have the same name
+        "{ const A = struct { x i8, y f32 }; var a = A { x: 3, y: 9.2 }; }\n"
+        "{ const A = struct { x i16, b bool }; var a = A { x: 3_000, b: true }; }\n",
+    };
+
+    bool ok = false;
+    for (string test : tests)
+    {
+        string test2 = "fun f()\n{\n" + test + "}\n";
+        ok = RunSemanticAnalysis(test2, failMsg, /*check_const_decls =*/false);
+        if (!ok)
+        {
+            break;
+        }
+    }
+
+    return ok;
+}
+
 bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
 {
     vector<InvalidTest> tests =
@@ -275,7 +299,7 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
             "const S = str;\n"
             "var s = S { };\n",
             "error: Expression value is not a struct type",
-        }
+        },
     };
 
     bool ok = true;

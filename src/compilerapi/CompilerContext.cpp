@@ -216,8 +216,8 @@ unsigned CompilerContext::AddFunctionConstantValue(const SyntaxTree::FunctionDec
 unsigned CompilerContext::AddTypeConstantValue(const TypeInfo* value)
 {
     unsigned id = 0;
-    ROString uniqueName = value->GetUniqueName();
-    auto iter = typeConstantsIdMap.find(uniqueName);
+    TypeId typeId = value->GetId();
+    auto iter = typeConstantsIdMap.find(typeId);
     if (iter != typeConstantsIdMap.cend())
     {
         id = iter->second;
@@ -226,7 +226,7 @@ unsigned CompilerContext::AddTypeConstantValue(const TypeInfo* value)
     {
         id = static_cast<unsigned>(typeConstants.size());
         typeConstants.push_back(value);
-        typeConstantsIdMap.insert({uniqueName, id});
+        typeConstantsIdMap.insert({typeId, id});
     }
 
     return id;
