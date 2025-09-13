@@ -72,6 +72,38 @@ INVALID_IDENTIFIERS: set[str] = {
     'while',
 }
 
+ADJECTIVES: list[str] = [
+    'blue',
+    'bold',
+    'caffeinated',
+    'excited',
+    'friendly',
+    'happy',
+    'purple',
+    'quirky',
+    'small',
+    'speedy',
+    'super',
+]
+
+NOUNS: list[str] = [
+    'atom',
+    'bit',
+    'byte',
+    'coffee',
+    'electron',
+    'keyboard',
+    'kitten',
+    'memory',
+    'mouse',
+    'neutron',
+    'processor',
+    'proton',
+    'quark',
+    'sun',
+    'wifi',
+]
+
 class Context:
     def __init__(self):
         self.functions: list[TypeInfo] = []
@@ -143,9 +175,12 @@ def get_identifier(context: Context) -> str:
 
     valid = False
     while not valid:
-        identifier = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
-        for _ in range(random.randint(0, 14)):
-            identifier += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
+        if random.randint(0, 1) == 0:
+            identifier = random.choice(ADJECTIVES) + '_' + random.choice(NOUNS)
+        else:
+            identifier = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
+            for _ in range(random.randint(0, 14)):
+                identifier += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
 
         valid = identifier not in invalid
 
@@ -278,7 +313,7 @@ REALLY_LONG_STRING = 'This is a ' + ('really, ' * 20) + 'long string.'
 def write_str_literal(io: IO[str]) -> None:
     io.write('"')
 
-    r = random.randint(0, 4)
+    r = random.randint(0, 5)
     if r == 0:
         io.write(random.choice([
             '',
@@ -287,9 +322,16 @@ def write_str_literal(io: IO[str]) -> None:
             'café',
             REALLY_LONG_STRING,
         ] + list(INVALID_IDENTIFIERS)))
+    elif r == 1:
+        io.write(random.choice(ADJECTIVES))
+        io.write(' ')
+        io.write(random.choice(NOUNS))
     else:
         for _ in range(random.randint(1, 12)):
-            io.write(random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-=_+πé'))
+            s = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-=_+πé\'"') # TODO: add \ when compiler bug is fixed
+            if s in ('"', '\\'):
+                s = '\\' + s
+            io.write(s)
 
     io.write('"')
 
