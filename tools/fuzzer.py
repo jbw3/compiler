@@ -8,7 +8,7 @@ import pathlib
 import random
 import subprocess
 import sys
-from typing import IO
+from typing import IO, Iterator
 
 SCRIPT_PATH = pathlib.Path(__file__)
 ROOT_DIR = SCRIPT_PATH.parent.parent
@@ -104,10 +104,19 @@ NOUNS: list[str] = [
     'wifi',
 ]
 
+class Scope:
+    def __init__(self):
+        self.identifiers: list[IdentifierInfo] = []
+
+    def copy(self) -> 'Scope':
+        s = Scope()
+        s.identifiers = self.identifiers[:]
+        return s
+
 class Context:
     def __init__(self):
         self.functions: list[TypeInfo] = []
-        self.identifier_stack: list[list[IdentifierInfo]] = [[]]
+        self.scope_stack: list[Scope] = [Scope()]
         self.indent_level = 0
         self.expression_level = 0
         self.basic_types = [
@@ -118,22 +127,22 @@ class Context:
         self.all_types = self.basic_types[:]
 
     def add_identifier(self, identifier: IdentifierInfo) -> None:
-        self.identifier_stack[-1].append(identifier)
+        self.scope_stack[-1].identifiers.append(identifier)
 
     def clear_current_identifier_scope(self) -> None:
-        self.identifier_stack[-1].clear()
+        self.scope_stack[-1].identifiers.clear()
 
-    def get_current_identifier_scope(self) -> list[IdentifierInfo]:
-        return self.identifier_stack[-1]
+    def get_current_scope_identifiers(self) -> Iterator[IdentifierInfo]:
+        return iter(self.scope_stack[-1].identifiers)
 
     def push_scope(self) -> None:
-        self.identifier_stack.append(self.identifier_stack[-1][:])
+        self.scope_stack.append(self.scope_stack[-1].copy())
 
     def pop_scope(self) -> None:
-        self.identifier_stack.pop()
+        self.scope_stack.pop()
 
     def get_identifier_of_type(self, type: TypeInfo) -> IdentifierInfo|None:
-        ids = [i for i in self.identifier_stack[-1] if i.type.name == type.name]
+        ids = [i for i in self.scope_stack[-1].identifiers if i.type.name == type.name]
         if len(ids) == 0:
             return None
         return random.choice(ids)
@@ -169,7 +178,7 @@ def get_indent_str(context: Context) -> str:
     return ' ' * (context.indent_level * 4)
 
 def get_identifier(context: Context) -> str:
-    invalid: set[str] = {i.name for i in context.get_current_identifier_scope()}
+    invalid: set[str] = {i.name for i in context.get_current_scope_identifiers()}
     invalid |= {f.name for f in context.functions}
     invalid |= INVALID_IDENTIFIERS
 
@@ -606,7 +615,7 @@ def write_code(io: IO[str]) -> None:
     for struct in structs:
         context.add_identifier(struct)
 
-    items = context.get_current_identifier_scope()[:]
+    items = list(context.get_current_scope_identifiers())
     random.shuffle(items)
     for i, item in enumerate(items):
         type = context.get_type_by_name(item.name)
