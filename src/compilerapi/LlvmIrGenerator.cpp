@@ -1101,58 +1101,8 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
 #endif // NDEBUG
 }
 
-void LlvmIrGenerator::Visit(StructDefinitionExpression* structDefinitionExpression)
+void LlvmIrGenerator::Visit(StructDefinitionExpression* /*structDefinitionExpression*/)
 {
-    unsigned typeIdx = structDefinitionExpression->GetConstantValueIndex();
-    const TypeInfo* structType = compilerContext.GetTypeConstantValue(typeIdx);
-    ROString structName = structType->GetShortName();
-
-    // TODO: delete this?
-#if 0
-    // add debug info for struct members
-    if (dbgInfo)
-    {
-        DIFile* diFile = diFiles[structDefinitionExpression->fileId];
-
-        SmallVector<Metadata*, 8> elements;
-
-        uint64_t offset = 0;
-        for (const MemberInfo* member : structType->GetMembers())
-        {
-            const TypeInfo* memberType = member->GetType();
-            DIType* memberDiType = CreateLlvmDebugType(memberType);
-            if (memberDiType == nullptr)
-            {
-                resultValue = nullptr;
-                return;
-            }
-
-            uint64_t memberSize = memberDiType->getSizeInBits();
-            unsigned pointerSize = compilerContext.typeRegistry.GetPointerSize();
-            uint32_t alignment = (memberSize > pointerSize) ? pointerSize : static_cast<uint32_t>(memberSize);
-            if (alignment > 0)
-            {
-                uint32_t rem = offset % alignment;
-                if (rem > 0)
-                {
-                    offset += alignment - rem;
-                }
-            }
-
-            ROString memberName = member->GetName();
-            unsigned memberLine = member->GetToken()->line;
-            elements.push_back(diBuilder->createMemberType(diFile, toStringRef(memberName), diFile, memberLine, memberSize, alignment, offset, DINode::FlagZero, memberDiType));
-
-            offset += memberSize;
-        }
-
-        DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
-        auto iter = diStructTypes.find(structName);
-        assert(iter != diStructTypes.end());
-        DICompositeType* diType = iter->second;
-        diType->replaceElements(elementsArray);
-    }
-#endif
 }
 
 void LlvmIrGenerator::Visit(StructInitializationExpression* structInitializationExpression)
