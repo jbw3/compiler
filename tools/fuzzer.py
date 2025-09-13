@@ -347,6 +347,15 @@ def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> No
         case _:
             assert False, f'Unexpected value: {r}'
 
+def write_range_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    context.expression_level += 1
+
+    write_expression(io, context, type)
+    io.write('..')
+    write_expression(io, context, type)
+
+    context.expression_level -= 1
+
 def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     context.expression_level += 1
 
@@ -420,14 +429,30 @@ def write_while_statement(io: IO[str], context: Context) -> None:
     io.write('\n')
     write_block(io, context)
 
+def write_for_statement(io: IO[str], context: Context) -> None:
+    name = get_identifier(context)
+
+    io.write(get_indent_str(context))
+    io.write('for ')
+    io.write(name)
+    io.write(' i32 in ')
+    write_range_expression(io, context, TYPE_I32)
+    io.write('\n')
+
+    context.push_scope()
+    context.add_identifier(IdentifierInfo(name, TYPE_I32))
+    write_block(io, context)
+    context.pop_scope()
+
 def write_statement(io: IO[str], context: Context) -> None:
     weights: list[float] = [
+        1 * math.exp(-0.3 * context.expression_level),
         1 * math.exp(-0.3 * context.expression_level),
         1 * math.exp(-0.3 * context.expression_level),
         6,
         6 * math.exp(-0.4 * context.expression_level),
     ]
-    r = random.choices([0, 1, 2, 3], weights)[0]
+    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
     match r:
         case 0:
@@ -435,8 +460,10 @@ def write_statement(io: IO[str], context: Context) -> None:
         case 1:
             write_while_statement(io, context)
         case 2:
-            write_variable_declaration(io, context)
+            write_for_statement(io, context)
         case 3:
+            write_variable_declaration(io, context)
+        case 4:
             io.write(get_indent_str(context))
             write_function_call_expression(io, context, None)
             io.write(';\n')
