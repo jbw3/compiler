@@ -26,7 +26,6 @@ class Modules;
 class NumericExpression;
 class Return;
 class StringLiteralExpression;
-class StructDefinition;
 class StructDefinitionExpression;
 class StructInitializationExpression;
 class UnaryExpression;
@@ -55,8 +54,6 @@ public:
     virtual void Visit(SyntaxTree::ExternFunctionDeclaration* externFunctionDeclaration) = 0;
 
     virtual void Visit(SyntaxTree::FunctionDefinition* functionDefinition) = 0;
-
-    virtual void Visit(SyntaxTree::StructDefinition* structDefinition) = 0;
 
     virtual void Visit(SyntaxTree::StructDefinitionExpression* structDefinitionExpression) = 0;
 

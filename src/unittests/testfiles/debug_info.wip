@@ -50,12 +50,12 @@ fun structType(n i64)
     };
 }
 
-struct TestStruct
+const TestStruct = struct
 {
     num1 i32,
     num2 i64,
     flag bool,
-}
+};
 
 fun ranges(n i32)
 {
@@ -78,9 +78,9 @@ fun forLoop(n i32) i32
 }
 
 # test struct dependencies with pointers
-struct A { n i32, b B }
-struct B { n i32, c C }
-struct C { n i32, a &A }
+const A = struct { n i32, b B };
+const B = struct { n i32, c C };
+const C = struct { n i32, a &A };
 
 fun pointerStructTest(a A)
 {

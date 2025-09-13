@@ -189,21 +189,6 @@ void SourceGenerator::Visit(FunctionDefinition* functionDefinition)
     *os << '\n';
 }
 
-void SourceGenerator::Visit(StructDefinition* structDefinition)
-{
-    *os << "struct " << structDefinition->name << "\n{\n";
-
-    for (const MemberDefinition* member : structDefinition->members)
-    {
-        ROString memberName = member->name;
-        *os << indentStr << memberName << ' ';
-        member->typeExpression->Accept(this);
-        *os << ",\n";
-    }
-
-    *os << "}\n";
-}
-
 void SourceGenerator::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
     *os << "struct\n";
@@ -261,20 +246,6 @@ void SourceGenerator::Visit(ModuleDefinition* moduleDefinition)
     {
         constDecl->Accept(this);
         *os << ";\n";
-    }
-
-    for (StructDefinition* structDef : moduleDefinition->structDefinitions)
-    {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            os->put('\n');
-        }
-
-        structDef->Accept(this);
     }
 
     for (ExternFunctionDeclaration* externFunDef : moduleDefinition->externFunctionDeclarations)

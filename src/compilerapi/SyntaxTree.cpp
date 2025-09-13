@@ -871,26 +871,6 @@ MemberDefinition::~MemberDefinition()
     delete typeExpression;
 }
 
-StructDefinition::StructDefinition(ROString name, const vector<MemberDefinition*>& members,
-                                   const Token* nameToken, unsigned fileId) :
-    nameToken(nameToken),
-    name(name),
-    members(members),
-    type(nullptr),
-    fileId(fileId)
-{
-}
-
-StructDefinition::~StructDefinition()
-{
-    deletePointerContainer(members);
-}
-
-void StructDefinition::Accept(SyntaxTreeVisitor* visitor)
-{
-    visitor->Visit(this);
-}
-
 StructDefinitionExpression::StructDefinitionExpression(
     const vector<MemberDefinition*>& members,
     unsigned fileId,
@@ -953,12 +933,10 @@ void StructInitializationExpression::Accept(SyntaxTreeVisitor* visitor)
 
 ModuleDefinition::ModuleDefinition(unsigned fileId,
                                    const ConstantDeclarations& constantDeclarations,
-                                   const vector<StructDefinition*>& structDefinitions,
                                    const vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                                    const vector<FunctionDefinition*>& functionDefinitions) :
     fileId(fileId),
     constantDeclarations(constantDeclarations),
-    structDefinitions(structDefinitions),
     externFunctionDeclarations(externFunctionDeclarations),
     functionDefinitions(functionDefinitions)
 {
@@ -967,7 +945,6 @@ ModuleDefinition::ModuleDefinition(unsigned fileId,
 ModuleDefinition::~ModuleDefinition()
 {
     deletePointerContainer(constantDeclarations);
-    deletePointerContainer(structDefinitions);
     deletePointerContainer(externFunctionDeclarations);
     deletePointerContainer(functionDefinitions);
 }

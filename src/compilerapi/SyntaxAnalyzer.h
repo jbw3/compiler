@@ -58,9 +58,6 @@ private:
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            SyntaxTree::Parameters& parameters);
 
-    SyntaxTree::StructDefinition* ProcessStructDefinition(TokenIterator& iter,
-                                                          TokenIterator endIter);
-
     SyntaxTree::StructDefinitionExpression* ProcessStructDefinitionExpression(
         TokenIterator& iter,
         TokenIterator endIter

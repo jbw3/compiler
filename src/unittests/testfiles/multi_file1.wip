@@ -13,13 +13,13 @@ fun fun4(s S3) i32
     s.s2.s1.x + s.s2.s1.y
 }
 
-struct S3
+const S3 = struct
 {
     s2 S2,
-}
+};
 
-struct S1
+const S1 = struct
 {
     x i32,
     y i32,
-}
+};

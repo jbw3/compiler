@@ -35,8 +35,6 @@ public:
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
-    void Visit(SyntaxTree::StructDefinition* structDefinition) override;
-
     void Visit(SyntaxTree::StructDefinitionExpression* structDefinitionExpression) override;
 
     void Visit(SyntaxTree::StructInitializationExpression* structInitializationExpression) override;
@@ -108,8 +106,6 @@ public:
 
     void Visit(SyntaxTree::FunctionDefinition* functionDefinition) override;
 
-    void Visit(SyntaxTree::StructDefinition* structDefinition) override;
-
     void Visit(SyntaxTree::StructDefinitionExpression* structDefinitionExpression) override;
 
     void Visit(SyntaxTree::StructInitializationExpression* structInitializationExpression) override;
@@ -172,15 +168,6 @@ private:
     void LogExistingIdentifierError(ROString name, const Token* token, const Token* existingToken = nullptr);
 
     void ProcessConstantDeclarations(std::vector<SyntaxTree::ConstantDeclarations*>& constantDeclarations);
-
-    bool SortTypeDefinitions(SyntaxTree::Modules* modules);
-
-    bool ResolveDependencies(
-        SyntaxTree::StructDefinition* structDef,
-        const std::unordered_map<ROString, SyntaxTree::StructDefinition*>& nameMap,
-        std::vector<SyntaxTree::StructDefinition*>& ordered,
-        std::unordered_set<ROString>& resolved,
-        std::unordered_set<ROString>& dependents);
 
     const TypeInfo* TypeExpressionToType(SyntaxTree::Expression* typeExpression);
 

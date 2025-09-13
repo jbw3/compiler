@@ -66,45 +66,6 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
                "    char* Data;\n"
                "};\n\n";
 
-    // print structs
-    for (const StructDefinition* structDef : modules->orderedStructDefinitions)
-    {
-        const TypeInfo* structType = structDef->type;
-
-        // print array structs
-        for (const MemberDefinition* member : structDef->members)
-        {
-            ROString memberName = member->name;
-            const MemberInfo* memberInfo = structType->GetMember(memberName);
-            const TypeInfo* memberType = memberInfo->GetType();
-            if (memberType->IsArray())
-            {
-                if (!PrintArrayStruct(outFile, memberType))
-                {
-                    return false;
-                }
-            }
-        }
-
-        outFile << "struct " << structDef->name << "\n{\n";
-
-        for (const MemberDefinition* member : structDef->members)
-        {
-            const MemberInfo* memberInfo = structType->GetMember(member->name);
-            const TypeInfo* memberType = memberInfo->GetType();
-
-            outFile << "    ";
-            if (!PrintCType(outFile, memberType, member->name))
-            {
-                return false;
-            }
-
-            outFile << ";\n";
-        }
-
-        outFile << "};\n\n";
-    }
-
     unordered_map<TypeId, ROString> printedTypeIds;
     for (const ConstantDeclaration* constDecl : modules->orderedGlobalConstants)
     {

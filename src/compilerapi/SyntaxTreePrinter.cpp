@@ -144,17 +144,6 @@ void SyntaxTreePrinter::Visit(FunctionDefinition* functionDefinition)
     PrintProperty("expression", functionDefinition->expression);
 }
 
-void SyntaxTreePrinter::Visit(StructDefinition* structDefinition)
-{
-    BracePrinter printer(*this, "{", "}");
-
-    function<void (MemberDefinition*)> printMemberDef = [this](MemberDefinition* member){ PrintMemberDefinition(member); };
-
-    PrintProperty(NODE_TYPE_PROPERTY, "StructDefinition");
-    PrintProperty("name", structDefinition->name);
-    PrintProperty("members", structDefinition->members, printMemberDef);
-}
-
 void SyntaxTreePrinter::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
     BracePrinter printer(*this, "{", "}");
@@ -182,7 +171,6 @@ void SyntaxTreePrinter::Visit(ModuleDefinition* moduleDefinition)
 
     PrintProperty(NODE_TYPE_PROPERTY, "ModuleDefinition");
     PrintProperty("constantDeclarations", moduleDefinition->constantDeclarations);
-    PrintProperty("structs", moduleDefinition->structDefinitions);
     PrintProperty("externFunctions", moduleDefinition->externFunctionDeclarations);
     PrintProperty("functions", moduleDefinition->functionDefinitions);
 }

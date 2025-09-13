@@ -574,23 +574,6 @@ public:
     ROString name;
 };
 
-class StructDefinition : public SyntaxTreeNode
-{
-public:
-    StructDefinition(ROString name, const std::vector<MemberDefinition*>& members,
-                     const Token* nameToken, unsigned fileId);
-
-    virtual ~StructDefinition();
-
-    void Accept(SyntaxTreeVisitor* visitor) override;
-
-    const Token* nameToken;
-    ROString name;
-    std::vector<MemberDefinition*> members;
-    const TypeInfo* type;
-    unsigned fileId;
-};
-
 class StructDefinitionExpression : public Expression
 {
 public:
@@ -648,7 +631,6 @@ class ModuleDefinition : public SyntaxTreeNode
 public:
     ModuleDefinition(unsigned fileId,
                      const ConstantDeclarations& constantDeclarations,
-                     const std::vector<StructDefinition*>& structDefinitions,
                      const std::vector<ExternFunctionDeclaration*>& externFunctionDeclarations,
                      const std::vector<FunctionDefinition*>& functionDefinitions);
 
@@ -658,7 +640,6 @@ public:
 
     unsigned fileId;
     ConstantDeclarations constantDeclarations;
-    std::vector<StructDefinition*> structDefinitions;
     std::vector<ExternFunctionDeclaration*> externFunctionDeclarations;
     std::vector<FunctionDefinition*> functionDefinitions;
 };
@@ -671,7 +652,6 @@ public:
     void Accept(SyntaxTreeVisitor* visitor) override;
 
     std::vector<ModuleDefinition*> modules;
-    std::vector<StructDefinition*> orderedStructDefinitions;
     std::vector<ConstantDeclaration*> orderedGlobalConstants;
 };
 } // namespace SyntaxTree

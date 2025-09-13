@@ -76,11 +76,6 @@ void StartEndTokenFinder::Visit(FunctionDefinition* /*functionDefinition*/)
     assert(false && "StartEndTokenFinder member function is not implemented");
 }
 
-void StartEndTokenFinder::Visit(StructDefinition* /*structDefinition*/)
-{
-    assert(false && "StartEndTokenFinder member function is not implemented");
-}
-
 void StartEndTokenFinder::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
     UpdateStart(structDefinitionExpression->structToken);
@@ -2137,49 +2132,6 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     }
 }
 
-void SemanticAnalyzer::Visit(StructDefinition* structDefinition)
-{
-    ROString structName = structDefinition->name;
-
-    auto iter = partialStructTypes.find(structName);
-    assert(iter != partialStructTypes.cend());
-    TypeInfo* newType = iter->second;
-
-    for (const MemberDefinition* member : structDefinition->members)
-    {
-        const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
-        if (memberType == nullptr)
-        {
-            isError = true;
-            return;
-        }
-
-        // make sure the type is not 'type', '[]type', '&type', etc.
-        const TypeInfo* innerMostType = memberType;
-        while (innerMostType->GetInnerType() != nullptr)
-        {
-            innerMostType = innerMostType->GetInnerType();
-        }
-        if (innerMostType->IsType())
-        {
-            isError = true;
-            logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetShortName());
-            return;
-        }
-
-        ROString memberName = member->name;
-        bool added = newType->AddMember(memberName, memberType, true, member->nameToken);
-        if (!added)
-        {
-            isError = true;
-            logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, structName);
-            return;
-        }
-    }
-
-    structDefinition->type = newType;
-}
-
 void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpression)
 {
     TypeInfo* structType = nullptr;
@@ -2496,142 +2448,6 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
     incompleteStructExpressions.clear();
 }
 
-bool SemanticAnalyzer::SortTypeDefinitions(Modules* modules)
-{
-    vector<StructDefinition*> structDefs;
-    for (ModuleDefinition* modDef : modules->modules)
-    {
-        for (StructDefinition* structDef : modDef->structDefinitions)
-        {
-            structDefs.push_back(structDef);
-        }
-    }
-    size_t numStructDefs = structDefs.size();
-
-    unordered_map<ROString, StructDefinition*> nameMap;
-    nameMap.reserve(numStructDefs);
-
-    // build map for fast lookup
-    for (StructDefinition* structDef : structDefs)
-    {
-        ROString structName = structDef->name;
-        auto rv = nameMap.insert({structName, structDef});
-        if (!rv.second)
-        {
-            logger.LogError(*structDef->nameToken, "Struct '{}' has already been defined", structName);
-            return false;
-        }
-    }
-
-    vector<StructDefinition*> ordered;
-    ordered.reserve(numStructDefs);
-
-    unordered_set<ROString> resolved;
-    resolved.reserve(numStructDefs);
-
-    unordered_set<ROString> dependents;
-
-    // resolve dependencies
-    for (StructDefinition* structDef : structDefs)
-    {
-        ROString structName = structDef->name;
-
-        // resolve this struct's dependencies if we have not done so already
-        if (resolved.find(structName) == resolved.end())
-        {
-            bool ok = ResolveDependencies(structDef, nameMap, ordered, resolved, dependents);
-            if (!ok)
-            {
-                return false;
-            }
-        }
-    }
-
-    modules->orderedStructDefinitions.swap(ordered);
-
-    return true;
-}
-
-bool SemanticAnalyzer::ResolveDependencies(
-    StructDefinition* structDef,
-    const unordered_map<ROString, StructDefinition*>& nameMap,
-    vector<StructDefinition*>& ordered,
-    unordered_set<ROString>& resolved,
-    unordered_set<ROString>& dependents)
-{
-    ROString structName = structDef->name;
-
-    for (const MemberDefinition* member : structDef->members)
-    {
-        IdentifierExpression* typeExpr = dynamic_cast<IdentifierExpression*>(member->typeExpression);
-
-        // we only need to check types that might be structs
-        // (which will be an IdentifierExpression)
-        if (typeExpr != nullptr)
-        {
-            ROString memberTypeName = typeExpr->name;
-
-            // if we have not seen this member's type yet, resolve its dependencies
-            if (compilerContext.typeRegistry.GetType(memberTypeName) == nullptr && resolved.find(memberTypeName) == resolved.end())
-            {
-                // check for a recursive dependency
-                auto dependentsIter = dependents.find(memberTypeName);
-                if (dependentsIter != dependents.end())
-                {
-                    ROString memberName = member->name;
-                    logger.LogError(*member->nameToken, "In struct '{}', member '{}' with type '{}' creates recursive dependency", structName, memberName, memberTypeName);
-                    return false;
-                }
-
-                dependents.insert(structName);
-
-                auto nameMapIter = nameMap.find(memberTypeName);
-                if (nameMapIter == nameMap.end())
-                {
-                    logger.LogError(*typeExpr->token, "'{}' is not a known type", memberTypeName);
-                    return false;
-                }
-
-                StructDefinition* memberStruct = nameMapIter->second;
-                bool ok = ResolveDependencies(memberStruct, nameMap, ordered, resolved, dependents);
-                if (!ok)
-                {
-                    return false;
-                }
-
-                dependents.erase(structName);
-            }
-        }
-    }
-
-    ordered.push_back(structDef);
-    resolved.insert(structName);
-
-    // register the type name. we'll add its members later
-    TypeInfo* newType = TypeInfo::CreateAggregateType(structName, structDef->nameToken);
-    partialStructTypes.insert({structName, newType});
-
-    // TODO: Is this needed?
-    bool added = compilerContext.typeRegistry.RegisterType(newType);
-    if (!added)
-    {
-        delete newType;
-        logger.LogError(*structDef->nameToken, "Struct '{}' has already been defined", structName);
-        return false;
-    }
-
-    unsigned idx = compilerContext.AddTypeConstantValue(newType);
-    bool ok = symbolTable.AddConstant(structName, structDef->nameToken, TypeInfo::TypeType, idx);
-    if (!ok)
-    {
-        delete newType;
-        LogExistingIdentifierError(structDef->name, structDef->nameToken);
-        return false;
-    }
-
-    return true;
-}
-
 const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpression)
 {
     typeExpression->Accept(this);
@@ -2690,24 +2506,6 @@ void SemanticAnalyzer::Visit(Modules* modules)
         return;
     }
 
-    // sort struct definitions so each comes after any struct definitions it depends on
-    bool ok = SortTypeDefinitions(modules);
-    if (!ok)
-    {
-        isError = true;
-        return;
-    }
-
-    // process struct definitions
-    for (StructDefinition* structDef : modules->orderedStructDefinitions)
-    {
-        structDef->Accept(this);
-        if (isError)
-        {
-            return;
-        }
-    }
-
     // build a look-up table for all functions
 
     for (ModuleDefinition* moduleDefinition : modules->modules)
@@ -2719,7 +2517,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
         {
             FunctionDeclaration* decl = externFunc->declaration;
 
-            ok = SetFunctionDeclarationTypes(decl);
+            bool ok = SetFunctionDeclarationTypes(decl);
             if (!ok)
             {
                 isError = true;
@@ -2729,7 +2527,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
             const TypeInfo* funType = compilerContext.typeRegistry.GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             externFunc->SetConstantValueIndex(idx);
-            bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
+            ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
             if (!ok)
             {
                 isError = true;
@@ -2742,7 +2540,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
         {
             FunctionDeclaration* decl = funcDef->declaration;
 
-            ok = SetFunctionDeclarationTypes(decl);
+            bool ok = SetFunctionDeclarationTypes(decl);
             if (!ok)
             {
                 isError = true;
@@ -2752,7 +2550,7 @@ void SemanticAnalyzer::Visit(Modules* modules)
             const TypeInfo* funType = compilerContext.typeRegistry.GetFunctionType(decl);
             unsigned idx = compilerContext.AddFunctionConstantValue(decl);
             funcDef->SetConstantValueIndex(idx);
-            bool ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
+            ok = symbolTable.AddConstant(decl->name, decl->nameToken, funType, idx);
             if (!ok)
             {
                 isError = true;

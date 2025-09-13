@@ -3,8 +3,8 @@ fun fun2() i32
     fun3()
 }
 
-struct S2
+const S2 = struct
 {
     s1 S1,
     string str,
-}
+};

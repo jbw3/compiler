@@ -46,7 +46,6 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
     TokenIterator endIter = tokens.end();
 
     vector<ConstantDeclaration*> constantDeclarations;
-    vector<StructDefinition*> structs;
     vector<FunctionDefinition*> functions;
     vector<ExternFunctionDeclaration*> externFunctions;
 
@@ -78,18 +77,6 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
                 functions.push_back(functionDefinition);
             }
         }
-        else if (iter->type == Token::eStruct)
-        {
-            StructDefinition* structDefinition = ProcessStructDefinition(iter, endIter);
-            if (structDefinition == nullptr)
-            {
-                ok = false;
-            }
-            else
-            {
-                structs.push_back(structDefinition);
-            }
-        }
         else if (iter->type == Token::eExtern)
         {
             ExternFunctionDeclaration* externDecl = ProcessExternFunction(iter, endIter);
@@ -111,12 +98,11 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
 
     if (ok)
     {
-        syntaxTree = new ModuleDefinition(currentFileId, constantDeclarations, structs, externFunctions, functions);
+        syntaxTree = new ModuleDefinition(currentFileId, constantDeclarations, externFunctions, functions);
     }
     else
     {
         deletePointerContainer(constantDeclarations);
-        deletePointerContainer(structs);
         deletePointerContainer(functions);
         deletePointerContainer(externFunctions);
         syntaxTree = nullptr;
@@ -350,114 +336,6 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
     }
 
     return true;
-}
-
-StructDefinition* SyntaxAnalyzer::ProcessStructDefinition(TokenIterator& iter, TokenIterator endIter)
-{
-    if (!EndIteratorCheck(iter, endIter, "Expected struct keyword"))
-    {
-        return nullptr;
-    }
-
-    if (iter->type != Token::eStruct)
-    {
-        logger.LogError("Expected struct keyword");
-    }
-
-    if (!IncrementIterator(iter, endIter, "Expected struct name"))
-    {
-        return nullptr;
-    }
-
-    if (iter->type != Token::eIdentifier)
-    {
-        logger.LogError(*iter, "'{}' is not a valid struct name", iter->value);
-        return nullptr;
-    }
-
-    const Token* structNameToken = &*iter;
-    ROString structName = iter->value;
-
-    if (!IncrementIterator(iter, endIter, "Expected '{'"))
-    {
-        return nullptr;
-    }
-
-    if (iter->type != Token::eOpenBrace)
-    {
-        logger.LogError(*iter, "Expected '{'");
-        return nullptr;
-    }
-
-    // increment past "}"
-    ++iter;
-
-    vector<MemberDefinition*> members;
-    while (iter != endIter && iter->type != Token::eCloseBrace)
-    {
-        // get member name
-        if (iter->type != Token::eIdentifier)
-        {
-            deletePointerContainer(members);
-            logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
-            return nullptr;
-        }
-        const Token* memberNameToken = &*iter;
-        ROString memberName = iter->value;
-
-        // get member type
-        if (!IncrementIterator(iter, endIter, "Expected member type"))
-        {
-            deletePointerContainer(members);
-            return nullptr;
-        }
-
-        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
-
-        // make sure there was a type
-        if (memberTypeExpr == nullptr)
-        {
-            deletePointerContainer(members);
-            logger.LogError(*iter, "Expected a member type");
-            return nullptr;
-        }
-
-        MemberDefinition* member = new MemberDefinition(memberName, memberTypeExpr, memberNameToken);
-        members.push_back(member);
-
-        Token::EType delimiter = iter->type;
-        if (delimiter == Token::eCloseBrace)
-        {
-            break;
-        }
-        else if (delimiter != Token::eComma)
-        {
-            logger.LogError(*iter, "Expected ',' or '}'");
-            deletePointerContainer(members);
-            return nullptr;
-        }
-
-        ++iter;
-    }
-
-    if (iter == endIter)
-    {
-        deletePointerContainer(members);
-        logger.LogError("Expected '}'");
-        return nullptr;
-    }
-    else if (iter->type != Token::eCloseBrace)
-    {
-        deletePointerContainer(members);
-        logger.LogError(*iter, "Expected '}'");
-        return nullptr;
-    }
-
-    // increment past "}"
-    ++iter;
-
-    StructDefinition* structDef = new StructDefinition(structName, members, structNameToken, currentFileId);
-    return structDef;
 }
 
 StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
