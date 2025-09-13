@@ -82,16 +82,19 @@ ADJECTIVES: list[str] = [
     'methodical',
     'purple',
     'quirky',
+    'sleepy',
     'small',
     'speedy',
     'super',
 ]
 
 NOUNS: list[str] = [
+    'aluminum',
     'atom',
     'bit',
     'byte',
     'coffee',
+    'copper',
     'electron',
     'integer',
     'keyboard',
@@ -279,9 +282,9 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
 
 def write_bool_expression(io: IO[str], context: Context) -> None:
     weights: list[float] = [
-        3 / context.expression_level,
+        math.pow(2.0, 2.59 - context.expression_level),
         1,
-        2 / context.expression_level,
+        math.pow(2.0, 2.0 - context.expression_level),
         1,
     ]
     r = random.choices([0, 1, 2, 3], weights)[0]
@@ -329,9 +332,9 @@ def write_int_binary_expression(io: IO[str], context: Context) -> None:
 
 def write_int_expression(io: IO[str], context: Context) -> None:
     weights: list[float] = [
-        3 / context.expression_level,
+        math.pow(2.0, 2.59 - context.expression_level),
         1,
-        2 / context.expression_level,
+        math.pow(2.0, 2.0 - context.expression_level),
         1,
     ]
     r = random.choices([0, 1, 2, 3], weights)[0]
@@ -529,12 +532,13 @@ def write_for_statement(io: IO[str], context: Context) -> None:
     context.pop_scope()
 
 def write_statement(io: IO[str], context: Context) -> None:
+    scope_level = len(context.scope_stack)
     weights: list[float] = [
-        1 * math.exp(-0.3 * context.expression_level),
-        1 * math.exp(-0.3 * context.expression_level),
-        1 * math.exp(-0.3 * context.expression_level),
+        math.exp(2.8 - scope_level),
+        math.exp(2.8 - scope_level),
+        math.exp(2.8 - scope_level),
         6,
-        6 * math.exp(-0.4 * context.expression_level),
+        6 * math.exp(-0.4 * scope_level),
     ]
     r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
