@@ -147,6 +147,11 @@ class Context:
         ]
         self.all_types = self.basic_types[:]
 
+        if random.randrange(6) == 0:
+            self.indent_str = '\t'
+        else:
+            self.indent_str = ' ' * random.randint(1, 5)
+
     def add_identifier(self, identifier: IdentifierInfo) -> None:
         self.scope_stack[-1].add_identifier(identifier)
 
@@ -213,7 +218,12 @@ def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     return proc.returncode
 
 def get_indent_str(context: Context) -> str:
-    return ' ' * (context.indent_level * 4)
+    # wrong indentation every once in a while
+    if random.randrange(30) == 0:
+        char = random.choice([' ', '\t'])
+        return char * random.randint(0, 3)
+    else:
+        return context.indent_str * context.indent_level
 
 def get_identifier(context: Context) -> str:
     invalid: set[str] = {i.name for i in context.get_current_scope_identifiers()}
@@ -494,7 +504,12 @@ def write_variable_declaration(io: IO[str], context: Context) -> None:
     context.add_identifier(IdentifierInfo(name, type))
 
 def write_block(io: IO[str], context: Context) -> None:
-    io.write(get_indent_str(context))
+    if random.randrange(2) == 0:
+        io.write('\n')
+        io.write(get_indent_str(context))
+    else:
+        io.write(' ')
+
     io.write('{\n')
     context.indent_level += 1
 
@@ -513,26 +528,23 @@ def write_if_statement(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('if ')
     write_expression(io, context, TYPE_BOOL)
-    io.write('\n')
     write_block(io, context)
 
     for _ in range(random.randint(0, 3)):
         io.write(get_indent_str(context))
         io.write('elif ')
         write_expression(io, context, TYPE_BOOL)
-        io.write('\n')
         write_block(io, context)
 
     if random.randint(0, 1) == 0:
         io.write(get_indent_str(context))
-        io.write('else\n')
+        io.write('else')
         write_block(io, context)
 
 def write_while_statement(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('while ')
     write_expression(io, context, TYPE_BOOL)
-    io.write('\n')
     write_block(io, context)
 
 def write_for_statement(io: IO[str], context: Context) -> None:
@@ -543,7 +555,6 @@ def write_for_statement(io: IO[str], context: Context) -> None:
     io.write(name)
     io.write(' i32 in ')
     write_range_expression(io, context, TYPE_I32)
-    io.write('\n')
 
     context.push_scope()
     context.add_identifier(IdentifierInfo(name, TYPE_I32))
