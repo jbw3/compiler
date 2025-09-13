@@ -41,10 +41,12 @@ TYPE_I32 = TypeInfo('i32')
 TYPE_STR = TypeInfo('str')
 TYPE_TYPE = TypeInfo('type')
 
-INVALID_IDENTIFIERS = {
+INVALID_IDENTIFIERS: set[str] = {
     'bool',
+    'break',
     'cast',
     'const',
+    'continue',
     'elif',
     'else',
     'f32',
@@ -59,6 +61,7 @@ INVALID_IDENTIFIERS = {
     'in',
     'isize',
     'str',
+    'struct',
     'type',
     'u8',
     'u16',
