@@ -407,17 +407,26 @@ def write_str_literal(io: IO[str]) -> None:
     io.write('"')
 
 def write_str_expression(io: IO[str], context: Context) -> None:
-    r = random.randint(0, 9)
-    if 0 <= r <= 3:
-        ok = write_identifier_expression(io, context, TYPE_STR)
-        if not ok:
+    weights: list[float] = [
+        1,
+        math.pow(2.0, 2.0 - context.expression_level),
+        1,
+    ]
+    r = random.choices([0, 1, 2], weights)[0]
+
+    match r:
+        case 0:
+            ok = write_identifier_expression(io, context, TYPE_STR)
+            if not ok:
+                write_str_literal(io)
+        case 1:
+            ok = write_function_call_expression(io, context, TYPE_STR)
+            if not ok:
+                write_str_literal(io)
+        case 2:
             write_str_literal(io)
-    elif 4 <= r <= 4:
-        ok = write_function_call_expression(io, context, TYPE_STR)
-        if not ok:
-            write_str_literal(io)
-    else:
-        write_str_literal(io)
+        case _:
+            assert False, f'Unexpected value: {r}'
 
 def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     assert type.is_struct, f"Type '{type.name}' is not a struct"
