@@ -233,6 +233,20 @@ def get_identifier(context: Context) -> str:
 
     return identifier
 
+def write_comment(io: IO[str], context: Context, comment: str) -> None:
+    indent = get_indent_str(context)
+
+    if random.randint(0, 1) == 0:
+        io.write(indent)
+        io.write(f'# {comment}\n')
+    else:
+        io.write(indent)
+        io.write('#!\n')
+        io.write(indent)
+        io.write(f'  {comment}\n')
+        io.write(indent)
+        io.write('!#\n')
+
 def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> bool:
     identifier = context.get_identifier_of_type(type)
     if identifier is None:
@@ -465,6 +479,9 @@ def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
     type = get_identifier_type(context)
 
+    if random.randrange(20) == 0:
+        write_comment(io, context, f'initializing {name}')
+
     io.write(get_indent_str(context))
     io.write('var ')
     io.write(name)
@@ -484,6 +501,8 @@ def write_block(io: IO[str], context: Context) -> None:
     context.push_scope()
     for _ in range(random.randint(1, 5)): # TODO: use range 0-5 when compiler bug is fixed
         write_statement(io, context)
+        if random.randrange(5) == 0:
+            io.write('\n')
     context.pop_scope()
 
     context.indent_level -= 1
@@ -560,6 +579,9 @@ def write_statement(io: IO[str], context: Context) -> None:
 
 def write_function(io: IO[str], context: Context, function: TypeInfo) -> None:
     assert function.return_type is not None
+
+    if random.randrange(3) == 0:
+        write_comment(io, context, 'This function does things...')
 
     context.push_scope()
 
