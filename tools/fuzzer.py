@@ -20,13 +20,13 @@ class IdentifierInfo:
 
 class TypeInfo:
     def __init__(
-            self,
-            name: str,
-            is_struct: bool=False,
-            members: list[IdentifierInfo]|None=None,
-            is_fun: bool=False,
-            params: list[IdentifierInfo]|None=None,
-            return_type: 'TypeInfo|None'=None,
+        self,
+        name: str,
+        is_struct: bool=False,
+        members: list[IdentifierInfo]|None=None,
+        is_fun: bool=False,
+        params: list[IdentifierInfo]|None=None,
+        return_type: 'TypeInfo|None'=None,
     ):
         self.name = name
         self.is_struct = is_struct
@@ -79,6 +79,7 @@ ADJECTIVES: list[str] = [
     'excited',
     'friendly',
     'happy',
+    'methodical',
     'purple',
     'quirky',
     'small',
@@ -92,12 +93,15 @@ NOUNS: list[str] = [
     'byte',
     'coffee',
     'electron',
+    'integer',
     'keyboard',
     'kitten',
     'memory',
     'mouse',
     'neutron',
+    'process',
     'processor',
+    'program',
     'proton',
     'quark',
     'sun',
@@ -107,11 +111,25 @@ NOUNS: list[str] = [
 class Scope:
     def __init__(self):
         self.identifiers: list[IdentifierInfo] = []
+        self.type_weights: dict[str, float] = {}
 
     def copy(self) -> 'Scope':
         s = Scope()
         s.identifiers = self.identifiers[:]
+        s.type_weights = {k: v for k, v in self.type_weights.items()}
         return s
+
+    def clear(self) -> None:
+        self.identifiers.clear()
+        self.type_weights.clear()
+
+    def add_identifier(self, identifier: IdentifierInfo) -> None:
+        self.identifiers.append(identifier)
+        type_name = identifier.type.name
+        if type_name not in self.type_weights:
+            self.type_weights[type_name] = 1.0
+        else:
+            self.type_weights[type_name] += 0.5
 
 class Context:
     def __init__(self):
@@ -127,13 +145,16 @@ class Context:
         self.all_types = self.basic_types[:]
 
     def add_identifier(self, identifier: IdentifierInfo) -> None:
-        self.scope_stack[-1].identifiers.append(identifier)
+        self.scope_stack[-1].add_identifier(identifier)
 
     def clear_current_identifier_scope(self) -> None:
-        self.scope_stack[-1].identifiers.clear()
+        self.scope_stack[-1].clear()
 
     def get_current_scope_identifiers(self) -> Iterator[IdentifierInfo]:
         return iter(self.scope_stack[-1].identifiers)
+
+    def get_current_scope_type_weights(self) -> dict[str, float]:
+        return self.scope_stack[-1].type_weights
 
     def push_scope(self) -> None:
         self.scope_stack.append(self.scope_stack[-1].copy())
@@ -162,6 +183,20 @@ class Context:
             if type.name == name:
                 return type
         return None
+
+def get_type_weight(type: TypeInfo, context: Context) -> float:
+    if type.is_struct:
+        weight = 1.0
+    else:
+        weight = 5.0
+
+    weight += context.get_current_scope_type_weights().get(type.name, 0.0)
+    return weight
+
+def get_identifier_type(context: Context) -> TypeInfo:
+    all_types_weights: list[float] = [get_type_weight(t, context) for t in context.all_types]
+    type = random.choices(context.all_types, all_types_weights)[0]
+    return type
 
 def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
     compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
@@ -425,9 +460,7 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
 
 def write_variable_declaration(io: IO[str], context: Context) -> None:
     name = get_identifier(context)
-
-    all_types_weights: list[float] = [1.0 if t.is_struct else 5.0 for t in context.all_types]
-    type = random.choices(context.all_types, all_types_weights)[0]
+    type = get_identifier_type(context)
 
     io.write(get_indent_str(context))
     io.write('var ')
