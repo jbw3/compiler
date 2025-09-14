@@ -833,8 +833,9 @@ def write_code(io: IO[str]) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--runs', type=int, default=1, help='number of runs')
     parser.add_argument('--keep-source', action='store_true', help="keep the fuzzer's generated source code")
+    parser.add_argument('-r', '--runs', type=int, default=None, help='number of runs')
+    parser.add_argument('-t', '--time', type=int, default=None, help='max time to run (in seconds)')
 
     args = parser.parse_args()
     return args
@@ -842,13 +843,22 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    out_dir = pathlib.Path(datetime.datetime.now().strftime('fuzzer_%Y-%m-%d_%H-%M-%S'))
+    start = datetime.datetime.now()
+    out_dir = pathlib.Path(start.strftime('fuzzer_%Y-%m-%d_%H-%M-%S'))
     os.makedirs(out_dir, exist_ok=True)
     src_filename = pathlib.Path('fuzzer.wip')
     out_filename = pathlib.Path('fuzzer.o')
 
+    max_time = None if args.time is None else datetime.timedelta(seconds=args.time)
+    total_runs = 0
     error_count = 0
-    for _ in range(args.runs):
+    while True:
+        if args.runs is not None and total_runs >= args.runs:
+            break
+        time_diff = datetime.datetime.now() - start
+        if max_time is not None and time_diff >= max_time:
+            break
+
         with open(src_filename, 'w') as f:
             write_code(f)
 
@@ -857,6 +867,13 @@ def main() -> int:
             error_count += 1
             print(f'Error: rc={rc}')
             src_filename.rename(out_dir / f'fuzzer-{error_count}.wip')
+
+        total_runs += 1
+
+    total_time = datetime.datetime.now() - start
+    print(f'Runs: {total_runs}')
+    print(f'Errors: {error_count}')
+    print(f'Time: {total_time}')
 
     if error_count == 0 and out_dir.exists():
         os.removedirs(out_dir)
