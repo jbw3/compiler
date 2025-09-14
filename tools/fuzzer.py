@@ -54,6 +54,17 @@ TYPE_U64 = TypeInfo('u64', size=64, is_int=True, is_signed=False)
 TYPE_STR = TypeInfo('str')
 TYPE_TYPE = TypeInfo('type')
 
+INT_TYPES: list[TypeInfo] = [
+    TYPE_I8,
+    TYPE_I16,
+    TYPE_I32,
+    TYPE_I64,
+    TYPE_U8,
+    TYPE_U16,
+    TYPE_U32,
+    TYPE_U64,
+]
+
 INVALID_IDENTIFIERS: set[str] = {
     'bool',
     'break',
@@ -399,19 +410,30 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     ]
     r = random.choices([0, 1, 2, 3], weights)[0]
 
+    # test implicit casts
+    if type.size > 8 and random.randrange(4) == 0 and False: # TODO: enable when compiler bug is fixed
+        new_type_choices = [
+            t
+            for t in INT_TYPES
+            if t.is_signed == type.is_signed and t.size < type.size
+        ]
+        new_type = random.choice(new_type_choices)
+    else:
+        new_type = type
+
     match r:
         case 0:
-            write_int_binary_expression(io, context, type)
+            write_int_binary_expression(io, context, new_type)
         case 1:
-            ok = write_identifier_expression(io, context, type)
+            ok = write_identifier_expression(io, context, new_type)
             if not ok:
-                write_int_literal(io, type)
+                write_int_literal(io, new_type)
         case 2:
-            ok = write_function_call_expression(io, context, type)
+            ok = write_function_call_expression(io, context, new_type)
             if not ok:
-                write_int_literal(io, type)
+                write_int_literal(io, new_type)
         case 3:
-            write_int_literal(io, type)
+            write_int_literal(io, new_type)
         case _:
             assert False, f'Unexpected value: {r}'
 
