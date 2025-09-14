@@ -29,6 +29,7 @@ class TypeInfo:
         params: list[IdentifierInfo]|None=None,
         return_type: 'TypeInfo|None'=None,
         is_int: bool = False,
+        is_float: bool = False,
         is_signed: bool = False,
     ):
         self.name = name
@@ -39,6 +40,7 @@ class TypeInfo:
         self.params = [] if params is None else params
         self.return_type = return_type
         self.is_int = is_int
+        self.is_float = is_float
         self.is_signed = is_signed
 
 TYPE_FUN = TypeInfo('fun') # TODO: generate type for each function
@@ -51,6 +53,8 @@ TYPE_U8 = TypeInfo('u8', size=8, is_int=True, is_signed=False)
 TYPE_U16 = TypeInfo('u16', size=16, is_int=True, is_signed=False)
 TYPE_U32 = TypeInfo('u32', size=32, is_int=True, is_signed=False)
 TYPE_U64 = TypeInfo('u64', size=64, is_int=True, is_signed=False)
+TYPE_F32 = TypeInfo('f32', size=32, is_float=True, is_signed=True)
+TYPE_F64 = TypeInfo('f64', size=64, is_float=True, is_signed=True)
 TYPE_STR = TypeInfo('str')
 TYPE_TYPE = TypeInfo('type')
 
@@ -183,6 +187,8 @@ class Context:
             TYPE_U16,
             TYPE_U32,
             TYPE_U64,
+            TYPE_F32,
+            TYPE_F64,
             TYPE_STR,
         ]
         self.all_types = self.basic_types[:]
@@ -437,6 +443,50 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         case _:
             assert False, f'Unexpected value: {r}'
 
+def write_float_literal(io: IO[str], type: TypeInfo) -> None:
+    if random.randrange(5) == 0:
+        n = 0.0
+    else:
+        n = random.random() * random.randint(1, 1_000_000_000)
+
+    if random.randrange(2) == 0:
+        n = -n
+
+    io.write(str(n))
+
+def write_float_binary_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    write_expression(io, context, type)
+
+    op = random.choice(['+', '-', '*', '/', '%'])
+    io.write(f' {op} ')
+
+    write_expression(io, context, type)
+
+def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    weights: list[float] = [
+        math.pow(2.0, 2.59 - context.expression_level),
+        1,
+        math.pow(2.0, 2.0 - context.expression_level),
+        1,
+    ]
+    r = random.choices([0, 1, 2, 3], weights)[0]
+
+    match r:
+        case 0:
+            write_float_binary_expression(io, context, type)
+        case 1:
+            ok = write_identifier_expression(io, context, type)
+            if not ok:
+                write_float_literal(io, type)
+        case 2:
+            ok = write_function_call_expression(io, context, type)
+            if not ok:
+                write_float_literal(io, type)
+        case 3:
+            write_float_literal(io, type)
+        case _:
+            assert False, f'Unexpected value: {r}'
+
 REALLY_LONG_STRING = 'This is a ' + ('really, ' * 20) + 'long string.'
 
 def write_str_literal(io: IO[str]) -> None:
@@ -543,6 +593,8 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         write_bool_expression(io, context)
     elif type.is_int:
         write_int_expression(io, context, type)
+    elif type.is_float:
+        write_float_expression(io, context, type)
     elif type.name == 'str':
         write_str_expression(io, context)
     elif type.is_struct:
