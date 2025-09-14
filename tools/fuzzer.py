@@ -47,6 +47,10 @@ TYPE_I8 = TypeInfo('i8', size=8, is_int=True, is_signed=True)
 TYPE_I16 = TypeInfo('i16', size=16, is_int=True, is_signed=True)
 TYPE_I32 = TypeInfo('i32', size=32, is_int=True, is_signed=True)
 TYPE_I64 = TypeInfo('i64', size=64, is_int=True, is_signed=True)
+TYPE_U8 = TypeInfo('u8', size=8, is_int=True, is_signed=False)
+TYPE_U16 = TypeInfo('u16', size=16, is_int=True, is_signed=False)
+TYPE_U32 = TypeInfo('u32', size=32, is_int=True, is_signed=False)
+TYPE_U64 = TypeInfo('u64', size=64, is_int=True, is_signed=False)
 TYPE_STR = TypeInfo('str')
 TYPE_TYPE = TypeInfo('type')
 
@@ -93,6 +97,7 @@ ADJECTIVES: list[str] = [
     'purple',
     'quirky',
     'sleepy',
+    'sluggish',
     'small',
     'speedy',
     'super',
@@ -105,11 +110,13 @@ NOUNS: list[str] = [
     'bit',
     'byte',
     'coffee',
+    'compiler',
     'copper',
     'electron',
     'integer',
     'keyboard',
     'kitten',
+    'koala',
     'laptop',
     'memory',
     'mouse',
@@ -161,6 +168,10 @@ class Context:
             TYPE_I16,
             TYPE_I32,
             TYPE_I64,
+            TYPE_U8,
+            TYPE_U16,
+            TYPE_U32,
+            TYPE_U64,
             TYPE_STR,
         ]
         self.all_types = self.basic_types[:]
@@ -358,8 +369,13 @@ def write_int_literal(io: IO[str], type: TypeInfo) -> None:
             # '0xfeedface',
         ])
     else:
-        lower_bound = -(1 << (type.size - 1)) + 1 # TODO: take away the "+ 1" after compiler bug is fixed
-        upper_bound = (1 << (type.size - 1)) - 1
+        if type.is_signed:
+            x = 1 << (type.size - 1)
+            lower_bound = -x + 1 # TODO: take away the "+ 1" after compiler bug is fixed
+            upper_bound = x - 1
+        else:
+            lower_bound = 0
+            upper_bound = (1 << type.size) - 1
         n = random.randint(lower_bound, upper_bound)
         f = random.choice([bin, oct, str, hex])
         i = f(n)
