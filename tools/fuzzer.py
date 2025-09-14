@@ -22,22 +22,31 @@ class TypeInfo:
     def __init__(
         self,
         name: str,
+        size: int = 0,
         is_struct: bool=False,
         members: list[IdentifierInfo]|None=None,
         is_fun: bool=False,
         params: list[IdentifierInfo]|None=None,
         return_type: 'TypeInfo|None'=None,
+        is_int: bool = False,
+        is_signed: bool = False,
     ):
         self.name = name
+        self.size = size
         self.is_struct = is_struct
         self.members = [] if members is None else members
         self.is_fun = is_fun
         self.params = [] if params is None else params
         self.return_type = return_type
+        self.is_int = is_int
+        self.is_signed = is_signed
 
 TYPE_FUN = TypeInfo('fun') # TODO: generate type for each function
 TYPE_BOOL = TypeInfo('bool')
-TYPE_I32 = TypeInfo('i32')
+TYPE_I8 = TypeInfo('i8', size=8, is_int=True, is_signed=True)
+TYPE_I16 = TypeInfo('i16', size=16, is_int=True, is_signed=True)
+TYPE_I32 = TypeInfo('i32', size=32, is_int=True, is_signed=True)
+TYPE_I64 = TypeInfo('i64', size=64, is_int=True, is_signed=True)
 TYPE_STR = TypeInfo('str')
 TYPE_TYPE = TypeInfo('type')
 
@@ -73,6 +82,7 @@ INVALID_IDENTIFIERS: set[str] = {
 }
 
 ADJECTIVES: list[str] = [
+    'average',
     'blue',
     'bold',
     'caffeinated',
@@ -86,6 +96,7 @@ ADJECTIVES: list[str] = [
     'small',
     'speedy',
     'super',
+    'zany',
 ]
 
 NOUNS: list[str] = [
@@ -99,6 +110,7 @@ NOUNS: list[str] = [
     'integer',
     'keyboard',
     'kitten',
+    'laptop',
     'memory',
     'mouse',
     'neutron',
@@ -109,6 +121,9 @@ NOUNS: list[str] = [
     'quark',
     'sun',
     'wifi',
+    'xylophone',
+    'yak',
+    'zebra',
 ]
 
 class Scope:
@@ -142,7 +157,10 @@ class Context:
         self.expression_level = 0
         self.basic_types = [
             TYPE_BOOL,
+            TYPE_I8,
+            TYPE_I16,
             TYPE_I32,
+            TYPE_I64,
             TYPE_STR,
         ]
         self.all_types = self.basic_types[:]
@@ -329,7 +347,7 @@ def write_bool_expression(io: IO[str], context: Context) -> None:
         case _:
             assert False, f'Unexpected value: {r}'
 
-def write_int_literal(io: IO[str]) -> None:
+def write_int_literal(io: IO[str], type: TypeInfo) -> None:
     r = random.randrange(0, 2)
     if r == 0:
         i = random.choice([
@@ -340,21 +358,23 @@ def write_int_literal(io: IO[str]) -> None:
             # '0xfeedface',
         ])
     else:
-        n = random.randint(-1_000_000, 1_000_000)
+        lower_bound = -(1 << (type.size - 1)) + 1 # TODO: take away the "+ 1" after compiler bug is fixed
+        upper_bound = (1 << (type.size - 1)) - 1
+        n = random.randint(lower_bound, upper_bound)
         f = random.choice([bin, oct, str, hex])
         i = f(n)
 
     io.write(i)
 
-def write_int_binary_expression(io: IO[str], context: Context) -> None:
-    write_expression(io, context, TYPE_I32)
+def write_int_binary_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    write_expression(io, context, type)
 
     op = random.choice(['+', '-', '*', '&', '|', '^'])
     io.write(f' {op} ')
 
-    write_expression(io, context, TYPE_I32)
+    write_expression(io, context, type)
 
-def write_int_expression(io: IO[str], context: Context) -> None:
+def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     weights: list[float] = [
         math.pow(2.0, 2.59 - context.expression_level),
         1,
@@ -365,17 +385,17 @@ def write_int_expression(io: IO[str], context: Context) -> None:
 
     match r:
         case 0:
-            write_int_binary_expression(io, context)
+            write_int_binary_expression(io, context, type)
         case 1:
-            ok = write_identifier_expression(io, context, TYPE_I32)
+            ok = write_identifier_expression(io, context, type)
             if not ok:
-                write_int_literal(io)
+                write_int_literal(io, type)
         case 2:
-            ok = write_function_call_expression(io, context, TYPE_I32)
+            ok = write_function_call_expression(io, context, type)
             if not ok:
-                write_int_literal(io)
+                write_int_literal(io, type)
         case 3:
-            write_int_literal(io)
+            write_int_literal(io, type)
         case _:
             assert False, f'Unexpected value: {r}'
 
@@ -483,8 +503,8 @@ def write_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
 
     if type.name == 'bool':
         write_bool_expression(io, context)
-    elif type.name == 'i32':
-        write_int_expression(io, context)
+    elif type.is_int:
+        write_int_expression(io, context, type)
     elif type.name == 'str':
         write_str_expression(io, context)
     elif type.is_struct:
