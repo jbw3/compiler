@@ -49,10 +49,12 @@ TYPE_I8 = TypeInfo('i8', size=8, is_int=True, is_signed=True)
 TYPE_I16 = TypeInfo('i16', size=16, is_int=True, is_signed=True)
 TYPE_I32 = TypeInfo('i32', size=32, is_int=True, is_signed=True)
 TYPE_I64 = TypeInfo('i64', size=64, is_int=True, is_signed=True)
+TYPE_ISIZE = TypeInfo('isize', size=64, is_int=True, is_signed=True)
 TYPE_U8 = TypeInfo('u8', size=8, is_int=True, is_signed=False)
 TYPE_U16 = TypeInfo('u16', size=16, is_int=True, is_signed=False)
 TYPE_U32 = TypeInfo('u32', size=32, is_int=True, is_signed=False)
 TYPE_U64 = TypeInfo('u64', size=64, is_int=True, is_signed=False)
+TYPE_USIZE = TypeInfo('usize', size=64, is_int=True, is_signed=False)
 TYPE_F32 = TypeInfo('f32', size=32, is_float=True, is_signed=True)
 TYPE_F64 = TypeInfo('f64', size=64, is_float=True, is_signed=True)
 TYPE_STR = TypeInfo('str')
@@ -63,10 +65,12 @@ INT_TYPES: list[TypeInfo] = [
     TYPE_I16,
     TYPE_I32,
     TYPE_I64,
+    TYPE_ISIZE,
     TYPE_U8,
     TYPE_U16,
     TYPE_U32,
     TYPE_U64,
+    TYPE_USIZE,
 ]
 
 INVALID_IDENTIFIERS: set[str] = {
@@ -581,7 +585,7 @@ def write_range_expression(io: IO[str], context: Context, type: TypeInfo) -> Non
     context.expression_level += 1
 
     write_expression(io, context, type)
-    io.write('..')
+    io.write(random.choice(['..', '..<']))
     write_expression(io, context, type)
 
     context.expression_level -= 1
@@ -667,16 +671,27 @@ def write_while_statement(io: IO[str], context: Context) -> None:
     write_block(io, context)
 
 def write_for_statement(io: IO[str], context: Context) -> None:
-    name = get_identifier(context)
+    iter_name = get_identifier(context)
+
+    iter_type = random.choice(INT_TYPES)
+    include_index = random.randrange(2) == 0
 
     io.write(get_indent_str(context))
     io.write('for ')
-    io.write(name)
-    io.write(' i32 in ')
-    write_range_expression(io, context, TYPE_I32)
+    io.write(iter_name)
+    io.write(f' {iter_type.name}')
+    if include_index:
+        index_name = get_identifier(context)
+        while index_name == iter_name:
+            index_name = get_identifier(context)
+        io.write(f', {index_name} usize')
+    io.write(' in ')
+    write_range_expression(io, context, iter_type)
 
     context.push_scope()
-    context.add_identifier(IdentifierInfo(name, TYPE_I32))
+    context.add_identifier(IdentifierInfo(iter_name, iter_type))
+    if include_index:
+        context.add_identifier(IdentifierInfo(index_name, TYPE_USIZE))
     write_block(io, context)
     context.pop_scope()
 
