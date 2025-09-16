@@ -156,16 +156,19 @@ class Scope:
     def __init__(self):
         self.identifiers: list[IdentifierInfo] = []
         self.type_weights: dict[str, float] = {}
+        self.struct_members_by_type: dict[str, list[tuple[str, TypeInfo]]] = {}
 
     def copy(self) -> 'Scope':
         s = Scope()
         s.identifiers = self.identifiers[:]
         s.type_weights = {k: v for k, v in self.type_weights.items()}
+        s.struct_members_by_type = {k: v for k, v in self.struct_members_by_type.items()}
         return s
 
     def clear(self) -> None:
         self.identifiers.clear()
         self.type_weights.clear()
+        self.struct_members_by_type.clear()
 
     def add_identifier(self, identifier: IdentifierInfo) -> None:
         self.identifiers.append(identifier)
@@ -174,6 +177,14 @@ class Scope:
             self.type_weights[type_name] = 1.0
         else:
             self.type_weights[type_name] += 0.5
+
+        type = identifier.type
+        if type.is_struct:
+            for member in type.members:
+                member_type_name = member.type.name
+                if member_type_name not in self.struct_members_by_type:
+                    self.struct_members_by_type[member_type_name] = []
+                self.struct_members_by_type[member_type_name].append((member.name, type))
 
 class Context:
     def __init__(self):
@@ -237,6 +248,12 @@ class Context:
             return None
         return random.choice(functions)
 
+    def has_struct_member_of_type(self, type: TypeInfo) -> bool:
+        return type.name in self.scope_stack[-1].struct_members_by_type
+
+    def get_struct_members_by_type(self, type: TypeInfo) -> list[tuple[str, TypeInfo]]:
+        return self.scope_stack[-1].struct_members_by_type.get(type.name, [])
+
     def get_type_by_name(self, name: str) -> TypeInfo|None:
         for type in self.all_types:
             if type.name == name:
@@ -251,6 +268,13 @@ def get_type_weight(type: TypeInfo, context: Context) -> float:
 
     weight += context.get_current_scope_type_weights().get(type.name, 0.0)
     return weight
+
+def get_struct_member_weight(member_type: TypeInfo, context: Context) -> float:
+    struct_member_weight = 0.0
+    if context.has_struct_member_of_type(member_type):
+        struct_member_weight = math.pow(1.3, 5.2 - context.expression_level)
+
+    return struct_member_weight
 
 def get_identifier_type(context: Context) -> TypeInfo:
     all_types_weights: list[float] = [get_type_weight(t, context) for t in context.all_types]
@@ -329,6 +353,14 @@ def write_function_call_expression(io: IO[str], context: Context, return_type: T
     io.write(')')
     return True
 
+def write_struct_member_expression(io: IO[str], context: Context, member_type: TypeInfo) -> None:
+    members_and_structs = context.get_struct_members_by_type(member_type)
+    member_name, struct_type = random.choice(members_and_structs)
+
+    write_expression(io, context, struct_type)
+    io.write('.')
+    io.write(member_name)
+
 def write_bool_literal(io: IO[str]) -> None:
     if random.randint(0, 1) == 0:
         value = 'false'
@@ -356,13 +388,16 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
             io.write(')')
 
 def write_bool_expression(io: IO[str], context: Context) -> None:
+    struct_member_weight = get_struct_member_weight(TYPE_BOOL, context)
+
     weights: list[float] = [
         math.pow(2.0, 2.59 - context.expression_level),
         1,
         math.pow(2.0, 2.0 - context.expression_level),
         1,
+        struct_member_weight,
     ]
-    r = random.choices([0, 1, 2, 3], weights)[0]
+    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
     match r:
         case 0:
@@ -377,6 +412,8 @@ def write_bool_expression(io: IO[str], context: Context) -> None:
                 write_bool_literal(io)
         case 3:
             write_bool_literal(io)
+        case 4:
+            write_struct_member_expression(io, context, TYPE_BOOL)
         case _:
             assert False, f'Unexpected value: {r}'
 
@@ -413,14 +450,6 @@ def write_int_binary_expression(io: IO[str], context: Context, type: TypeInfo) -
     write_expression(io, context, type)
 
 def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
-    weights: list[float] = [
-        math.pow(2.0, 2.59 - context.expression_level),
-        1,
-        math.pow(2.0, 2.0 - context.expression_level),
-        1,
-    ]
-    r = random.choices([0, 1, 2, 3], weights)[0]
-
     # test implicit casts
     if type.size > 8 and random.randrange(4) == 0 and False: # TODO: enable when compiler bug is fixed
         new_type_choices = [
@@ -431,6 +460,17 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         new_type = random.choice(new_type_choices)
     else:
         new_type = type
+
+    struct_member_weight = get_struct_member_weight(new_type, context)
+
+    weights: list[float] = [
+        math.pow(2.0, 2.59 - context.expression_level),
+        1,
+        math.pow(2.0, 2.0 - context.expression_level),
+        1,
+        struct_member_weight,
+    ]
+    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
     match r:
         case 0:
@@ -445,6 +485,8 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
                 write_int_literal(io, new_type)
         case 3:
             write_int_literal(io, new_type)
+        case 4:
+            write_struct_member_expression(io, context, new_type)
         case _:
             assert False, f'Unexpected value: {r}'
 
@@ -468,13 +510,16 @@ def write_float_binary_expression(io: IO[str], context: Context, type: TypeInfo)
     write_expression(io, context, type)
 
 def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
+    struct_member_weight = get_struct_member_weight(type, context)
+
     weights: list[float] = [
         math.pow(2.0, 2.59 - context.expression_level),
         1,
         math.pow(2.0, 2.0 - context.expression_level),
         1,
+        struct_member_weight,
     ]
-    r = random.choices([0, 1, 2, 3], weights)[0]
+    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
     match r:
         case 0:
@@ -489,6 +534,8 @@ def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> Non
                 write_float_literal(io, type)
         case 3:
             write_float_literal(io, type)
+        case 4:
+            write_struct_member_expression(io, context, type)
         case _:
             assert False, f'Unexpected value: {r}'
 
@@ -520,12 +567,15 @@ def write_str_literal(io: IO[str]) -> None:
     io.write('"')
 
 def write_str_expression(io: IO[str], context: Context) -> None:
+    struct_member_weight = get_struct_member_weight(TYPE_STR, context)
+
     weights: list[float] = [
         1,
         math.pow(2.0, 2.0 - context.expression_level),
         1,
+        struct_member_weight,
     ]
-    r = random.choices([0, 1, 2], weights)[0]
+    r = random.choices([0, 1, 2, 3], weights)[0]
 
     match r:
         case 0:
@@ -538,6 +588,8 @@ def write_str_expression(io: IO[str], context: Context) -> None:
                 write_str_literal(io)
         case 2:
             write_str_literal(io)
+        case 3:
+            write_struct_member_expression(io, context, TYPE_STR)
         case _:
             assert False, f'Unexpected value: {r}'
 
@@ -566,11 +618,14 @@ def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) 
 def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     assert type.is_struct, f"Type '{type.name}' is not a struct"
 
+    struct_member_weight = get_struct_member_weight(type, context)
+
     weights: list[float] = [
         1,
         1 * math.exp(-context.expression_level),
+        struct_member_weight,
     ]
-    r = random.choices([0, 1], weights)[0]
+    r = random.choices([0, 1, 2], weights)[0]
 
     match r:
         case 0:
@@ -579,6 +634,8 @@ def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> No
                 write_struct_init_expression(io, context, type)
         case 1:
             write_struct_init_expression(io, context, type)
+        case 2:
+            write_struct_member_expression(io, context, type)
         case _:
             assert False, f'Unexpected value: {r}'
 
