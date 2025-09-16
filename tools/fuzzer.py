@@ -181,6 +181,7 @@ class Context:
         self.scope_stack: list[Scope] = [Scope()]
         self.indent_level = 0
         self.expression_level = 0
+        self.loop_level = 0
         self.basic_types = [
             TYPE_BOOL,
             TYPE_I8,
@@ -668,7 +669,9 @@ def write_while_statement(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('while ')
     write_expression(io, context, TYPE_BOOL)
+    context.loop_level += 1
     write_block(io, context)
+    context.loop_level -= 1
 
 def write_for_statement(io: IO[str], context: Context) -> None:
     iter_name = get_identifier(context)
@@ -692,7 +695,9 @@ def write_for_statement(io: IO[str], context: Context) -> None:
     context.add_identifier(IdentifierInfo(iter_name, iter_type))
     if include_index:
         context.add_identifier(IdentifierInfo(index_name, TYPE_USIZE))
+    context.loop_level += 1
     write_block(io, context)
+    context.loop_level -= 1
     context.pop_scope()
 
 def write_statement(io: IO[str], context: Context) -> None:
@@ -704,7 +709,9 @@ def write_statement(io: IO[str], context: Context) -> None:
         6,
         6 * math.exp(-0.4 * scope_level),
     ]
-    r = random.choices([0, 1, 2, 3, 4], weights)[0]
+    if context.loop_level > 0:
+        weights.extend([1, 1])
+    r = random.choices(list(range(len(weights))), weights)[0]
 
     match r:
         case 0:
@@ -719,6 +726,12 @@ def write_statement(io: IO[str], context: Context) -> None:
             io.write(get_indent_str(context))
             write_function_call_expression(io, context, None)
             io.write(';\n')
+        case 5:
+            io.write(get_indent_str(context))
+            io.write('break;\n')
+        case 6:
+            io.write(get_indent_str(context))
+            io.write('continue;\n')
         case _:
             assert False, f'Unexpected value: {r}'
 
