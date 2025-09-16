@@ -708,6 +708,7 @@ def write_statement(io: IO[str], context: Context) -> None:
         math.exp(2.8 - scope_level),
         6,
         6 * math.exp(-0.4 * scope_level),
+        3 * math.exp(1.1 * (1 - scope_level)),
     ]
     if context.loop_level > 0:
         weights.extend([1, 1])
@@ -727,9 +728,11 @@ def write_statement(io: IO[str], context: Context) -> None:
             write_function_call_expression(io, context, None)
             io.write(';\n')
         case 5:
+            write_block(io, context)
+        case 6:
             io.write(get_indent_str(context))
             io.write('break;\n')
-        case 6:
+        case 7:
             io.write(get_indent_str(context))
             io.write('continue;\n')
         case _:
