@@ -792,7 +792,7 @@ def write_code(io: IO[str]) -> None:
 
     all_types_weights: list[float] = [5.0] * len(context.all_types)
     structs: list[IdentifierInfo] = []
-    for _ in range(random.randint(2, 5)):
+    for _ in range(random.randint(0, 5)):
         name = get_identifier(context)
         context.push_scope()
         members: list[IdentifierInfo] = []
@@ -810,7 +810,7 @@ def write_code(io: IO[str]) -> None:
         all_types_weights.append(1.0)
         structs.append(struct)
 
-    for _ in range(random.randint(2, 10)):
+    for _ in range(random.randint(2, 10)): # TODO: start range at 0 when compiler bug is fixed
         name = get_identifier(context)
         context.add_identifier(IdentifierInfo(name, TYPE_FUN))
         return_type = random.choices(context.all_types, all_types_weights)[0]
