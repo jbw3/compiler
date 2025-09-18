@@ -375,7 +375,7 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
     r = random.randint(0, 1)
     if r == 0:
         write_expression(io, context, TYPE_BOOL)
-        op = random.choice(['&', '|'])
+        op = random.choice(['&', '|', '^'])
         io.write(f' {op} ')
         write_expression(io, context, TYPE_BOOL)
     else:
@@ -529,9 +529,15 @@ def write_str_literal(io: IO[str]) -> None:
         io.write(random.choice(NOUNS))
     else:
         for _ in range(random.randint(1, 12)):
-            s = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-=_+πé\'"') # TODO: add \ when compiler bug is fixed
+            s = random.choice('\t\n\r !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~πé') # TODO: add \ when compiler bug is fixed
             if s in ('"', '\\'):
                 s = '\\' + s
+            elif s == '\t':
+                s = '\\t'
+            elif s == '\n':
+                s = '\\n'
+            elif s == '\r':
+                s = '\\r'
             io.write(s)
 
     io.write('"')
