@@ -272,7 +272,7 @@ def get_type_weight(type: TypeInfo, context: Context) -> float:
 def get_struct_member_weight(member_type: TypeInfo, context: Context) -> float:
     struct_member_weight = 0.0
     if context.has_struct_member_of_type(member_type):
-        struct_member_weight = math.pow(1.3, 5.2 - context.expression_level)
+        struct_member_weight = math.pow(1.3, 3.7 - context.expression_level) + 0.1
 
     return struct_member_weight
 
@@ -592,7 +592,7 @@ def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> No
 
     weights: list[float] = [
         1 if context.get_identifier_of_type(type) is not None else 0,
-        1 * math.exp(-context.expression_level),
+        math.exp(0.7 * (1.5 - context.expression_level)),
         get_struct_member_weight(type, context),
     ]
 
