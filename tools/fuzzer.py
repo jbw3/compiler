@@ -897,8 +897,8 @@ def main() -> int:
         total_runs += 1
 
     total_time = datetime.datetime.now() - start
-    print(f'Runs: {total_runs}')
-    print(f'Errors: {error_count}')
+    print(f'Runs: {total_runs:,}')
+    print(f'Errors: {error_count:,}')
     print(f'Time: {total_time}')
 
     if error_count == 0 and out_dir.exists():
