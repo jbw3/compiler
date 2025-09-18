@@ -529,7 +529,7 @@ def write_str_literal(io: IO[str]) -> None:
         io.write(random.choice(NOUNS))
     else:
         for _ in range(random.randint(1, 12)):
-            s = random.choice('\t\n\r !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~πé') # TODO: add \ when compiler bug is fixed
+            s = random.choice('\t\n\r !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~πé')
             if s in ('"', '\\'):
                 s = '\\' + s
             elif s == '\t':

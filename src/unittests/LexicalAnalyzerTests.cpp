@@ -307,6 +307,7 @@ bool LexicalAnalyzerTests::TestStrings(string& failMsg)
         make_tuple(R"("abc")", true),
         make_tuple(R"("Testing 1, 2, 3...")", true),
         make_tuple(R"("abc\n123")", true),
+        make_tuple(R"("\\")", true),
 
         // invalid strings
         make_tuple(R"(")", false),
