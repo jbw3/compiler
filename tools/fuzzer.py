@@ -8,7 +8,7 @@ import pathlib
 import random
 import subprocess
 import sys
-from typing import IO, Iterator
+from typing import Callable, IO, Iterator
 
 SCRIPT_PATH = pathlib.Path(__file__)
 ROOT_DIR = SCRIPT_PATH.parent.parent
@@ -318,6 +318,14 @@ def get_identifier(context: Context) -> str:
 
     return identifier
 
+def write_random(io: IO[str], context: Context, funs: list[Callable[[IO[str], Context], None]], weights: list[float]) -> None:
+    fun = random.choices(funs, weights)[0]
+    fun(io, context)
+
+def write_indented_str(io: IO[str], context: Context, s: str) -> None:
+    io.write(get_indent_str(context))
+    io.write(s)
+
 def write_comment(io: IO[str], context: Context, comment: str) -> None:
     indent = get_indent_str(context)
 
@@ -332,18 +340,14 @@ def write_comment(io: IO[str], context: Context, comment: str) -> None:
         io.write(indent)
         io.write('!#\n')
 
-def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> bool:
+def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     identifier = context.get_identifier_of_type(type)
-    if identifier is None:
-        return False
-
+    assert identifier is not None
     io.write(identifier.name)
-    return True
 
-def write_function_call_expression(io: IO[str], context: Context, return_type: TypeInfo|None) -> bool:
+def write_function_call_expression(io: IO[str], context: Context, return_type: TypeInfo|None) -> None:
     function = context.get_function_with_return_type(return_type)
-    if function is None:
-        return False
+    assert function is not None
 
     io.write(function.name)
     io.write('(')
@@ -351,7 +355,6 @@ def write_function_call_expression(io: IO[str], context: Context, return_type: T
         write_expression(io, context, param.type)
         io.write(', ')
     io.write(')')
-    return True
 
 def write_struct_member_expression(io: IO[str], context: Context, member_type: TypeInfo) -> None:
     members_and_structs = context.get_struct_members_by_type(member_type)
@@ -388,34 +391,23 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
             io.write(')')
 
 def write_bool_expression(io: IO[str], context: Context) -> None:
-    struct_member_weight = get_struct_member_weight(TYPE_BOOL, context)
+    funs: list[Callable[[IO[str], Context], None]] = [
+        write_bool_binary_expression,
+        lambda i, c: write_identifier_expression(i, c, TYPE_BOOL),
+        lambda i, c: write_function_call_expression(i, c, TYPE_BOOL),
+        lambda i, _: write_bool_literal(i),
+        lambda i, c: write_struct_member_expression(i, c, TYPE_BOOL),
+    ]
 
     weights: list[float] = [
         math.pow(2.0, 2.59 - context.expression_level),
+        1 if context.get_identifier_of_type(TYPE_BOOL) is not None else 0,
+        math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(TYPE_BOOL) is not None else 0,
         1,
-        math.pow(2.0, 2.0 - context.expression_level),
-        1,
-        struct_member_weight,
+        get_struct_member_weight(TYPE_BOOL, context),
     ]
-    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
-    match r:
-        case 0:
-            write_bool_binary_expression(io, context)
-        case 1:
-            ok = write_identifier_expression(io, context, TYPE_BOOL)
-            if not ok:
-                write_bool_literal(io)
-        case 2:
-            ok = write_function_call_expression(io, context, TYPE_BOOL)
-            if not ok:
-                write_bool_literal(io)
-        case 3:
-            write_bool_literal(io)
-        case 4:
-            write_struct_member_expression(io, context, TYPE_BOOL)
-        case _:
-            assert False, f'Unexpected value: {r}'
+    write_random(io, context, funs, weights)
 
 def write_int_literal(io: IO[str], type: TypeInfo) -> None:
     r = random.randrange(0, 2)
@@ -461,34 +453,23 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     else:
         new_type = type
 
-    struct_member_weight = get_struct_member_weight(new_type, context)
+    funs: list[Callable[[IO[str], Context], None]] = [
+        lambda i, c: write_int_binary_expression(i, c, new_type),
+        lambda i, c: write_identifier_expression(i, c, new_type),
+        lambda i, c: write_function_call_expression(i, c, new_type),
+        lambda i, _: write_int_literal(i, new_type),
+        lambda i, c: write_struct_member_expression(i, c, new_type),
+    ]
 
     weights: list[float] = [
         math.pow(2.0, 2.59 - context.expression_level),
+        1 if context.get_identifier_of_type(new_type) is not None else 0,
+        math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(new_type) is not None else 0,
         1,
-        math.pow(2.0, 2.0 - context.expression_level),
-        1,
-        struct_member_weight,
+        get_struct_member_weight(new_type, context),
     ]
-    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
-    match r:
-        case 0:
-            write_int_binary_expression(io, context, new_type)
-        case 1:
-            ok = write_identifier_expression(io, context, new_type)
-            if not ok:
-                write_int_literal(io, new_type)
-        case 2:
-            ok = write_function_call_expression(io, context, new_type)
-            if not ok:
-                write_int_literal(io, new_type)
-        case 3:
-            write_int_literal(io, new_type)
-        case 4:
-            write_struct_member_expression(io, context, new_type)
-        case _:
-            assert False, f'Unexpected value: {r}'
+    write_random(io, context, funs, weights)
 
 def write_float_literal(io: IO[str], type: TypeInfo) -> None:
     if random.randrange(5) == 0:
@@ -510,34 +491,23 @@ def write_float_binary_expression(io: IO[str], context: Context, type: TypeInfo)
     write_expression(io, context, type)
 
 def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
-    struct_member_weight = get_struct_member_weight(type, context)
+    funs: list[Callable[[IO[str], Context], None]] = [
+        lambda i, c: write_float_binary_expression(i, c, type),
+        lambda i, c: write_identifier_expression(i, c, type),
+        lambda i, c: write_function_call_expression(i, c, type),
+        lambda i, _: write_float_literal(i, type),
+        lambda i, c: write_struct_member_expression(i, c, type),
+    ]
 
     weights: list[float] = [
         math.pow(2.0, 2.59 - context.expression_level),
+        1 if context.get_identifier_of_type(type) is not None else 0,
+        math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(type) is not None else 0,
         1,
-        math.pow(2.0, 2.0 - context.expression_level),
-        1,
-        struct_member_weight,
+        get_struct_member_weight(type, context),
     ]
-    r = random.choices([0, 1, 2, 3, 4], weights)[0]
 
-    match r:
-        case 0:
-            write_float_binary_expression(io, context, type)
-        case 1:
-            ok = write_identifier_expression(io, context, type)
-            if not ok:
-                write_float_literal(io, type)
-        case 2:
-            ok = write_function_call_expression(io, context, type)
-            if not ok:
-                write_float_literal(io, type)
-        case 3:
-            write_float_literal(io, type)
-        case 4:
-            write_struct_member_expression(io, context, type)
-        case _:
-            assert False, f'Unexpected value: {r}'
+    write_random(io, context, funs, weights)
 
 REALLY_LONG_STRING = 'This is a ' + ('really, ' * 20) + 'long string.'
 
@@ -567,31 +537,21 @@ def write_str_literal(io: IO[str]) -> None:
     io.write('"')
 
 def write_str_expression(io: IO[str], context: Context) -> None:
-    struct_member_weight = get_struct_member_weight(TYPE_STR, context)
+    funs: list[Callable[[IO[str], Context], None]] = [
+        lambda i, c: write_identifier_expression(i, c, TYPE_STR),
+        lambda i, c: write_function_call_expression(i, c, TYPE_STR),
+        lambda i, _: write_str_literal(i),
+        lambda i, c: write_struct_member_expression(i, c, TYPE_STR),
+    ]
 
     weights: list[float] = [
+        1 if context.get_identifier_of_type(TYPE_STR) is not None else 0,
+        math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(TYPE_STR) is not None else 0,
         1,
-        math.pow(2.0, 2.0 - context.expression_level),
-        1,
-        struct_member_weight,
+        get_struct_member_weight(TYPE_STR, context),
     ]
-    r = random.choices([0, 1, 2, 3], weights)[0]
 
-    match r:
-        case 0:
-            ok = write_identifier_expression(io, context, TYPE_STR)
-            if not ok:
-                write_str_literal(io)
-        case 1:
-            ok = write_function_call_expression(io, context, TYPE_STR)
-            if not ok:
-                write_str_literal(io)
-        case 2:
-            write_str_literal(io)
-        case 3:
-            write_struct_member_expression(io, context, TYPE_STR)
-        case _:
-            assert False, f'Unexpected value: {r}'
+    write_random(io, context, funs, weights)
 
 def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     assert type.is_struct, f"Type '{type.name}' is not a struct"
@@ -618,26 +578,19 @@ def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) 
 def write_struct_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     assert type.is_struct, f"Type '{type.name}' is not a struct"
 
-    struct_member_weight = get_struct_member_weight(type, context)
+    funs: list[Callable[[IO[str], Context], None]] = [
+        lambda i, c: write_identifier_expression(i, c, type),
+        lambda i, c: write_struct_init_expression(i, c, type),
+        lambda i, c: write_struct_member_expression(i, c, type),
+    ]
 
     weights: list[float] = [
-        1,
+        1 if context.get_identifier_of_type(type) is not None else 0,
         1 * math.exp(-context.expression_level),
-        struct_member_weight,
+        get_struct_member_weight(type, context),
     ]
-    r = random.choices([0, 1, 2], weights)[0]
 
-    match r:
-        case 0:
-            ok = write_identifier_expression(io, context, type)
-            if not ok:
-                write_struct_init_expression(io, context, type)
-        case 1:
-            write_struct_init_expression(io, context, type)
-        case 2:
-            write_struct_member_expression(io, context, type)
-        case _:
-            assert False, f'Unexpected value: {r}'
+    write_random(io, context, funs, weights)
 
 def write_range_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     context.expression_level += 1
@@ -757,8 +710,25 @@ def write_for_statement(io: IO[str], context: Context) -> None:
     context.loop_level -= 1
     context.pop_scope()
 
+def write_function_call_statement(io: IO[str], context: Context) -> None:
+    io.write(get_indent_str(context))
+    write_function_call_expression(io, context, None)
+    io.write(';\n')
+
 def write_statement(io: IO[str], context: Context) -> None:
+    funs: list[Callable[[IO[str], Context], None]] = [
+        write_if_statement,
+        write_while_statement,
+        write_for_statement,
+        write_variable_declaration,
+        write_function_call_statement,
+        write_block,
+        lambda i, c: write_indented_str(i, c, 'break;\n'),
+        lambda i, c: write_indented_str(i, c, 'continue;\n'),
+    ]
+
     scope_level = len(context.scope_stack)
+    break_continue_weight = 1 if context.loop_level > 0 else 0
     weights: list[float] = [
         math.exp(2.8 - scope_level),
         math.exp(2.8 - scope_level),
@@ -766,34 +736,11 @@ def write_statement(io: IO[str], context: Context) -> None:
         6,
         6 * math.exp(-0.4 * scope_level),
         3 * math.exp(1.1 * (1 - scope_level)),
+        break_continue_weight,
+        break_continue_weight,
     ]
-    if context.loop_level > 0:
-        weights.extend([1, 1])
-    r = random.choices(list(range(len(weights))), weights)[0]
 
-    match r:
-        case 0:
-            write_if_statement(io, context)
-        case 1:
-            write_while_statement(io, context)
-        case 2:
-            write_for_statement(io, context)
-        case 3:
-            write_variable_declaration(io, context)
-        case 4:
-            io.write(get_indent_str(context))
-            write_function_call_expression(io, context, None)
-            io.write(';\n')
-        case 5:
-            write_block(io, context)
-        case 6:
-            io.write(get_indent_str(context))
-            io.write('break;\n')
-        case 7:
-            io.write(get_indent_str(context))
-            io.write('continue;\n')
-        case _:
-            assert False, f'Unexpected value: {r}'
+    write_random(io, context, funs, weights)
 
 def write_function(io: IO[str], context: Context, function: TypeInfo) -> None:
     assert function.return_type is not None
