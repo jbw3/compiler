@@ -109,9 +109,12 @@ ADJECTIVES: list[str] = [
     'blue',
     'bold',
     'caffeinated',
+    'delightful',
     'excited',
     'friendly',
+    'grateful',
     'happy',
+    'mathematical',
     'methodical',
     'purple',
     'quirky',
@@ -137,6 +140,8 @@ NOUNS: list[str] = [
     'kitten',
     'koala',
     'laptop',
+    'laser',
+    'math',
     'memory',
     'mouse',
     'neutron',
@@ -145,7 +150,9 @@ NOUNS: list[str] = [
     'program',
     'proton',
     'quark',
+    'robot',
     'sun',
+    'tortoise',
     'wifi',
     'xylophone',
     'yak',
@@ -390,6 +397,18 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
         if context.expression_level > 1:
             io.write(')')
 
+def write_bool_op_assignment(io: IO[str], context: Context) -> None:
+    id_info = random.choice([i for i in context.get_current_scope_identifiers() if i.type.name == 'bool'])
+
+    io.write(get_indent_str(context))
+    io.write(id_info.name)
+    op = random.choice(['&=', '|=', '^='])
+    io.write(f' {op} ')
+
+    write_expression(io, context, id_info.type)
+
+    io.write(';\n')
+
 def write_bool_expression(io: IO[str], context: Context) -> None:
     funs: list[Callable[[IO[str], Context], None]] = [
         write_bool_binary_expression,
@@ -441,6 +460,18 @@ def write_int_binary_expression(io: IO[str], context: Context, type: TypeInfo) -
 
     write_expression(io, context, type)
 
+def write_int_op_assignment(io: IO[str], context: Context) -> None:
+    id_info = random.choice([i for i in context.get_current_scope_identifiers() if i.type.is_int])
+
+    io.write(get_indent_str(context))
+    io.write(id_info.name)
+    op = random.choice(['+=', '-=', '*=', '&=', '|=', '^='])
+    io.write(f' {op} ')
+
+    write_expression(io, context, id_info.type)
+
+    io.write(';\n')
+
 def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     # test implicit casts
     if type.size > 8 and random.randrange(4) == 0 and False: # TODO: enable when compiler bug is fixed
@@ -489,6 +520,18 @@ def write_float_binary_expression(io: IO[str], context: Context, type: TypeInfo)
     io.write(f' {op} ')
 
     write_expression(io, context, type)
+
+def write_float_op_assignment(io: IO[str], context: Context) -> None:
+    id_info = random.choice([i for i in context.get_current_scope_identifiers() if i.type.is_float])
+
+    io.write(get_indent_str(context))
+    io.write(id_info.name)
+    op = random.choice(['+=', '-=', '*='])
+    io.write(f' {op} ')
+
+    write_expression(io, context, id_info.type)
+
+    io.write(';\n')
 
 def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     funs: list[Callable[[IO[str], Context], None]] = [
@@ -731,6 +774,9 @@ def write_statement(io: IO[str], context: Context) -> None:
         write_block,
         lambda i, c: write_indented_str(i, c, 'break;\n'),
         lambda i, c: write_indented_str(i, c, 'continue;\n'),
+        write_int_op_assignment,
+        write_float_op_assignment,
+        write_bool_op_assignment,
     ]
 
     scope_level = len(context.scope_stack)
@@ -739,11 +785,14 @@ def write_statement(io: IO[str], context: Context) -> None:
         math.exp(2.8 - scope_level),
         math.exp(2.8 - scope_level),
         math.exp(2.8 - scope_level),
-        6,
+        5,
         6 * math.exp(-0.4 * scope_level),
         3 * math.exp(1.1 * (1 - scope_level)),
         break_continue_weight,
         break_continue_weight,
+        6 if any(i.type.is_int for i in context.get_current_scope_identifiers()) else 0,
+        6 if any(i.type.is_float for i in context.get_current_scope_identifiers()) else 0,
+        6 if any(i.type.name == 'bool' for i in context.get_current_scope_identifiers()) else 0,
     ]
 
     write_random(io, context, funs, weights)
