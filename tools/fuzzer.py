@@ -288,17 +288,6 @@ def get_identifier_type(context: Context) -> TypeInfo:
     type = random.choices(context.all_types, all_types_weights)[0]
     return type
 
-def run_compiler(src_filename: pathlib.Path, out_filename: pathlib.Path) -> int:
-    compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
-    cmd = [
-        compiler_path,
-        src_filename,
-        '-o',
-        out_filename,
-    ]
-    proc = subprocess.run(cmd)
-    return proc.returncode
-
 def get_indent_str(context: Context) -> str:
     # wrong indentation every once in a while
     if random.randrange(30) == 0:
@@ -314,12 +303,14 @@ def get_identifier(context: Context) -> str:
 
     valid = False
     while not valid:
-        if random.randint(0, 1) == 0:
-            identifier = random.choice(ADJECTIVES) + '_' + random.choice(NOUNS)
+        if random.randrange(2) == 0:
+            if random.randrange(2) == 0:
+                identifier = random.choice(ADJECTIVES) + '_' + random.choice(NOUNS)
+            else:
+                identifier = random.choice(ADJECTIVES) + random.choice(NOUNS).title()
         else:
             identifier = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
-            for _ in range(random.randint(0, 14)):
-                identifier += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
+            identifier += ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789', k=random.randint(0, 14)))
 
         valid = identifier not in invalid
 
@@ -962,20 +953,28 @@ def main() -> int:
     src_filename = pathlib.Path('fuzzer.wip')
     out_filename = pathlib.Path('fuzzer.o')
 
+    compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
+    cmd = [
+        compiler_path,
+        src_filename,
+        '-o',
+        out_filename,
+    ]
+
     max_time = None if args.time is None else datetime.timedelta(seconds=args.time)
     total_runs = 0
     error_count = 0
     while True:
         if args.runs is not None and total_runs >= args.runs:
             break
-        time_diff = datetime.datetime.now() - start
-        if max_time is not None and time_diff >= max_time:
+        if max_time is not None and datetime.datetime.now() - start >= max_time:
             break
 
         with open(src_filename, 'w') as f:
             write_code(f)
 
-        rc = run_compiler(src_filename, out_filename)
+        proc = subprocess.run(cmd)
+        rc = proc.returncode
         if rc != 0:
             error_count += 1
             print(f'Error: rc={rc}')
