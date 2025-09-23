@@ -333,19 +333,43 @@ def write_indented_str(io: IO[str], context: Context, s: str) -> None:
     io.write(get_indent_str(context))
     io.write(s)
 
-def write_comment(io: IO[str], context: Context, comment: str) -> None:
-    indent = get_indent_str(context)
-
-    if random.randint(0, 1) == 0:
-        io.write(indent)
-        io.write(f'# {comment}\n')
+def write_token_sep(io: IO[str], context: Context) -> None:
+    r = random.randint(0, 50)
+    if r == 0:
+        write_block_comment(io, context, 'this is important because reasons', False)
+    elif 1 <= r <= 10:
+        pass
     else:
-        io.write(indent)
-        io.write('#!\n')
-        io.write(indent)
-        io.write(f'  {comment}\n')
-        io.write(indent)
-        io.write('!#\n')
+        io.write(' ')
+
+def write_line_comment(io: IO[str], context: Context, comment: str, indent: bool) -> None:
+    if indent:
+        indent_str = get_indent_str(context)
+        io.write(indent_str)
+    io.write(f'# {comment}\n')
+
+def write_block_comment(io: IO[str], context: Context, comment: str, indent: bool) -> None:
+    if indent:
+        indent_str = get_indent_str(context)
+    else:
+        indent_str = ''
+
+    io.write(indent_str)
+    io.write('#!\n')
+    io.write(indent_str)
+    io.write(f'  {comment}\n')
+
+    if random.randrange(50) == 0:
+        write_block_comment(io, context, 'Nested comment!!!', True)
+
+    io.write(indent_str)
+    io.write('!#\n')
+
+def write_comment(io: IO[str], context: Context, comment: str) -> None:
+    if random.randint(0, 1) == 0:
+        write_line_comment(io, context, comment, True)
+    else:
+        write_block_comment(io, context, comment, True)
 
 def write_identifier_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     identifier = context.get_identifier_of_type(type)
@@ -383,7 +407,9 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
     if r == 0:
         write_expression(io, context, TYPE_BOOL)
         op = random.choice(['&', '|', '^'])
-        io.write(f' {op} ')
+        write_token_sep(io, context)
+        io.write(op)
+        write_token_sep(io, context)
         write_expression(io, context, TYPE_BOOL)
     else:
         if context.expression_level > 1:
@@ -391,7 +417,9 @@ def write_bool_binary_expression(io: IO[str], context: Context) -> None:
 
         write_expression(io, context, TYPE_I32)
         op = random.choice(['==', '!=', '<', '<=', '>', '>='])
-        io.write(f' {op} ')
+        write_token_sep(io, context)
+        io.write(op)
+        write_token_sep(io, context)
         write_expression(io, context, TYPE_I32)
 
         if context.expression_level > 1:
@@ -403,7 +431,9 @@ def write_bool_op_assignment(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write(id_info.name)
     op = random.choice(['&=', '|=', '^='])
-    io.write(f' {op} ')
+    write_token_sep(io, context)
+    io.write(op)
+    write_token_sep(io, context)
 
     write_expression(io, context, id_info.type)
 
@@ -456,7 +486,9 @@ def write_int_binary_expression(io: IO[str], context: Context, type: TypeInfo) -
     write_expression(io, context, type)
 
     op = random.choice(['+', '-', '*', '&', '|', '^'])
-    io.write(f' {op} ')
+    write_token_sep(io, context)
+    io.write(op)
+    write_token_sep(io, context)
 
     write_expression(io, context, type)
 
@@ -466,7 +498,9 @@ def write_int_op_assignment(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write(id_info.name)
     op = random.choice(['+=', '-=', '*=', '&=', '|=', '^='])
-    io.write(f' {op} ')
+    write_token_sep(io, context)
+    io.write(op)
+    write_token_sep(io, context)
 
     write_expression(io, context, id_info.type)
 
@@ -517,7 +551,9 @@ def write_float_binary_expression(io: IO[str], context: Context, type: TypeInfo)
     write_expression(io, context, type)
 
     op = random.choice(['+', '-', '*', '/', '%'])
-    io.write(f' {op} ')
+    write_token_sep(io, context)
+    io.write(op)
+    write_token_sep(io, context)
 
     write_expression(io, context, type)
 
@@ -527,7 +563,9 @@ def write_float_op_assignment(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write(id_info.name)
     op = random.choice(['+=', '-=', '*='])
-    io.write(f' {op} ')
+    write_token_sep(io, context)
+    io.write(op)
+    write_token_sep(io, context)
 
     write_expression(io, context, id_info.type)
 
