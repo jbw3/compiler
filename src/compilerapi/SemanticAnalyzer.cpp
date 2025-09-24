@@ -219,6 +219,20 @@ SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     symbolTable(compilerContext),
     currentFunction(nullptr)
 {
+    // create a default entry for struct definition expressions
+    incompleteStructExpressions.push(new vector<StructDefinitionExpression*>());
+}
+
+SemanticAnalyzer::~SemanticAnalyzer()
+{
+    // in an error case, there might be invalid pointers on the stack, so we need
+    // to pop them off
+    while (incompleteStructExpressions.size() > 1)
+    {
+        incompleteStructExpressions.pop();
+    }
+
+    delete incompleteStructExpressions.top();
 }
 
 bool SemanticAnalyzer::Process(SyntaxTreeNode* syntaxTree)
@@ -230,11 +244,6 @@ bool SemanticAnalyzer::Process(SyntaxTreeNode* syntaxTree)
 void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 {
     UnaryExpression::EOperator op = unaryExpression->op;
-
-    if (op == UnaryExpression::eAddressOf && needsStructImplStack.size() > 0)
-    {
-        needsStructImplStack.top() = false;
-    }
 
     Expression* subExpr = unaryExpression->subExpression;
     subExpr->Accept(this);
@@ -2137,11 +2146,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     TypeInfo* structType = nullptr;
     unsigned constIdx = -1;
 
-    bool needsStructImpl = true;
-    if (needsStructImplStack.size() > 0)
-    {
-        needsStructImpl = needsStructImplStack.top();
-    }
+    bool needsStructImpl = needsStructImplStack.top();
 
     // if the constant index is set, this struct already has a declaration, so get it
     if (structDefinitionExpression->GetIsConstant())
@@ -2154,7 +2159,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     // otherwise, this is a new struct
     else
     {
-        structType = TypeInfo::CreateAggregateType("", nullptr);
+        structType = TypeInfo::CreateAggregateType("", structDefinitionExpression->structToken);
 
         // set the struct's name if it does not already have one
         if (structDefinitionExpression->name.IsEmpty())
@@ -2176,21 +2181,15 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
         if (!needsStructImpl)
         {
             incompleteStructTypes.insert({constIdx, structType});
-            incompleteStructExpressions.push_back(structDefinitionExpression);
+            incompleteStructExpressions.top()->push_back(structDefinitionExpression);
         }
     }
 
     // only process the members if this is not a declaration
     if (needsStructImpl)
     {
-        // TODO: check if currently processing this struct and push to stack if not
-
-        needsStructImplStack.push(true);
-
         for (const MemberDefinition* member : structDefinitionExpression->members)
         {
-            needsStructImplStack.top() = true;
-
             const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
             if (memberType == nullptr)
             {
@@ -2211,6 +2210,8 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
                 return;
             }
 
+            // TODO: check if member type creates a recursive dependency
+
             ROString memberName = member->name;
             bool added = structType->AddMember(memberName, memberType, true, member->nameToken);
             if (!added)
@@ -2221,7 +2222,6 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
             }
         }
 
-        needsStructImplStack.pop();
         incompleteStructTypes.erase(constIdx);
     }
 }
@@ -2416,6 +2416,7 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
     }
 
     // process constants, but don't process struct members yet
+    needsStructImplStack.push(false);
     for (ConstantDeclarations* inner : constantDeclarations)
     {
         for (ConstantDeclaration* constDecl : *inner)
@@ -2431,21 +2432,6 @@ void SemanticAnalyzer::ProcessConstantDeclarations(vector<ConstantDeclarations*>
             }
         }
     }
-
-    // process incomplete structs
-    for (StructDefinitionExpression* structExpr : incompleteStructExpressions)
-    {
-        unsigned idx = structExpr->GetConstantValueIndex();
-        if (incompleteStructTypes.find(idx) != incompleteStructTypes.end())
-        {
-            structExpr->Accept(this);
-            if (isError)
-            {
-                return;
-            }
-        }
-    }
-    incompleteStructExpressions.clear();
 }
 
 const TypeInfo* SemanticAnalyzer::TypeExpressionToType(Expression* typeExpression)
@@ -3421,8 +3407,12 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
 
     // process right of assignment expression before adding constant to symbol
     // table in order to detect if the constant is referenced before it is assigned
+    vector<StructDefinitionExpression*> incompleteStructExprs;
+    incompleteStructExpressions.push(&incompleteStructExprs);
     processingConsts.insert(constName);
+    needsStructImplStack.push(false);
     rightExpr->Accept(this);
+    needsStructImplStack.pop();
     processingConsts.erase(constName);
     if (isError)
     {
@@ -3477,6 +3467,25 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     {
         return;
     }
+
+    // process incomplete structs
+    processingConsts.insert(constName);
+    needsStructImplStack.push(true);
+    for (StructDefinitionExpression* structExpr : incompleteStructExprs)
+    {
+        unsigned idx = structExpr->GetConstantValueIndex();
+        if (incompleteStructTypes.find(idx) != incompleteStructTypes.end())
+        {
+            structExpr->Accept(this);
+            if (isError)
+            {
+                return;
+            }
+        }
+    }
+    needsStructImplStack.pop();
+    processingConsts.erase(constName);
+    incompleteStructExpressions.pop();
 
     // we've resolved this constant so remove it from the unresolved list
     unresolvedConsts.erase(constName);

@@ -86,6 +86,8 @@ class SemanticAnalyzer : public SyntaxTreeVisitor
 public:
     SemanticAnalyzer(CompilerContext& compilerContext);
 
+    ~SemanticAnalyzer();
+
     bool Process(SyntaxTree::SyntaxTreeNode* syntaxTree);
 
     void Visit(SyntaxTree::UnaryExpression* unaryExpression) override;
@@ -161,7 +163,7 @@ private:
     std::unordered_map<unsigned, TypeInfo*> incompleteStructTypes;
     std::vector<SyntaxTree::StructInitializationExpression*> incompleteStructInits;
     std::stack<bool> needsStructImplStack;
-    std::vector<SyntaxTree::StructDefinitionExpression*> incompleteStructExpressions;
+    std::stack<std::vector<SyntaxTree::StructDefinitionExpression*>*> incompleteStructExpressions;
     std::vector<SyntaxTree::ConstantDeclaration*> orderedGlobalConsts;
     std::vector<const Token*> constIdentifierStack;
 
