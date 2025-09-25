@@ -747,8 +747,8 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 unsigned startColumn = column;
                 ch = Read(buff);
                 ++column;
-                char prevChar = ch;
-                while (isMore && (ch != '"' || prevChar == '\\'))
+                bool escaping = false;
+                while (isMore && (ch != '"' || escaping))
                 {
                     if (ch == '\n')
                     {
@@ -756,9 +756,18 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         ok = false;
                         break;
                     }
+
+                    if (escaping)
+                    {
+                        escaping = false;
+                    }
+                    else if (ch == '\\')
+                    {
+                        escaping = true;
+                    }
+
                     ++valueSize;
 
-                    prevChar = ch;
                     ch = Read(buff);
                     ++column;
                 }
