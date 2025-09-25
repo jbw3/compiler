@@ -155,6 +155,9 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         "const A = struct { x i32, };\n"
         "const B type = A;\n"
         "const AInst A = B { x: 123, };\n",
+
+        // struct can have a pointer to itself
+        "const A = struct { a &A };",
     };
 
     bool ok = false;
@@ -203,6 +206,12 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
             "const B = struct { c C };\n"
             "const C = struct { a A };\n",
             "error: Member 'b' creates a recursive dependency",
+        },
+
+        // struct recursive dependency via array
+        {
+            "const A = struct { a []A };",
+            "error: Member 'a' creates a recursive dependency",
         },
 
         // invalid struct type
