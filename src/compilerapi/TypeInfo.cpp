@@ -118,7 +118,6 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     return type;
 }
 
-// TODO: Does token need to be saved?
 TypeInfo* TypeInfo::CreateAggregateType(ROString name, const Token* token)
 {
     return new TypeInfo(0, F_AGGREGATE, TypeInfo::eNotApplicable, name, name, nullptr, token);

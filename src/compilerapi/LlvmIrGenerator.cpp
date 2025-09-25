@@ -2559,20 +2559,6 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
         DINodeArray elementsArray = diBuilder->getOrCreateArray(elements);
         diType = diBuilder->createStructType(diFile, toStringRef(name), diFile, line, numBits, 0, DINode::FlagZero, nullptr, elementsArray);
     }
-    else
-    {
-        // TODO: delete this?
-        ROString name = type->GetShortName();
-        auto iter = diStructTypes.find(name);
-        if (iter != diStructTypes.end())
-        {
-            diType = iter->second;
-        }
-        else
-        {
-            logger.LogInternalError("Could not determine debug type");
-        }
-    }
 
     if (diType != nullptr)
     {

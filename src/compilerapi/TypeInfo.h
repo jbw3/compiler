@@ -127,7 +127,6 @@ private:
     static TypeId nextTypeId;
     static TypeId GetNextTypeId();
 
-    // TODO: is this needed?
     const Token* token;
     bool deleteData;
 
