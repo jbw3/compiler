@@ -860,9 +860,11 @@ def write_function(io: IO[str], context: Context, function: TypeInfo) -> None:
     context.pop_scope()
 
 def write_struct_definition(io: IO[str], context: Context, struct: TypeInfo) -> None:
-    io.write('struct ')
+    io.write('const ')
     io.write(struct.name)
-    io.write('\n{\n')
+    if random.randrange(2) == 0:
+        io.write(' type')
+    io.write(' = struct\n{\n')
     context.indent_level += 1
 
     for member in struct.members:
@@ -873,7 +875,7 @@ def write_struct_definition(io: IO[str], context: Context, struct: TypeInfo) -> 
         io.write(',\n')
 
     context.indent_level -= 1
-    io.write('}\n')
+    io.write('};\n')
 
 def write_code(io: IO[str]) -> None:
     context = Context()
