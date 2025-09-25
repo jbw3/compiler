@@ -198,6 +198,39 @@ TypeInfo::~TypeInfo()
     }
 }
 
+bool TypeInfo::IsRecursiveStructDependency(const unordered_set<ROString>& processingConsts) const
+{
+    if (IsPointer())
+    {
+        return false;
+    }
+    else if (IsArray())
+    {
+        return data->innerType->IsRecursiveStructDependency(processingConsts);
+    }
+    else if (IsAggregate())
+    {
+        if (processingConsts.find(shortName) != processingConsts.end())
+        {
+            return true;
+        }
+
+        for (const MemberInfo* member : data->members)
+        {
+            if (member->GetType()->IsRecursiveStructDependency(processingConsts))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    else
+    {
+        return processingConsts.find(shortName) != processingConsts.end();
+    }
+}
+
 bool TypeInfo::IsOrContainsLiteral() const
 {
     if (IsArray() || IsRange())

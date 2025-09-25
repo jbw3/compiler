@@ -2210,7 +2210,13 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
                 return;
             }
 
-            // TODO: check if member type creates a recursive dependency
+            // check if member type creates a recursive dependency
+            if (memberType->IsRecursiveStructDependency(processingConsts))
+            {
+                isError = true;
+                logger.LogError(*member->nameToken, "Member '{}' creates a recursive dependency", member->name);
+                return;
+            }
 
             ROString memberName = member->name;
             bool added = structType->AddMember(memberName, memberType, true, member->nameToken);
