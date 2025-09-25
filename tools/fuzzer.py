@@ -900,7 +900,7 @@ def write_code(io: IO[str]) -> None:
         all_types_weights.append(1.0)
         structs.append(struct)
 
-    for _ in range(random.randint(2, 10)): # TODO: start range at 0 when compiler bug is fixed
+    for _ in range(random.randint(0, 10)):
         name = get_identifier(context)
         context.add_identifier(IdentifierInfo(name, TYPE_FUN))
         return_type = random.choices(context.all_types, all_types_weights)[0]

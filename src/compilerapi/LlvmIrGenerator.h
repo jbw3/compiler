@@ -159,6 +159,7 @@ private:
     unsigned optimizationLevel;
     bool dbgInfo;
     bool boundsCheck;
+    bool error;
     CompilerContext& compilerContext;
     ErrorLogger& logger;
     llvm::LLVMContext context;

@@ -60,6 +60,7 @@ LlvmIrGenerator::LlvmIrGenerator(CompilerContext& compilerContext) :
     optimizationLevel(compilerContext.config.optimizationLevel),
     dbgInfo(compilerContext.config.debugInfo),
     boundsCheck(compilerContext.config.boundsCheck),
+    error(false),
     compilerContext(compilerContext),
     logger(compilerContext.logger),
     builder(context),
@@ -1146,6 +1147,7 @@ void LlvmIrGenerator::Visit(ModuleDefinition* moduleDefinition)
         funcDef->Accept(this);
         if (resultValue == nullptr)
         {
+            error = true;
             return;
         }
     }
@@ -1170,6 +1172,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
             if (!ok)
             {
                 resultValue = nullptr;
+                error = true;
                 return;
             }
 
@@ -1183,6 +1186,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
             if (!ok)
             {
                 resultValue = nullptr;
+                error = true;
                 return;
             }
 
@@ -1207,7 +1211,7 @@ void LlvmIrGenerator::Visit(Modules* modules)
         }
 
         moduleDefinition->Accept(this);
-        if (resultValue == nullptr)
+        if (error)
         {
             return;
         }
@@ -2238,7 +2242,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     this->module = module;
     syntaxTree->Accept(this);
 
-    if (resultValue == nullptr)
+    if (error)
     {
         delete module;
         module = nullptr;
