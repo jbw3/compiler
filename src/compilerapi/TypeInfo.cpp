@@ -198,7 +198,7 @@ TypeInfo::~TypeInfo()
     }
 }
 
-bool TypeInfo::IsRecursiveStructDependency(const unordered_set<ROString>& processingConsts) const
+bool TypeInfo::IsRecursiveStructDependency(ROString structName, vector<const Token*>& structTokenStack) const
 {
     if (IsPointer())
     {
@@ -206,18 +206,20 @@ bool TypeInfo::IsRecursiveStructDependency(const unordered_set<ROString>& proces
     }
     else if (IsArray())
     {
-        return data->innerType->IsRecursiveStructDependency(processingConsts);
+        return data->innerType->IsRecursiveStructDependency(structName, structTokenStack);
     }
     else if (IsAggregate())
     {
-        if (processingConsts.find(shortName) != processingConsts.end())
+        structTokenStack.push_back(token);
+
+        if (shortName == structName)
         {
             return true;
         }
 
         for (const MemberInfo* member : data->members)
         {
-            if (member->GetType()->IsRecursiveStructDependency(processingConsts))
+            if (member->GetType()->IsRecursiveStructDependency(structName, structTokenStack))
             {
                 return true;
             }
@@ -227,7 +229,7 @@ bool TypeInfo::IsRecursiveStructDependency(const unordered_set<ROString>& proces
     }
     else
     {
-        return processingConsts.find(shortName) != processingConsts.end();
+        return false;
     }
 }
 

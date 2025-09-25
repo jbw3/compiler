@@ -2188,8 +2188,11 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     // only process the members if this is not a declaration
     if (needsStructImpl)
     {
+        vector<const Token*> structTokenStack;
         for (const MemberDefinition* member : structDefinitionExpression->members)
         {
+            structTokenStack.clear();
+
             const TypeInfo* memberType = TypeExpressionToType(member->typeExpression);
             if (memberType == nullptr)
             {
@@ -2211,10 +2214,17 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
             }
 
             // check if member type creates a recursive dependency
-            if (memberType->IsRecursiveStructDependency(processingConsts))
+            if (memberType->IsRecursiveStructDependency(structType->GetShortName(), structTokenStack))
             {
                 isError = true;
                 logger.LogError(*member->nameToken, "Member '{}' creates a recursive dependency", member->name);
+
+                for (auto iter = structTokenStack.cbegin(); iter != structTokenStack.cend(); ++iter)
+                {
+                    const Token* token = *iter;
+                    logger.LogNote(*token, "Dependency on '{}'", token->value);
+                }
+
                 return;
             }
 
@@ -3409,6 +3419,7 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     if (structDefExpr != nullptr)
     {
         structDefExpr->name = constantDeclaration->name;
+        structDefExpr->structToken = constantDeclaration->nameToken;
     }
 
     // process right of assignment expression before adding constant to symbol

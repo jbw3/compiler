@@ -202,7 +202,7 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
             "const A = struct { b B };\n"
             "const B = struct { c C };\n"
             "const C = struct { a A };\n",
-            "error: Member 'a' creates a recursive dependency",
+            "error: Member 'b' creates a recursive dependency",
         },
 
         // invalid struct type

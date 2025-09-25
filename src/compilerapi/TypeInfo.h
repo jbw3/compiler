@@ -3,7 +3,6 @@
 
 #include "ROString.h"
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace llvm
@@ -263,7 +262,7 @@ public:
         return (data->flags & F_HALF_OPEN) != 0;
     }
 
-    bool IsRecursiveStructDependency(const std::unordered_set<ROString>& processingConsts) const;
+    bool IsRecursiveStructDependency(ROString structName, std::vector<const Token*>& structTokenStack) const;
 
     bool IsOrContainsLiteral() const;
 
