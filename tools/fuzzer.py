@@ -635,7 +635,7 @@ def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) 
     assert type.is_struct, f"Type '{type.name}' is not a struct"
 
     io.write(type.name)
-    io.write('\n')
+    io.write(':\n')
     io.write(get_indent_str(context))
     io.write('{\n')
 
@@ -644,7 +644,7 @@ def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) 
     for member in type.members:
         io.write(get_indent_str(context))
         io.write(member.name)
-        io.write(': ')
+        io.write(' = ')
         write_expression(io, context, member.type)
         io.write(',\n')
 

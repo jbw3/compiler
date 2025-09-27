@@ -42,11 +42,11 @@ fun types()
 
 fun structType(n i64)
 {
-    var t = TestStruct
+    var t = TestStruct:
     {
-        num1: 12,
-        num2: n,
-        flag: true,
+        num1 = 12,
+        num2 = n,
+        flag = true,
     };
 }
 

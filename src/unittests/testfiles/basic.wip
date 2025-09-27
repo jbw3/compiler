@@ -661,24 +661,24 @@ fun scopes(x i32) i32
 
 fun initTypes()
 {
-    var empty EmptyType = EmptyType { };
+    var empty EmptyType = EmptyType: { };
 
-    var test1 Test1 = Test1
+    var test1 Test1 = Test1:
     {
-        c: "café",
-        a: types_i16(1, 2),
-        b: true
+        c = "café",
+        a = types_i16(1, 2),
+        b = true
     };
 
-    var test2 Test2 = Test2
+    var test2 Test2 = Test2:
     {
-        test: Test1
+        test = Test1:
         {
-            a: 1,
-            b: false,
-            c: "abc",
+            a = 1,
+            b = false,
+            c = "abc",
         },
-        n: 12,
+        n = 12,
     };
 
     test1.b = false;
@@ -764,11 +764,11 @@ fun pointers(p1 &i32) &i32
     var xPtr = &x;
     *xPtr += 5;
 
-    var test = Test1
+    var test = Test1:
     {
-        a: *xPtr,
-        b: true,
-        c: "abc"
+        a = *xPtr,
+        b = true,
+        c = "abc"
     };
 
     var bPtr1 &bool = &test.b;
@@ -873,7 +873,7 @@ fun arrays2()
 
     arrays1([12; 1]);
 
-    var s = ArrayTest { arr: [3; 19] };
+    var s = ArrayTest: { arr = [3; 19] };
 
     arrays1([12; 123][4..<7]);
 
@@ -892,7 +892,7 @@ fun arrays3()
 
     arrays1([10, 20, 30]);
 
-    var s = ArrayTest { arr: [1, 2, 3] };
+    var s = ArrayTest: { arr = [1, 2, 3] };
 
     arrays1([10, 20, 30, 40, 50][1..3]);
 
@@ -962,15 +962,15 @@ fun consts()
     const c15 = cast(u8, c2);
     const c16 = cast(i16, 100);
     const c17 = cast(i16, c1 - 13);
-    const c18 = Test2
+    const c18 = Test2:
     {
-        test: Test1
+        test = Test1:
         {
-            a: 7,
-            b: true,
-            c: c6,
+            a = 7,
+            b = true,
+            c = c6,
         },
-        n: c1 + c2,
+        n = c1 + c2,
     };
     const c19 = c6.Size;
     const c20 = c18.test.a;
@@ -1126,13 +1126,13 @@ fun types()
 
     const Types []type = [i32];
 
-    var t0 T0 = TypesTest { };
+    var t0 T0 = TypesTest: { };
     var t1 T1 = &t0;
-    var t2 T2 = [t0, TypesTest { }];
+    var t2 T2 = [t0, TypesTest: { }];
     var t3 T3 = 10;
     var t4 T4 = &t3;
-    var t5 T5 = TypesTest { };
-    var t6 T6 = T6 { a: 2, b: 1_847 };
+    var t5 T5 = TypesTest: { };
+    var t6 T6 = T6: { a = 2, b = 1_847 };
 
     const F0 = fun();
     const F1 = fun() Types[0];

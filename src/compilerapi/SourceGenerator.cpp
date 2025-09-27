@@ -212,7 +212,7 @@ void SourceGenerator::Visit(StructDefinitionExpression* structDefinitionExpressi
 void SourceGenerator::Visit(StructInitializationExpression* structInitializationExpression)
 {
     structInitializationExpression->structTypeExpression->Accept(this);
-    *os << '\n';
+    *os << ":\n";
     Indent();
     *os << "{\n";
     ++indentLevel;
@@ -220,7 +220,7 @@ void SourceGenerator::Visit(StructInitializationExpression* structInitialization
     for (const MemberInitialization* memberInit : structInitializationExpression->memberInitializations)
     {
         Indent();
-        *os << memberInit->name << ": ";
+        *os << memberInit->name << " = ";
         memberInit->expression->Accept(this);
         *os << ",\n";
     }

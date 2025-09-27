@@ -170,10 +170,10 @@ fun casts(x bool, y i32)
 
 fun structs(num u32) usize
 {
-    var p1 = Person
+    var p1 = Person:
     {
-        name: "Joe",
-        age: num / 2,
+        name = "Joe",
+        age = num / 2,
     };
     p1.name.Size
 }

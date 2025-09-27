@@ -115,8 +115,8 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         "const STR = \"abc\";\n"
         "const A = struct { a i32, b f64, c bool, };\n"
         "const B = struct { x A, s str };\n"
-        "const StructA = A { a: 12, b: 1.5, c: true, };\n"
-        "const StructB = B { x: StructA, s: STR };\n",
+        "const StructA = A: { a = 12, b = 1.5, c = true, };\n"
+        "const StructB = B: { x = StructA, s = STR };\n",
 
         // consts can be evaluated out-of-order
         "const NUM1 i32 = NUM2 - 1;\n"
@@ -142,11 +142,11 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         {
             s Struct0
         };
-        const w = Wrapper
+        const w = Wrapper:
         {
-            s: Struct0
+            s = Struct0:
             {
-                n: 123
+                n = 123
             }
         };
         )",
@@ -154,7 +154,7 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         // same struct can have different names
         "const A = struct { x i32, };\n"
         "const B type = A;\n"
-        "const AInst A = B { x: 123, };\n",
+        "const AInst A = B: { x = 123, };\n",
 
         // struct can have a pointer to itself
         "const A = struct { a &A };",
@@ -217,7 +217,7 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
         // invalid struct type
         {
             "const I32 = i32;\n"
-            "const Bad = I32 { a: 2 };\n",
+            "const Bad = I32: { a = 2 };\n",
             "error: Expression value is not a struct type",
         },
 
@@ -225,7 +225,7 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
         {
             "const A = struct { a i32, b f64, c bool };\n"
             "const B = struct { a i32, b f64, c bool };\n"
-            "const AInst A = B { a: 123, b: 1.23, c: false };\n",
+            "const AInst A = B: { a = 123, b = 1.23, c = false };\n",
             "error: Binary operator '=' does not support types 'A' and 'B'",
         }
     };
@@ -275,8 +275,8 @@ bool SemanticAnalyzerTests::TestValidVariables(string& failMsg)
     vector<string> tests =
     {
         // constants in different scopes can have the same name
-        "{ const A = struct { x i8, y f32 }; var a = A { x: 3, y: 9.2 }; }\n"
-        "{ const A = struct { x i16, b bool }; var a = A { x: 3_000, b: true }; }\n",
+        "{ const A = struct { x i8, y f32 }; var a = A: { x = 3, y = 9.2 }; }\n"
+        "{ const A = struct { x i16, b bool }; var a = A: { x = 3_000, b = true }; }\n",
     };
 
     bool ok = false;
@@ -306,7 +306,7 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
         // str can't be initialized like a struct
         {
             "const S = str;\n"
-            "var s = S { };\n",
+            "var s = S: { };\n",
             "error: Expression value is not a struct type",
         },
     };

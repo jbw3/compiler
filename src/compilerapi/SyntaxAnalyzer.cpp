@@ -444,49 +444,17 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
     return structDef;
 }
 
-bool SyntaxAnalyzer::IsStructInitialization(TokenIterator iter, TokenIterator endIter)
+StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
+    TokenIterator& iter,
+    TokenIterator endIter,
+    SyntaxTree::Expression* structTypeExpr
+)
 {
-    if (iter == endIter)
+    // make sure ':' is followed by '{'
+    if (!IncrementIteratorCheckType(iter, endIter, Token::eOpenBrace, "Expected '{' after ':'"))
     {
-        return false;
+        return nullptr;
     }
-
-    ++iter;
-    if (iter == endIter || iter->type != Token::eOpenBrace)
-    {
-        return false;
-    }
-
-    ++iter;
-    if (iter == endIter)
-    {
-        return false;
-    }
-    else if (iter->type == Token::eCloseBrace)
-    {
-        return true;
-    }
-    else if (iter->type != Token::eIdentifier)
-    {
-        return false;
-    }
-
-    ++iter;
-    if (iter == endIter || iter->type != Token::eColon)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(TokenIterator& iter, TokenIterator endIter)
-{
-    const Token* structNameToken = &*iter;
-    ROString structName = iter->value;
-
-    // skip struct name
-    ++iter;
 
     const Token* openBraceToken = &*iter;
 
@@ -512,8 +480,8 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
         const Token* memberNameToken = &*iter;
         ROString memberName = iter->value;
 
-        // make sure member name is followed by ':'
-        if (!IncrementIteratorCheckType(iter, endIter, Token::eColon, "Expected ':' after member"))
+        // make sure member name is followed by '='
+        if (!IncrementIteratorCheckType(iter, endIter, Token::eEqual, "Expected '=' after member"))
         {
             deletePointerContainer(members);
             return nullptr;
@@ -561,8 +529,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(Toke
 
     const Token* closeBraceToken = &*iter;
 
-    IdentifierExpression* structNameExpression = new IdentifierExpression(structName, structNameToken);
-    StructInitializationExpression* structInit = new StructInitializationExpression(structNameExpression, members, openBraceToken, closeBraceToken);
+    StructInitializationExpression* structInit = new StructInitializationExpression(structTypeExpr, members, openBraceToken, closeBraceToken);
     return structInit;
 }
 
@@ -973,19 +940,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     }
     else if (type == Token::eIdentifier)
     {
-        // check if it's a struct initialization
-        if (IsStructInitialization(iter, endIter))
-        {
-            expr = ProcessStructInitialization(iter, endIter);
-            if (expr == nullptr)
-            {
-                return nullptr;
-            }
-        }
-        else // it's an identifier
-        {
-            expr = new IdentifierExpression(iter->value, &*iter);
-        }
+        expr = new IdentifierExpression(iter->value, &*iter);
     }
     else if (Token::IsTypeName(type))
     {
@@ -1344,7 +1299,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 // update nextIter since iter may have changed in ProcessTerm()
                 nextIter = (iter == endIter) ? endIter : iter + 1;
 
-                if ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket) )
+                if ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket || nextIter->type == Token::eColon) )
                 {
                     expr = ProcessPostTerm(expr, iter, endIter);
                     if (expr == nullptr)
@@ -2043,7 +1998,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
 {
     TokenIterator nextIter = iter + 1;
 
-    while ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket) )
+    while ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket || nextIter->type == Token::eColon) )
     {
         // process member expressions
         while (nextIter != endIter && nextIter->type == Token::ePeriod)
@@ -2126,6 +2081,21 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
             const Token* opToken2 = &*iter;
 
             expr = new BinaryExpression(BinaryExpression::eSubscript, expr, subscriptExpr, opToken, opToken2);
+
+            nextIter = iter + 1;
+        }
+
+        // process struct initialization expressions
+        if (nextIter != endIter && nextIter->type == Token::eColon)
+        {
+            // move to ':'
+            ++iter;
+
+            expr = ProcessStructInitialization(iter, endIter, expr);
+            if (expr == nullptr)
+            {
+                return nullptr;
+            }
 
             nextIter = iter + 1;
         }

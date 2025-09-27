@@ -63,10 +63,11 @@ private:
         TokenIterator endIter
     );
 
-    bool IsStructInitialization(TokenIterator iter, TokenIterator endIter);
-
-    SyntaxTree::StructInitializationExpression* ProcessStructInitialization(TokenIterator& iter,
-                                                                            TokenIterator endIter);
+    SyntaxTree::StructInitializationExpression* ProcessStructInitialization(
+        TokenIterator& iter,
+        TokenIterator endIter,
+        SyntaxTree::Expression* structTypeExpr
+    );
 
     SyntaxTree::ConstantDeclaration* ProcessConstantDeclaration(TokenIterator& iter, TokenIterator endIter);
 
