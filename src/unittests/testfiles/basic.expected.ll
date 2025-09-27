@@ -20,9 +20,9 @@ $target_triple
 %"[]u8" = type { i64, ptr }
 %"RangeClosed'u32'" = type { i32, i32 }
 %"RangeClosed'i16'" = type { i16, i16 }
-%T6 = type { i32, i16 }
-%T5 = type {}
-%T2 = type { i64, ptr }
+%"<struct271>" = type { i32, i16 }
+%TypesTest = type {}
+%"[]TypesTest" = type { i64, ptr }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, ptr @strData0 }
@@ -3427,27 +3427,27 @@ entry:
   %f2 = alloca ptr, align 8
   %f1 = alloca ptr, align 8
   %f0 = alloca ptr, align 8
-  %t6 = alloca %T6, align 8
-  %t5 = alloca %T5, align 8
+  %t6 = alloca %"<struct271>", align 8
+  %t5 = alloca %TypesTest, align 8
   %t4 = alloca ptr, align 8
   %t3 = alloca i32, align 4
-  %array = alloca [2 x %T5], align 8
-  %t2 = alloca %T2, align 8
+  %array = alloca [2 x %TypesTest], align 8
+  %t2 = alloca %"[]TypesTest", align 8
   %t1 = alloca ptr, align 8
-  %t0 = alloca %T5, align 8
-  store %T5 undef, ptr %t0, align 1
+  %t0 = alloca %TypesTest, align 8
+  store %TypesTest undef, ptr %t0, align 1
   store ptr %t0, ptr %t1, align 8
-  %t01 = load %T5, ptr %t0, align 1
-  %ptr = getelementptr inbounds [2 x %T5], ptr %array, i64 0, i64 0
-  store %T5 %t01, ptr %ptr, align 1
-  %ptr2 = getelementptr inbounds [2 x %T5], ptr %array, i64 0, i64 1
-  store %T5 undef, ptr %ptr2, align 1
-  %agg = insertvalue %T2 { i64 2, ptr undef }, ptr %array, 1
-  store %T2 %agg, ptr %t2, align 8
+  %t01 = load %TypesTest, ptr %t0, align 1
+  %ptr = getelementptr inbounds [2 x %TypesTest], ptr %array, i64 0, i64 0
+  store %TypesTest %t01, ptr %ptr, align 1
+  %ptr2 = getelementptr inbounds [2 x %TypesTest], ptr %array, i64 0, i64 1
+  store %TypesTest undef, ptr %ptr2, align 1
+  %agg = insertvalue %"[]TypesTest" { i64 2, ptr undef }, ptr %array, 1
+  store %"[]TypesTest" %agg, ptr %t2, align 8
   store i32 10, ptr %t3, align 4
   store ptr %t3, ptr %t4, align 8
-  store %T5 undef, ptr %t5, align 1
-  store %T6 { i32 2, i16 1847 }, ptr %t6, align 4
+  store %TypesTest undef, ptr %t5, align 1
+  store %"<struct271>" { i32 2, i16 1847 }, ptr %t6, align 4
   store ptr @ftype1, ptr %f0, align 8
   store ptr @ftype3, ptr %f1, align 8
   store ptr @oneArg, ptr %f2, align 8

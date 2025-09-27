@@ -207,6 +207,11 @@ public:
         return typeConstants[id];
     }
 
+    const std::vector<const TypeInfo*>& GetTypeConstants() const
+    {
+        return typeConstants;
+    }
+
 private:
     std::vector<std::string> filenames;
     std::vector<CharBuffer> fileBuffers;

@@ -2164,7 +2164,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     types.insert({compilerContext.typeRegistry.GetStringType()->GetId(), strStructType});
 
     // create LLVM types
-    for (const TypeInfo* type : compilerContext.typeRegistry)
+    for (const TypeInfo* type : compilerContext.GetTypeConstants())
     {
         CreateLlvmType(type);
 
@@ -2176,7 +2176,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
 
     // add struct members
     vector<Type*> structMembers;
-    for (const TypeInfo* type : compilerContext.typeRegistry)
+    for (const TypeInfo* type : compilerContext.GetTypeConstants())
     {
         if (type->IsAggregate())
         {
