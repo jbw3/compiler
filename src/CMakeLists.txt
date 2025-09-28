@@ -137,10 +137,10 @@ if(WIN32)
         ws2_32.lib
     )
 else()
-    execute_process(COMMAND llvm-config-18 --libs all
+    execute_process(COMMAND llvm-config-20 --libs all
                     OUTPUT_VARIABLE llvm_all_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND llvm-config-18 --system-libs
+    execute_process(COMMAND llvm-config-20 --system-libs
                     OUTPUT_VARIABLE llvm_system_libs
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(llvm_libs "${llvm_all_libs} ${llvm_system_libs}")

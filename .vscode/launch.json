@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "type": "lldb-dap",
             "request": "launch",
             "name": "compiler",
             "program": "${workspaceFolder}/debug/compiler/wip",
@@ -19,7 +19,7 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "type": "lldb",
+            "type": "lldb-dap",
             "request": "launch",
             "name": "unit tests",
             "program": "${workspaceFolder}/debug/unittests/unittests",

@@ -10,6 +10,7 @@
 #include "Config.h"
 #include "ErrorLogger.h"
 #include "SyntaxTree.h"
+#include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Target/TargetMachine.h"
 #include <filesystem>
@@ -2322,7 +2323,7 @@ Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
         Type* innerType = CreateLlvmType(type->GetInnerType());
         if (innerType != nullptr)
         {
-            llvmType = innerType->getPointerTo();
+            llvmType = PointerType::get(innerType, 0);
         }
     }
     else
@@ -2365,7 +2366,7 @@ Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
                 return nullptr;
             }
 
-            llvmType = funType->getPointerTo();
+            llvmType = PointerType::get(funType, 0);
         }
         else if (type->IsAggregate())
         {

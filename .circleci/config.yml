@@ -13,7 +13,7 @@ jobs:
       - run: |
           mkdir release
           cd release
-          cmake ../src -DCMAKE_CXX_COMPILER=clang++-18 -DLLVM_DIR=/usr/lib/llvm-18/cmake -DCMAKE_BUILD_TYPE=Release
+          cmake ../src -DCMAKE_CXX_COMPILER=clang++-20 -DLLVM_DIR=/usr/lib/llvm-20/cmake -DCMAKE_BUILD_TYPE=Release
           make -j2
           ctest --output-on-failure
       - store_test_results:

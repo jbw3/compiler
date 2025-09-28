@@ -10,6 +10,7 @@
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
 #include "SyntaxTreePrinter.h"
+#include "llvm/IR/Module.h"
 #include <fstream>
 #include <iostream>
 
