@@ -55,21 +55,21 @@ make
 
 #### Dependencies
 
-LLVM 18 is required to build the compiler.
+LLVM 20 is required to build the compiler.
 The standard LLVM Windows install is not sufficient to be able to build against LLVM.
 Instead, the LLVM source must be downloaded and built from scratch.
-Download the source code (Source code (tar.gz)) from [here](https://github.com/llvm/llvm-project/releases/tag/llvmorg-18.1.8).
+Download the source code (`Source code (tar.gz)`) from [here](https://github.com/llvm/llvm-project/releases/tag/llvmorg-20.1.8).
 
 Configure the LLVM project.
-The following assumes the LLVM source has been extracted into a directory named `llvm-project-llvmorg-18.1.8`.
+The following assumes the LLVM source has been extracted into a directory named `llvm-project-llvmorg-20.1.8`.
 ```
-mkdir llvm-project-llvmorg-18.1.8\llvm\llvm-debug
-cd llvm-project-llvmorg-18.1.8\llvm\llvm-debug
-cmake ..\llvm-18.1.8.src -Thost=x64
+cd llvm-project-llvmorg-20.1.8
+cmake -S llvm -B build -Thost=x64
 ```
 
 Build and install debug:
 ```
+cd build
 cmake --build . --config Debug --target INSTALL
 ```
 
