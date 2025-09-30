@@ -28,7 +28,7 @@ define i16 @param(i8 %param1) #0 !dbg !8 {
 entry:
   %param11 = alloca i8, align 1
   store i8 %param1, ptr %param11, align 1
-  call void @llvm.dbg.declare(metadata ptr %param11, metadata !14, metadata !DIExpression()), !dbg !15
+    #dbg_declare(ptr %param11, !14, !DIExpression(), !15)
   %param12 = load i8, ptr %param11, align 1, !dbg !16
   %zeroext = zext i8 %param12 to i16, !dbg !16
   ret i16 %zeroext, !dbg !16
@@ -41,11 +41,11 @@ entry:
   %y2 = alloca i64, align 8
   %x1 = alloca i32, align 4
   store i32 %x, ptr %x1, align 4
-  call void @llvm.dbg.declare(metadata ptr %x1, metadata !24, metadata !DIExpression()), !dbg !27
+    #dbg_declare(ptr %x1, !24, !DIExpression(), !27)
   store i64 %y, ptr %y2, align 8
-  call void @llvm.dbg.declare(metadata ptr %y2, metadata !25, metadata !DIExpression()), !dbg !27
+    #dbg_declare(ptr %y2, !25, !DIExpression(), !27)
   store i8 %z, ptr %z3, align 1
-  call void @llvm.dbg.declare(metadata ptr %z3, metadata !26, metadata !DIExpression()), !dbg !27
+    #dbg_declare(ptr %z3, !26, !DIExpression(), !27)
   %x4 = load i32, ptr %x1, align 4, !dbg !28
   %neg = sub i32 0, %x4, !dbg !30
   %signext = sext i32 %neg to i64, !dbg !30
@@ -66,9 +66,9 @@ entry:
   %b2 = alloca i32, align 4
   %a1 = alloca i32, align 4
   store i32 %a, ptr %a1, align 4
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !41, metadata !DIExpression()), !dbg !43
+    #dbg_declare(ptr %a1, !41, !DIExpression(), !43)
   store i32 %b, ptr %b2, align 4
-  call void @llvm.dbg.declare(metadata ptr %b2, metadata !42, metadata !DIExpression()), !dbg !43
+    #dbg_declare(ptr %b2, !42, !DIExpression(), !43)
   br label %whileCond
 
 whileCond:                                        ; preds = %whileBody, %entry
@@ -105,29 +105,29 @@ entry:
   %x1 = alloca i16, align 2
   %x0 = alloca i8, align 1
   %b = alloca i1, align 1
-  call void @llvm.dbg.declare(metadata ptr %b, metadata !56, metadata !DIExpression()), !dbg !80
+    #dbg_declare(ptr %b, !56, !DIExpression(), !80)
   store i1 true, ptr %b, align 1, !dbg !81
-  call void @llvm.dbg.declare(metadata ptr %x0, metadata !59, metadata !DIExpression()), !dbg !82
+    #dbg_declare(ptr %x0, !59, !DIExpression(), !82)
   store i8 0, ptr %x0, align 1, !dbg !83
-  call void @llvm.dbg.declare(metadata ptr %x1, metadata !60, metadata !DIExpression()), !dbg !84
+    #dbg_declare(ptr %x1, !60, !DIExpression(), !84)
   store i16 1, ptr %x1, align 2, !dbg !85
-  call void @llvm.dbg.declare(metadata ptr %x2, metadata !62, metadata !DIExpression()), !dbg !86
+    #dbg_declare(ptr %x2, !62, !DIExpression(), !86)
   store i32 2, ptr %x2, align 4, !dbg !87
-  call void @llvm.dbg.declare(metadata ptr %x3, metadata !63, metadata !DIExpression()), !dbg !88
+    #dbg_declare(ptr %x3, !63, !DIExpression(), !88)
   store i64 3, ptr %x3, align 8, !dbg !89
-  call void @llvm.dbg.declare(metadata ptr %x4, metadata !64, metadata !DIExpression()), !dbg !90
+    #dbg_declare(ptr %x4, !64, !DIExpression(), !90)
   store i64 4, ptr %x4, align 8, !dbg !91
-  call void @llvm.dbg.declare(metadata ptr %x5, metadata !66, metadata !DIExpression()), !dbg !92
+    #dbg_declare(ptr %x5, !66, !DIExpression(), !92)
   store i8 5, ptr %x5, align 1, !dbg !93
-  call void @llvm.dbg.declare(metadata ptr %x6, metadata !67, metadata !DIExpression()), !dbg !94
+    #dbg_declare(ptr %x6, !67, !DIExpression(), !94)
   store i16 6, ptr %x6, align 2, !dbg !95
-  call void @llvm.dbg.declare(metadata ptr %x7, metadata !68, metadata !DIExpression()), !dbg !96
+    #dbg_declare(ptr %x7, !68, !DIExpression(), !96)
   store i32 7, ptr %x7, align 4, !dbg !97
-  call void @llvm.dbg.declare(metadata ptr %x8, metadata !70, metadata !DIExpression()), !dbg !98
+    #dbg_declare(ptr %x8, !70, !DIExpression(), !98)
   store i64 8, ptr %x8, align 8, !dbg !99
-  call void @llvm.dbg.declare(metadata ptr %x9, metadata !72, metadata !DIExpression()), !dbg !100
+    #dbg_declare(ptr %x9, !72, !DIExpression(), !100)
   store i64 9, ptr %x9, align 8, !dbg !101
-  call void @llvm.dbg.declare(metadata ptr %s, metadata !74, metadata !DIExpression()), !dbg !102
+    #dbg_declare(ptr %s, !74, !DIExpression(), !102)
   %load = load %str, ptr @strStruct0, align 8, !dbg !102
   store %str %load, ptr %s, align 8, !dbg !103
   ret %UnitType zeroinitializer, !dbg !103
@@ -139,8 +139,8 @@ entry:
   %t = alloca %TestStruct, align 8
   %n1 = alloca i64, align 8
   store i64 %n, ptr %n1, align 8
-  call void @llvm.dbg.declare(metadata ptr %n1, metadata !108, metadata !DIExpression()), !dbg !116
-  call void @llvm.dbg.declare(metadata ptr %t, metadata !109, metadata !DIExpression()), !dbg !117
+    #dbg_declare(ptr %n1, !108, !DIExpression(), !116)
+    #dbg_declare(ptr %t, !109, !DIExpression(), !117)
   %n2 = load i64, ptr %n1, align 8, !dbg !118
   %agg = insertvalue %TestStruct { i32 12, i64 undef, i1 undef }, i64 %n2, 1, !dbg !119
   %agg3 = insertvalue %TestStruct %agg, i1 true, 2, !dbg !120
@@ -155,12 +155,12 @@ entry:
   %r1 = alloca %"RangeClosed'i32'", align 8
   %n1 = alloca i32, align 4
   store i32 %n, ptr %n1, align 4
-  call void @llvm.dbg.declare(metadata ptr %n1, metadata !126, metadata !DIExpression()), !dbg !135
-  call void @llvm.dbg.declare(metadata ptr %r1, metadata !127, metadata !DIExpression()), !dbg !136
+    #dbg_declare(ptr %n1, !126, !DIExpression(), !135)
+    #dbg_declare(ptr %r1, !127, !DIExpression(), !136)
   %n2 = load i32, ptr %n1, align 4, !dbg !137
   %rng = insertvalue %"RangeClosed'i32'" { i32 0, i32 undef }, i32 %n2, 1, !dbg !138
   store %"RangeClosed'i32'" %rng, ptr %r1, align 4, !dbg !139
-  call void @llvm.dbg.declare(metadata ptr %r2, metadata !133, metadata !DIExpression()), !dbg !140
+    #dbg_declare(ptr %r2, !133, !DIExpression(), !140)
   %n3 = load i32, ptr %n1, align 4, !dbg !141
   %neg = sub i32 0, %n3, !dbg !142
   %n4 = load i32, ptr %n1, align 4, !dbg !143
@@ -179,12 +179,12 @@ entry:
   %a = alloca i32, align 4
   %n1 = alloca i32, align 4
   store i32 %n, ptr %n1, align 4
-  call void @llvm.dbg.declare(metadata ptr %n1, metadata !151, metadata !DIExpression()), !dbg !159
-  call void @llvm.dbg.declare(metadata ptr %a, metadata !152, metadata !DIExpression()), !dbg !160
+    #dbg_declare(ptr %n1, !151, !DIExpression(), !159)
+    #dbg_declare(ptr %a, !152, !DIExpression(), !160)
   store i32 0, ptr %a, align 4, !dbg !161
   %n2 = load i32, ptr %n1, align 4, !dbg !162
   %rng = insertvalue %"RangeClosed'i32'" { i32 0, i32 undef }, i32 %n2, 1, !dbg !163
-  call void @llvm.dbg.declare(metadata ptr %i, metadata !154, metadata !DIExpression()), !dbg !164
+    #dbg_declare(ptr %i, !154, !DIExpression(), !164)
   %start = extractvalue %"RangeClosed'i32'" %rng, 0, !dbg !163
   %end = extractvalue %"RangeClosed'i32'" %rng, 1, !dbg !163
   br label %forCond, !dbg !163
@@ -199,7 +199,7 @@ forBody:                                          ; preds = %forCond
   %n3 = load i32, ptr %n1, align 4, !dbg !165
   %rng4 = insertvalue %"RangeClosed'i32'" undef, i32 %n3, 0, !dbg !166
   %rng5 = insertvalue %"RangeClosed'i32'" %rng4, i32 10, 1, !dbg !166
-  call void @llvm.dbg.declare(metadata ptr %j, metadata !156, metadata !DIExpression()), !dbg !167
+    #dbg_declare(ptr %j, !156, !DIExpression(), !167)
   %start6 = extractvalue %"RangeClosed'i32'" %rng5, 0, !dbg !166
   %end7 = extractvalue %"RangeClosed'i32'" %rng5, 1, !dbg !166
   br label %forCond8, !dbg !166
@@ -240,7 +240,7 @@ define %UnitType @pointerStructTest(%A %a) #0 !dbg !174 {
 entry:
   %a1 = alloca %A, align 8
   store %A %a, ptr %a1, align 8
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !191, metadata !DIExpression()), !dbg !192
+    #dbg_declare(ptr %a1, !191, !DIExpression(), !192)
   ret %UnitType zeroinitializer
 }
 
@@ -250,8 +250,8 @@ entry:
   %ptr = alloca ptr, align 8
   %x1 = alloca i32, align 4
   store i32 %x, ptr %x1, align 4
-  call void @llvm.dbg.declare(metadata ptr %x1, metadata !195, metadata !DIExpression()), !dbg !199
-  call void @llvm.dbg.declare(metadata ptr %ptr, metadata !196, metadata !DIExpression()), !dbg !200
+    #dbg_declare(ptr %x1, !195, !DIExpression(), !199)
+    #dbg_declare(ptr %ptr, !196, !DIExpression(), !200)
   store ptr %x1, ptr %ptr, align 8, !dbg !201
   %ptr2 = load ptr, ptr %ptr, align 8, !dbg !202
   store i32 17, ptr %ptr2, align 4, !dbg !203
@@ -263,7 +263,7 @@ define %UnitType @break_and_continue() #0 !dbg !204 {
 entry:
   %j = alloca i8, align 1
   %i = alloca i8, align 1
-  call void @llvm.dbg.declare(metadata ptr %i, metadata !206, metadata !DIExpression()), !dbg !210
+    #dbg_declare(ptr %i, !206, !DIExpression(), !210)
   br label %forCond, !dbg !211
 
 forCond:                                          ; preds = %forIter, %entry
@@ -311,7 +311,7 @@ forIter:                                          ; preds = %merge6, %if4
   br label %forCond, !dbg !221
 
 forExit:                                          ; preds = %if, %forCond
-  call void @llvm.dbg.declare(metadata ptr %j, metadata !209, metadata !DIExpression()), !dbg !222
+    #dbg_declare(ptr %j, !209, !DIExpression(), !222)
   store i8 1, ptr %j, align 1, !dbg !223
   br label %whileCond, !dbg !223
 
@@ -369,10 +369,10 @@ entry:
   %b2 = alloca i16, align 2
   %a1 = alloca i16, align 2
   store i16 %a, ptr %a1, align 2
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !242, metadata !DIExpression()), !dbg !246
+    #dbg_declare(ptr %a1, !242, !DIExpression(), !246)
   store i16 %b, ptr %b2, align 2
-  call void @llvm.dbg.declare(metadata ptr %b2, metadata !243, metadata !DIExpression()), !dbg !246
-  call void @llvm.dbg.declare(metadata ptr %rv, metadata !244, metadata !DIExpression()), !dbg !247
+    #dbg_declare(ptr %b2, !243, !DIExpression(), !246)
+    #dbg_declare(ptr %rv, !244, !DIExpression(), !247)
   %a3 = load i16, ptr %a1, align 2, !dbg !248
   %b4 = load i16, ptr %b2, align 2, !dbg !249
   %add = add i16 %a3, %b4, !dbg !250
@@ -388,9 +388,9 @@ entry:
   %p2 = alloca ptr, align 8
   %a1 = alloca i32, align 4
   store i32 %a, ptr %a1, align 4
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !257, metadata !DIExpression()), !dbg !259
+    #dbg_declare(ptr %a1, !257, !DIExpression(), !259)
   store ptr %p, ptr %p2, align 8
-  call void @llvm.dbg.declare(metadata ptr %p2, metadata !258, metadata !DIExpression()), !dbg !259
+    #dbg_declare(ptr %p2, !258, !DIExpression(), !259)
   %a3 = load i32, ptr %a1, align 4, !dbg !260
   %cmplt = icmp slt i32 %a3, 0, !dbg !262
   br i1 %cmplt, label %if, label %else, !dbg !262
@@ -418,8 +418,8 @@ entry:
   %n = alloca i16, align 2
   %a1 = alloca %"[]u16", align 8
   store %"[]u16" %a, ptr %a1, align 8
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !276, metadata !DIExpression()), !dbg !279
-  call void @llvm.dbg.declare(metadata ptr %n, metadata !277, metadata !DIExpression()), !dbg !280
+    #dbg_declare(ptr %a1, !276, !DIExpression(), !279)
+    #dbg_declare(ptr %n, !277, !DIExpression(), !280)
   %a2 = load %"[]u16", ptr %a1, align 8, !dbg !281
   %size = extractvalue %"[]u16" %a2, 0, !dbg !282
   %check = icmp uge i64 0, %size, !dbg !282
@@ -460,12 +460,12 @@ entry:
   %num = alloca i64, align 8
   %a1 = alloca %"[]u32", align 8
   store %"[]u32" %a, ptr %a1, align 8
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !297, metadata !DIExpression()), !dbg !303
-  call void @llvm.dbg.declare(metadata ptr %num, metadata !298, metadata !DIExpression()), !dbg !304
+    #dbg_declare(ptr %a1, !297, !DIExpression(), !303)
+    #dbg_declare(ptr %num, !298, !DIExpression(), !304)
   store i64 0, ptr %num, align 8, !dbg !305
   %a2 = load %"[]u32", ptr %a1, align 8, !dbg !306
-  call void @llvm.dbg.declare(metadata ptr %x, metadata !300, metadata !DIExpression()), !dbg !307
-  call void @llvm.dbg.declare(metadata ptr %i, metadata !302, metadata !DIExpression()), !dbg !308
+    #dbg_declare(ptr %x, !300, !DIExpression(), !307)
+    #dbg_declare(ptr %i, !302, !DIExpression(), !308)
   %size = extractvalue %"[]u32" %a2, 0, !dbg !306
   %data = extractvalue %"[]u32" %a2, 1, !dbg !306
   br label %forCond, !dbg !306
@@ -504,8 +504,8 @@ entry:
   %x = alloca i8, align 1
   %a1 = alloca i32, align 4
   store i32 %a, ptr %a1, align 4
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !317, metadata !DIExpression()), !dbg !320
-  call void @llvm.dbg.declare(metadata ptr %x, metadata !318, metadata !DIExpression()), !dbg !321
+    #dbg_declare(ptr %a1, !317, !DIExpression(), !320)
+    #dbg_declare(ptr %x, !318, !DIExpression(), !321)
   %a2 = load i32, ptr %a1, align 4, !dbg !322
   %cast = trunc i32 %a2 to i8, !dbg !323
   store i8 %cast, ptr %x, align 1, !dbg !324
@@ -529,11 +529,11 @@ define %UnitType @function_type() #0 !dbg !331 {
 entry:
   %f2 = alloca ptr, align 8
   %f1 = alloca ptr, align 8
-  call void @llvm.dbg.declare(metadata ptr %f1, metadata !333, metadata !DIExpression()), !dbg !340
+    #dbg_declare(ptr %f1, !333, !DIExpression(), !340)
   store ptr @ftype1, ptr %f1, align 8, !dbg !341
   %f11 = load ptr, ptr %f1, align 8, !dbg !342
   %call = call %UnitType %f11(), !dbg !342
-  call void @llvm.dbg.declare(metadata ptr %f2, metadata !337, metadata !DIExpression()), !dbg !343
+    #dbg_declare(ptr %f2, !337, !DIExpression(), !343)
   store ptr @ftype2, ptr %f2, align 8, !dbg !344
   %f22 = load ptr, ptr %f2, align 8, !dbg !345
   %call3 = call i1 %f22(), !dbg !345
@@ -547,10 +547,10 @@ entry:
   %x = alloca float, align 4
   %a1 = alloca double, align 8
   store double %a, ptr %a1, align 8
-  call void @llvm.dbg.declare(metadata ptr %a1, metadata !351, metadata !DIExpression()), !dbg !356
-  call void @llvm.dbg.declare(metadata ptr %x, metadata !352, metadata !DIExpression()), !dbg !357
+    #dbg_declare(ptr %a1, !351, !DIExpression(), !356)
+    #dbg_declare(ptr %x, !352, !DIExpression(), !357)
   store float 0x3F8945B6C0000000, ptr %x, align 4, !dbg !358
-  call void @llvm.dbg.declare(metadata ptr %y, metadata !355, metadata !DIExpression()), !dbg !359
+    #dbg_declare(ptr %y, !355, !DIExpression(), !359)
   store double 3.141590e+00, ptr %y, align 8, !dbg !360
   %a2 = load double, ptr %a1, align 8, !dbg !361
   %x3 = load float, ptr %x, align 4, !dbg !362
@@ -561,13 +561,9 @@ entry:
   ret double %add, !dbg !365
 }
 
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
-
 declare void @exit(i32)
 
 attributes #0 = { noinline nounwind optnone }
-attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
 
 !llvm.dbg.cu = !{!0}
 

@@ -26,7 +26,7 @@ define i32 @fun4(%S3 %s) #0 !dbg !11 {
 entry:
   %s1 = alloca %S3, align 8
   store %S3 %s, ptr %s1, align 8
-  call void @llvm.dbg.declare(metadata ptr %s1, metadata !34, metadata !DIExpression()), !dbg !35
+    #dbg_declare(ptr %s1, !34, !DIExpression(), !35)
   %s2 = load %S3, ptr %s1, align 8, !dbg !36
   %mber = extractvalue %S3 %s2, 0, !dbg !38
   %mber3 = extractvalue %S2 %mber, 0, !dbg !39
@@ -46,11 +46,7 @@ entry:
   ret i32 %call, !dbg !47
 }
 
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
-
 attributes #0 = { noinline nounwind optnone }
-attributes #1 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
 
 !llvm.dbg.cu = !{!0}
 
