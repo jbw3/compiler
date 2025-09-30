@@ -3038,6 +3038,11 @@ void SemanticAnalyzer::Visit(CastExpression* castExpression)
                     value = static_cast<int64_t>(unsignedValue);
                 }
 
+                unsigned castSize = castType->GetNumBits();
+                int64_t mask = getBitMask(castSize);
+                assert(mask != 0 && "Invalid int type size");
+                value &= mask;
+
                 unsigned idx = compilerContext.AddIntConstantValue(value);
                 castExpression->SetConstantValueIndex(idx);
             }

@@ -1375,7 +1375,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
         int64_t value = compilerContext.GetIntConstantValue(constIdx);
         unsigned numBits = type->GetNumBits();
         bool isSigned = type->GetSign() == TypeInfo::eSigned;
-        constValue = ConstantInt::get(context, APInt(numBits, value, isSigned));
+        constValue = ConstantInt::get(context, APInt(numBits, value, isSigned, true));
     }
     else if (type->IsFloat())
     {
