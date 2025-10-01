@@ -707,8 +707,9 @@ def write_variable_declaration(io: IO[str], context: Context) -> None:
     io.write(get_indent_str(context))
     io.write('var ')
     io.write(name)
-    io.write(' ')
-    io.write(type.name)
+    if type.is_int or type.is_float or random.randrange(2) == 0:
+        io.write(' ')
+        io.write(type.name)
     io.write(' = ')
     write_expression(io, context, type)
     io.write(';\n')
