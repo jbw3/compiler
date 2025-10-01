@@ -726,7 +726,7 @@ def write_block(io: IO[str], context: Context) -> None:
     context.indent_level += 1
 
     context.push_scope()
-    for _ in range(random.randint(1, 5)): # TODO: use range 0-5 when compiler bug is fixed
+    for _ in range(random.randint(0, 5)):
         write_statement(io, context)
         if random.randrange(5) == 0:
             io.write('\n')
