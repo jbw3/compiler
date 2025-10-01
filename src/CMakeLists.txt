@@ -45,6 +45,7 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMBPFDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMBPFInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCFGuard.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMCGData.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCodeGenTypes.lib
         ${LLVM_LIBRARY_DIRS}/LLVMCore.lib
@@ -52,6 +53,7 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoCodeView.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDebugInfoDWARF.lib
         ${LLVM_LIBRARY_DIRS}/LLVMDemangle.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMFrontendAtomic.lib
         ${LLVM_LIBRARY_DIRS}/LLVMFrontendOffloading.lib
         ${LLVM_LIBRARY_DIRS}/LLVMFrontendOpenMP.lib
         ${LLVM_LIBRARY_DIRS}/LLVMGlobalISel.lib
@@ -102,12 +104,17 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMRISCVInfo.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMSandboxIR.lib
         ${LLVM_LIBRARY_DIRS}/LLVMScalarOpts.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSelectionDAG.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSparcInfo.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMSPIRVAnalysis.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMSPIRVCodeGen.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMSPIRVDesc.lib
+        ${LLVM_LIBRARY_DIRS}/LLVMSPIRVInfo.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSupport.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZAsmParser.lib
         ${LLVM_LIBRARY_DIRS}/LLVMSystemZCodeGen.lib
@@ -134,7 +141,7 @@ if(WIN32)
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreCodeGen.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreDesc.lib
         ${LLVM_LIBRARY_DIRS}/LLVMXCoreInfo.lib
-        ws2_32.lib
+        ntdll.lib
     )
 else()
     execute_process(COMMAND llvm-config-20 --libs all
