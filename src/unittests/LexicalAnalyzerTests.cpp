@@ -114,6 +114,16 @@ bool LexicalAnalyzerTests::TestValidInputs(string& failMsg)
                 {R"("#!")", 0, 1, 17, Token::eStrLit},
             }
         },
+        {
+            "x = @pi+1.5",
+            {
+                {"x", 0, 1, 1, Token::eIdentifier},
+                {"=", 0, 1, 3, Token::eEqual},
+                {"@pi", 0, 1, 5, Token::eBuiltInIdentifier},
+                {"+", 0, 1, 8, Token::ePlus},
+                {"1.5", 0, 1, 9, Token::eFloatLit},
+            }
+        },
     };
 
     Config config;

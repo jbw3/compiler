@@ -12,13 +12,14 @@ public:
     // types
     enum EMainType : uint16_t
     {
-        eIdentifierType   = 0x1000,
-        eKeywordType      = 0x2000,
-        eBoolLiteralType  = 0x3000,
-        eIntLiteralType   = 0x4000,
-        eFloatLiteralType = 0x5000,
-        eStrLiteralType   = 0x6000,
-        eSymbolType       = 0x7000,
+        eIdentifierType        = 0x1000,
+        eBuiltInIdentifierType = 0x2000,
+        eKeywordType           = 0x3000,
+        eBoolLiteralType       = 0x4000,
+        eIntLiteralType        = 0x5000,
+        eFloatLiteralType      = 0x6000,
+        eStrLiteralType        = 0x7000,
+        eSymbolType            = 0x8000,
     };
 
     enum ESymbolFlags : uint16_t
@@ -38,6 +39,9 @@ public:
 
         // identifier
         eIdentifier   = eIdentifierType,
+
+        // built-in identifier
+        eBuiltInIdentifier = eBuiltInIdentifierType,
 
         // keyword
         eBool         = eKeywordType | eTypeName |  0,

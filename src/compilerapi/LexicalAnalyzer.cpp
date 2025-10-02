@@ -789,6 +789,31 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                     ++column;
                 }
             }
+            // parse built-in identifiers
+            else if (ch == '@')
+            {
+                unsigned startColumn = column;
+                ch = Read(buff);
+                ++column;
+
+                if (!isMore || (!std::isalpha(ch) && ch != '_'))
+                {
+                    logger.LogError(filenameId, line, column, "Expected a letter or underscore after '@'");
+                    ok = false;
+                }
+                else
+                {
+                    while (isMore && (std::isalnum(ch) || ch == '_'))
+                    {
+                        ++valueSize;
+                        ch = Read(buff);
+                        ++column;
+                    }
+
+                    ROString value(valuePtr, valueSize);
+                    tokens.Append(Token(value, filenameId, line, startColumn, Token::eBuiltInIdentifier));
+                }
+            }
             else
             {
                 logger.LogError(filenameId, line, column, "Invalid character '{}'", ch);
