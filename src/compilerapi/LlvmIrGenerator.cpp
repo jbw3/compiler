@@ -1570,7 +1570,7 @@ void LlvmIrGenerator::Visit(BuiltInIdentifierExpression* builtInIdentifierExpres
 
     ROString name = token->value;
     const TypeInfo* type = builtInIdentifierExpression->GetType();
-    if (name == "@pi")
+    if (name == "@e" || name == "@pi")
     {
         double value = compilerContext.GetFloatConstantValue(builtInIdentifierExpression->GetConstantValueIndex());
 

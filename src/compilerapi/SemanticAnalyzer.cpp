@@ -2704,7 +2704,12 @@ void SemanticAnalyzer::Visit(BuiltInIdentifierExpression* builtInIdentifierExpre
 
     const TypeInfo* type = nullptr;
     unsigned constIdx = static_cast<unsigned>(-1);
-    if (name == "@pi")
+    if (name == "@e")
+    {
+        type = TypeInfo::Float32LiteralType;
+        constIdx = compilerContext.AddFloatConstantValue(2.71828182845904523536);
+    }
+    else if (name == "@pi")
     {
         type = TypeInfo::Float32LiteralType;
         constIdx = compilerContext.AddFloatConstantValue(3.14159265358979323846);
