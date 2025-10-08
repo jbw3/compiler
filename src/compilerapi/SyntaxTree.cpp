@@ -528,6 +528,16 @@ void IdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+BuiltInIdentifierExpression::BuiltInIdentifierExpression(const Token* token) :
+    token(token)
+{
+}
+
+void BuiltInIdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO
+}
+
 CastExpression::CastExpression(Expression* typeExpression, Expression* subExpression,
                                const Token* castToken,
                                const Token* openParToken,
@@ -578,17 +588,37 @@ FunctionCallExpression::FunctionCallExpression(Expression* functionExpr, const E
 
 FunctionCallExpression::~FunctionCallExpression()
 {
-    for (Expression* arg : arguments)
-    {
-        delete arg;
-    }
-
+    deletePointerContainer(arguments);
     delete functionExpression;
 }
 
 void FunctionCallExpression::Accept(SyntaxTreeVisitor* visitor)
 {
     visitor->Visit(this);
+}
+
+BuiltInFunctionCallExpression::BuiltInFunctionCallExpression(
+    const Token* nameToken,
+    const Expressions& arguments,
+    const Token* openParToken,
+    const Token* closeParToken
+) :
+    nameToken(nameToken),
+    openParToken(openParToken),
+    closeParToken(closeParToken),
+    functionType(nullptr),
+    arguments(arguments)
+{
+}
+
+BuiltInFunctionCallExpression::~BuiltInFunctionCallExpression()
+{
+    deletePointerContainer(arguments);
+}
+
+void BuiltInFunctionCallExpression::Accept(SyntaxTreeVisitor* visitor)
+{
+    // TODO
 }
 
 MemberExpression::MemberExpression(Expression* subExpr, ROString memberName,

@@ -282,6 +282,18 @@ public:
     ROString name;
 };
 
+class BuiltInIdentifierExpression : public Expression
+{
+public:
+    BuiltInIdentifierExpression(const Token* token);
+
+    virtual ~BuiltInIdentifierExpression() = default;
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* token;
+};
+
 class CastExpression : public Expression
 {
 public:
@@ -327,6 +339,27 @@ public:
     const Token* closeParToken;
     const TypeInfo* functionType;
     Expression* functionExpression;
+    Expressions arguments;
+};
+
+class BuiltInFunctionCallExpression : public Expression
+{
+public:
+    BuiltInFunctionCallExpression(
+        const Token* nameToken,
+        const Expressions& arguments,
+        const Token* openParToken,
+        const Token* closeParToken
+    );
+
+    virtual ~BuiltInFunctionCallExpression();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* nameToken;
+    const Token* openParToken;
+    const Token* closeParToken;
+    const TypeInfo* functionType;
     Expressions arguments;
 };
 

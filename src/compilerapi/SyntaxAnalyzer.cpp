@@ -1192,6 +1192,49 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
         expr = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, openParToken, closeParToken, paramNameTokens);
     }
+    else if (type == Token::eBuiltInIdentifier)
+    {
+        TokenIterator nextIter = iter + 1;
+        if (nextIter != endIter && nextIter->type == Token::eOpenPar)
+        {
+            const Token* nameToken = &*iter;
+            const Token* openParToken = &*nextIter;
+
+            // skip to token after "("
+            iter += 2;
+            if (iter == endIter)
+            {
+                logger.LogError("Unexpected end of file in the middle of a built-in function call");
+                return nullptr;
+            }
+
+            // process arguments
+            vector<Expression*> arguments;
+            while (iter->type != Token::eClosePar)
+            {
+                Expression* argExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+                if (argExpr == nullptr)
+                {
+                    deletePointerContainer(arguments);
+                    return nullptr;
+                }
+                arguments.push_back(argExpr);
+
+                if (iter->type == Token::eComma)
+                {
+                    ++iter;
+                }
+            }
+
+            const Token* closeParToken = &*iter;
+
+            expr = new BuiltInFunctionCallExpression(nameToken, arguments, openParToken, closeParToken);
+        }
+        else
+        {
+            expr = new BuiltInIdentifierExpression(&*iter);
+        }
+    }
     else
     {
         logger.LogError(*iter, "Unexpected term '{}'", iter->value);
