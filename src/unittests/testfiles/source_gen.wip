@@ -164,8 +164,8 @@ fun vars() i32
 
 fun casts(x bool, y i32)
 {
-    var b bool = cast(bool, y + 2);
-    var i = cast(i32, x);
+    var b bool = @cast(bool, y + 2);
+    var i = @cast(i32, x);
 }
 
 fun structs(num u32) usize
@@ -181,7 +181,7 @@ fun structs(num u32) usize
 fun arrays(x i8, y i16)
 {
     var a1 = [128; false];
-    var a2 []i32 = [0, x * 27 + y, passThru(8), cast(i32, a1[17])];
+    var a2 []i32 = [0, x * 27 + y, passThru(8), @cast(i32, a1[17])];
 }
 
 fun test1()
