@@ -1987,7 +1987,162 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
 
 void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
-    // TODO
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+    if (name == "@cast")
+    {
+        BuiltInCast(builtInFunctionCallExpression);
+    }
+    else
+    {
+        assert(false && "Unknown built-in function");
+        resultValue = nullptr;
+    }
+}
+
+void LlvmIrGenerator::BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+
+    Expression* subExpression = args[1];
+    subExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    SetDebugLocation(nameToken);
+
+    const TypeInfo* exprType = subExpression->GetType();
+    const TypeInfo* castType = builtInFunctionCallExpression->GetType();
+
+    if (exprType->IsBool())
+    {
+        if (castType->IsInt())
+        {
+            Type* dstType = CreateLlvmType(castType);
+            resultValue = builder.CreateZExt(resultValue, dstType, "cast");
+        }
+        else if (castType->IsFloat())
+        {
+            Type* dstType = CreateLlvmType(castType);
+            resultValue = builder.CreateUIToFP(resultValue, dstType, "cast");
+        }
+        else if (castType->IsBool())
+        {
+            // nothing to do in this case
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
+    }
+    else if (exprType->IsInt())
+    {
+        if (castType->IsInt())
+        {
+            unsigned exprSize = exprType->GetNumBits();
+            unsigned castSize = castType->GetNumBits();
+            if (castSize < exprSize)
+            {
+                Type* dstType = CreateLlvmType(castType);
+                resultValue = builder.CreateTrunc(resultValue, dstType, "cast");
+            }
+            else if (castSize > exprSize)
+            {
+                Type* dstType = CreateLlvmType(castType);
+
+                TypeInfo::ESign exprSign = exprType->GetSign();
+                if (exprSign == TypeInfo::eSigned)
+                {
+                    resultValue = builder.CreateSExt(resultValue, dstType, "cast");
+                }
+                else
+                {
+                    resultValue = builder.CreateZExt(resultValue, dstType, "cast");
+                }
+            }
+            else // sizes are equal
+            {
+                // nothing to do if the sizes are equal
+            }
+        }
+        else if (castType->IsFloat())
+        {
+            Type* dstType = CreateLlvmType(castType);
+            TypeInfo::ESign exprSign = exprType->GetSign();
+            Instruction::CastOps castOp = (exprSign == TypeInfo::eSigned) ? Instruction::CastOps::SIToFP : Instruction::CastOps::UIToFP;
+            resultValue = builder.CreateCast(castOp, resultValue, dstType, "cast");
+        }
+        else if (castType->IsBool())
+        {
+            Type* resultValueType = resultValue->getType();
+            bool isSigned = exprType->GetSign() == TypeInfo::eSigned;
+            Value* zero = ConstantInt::get(resultValueType, 0, isSigned);
+            resultValue = builder.CreateICmpNE(resultValue, zero, "cast");
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
+    }
+    else if (exprType->IsFloat())
+    {
+        if (castType->IsInt())
+        {
+            Type* dstType = CreateLlvmType(castType);
+            TypeInfo::ESign exprSign = castType->GetSign();
+            Instruction::CastOps castOp = (exprSign == TypeInfo::eSigned) ? Instruction::CastOps::FPToSI : Instruction::CastOps::FPToUI;
+            resultValue = builder.CreateCast(castOp, resultValue, dstType, "cast");
+        }
+        else if (castType->IsBool())
+        {
+            APFloat::Semantics semantics = APFloat::S_IEEEdouble;
+            switch (exprType->GetNumBits())
+            {
+                case 32:
+                    semantics = APFloat::S_IEEEsingle;
+                    break;
+                case 64:
+                    semantics = APFloat::S_IEEEdouble;
+                    break;
+                default:
+                    assert(false && "Invalid float size in cast");
+                    break;
+            }
+
+            Value* zero = ConstantFP::get(context, APFloat::getZero(APFloat::EnumToSemantics(semantics)));
+            resultValue = builder.CreateFCmpONE(resultValue, zero, "cast");
+        }
+        else if (castType->IsFloat())
+        {
+            unsigned exprSize = exprType->GetNumBits();
+            unsigned castSize = castType->GetNumBits();
+            if (castSize < exprSize)
+            {
+                Type* dstType = CreateLlvmType(castType);
+                resultValue = builder.CreateFPTrunc(resultValue, dstType, "cast");
+            }
+            else if (castSize > exprSize)
+            {
+                Type* dstType = CreateLlvmType(castType);
+                resultValue = builder.CreateFPExt(resultValue, dstType, "cast");
+            }
+            else // sizes are equal
+            {
+                // nothing to do if the sizes are equal
+            }
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
+    }
+    else
+    {
+        assert(false && "Invalid cast");
+    }
 }
 
 void LlvmIrGenerator::Visit(MemberExpression* memberExpression)

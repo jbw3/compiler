@@ -216,6 +216,8 @@ private:
     void SetDebugLocation(const Token* token);
 
     void CreateDebugVariable(const Token* token, const TypeInfo* type, llvm::AllocaInst* alloca);
+
+    void BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
 };
 
 #endif // LLVM_IR_GENERATOR_H_

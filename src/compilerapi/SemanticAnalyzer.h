@@ -210,6 +210,8 @@ private:
     bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, SyntaxTree::Expression* expression, const Token* errorToken, SyntaxTree::Expression*& resultExpression);
 
     SyntaxTree::Expression* ImplicitCast(SyntaxTree::Expression* expression, const TypeInfo* type);
+
+    void BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
 };
 
 #endif // SEMANTIC_ANALYZER_H_

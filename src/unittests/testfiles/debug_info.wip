@@ -162,7 +162,7 @@ fun forIndex(a []u32) usize
 
 fun casts(a i32)
 {
-    var x = cast(i8, a);
+    var x = @cast(i8, a);
 }
 
 fun ftype1(){}

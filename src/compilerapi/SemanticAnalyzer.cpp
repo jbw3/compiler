@@ -2716,7 +2716,7 @@ void SemanticAnalyzer::Visit(BuiltInIdentifierExpression* builtInIdentifierExpre
     }
     else
     {
-        logger.LogError(*token, "'{}' is not a built-in identifier", name);
+        logger.LogError(*token, "'{}' is not a valid built-in identifier", name);
         isError = true;
         return;
     }
@@ -3178,7 +3178,228 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
 
 void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
-    // TODO
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+
+    if (name == "@cast")
+    {
+        BuiltInCast(builtInFunctionCallExpression);
+    }
+    else
+    {
+        logger.LogError(*nameToken, "'{}' is not a valid built-in function", name);
+        isError = true;
+    }
+}
+
+void SemanticAnalyzer::BuiltInCast(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+    if (args.size() != 2)
+    {
+        logger.LogError(*nameToken, "{} expected 2 arguments but got {}", name, args.size());
+        isError = true;
+        return;
+    }
+
+    Expression* typeExpression = args[0];
+    const TypeInfo* castType = TypeExpressionToType(typeExpression);
+    if (castType == nullptr)
+    {
+        isError = true;
+        return;
+    }
+
+    Expression* subExpression = args[1];
+    subExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    const TypeInfo* exprType = subExpression->GetType();
+
+    // check if the cast is valid
+    bool canCast = false;
+    if (exprType->IsBool())
+    {
+        canCast = castType->IsBool() || castType->IsInt() || castType->IsFloat();
+    }
+    else if (exprType->IsInt())
+    {
+        canCast = castType->IsBool() || castType->IsInt() || castType->IsFloat();
+    }
+    else if (exprType->IsFloat())
+    {
+        canCast = castType->IsBool() || castType->IsInt() || castType->IsFloat();
+    }
+
+    if (!canCast)
+    {
+        StartEndTokenFinder finder;
+        subExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Cannot cast expression of type '{}' to type '{}'",
+            exprType->GetShortName(), castType->GetShortName()
+        );
+        isError = true;
+        return;
+    }
+
+    builtInFunctionCallExpression->SetType(castType);
+
+    if (subExpression->GetIsConstant())
+    {
+        unsigned subExprConstIdx = subExpression->GetConstantValueIndex();
+
+        if (exprType->IsBool())
+        {
+            if (castType->IsBool())
+            {
+                builtInFunctionCallExpression->SetConstantValueIndex(subExprConstIdx);
+            }
+            else if (castType->IsInt())
+            {
+                bool subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
+                int64_t value = subValue ? 1 : 0;
+                unsigned idx = compilerContext.AddIntConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsFloat())
+            {
+                bool subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
+                double value = subValue ? 1.0 : 0.0;
+                unsigned idx = compilerContext.AddFloatConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (exprType->IsInt())
+        {
+            int64_t subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
+            if (castType->IsBool())
+            {
+                bool value = subValue != 0;
+                unsigned idx = compilerContext.AddBoolConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsInt())
+            {
+                int64_t value = subValue;
+
+                unsigned exprSize = exprType->GetNumBits();
+                unsigned castSize = castType->GetNumBits();
+                if (castSize < exprSize)
+                {
+                    int64_t mask = getBitMask(castSize);
+                    if (mask == 0)
+                    {
+                        logger.LogInternalError("Invalid int type size");
+                        isError = true;
+                        return;
+                    }
+                    value &= mask;
+                }
+                else if (castSize > exprSize)
+                {
+                    TypeInfo::ESign exprSign = exprType->GetSign();
+                    if (exprSign == TypeInfo::eSigned)
+                    {
+                        // sign extend
+                        int64_t signBit = static_cast<int64_t>(1) << (castSize - 1);
+                        bool isOne = (value & signBit) != 0;
+                        if (isOne)
+                        {
+                            unsigned size = exprSize;
+                            while (size < castSize)
+                            {
+                                signBit <<= 1;
+                                value |= signBit;
+                                ++size;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // zero extension; nothing to do
+                    }
+                }
+                else // sizes are equal
+                {
+                    // nothing to do if the sizes are equal
+                }
+
+                unsigned idx = compilerContext.AddIntConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsFloat())
+            {
+                unsigned castSize = castType->GetNumBits();
+                double value = 0.0;
+                if (castSize == 32)
+                {
+                    float floatValue = static_cast<float>(subValue);
+                    value = static_cast<double>(floatValue);
+                }
+                else
+                {
+                    value = static_cast<double>(subValue);
+                }
+
+                unsigned idx = compilerContext.AddFloatConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (exprType->IsFloat())
+        {
+            double subValue = compilerContext.GetFloatConstantValue(subExprConstIdx);
+
+            if (castType->IsBool())
+            {
+                bool value = (subValue != 0.0);
+                unsigned idx = compilerContext.AddBoolConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsInt())
+            {
+                int64_t value = 0;
+                if (castType->GetSign() == TypeInfo::eSigned)
+                {
+                    value = static_cast<int64_t>(subValue);
+                }
+                else
+                {
+                    uint64_t unsignedValue = static_cast<uint64_t>(subValue);
+                    value = static_cast<int64_t>(unsignedValue);
+                }
+
+                unsigned castSize = castType->GetNumBits();
+                int64_t mask = getBitMask(castSize);
+                assert(mask != 0 && "Invalid int type size");
+                value &= mask;
+
+                unsigned idx = compilerContext.AddIntConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsFloat())
+            {
+                unsigned idx = subExprConstIdx;
+                if (castType->GetNumBits() < exprType->GetNumBits())
+                {
+                    float floatValue = static_cast<float>(subValue);
+                    double value = static_cast<double>(floatValue);
+                    idx = compilerContext.AddFloatConstantValue(value);
+                }
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+        }
+    }
 }
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)

@@ -116,7 +116,7 @@ fun assignOps(a i8, b i16, c i32)
     c *= a;
     c /= a + b;
     c %= a;
-    c <<= cast(u32, a + b);
+    c <<= @cast(u32, a + b);
     c >>= 2;
     c >>>= 9;
     c &= a + b;
@@ -913,30 +913,30 @@ fun slices(array []i32, s str, start u32, end u32)
 
 fun casts(x i16, y u16, b bool, z f32)
 {
-    var c1 = cast(i32, x);
-    var c2 = cast(i32, y);
-    var c3 = cast(i32, b);
-    var c4 = cast(i32, z);
+    var c1 = @cast(i32, x);
+    var c2 = @cast(i32, y);
+    var c3 = @cast(i32, b);
+    var c4 = @cast(i32, z);
 
-    var c5 = cast(u32, x);
-    var c6 = cast(u32, y);
-    var c7 = cast(u32, b);
-    var c8 = cast(u32, z);
+    var c5 = @cast(u32, x);
+    var c6 = @cast(u32, y);
+    var c7 = @cast(u32, b);
+    var c8 = @cast(u32, z);
 
-    var c9 = cast(bool, x);
-    var c10 = cast(bool, y);
-    var c11 = cast(bool, b);
-    var c12 = cast(bool, z);
+    var c9 = @cast(bool, x);
+    var c10 = @cast(bool, y);
+    var c11 = @cast(bool, b);
+    var c12 = @cast(bool, z);
 
-    var c13 = cast(i8, x);
-    var c14 = cast(i8, y);
-    var c15 = cast(i8, b);
-    var c16 = cast(i8, z);
+    var c13 = @cast(i8, x);
+    var c14 = @cast(i8, y);
+    var c15 = @cast(i8, b);
+    var c16 = @cast(i8, z);
 
-    var c17 = cast(f64, x);
-    var c18 = cast(f64, y);
-    var c19 = cast(f64, b);
-    var c20 = cast(f64, z);
+    var c17 = @cast(f64, x);
+    var c18 = @cast(f64, y);
+    var c19 = @cast(f64, b);
+    var c20 = @cast(f64, z);
 }
 
 const global_constant1 i8 = 9;
@@ -955,13 +955,13 @@ fun consts()
     const c8 = ((c1 >> 2) | (c1 << 1)) ^ 0x6;
     const c9 = global_constant1 & global_constant2;
     const c10 = c4 & !c4 ^ true | false;
-    const c11 = cast(bool, true);
-    const c12 = cast(bool, 0);
-    const c13 = cast(bool, 1);
-    const c14 = cast(i8, true);
-    const c15 = cast(u8, c2);
-    const c16 = cast(i16, 100);
-    const c17 = cast(i16, c1 - 13);
+    const c11 = @cast(bool, true);
+    const c12 = @cast(bool, 0);
+    const c13 = @cast(bool, 1);
+    const c14 = @cast(i8, true);
+    const c15 = @cast(u8, c2);
+    const c16 = @cast(i16, 100);
+    const c17 = @cast(i16, c1 - 13);
     const c18 = Test2:
     {
         test = Test1:
@@ -989,12 +989,12 @@ fun consts()
     const c33 = ftype1;
     const c34 f32 = 1.0 / 2.0;
     const c35 = c34 + -3.25;
-    const c36 f64 = cast(f64, c1);
-    const c37 f64 = cast(f64, 1_000_000_000_000) + 1.0;
-    const c38 f32 = cast(f32, 1_000_000_000_000) + 1.0;
-    const c39 i32 = cast(i32, c35);
-    const c40 i8 = cast(i8, 1_234.0);
-    const c41 u64 = cast(u64, 10e18);
+    const c36 f64 = @cast(f64, c1);
+    const c37 f64 = @cast(f64, 1_000_000_000_000) + 1.0;
+    const c38 f32 = @cast(f32, 1_000_000_000_000) + 1.0;
+    const c39 i32 = @cast(i32, c35);
+    const c40 i8 = @cast(i8, 1_234.0);
+    const c41 u64 = @cast(u64, 10e18);
 
     var v1 = c1;
     var v2 = c2;
