@@ -314,6 +314,11 @@ void SourceGenerator::Visit(IdentifierExpression* identifierExpression)
     *os << identifierExpression->name;
 }
 
+void SourceGenerator::Visit(BuiltInIdentifierExpression* builtInIdentifierExpression)
+{
+    *os << builtInIdentifierExpression->token->value;
+}
+
 void SourceGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 {
     *os << '[';
@@ -416,6 +421,26 @@ void SourceGenerator::Visit(FunctionCallExpression* functionCallExpression)
     *os << '(';
 
     const Expressions& args = functionCallExpression->arguments;
+    size_t numArgs = args.size();
+    if (numArgs > 0)
+    {
+        args[0]->Accept(this);
+
+        for (size_t i = 1; i < numArgs; ++i)
+        {
+            *os << ", ";
+            args[i]->Accept(this);
+        }
+    }
+
+    *os << ")";
+}
+
+void SourceGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    *os << builtInFunctionCallExpression->nameToken->value << '(';
+
+    const Expressions& args = builtInFunctionCallExpression->arguments;
     size_t numArgs = args.size();
     if (numArgs > 0)
     {

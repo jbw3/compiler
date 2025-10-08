@@ -9,6 +9,8 @@ class BinaryExpression;
 class BoolLiteralExpression;
 class BlockExpression;
 class BranchExpression;
+class BuiltInFunctionCallExpression;
+class BuiltInIdentifierExpression;
 class CastExpression;
 class ConstantDeclaration;
 class ExternFunctionDeclaration;
@@ -75,6 +77,8 @@ public:
 
     virtual void Visit(SyntaxTree::IdentifierExpression* identifierExpression) = 0;
 
+    virtual void Visit(SyntaxTree::BuiltInIdentifierExpression* builtInIdentifierExpression) = 0;
+
     virtual void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) = 0;
 
     virtual void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) = 0;
@@ -86,6 +90,8 @@ public:
     virtual void Visit(SyntaxTree::ImplicitCastExpression* castExpression) = 0;
 
     virtual void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) = 0;
+
+    virtual void Visit(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression) = 0;
 
     virtual void Visit(SyntaxTree::MemberExpression* memberExpression) = 0;
 

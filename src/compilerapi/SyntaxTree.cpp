@@ -535,7 +535,7 @@ BuiltInIdentifierExpression::BuiltInIdentifierExpression(const Token* token) :
 
 void BuiltInIdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO
+    visitor->Visit(this);
 }
 
 CastExpression::CastExpression(Expression* typeExpression, Expression* subExpression,
@@ -618,7 +618,7 @@ BuiltInFunctionCallExpression::~BuiltInFunctionCallExpression()
 
 void BuiltInFunctionCallExpression::Accept(SyntaxTreeVisitor* visitor)
 {
-    // TODO
+    visitor->Visit(this);
 }
 
 MemberExpression::MemberExpression(Expression* subExpr, ROString memberName,

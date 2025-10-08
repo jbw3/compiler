@@ -311,6 +311,14 @@ void SyntaxTreePrinter::Visit(IdentifierExpression* identifierExpression)
     PrintProperty("name", identifierExpression->name);
 }
 
+void SyntaxTreePrinter::Visit(BuiltInIdentifierExpression* builtInIdentifierExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "BuiltInIdentifierExpression");
+    PrintProperty("name", builtInIdentifierExpression->token->value);
+}
+
 void SyntaxTreePrinter::Visit(ArraySizeValueExpression* arrayExpression)
 {
     BracePrinter printer(*this, "{", "}");
@@ -363,6 +371,15 @@ void SyntaxTreePrinter::Visit(FunctionCallExpression* functionCallExpression)
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionExpression");
     PrintProperty("functionExpression", functionCallExpression->functionExpression);
     PrintProperty("arguments", functionCallExpression->arguments);
+}
+
+void SyntaxTreePrinter::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "BuiltInFunctionExpression");
+    PrintProperty("name", builtInFunctionCallExpression->nameToken->value);
+    PrintProperty("arguments", builtInFunctionCallExpression->arguments);
 }
 
 void SyntaxTreePrinter::Visit(MemberExpression* memberExpression)

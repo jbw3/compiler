@@ -55,6 +55,8 @@ public:
 
     void Visit(SyntaxTree::IdentifierExpression* identifierExpression) override;
 
+    void Visit(SyntaxTree::BuiltInIdentifierExpression* builtInIdentifierExpression) override;
+
     void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) override;
 
     void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) override;
@@ -66,6 +68,8 @@ public:
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 
     void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) override;
+
+    void Visit(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression) override;
 
     void Visit(SyntaxTree::MemberExpression* memberExpression) override;
 
@@ -128,6 +132,8 @@ public:
 
     void Visit(SyntaxTree::IdentifierExpression* identifierExpression) override;
 
+    void Visit(SyntaxTree::BuiltInIdentifierExpression* builtInIdentifierExpression) override;
+
     void Visit(SyntaxTree::ArraySizeValueExpression* arrayExpression) override;
 
     void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) override;
@@ -139,6 +145,8 @@ public:
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 
     void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) override;
+
+    void Visit(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression) override;
 
     void Visit(SyntaxTree::MemberExpression* memberExpression) override;
 

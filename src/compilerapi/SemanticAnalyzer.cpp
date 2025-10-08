@@ -137,6 +137,13 @@ void StartEndTokenFinder::Visit(IdentifierExpression* identifierExpression)
     UpdateEnd(token);
 }
 
+void StartEndTokenFinder::Visit(BuiltInIdentifierExpression* builtInIdentifierExpression)
+{
+    const Token* token = builtInIdentifierExpression->token;
+    UpdateStart(token);
+    UpdateEnd(token);
+}
+
 void StartEndTokenFinder::Visit(ArraySizeValueExpression* arrayExpression)
 {
     UpdateStart(arrayExpression->startToken);
@@ -170,6 +177,12 @@ void StartEndTokenFinder::Visit(FunctionCallExpression* functionCallExpression)
 {
     functionCallExpression->functionExpression->Accept(this);
     UpdateEnd(functionCallExpression->closeParToken);
+}
+
+void StartEndTokenFinder::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    UpdateStart(builtInFunctionCallExpression->nameToken);
+    UpdateEnd(builtInFunctionCallExpression->closeParToken);
 }
 
 void StartEndTokenFinder::Visit(MemberExpression* memberExpression)
@@ -1297,6 +1310,10 @@ void SemanticAnalyzer::FixNumericLiteralExpression(Expression* expr, const TypeI
         }
 
         arrMultiValExpr->SetType(resultType);
+    }
+    else if (BuiltInIdentifierExpression* builtInIdExpr = dynamic_cast<BuiltInIdentifierExpression*>(expr); builtInIdExpr != nullptr)
+    {
+        builtInIdExpr->SetType(resultType);
     }
     else
     {
@@ -2680,6 +2697,29 @@ void SemanticAnalyzer::Visit(IdentifierExpression* identifierExpression)
     }
 }
 
+void SemanticAnalyzer::Visit(BuiltInIdentifierExpression* builtInIdentifierExpression)
+{
+    const Token* token = builtInIdentifierExpression->token;
+    ROString name = token->value;
+
+    const TypeInfo* type = nullptr;
+    unsigned constIdx = static_cast<unsigned>(-1);
+    if (name == "@pi")
+    {
+        type = TypeInfo::Float32LiteralType;
+        constIdx = compilerContext.AddFloatConstantValue(3.14159265358979323846);
+    }
+    else
+    {
+        logger.LogError(*token, "'{}' is not a built-in identifier", name);
+        isError = true;
+        return;
+    }
+
+    builtInIdentifierExpression->SetType(type);
+    builtInIdentifierExpression->SetConstantValueIndex(constIdx);
+}
+
 void SemanticAnalyzer::Visit(ArraySizeValueExpression* arrayExpression)
 {
     Expression* sizeExpression = arrayExpression->sizeExpression;
@@ -3129,6 +3169,11 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
 
     // set expression's type to the function's return type
     functionCallExpression->SetType(funType->GetReturnType());
+}
+
+void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    // TODO
 }
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)

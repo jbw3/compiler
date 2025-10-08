@@ -1563,6 +1563,40 @@ void LlvmIrGenerator::Visit(IdentifierExpression* identifierExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(BuiltInIdentifierExpression* builtInIdentifierExpression)
+{
+    const Token* token = builtInIdentifierExpression->token;
+    SetDebugLocation(token);
+
+    ROString name = token->value;
+    const TypeInfo* type = builtInIdentifierExpression->GetType();
+    if (name == "@pi")
+    {
+        double value = compilerContext.GetFloatConstantValue(builtInIdentifierExpression->GetConstantValueIndex());
+
+        unsigned numBits = type->GetNumBits();
+        if (numBits == 32)
+        {
+            float singleValue = static_cast<float>(value);
+            resultValue = ConstantFP::get(context, APFloat(singleValue));
+        }
+        else if (numBits == 64)
+        {
+            resultValue = ConstantFP::get(context, APFloat(value));
+        }
+        else
+        {
+            assert(false && "Unexpected float size");
+            resultValue = nullptr;
+        }
+    }
+    else
+    {
+        assert(false && "Unknown built-in identifier");
+        resultValue = nullptr;
+    }
+}
+
 void LlvmIrGenerator::Visit(ArraySizeValueExpression* arrayExpression)
 {
     Expression* sizeExpression = arrayExpression->sizeExpression;
@@ -1949,6 +1983,11 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
 
     FunctionCallee func(funType, funValue);
     resultValue = builder.CreateCall(func, args, "call");
+}
+
+void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    // TODO
 }
 
 void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
