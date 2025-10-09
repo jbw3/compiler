@@ -76,7 +76,6 @@ INT_TYPES: list[TypeInfo] = [
 INVALID_IDENTIFIERS: set[str] = {
     'bool',
     'break',
-    'cast',
     'const',
     'continue',
     'elif',
@@ -538,6 +537,10 @@ def write_float_literal(io: IO[str], type: TypeInfo) -> None:
 
     io.write(str(n))
 
+def write_float_built_in(io: IO[str], type: TypeInfo) -> None:
+    s = random.choice(['@e', '@pi'])
+    io.write(s)
+
 def write_float_binary_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     write_expression(io, context, type)
 
@@ -568,6 +571,7 @@ def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> Non
         lambda i, c: write_identifier_expression(i, c, type),
         lambda i, c: write_function_call_expression(i, c, type),
         lambda i, _: write_float_literal(i, type),
+        lambda i, _: write_float_built_in(i, type),
         lambda i, c: write_struct_member_expression(i, c, type),
     ]
 
@@ -575,6 +579,7 @@ def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> Non
         math.pow(2.0, 2.59 - context.expression_level),
         1 if context.get_identifier_of_type(type) is not None else 0,
         math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(type) is not None else 0,
+        1,
         1,
         get_struct_member_weight(type, context),
     ]
