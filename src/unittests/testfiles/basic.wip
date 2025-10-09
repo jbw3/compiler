@@ -1193,3 +1193,10 @@ fun fLiterals()
     var c f64 = 1.235_032e5;
     var d = b + c + 1.0;
 }
+
+fun builtIns()
+{
+    const TwoPi f64 = 2.0 * @pi;
+    var x f32 = @pi;
+    var y f64 = @e + x + TwoPi;
+}

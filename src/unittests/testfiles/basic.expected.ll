@@ -20,7 +20,7 @@ $target_triple
 %"[]u8" = type { i64, ptr }
 %"RangeClosed'u32'" = type { i32, i32 }
 %"RangeClosed'i16'" = type { i16, i16 }
-%"<struct271>" = type { i32, i16 }
+%"<struct281>" = type { i32, i16 }
 %TypesTest = type {}
 %"[]TypesTest" = type { i64, ptr }
 
@@ -3427,7 +3427,7 @@ entry:
   %f2 = alloca ptr, align 8
   %f1 = alloca ptr, align 8
   %f0 = alloca ptr, align 8
-  %t6 = alloca %"<struct271>", align 8
+  %t6 = alloca %"<struct281>", align 8
   %t5 = alloca %TypesTest, align 8
   %t4 = alloca ptr, align 8
   %t3 = alloca i32, align 4
@@ -3447,7 +3447,7 @@ entry:
   store i32 10, ptr %t3, align 4
   store ptr %t3, ptr %t4, align 8
   store %TypesTest undef, ptr %t5, align 1
-  store %"<struct271>" { i32 2, i16 1847 }, ptr %t6, align 4
+  store %"<struct281>" { i32 2, i16 1847 }, ptr %t6, align 4
   store ptr @ftype1, ptr %f0, align 8
   store ptr @ftype3, ptr %f1, align 8
   store ptr @oneArg, ptr %f2, align 8
@@ -3621,6 +3621,20 @@ entry:
   %add = fadd double %b1, %c2
   %add3 = fadd double %add, 1.000000e+00
   store double %add3, ptr %d, align 8
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @builtIns() #0 {
+entry:
+  %y = alloca double, align 8
+  %x = alloca float, align 4
+  store float 0x400921FB60000000, ptr %x, align 4
+  %x1 = load float, ptr %x, align 4
+  %add = fadd float 0x4005BF0A80000000, %x1
+  %fpext = fpext float %add to double
+  %add2 = fadd double %fpext, 0x401921FB54442D18
+  store double %add2, ptr %y, align 8
   ret %UnitType zeroinitializer
 }
 

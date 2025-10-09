@@ -277,6 +277,10 @@ bool SemanticAnalyzerTests::TestValidVariables(string& failMsg)
         // constants in different scopes can have the same name
         "{ const A = struct { x i8, y f32 }; var a = A: { x = 3, y = 9.2 }; }\n"
         "{ const A = struct { x i16, b bool }; var a = A: { x = 3_000, b = true }; }\n",
+
+        // built-in identifiers
+        "var x f32 = @e;\n"
+        "var y f64 = @e + @pi * x;\n",
     };
 
     bool ok = false;
@@ -308,6 +312,12 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
             "const S = str;\n"
             "var s = S: { };\n",
             "error: Expression value is not a struct type",
+        },
+
+        // invalid built-in identifiers
+        {
+            "var x = @notValid;\n",
+            "error: '@notValid' is not a valid built-in identifier",
         },
     };
 
