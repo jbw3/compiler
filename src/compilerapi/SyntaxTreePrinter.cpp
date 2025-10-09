@@ -345,17 +345,6 @@ void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
     PrintProperty("statements", blockExpression->statements);
 }
 
-void SyntaxTreePrinter::Visit(CastExpression* castExpression)
-{
-    BracePrinter printer(*this, "{", "}");
-
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
-
-    PrintProperty(NODE_TYPE_PROPERTY, "CastExpression");
-    PrintProperty("typeExpression", castExpression->typeExpression);
-    PrintProperty("expression", castExpression->subExpression);
-}
-
 void SyntaxTreePrinter::Visit(ImplicitCastExpression* castExpression)
 {
     BracePrinter printer(*this, "{", "}");

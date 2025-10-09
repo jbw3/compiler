@@ -538,29 +538,6 @@ void BuiltInIdentifierExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-CastExpression::CastExpression(Expression* typeExpression, Expression* subExpression,
-                               const Token* castToken,
-                               const Token* openParToken,
-                               const Token* closeParToken) :
-    typeExpression(typeExpression),
-    subExpression(subExpression),
-    castToken(castToken),
-    openParToken(openParToken),
-    closeParToken(closeParToken)
-{
-}
-
-CastExpression::~CastExpression()
-{
-    delete typeExpression;
-    delete subExpression;
-}
-
-void CastExpression::Accept(SyntaxTreeVisitor* visitor)
-{
-    visitor->Visit(this);
-}
-
 ImplicitCastExpression::ImplicitCastExpression(Expression* subExpression) :
     subExpression(subExpression)
 {

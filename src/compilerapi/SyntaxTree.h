@@ -294,25 +294,6 @@ public:
     const Token* token;
 };
 
-class CastExpression : public Expression
-{
-public:
-    CastExpression(Expression* typeExpression, Expression* subExpression,
-                   const Token* castToken,
-                   const Token* openParToken,
-                   const Token* closeParToken);
-
-    virtual ~CastExpression();
-
-    void Accept(SyntaxTreeVisitor* visitor) override;
-
-    Expression* typeExpression;
-    Expression* subExpression;
-    const Token* castToken;
-    const Token* openParToken;
-    const Token* closeParToken;
-};
-
 class ImplicitCastExpression : public Expression
 {
 public:

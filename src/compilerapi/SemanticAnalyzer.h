@@ -63,8 +63,6 @@ public:
 
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;
 
-    void Visit(SyntaxTree::CastExpression* castExpression) override;
-
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 
     void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) override;
@@ -139,8 +137,6 @@ public:
     void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) override;
 
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;
-
-    void Visit(SyntaxTree::CastExpression* castExpression) override;
 
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 

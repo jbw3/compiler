@@ -400,15 +400,6 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
     *os << "}";
 }
 
-void SourceGenerator::Visit(CastExpression* castExpression)
-{
-    *os << "cast(";
-    castExpression->typeExpression->Accept(this);
-    *os << ", ";
-    castExpression->subExpression->Accept(this);
-    *os << ')';
-}
-
 void SourceGenerator::Visit(ImplicitCastExpression* castExpression)
 {
     castExpression->subExpression->Accept(this);

@@ -204,7 +204,6 @@ const LexicalAnalyzer::TokenValue KEYWORD_VALUES2[] =
 {
     LexicalAnalyzer::TokenValue{ROString("continue"), Token::eContinue},
     LexicalAnalyzer::TokenValue{ROString("const"), Token::eConst},
-    LexicalAnalyzer::TokenValue{ROString("cast"), Token::eCast},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES4[] =

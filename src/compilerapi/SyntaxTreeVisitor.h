@@ -11,7 +11,6 @@ class BlockExpression;
 class BranchExpression;
 class BuiltInFunctionCallExpression;
 class BuiltInIdentifierExpression;
-class CastExpression;
 class ConstantDeclaration;
 class ExternFunctionDeclaration;
 class FloatLiteralExpression;
@@ -84,8 +83,6 @@ public:
     virtual void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) = 0;
 
     virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
-
-    virtual void Visit(SyntaxTree::CastExpression* castExpression) = 0;
 
     virtual void Visit(SyntaxTree::ImplicitCastExpression* castExpression) = 0;
 
