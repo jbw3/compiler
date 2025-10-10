@@ -288,7 +288,7 @@ NumericLiteralType::NumericLiteralType(
     ROString uniqueName,
     ROString name
 ) :
-    TypeInfo(0, F_INT, sign, uniqueName, name),
+    TypeInfo(0, F_INT | F_LITERAL, sign, uniqueName, name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {

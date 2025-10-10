@@ -319,6 +319,25 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
             "var x = @notValid;\n",
             "error: '@notValid' is not a valid built-in identifier",
         },
+
+        // invalid bit-cast expression type
+        {
+            "var a = @bitCast(u8, true);",
+            "error: Cannot bit-cast expression of type 'bool' to type 'u8'",
+        },
+
+        // invalid bit-cast cast type
+        {
+            "var x u8 = 1;\n"
+            "var a = @bitCast(bool, x);\n",
+            "error: Cannot bit-cast expression of type 'u8' to type 'bool'",
+        },
+
+        // can't bit-cast int literal to int type that's too small
+        {
+            "var a = @bitCast(u8, 17_000);",
+            "error: Cannot bit-cast expression of type '{integer}' to type 'u8' because sizes are not equal",
+        },
     };
 
     bool ok = true;

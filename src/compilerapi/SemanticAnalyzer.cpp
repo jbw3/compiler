@@ -2977,7 +2977,11 @@ void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallE
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     ROString name = nameToken->value;
 
-    if (name == "@cast")
+    if (name == "@bitCast")
+    {
+        BuiltInBitCast(builtInFunctionCallExpression);
+    }
+    else if (name == "@cast")
     {
         BuiltInCast(builtInFunctionCallExpression);
     }
@@ -2985,6 +2989,174 @@ void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallE
     {
         logger.LogError(*nameToken, "'{}' is not a valid built-in function", name);
         isError = true;
+    }
+}
+
+void SemanticAnalyzer::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+    if (args.size() != 2)
+    {
+        logger.LogError(*nameToken, "{} expected 2 arguments but got {}", name, args.size());
+        isError = true;
+        return;
+    }
+
+    Expression* typeExpression = args[0];
+    const TypeInfo* castType = TypeExpressionToType(typeExpression);
+    if (castType == nullptr)
+    {
+        isError = true;
+        return;
+    }
+
+    Expression* subExpression = args[1];
+    subExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    const TypeInfo* exprType = subExpression->GetType();
+
+    // check if the cast is valid
+    bool canCast = false;
+    if (exprType->IsInt())
+    {
+        canCast = castType->IsInt() || castType->IsFloat();
+    }
+    else if (exprType->IsFloat())
+    {
+        canCast = castType->IsInt() || castType->IsFloat();
+    }
+
+    if (!canCast)
+    {
+        StartEndTokenFinder finder;
+        subExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Cannot bit-cast expression of type '{}' to type '{}'",
+            exprType->GetShortName(), castType->GetShortName()
+        );
+        isError = true;
+        return;
+    }
+
+    // check if we need an implicit cast
+    if (exprType->IsLiteral() && exprType->GetNumBits() < castType->GetNumBits())
+    {
+        if (exprType->IsInt())
+        {
+            const NumericLiteralType* newExprType = nullptr;
+            if (exprType->GetSign() == TypeInfo::eSigned)
+            {
+                newExprType = compilerContext.typeRegistry.CreateSignedNumericLiteralType(castType->GetNumBits());
+            }
+            else
+            {
+                newExprType = compilerContext.typeRegistry.CreateUnsignedNumericLiteralType(castType->GetNumBits());
+            }
+
+            builtInFunctionCallExpression->arguments[1] = ImplicitCast(builtInFunctionCallExpression->arguments[1], newExprType);
+            subExpression = builtInFunctionCallExpression->arguments[1];
+            exprType = subExpression->GetType();
+        }
+        else if (exprType->IsFloat())
+        {
+            if (exprType->GetNumBits() == 32 && castType->GetNumBits() == 64)
+            {
+                builtInFunctionCallExpression->arguments[1] = ImplicitCast(builtInFunctionCallExpression->arguments[1], TypeInfo::Float64LiteralType);
+                subExpression = builtInFunctionCallExpression->arguments[1];
+                exprType = subExpression->GetType();
+            }
+        }
+    }
+
+    // make sure types are of the same size
+    if (exprType->GetNumBits() != castType->GetNumBits())
+    {
+        StartEndTokenFinder finder;
+        subExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Cannot bit-cast expression of type '{}' to type '{}' because sizes are not equal",
+            exprType->GetShortName(), castType->GetShortName()
+        );
+        isError = true;
+        return;
+    }
+
+    builtInFunctionCallExpression->SetType(castType);
+
+    if (subExpression->GetIsConstant())
+    {
+        unsigned subExprConstIdx = subExpression->GetConstantValueIndex();
+
+        if (exprType->IsInt())
+        {
+            int64_t subValue = compilerContext.GetIntConstantValue(subExprConstIdx);
+
+            if (castType->IsInt())
+            {
+                unsigned idx = compilerContext.AddIntConstantValue(subValue);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsFloat())
+            {
+                unsigned castSize = castType->GetNumBits();
+                double value = 0.0;
+                if (castSize == 32)
+                {
+                    int32_t subValue32 = static_cast<int32_t>(subValue);
+                    float* floatValuePtr = reinterpret_cast<float*>(&subValue32);
+                    float floatValue = *floatValuePtr;
+                    value = static_cast<double>(floatValue);
+                }
+                else
+                {
+                    double* doubleValuePtr = reinterpret_cast<double*>(&subValue);
+                    value = *doubleValuePtr;
+                }
+
+                unsigned idx = compilerContext.AddFloatConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+        }
+        else if (exprType->IsFloat())
+        {
+            double subValue = compilerContext.GetFloatConstantValue(subExprConstIdx);
+
+            if (castType->IsInt())
+            {
+                unsigned castSize = castType->GetNumBits();
+                int64_t value = 0;
+                if (castSize == 32)
+                {
+                    float floatValue = static_cast<float>(subValue);
+                    uint32_t* intValuePtr = reinterpret_cast<uint32_t*>(&floatValue);
+                    uint64_t intValue = static_cast<uint64_t>(*intValuePtr);
+                    value = static_cast<int64_t>(intValue);
+                }
+                else if (castSize == 64)
+                {
+                    int64_t* intValuePtr = reinterpret_cast<int64_t*>(&subValue);
+                    value = *intValuePtr;
+                }
+
+                unsigned idx = compilerContext.AddIntConstantValue(value);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+            else if (castType->IsFloat())
+            {
+                unsigned idx = compilerContext.AddFloatConstantValue(subValue);
+                builtInFunctionCallExpression->SetConstantValueIndex(idx);
+            }
+        }
     }
 }
 

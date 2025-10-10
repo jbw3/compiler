@@ -1199,4 +1199,9 @@ fun builtIns()
     const TwoPi f64 = 2.0 * @pi;
     var x f32 = @pi;
     var y f64 = @e + x + TwoPi;
+
+    var n i32 = 0x0123_4567;
+    var a = @bitCast(u64, @pi);
+    var b = @bitCast(f32, n);
+    var c = @bitCast(u16, 1);
 }

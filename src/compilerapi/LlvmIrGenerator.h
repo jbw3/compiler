@@ -215,6 +215,8 @@ private:
 
     void CreateDebugVariable(const Token* token, const TypeInfo* type, llvm::AllocaInst* alloca);
 
+    void BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
+
     void BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
 };
 

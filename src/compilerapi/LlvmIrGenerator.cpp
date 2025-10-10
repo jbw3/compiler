@@ -1847,7 +1847,11 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
 {
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     ROString name = nameToken->value;
-    if (name == "@cast")
+    if (name == "@bitCast")
+    {
+        BuiltInBitCast(builtInFunctionCallExpression);
+    }
+    else if (name == "@cast")
     {
         BuiltInCast(builtInFunctionCallExpression);
     }
@@ -1855,6 +1859,57 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
     {
         assert(false && "Unknown built-in function");
         resultValue = nullptr;
+    }
+}
+
+void LlvmIrGenerator::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+
+    Expression* subExpression = args[1];
+    subExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    SetDebugLocation(nameToken);
+
+    const TypeInfo* exprType = subExpression->GetType();
+    const TypeInfo* castType = builtInFunctionCallExpression->GetType();
+
+    if (exprType->IsInt())
+    {
+        if (castType->IsInt())
+        {
+            // sizes should be equal; nothing to do
+        }
+        else if (castType->IsFloat())
+        {
+            Type* dstType = CreateLlvmType(castType);
+            resultValue = builder.CreateBitCast(resultValue, dstType, "cast");
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
+    }
+    else if (exprType->IsFloat())
+    {
+        if (castType->IsFloat())
+        {
+            // sizes should be equal; nothing to do
+        }
+        else if (castType->IsInt())
+        {
+            Type* dstType = CreateLlvmType(castType);
+            resultValue = builder.CreateBitCast(resultValue, dstType, "cast");
+        }
+        else
+        {
+            assert(false && "Invalid cast");
+        }
     }
 }
 
