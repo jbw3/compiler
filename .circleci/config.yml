@@ -9,7 +9,8 @@ jobs:
     resource_class: medium
 
     steps:
-      - checkout
+      - checkout:
+          method: blobless
       - run: |
           mkdir release
           cd release
