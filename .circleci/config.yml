@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: jbw3/compiler:0.7.0
 
-    resource_class: medium
+    resource_class: large
 
     steps:
       - checkout:
@@ -15,7 +15,7 @@ jobs:
           mkdir release
           cd release
           cmake ../src -DCMAKE_CXX_COMPILER=clang++-20 -DLLVM_DIR=/usr/lib/llvm-20/cmake -DCMAKE_BUILD_TYPE=Release
-          make -j2
+          make -j4
           ctest --output-on-failure
       - store_test_results:
           path: test_results.xml
