@@ -218,6 +218,10 @@ private:
     void BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
 
     void BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
+
+    void BuiltInIntToPtr(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
+
+    void BuiltInPtrToInt(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
 };
 
 #endif // LLVM_IR_GENERATOR_H_

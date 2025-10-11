@@ -2989,6 +2989,14 @@ void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallE
     {
         BuiltInCast(builtInFunctionCallExpression);
     }
+    else if (name == "@intToPtr")
+    {
+        BuiltInIntToPtr(builtInFunctionCallExpression);
+    }
+    else if (name == "@ptrToInt")
+    {
+        BuiltInPtrToInt(builtInFunctionCallExpression);
+    }
     else
     {
         logger.LogError(*nameToken, "'{}' is not a valid built-in function", name);
@@ -3372,6 +3380,104 @@ void SemanticAnalyzer::BuiltInCast(BuiltInFunctionCallExpression* builtInFunctio
             }
         }
     }
+}
+
+void SemanticAnalyzer::BuiltInIntToPtr(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+    if (args.size() != 2)
+    {
+        logger.LogError(*nameToken, "{} expected 2 arguments but got {}", name, args.size());
+        isError = true;
+        return;
+    }
+
+    Expression* typeExpression = args[0];
+    const TypeInfo* ptrType = TypeExpressionToType(typeExpression);
+    if (ptrType == nullptr)
+    {
+        isError = true;
+        return;
+    }
+
+    if (!ptrType->IsPointer())
+    {
+        StartEndTokenFinder finder;
+        typeExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Expected a pointer type but got '{}'",
+            ptrType->GetShortName()
+        );
+        isError = true;
+        return;
+    }
+
+    Expression* subExpression = args[1];
+    subExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    const TypeInfo* exprType = subExpression->GetType();
+
+    if (!exprType->IsInt() || exprType->GetSign() == TypeInfo::eSigned)
+    {
+        StartEndTokenFinder finder;
+        subExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Cannot cast expression of type '{}' to a pointer. Expected an unsigned integer type",
+            exprType->GetShortName()
+        );
+        isError = true;
+        return;
+    }
+
+    builtInFunctionCallExpression->SetType(ptrType);
+}
+
+void SemanticAnalyzer::BuiltInPtrToInt(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+    if (args.size() != 1)
+    {
+        logger.LogError(*nameToken, "{} expected 1 argument but got {}", name, args.size());
+        isError = true;
+        return;
+    }
+
+    Expression* subExpression = args[0];
+    subExpression->Accept(this);
+    if (isError)
+    {
+        return;
+    }
+    const TypeInfo* exprType = subExpression->GetType();
+
+    if (!exprType->IsPointer())
+    {
+        StartEndTokenFinder finder;
+        subExpression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start, *finder.end,
+            "Cannot cast expression of type '{}' to an integer. Expected a pointer type",
+            exprType->GetShortName()
+        );
+        isError = true;
+        return;
+    }
+
+    builtInFunctionCallExpression->SetType(compilerContext.typeRegistry.GetUIntSizeType());
 }
 
 void SemanticAnalyzer::Visit(MemberExpression* memberExpression)

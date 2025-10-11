@@ -3659,6 +3659,8 @@ entry:
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @builtIns() #0 {
 entry:
+  %ptr = alloca ptr, align 8
+  %addr = alloca i64, align 8
   %c = alloca i16, align 2
   %b = alloca float, align 4
   %a = alloca i64, align 8
@@ -3677,6 +3679,11 @@ entry:
   %cast = bitcast i32 %n3 to float
   store float %cast, ptr %b, align 4
   store i16 1, ptr %c, align 2
+  %cast4 = ptrtoint ptr %n to i64
+  store i64 %cast4, ptr %addr, align 8
+  %addr5 = load i64, ptr %addr, align 8
+  %cast6 = inttoptr i64 %addr5 to ptr
+  store ptr %cast6, ptr %ptr, align 8
   ret %UnitType zeroinitializer
 }
 

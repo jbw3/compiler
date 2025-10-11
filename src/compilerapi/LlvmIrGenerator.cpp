@@ -1855,6 +1855,14 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
     {
         BuiltInCast(builtInFunctionCallExpression);
     }
+    else if (name == "@intToPtr")
+    {
+        BuiltInIntToPtr(builtInFunctionCallExpression);
+    }
+    else if (name == "@ptrToInt")
+    {
+        BuiltInPtrToInt(builtInFunctionCallExpression);
+    }
     else
     {
         assert(false && "Unknown built-in function");
@@ -2056,6 +2064,44 @@ void LlvmIrGenerator::BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* bui
     {
         assert(false && "Invalid cast");
     }
+}
+
+void LlvmIrGenerator::BuiltInIntToPtr(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+
+    Expression* subExpression = args[1];
+    subExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    SetDebugLocation(nameToken);
+
+    const TypeInfo* ptrType = builtInFunctionCallExpression->GetType();
+    Type* dstType = CreateLlvmType(ptrType);
+    resultValue = builder.CreateIntToPtr(resultValue, dstType, "cast");
+}
+
+void LlvmIrGenerator::BuiltInPtrToInt(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+
+    Expression* subExpression = args[0];
+    subExpression->Accept(this);
+    if (resultValue == nullptr)
+    {
+        return;
+    }
+
+    SetDebugLocation(nameToken);
+
+    const TypeInfo* intType = builtInFunctionCallExpression->GetType();
+    Type* dstType = CreateLlvmType(intType);
+    resultValue = builder.CreatePtrToInt(resultValue, dstType, "cast");
 }
 
 void LlvmIrGenerator::Visit(MemberExpression* memberExpression)
