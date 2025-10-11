@@ -10,6 +10,7 @@ $target_triple
 %"[]i32" = type { i64, ptr }
 %"[]i8" = type { i64, ptr }
 %"[]i16" = type { i64, ptr }
+%"RangeClosed'i8'" = type { i8, i8 }
 %Test2 = type { %Test1, i32 }
 %Test1 = type { i32, i1, %str }
 %EmptyType = type {}
@@ -1917,6 +1918,37 @@ forIter19:                                        ; preds = %forBody14
 forExit22:                                        ; preds = %forCond11
   %num23 = load i64, ptr %num, align 8
   ret i64 %num23
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @forLoopImplicitCast() #0 {
+entry:
+  %i = alloca i32, align 4
+  %x = alloca i8, align 1
+  store i8 10, ptr %x, align 1
+  %x1 = load i8, ptr %x, align 1
+  %rng = insertvalue %"RangeClosed'i8'" { i8 0, i8 undef }, i8 %x1, 1
+  %start = extractvalue %"RangeClosed'i8'" %rng, 0
+  %signext = sext i8 %start to i32
+  %end = extractvalue %"RangeClosed'i8'" %rng, 1
+  %signext2 = sext i8 %end to i32
+  br label %forCond
+
+forCond:                                          ; preds = %forIter, %entry
+  %iter = phi i32 [ %signext, %entry ], [ %inc, %forIter ]
+  %cmp = icmp sle i32 %iter, %signext2
+  br i1 %cmp, label %forBody, label %forExit
+
+forBody:                                          ; preds = %forCond
+  store i32 %iter, ptr %i, align 4
+  br label %forIter
+
+forIter:                                          ; preds = %forBody
+  %inc = add i32 %iter, 1
+  br label %forCond
+
+forExit:                                          ; preds = %forCond
+  ret %UnitType zeroinitializer
 }
 
 ; Function Attrs: noinline nounwind optnone

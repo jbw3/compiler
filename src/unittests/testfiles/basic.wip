@@ -605,6 +605,14 @@ fun forLoopIndex(array []i32) usize
     num
 }
 
+fun forLoopImplicitCast()
+{
+    var x i8 = 10;
+    for i i32 in 0..x
+    {
+    }
+}
+
 fun blockExpression(param i32) i32
 {
     var x i32 = {

@@ -1955,7 +1955,11 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
 
         assert(newType != nullptr && "Unable to cast for loop iter expression");
 
-        forLoop->iterExpression = ImplicitCast(iterExpression, newType);
+        const TypeInfo* iterExprType = iterExpression->GetType();
+        if (iterExprType->IsOrContainsNumericLiteral() || iterExprType->IsOrContainsLiteral())
+        {
+            FixNumericLiteralExpression(iterExpression, newType);
+        }
     }
 
     // process body expression
