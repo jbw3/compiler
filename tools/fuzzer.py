@@ -436,6 +436,7 @@ def write_bool_expression(io: IO[str], context: Context) -> None:
         lambda i, c: write_function_call_expression(i, c, TYPE_BOOL),
         lambda i, _: write_bool_literal(i),
         lambda i, c: write_struct_member_expression(i, c, TYPE_BOOL),
+        lambda i, c: write_cast_expression(i, c, TYPE_BOOL),
     ]
 
     weights: list[float] = [
@@ -444,6 +445,7 @@ def write_bool_expression(io: IO[str], context: Context) -> None:
         math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(TYPE_BOOL) is not None else 0,
         1,
         get_struct_member_weight(TYPE_BOOL, context),
+        math.pow(2.0, 2.0 - context.expression_level),
     ]
 
     write_random(io, context, funs, weights)
@@ -514,6 +516,7 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         lambda i, c: write_function_call_expression(i, c, new_type),
         lambda i, _: write_int_literal(i, new_type),
         lambda i, c: write_struct_member_expression(i, c, new_type),
+        lambda i, c: write_cast_expression(i, c, new_type),
     ]
 
     weights: list[float] = [
@@ -522,6 +525,7 @@ def write_int_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
         math.pow(2.0, 2.0 - context.expression_level) if context.get_function_with_return_type(new_type) is not None else 0,
         1,
         get_struct_member_weight(new_type, context),
+        math.pow(2.0, 2.0 - context.expression_level),
     ]
 
     write_random(io, context, funs, weights)
@@ -573,6 +577,7 @@ def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> Non
         lambda i, _: write_float_literal(i, type),
         lambda i, _: write_float_built_in(i, type),
         lambda i, c: write_struct_member_expression(i, c, type),
+        lambda i, c: write_cast_expression(i, c, type),
     ]
 
     weights: list[float] = [
@@ -582,6 +587,7 @@ def write_float_expression(io: IO[str], context: Context, type: TypeInfo) -> Non
         1,
         1,
         get_struct_member_weight(type, context),
+        math.pow(2.0, 2.0 - context.expression_level),
     ]
 
     write_random(io, context, funs, weights)
@@ -635,6 +641,28 @@ def write_str_expression(io: IO[str], context: Context) -> None:
     ]
 
     write_random(io, context, funs, weights)
+
+def write_cast_expression(io: IO[str], context: Context, cast_type: TypeInfo) -> None:
+    io.write('@cast(')
+    io.write(cast_type.name)
+    io.write(', ')
+
+    expr_type = random.choice([
+        TYPE_BOOL,
+        TYPE_I8,
+        TYPE_I16,
+        TYPE_I32,
+        TYPE_I64,
+        TYPE_U8,
+        TYPE_U16,
+        TYPE_U32,
+        TYPE_U64,
+        TYPE_F32,
+        TYPE_F64,
+    ])
+    write_expression(io, context, expr_type)
+
+    io.write(')')
 
 def write_struct_init_expression(io: IO[str], context: Context, type: TypeInfo) -> None:
     assert type.is_struct, f"Type '{type.name}' is not a struct"
