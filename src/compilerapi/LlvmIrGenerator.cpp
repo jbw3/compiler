@@ -1862,7 +1862,7 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
     }
 }
 
-void LlvmIrGenerator::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+void LlvmIrGenerator::BuiltInBitCast(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     const Expressions& args = builtInFunctionCallExpression->arguments;
@@ -1962,7 +1962,7 @@ void LlvmIrGenerator::BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* bui
                 Type* dstType = CreateLlvmType(castType);
                 resultValue = builder.CreateTrunc(resultValue, dstType, "cast");
             }
-            else if (castSize > exprSize)
+            else
             {
                 Type* dstType = CreateLlvmType(castType);
 
@@ -1975,10 +1975,6 @@ void LlvmIrGenerator::BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* bui
                 {
                     resultValue = builder.CreateZExt(resultValue, dstType, "cast");
                 }
-            }
-            else // sizes are equal
-            {
-                // nothing to do if the sizes are equal
             }
         }
         else if (castType->IsFloat())
