@@ -375,6 +375,7 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
             dynamic_cast<BranchExpression*>(statement) == nullptr
          && dynamic_cast<WhileLoop*>(statement) == nullptr
          && dynamic_cast<ForLoop*>(statement) == nullptr
+         && dynamic_cast<UncheckedBlock*>(statement) == nullptr
         )
         {
             *os << ";";

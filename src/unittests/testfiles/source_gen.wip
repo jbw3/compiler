@@ -166,6 +166,10 @@ fun casts(x bool, y i32)
 {
     var b bool = @cast(bool, y + 2);
     var i = @cast(i32, x);
+    unchecked
+    {
+        var ptr = @intToPtr(&i32, 0xabcd);
+    }
 }
 
 fun structs(num u32) usize
