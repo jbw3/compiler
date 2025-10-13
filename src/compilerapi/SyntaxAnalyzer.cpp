@@ -1815,6 +1815,33 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                 statement = nullptr;
             }
         }
+        else if (tokenType == Token::eUnchecked)
+        {
+            const Token* token = &*iter;
+
+            if (!IncrementIterator(iter, endIter, "Expected '{'"))
+            {
+                return nullptr;
+            }
+
+            if (iter->type != Token::eOpenBrace)
+            {
+                logger.LogError(*iter, "Expected '{'");
+                return nullptr;
+            }
+
+            // read block
+            BlockExpression* block = ProcessBlockExpression(iter, endIter);
+            if (block == nullptr)
+            {
+                return nullptr;
+            }
+
+            // increment iter past end brace
+            ++iter;
+
+            statement = new UncheckedBlock(block, token);
+        }
         else
         {
             // process the sub-expression

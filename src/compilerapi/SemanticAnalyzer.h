@@ -63,6 +63,8 @@ public:
 
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;
 
+    void Visit(SyntaxTree::UncheckedBlock* uncheckedBlock) override;
+
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 
     void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) override;
@@ -138,6 +140,8 @@ public:
 
     void Visit(SyntaxTree::BlockExpression* blockExpression) override;
 
+    void Visit(SyntaxTree::UncheckedBlock* uncheckedBlock) override;
+
     void Visit(SyntaxTree::ImplicitCastExpression* castExpression) override;
 
     void Visit(SyntaxTree::FunctionCallExpression* functionCallExpression) override;
@@ -155,6 +159,7 @@ public:
 private:
     ErrorLogger& logger;
     unsigned loopLevel;
+    unsigned uncheckedLevel;
     bool isError;
     bool isConstDecl;
     std::unordered_map<ROString, TypeInfo*> partialStructTypes;

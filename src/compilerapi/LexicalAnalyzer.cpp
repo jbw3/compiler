@@ -255,6 +255,7 @@ const LexicalAnalyzer::TokenValue KEYWORD_VALUES20[] =
     LexicalAnalyzer::TokenValue{ROString("u32"), Token::eU32},
     LexicalAnalyzer::TokenValue{ROString("u16"), Token::eU16},
     LexicalAnalyzer::TokenValue{ROString("u8"), Token::eU8},
+    LexicalAnalyzer::TokenValue{ROString("unchecked"), Token::eUnchecked},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES21[] =
@@ -272,7 +273,7 @@ const LexicalAnalyzer::Bucket LexicalAnalyzer::KEYWORDS_HASH_TABLE[KEYWORDS_HASH
 {
     LexicalAnalyzer::Bucket{nullptr, 0},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES1, 2},
-    LexicalAnalyzer::Bucket{KEYWORD_VALUES2, 3},
+    LexicalAnalyzer::Bucket{KEYWORD_VALUES2, 2},
     LexicalAnalyzer::Bucket{nullptr, 0},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES4, 3},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES5, 3},
@@ -290,7 +291,7 @@ const LexicalAnalyzer::Bucket LexicalAnalyzer::KEYWORDS_HASH_TABLE[KEYWORDS_HASH
     LexicalAnalyzer::Bucket{KEYWORD_VALUES17, 1},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES18, 2},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES19, 2},
-    LexicalAnalyzer::Bucket{KEYWORD_VALUES20, 5},
+    LexicalAnalyzer::Bucket{KEYWORD_VALUES20, 6},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES21, 1},
     LexicalAnalyzer::Bucket{KEYWORD_VALUES22, 1},
     LexicalAnalyzer::Bucket{nullptr, 0},

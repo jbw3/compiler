@@ -162,6 +162,11 @@ void StartEndTokenFinder::Visit(BlockExpression* blockExpression)
     UpdateEnd(blockExpression->endToken);
 }
 
+void StartEndTokenFinder::Visit(UncheckedBlock* /*uncheckedBlock*/)
+{
+    assert(false && "StartEndTokenFinder member function is not implemented");
+}
+
 void StartEndTokenFinder::Visit(ImplicitCastExpression* castExpression)
 {
     castExpression->Accept(this);
@@ -220,6 +225,7 @@ void StartEndTokenFinder::UpdateEnd(const Token* newEnd)
 SemanticAnalyzer::SemanticAnalyzer(CompilerContext& compilerContext) :
     logger(compilerContext.logger),
     loopLevel(0),
+    uncheckedLevel(0),
     isError(false),
     isConstDecl(false),
     compilerContext(compilerContext),
@@ -2904,6 +2910,13 @@ void SemanticAnalyzer::Visit(BlockExpression* blockExpression)
             }
         }
     }
+}
+
+void SemanticAnalyzer::Visit(UncheckedBlock* uncheckedBlock)
+{
+    ++uncheckedLevel;
+    uncheckedBlock->block->Accept(this);
+    --uncheckedLevel;
 }
 
 void SemanticAnalyzer::Visit(ImplicitCastExpression* castExpression)

@@ -345,6 +345,14 @@ void SyntaxTreePrinter::Visit(BlockExpression* blockExpression)
     PrintProperty("statements", blockExpression->statements);
 }
 
+void SyntaxTreePrinter::Visit(UncheckedBlock* uncheckedBlock)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    PrintProperty(NODE_TYPE_PROPERTY, "UncheckedBlock");
+    PrintProperty("block", uncheckedBlock->block);
+}
+
 void SyntaxTreePrinter::Visit(ImplicitCastExpression* castExpression)
 {
     BracePrinter printer(*this, "{", "}");

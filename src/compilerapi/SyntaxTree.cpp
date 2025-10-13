@@ -235,6 +235,22 @@ void BlockExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
+UncheckedBlock::UncheckedBlock(BlockExpression* block, const Token* uncheckedToken) :
+    uncheckedToken(uncheckedToken),
+    block(block)
+{
+}
+
+UncheckedBlock::~UncheckedBlock()
+{
+    delete block;
+}
+
+void UncheckedBlock::Accept(SyntaxTreeVisitor* visitor)
+{
+    visitor->Visit(this);
+}
+
 const char* BinaryExpression::GetOperatorString(EOperator op)
 {
     switch (op)

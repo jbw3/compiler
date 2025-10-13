@@ -30,6 +30,7 @@ class StringLiteralExpression;
 class StructDefinitionExpression;
 class StructInitializationExpression;
 class UnaryExpression;
+class UncheckedBlock;
 class UnitTypeLiteralExpression;
 class VariableDeclaration;
 class WhileLoop;
@@ -83,6 +84,8 @@ public:
     virtual void Visit(SyntaxTree::ArrayMultiValueExpression* arrayExpression) = 0;
 
     virtual void Visit(SyntaxTree::BlockExpression* blockExpression) = 0;
+
+    virtual void Visit(SyntaxTree::UncheckedBlock* uncheckedBlock) = 0;
 
     virtual void Visit(SyntaxTree::ImplicitCastExpression* castExpression) = 0;
 

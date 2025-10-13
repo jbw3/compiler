@@ -182,6 +182,19 @@ public:
     SyntaxTreeNodes statements;
 };
 
+class UncheckedBlock : public SyntaxTreeNode
+{
+public:
+    UncheckedBlock(BlockExpression* block, const Token* uncheckedToken);
+
+    virtual ~UncheckedBlock();
+
+    void Accept(SyntaxTreeVisitor* visitor) override;
+
+    const Token* uncheckedToken;
+    BlockExpression* block;
+};
+
 class BinaryExpression : public Expression
 {
 public:

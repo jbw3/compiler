@@ -1771,6 +1771,11 @@ void LlvmIrGenerator::Visit(BlockExpression* blockExpression)
     }
 }
 
+void LlvmIrGenerator::Visit(UncheckedBlock* uncheckedBlock)
+{
+    uncheckedBlock->block->Accept(this);
+}
+
 void LlvmIrGenerator::Visit(ImplicitCastExpression* castExpression)
 {
     Expression* subExpression = castExpression->subExpression;
@@ -1870,7 +1875,7 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
     }
 }
 
-void LlvmIrGenerator::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+void LlvmIrGenerator::BuiltInBitCast(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     const Expressions& args = builtInFunctionCallExpression->arguments;
@@ -1921,7 +1926,7 @@ void LlvmIrGenerator::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* 
     }
 }
 
-void LlvmIrGenerator::BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+void LlvmIrGenerator::BuiltInCast(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     const Expressions& args = builtInFunctionCallExpression->arguments;

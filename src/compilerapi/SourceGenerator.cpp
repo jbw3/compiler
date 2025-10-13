@@ -400,6 +400,12 @@ void SourceGenerator::Visit(BlockExpression* blockExpression)
     *os << "}";
 }
 
+void SourceGenerator::Visit(UncheckedBlock* uncheckedBlock)
+{
+    *os << "unchecked\n";
+    uncheckedBlock->block->Accept(this);
+}
+
 void SourceGenerator::Visit(ImplicitCastExpression* castExpression)
 {
     castExpression->subExpression->Accept(this);

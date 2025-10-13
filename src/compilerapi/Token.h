@@ -68,9 +68,10 @@ public:
         eU16          = eKeywordType | eTypeName | 21,
         eU32          = eKeywordType | eTypeName | 22,
         eU64          = eKeywordType | eTypeName | 23,
-        eUSize        = eKeywordType | eTypeName | 24,
-        eVar          = eKeywordType | 25,
-        eWhile        = eKeywordType | 26,
+        eUnchecked    = eKeywordType | 24,
+        eUSize        = eKeywordType | eTypeName | 25,
+        eVar          = eKeywordType | 26,
+        eWhile        = eKeywordType | 27,
 
         // bool literal
         eFalseLit     = eBoolLiteralType | 0,
