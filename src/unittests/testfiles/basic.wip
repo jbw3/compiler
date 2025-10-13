@@ -1214,5 +1214,8 @@ fun builtIns()
     var c = @bitCast(u16, 1);
 
     var addr = @ptrToInt(&n);
-    var ptr = @intToPtr(&i32, addr);
+    unchecked
+    {
+        var ptr = @intToPtr(&i32, addr);
+    }
 }

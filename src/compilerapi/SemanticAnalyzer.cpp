@@ -3430,6 +3430,14 @@ void SemanticAnalyzer::BuiltInIntToPtr(BuiltInFunctionCallExpression* builtInFun
         return;
     }
 
+    // this can only be called in an 'unchecked' block
+    if (uncheckedLevel == 0)
+    {
+        logger.LogError(*nameToken, "{} may only be called in an 'unchecked' block", name);
+        isError = true;
+        return;
+    }
+
     Expression* subExpression = args[1];
     subExpression->Accept(this);
     if (isError)
