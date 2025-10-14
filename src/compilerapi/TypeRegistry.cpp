@@ -102,6 +102,15 @@ const TypeInfo* TypeRegistry::GetStringType() const
 
 const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHalfOpen)
 {
+    TypeId memberTypeId = memberType->GetId();
+    tuple<TypeId, bool> key(memberTypeId, isHalfOpen);
+
+    auto iter = rangeTypes.find(key);
+    if (iter != rangeTypes.end())
+    {
+        return iter->second;
+    }
+
     ROString uniqueName = compilerContext.stringBuilder
         .Append("Range")
         .Append(isHalfOpen ? "HalfOpen" : "Closed")
@@ -109,29 +118,25 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
         .Append(memberType->GetUniqueName())
         .Append("'")
         .CreateString();
-    const TypeInfo* rangeType = GetType(uniqueName);
-    if (rangeType == nullptr)
-    {
-        unsigned size = memberType->GetNumBits() * 2;
-        uint16_t flags = TypeInfo::F_RANGE | (isHalfOpen ? TypeInfo::F_HALF_OPEN : TypeInfo::F_NONE);
 
-        ROString name = compilerContext.stringBuilder
-            .Append("Range")
-            .Append(isHalfOpen ? "HalfOpen" : "Closed")
-            .Append("'")
-            .Append(memberType->GetShortName())
-            .Append("'")
-            .CreateString();
+    unsigned size = memberType->GetNumBits() * 2;
+    uint16_t flags = TypeInfo::F_RANGE | (isHalfOpen ? TypeInfo::F_HALF_OPEN : TypeInfo::F_NONE);
 
-        TypeInfo* newRangeType = new TypeInfo(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
-        newRangeType->AddMember("Start", memberType, false, Token::None);
-        newRangeType->AddMember("End", memberType, false, Token::None);
-        RegisterType(newRangeType);
+    ROString name = compilerContext.stringBuilder
+        .Append("Range")
+        .Append(isHalfOpen ? "HalfOpen" : "Closed")
+        .Append("'")
+        .Append(memberType->GetShortName())
+        .Append("'")
+        .CreateString();
 
-        rangeType = newRangeType;
-    }
+    TypeInfo* newRangeType = new TypeInfo(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
+    newRangeType->AddMember("Start", memberType, false, Token::None);
+    newRangeType->AddMember("End", memberType, false, Token::None);
+    RegisterType(newRangeType);
+    rangeTypes.insert({key, newRangeType});
 
-    return rangeType;
+    return newRangeType;
 }
 
 static ROString getFunctionUniqueName(

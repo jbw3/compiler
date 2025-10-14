@@ -365,6 +365,19 @@ namespace std
             return h;
         }
     };
+
+    template<>
+    struct hash<tuple<TypeId, bool>>
+    {
+        std::size_t operator()(tuple<TypeId, bool> t) const
+        {
+            std::size_t h = static_cast<std::size_t>(get<0>(t));
+            h <<= 1;
+            h |= static_cast<std::size_t>(get<1>(t));
+
+            return h;
+        }
+    };
 }
 
 #endif // TYPE_INFO_H_
