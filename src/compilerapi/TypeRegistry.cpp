@@ -71,53 +71,19 @@ TypeRegistry::TypeRegistry(CompilerContext& compilerContext) :
 {
     pointerSize = 8 * compilerContext.config.targetMachine->getAllocaPointerSize();
 
-    types.insert({BOOL_KEYWORD, TypeInfo::BoolType});
-    types.insert({INT8_KEYWORD, TypeInfo::Int8Type});
-    types.insert({INT16_KEYWORD, TypeInfo::Int16Type});
-    types.insert({INT32_KEYWORD, TypeInfo::Int32Type});
-    types.insert({INT64_KEYWORD, TypeInfo::Int64Type});
-    types.insert({UINT8_KEYWORD, TypeInfo::UInt8Type});
-    types.insert({UINT16_KEYWORD, TypeInfo::UInt16Type});
-    types.insert({UINT32_KEYWORD, TypeInfo::UInt32Type});
-    types.insert({UINT64_KEYWORD, TypeInfo::UInt64Type});
-    types.insert({FLOAT32_KEYWORD, TypeInfo::Float32Type});
-    types.insert({FLOAT64_KEYWORD, TypeInfo::Float64Type});
-    types.insert({TYPE_KEYWORD, TypeInfo::TypeType});
-
     intSizeType = new TypeInfo(pointerSize, TypeInfo::F_INT, TypeInfo::eSigned, INT_SIZE_KEYWORD, INT_SIZE_KEYWORD);
-    RegisterType(intSizeType);
-
     uintSizeType = new TypeInfo(pointerSize, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT_SIZE_KEYWORD, UINT_SIZE_KEYWORD);
-    RegisterType(uintSizeType);
 
     stringType = new TypeInfo(pointerSize * 2, TypeInfo::F_STR, TypeInfo::eNotApplicable, STR_KEYWORD, STR_KEYWORD);
     stringType->AddMember("Size", uintSizeType, false, Token::None);
     stringType->AddMember("Data", GetPointerToType(TypeInfo::UInt8Type), false, Token::None);
-    RegisterType(stringType);
 }
 
 TypeRegistry::~TypeRegistry()
 {
-    // remove types that are not dynamically allocated
-    types.erase(BOOL_KEYWORD);
-    types.erase(INT8_KEYWORD);
-    types.erase(INT16_KEYWORD);
-    types.erase(INT32_KEYWORD);
-    types.erase(INT64_KEYWORD);
-    types.erase(UINT8_KEYWORD);
-    types.erase(UINT16_KEYWORD);
-    types.erase(UINT32_KEYWORD);
-    types.erase(UINT64_KEYWORD);
-    types.erase(FLOAT32_KEYWORD);
-    types.erase(FLOAT64_KEYWORD);
-    types.erase(TYPE_KEYWORD);
-
-    // delete dynamically allocated types
-    for (auto pair : types)
-    {
-        delete pair.second;
-    }
-    types.clear();
+    delete intSizeType;
+    delete uintSizeType;
+    delete stringType;
 
     for (auto pair : numericLiteralTypes)
     {
@@ -179,7 +145,6 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
     TypeInfo* newRangeType = new TypeInfo(size, flags, TypeInfo::eNotApplicable, uniqueName, name, memberType);
     newRangeType->AddMember("Start", memberType, false, Token::None);
     newRangeType->AddMember("End", memberType, false, Token::None);
-    RegisterType(newRangeType);
     rangeTypes.insert({key, newRangeType});
 
     return newRangeType;
@@ -266,7 +231,6 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
     ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
     // add param and return types
     const TypeInfo* newFunType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
-    RegisterType(newFunType);
     functionTypes.insert({key, newFunType});
 
     return newFunType;
@@ -289,7 +253,6 @@ const TypeInfo* TypeRegistry::GetFunctionType(
     ROString uniqueName = getFunctionUniqueName(compilerContext.stringBuilder, parameterTypes, returnType);
     ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
     const TypeInfo* newFunType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
-    RegisterType(newFunType);
     functionTypes.insert({key, newFunType});
 
     return newFunType;
@@ -314,7 +277,6 @@ const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
         .Append(type->GetShortName())
         .CreateString();
     TypeInfo* newPtrType = new TypeInfo(pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, uniqueName, name, type);
-    RegisterType(newPtrType);
     pointerTypes.insert({typeId, newPtrType});
 
     return newPtrType;
@@ -342,7 +304,6 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
     TypeInfo* newArrayType = new TypeInfo(pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, uniqueName, name, type);
     newArrayType->AddMember("Size", GetUIntSizeType(), false, Token::None);
     newArrayType->AddMember("Data", GetPointerToType(type), false, Token::None);
-    RegisterType(newArrayType);
     arrayTypes.insert({typeId, newArrayType});
 
     return newArrayType;
@@ -351,24 +312,7 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const Token* newToken, const TypeInfo *typeInfo)
 {
     const TypeInfo* newTypeInfo = TypeInfo::CreateTypeAlias(newName, newToken, typeInfo);
-    RegisterType(newTypeInfo);
     return newTypeInfo;
-}
-
-bool TypeRegistry::RegisterType(const TypeInfo* typeInfo)
-{
-    auto pair = types.insert({ typeInfo->GetUniqueName(), typeInfo });
-    return pair.second;
-}
-
-const TypeInfo* TypeRegistry::GetType(ROString typeName)
-{
-    auto iter = types.find(typeName);
-    if (iter == types.cend())
-    {
-        return nullptr;
-    }
-    return iter->second;
 }
 
 const NumericLiteralType* TypeRegistry::CreateNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits)

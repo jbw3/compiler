@@ -79,10 +79,6 @@ public:
 
     const TypeInfo* GetTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo);
 
-    bool RegisterType(const TypeInfo* typeInfo);
-
-    const TypeInfo* GetType(ROString typeName);
-
     const NumericLiteralType* CreateNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits);
 
     const NumericLiteralType* CreateSignedNumericLiteralType(unsigned numBits);
@@ -96,7 +92,6 @@ private:
     TypeInfo* intSizeType;
     TypeInfo* uintSizeType;
     TypeInfo* stringType;
-    std::unordered_map<ROString, const TypeInfo*> types;
     std::unordered_map<TypeId, const TypeInfo*> pointerTypes; // maps type IDs to a pointer to that type
     std::unordered_map<TypeId, const TypeInfo*> arrayTypes; // maps type IDs to an array of that type
     std::unordered_map<std::tuple<TypeId, bool>, const TypeInfo*> rangeTypes; // maps (type ID, half-open/closed) to a range of that type
@@ -111,59 +106,6 @@ private:
     ROString GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits);
 
     const NumericLiteralType* CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, ROString name);
-
-public:
-    class TypeIterator
-    {
-    public:
-        typedef std::unordered_map<ROString, const TypeInfo*>::const_iterator InnerIter;
-
-        TypeIterator(InnerIter mapIter)
-        {
-            this->mapIter = mapIter;
-        }
-
-        bool operator ==(const TypeIterator& other) const
-        {
-            return mapIter == other.mapIter;
-        }
-
-        bool operator !=(const TypeIterator& other) const
-        {
-            return mapIter != other.mapIter;
-        }
-
-        TypeIterator& operator ++()
-        {
-            ++mapIter;
-            return *this;
-        }
-
-        TypeIterator operator ++(int)
-        {
-            TypeIterator copy = *this;
-            ++mapIter;
-            return copy;
-        }
-
-        const TypeInfo* operator *() const
-        {
-            return mapIter->second;
-        }
-
-    private:
-        InnerIter mapIter;
-    };
-
-    TypeIterator begin() const
-    {
-        return TypeIterator(types.begin());
-    }
-
-    TypeIterator end() const
-    {
-        return TypeIterator(types.end());
-    }
 };
 
 #endif // TYPE_REGISTRY_H_
