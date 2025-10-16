@@ -12,6 +12,42 @@ class FunctionDeclaration;
 }
 class CompilerContext;
 
+class FunctionTypeKey
+{
+public:
+    FunctionTypeKey(const SyntaxTree::FunctionDeclaration* functionDeclaration);
+
+    FunctionTypeKey(const std::vector<const TypeInfo*>& parameterTypes, const TypeInfo* returnType);
+
+    ~FunctionTypeKey() = default;
+
+    bool operator ==(const FunctionTypeKey& other) const;
+
+    std::vector<TypeId> paramTypeIds;
+    TypeId returnTypeId;
+};
+
+namespace std
+{
+    template<>
+    struct hash<FunctionTypeKey>
+    {
+        std::size_t operator()(const FunctionTypeKey& key) const
+        {
+            std::size_t h = 257;
+            h ^= static_cast<std::size_t>(key.returnTypeId);
+            h *= 31;
+            for (TypeId paramTypeId : key.paramTypeIds)
+            {
+                h ^= static_cast<std::size_t>(paramTypeId);
+                h *= 31;
+            }
+
+            return h;
+        }
+    };
+}
+
 class TypeRegistry
 {
 public:
@@ -64,6 +100,7 @@ private:
     std::unordered_map<TypeId, const TypeInfo*> pointerTypes; // maps type IDs to a pointer to that type
     std::unordered_map<TypeId, const TypeInfo*> arrayTypes; // maps type IDs to an array of that type
     std::unordered_map<std::tuple<TypeId, bool>, const TypeInfo*> rangeTypes; // maps (type ID, half-open/closed) to a range of that type
+    std::unordered_map<FunctionTypeKey, const TypeInfo*> functionTypes; // maps function return type/param types to a function type
     unsigned pointerSize;
     std::unordered_map
     <

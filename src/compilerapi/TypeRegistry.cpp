@@ -20,6 +20,52 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
+FunctionTypeKey::FunctionTypeKey(const FunctionDeclaration* functionDeclaration)
+{
+    paramTypeIds.reserve(functionDeclaration->parameters.size());
+    for (const Parameter* param : functionDeclaration->parameters)
+    {
+        paramTypeIds.push_back(param->type->GetId());
+    }
+
+    returnTypeId = functionDeclaration->returnType->GetId();
+}
+
+FunctionTypeKey::FunctionTypeKey(const vector<const TypeInfo*>& parameterTypes, const TypeInfo* returnType)
+{
+    paramTypeIds.reserve(parameterTypes.size());
+    for (const TypeInfo* paramType : parameterTypes)
+    {
+        paramTypeIds.push_back(paramType->GetId());
+    }
+
+    returnTypeId = returnType->GetId();
+}
+
+bool FunctionTypeKey::operator ==(const FunctionTypeKey& other) const
+{
+    if (returnTypeId != other.returnTypeId)
+    {
+        return false;
+    }
+
+    size_t size = paramTypeIds.size();
+    if (size != other.paramTypeIds.size())
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        if (paramTypeIds[i] != other.paramTypeIds[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 TypeRegistry::TypeRegistry(CompilerContext& compilerContext) :
     compilerContext(compilerContext)
 {
@@ -198,6 +244,14 @@ static ROString getFunctionName(
 
 const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functionDeclaration)
 {
+    FunctionTypeKey key(functionDeclaration);
+
+    auto iter = functionTypes.find(key);
+    if (iter != functionTypes.end())
+    {
+        return iter->second;
+    }
+
     const Parameters& parameters = functionDeclaration->parameters;
     vector<const TypeInfo*> parameterTypes;
     vector<ROString> parameterNames;
@@ -209,18 +263,13 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
     const TypeInfo* returnType = functionDeclaration->returnType;
 
     ROString uniqueName = getFunctionUniqueName(compilerContext.stringBuilder, parameterTypes, returnType);
+    ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
+    // add param and return types
+    const TypeInfo* newFunType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
+    RegisterType(newFunType);
+    functionTypes.insert({key, newFunType});
 
-    const TypeInfo* funType = GetType(uniqueName);
-    if (funType == nullptr)
-    {
-        ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
-
-        // add param and return types
-        funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
-        RegisterType(funType);
-    }
-
-    return funType;
+    return newFunType;
 }
 
 const TypeInfo* TypeRegistry::GetFunctionType(
@@ -229,17 +278,21 @@ const TypeInfo* TypeRegistry::GetFunctionType(
         const TypeInfo* returnType
 )
 {
-    ROString uniqueName = getFunctionUniqueName(compilerContext.stringBuilder, parameterTypes, returnType);
+    FunctionTypeKey key(parameterTypes, returnType);
 
-    const TypeInfo* funType = GetType(uniqueName);
-    if (funType == nullptr)
+    auto iter = functionTypes.find(key);
+    if (iter != functionTypes.end())
     {
-        ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
-        funType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
-        RegisterType(funType);
+        return iter->second;
     }
 
-    return funType;
+    ROString uniqueName = getFunctionUniqueName(compilerContext.stringBuilder, parameterTypes, returnType);
+    ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
+    const TypeInfo* newFunType = TypeInfo::CreateFunctionType(GetUIntSizeType()->GetNumBits(), uniqueName, name, parameterTypes, parameterNames, returnType);
+    RegisterType(newFunType);
+    functionTypes.insert({key, newFunType});
+
+    return newFunType;
 }
 
 const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
