@@ -192,7 +192,7 @@ bool TypeInfo::IsRecursiveStructDependency(ROString structName, vector<const Tok
     {
         return data->innerType->IsRecursiveStructDependency(structName, structTokenStack);
     }
-    else if (IsAggregate())
+    else if (IsStruct())
     {
         structTokenStack.push_back(token);
 

@@ -67,7 +67,7 @@ public:
 
     const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isHalfOpen);
 
-    TypeInfo* GetAggregateType(ROString name, const Token* token);
+    TypeInfo* GetStructType(ROString name, const Token* token);
 
     const TypeInfo* GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration);
 

@@ -80,7 +80,7 @@ public:
 
     // attributes
     static constexpr uint16_t F_LITERAL   = 1 << 12;
-    static constexpr uint16_t F_AGGREGATE = 1 << 13;
+    static constexpr uint16_t F_STRUCT = 1 << 13;
     static constexpr uint16_t F_HALF_OPEN = 1 << 14;
 
     enum ESign
@@ -244,9 +244,9 @@ public:
         return (data->flags & F_LITERAL) != 0;
     }
 
-    bool IsAggregate() const
+    bool IsStruct() const
     {
-        return (data->flags & F_AGGREGATE) != 0;
+        return (data->flags & F_STRUCT) != 0;
     }
 
     bool IsHalfOpen() const

@@ -1424,7 +1424,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
 
         constValue = ConstantStruct::get(rangeType, initValues);
     }
-    else if (type->IsAggregate())
+    else if (type->IsStruct())
     {
         Type* llvmType = CreateLlvmType(type);
         if (llvmType == nullptr)
@@ -2337,7 +2337,7 @@ bool LlvmIrGenerator::Generate(Modules* syntaxTree, Module*& module)
     vector<Type*> structMembers;
     for (const TypeInfo* type : compilerContext.GetTypeConstants())
     {
-        if (type->IsAggregate())
+        if (type->IsStruct())
         {
             structMembers.clear();
             for (const MemberInfo* member : type->GetMembers())
@@ -2526,7 +2526,7 @@ Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
 
             llvmType = PointerType::get(funType, 0);
         }
-        else if (type->IsAggregate())
+        else if (type->IsStruct())
         {
             llvmType = StructType::create(context, toStringRef(type->GetName()));
         }
@@ -2702,7 +2702,7 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
         diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetName()));
     }
-    else if (type->IsAggregate())
+    else if (type->IsStruct())
     {
         DIFile* diFile = nullptr;
         unsigned line = 0;

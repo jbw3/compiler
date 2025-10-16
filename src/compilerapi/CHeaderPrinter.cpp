@@ -73,7 +73,7 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
         {
             unsigned constIdx = constDecl->assignmentExpression->right->GetConstantValueIndex();
             const TypeInfo* type = compilerContext.GetTypeConstantValue(constIdx);
-            if (type->IsAggregate())
+            if (type->IsStruct())
             {
                 TypeId id = type->GetId();
                 auto iter = printedTypeIds.find(id);
@@ -97,7 +97,7 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
                             }
                         }
                         // forward declare structs if needed
-                        else if (memberType->IsPointer() && memberType->GetInnerType()->IsAggregate())
+                        else if (memberType->IsPointer() && memberType->GetInnerType()->IsStruct())
                         {
                             outFile << "struct " << memberType->GetInnerType()->GetName() << ";\n\n";
                         }
@@ -397,7 +397,7 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, ROString varN
         printVarName(os, varName);
         return true;
     }
-    else if (type->IsAggregate())
+    else if (type->IsStruct())
     {
         os << "struct " << type->GetName();
         printVarName(os, varName);

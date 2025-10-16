@@ -198,9 +198,9 @@ static ROString getFunctionName(
     return sb.CreateString();
 }
 
-TypeInfo* TypeRegistry::GetAggregateType(ROString name, const Token* token)
+TypeInfo* TypeRegistry::GetStructType(ROString name, const Token* token)
 {
-    TypeInfo* newType = new TypeInfo(GetNextTypeId(), 0, TypeInfo::F_AGGREGATE, TypeInfo::eNotApplicable, name, nullptr, token);
+    TypeInfo* newType = new TypeInfo(GetNextTypeId(), 0, TypeInfo::F_STRUCT, TypeInfo::eNotApplicable, name, nullptr, token);
     types.push_back(newType);
     return newType;
 }

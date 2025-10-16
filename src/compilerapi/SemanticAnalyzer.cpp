@@ -2180,7 +2180,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     // otherwise, this is a new struct
     else
     {
-        structType = compilerContext.typeRegistry.GetAggregateType("", structDefinitionExpression->structToken);
+        structType = compilerContext.typeRegistry.GetStructType("", structDefinitionExpression->structToken);
 
         // set the struct's name if it does not already have one
         if (structDefinitionExpression->name.IsEmpty())
@@ -2296,7 +2296,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
 
     // check if type is a struct
     const TypeInfo* type = compilerContext.GetTypeConstantValue(structTypeExpr->GetConstantValueIndex());
-    if (!type->IsAggregate())
+    if (!type->IsStruct())
     {
         StartEndTokenFinder finder;
         structTypeExpr->Accept(&finder);
@@ -3572,7 +3572,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
             unsigned idx = compilerContext.AddIntConstantValue(memberValue);
             memberExpression->SetConstantValueIndex(idx);
         }
-        else if (type->IsAggregate())
+        else if (type->IsStruct())
         {
             unsigned structIdx = expr->GetConstantValueIndex();
             StructConstValue structValue = compilerContext.GetStructConstantValue(structIdx);
