@@ -99,7 +99,7 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
                         // forward declare structs if needed
                         else if (memberType->IsPointer() && memberType->GetInnerType()->IsAggregate())
                         {
-                            outFile << "struct " << memberType->GetInnerType()->GetShortName() << ";\n\n";
+                            outFile << "struct " << memberType->GetInnerType()->GetName() << ";\n\n";
                         }
                     }
 
@@ -278,7 +278,7 @@ void PrintArrayName(ostream& os, const TypeInfo* arrayType)
         innerType = innerType->GetInnerType();
     }
 
-    os << innerType->GetShortName();
+    os << innerType->GetName();
 }
 
 void printVarName(ostream& os, ROString varName)
@@ -305,7 +305,7 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, ROString varN
     }
     else if (type->IsInt())
     {
-        ROString shortName = type->GetShortName();
+        ROString shortName = type->GetName();
 
         if (shortName == INT_SIZE_KEYWORD)
         {
@@ -399,7 +399,7 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, ROString varN
     }
     else if (type->IsAggregate())
     {
-        os << "struct " << type->GetShortName();
+        os << "struct " << type->GetName();
         printVarName(os, varName);
         return true;
     }
@@ -409,7 +409,7 @@ bool CHeaderPrinter::PrintCType(ostream& os, const TypeInfo* type, ROString varN
     }
     else
     {
-        logger.LogError("C header printer does not support type '{}'", type->GetShortName());
+        logger.LogError("C header printer does not support type '{}'", type->GetName());
 
         return false;
     }
@@ -449,7 +449,7 @@ bool CHeaderPrinter::PrintCFunctionType(std::ostream& os, const TypeInfo* type, 
 
 bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
 {
-    ROString typeName = arrayType->GetShortName();
+    ROString typeName = arrayType->GetName();
     if (arrayTypeNames.find(typeName) == arrayTypeNames.end())
     {
         const TypeInfo* innerType = arrayType->GetInnerType();

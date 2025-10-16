@@ -1518,7 +1518,7 @@ Value* LlvmIrGenerator::CreateConstantValue(const TypeInfo* type, unsigned const
     }
     else
     {
-        logger.LogInternalError("Unexpected constant type '{}'", type->GetShortName());
+        logger.LogInternalError("Unexpected constant type '{}'", type->GetName());
     }
 
     return constValue;
@@ -2501,7 +2501,7 @@ Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
                 members.push_back(memberType);
             }
 
-            llvmType = StructType::create(context, members, toStringRef(type->GetShortName()));
+            llvmType = StructType::create(context, members, toStringRef(type->GetName()));
         }
         else if (type->IsArray())
         {
@@ -2513,7 +2513,7 @@ Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
                 arrayStructElements[1] = PointerType::get(innerType, 0);
 
                 ArrayRef<Type*> arrayRef(arrayStructElements, 2);
-                llvmType = StructType::create(context, arrayRef, toStringRef(type->GetShortName()));
+                llvmType = StructType::create(context, arrayRef, toStringRef(type->GetName()));
             }
         }
         else if (type->IsFunction())
@@ -2528,7 +2528,7 @@ Type* LlvmIrGenerator::CreateLlvmType(const TypeInfo* type)
         }
         else if (type->IsAggregate())
         {
-            llvmType = StructType::create(context, toStringRef(type->GetShortName()));
+            llvmType = StructType::create(context, toStringRef(type->GetName()));
         }
         else // could not determine the type
         {
@@ -2557,21 +2557,21 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
     DIType* diType = nullptr;
     if (type->IsInt())
     {
-        ROString name = type->GetShortName();
+        ROString name = type->GetName();
         unsigned numBits = type->GetNumBits();
         unsigned encoding = (type->GetSign() == TypeInfo::eSigned) ? dwarf::DW_ATE_signed : dwarf::DW_ATE_unsigned;
         diType = diBuilder->createBasicType(toStringRef(name), numBits, encoding);
     }
     else if (type->IsFloat())
     {
-        ROString name = type->GetShortName();
+        ROString name = type->GetName();
         unsigned numBits = type->GetNumBits();
         unsigned encoding = dwarf::DW_ATE_float;
         diType = diBuilder->createBasicType(toStringRef(name), numBits, encoding);
     }
     else if (type->IsBool())
     {
-        ROString name = type->GetShortName();
+        ROString name = type->GetName();
         diType = diBuilder->createBasicType(toStringRef(name), 8, dwarf::DW_ATE_boolean);
     }
     else if (type->IsPointer())
@@ -2581,16 +2581,16 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
         {
             return nullptr;
         }
-        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetShortName()));
+        diType = diBuilder->createPointerType(innerDiType, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetName()));
     }
     else if (type->IsSameAs(*TypeInfo::UnitType))
     {
-        diType = diBuilder->createBasicType(toStringRef(TypeInfo::UnitType->GetShortName()), 0, dwarf::DW_ATE_unsigned);
+        diType = diBuilder->createBasicType(toStringRef(TypeInfo::UnitType->GetName()), 0, dwarf::DW_ATE_unsigned);
     }
     else if (type->IsStr())
     {
         const TypeInfo* strType = compilerContext.typeRegistry.GetStringType();
-        ROString name = strType->GetShortName();
+        ROString name = strType->GetName();
         unsigned numBits = strType->GetNumBits();
 
         SmallVector<Metadata*, 2> elements;
@@ -2618,11 +2618,11 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
     }
     else if (type->IsType())
     {
-        diType = diBuilder->createBasicType(toStringRef(TypeInfo::TypeType->GetShortName()), 0, dwarf::DW_ATE_unsigned);
+        diType = diBuilder->createBasicType(toStringRef(TypeInfo::TypeType->GetName()), 0, dwarf::DW_ATE_unsigned);
     }
     else if (type->IsArray())
     {
-        ROString name = type->GetShortName();
+        ROString name = type->GetName();
         unsigned numBits = type->GetNumBits();
 
         SmallVector<Metadata*, 2> elements;
@@ -2650,7 +2650,7 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
     }
     else if (type->IsRange())
     {
-        ROString name = type->GetShortName();
+        ROString name = type->GetName();
         unsigned numBits = type->GetNumBits();
 
         SmallVector<Metadata*, 2> elements;
@@ -2700,7 +2700,7 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
         }
 
         DISubroutineType* subroutine = diBuilder->createSubroutineType(diBuilder->getOrCreateTypeArray(funTypes));
-        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetShortName()));
+        diType = diBuilder->createPointerType(subroutine, compilerContext.typeRegistry.GetPointerSize(), 0, {}, toStringRef(type->GetName()));
     }
     else if (type->IsAggregate())
     {
@@ -2714,7 +2714,7 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
             line = token->line;
         }
 
-        ROString name = type->GetShortName();
+        ROString name = type->GetName();
         unsigned numBits = type->GetNumBits();
 
         // TODO: set alignment

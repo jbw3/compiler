@@ -142,20 +142,20 @@ private:
     TypeInfoData* data;
 
     TypeInfo(
-        ROString shortName,
+        ROString name,
         TypeInfoData* data,
         const Token* token
     );
 
 public:
-    ROString shortName;
+    ROString name;
 
     TypeInfo(
         TypeId id,
         unsigned numBits,
         uint16_t flags,
         ESign sign,
-        ROString shortName,
+        ROString name,
         const TypeInfo* innerType = nullptr,
         const Token* token = nullptr
     );
@@ -265,10 +265,9 @@ public:
         return data->numBits;
     }
 
-    // TODO: rename (GetFriendlyName?)
-    ROString GetShortName() const
+    ROString GetName() const
     {
-        return shortName;
+        return name;
     }
 
     const MemberInfo* GetMember(ROString memberName) const;

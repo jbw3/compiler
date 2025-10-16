@@ -154,7 +154,7 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
         .Append("Range")
         .Append(isHalfOpen ? "HalfOpen" : "Closed")
         .Append("'")
-        .Append(memberType->GetShortName())
+        .Append(memberType->GetName())
         .Append("'")
         .CreateString();
 
@@ -176,14 +176,14 @@ static ROString getFunctionName(
     sb.Append("fun(");
     if (paramSize > 0)
     {
-        sb.Append(parameterTypes[0]->GetShortName());
+        sb.Append(parameterTypes[0]->GetName());
 
         for (size_t i = 1; i < paramSize; ++i)
         {
             const TypeInfo* paramType = parameterTypes[i];
 
             sb.Append(", ");
-            sb.Append(paramType->GetShortName());
+            sb.Append(paramType->GetName());
         }
     }
 
@@ -192,7 +192,7 @@ static ROString getFunctionName(
     if (!returnType->IsUnit())
     {
         sb.Append(' ');
-        sb.Append(returnType->GetShortName());
+        sb.Append(returnType->GetName());
     }
 
     return sb.CreateString();
@@ -268,7 +268,7 @@ const TypeInfo* TypeRegistry::GetPointerToType(const TypeInfo* type)
 
     ROString name = compilerContext.stringBuilder
         .Append(POINTER_TYPE_TOKEN)
-        .Append(type->GetShortName())
+        .Append(type->GetName())
         .CreateString();
     TypeInfo* newPtrType = new TypeInfo(GetNextTypeId(), pointerSize, TypeInfo::F_POINTER, TypeInfo::eNotApplicable, name, type);
     types.push_back(newPtrType);
@@ -288,7 +288,7 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
     }
 
     ROString name = compilerContext.stringBuilder
-        .Append(ARRAY_TYPE_START_TOKEN, ARRAY_TYPE_END_TOKEN, type->GetShortName())
+        .Append(ARRAY_TYPE_START_TOKEN, ARRAY_TYPE_END_TOKEN, type->GetName())
         .CreateString();
 
     TypeInfo* newArrayType = new TypeInfo(GetNextTypeId(), pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, name, type);

@@ -23,21 +23,21 @@ SymbolTable::SymbolTable(CompilerContext& compilerContext)
 {
     Push();
 
-    AddConstant(TypeInfo::BoolType->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::BoolType->GetId());
-    AddConstant(TypeInfo::Int8Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int8Type->GetId());
-    AddConstant(TypeInfo::Int16Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int16Type->GetId());
-    AddConstant(TypeInfo::Int32Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int32Type->GetId());
-    AddConstant(TypeInfo::Int64Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int64Type->GetId());
-    AddConstant(compilerContext.typeRegistry.GetIntSizeType()->GetShortName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetIntSizeType()->GetId());
-    AddConstant(TypeInfo::UInt8Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt8Type->GetId());
-    AddConstant(TypeInfo::UInt16Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt16Type->GetId());
-    AddConstant(TypeInfo::UInt32Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt32Type->GetId());
-    AddConstant(TypeInfo::UInt64Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt64Type->GetId());
-    AddConstant(compilerContext.typeRegistry.GetUIntSizeType()->GetShortName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetUIntSizeType()->GetId());
-    AddConstant(compilerContext.typeRegistry.GetStringType()->GetShortName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetStringType()->GetId());
-    AddConstant(TypeInfo::Float32Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Float32Type->GetId());
-    AddConstant(TypeInfo::Float64Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Float64Type->GetId());
-    AddConstant(TypeInfo::TypeType->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::TypeType->GetId());
+    AddConstant(TypeInfo::BoolType->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::BoolType->GetId());
+    AddConstant(TypeInfo::Int8Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::Int8Type->GetId());
+    AddConstant(TypeInfo::Int16Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::Int16Type->GetId());
+    AddConstant(TypeInfo::Int32Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::Int32Type->GetId());
+    AddConstant(TypeInfo::Int64Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::Int64Type->GetId());
+    AddConstant(compilerContext.typeRegistry.GetIntSizeType()->GetName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetIntSizeType()->GetId());
+    AddConstant(TypeInfo::UInt8Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt8Type->GetId());
+    AddConstant(TypeInfo::UInt16Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt16Type->GetId());
+    AddConstant(TypeInfo::UInt32Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt32Type->GetId());
+    AddConstant(TypeInfo::UInt64Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt64Type->GetId());
+    AddConstant(compilerContext.typeRegistry.GetUIntSizeType()->GetName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetUIntSizeType()->GetId());
+    AddConstant(compilerContext.typeRegistry.GetStringType()->GetName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetStringType()->GetId());
+    AddConstant(TypeInfo::Float32Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::Float32Type->GetId());
+    AddConstant(TypeInfo::Float64Type->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::Float64Type->GetId());
+    AddConstant(TypeInfo::TypeType->GetName(), nullptr, TypeInfo::TypeType, TypeInfo::TypeType->GetId());
 }
 
 SymbolTable::~SymbolTable()

@@ -364,7 +364,7 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
     if (!ok)
     {
         ROString opString = UnaryExpression::GetOperatorString(op);
-        logger.LogError(*unaryExpression->opToken, "Unary operator '{}' does not support type '{}'", opString, subExprType->GetShortName());
+        logger.LogError(*unaryExpression->opToken, "Unary operator '{}' does not support type '{}'", opString, subExprType->GetName());
         isError = true;
         return;
     }
@@ -518,8 +518,8 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
             *opToken,
             "Binary operator '{}' does not support types '{}' and '{}'",
             opString,
-            binaryExpression->left->GetType()->GetShortName(),
-            binaryExpression->right->GetType()->GetShortName());
+            binaryExpression->left->GetType()->GetName(),
+            binaryExpression->right->GetType()->GetName());
 
         isError = true;
         return;
@@ -1858,7 +1858,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
     if (innerMostType->IsType())
     {
         isError = true;
-        logger.LogError(*forLoop->variableNameToken, "Variable cannot be of type '{}'", varType->GetShortName());
+        logger.LogError(*forLoop->variableNameToken, "Variable cannot be of type '{}'", varType->GetName());
         return;
     }
 
@@ -1940,9 +1940,9 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
         logger.LogError(
             *forLoop->variableNameToken,
             "Cannot assign value of type '{}' to variable '{}' of type '{}'",
-            inferType->GetShortName(),
+            inferType->GetName(),
             varName,
-            varType->GetShortName()
+            varType->GetName()
         );
         return;
     }
@@ -2191,7 +2191,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
         }
 
         // set the type's name
-        structType->shortName = structDefinitionExpression->name;
+        structType->name = structDefinitionExpression->name;
 
         structDefinitionExpression->SetType(TypeInfo::TypeType);
 
@@ -2229,12 +2229,12 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
             if (innerMostType->IsType())
             {
                 isError = true;
-                logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetShortName());
+                logger.LogError(*member->nameToken, "Member cannot be of type '{}'", memberType->GetName());
                 return;
             }
 
             // check if member type creates a recursive dependency
-            if (memberType->IsRecursiveStructDependency(structType->GetShortName(), structTokenStack))
+            if (memberType->IsRecursiveStructDependency(structType->GetName(), structTokenStack))
             {
                 isError = true;
                 logger.LogError(*member->nameToken, "Member '{}' creates a recursive dependency", member->name);
@@ -2253,7 +2253,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
             if (!added)
             {
                 isError = true;
-                logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, structType->GetShortName());
+                logger.LogError(*member->nameToken, "Duplicate member '{}' in struct '{}'", memberName, structType->GetName());
                 return;
             }
         }
@@ -2324,7 +2324,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         if (memberInfo == nullptr)
         {
             isError = true;
-            ROString structName = type->GetShortName();
+            ROString structName = type->GetName();
             const Token* token = member->nameToken;
             logger.LogError(*token, "Struct '{}' does not have a member named '{}'", structName, memberName);
             return;
@@ -2361,7 +2361,7 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
             logger.LogError(
                 *finder.start, *finder.end,
                 "Cannot assign expression of type '{}' to member '{}' of type '{}'",
-                exprType->GetShortName(), memberName, memberType->GetShortName());
+                exprType->GetName(), memberName, memberType->GetName());
             return;
         }
 
@@ -2825,8 +2825,8 @@ void SemanticAnalyzer::Visit(ArrayMultiValueExpression* arrayExpression)
                     *finder.start, *finder.end,
                     "Array item at index {} with type '{}' does not match previous item type '{}'",
                     i,
-                    exprType->GetShortName(),
-                    type->GetShortName()
+                    exprType->GetName(),
+                    type->GetName()
                 );
                 return;
             }
@@ -2968,8 +2968,8 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
             logger.LogError(
                 *finder.start, *finder.end,
                 "Argument type does not match parameter type. Argument: '{}', parameter: '{}'",
-                argType->GetShortName(),
-                paramType->GetShortName()
+                argType->GetName(),
+                paramType->GetName()
             );
             isError = true;
             return;
@@ -3064,7 +3064,7 @@ void SemanticAnalyzer::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression*
         logger.LogError(
             *finder.start, *finder.end,
             "Cannot bit-cast expression of type '{}' to type '{}'",
-            exprType->GetShortName(), castType->GetShortName()
+            exprType->GetName(), castType->GetName()
         );
         isError = true;
         return;
@@ -3109,7 +3109,7 @@ void SemanticAnalyzer::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression*
         logger.LogError(
             *finder.start, *finder.end,
             "Cannot bit-cast expression of type '{}' to type '{}' because sizes are not equal",
-            exprType->GetShortName(), castType->GetShortName()
+            exprType->GetName(), castType->GetName()
         );
         isError = true;
         return;
@@ -3236,7 +3236,7 @@ void SemanticAnalyzer::BuiltInCast(BuiltInFunctionCallExpression* builtInFunctio
         logger.LogError(
             *finder.start, *finder.end,
             "Cannot cast expression of type '{}' to type '{}'",
-            exprType->GetShortName(), castType->GetShortName()
+            exprType->GetName(), castType->GetName()
         );
         isError = true;
         return;
@@ -3423,7 +3423,7 @@ void SemanticAnalyzer::BuiltInIntToPtr(BuiltInFunctionCallExpression* builtInFun
         logger.LogError(
             *finder.start, *finder.end,
             "Expected a pointer type but got '{}'",
-            ptrType->GetShortName()
+            ptrType->GetName()
         );
         isError = true;
         return;
@@ -3453,7 +3453,7 @@ void SemanticAnalyzer::BuiltInIntToPtr(BuiltInFunctionCallExpression* builtInFun
         logger.LogError(
             *finder.start, *finder.end,
             "Cannot cast expression of type '{}' to a pointer. Expected an unsigned integer type",
-            exprType->GetShortName()
+            exprType->GetName()
         );
         isError = true;
         return;
@@ -3491,7 +3491,7 @@ void SemanticAnalyzer::BuiltInPtrToInt(BuiltInFunctionCallExpression* builtInFun
         logger.LogError(
             *finder.start, *finder.end,
             "Cannot cast expression of type '{}' to an integer. Expected a pointer type",
-            exprType->GetShortName()
+            exprType->GetName()
         );
         isError = true;
         return;
@@ -3523,7 +3523,7 @@ void SemanticAnalyzer::Visit(MemberExpression* memberExpression)
     if (member == nullptr)
     {
         const Token* memberToken = memberExpression->memberNameToken;
-        logger.LogError(*memberToken, "Type '{}' has no member named '{}'", type->GetShortName(), memberName);
+        logger.LogError(*memberToken, "Type '{}' has no member named '{}'", type->GetName(), memberName);
         isError = true;
         return;
     }
@@ -3743,8 +3743,8 @@ void SemanticAnalyzer::Visit(BranchExpression* branchExpression)
     {
         isError = true;
         logger.LogError(*branchExpression->ifToken, "'if' and 'else' expressions have mismatching types ('{}' and '{}')",
-            ifType->GetShortName(),
-            elseType->GetShortName());
+            ifType->GetName(),
+            elseType->GetName());
         return;
     }
 
@@ -3926,7 +3926,7 @@ void SemanticAnalyzer::Visit(VariableDeclaration* variableDeclaration)
     if (innerMostType->IsType())
     {
         isError = true;
-        logger.LogError(*nameToken, "Variable cannot be of type '{}'", type->GetShortName());
+        logger.LogError(*nameToken, "Variable cannot be of type '{}'", type->GetName());
         return;
     }
 
@@ -3978,7 +3978,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         }
         if (innerMostType->IsType())
         {
-            logger.LogError(*param->nameToken, "Parameter cannot be of type '{}'", paramType->GetShortName());
+            logger.LogError(*param->nameToken, "Parameter cannot be of type '{}'", paramType->GetName());
             return false;
         }
 
@@ -4009,7 +4009,7 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         }
         if (innerMostType->IsType())
         {
-            logger.LogError(*functionDeclaration->nameToken, "Return type cannot be of type '{}'", returnType->GetShortName());
+            logger.LogError(*functionDeclaration->nameToken, "Return type cannot be of type '{}'", returnType->GetName());
             return false;
         }
     }
@@ -4129,7 +4129,7 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
     bool needsCast = false;
     if (!AreCompatibleAssignmentTypes(returnType, expressionType, needsCast))
     {
-        logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->name, returnType->GetShortName(), expressionType->GetShortName());
+        logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->name, returnType->GetName(), expressionType->GetName());
         return false;
     }
 

@@ -144,13 +144,13 @@ TypeInfo::TypeInfo(
     unsigned numBits,
     uint16_t flags,
     ESign sign,
-    ROString shortName,
+    ROString name,
     const TypeInfo* innerType,
     const Token* token
 ) :
     token(token),
     deleteData(true),
-    shortName(shortName)
+    name(name)
 {
     data = new TypeInfoData;
     data->id = id;
@@ -162,14 +162,14 @@ TypeInfo::TypeInfo(
 }
 
 TypeInfo::TypeInfo(
-    ROString shortName,
+    ROString name,
     TypeInfoData* data,
     const Token* token
 ) :
     token(token),
     deleteData(false),
     data(data),
-    shortName(shortName)
+    name(name)
 {
 }
 
@@ -196,7 +196,7 @@ bool TypeInfo::IsRecursiveStructDependency(ROString structName, vector<const Tok
     {
         structTokenStack.push_back(token);
 
-        if (shortName == structName)
+        if (name == structName)
         {
             return true;
         }
