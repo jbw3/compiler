@@ -2180,7 +2180,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     // otherwise, this is a new struct
     else
     {
-        structType = TypeInfo::CreateAggregateType("", structDefinitionExpression->structToken);
+        structType = compilerContext.typeRegistry.GetAggregateType("", structDefinitionExpression->structToken);
 
         // set the struct's name if it does not already have one
         if (structDefinitionExpression->name.IsEmpty())

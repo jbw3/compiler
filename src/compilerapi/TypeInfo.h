@@ -111,9 +111,8 @@ public:
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
 
-    static TypeInfo* CreateAggregateType(ROString name, const Token* token);
-
     static const TypeInfo* CreateFunctionType(
+        TypeId id,
         unsigned numBits,
         ROString uniqueName,
         ROString name,
@@ -124,9 +123,6 @@ public:
     static const TypeInfo* CreateTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo);
 
 private:
-    static TypeId nextTypeId;
-    static TypeId GetNextTypeId();
-
     const Token* token;
     bool deleteData;
 
@@ -158,6 +154,7 @@ public:
     ROString shortName;
 
     TypeInfo(
+        TypeId id,
         unsigned numBits,
         uint16_t flags,
         ESign sign,
@@ -327,6 +324,7 @@ class NumericLiteralType : public TypeInfo
 {
 public:
     NumericLiteralType(
+        TypeId id,
         ESign sign,
         unsigned signedNumBits,
         unsigned unsignedNumBits,

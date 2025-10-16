@@ -65,6 +65,8 @@ public:
 
     const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isHalfOpen);
 
+    TypeInfo* GetAggregateType(ROString name, const Token* token);
+
     const TypeInfo* GetFunctionType(const SyntaxTree::FunctionDeclaration* functionDeclaration);
 
     const TypeInfo* GetFunctionType(
@@ -88,10 +90,14 @@ public:
     const TypeInfo* GetMinSizeNumericLiteralType(const NumericLiteralType* numLitType, TypeInfo::ESign sign);
 
 private:
+    TypeId GetNextTypeId();
+
     CompilerContext& compilerContext;
     TypeInfo* intSizeType;
     TypeInfo* uintSizeType;
     TypeInfo* stringType;
+    size_t typeDeleteStartIndex;
+    std::vector<const TypeInfo*> types;
     std::unordered_map<TypeId, const TypeInfo*> pointerTypes; // maps type IDs to a pointer to that type
     std::unordered_map<TypeId, const TypeInfo*> arrayTypes; // maps type IDs to an array of that type
     std::unordered_map<std::tuple<TypeId, bool>, const TypeInfo*> rangeTypes; // maps (type ID, half-open/closed) to a range of that type

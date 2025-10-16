@@ -21,7 +21,7 @@ $target_triple
 %"[]u8" = type { i64, ptr }
 %"RangeClosed'u32'" = type { i32, i32 }
 %"RangeClosed'i16'" = type { i16, i16 }
-%"<struct299>" = type { i32, i16 }
+%"<struct29>" = type { i32, i16 }
 %TypesTest = type {}
 %"[]TypesTest" = type { i64, ptr }
 
@@ -3459,7 +3459,7 @@ entry:
   %f2 = alloca ptr, align 8
   %f1 = alloca ptr, align 8
   %f0 = alloca ptr, align 8
-  %t6 = alloca %"<struct299>", align 8
+  %t6 = alloca %"<struct29>", align 8
   %t5 = alloca %TypesTest, align 8
   %t4 = alloca ptr, align 8
   %t3 = alloca i32, align 4
@@ -3479,7 +3479,7 @@ entry:
   store i32 10, ptr %t3, align 4
   store ptr %t3, ptr %t4, align 8
   store %TypesTest undef, ptr %t5, align 1
-  store %"<struct299>" { i32 2, i16 1847 }, ptr %t6, align 4
+  store %"<struct29>" { i32 2, i16 1847 }, ptr %t6, align 4
   store ptr @ftype1, ptr %f0, align 8
   store ptr @ftype3, ptr %f1, align 8
   store ptr @oneArg, ptr %f2, align 8
