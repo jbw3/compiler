@@ -26,7 +26,6 @@ Compiler::Compiler(const Config& config) :
     config(config),
     compilerContext(config, cerr)
 {
-    compilerContext.InitBasicTypes();
 }
 
 bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)

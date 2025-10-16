@@ -55,6 +55,8 @@ public:
 
     ~TypeRegistry();
 
+    const std::vector<const TypeInfo*>& GetTypes() const;
+
     unsigned GetPointerSize() const;
 
     const TypeInfo* GetIntSizeType() const;

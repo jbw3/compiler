@@ -29,7 +29,6 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
     config.color = Config::eFalse;
     stringstream errStream;
     CompilerContext compilerContext(config, errStream);
-    compilerContext.InitBasicTypes();
 
     Modules* syntaxTree = new Modules;
 

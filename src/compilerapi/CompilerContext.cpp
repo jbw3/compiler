@@ -66,8 +66,7 @@ void StringBuilder::AppendBuff(const char* ptr, size_t size)
 CompilerContext::CompilerContext(Config config, ostream& logStream) :
     config(config),
     logger(*this, &logStream, config.color),
-    typeRegistry(*this),
-    basicTypeCount(0)
+    typeRegistry(*this)
 {
 }
 
@@ -87,27 +86,6 @@ unsigned CompilerContext::AddFile(const string& filename, CharBuffer fileBuffer)
     fileTokens.push_back(TokenList());
 
     return id;
-}
-
-void CompilerContext::InitBasicTypes()
-{
-    AddTypeConstantValue(TypeInfo::BoolType);
-    AddTypeConstantValue(TypeInfo::Int8Type);
-    AddTypeConstantValue(TypeInfo::Int16Type);
-    AddTypeConstantValue(TypeInfo::Int32Type);
-    AddTypeConstantValue(TypeInfo::Int64Type);
-    AddTypeConstantValue(typeRegistry.GetIntSizeType());
-    AddTypeConstantValue(TypeInfo::UInt8Type);
-    AddTypeConstantValue(TypeInfo::UInt16Type);
-    AddTypeConstantValue(TypeInfo::UInt32Type);
-    AddTypeConstantValue(TypeInfo::UInt64Type);
-    AddTypeConstantValue(typeRegistry.GetUIntSizeType());
-    AddTypeConstantValue(typeRegistry.GetStringType());
-    AddTypeConstantValue(TypeInfo::Float32Type);
-    AddTypeConstantValue(TypeInfo::Float64Type);
-    AddTypeConstantValue(TypeInfo::TypeType);
-
-    basicTypeCount = static_cast<unsigned>(typeConstants.size());
 }
 
 constexpr int64_t INT_ENCODE_THRESHOLD = 256;
@@ -209,25 +187,6 @@ unsigned CompilerContext::AddFunctionConstantValue(const SyntaxTree::FunctionDec
 {
     unsigned id = static_cast<unsigned>(functionConstants.size());
     functionConstants.push_back(value);
-
-    return id;
-}
-
-unsigned CompilerContext::AddTypeConstantValue(const TypeInfo* value)
-{
-    unsigned id = 0;
-    TypeId typeId = value->GetId();
-    auto iter = typeConstantsIdMap.find(typeId);
-    if (iter != typeConstantsIdMap.cend())
-    {
-        id = iter->second;
-    }
-    else
-    {
-        id = static_cast<unsigned>(typeConstants.size());
-        typeConstants.push_back(value);
-        typeConstantsIdMap.insert({typeId, id});
-    }
 
     return id;
 }

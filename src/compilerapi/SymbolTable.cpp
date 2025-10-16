@@ -23,11 +23,21 @@ SymbolTable::SymbolTable(CompilerContext& compilerContext)
 {
     Push();
 
-    for (unsigned id = 0; id < compilerContext.GetBasicTypeCount(); ++id)
-    {
-        const TypeInfo* type = compilerContext.GetTypeConstantValue(id);
-        AddConstant(type->GetShortName(), nullptr, TypeInfo::TypeType, id);
-    }
+    AddConstant(TypeInfo::BoolType->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::BoolType->GetId());
+    AddConstant(TypeInfo::Int8Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int8Type->GetId());
+    AddConstant(TypeInfo::Int16Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int16Type->GetId());
+    AddConstant(TypeInfo::Int32Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int32Type->GetId());
+    AddConstant(TypeInfo::Int64Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Int64Type->GetId());
+    AddConstant(compilerContext.typeRegistry.GetIntSizeType()->GetShortName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetIntSizeType()->GetId());
+    AddConstant(TypeInfo::UInt8Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt8Type->GetId());
+    AddConstant(TypeInfo::UInt16Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt16Type->GetId());
+    AddConstant(TypeInfo::UInt32Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt32Type->GetId());
+    AddConstant(TypeInfo::UInt64Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::UInt64Type->GetId());
+    AddConstant(compilerContext.typeRegistry.GetUIntSizeType()->GetShortName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetUIntSizeType()->GetId());
+    AddConstant(compilerContext.typeRegistry.GetStringType()->GetShortName(), nullptr, TypeInfo::TypeType, compilerContext.typeRegistry.GetStringType()->GetId());
+    AddConstant(TypeInfo::Float32Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Float32Type->GetId());
+    AddConstant(TypeInfo::Float64Type->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::Float64Type->GetId());
+    AddConstant(TypeInfo::TypeType->GetShortName(), nullptr, TypeInfo::TypeType, TypeInfo::TypeType->GetId());
 }
 
 SymbolTable::~SymbolTable()

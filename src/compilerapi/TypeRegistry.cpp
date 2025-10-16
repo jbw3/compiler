@@ -111,6 +111,11 @@ TypeRegistry::~TypeRegistry()
     }
 }
 
+const vector<const TypeInfo*>& TypeRegistry::GetTypes() const
+{
+    return types;
+}
+
 unsigned TypeRegistry::GetPointerSize() const
 {
     return pointerSize;

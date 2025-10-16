@@ -131,13 +131,6 @@ public:
         return fileTokens[id];
     }
 
-    void InitBasicTypes();
-
-    unsigned GetBasicTypeCount() const
-    {
-        return basicTypeCount;
-    }
-
     unsigned AddBoolConstantValue(bool value)
     {
         // encode the value in the index
@@ -200,23 +193,25 @@ public:
         return functionConstants[id];
     }
 
-    unsigned AddTypeConstantValue(const TypeInfo* value);
+    unsigned AddTypeConstantValue(const TypeInfo* value)
+    {
+        return static_cast<unsigned>(value->GetId());
+    }
 
     const TypeInfo* GetTypeConstantValue(unsigned id) const
     {
-        return typeConstants[id];
+        return typeRegistry.GetTypes()[id];
     }
 
     const std::vector<const TypeInfo*>& GetTypeConstants() const
     {
-        return typeConstants;
+        return typeRegistry.GetTypes();
     }
 
 private:
     std::vector<std::string> filenames;
     std::vector<CharBuffer> fileBuffers;
     std::vector<TokenList> fileTokens;
-    unsigned basicTypeCount;
     std::vector<int64_t> intConstants;
     std::vector<double> floatConstants;
     std::vector<std::vector<char>> strConstants;
@@ -224,9 +219,6 @@ private:
     std::vector<StructConstValue> structConstants;
     std::vector<ArrayConstValue> arrayConstants;
     std::vector<const SyntaxTree::FunctionDeclaration*> functionConstants;
-
-    std::unordered_map<TypeId, unsigned> typeConstantsIdMap;
-    std::vector<const TypeInfo*> typeConstants;
 };
 
 #endif // COMPILER_CONTEXT_H_
