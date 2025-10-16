@@ -114,7 +114,6 @@ public:
     static const TypeInfo* CreateFunctionType(
         TypeId id,
         unsigned numBits,
-        ROString uniqueName,
         ROString name,
         const std::vector<const TypeInfo*>& parameterTypes,
         const std::vector<ROString>& parameterNames,
@@ -143,14 +142,12 @@ private:
     TypeInfoData* data;
 
     TypeInfo(
-        ROString uniqueName,
         ROString shortName,
         TypeInfoData* data,
         const Token* token
     );
 
 public:
-    ROString uniqueName;
     ROString shortName;
 
     TypeInfo(
@@ -158,7 +155,6 @@ public:
         unsigned numBits,
         uint16_t flags,
         ESign sign,
-        ROString uniqueName,
         ROString shortName,
         const TypeInfo* innerType = nullptr,
         const Token* token = nullptr
@@ -269,11 +265,6 @@ public:
         return data->numBits;
     }
 
-    ROString GetUniqueName() const
-    {
-        return uniqueName;
-    }
-
     // TODO: rename (GetFriendlyName?)
     ROString GetShortName() const
     {
@@ -328,7 +319,6 @@ public:
         ESign sign,
         unsigned signedNumBits,
         unsigned unsignedNumBits,
-        ROString uniqueName,
         ROString name
     );
 

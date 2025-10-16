@@ -2192,7 +2192,6 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
 
         // set the type's name
         structType->shortName = structDefinitionExpression->name;
-        structType->uniqueName = structDefinitionExpression->name;
 
         structDefinitionExpression->SetType(TypeInfo::TypeType);
 

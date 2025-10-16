@@ -111,8 +111,6 @@ private:
         const NumericLiteralType*
     > numericLiteralTypes;
 
-    ROString GetNumericLiteralTypeUniqueName(unsigned signedNumBits, unsigned unsignedNumBits);
-
     const NumericLiteralType* CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits, ROString name);
 };
 

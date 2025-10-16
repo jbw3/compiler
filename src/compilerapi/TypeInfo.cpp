@@ -22,21 +22,21 @@ using namespace llvm;
 using namespace std;
 using namespace SyntaxTree;
 
-TypeInfo unitType(0, 0, TypeInfo::F_UNIT, TypeInfo::eNotApplicable, "Unit", "Unit");
-TypeInfo boolTypeInfo(1, 1, TypeInfo::F_BOOL, TypeInfo::eNotApplicable, BOOL_KEYWORD, BOOL_KEYWORD);
-TypeInfo int8TypeInfo(2, 8, TypeInfo::F_INT, TypeInfo::eSigned, INT8_KEYWORD, INT8_KEYWORD);
-TypeInfo int16TypeInfo(3, 16, TypeInfo::F_INT, TypeInfo::eSigned, INT16_KEYWORD, INT16_KEYWORD);
-TypeInfo int32TypeInfo(4, 32, TypeInfo::F_INT, TypeInfo::eSigned, INT32_KEYWORD, INT32_KEYWORD);
-TypeInfo int64TypeInfo(5, 64, TypeInfo::F_INT, TypeInfo::eSigned, INT64_KEYWORD, INT64_KEYWORD);
-TypeInfo uInt8TypeInfo(6, 8, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT8_KEYWORD, UINT8_KEYWORD);
-TypeInfo uInt16TypeInfo(7, 16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KEYWORD, UINT16_KEYWORD);
-TypeInfo uInt32TypeInfo(8, 32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD, UINT32_KEYWORD);
-TypeInfo uInt64TypeInfo(9, 64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD, UINT64_KEYWORD);
-TypeInfo float32TypeInfo(10, 32, TypeInfo::F_FLOAT, TypeInfo::eSigned, FLOAT32_KEYWORD, FLOAT32_KEYWORD);
-TypeInfo float64TypeInfo(11, 64, TypeInfo::F_FLOAT, TypeInfo::eSigned, FLOAT64_KEYWORD, FLOAT64_KEYWORD);
-TypeInfo float32LiteralTypeInfo(12, 32, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float32-literal}", "{float-literal}");
-TypeInfo float64LiteralTypeInfo(13, 64, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float64-literal}", "{float-literal}");
-TypeInfo typeTypeInfo(14, 0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, TYPE_KEYWORD, TYPE_KEYWORD);
+TypeInfo unitType(0, 0, TypeInfo::F_UNIT, TypeInfo::eNotApplicable, "Unit");
+TypeInfo boolTypeInfo(1, 1, TypeInfo::F_BOOL, TypeInfo::eNotApplicable, BOOL_KEYWORD);
+TypeInfo int8TypeInfo(2, 8, TypeInfo::F_INT, TypeInfo::eSigned, INT8_KEYWORD);
+TypeInfo int16TypeInfo(3, 16, TypeInfo::F_INT, TypeInfo::eSigned, INT16_KEYWORD);
+TypeInfo int32TypeInfo(4, 32, TypeInfo::F_INT, TypeInfo::eSigned, INT32_KEYWORD);
+TypeInfo int64TypeInfo(5, 64, TypeInfo::F_INT, TypeInfo::eSigned, INT64_KEYWORD);
+TypeInfo uInt8TypeInfo(6, 8, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT8_KEYWORD);
+TypeInfo uInt16TypeInfo(7, 16, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT16_KEYWORD);
+TypeInfo uInt32TypeInfo(8, 32, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT32_KEYWORD);
+TypeInfo uInt64TypeInfo(9, 64, TypeInfo::F_INT, TypeInfo::eUnsigned, UINT64_KEYWORD);
+TypeInfo float32TypeInfo(10, 32, TypeInfo::F_FLOAT, TypeInfo::eSigned, FLOAT32_KEYWORD);
+TypeInfo float64TypeInfo(11, 64, TypeInfo::F_FLOAT, TypeInfo::eSigned, FLOAT64_KEYWORD);
+TypeInfo float32LiteralTypeInfo(12, 32, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float-literal}");
+TypeInfo float64LiteralTypeInfo(13, 64, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float-literal}");
+TypeInfo typeTypeInfo(14, 0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, TYPE_KEYWORD);
 
 MemberInfo::MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
     name(name),
@@ -114,13 +114,12 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
 const TypeInfo* TypeInfo::CreateFunctionType(
     TypeId id,
     unsigned numBits,
-    ROString uniqueName,
     ROString name,
     const vector<const TypeInfo*>& parameterTypes,
     const vector<ROString>& parameterNames,
     const TypeInfo* returnType)
 {
-    TypeInfo* newFunType = new TypeInfo(id, numBits, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, uniqueName, name);
+    TypeInfo* newFunType = new TypeInfo(id, numBits, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, name);
 
     // add param and return types
     size_t paramSize = parameterTypes.size();
@@ -136,7 +135,7 @@ const TypeInfo* TypeInfo::CreateFunctionType(
 
 const TypeInfo* TypeInfo::CreateTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo)
 {
-    TypeInfo* typeAlias = new TypeInfo(newName, newName, typeInfo->data, newToken);
+    TypeInfo* typeAlias = new TypeInfo(newName, typeInfo->data, newToken);
     return typeAlias;
 }
 
@@ -145,14 +144,12 @@ TypeInfo::TypeInfo(
     unsigned numBits,
     uint16_t flags,
     ESign sign,
-    ROString uniqueName,
     ROString shortName,
     const TypeInfo* innerType,
     const Token* token
 ) :
     token(token),
     deleteData(true),
-    uniqueName(uniqueName),
     shortName(shortName)
 {
     data = new TypeInfoData;
@@ -165,7 +162,6 @@ TypeInfo::TypeInfo(
 }
 
 TypeInfo::TypeInfo(
-    ROString uniqueName,
     ROString shortName,
     TypeInfoData* data,
     const Token* token
@@ -173,7 +169,6 @@ TypeInfo::TypeInfo(
     token(token),
     deleteData(false),
     data(data),
-    uniqueName(uniqueName),
     shortName(shortName)
 {
 }
@@ -276,10 +271,9 @@ NumericLiteralType::NumericLiteralType(
     ESign sign,
     unsigned signedNumBits,
     unsigned unsignedNumBits,
-    ROString uniqueName,
     ROString name
 ) :
-    TypeInfo(id, 0, F_INT | F_LITERAL, sign, uniqueName, name),
+    TypeInfo(id, 0, F_INT | F_LITERAL, sign, name),
     signedNumBits(signedNumBits),
     unsignedNumBits(unsignedNumBits)
 {
