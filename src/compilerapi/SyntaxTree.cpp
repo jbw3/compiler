@@ -96,53 +96,6 @@ void NumericExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-unsigned NumericExpression::GetMinSignedSize() const
-{
-    unsigned numBits = 0;
-    if (value >= numeric_limits<int8_t>::min() && value <= numeric_limits<int8_t>::max())
-    {
-        numBits = 8;
-    }
-    else if (value >= numeric_limits<int16_t>::min() && value <= numeric_limits<int16_t>::max())
-    {
-        numBits = 16;
-    }
-    else if (value >= numeric_limits<int32_t>::min() && value <= numeric_limits<int32_t>::max())
-    {
-        numBits = 32;
-    }
-    else if (value >= numeric_limits<int64_t>::min() && value <= numeric_limits<int64_t>::max())
-    {
-        numBits = 64;
-    }
-
-    return numBits;
-}
-
-unsigned NumericExpression::GetMinUnsignedSize() const
-{
-    unsigned numBits = 0;
-    uint64_t unsignedValue = static_cast<uint64_t>(value);
-    if (unsignedValue <= numeric_limits<uint8_t>::max())
-    {
-        numBits = 8;
-    }
-    else if (unsignedValue <= numeric_limits<uint16_t>::max())
-    {
-        numBits = 16;
-    }
-    else if (unsignedValue <= numeric_limits<uint32_t>::max())
-    {
-        numBits = 32;
-    }
-    else if (unsignedValue <= numeric_limits<uint64_t>::max())
-    {
-        numBits = 64;
-    }
-
-    return numBits;
-}
-
 FloatLiteralExpression::FloatLiteralExpression(double value, const Token* token) :
     token(token),
     value(value)

@@ -88,10 +88,6 @@ public:
 
     void Accept(SyntaxTreeVisitor* visitor) override;
 
-    unsigned GetMinSignedSize() const;
-
-    unsigned GetMinUnsignedSize() const;
-
     const Token* token;
     int64_t value;
 };

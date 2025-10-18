@@ -293,3 +293,49 @@ double stringToFloat(ROString str)
 
     return num;
 }
+
+unsigned getMinSignedSize(int64_t value)
+{
+    unsigned numBits = 0;
+    if (value >= numeric_limits<int8_t>::min() && value <= numeric_limits<int8_t>::max())
+    {
+        numBits = 8;
+    }
+    else if (value >= numeric_limits<int16_t>::min() && value <= numeric_limits<int16_t>::max())
+    {
+        numBits = 16;
+    }
+    else if (value >= numeric_limits<int32_t>::min() && value <= numeric_limits<int32_t>::max())
+    {
+        numBits = 32;
+    }
+    else if (value >= numeric_limits<int64_t>::min() && value <= numeric_limits<int64_t>::max())
+    {
+        numBits = 64;
+    }
+
+    return numBits;
+}
+
+unsigned getMinUnsignedSize(uint64_t value)
+{
+    unsigned numBits = 0;
+    if (value <= numeric_limits<uint8_t>::max())
+    {
+        numBits = 8;
+    }
+    else if (value <= numeric_limits<uint16_t>::max())
+    {
+        numBits = 16;
+    }
+    else if (value <= numeric_limits<uint32_t>::max())
+    {
+        numBits = 32;
+    }
+    else if (value <= numeric_limits<uint64_t>::max())
+    {
+        numBits = 64;
+    }
+
+    return numBits;
+}

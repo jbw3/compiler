@@ -2598,8 +2598,8 @@ void SemanticAnalyzer::Visit(UnitTypeLiteralExpression* unitTypeLiteralExpressio
 
 void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
 {
-    unsigned minSignedNumBits = numericExpression->GetMinSignedSize();
-    unsigned minUnsignedNumBits = numericExpression->GetMinUnsignedSize();
+    unsigned minSignedNumBits = getMinSignedSize(numericExpression->value);
+    unsigned minUnsignedNumBits = getMinUnsignedSize(static_cast<uint64_t>(numericExpression->value));
     if (minSignedNumBits == 0 || minUnsignedNumBits == 0)
     {
         isError = true;

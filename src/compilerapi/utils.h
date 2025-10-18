@@ -2,6 +2,7 @@
 #define UTILS_H_
 
 #include <cctype>
+#include <cstdint>
 #include <cstring>
 #include "ROString.h"
 
@@ -57,6 +58,10 @@ constexpr bool hexDigitToNum(char ch, char& num)
 bool stringToInteger(ROString str, int64_t& num);
 
 double stringToFloat(ROString str);
+
+unsigned getMinSignedSize(int64_t value);
+
+unsigned getMinUnsignedSize(uint64_t value);
 
 constexpr int64_t getBitMask(unsigned size)
 {
