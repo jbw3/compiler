@@ -111,34 +111,6 @@ const TypeInfo* TypeInfo::GetMinUnsignedIntTypeForSize(unsigned size)
     return type;
 }
 
-const TypeInfo* TypeInfo::CreateFunctionType(
-    TypeId id,
-    unsigned numBits,
-    ROString name,
-    const vector<const TypeInfo*>& parameterTypes,
-    const vector<ROString>& parameterNames,
-    const TypeInfo* returnType)
-{
-    TypeInfo* newFunType = new TypeInfo(id, numBits, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, name);
-
-    // add param and return types
-    size_t paramSize = parameterTypes.size();
-    for (size_t i = 0; i < paramSize; ++i)
-    {
-        newFunType->data->paramTypes.push_back(parameterTypes[i]);
-        newFunType->data->paramNames.push_back(parameterNames[i]);
-    }
-    newFunType->data->returnType = returnType;
-
-    return newFunType;
-}
-
-const TypeInfo* TypeInfo::CreateTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo)
-{
-    TypeInfo* typeAlias = new TypeInfo(newName, typeInfo->data, newToken);
-    return typeAlias;
-}
-
 TypeInfo::TypeInfo(
     TypeId id,
     unsigned numBits,

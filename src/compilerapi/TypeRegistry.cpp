@@ -111,31 +111,6 @@ TypeRegistry::~TypeRegistry()
     }
 }
 
-const vector<const TypeInfo*>& TypeRegistry::GetTypes() const
-{
-    return types;
-}
-
-unsigned TypeRegistry::GetPointerSize() const
-{
-    return pointerSize;
-}
-
-const TypeInfo* TypeRegistry::GetIntSizeType() const
-{
-    return intSizeType;
-}
-
-const TypeInfo* TypeRegistry::GetUIntSizeType() const
-{
-    return uintSizeType;
-}
-
-const TypeInfo* TypeRegistry::GetStringType() const
-{
-    return stringType;
-}
-
 const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHalfOpen)
 {
     TypeId memberTypeId = memberType->GetId();
@@ -217,19 +192,25 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
 
     const Parameters& parameters = functionDeclaration->parameters;
     vector<const TypeInfo*> parameterTypes;
-    vector<ROString> parameterNames;
     for (const Parameter* param : parameters)
     {
         parameterTypes.push_back(param->type);
-        parameterNames.push_back(param->name);
     }
-    const TypeInfo* returnType = functionDeclaration->returnType;
 
-    ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
-    // add param and return types
-    const TypeInfo* newFunType = TypeInfo::CreateFunctionType(GetNextTypeId(), GetUIntSizeType()->GetNumBits(), name, parameterTypes, parameterNames, returnType);
+    ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, functionDeclaration->returnType);
+
+    TypeInfo* newFunType = new TypeInfo(GetNextTypeId(), pointerSize, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, name);
+
     types.push_back(newFunType);
     functionTypes.insert({key, newFunType});
+
+    // add param and return types
+    for (const Parameter* param : parameters)
+    {
+        newFunType->data->paramTypes.push_back(param->type);
+        newFunType->data->paramNames.push_back(param->name);
+    }
+    newFunType->data->returnType = functionDeclaration->returnType;
 
     return newFunType;
 }
@@ -249,9 +230,19 @@ const TypeInfo* TypeRegistry::GetFunctionType(
     }
 
     ROString name = getFunctionName(compilerContext.stringBuilder, parameterTypes, returnType);
-    const TypeInfo* newFunType = TypeInfo::CreateFunctionType(GetNextTypeId(), GetUIntSizeType()->GetNumBits(), name, parameterTypes, parameterNames, returnType);
+
+    TypeInfo* newFunType = new TypeInfo(GetNextTypeId(), pointerSize, TypeInfo::F_FUNCTION, TypeInfo::eNotApplicable, name);
     types.push_back(newFunType);
     functionTypes.insert({key, newFunType});
+
+    // add param and return types
+    size_t paramSize = parameterTypes.size();
+    for (size_t i = 0; i < paramSize; ++i)
+    {
+        newFunType->data->paramTypes.push_back(parameterTypes[i]);
+        newFunType->data->paramNames.push_back(parameterNames[i]);
+    }
+    newFunType->data->returnType = returnType;
 
     return newFunType;
 }
@@ -302,7 +293,7 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 
 const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const Token* newToken, const TypeInfo *typeInfo)
 {
-    const TypeInfo* newTypeInfo = TypeInfo::CreateTypeAlias(newName, newToken, typeInfo);
+    const TypeInfo* newTypeInfo = new TypeInfo(newName, typeInfo->data, newToken);
     return newTypeInfo;
 }
 

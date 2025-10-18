@@ -64,24 +64,26 @@ typedef uint32_t TypeId;
 class TypeInfo
 {
 public:
+    friend class TypeRegistry;
+
     static constexpr uint16_t F_NONE = 0;
 
     // main types
-    static constexpr uint16_t F_UNIT     = 1 << 0;
-    static constexpr uint16_t F_BOOL     = 1 << 1;
-    static constexpr uint16_t F_INT      = 1 << 2;
-    static constexpr uint16_t F_FLOAT    = 1 << 3;
-    static constexpr uint16_t F_STR      = 1 << 4;
-    static constexpr uint16_t F_RANGE    = 1 << 5;
-    static constexpr uint16_t F_POINTER  = 1 << 6;
-    static constexpr uint16_t F_ARRAY    = 1 << 7;
-    static constexpr uint16_t F_FUNCTION = 1 << 8;
-    static constexpr uint16_t F_TYPE     = 1 << 9;
+    static constexpr uint16_t F_UNIT     = 1 <<  0;
+    static constexpr uint16_t F_BOOL     = 1 <<  1;
+    static constexpr uint16_t F_INT      = 1 <<  2;
+    static constexpr uint16_t F_FLOAT    = 1 <<  3;
+    static constexpr uint16_t F_STR      = 1 <<  4;
+    static constexpr uint16_t F_RANGE    = 1 <<  5;
+    static constexpr uint16_t F_POINTER  = 1 <<  6;
+    static constexpr uint16_t F_ARRAY    = 1 <<  7;
+    static constexpr uint16_t F_FUNCTION = 1 <<  8;
+    static constexpr uint16_t F_TYPE     = 1 <<  9;
+    static constexpr uint16_t F_STRUCT   = 1 << 10;
 
     // attributes
-    static constexpr uint16_t F_LITERAL   = 1 << 12;
-    static constexpr uint16_t F_STRUCT = 1 << 13;
-    static constexpr uint16_t F_HALF_OPEN = 1 << 14;
+    static constexpr uint16_t F_LITERAL   = 1 << 14;
+    static constexpr uint16_t F_HALF_OPEN = 1 << 15;
 
     enum ESign
     {
@@ -110,16 +112,6 @@ public:
     static const TypeInfo* GetMinSignedIntTypeForSize(unsigned size);
 
     static const TypeInfo* GetMinUnsignedIntTypeForSize(unsigned size);
-
-    static const TypeInfo* CreateFunctionType(
-        TypeId id,
-        unsigned numBits,
-        ROString name,
-        const std::vector<const TypeInfo*>& parameterTypes,
-        const std::vector<ROString>& parameterNames,
-        const TypeInfo* returnType);
-
-    static const TypeInfo* CreateTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo);
 
 private:
     const Token* token;

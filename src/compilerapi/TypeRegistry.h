@@ -55,15 +55,30 @@ public:
 
     ~TypeRegistry();
 
-    const std::vector<const TypeInfo*>& GetTypes() const;
+    const std::vector<const TypeInfo*>& GetTypes() const
+    {
+        return types;
+    }
 
-    unsigned GetPointerSize() const;
+    unsigned GetPointerSize() const
+    {
+        return pointerSize;
+    }
 
-    const TypeInfo* GetIntSizeType() const;
+    const TypeInfo* GetIntSizeType() const
+    {
+        return intSizeType;
+    }
 
-    const TypeInfo* GetUIntSizeType() const;
+    const TypeInfo* GetUIntSizeType() const
+    {
+        return uintSizeType;
+    }
 
-    const TypeInfo* GetStringType() const;
+    const TypeInfo* GetStringType() const
+    {
+        return stringType;
+    }
 
     const TypeInfo* GetRangeType(const TypeInfo* memberType, bool isHalfOpen);
 
