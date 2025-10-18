@@ -98,13 +98,13 @@ public:
 
     const TypeInfo* GetTypeAlias(ROString newName, const Token* newToken, const TypeInfo* typeInfo);
 
-    const NumericLiteralType* CreateNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits);
-
     const NumericLiteralType* CreateSignedNumericLiteralType(unsigned numBits);
 
     const NumericLiteralType* CreateUnsignedNumericLiteralType(unsigned numBits);
 
-    const TypeInfo* GetMinSizeNumericLiteralType(const NumericLiteralType* numLitType, TypeInfo::ESign sign);
+    const NumericLiteralType* CreateContextDependentNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits);
+
+    const TypeInfo* CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits);
 
 private:
     TypeId GetNextTypeId();

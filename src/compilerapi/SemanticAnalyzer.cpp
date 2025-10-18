@@ -1893,7 +1893,7 @@ void SemanticAnalyzer::Visit(ForLoop* forLoop)
                 return;
             }
 
-            inferType = compilerContext.typeRegistry.GetMinSizeNumericLiteralType(arrayInnerLiteralType, varType->GetSign());
+            inferType = compilerContext.typeRegistry.CreateNumericLiteralType(varType->GetSign(), arrayInnerLiteralType->GetSignedNumBits(), arrayInnerLiteralType->GetUnsignedNumBits());
             if (inferType == nullptr)
             {
                 logger.LogInternalError("Could not determine expression result type");
@@ -2607,7 +2607,7 @@ void SemanticAnalyzer::Visit(NumericExpression* numericExpression)
         return;
     }
 
-    const NumericLiteralType* type = compilerContext.typeRegistry.CreateNumericLiteralType(minSignedNumBits, minUnsignedNumBits);
+    const NumericLiteralType* type = compilerContext.typeRegistry.CreateContextDependentNumericLiteralType(minSignedNumBits, minUnsignedNumBits);
     numericExpression->SetType(type);
 
     int64_t value = numericExpression->value;

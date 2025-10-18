@@ -297,11 +297,6 @@ const TypeInfo* TypeRegistry::GetTypeAlias(ROString newName, const Token* newTok
     return newTypeInfo;
 }
 
-const NumericLiteralType* TypeRegistry::CreateNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits)
-{
-    return CreateNumericLiteralType(TypeInfo::eContextDependent, signedNumBits, unsignedNumBits, "{integer}");
-}
-
 const NumericLiteralType* TypeRegistry::CreateSignedNumericLiteralType(unsigned numBits)
 {
     return CreateNumericLiteralType(TypeInfo::eSigned, numBits, 0, "{signed-integer}");
@@ -312,7 +307,12 @@ const NumericLiteralType* TypeRegistry::CreateUnsignedNumericLiteralType(unsigne
     return CreateNumericLiteralType(TypeInfo::eUnsigned, 0, numBits, "{unsigned-integer}");
 }
 
-const TypeInfo* TypeRegistry::GetMinSizeNumericLiteralType(const NumericLiteralType* numLitType, TypeInfo::ESign sign)
+const NumericLiteralType* TypeRegistry::CreateContextDependentNumericLiteralType(unsigned signedNumBits, unsigned unsignedNumBits)
+{
+    return CreateNumericLiteralType(TypeInfo::eContextDependent, signedNumBits, unsignedNumBits, "{integer}");
+}
+
+const TypeInfo* TypeRegistry::CreateNumericLiteralType(TypeInfo::ESign sign, unsigned signedNumBits, unsigned unsignedNumBits)
 {
     const TypeInfo* type = nullptr;
     switch (sign)
@@ -321,13 +321,13 @@ const TypeInfo* TypeRegistry::GetMinSizeNumericLiteralType(const NumericLiteralT
             type = nullptr;
             break;
         case TypeInfo::eSigned:
-            type = CreateSignedNumericLiteralType(numLitType->GetSignedNumBits());
+            type = CreateSignedNumericLiteralType(signedNumBits);
             break;
         case TypeInfo::eUnsigned:
-            type = CreateUnsignedNumericLiteralType(numLitType->GetUnsignedNumBits());
+            type = CreateUnsignedNumericLiteralType(unsignedNumBits);
             break;
         case TypeInfo::eContextDependent:
-            type = numLitType;
+            type = CreateContextDependentNumericLiteralType(signedNumBits, unsignedNumBits);
             break;
     }
 
