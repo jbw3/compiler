@@ -3,7 +3,7 @@
 
 using namespace std;
 
-constexpr char NUMERIC_LITERAL_SEPERATOR = '_';
+constexpr char NUMERIC_LITERAL_SEPARATOR = '_';
 
 bool binStringToInteger(ROString str, int64_t& num)
 {
@@ -14,7 +14,7 @@ bool binStringToInteger(ROString str, int64_t& num)
     for (size_t i = 2; i < str.GetSize(); ++i)
     {
         char ch = str[i];
-        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        if (ch != NUMERIC_LITERAL_SEPARATOR)
         {
             hasDigit = true;
 
@@ -44,7 +44,7 @@ bool octStringToInteger(ROString str, int64_t& num)
     for (size_t i = 2; i < str.GetSize(); ++i)
     {
         char ch = str[i];
-        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        if (ch != NUMERIC_LITERAL_SEPARATOR)
         {
             hasDigit = true;
 
@@ -73,7 +73,7 @@ bool decStringToInteger(ROString str, int64_t& num)
     for (size_t i = 0; i < str.GetSize(); ++i)
     {
         char ch = str[i];
-        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        if (ch != NUMERIC_LITERAL_SEPARATOR)
         {
             hasDigit = true;
 
@@ -102,7 +102,7 @@ bool hexStringToInteger(ROString str, int64_t& num)
     for (size_t i = 2; i < str.GetSize(); ++i)
     {
         char ch = str[i];
-        if (ch != NUMERIC_LITERAL_SEPERATOR)
+        if (ch != NUMERIC_LITERAL_SEPARATOR)
         {
             hasDigit = true;
 
@@ -128,7 +128,7 @@ bool stringToInteger(ROString str, int64_t& num)
 {
     bool ok = false;
 
-    if (str.GetSize() == 0 || str[0] == NUMERIC_LITERAL_SEPERATOR)
+    if (str.GetSize() == 0 || str[0] == NUMERIC_LITERAL_SEPARATOR)
     {
         num = 0;
         ok = false;
