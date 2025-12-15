@@ -212,6 +212,8 @@ private:
 
     SyntaxTree::Expression* ImplicitCast(SyntaxTree::Expression* expression, const TypeInfo* type);
 
+    void BuiltInAssert(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
+
     void BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);
 
     void BuiltInCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression);

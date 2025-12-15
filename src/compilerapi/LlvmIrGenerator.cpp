@@ -1852,7 +1852,11 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
 {
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     ROString name = nameToken->value;
-    if (name == "@bitCast")
+    if (name == "@assert")
+    {
+        BuiltInAssert(builtInFunctionCallExpression);
+    }
+    else if (name == "@bitCast")
     {
         BuiltInBitCast(builtInFunctionCallExpression);
     }
@@ -1872,6 +1876,82 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
     {
         assert(false && "Unknown built-in function");
         resultValue = nullptr;
+    }
+}
+
+void LlvmIrGenerator::BuiltInAssert(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    bool assertions = true; // TODO: change this to be user configurable
+
+    if (assertions)
+    {
+        vector<Expression*> argExpressions = builtInFunctionCallExpression->arguments;
+
+        // generate the asserted bool value expression
+        Expression* expr = argExpressions[0];
+        expr->Accept(this);
+        if (resultValue == nullptr)
+        {
+            return;
+        }
+        Value* checkValue = resultValue;
+
+        Function* function = builder.GetInsertBlock()->getParent();
+        BasicBlock* failedBlock = BasicBlock::Create(context, "failed", function);
+        BasicBlock* passedBlock = BasicBlock::Create(context, "passed", function);
+
+        builder.CreateCondBr(checkValue, passedBlock, failedBlock);
+
+        // generate "failed" block IR
+        builder.SetInsertPoint(failedBlock);
+
+        Function* logErrorFunc = module->getFunction("logError");
+        if (logErrorFunc != nullptr)
+        {
+            const Token* token = builtInFunctionCallExpression->nameToken;
+
+            Type* llvmStrType = CreateLlvmType(compilerContext.typeRegistry.GetStringType());
+
+            const string& filename = compilerContext.GetFilename(token->filenameId);
+            Constant* fileStrPtr = CreateConstantString(filename);
+            Value* fileStr = builder.CreateLoad(llvmStrType, fileStrPtr, "filestr");
+            uint64_t line = static_cast<uint64_t>(token->line);
+            Constant* lineNum = ConstantInt::get(context, APInt(32, line, false));
+
+            // generate the error message string expression
+            expr = argExpressions[1];
+            expr->Accept(this);
+            if (resultValue == nullptr)
+            {
+                return;
+            }
+            Value* msgStr = resultValue;
+
+            vector<Value*> logErrorArgs;
+            logErrorArgs.push_back(fileStr);
+            logErrorArgs.push_back(lineNum);
+            logErrorArgs.push_back(msgStr);
+            builder.CreateCall(logErrorFunc, logErrorArgs);
+        }
+
+        Function* exitFunc = module->getFunction("exit");
+
+        // declare the function if it does not exist
+        if (exitFunc == nullptr)
+        {
+            vector<Type*> parameters;
+            parameters.push_back(Type::getInt32Ty(context));
+            FunctionType* funcType = FunctionType::get(Type::getVoidTy(context), parameters, false);
+            exitFunc = Function::Create(funcType, Function::ExternalLinkage, "exit", module);
+        }
+
+        vector<Value*> exitArgs;
+        exitArgs.push_back(ConstantInt::get(context, APInt(32, 1)));
+        builder.CreateCall(exitFunc, exitArgs);
+        builder.CreateUnreachable();
+
+        // generate "passed" block IR
+        builder.SetInsertPoint(passedBlock);
     }
 }
 

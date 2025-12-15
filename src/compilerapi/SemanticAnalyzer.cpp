@@ -2993,7 +2993,11 @@ void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallE
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     ROString name = nameToken->value;
 
-    if (name == "@bitCast")
+    if (name == "@assert")
+    {
+        BuiltInAssert(builtInFunctionCallExpression);
+    }
+    else if (name == "@bitCast")
     {
         BuiltInBitCast(builtInFunctionCallExpression);
     }
@@ -3016,7 +3020,62 @@ void SemanticAnalyzer::Visit(BuiltInFunctionCallExpression* builtInFunctionCallE
     }
 }
 
-void SemanticAnalyzer::BuiltInBitCast(SyntaxTree::BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+void SemanticAnalyzer::BuiltInAssert(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
+{
+    const Token* nameToken = builtInFunctionCallExpression->nameToken;
+    ROString name = nameToken->value;
+
+    const Expressions& args = builtInFunctionCallExpression->arguments;
+    if (args.size() != 2)
+    {
+        logger.LogError(*nameToken, "{} expected 2 arguments but got {}", name, args.size());
+        isError = true;
+        return;
+    }
+
+    const TypeInfo* paramTypes[2] = {
+        TypeInfo::BoolType,
+        compilerContext.typeRegistry.GetStringType(),
+    };
+
+    for (size_t i = 0; i < 2; ++i)
+    {
+        Expression* arg = args[i];
+        arg->Accept(this);
+        if (isError)
+        {
+            return;
+        }
+
+        const TypeInfo* argType = arg->GetType();
+        const TypeInfo* paramType = paramTypes[i];
+
+        bool needsCast = false;
+        if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
+        {
+            StartEndTokenFinder finder;
+            arg->Accept(&finder);
+
+            logger.LogError(
+                *finder.start, *finder.end,
+                "Argument type does not match parameter type. Argument: '{}', parameter: '{}'",
+                argType->GetName(),
+                paramType->GetName()
+            );
+            isError = true;
+            return;
+        }
+
+        if (needsCast)
+        {
+            builtInFunctionCallExpression->arguments[i] = ImplicitCast(arg, paramType);
+        }
+    }
+
+    builtInFunctionCallExpression->SetType(TypeInfo::UnitType);
+}
+
+void SemanticAnalyzer::BuiltInBitCast(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
     const Token* nameToken = builtInFunctionCallExpression->nameToken;
     ROString name = nameToken->value;
