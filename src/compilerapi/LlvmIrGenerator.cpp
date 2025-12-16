@@ -1881,9 +1881,7 @@ void LlvmIrGenerator::Visit(BuiltInFunctionCallExpression* builtInFunctionCallEx
 
 void LlvmIrGenerator::BuiltInAssert(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
 {
-    bool assertions = true; // TODO: change this to be user configurable
-
-    if (assertions)
+    if (compilerContext.config.assertions)
     {
         vector<Expression*> argExpressions = builtInFunctionCallExpression->arguments;
 

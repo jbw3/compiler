@@ -33,6 +33,7 @@ Config::Config()
     architecture = "";
     targetMachine = CreateTargetMachine(architecture, optimizationLevel);
     debugInfo = false;
+    assertions = true;
     boundsCheck = true;
     color = eAuto;
 }
@@ -261,6 +262,10 @@ bool Config::ParseNextArgs(int argc, const char* const argv[], int& idx, bool& h
             }
         }
     }
+    else if (strcmp(arg, "--no-assertions") == 0)
+    {
+        assertions = false;
+    }
     else if (strcmp(arg, "--no-bounds-check") == 0)
     {
         boundsCheck = false;
@@ -290,6 +295,7 @@ Options:
   --color <value>        Whether to color output messages: auto, true, false
   -d, --debug-info       Generate debug info
   -e, --emit <value>     Output type: asm, c-header, llvm, tokens, tree
+  --no-assertions        Disable runtime assertions
   --no-bounds-check      Disable array index bounds checking
   -O <value>             Optimization level: 0, 1, 2
   -o, --output <file>    Specify name of output file
