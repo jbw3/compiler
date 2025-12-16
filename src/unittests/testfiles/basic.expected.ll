@@ -3684,6 +3684,15 @@ entry:
   %addr5 = load i64, ptr %addr, align 8
   %cast6 = inttoptr i64 %addr5 to ptr
   store ptr %cast6, ptr %ptr, align 8
+  %x7 = load float, ptr %x, align 4
+  %cmplt = fcmp olt float %x7, 4.000000e+00
+  br i1 %cmplt, label %passed, label %failed
+
+failed:                                           ; preds = %entry
+  call void @exit(i32 1)
+  unreachable
+
+passed:                                           ; preds = %entry
   ret %UnitType zeroinitializer
 }
 

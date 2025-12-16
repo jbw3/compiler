@@ -1218,4 +1218,6 @@ fun builtIns()
     {
         var ptr = @intToPtr(&i32, addr);
     }
+
+    @assert(x < 4.0, "pi is wrong!");
 }
