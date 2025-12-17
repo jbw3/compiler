@@ -466,6 +466,7 @@ void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->name);
     PrintProperty("typeExpression", member->typeExpression);
+    PrintProperty("defaultValueExpression", member->defaultValueExpression);
 }
 
 void SyntaxTreePrinter::PrintMemberInitialization(const MemberInitialization* memberInitialization)

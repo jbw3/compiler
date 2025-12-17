@@ -2209,7 +2209,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
     if (needsStructImpl)
     {
         vector<const Token*> structTokenStack;
-        for (const MemberDefinition* member : structDefinitionExpression->members)
+        for (MemberDefinition* member : structDefinitionExpression->members)
         {
             structTokenStack.clear();
 
@@ -2246,6 +2246,51 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
                 }
 
                 return;
+            }
+
+            // if there is a default member expression, process it
+            if (member->defaultValueExpression != nullptr)
+            {
+                member->defaultValueExpression->Accept(this);
+                if (isError)
+                {
+                    return;
+                }
+
+                bool needsCast = false;
+                if (!AreCompatibleAssignmentTypes(memberType, member->defaultValueExpression->GetType(), needsCast))
+                {
+                    const Token* opToken = member->equalOpToken;
+                    logger.LogError(
+                        *opToken,
+                        "Default value type '{}' cannot be assigned to member type '{}'",
+                        member->defaultValueExpression->GetType()->GetName(),
+                        memberType->GetName()
+                    );
+
+                    isError = true;
+                    return;
+                }
+
+                if (needsCast)
+                {
+                    member->defaultValueExpression = ImplicitCast(member->defaultValueExpression, memberType);
+                }
+
+                // check if expression is constant
+                if (!member->defaultValueExpression->GetIsConstant())
+                {
+                    StartEndTokenFinder finder;
+                    member->defaultValueExpression->Accept(&finder);
+
+                    logger.LogError(
+                        *finder.start, *finder.end,
+                        "Default member value is not a constant expression"
+                    );
+
+                    isError = true;
+                    return;
+                }
             }
 
             ROString memberName = member->name;

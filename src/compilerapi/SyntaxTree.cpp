@@ -834,17 +834,25 @@ void FunctionDefinition::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-MemberDefinition::MemberDefinition(ROString name, Expression* typeExpression,
-                                   const Token* nameToken) :
+MemberDefinition::MemberDefinition(
+    ROString name,
+    Expression* typeExpression,
+    Expression* defaultValueExpression,
+    const Token* nameToken,
+    const Token* equalOpToken
+) :
     nameToken(nameToken),
+    equalOpToken(equalOpToken),
     typeExpression(typeExpression),
-    name(name)
+    name(name),
+    defaultValueExpression(defaultValueExpression)
 {
 }
 
 MemberDefinition::~MemberDefinition()
 {
     delete typeExpression;
+    delete defaultValueExpression;
 }
 
 StructDefinitionExpression::StructDefinitionExpression(

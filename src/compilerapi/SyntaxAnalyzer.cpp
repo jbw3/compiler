@@ -391,7 +391,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
             return nullptr;
         }
 
-        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
+        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::eEqual, Token::eComma, Token::eCloseBrace);
 
         // make sure there was a type
         if (memberTypeExpr == nullptr)
@@ -401,10 +401,41 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
             return nullptr;
         }
 
-        MemberDefinition* member = new MemberDefinition(memberName, memberTypeExpr, memberNameToken);
+        Token::EType delimiter = iter->type;
+
+        // check if there is a default member value
+        const Token* equalOpToken = nullptr;
+        Expression* defaultMemberExpr = nullptr;
+        if (delimiter == Token::eEqual)
+        {
+            equalOpToken = &*iter;
+
+            // get default member value
+            if (!IncrementIterator(iter, endIter, "Expected default member value expression"))
+            {
+                deletePointerContainer(members);
+                return nullptr;
+            }
+
+            defaultMemberExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
+            if (defaultMemberExpr == nullptr)
+            {
+                deletePointerContainer(members);
+                return nullptr;
+            }
+
+            delimiter = iter->type;
+        }
+
+        MemberDefinition* member = new MemberDefinition(
+            memberName,
+            memberTypeExpr,
+            defaultMemberExpr,
+            memberNameToken,
+            equalOpToken
+        );
         members.push_back(member);
 
-        Token::EType delimiter = iter->type;
         if (delimiter == Token::eCloseBrace)
         {
             break;

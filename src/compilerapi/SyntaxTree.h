@@ -587,14 +587,21 @@ public:
 class MemberDefinition
 {
 public:
-    MemberDefinition(ROString name, Expression* typeExpression,
-                     const Token* nameToken);
+    MemberDefinition(
+        ROString name,
+        Expression* typeExpression,
+        Expression* defaultValueExpression,
+        const Token* nameToken,
+        const Token* equalOpToken
+    );
 
     ~MemberDefinition();
 
     const Token* nameToken;
+    const Token* equalOpToken;
     Expression* typeExpression;
     ROString name;
+    Expression* defaultValueExpression;
 };
 
 class StructDefinitionExpression : public Expression
