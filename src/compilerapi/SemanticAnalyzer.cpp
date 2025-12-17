@@ -2260,11 +2260,14 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
                 bool needsCast = false;
                 if (!AreCompatibleAssignmentTypes(memberType, member->defaultValueExpression->GetType(), needsCast))
                 {
-                    const Token* opToken = member->equalOpToken;
+                    StartEndTokenFinder finder;
+                    member->defaultValueExpression->Accept(&finder);
+
                     logger.LogError(
-                        *opToken,
-                        "Default value type '{}' cannot be assigned to member type '{}'",
+                        *finder.start, *finder.end,
+                        "Cannot assign expression of type '{}' to member '{}' of type '{}'",
                         member->defaultValueExpression->GetType()->GetName(),
+                        member->name,
                         memberType->GetName()
                     );
 

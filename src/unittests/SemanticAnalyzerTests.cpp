@@ -236,7 +236,7 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
         {
             "const X i32 = 12;\n"
             "const S = struct { m1 bool = X };",
-            "error: Default value type 'i32' cannot be assigned to member type 'bool'",
+            "Cannot assign expression of type 'i32' to member 'm1' of type 'bool'",
         },
 
         // struct with non-constant default member value
