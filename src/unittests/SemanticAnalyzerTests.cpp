@@ -130,6 +130,10 @@ bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
         // empty struct definition
         "const Empty = struct { };",
 
+        // struct with default member values
+        "const X i32 = 12;\n"
+        "const S = struct { m1 bool = true, m2 i32 = X + 2, m3 bool, m4 str = \"\", m5 i32 };",
+
         // defining structs in an array
         R"(
         const STRUCTS []type = [
@@ -226,7 +230,20 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
             "const B = struct { a i32, b f64, c bool };\n"
             "const AInst A = B: { a = 123, b = 1.23, c = false };\n",
             "error: Binary operator '=' does not support types 'A' and 'B'",
-        }
+        },
+
+        // struct with invalid default member value type
+        {
+            "const X i32 = 12;\n"
+            "const S = struct { m1 bool = X };",
+            "error: Default value type 'i32' cannot be assigned to member type 'bool'",
+        },
+
+        // struct with non-constant default member value
+        {
+            "const S = struct { m1 bool = true && true };",
+            "error: Default member value is not a constant expression",
+        },
     };
 
     bool ok = true;
