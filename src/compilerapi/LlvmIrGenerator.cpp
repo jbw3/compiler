@@ -2351,13 +2351,6 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
     unsigned constIdx = constantDeclaration->assignmentExpression->right->GetConstantValueIndex();
     symbolTable.AddConstant(constName, constantDeclaration->nameToken, constType, constIdx);
 
-    StructDefinitionExpression* structDef = dynamic_cast<StructDefinitionExpression*>(constantDeclaration->assignmentExpression->right);
-    if (structDef != nullptr)
-    {
-        // TODO: Is this call necessary?
-        structDef->Accept(this);
-    }
-
     resultValue = ConstantStruct::get(unitType);
 }
 
