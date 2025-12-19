@@ -4,13 +4,13 @@ import argparse
 import datetime
 import math
 import os
-import pathlib
+from pathlib import Path
 import random
 import subprocess
 import sys
 from typing import Callable, IO, Iterator
 
-SCRIPT_PATH = pathlib.Path(__file__)
+SCRIPT_PATH = Path(__file__)
 ROOT_DIR = SCRIPT_PATH.parent.parent
 
 class IdentifierInfo:
@@ -974,6 +974,7 @@ def write_code(io: IO[str]) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('--keep-source', action='store_true', help="keep the fuzzer's generated source code")
+    parser.add_argument('-m', '--max-errors', type=int, default=None, help='maximum number of errors')
     parser.add_argument('-r', '--runs', type=int, default=None, help='number of runs')
     parser.add_argument('-t', '--time', type=int, default=None, help='max time to run (in seconds)')
 
@@ -984,10 +985,10 @@ def main() -> int:
     args = parse_args()
 
     start = datetime.datetime.now()
-    out_dir = pathlib.Path(start.strftime('fuzzer_%Y-%m-%d_%H-%M-%S'))
+    out_dir = Path(start.strftime('fuzzer_%Y-%m-%d_%H-%M-%S'))
     os.makedirs(out_dir, exist_ok=True)
-    src_filename = pathlib.Path('fuzzer.wip')
-    out_filename = pathlib.Path('fuzzer.o')
+    src_filename = Path('fuzzer.wip')
+    out_filename = Path('fuzzer.o')
 
     compiler_path = ROOT_DIR / 'debug' / 'compiler' / 'wip'
     cmd = [
@@ -1001,6 +1002,8 @@ def main() -> int:
     total_runs = 0
     error_count = 0
     while True:
+        if args.max_errors is not None and error_count >= args.max_errors:
+            break
         if args.runs is not None and total_runs >= args.runs:
             break
         if max_time is not None and datetime.datetime.now() - start >= max_time:
