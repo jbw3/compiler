@@ -1221,3 +1221,17 @@ fun builtIns()
 
     @assert(x < 4.0, "pi is wrong!");
 }
+
+const StructWithDefaults = struct
+{
+    m0 i32,
+    m1 bool = true,
+    m2 u16 = 10_000,
+};
+
+fun structWithDefaults(x u16)
+{
+    var s1 = StructWithDefaults: { m0 = 1 };
+    var s2 = StructWithDefaults: { m2 = x, m0 = 2, };
+    var s3 = StructWithDefaults: { m0 = 3, m1 = false };
+}

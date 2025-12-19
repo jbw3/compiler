@@ -24,6 +24,7 @@ $target_triple
 %"<struct29>" = type { i32, i16 }
 %TypesTest = type {}
 %"[]TypesTest" = type { i64, ptr }
+%StructWithDefaults = type { i32, i1, i16 }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, ptr @strData0 }
@@ -3693,6 +3694,24 @@ failed:                                           ; preds = %entry
   unreachable
 
 passed:                                           ; preds = %entry
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @structWithDefaults(i16 %x) #0 {
+entry:
+  %s3 = alloca %StructWithDefaults, align 8
+  %s2 = alloca %StructWithDefaults, align 8
+  %s1 = alloca %StructWithDefaults, align 8
+  %x1 = alloca i16, align 2
+  store i16 %x, ptr %x1, align 2
+  store %StructWithDefaults { i32 1, i1 true, i16 10000 }, ptr %s1, align 4
+  %x2 = load i16, ptr %x1, align 2
+  %agg = insertvalue %StructWithDefaults undef, i16 %x2, 2
+  %agg3 = insertvalue %StructWithDefaults %agg, i32 2, 0
+  %agg4 = insertvalue %StructWithDefaults %agg3, i1 true, 1
+  store %StructWithDefaults %agg4, ptr %s2, align 4
+  store %StructWithDefaults { i32 3, i1 false, i16 10000 }, ptr %s3, align 4
   ret %UnitType zeroinitializer
 }
 
