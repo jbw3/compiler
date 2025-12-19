@@ -2296,8 +2296,14 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
                 }
             }
 
+            unsigned defaultValueIndex = MemberInfo::NO_DEFAULT_VALUE;
+            if (member->defaultValueExpression != nullptr)
+            {
+                defaultValueIndex = member->defaultValueExpression->GetConstantValueIndex();
+            }
+
             ROString memberName = member->name;
-            bool added = structType->AddMember(memberName, memberType, true, member->nameToken);
+            bool added = structType->AddMember(memberName, memberType, true, defaultValueIndex, member->nameToken);
             if (!added)
             {
                 isError = true;
@@ -2419,6 +2425,19 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
         }
     }
 
+    // check if uninitialized members have default values
+    for (auto iter = membersToInit.begin(); iter != membersToInit.end(); )
+    {
+        if (type->GetMember(*iter)->HasDefaultValue())
+        {
+            iter = membersToInit.erase(iter);
+        }
+        else
+        {
+            ++iter;
+        }
+    }
+
     // error if not all members were initialized
     size_t membersNotInit = membersToInit.size();
     if (membersNotInit > 0)
@@ -2450,9 +2469,23 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
     if (allMembersAreConst)
     {
         StructConstValue constValue;
-        for (const MemberInitialization* member : structInitializationExpression->memberInitializations)
+        for (const MemberInfo* memberInfo : type->GetMembers())
         {
-            constValue.memberIndices.push_back(member->expression->GetConstantValueIndex());
+            bool found = false;
+            for (const MemberInitialization* memberInit : structInitializationExpression->memberInitializations)
+            {
+                if (memberInfo->GetName() == memberInit->name)
+                {
+                    constValue.memberIndices.push_back(memberInit->expression->GetConstantValueIndex());
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                constValue.memberIndices.push_back(memberInfo->GetDefaultValueIndex());
+            }
         }
 
         unsigned idx = compilerContext.AddStructConstantValue(constValue);

@@ -38,12 +38,13 @@ TypeInfo float32LiteralTypeInfo(12, 32, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL,
 TypeInfo float64LiteralTypeInfo(13, 64, TypeInfo::F_FLOAT | TypeInfo::F_LITERAL, TypeInfo::eSigned, "{float-literal}");
 TypeInfo typeTypeInfo(14, 0, TypeInfo::F_TYPE, TypeInfo::eNotApplicable, TYPE_KEYWORD);
 
-MemberInfo::MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token) :
+MemberInfo::MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, unsigned defaultValueIndex, const Token* token) :
     name(name),
     index(index),
     isStorage(isStorage),
     type(type),
-    token(token)
+    token(token),
+    defaultValueIndex(defaultValueIndex)
 {
 }
 
@@ -220,9 +221,9 @@ const MemberInfo* TypeInfo::GetMember(ROString memberName) const
     return iter->second;
 }
 
-bool TypeInfo::AddMember(ROString name, const TypeInfo* type, bool isAssignable, const Token* token)
+bool TypeInfo::AddMember(ROString name, const TypeInfo* type, bool isAssignable, unsigned defaultValueIndex, const Token* token)
 {
-    MemberInfo* member = new MemberInfo(name, static_cast<unsigned>(data->members.size()), type, isAssignable, token);
+    MemberInfo* member = new MemberInfo(name, static_cast<unsigned>(data->members.size()), type, isAssignable, defaultValueIndex, token);
     auto rv = data->memberMap.insert({name, member});
 
     bool inserted = rv.second;

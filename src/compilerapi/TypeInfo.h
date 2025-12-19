@@ -24,7 +24,9 @@ const char* const ARRAY_TYPE_END_TOKEN = "]";
 class MemberInfo
 {
 public:
-    MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, const Token* token);
+    static constexpr unsigned NO_DEFAULT_VALUE = static_cast<unsigned>(-1);
+
+    MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, unsigned defaultValueIndex, const Token* token);
 
     const ROString GetName() const
     {
@@ -46,6 +48,16 @@ public:
         return isStorage;
     }
 
+    unsigned GetDefaultValueIndex() const
+    {
+        return defaultValueIndex;
+    }
+
+    bool HasDefaultValue() const
+    {
+        return defaultValueIndex != NO_DEFAULT_VALUE;
+    }
+
     const Token* GetToken() const
     {
         return token;
@@ -57,6 +69,7 @@ private:
     bool isStorage;
     const TypeInfo* type;
     const Token* token;
+    unsigned defaultValueIndex;
 };
 
 typedef uint32_t TypeId;
@@ -274,7 +287,7 @@ public:
         return data->members.size();
     }
 
-    bool AddMember(ROString name, const TypeInfo* type, bool isAssignable, const Token* token);
+    bool AddMember(ROString name, const TypeInfo* type, bool isAssignable, unsigned defaultValueIndex, const Token* token);
 
     const Token* GetToken() const
     {

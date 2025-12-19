@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #else
@@ -1118,6 +1119,12 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
         return;
     }
 
+    unordered_set<ROString> membersToInit;
+    for (const MemberInfo* member : typeInfo->GetMembers())
+    {
+        membersToInit.insert(member->GetName());
+    }
+
     vector<unsigned> index(1);
     Value* initValue = UndefValue::get(type);
     for (const MemberInitialization* member : structInitializationExpression->memberInitializations)
@@ -1135,6 +1142,23 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
 
         index[0] = memberInfo->GetIndex();
         initValue = builder.CreateInsertValue(initValue, resultValue, index, "agg");
+
+        membersToInit.erase(member->name);
+    }
+
+    // init members with default values
+    for (const MemberInfo* memberInfo : typeInfo->GetMembers())
+    {
+        if (membersToInit.find(memberInfo->GetName()) != membersToInit.end())
+        {
+            unsigned constIdx = memberInfo->GetDefaultValueIndex();
+            assert(constIdx != MemberInfo::NO_DEFAULT_VALUE && "Member does not have a default value index");
+
+            Value* value = CreateConstantValue(memberInfo->GetType(), constIdx);
+
+            index[0] = memberInfo->GetIndex();
+            initValue = builder.CreateInsertValue(initValue, value, index, "agg");
+        }
     }
 
     resultValue = initValue;
@@ -2330,6 +2354,7 @@ void LlvmIrGenerator::Visit(ConstantDeclaration* constantDeclaration)
     StructDefinitionExpression* structDef = dynamic_cast<StructDefinitionExpression*>(constantDeclaration->assignmentExpression->right);
     if (structDef != nullptr)
     {
+        // TODO: Is this call necessary?
         structDef->Accept(this);
     }
 
