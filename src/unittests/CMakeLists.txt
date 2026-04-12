@@ -25,6 +25,11 @@ add_executable(unittests
 
 target_link_libraries(unittests compilerapi ${llvm_libs})
 
+if(CODE_COVERAGE)
+    target_compile_options(unittests PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    target_link_options(unittests PRIVATE -fprofile-instr-generate)
+endif()
+
 if(WIN32)
 else()
     target_compile_options(unittests PRIVATE -Wall -Wextra)

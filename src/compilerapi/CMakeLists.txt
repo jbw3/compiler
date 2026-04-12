@@ -56,6 +56,11 @@ add_library(compilerapi
     utils.h
 )
 
+if(CODE_COVERAGE)
+    target_compile_options(compilerapi PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    target_link_options(compilerapi PRIVATE -fprofile-instr-generate)
+endif()
+
 if(WIN32)
 else()
     target_compile_options(compilerapi PRIVATE -Wall -Wextra)

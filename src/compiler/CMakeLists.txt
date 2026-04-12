@@ -9,6 +9,11 @@ add_executable(wip main.cpp)
 
 target_link_libraries(wip compilerapi ${llvm_libs})
 
+if(CODE_COVERAGE)
+    target_compile_options(wip PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    target_link_options(wip PRIVATE -fprofile-instr-generate)
+endif()
+
 if(WIN32)
 else()
     target_compile_options(wip PRIVATE -Wall -Wextra)
