@@ -30,6 +30,7 @@ def main() -> None:
             'unittests/unittests',
             '--sources', api_dir,
             '-format=html',
+            '-coverage-watermark=90,70',
             '-output-dir=../coverage-report',
         ],
         cwd=build_dir,
