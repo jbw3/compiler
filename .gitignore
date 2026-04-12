@@ -3,7 +3,9 @@
 build
 debug
 release
+coverage-report
 test_results.xml
 *.out.ll
 *.out.wip
+*.profraw
 *.swp
