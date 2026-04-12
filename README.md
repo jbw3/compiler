@@ -51,6 +51,8 @@ cmake ../src -DCMAKE_CXX_COMPILER=clang++-20 -DLLVM_DIR=/usr/lib/llvm-20/cmake -
 make
 ```
 
+Note: Add `-DCODE_COVERAGE=TRUE` to turn on code coverage.
+
 ### Windows
 
 #### Dependencies
