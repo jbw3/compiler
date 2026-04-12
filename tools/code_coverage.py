@@ -7,6 +7,7 @@ def main() -> None:
     script_dir = Path(__file__).parent
     root_dir = script_dir.parent
     build_dir = root_dir / 'debug'
+    api_dir = root_dir / 'src' / 'compilerapi'
 
     # run ctest
     subprocess.check_call(
@@ -23,13 +24,26 @@ def main() -> None:
     )
 
     subprocess.check_call(
-        ['llvm-cov-20', 'show', '--instr-profile', 'default.profdata', 'unittests/unittests', '-format=html', '-output-dir=../coverage-report'],
+        [
+            'llvm-cov-20', 'show',
+            '--instr-profile', 'default.profdata',
+            'unittests/unittests',
+            '--sources', api_dir,
+            '-format=html',
+            '-output-dir=../coverage-report',
+        ],
         cwd=build_dir,
     )
 
     with open(build_dir / 'lcov.info', 'wb') as lcov_info:
         subprocess.check_call(
-            ['llvm-cov-20', 'export', '--instr-profile', 'default.profdata', 'unittests/unittests', '-format=lcov'],
+            [
+                'llvm-cov-20', 'export',
+                '--instr-profile', 'default.profdata',
+                'unittests/unittests',
+                '--sources', api_dir,
+                '-format=lcov',
+            ],
             stdout=lcov_info,
             cwd=build_dir,
         )
