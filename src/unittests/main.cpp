@@ -3,6 +3,7 @@
 #include "ROStringTests.h"
 #include "SemanticAnalyzerTests.h"
 #include "SourceGeneratorTests.h"
+#include "SyntaxAnalyzerTests.h"
 #include "UtilsTests.h"
 #include <fstream>
 #include <iostream>
@@ -20,6 +21,7 @@ int main(int argc, const char* const argv[])
         shared_ptr<TestClass>(new UtilsTests(resultsFile)),
         shared_ptr<TestClass>(new ROStringTests(resultsFile)),
         shared_ptr<TestClass>(new LexicalAnalyzerTests(resultsFile)),
+        shared_ptr<TestClass>(new SyntaxAnalyzerTests(resultsFile)),
         shared_ptr<TestClass>(new SemanticAnalyzerTests(resultsFile)),
         shared_ptr<TestClass>(new SourceGeneratorTests(resultsFile)),
         shared_ptr<TestClass>(new CompilerTests(resultsFile)),

@@ -17,6 +17,8 @@ add_executable(unittests
     SemanticAnalyzerTests.h
     SourceGeneratorTests.cpp
     SourceGeneratorTests.h
+    SyntaxAnalyzerTests.cpp
+    SyntaxAnalyzerTests.h
     TestClass.cpp
     TestClass.h
     UtilsTests.cpp
