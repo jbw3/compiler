@@ -20,142 +20,142 @@ const unordered_set<char> LexicalAnalyzer::SYMBOL_START_CHAR =
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES1[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("%"), Token::eRemainder},
+    LexicalAnalyzer::TokenValue{ROString("%"), Token::Remainder},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES2[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("&"), Token::eAmpersand},
-    LexicalAnalyzer::TokenValue{ROString("*="), Token::eTimesEqual},
-    LexicalAnalyzer::TokenValue{ROString("..<"), Token::ePeriodPeriodLess},
+    LexicalAnalyzer::TokenValue{ROString("&"), Token::Ampersand},
+    LexicalAnalyzer::TokenValue{ROString("*="), Token::TimesEqual},
+    LexicalAnalyzer::TokenValue{ROString("..<"), Token::PeriodPeriodLess},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES3[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("+="), Token::ePlusEqual},
+    LexicalAnalyzer::TokenValue{ROString("+="), Token::PlusEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES5[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("!"), Token::eExclaim},
-    LexicalAnalyzer::TokenValue{ROString("-="), Token::eMinusEqual},
+    LexicalAnalyzer::TokenValue{ROString("!"), Token::Exclaim},
+    LexicalAnalyzer::TokenValue{ROString("-="), Token::MinusEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES6[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(".."), Token::ePeriodPeriod},
+    LexicalAnalyzer::TokenValue{ROString(".."), Token::PeriodPeriod},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES7[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("/="), Token::eDivideEqual},
+    LexicalAnalyzer::TokenValue{ROString("/="), Token::DivideEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES8[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(","), Token::eComma},
+    LexicalAnalyzer::TokenValue{ROString(","), Token::Comma},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES9[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("-"), Token::eMinus},
-    LexicalAnalyzer::TokenValue{ROString("!="), Token::eExclaimEqual},
+    LexicalAnalyzer::TokenValue{ROString("-"), Token::Minus},
+    LexicalAnalyzer::TokenValue{ROString("!="), Token::ExclaimEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES10[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("."), Token::ePeriod},
+    LexicalAnalyzer::TokenValue{ROString("."), Token::Period},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES11[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("/"), Token::eDivide},
+    LexicalAnalyzer::TokenValue{ROString("/"), Token::Divide},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES12[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("("), Token::eOpenPar},
+    LexicalAnalyzer::TokenValue{ROString("("), Token::OpenPar},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES13[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(")"), Token::eClosePar},
-    LexicalAnalyzer::TokenValue{ROString("%="), Token::eRemainderEqual},
+    LexicalAnalyzer::TokenValue{ROString(")"), Token::ClosePar},
+    LexicalAnalyzer::TokenValue{ROString("%="), Token::RemainderEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES14[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("*"), Token::eTimes},
-    LexicalAnalyzer::TokenValue{ROString("&&"), Token::eAmpersandAmpersand},
-    LexicalAnalyzer::TokenValue{ROString("&="), Token::eAmpersandEqual},
-    LexicalAnalyzer::TokenValue{ROString(">>>="), Token::eGreaterGreaterGreaterEqual},
+    LexicalAnalyzer::TokenValue{ROString("*"), Token::Times},
+    LexicalAnalyzer::TokenValue{ROString("&&"), Token::AmpersandAmpersand},
+    LexicalAnalyzer::TokenValue{ROString("&="), Token::AmpersandEqual},
+    LexicalAnalyzer::TokenValue{ROString(">>>="), Token::GreaterGreaterGreaterEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES15[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("+"), Token::ePlus},
+    LexicalAnalyzer::TokenValue{ROString("+"), Token::Plus},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES16[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("<<="), Token::eLessLessEqual},
+    LexicalAnalyzer::TokenValue{ROString("<<="), Token::LessLessEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES18[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(">>="), Token::eGreaterGreaterEqual},
-    LexicalAnalyzer::TokenValue{ROString(">>>"), Token::eGreaterGreaterGreater},
+    LexicalAnalyzer::TokenValue{ROString(">>="), Token::GreaterGreaterEqual},
+    LexicalAnalyzer::TokenValue{ROString(">>>"), Token::GreaterGreaterGreater},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES20[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("<="), Token::eLessEqual},
-    LexicalAnalyzer::TokenValue{ROString("||"), Token::eBarBar},
-    LexicalAnalyzer::TokenValue{ROString("<<"), Token::eLessLess},
-    LexicalAnalyzer::TokenValue{ROString("|="), Token::eBarEqual},
+    LexicalAnalyzer::TokenValue{ROString("<="), Token::LessEqual},
+    LexicalAnalyzer::TokenValue{ROString("||"), Token::BarBar},
+    LexicalAnalyzer::TokenValue{ROString("<<"), Token::LessLess},
+    LexicalAnalyzer::TokenValue{ROString("|="), Token::BarEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES21[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("=="), Token::eEqualEqual},
+    LexicalAnalyzer::TokenValue{ROString("=="), Token::EqualEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES22[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(">="), Token::eGreaterEqual},
-    LexicalAnalyzer::TokenValue{ROString(">>"), Token::eGreaterGreater},
-    LexicalAnalyzer::TokenValue{ROString("^="), Token::eCaretEqual},
+    LexicalAnalyzer::TokenValue{ROString(">="), Token::GreaterEqual},
+    LexicalAnalyzer::TokenValue{ROString(">>"), Token::GreaterGreater},
+    LexicalAnalyzer::TokenValue{ROString("^="), Token::CaretEqual},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES24[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("<"), Token::eLess},
-    LexicalAnalyzer::TokenValue{ROString("|"), Token::eBar},
+    LexicalAnalyzer::TokenValue{ROString("<"), Token::Less},
+    LexicalAnalyzer::TokenValue{ROString("|"), Token::Bar},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES25[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("="), Token::eEqual},
-    LexicalAnalyzer::TokenValue{ROString("}"), Token::eCloseBrace},
-    LexicalAnalyzer::TokenValue{ROString("]"), Token::eCloseBracket},
+    LexicalAnalyzer::TokenValue{ROString("="), Token::Equal},
+    LexicalAnalyzer::TokenValue{ROString("}"), Token::CloseBrace},
+    LexicalAnalyzer::TokenValue{ROString("]"), Token::CloseBracket},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES26[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(">"), Token::eGreater},
-    LexicalAnalyzer::TokenValue{ROString("^"), Token::eCaret},
+    LexicalAnalyzer::TokenValue{ROString(">"), Token::Greater},
+    LexicalAnalyzer::TokenValue{ROString("^"), Token::Caret},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES30[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(":"), Token::eColon},
+    LexicalAnalyzer::TokenValue{ROString(":"), Token::Colon},
 };
 
 const LexicalAnalyzer::TokenValue SYMBOL_VALUES31[] =
 {
-    LexicalAnalyzer::TokenValue{ROString(";"), Token::eSemiColon},
-    LexicalAnalyzer::TokenValue{ROString("{"), Token::eOpenBrace},
-    LexicalAnalyzer::TokenValue{ROString("["), Token::eOpenBracket},
+    LexicalAnalyzer::TokenValue{ROString(";"), Token::SemiColon},
+    LexicalAnalyzer::TokenValue{ROString("{"), Token::OpenBrace},
+    LexicalAnalyzer::TokenValue{ROString("["), Token::OpenBracket},
 };
 
 const LexicalAnalyzer::Bucket LexicalAnalyzer::SYMBOLS_HASH_TABLE[SYMBOLS_HASH_TABLE_SIZE] =
@@ -196,76 +196,76 @@ const LexicalAnalyzer::Bucket LexicalAnalyzer::SYMBOLS_HASH_TABLE[SYMBOLS_HASH_T
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES1[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("break"), Token::eBreak},
-    LexicalAnalyzer::TokenValue{ROString("bool"), Token::eBool},
+    LexicalAnalyzer::TokenValue{ROString("break"), Token::Break},
+    LexicalAnalyzer::TokenValue{ROString("bool"), Token::Bool},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES2[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("continue"), Token::eContinue},
-    LexicalAnalyzer::TokenValue{ROString("const"), Token::eConst},
+    LexicalAnalyzer::TokenValue{ROString("continue"), Token::Continue},
+    LexicalAnalyzer::TokenValue{ROString("const"), Token::Const},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES4[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("extern"), Token::eExtern},
-    LexicalAnalyzer::TokenValue{ROString("else"), Token::eElse},
-    LexicalAnalyzer::TokenValue{ROString("elif"), Token::eElif},
+    LexicalAnalyzer::TokenValue{ROString("extern"), Token::Extern},
+    LexicalAnalyzer::TokenValue{ROString("else"), Token::Else},
+    LexicalAnalyzer::TokenValue{ROString("elif"), Token::Elif},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES5[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("fun"), Token::eFun},
-    LexicalAnalyzer::TokenValue{ROString("for"), Token::eFor},
-    LexicalAnalyzer::TokenValue{ROString("false"), Token::eFalseLit},
+    LexicalAnalyzer::TokenValue{ROString("fun"), Token::Fun},
+    LexicalAnalyzer::TokenValue{ROString("for"), Token::For},
+    LexicalAnalyzer::TokenValue{ROString("false"), Token::FalseLit},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES8[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("isize"), Token::eISize},
-    LexicalAnalyzer::TokenValue{ROString("in"), Token::eIn},
-    LexicalAnalyzer::TokenValue{ROString("i64"), Token::eI64},
-    LexicalAnalyzer::TokenValue{ROString("i32"), Token::eI32},
-    LexicalAnalyzer::TokenValue{ROString("i16"), Token::eI16},
-    LexicalAnalyzer::TokenValue{ROString("i8"), Token::eI8},
-    LexicalAnalyzer::TokenValue{ROString("if"), Token::eIf},
+    LexicalAnalyzer::TokenValue{ROString("isize"), Token::ISize},
+    LexicalAnalyzer::TokenValue{ROString("in"), Token::In},
+    LexicalAnalyzer::TokenValue{ROString("i64"), Token::I64},
+    LexicalAnalyzer::TokenValue{ROString("i32"), Token::I32},
+    LexicalAnalyzer::TokenValue{ROString("i16"), Token::I16},
+    LexicalAnalyzer::TokenValue{ROString("i8"), Token::I8},
+    LexicalAnalyzer::TokenValue{ROString("if"), Token::If},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES17[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("return"), Token::eReturn},
+    LexicalAnalyzer::TokenValue{ROString("return"), Token::Return},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES18[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("struct"), Token::eStruct},
-    LexicalAnalyzer::TokenValue{ROString("str"), Token::eStr},
+    LexicalAnalyzer::TokenValue{ROString("struct"), Token::Struct},
+    LexicalAnalyzer::TokenValue{ROString("str"), Token::Str},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES19[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("type"), Token::eType},
-    LexicalAnalyzer::TokenValue{ROString("true"), Token::eTrueLit},
+    LexicalAnalyzer::TokenValue{ROString("type"), Token::Type},
+    LexicalAnalyzer::TokenValue{ROString("true"), Token::TrueLit},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES20[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("usize"), Token::eUSize},
-    LexicalAnalyzer::TokenValue{ROString("u64"), Token::eU64},
-    LexicalAnalyzer::TokenValue{ROString("u32"), Token::eU32},
-    LexicalAnalyzer::TokenValue{ROString("u16"), Token::eU16},
-    LexicalAnalyzer::TokenValue{ROString("u8"), Token::eU8},
-    LexicalAnalyzer::TokenValue{ROString("unchecked"), Token::eUnchecked},
+    LexicalAnalyzer::TokenValue{ROString("usize"), Token::USize},
+    LexicalAnalyzer::TokenValue{ROString("u64"), Token::U64},
+    LexicalAnalyzer::TokenValue{ROString("u32"), Token::U32},
+    LexicalAnalyzer::TokenValue{ROString("u16"), Token::U16},
+    LexicalAnalyzer::TokenValue{ROString("u8"), Token::U8},
+    LexicalAnalyzer::TokenValue{ROString("unchecked"), Token::Unchecked},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES21[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("var"), Token::eVar},
+    LexicalAnalyzer::TokenValue{ROString("var"), Token::Var},
 };
 
 const LexicalAnalyzer::TokenValue KEYWORD_VALUES22[] =
 {
-    LexicalAnalyzer::TokenValue{ROString("while"), Token::eWhile},
+    LexicalAnalyzer::TokenValue{ROString("while"), Token::While},
 };
 
 
@@ -299,7 +299,7 @@ const LexicalAnalyzer::Bucket LexicalAnalyzer::KEYWORDS_HASH_TABLE[KEYWORDS_HASH
     LexicalAnalyzer::Bucket{nullptr, 0},
 };
 
-Token::EType LexicalAnalyzer::GetSymbolType(ROString str)
+uint16_t LexicalAnalyzer::GetSymbolType(ROString str)
 {
     size_t index = static_cast<size_t>(str[0]) ^ (str.GetSize() << 2);
     index %= SYMBOLS_HASH_TABLE_SIZE;
@@ -315,10 +315,10 @@ Token::EType LexicalAnalyzer::GetSymbolType(ROString str)
         }
     }
 
-    return Token::eInvalid;
+    return Token::Invalid;
 }
 
-Token::EType LexicalAnalyzer::GetKeywordType(ROString str)
+uint16_t LexicalAnalyzer::GetKeywordType(ROString str)
 {
     size_t index = static_cast<size_t>(str[0] - 'a');
     if (index < KEYWORDS_HASH_TABLE_SIZE)
@@ -335,7 +335,7 @@ Token::EType LexicalAnalyzer::GetKeywordType(ROString str)
         }
     }
 
-    return Token::eInvalid;
+    return Token::Invalid;
 }
 
 constexpr bool isWhitespace(char ch)
@@ -487,10 +487,10 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 ROString value(valuePtr, valueSize);
 
                 // get token type
-                Token::EType tokenType = GetKeywordType(value);
-                if (tokenType == Token::eInvalid)
+                uint16_t tokenType = GetKeywordType(value);
+                if (tokenType == Token::Invalid)
                 {
-                    tokenType = Token::eIdentifier;
+                    tokenType = Token::Identifier;
                 }
 
                 tokens.Append(Token(value, filenameId, line, startColumn, tokenType));
@@ -504,7 +504,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 ++column;
 
                 size_t tempSize = 2;
-                while (isMore && GetSymbolType(ROString(valuePtr, tempSize)) != Token::eInvalid)
+                while (isMore && GetSymbolType(ROString(valuePtr, tempSize)) != Token::Invalid)
                 {
                     ++valueSize;
                     ++tempSize;
@@ -514,8 +514,8 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                 }
 
                 ROString symbolStr(valuePtr, valueSize);
-                Token::EType tokenType = GetSymbolType(symbolStr);
-                if (tokenType == Token::eInvalid)
+                uint16_t tokenType = GetSymbolType(symbolStr);
+                if (tokenType == Token::Invalid)
                 {
                     logger.LogError(filenameId, line, column, "Invalid symbol");
                     ok = false;
@@ -529,7 +529,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
             else if (ch >= '0' && ch <= '9')
             {
                 char firstCh = ch;
-                Token::EType tokenType = Token::eDecIntLit;
+                uint16_t tokenType = Token::DecIntLit;
                 unsigned startColumn = column;
                 ch = Read(buff);
                 ++column;
@@ -549,7 +549,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         char nextCh = Peek(buff);
                         if (isMore && ( (ch == '.' && nextCh != '.') || ch == 'e') )
                         {
-                            tokenType = Token::eFloatLit;
+                            tokenType = Token::FloatLit;
 
                             if (ch == '.')
                             {
@@ -622,7 +622,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         bool hasDigit = false;
                         if (ch == 'x')
                         {
-                            tokenType = Token::eHexIntLit;
+                            tokenType = Token::HexIntLit;
                             ++valueSize;
                             ch = Read(buff);
                             ++column;
@@ -656,7 +656,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         }
                         else if (ch == 'b')
                         {
-                            tokenType = Token::eBinIntLit;
+                            tokenType = Token::BinIntLit;
                             ++valueSize;
                             ch = Read(buff);
                             ++column;
@@ -690,7 +690,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                         }
                         else if (ch == 'o')
                         {
-                            tokenType = Token::eOctIntLit;
+                            tokenType = Token::OctIntLit;
                             ++valueSize;
                             ch = Read(buff);
                             ++column;
@@ -783,7 +783,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                     ++valueSize; // increment for last '"'
                     ROString value(valuePtr, valueSize);
 
-                    tokens.Append(Token(value, filenameId, line, startColumn, Token::eStrLit));
+                    tokens.Append(Token(value, filenameId, line, startColumn, Token::StrLit));
 
                     ch = Read(buff);
                     ++column;
@@ -811,7 +811,7 @@ bool LexicalAnalyzer::Process(CharBuffer buff, TokenList& tokens)
                     }
 
                     ROString value(valuePtr, valueSize);
-                    tokens.Append(Token(value, filenameId, line, startColumn, Token::eBuiltInIdentifier));
+                    tokens.Append(Token(value, filenameId, line, startColumn, Token::BuiltInIdentifier));
                 }
             }
             else

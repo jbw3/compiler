@@ -12,7 +12,7 @@ public:
     struct TokenValue
     {
         ROString str;
-        Token::EType type;
+        uint16_t type;
     };
 
     struct Bucket
@@ -42,9 +42,9 @@ private:
     static constexpr size_t KEYWORDS_HASH_TABLE_SIZE = 26;
     static const Bucket KEYWORDS_HASH_TABLE[KEYWORDS_HASH_TABLE_SIZE];
 
-    static Token::EType GetSymbolType(ROString str);
+    static uint16_t GetSymbolType(ROString str);
 
-    static Token::EType GetKeywordType(ROString str);
+    static uint16_t GetKeywordType(ROString str);
 
     CompilerContext& compilerContext;
     size_t buffIdx;

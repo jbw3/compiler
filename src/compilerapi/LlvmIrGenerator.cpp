@@ -897,16 +897,16 @@ void LlvmIrGenerator::Visit(ForLoop* forLoop)
 void LlvmIrGenerator::Visit(LoopControl* loopControl)
 {
     const Token* token = loopControl->token;
-    Token::EType tokenType = token->type;
+    uint16_t tokenType = token->type;
     LoopInfo loopInfo = loops.top();
 
     SetDebugLocation(token);
 
-    if (tokenType == Token::eBreak)
+    if (tokenType == Token::Break)
     {
         builder.CreateBr(loopInfo.breakBlock);
     }
-    else if (tokenType == Token::eContinue)
+    else if (tokenType == Token::Continue)
     {
         builder.CreateBr(loopInfo.continueBlock);
     }
@@ -1313,7 +1313,7 @@ void LlvmIrGenerator::Visit(BoolLiteralExpression* boolLiteralExpression)
 
     SetDebugLocation(token);
 
-    bool value = token->type == Token::eTrueLit;
+    bool value = token->type == Token::TrueLit;
     resultValue = value ? ConstantInt::getTrue(context) : ConstantInt::getFalse(context);
 }
 
@@ -2804,7 +2804,7 @@ DIType* LlvmIrGenerator::CreateLlvmDebugType(const TypeInfo* type)
         unsigned line = 0;
 
         const Token* token = type->GetToken();
-        if (token->type != Token::eInvalid)
+        if (token->type != Token::Invalid)
         {
             diFile = diFiles[token->filenameId];
             line = token->line;

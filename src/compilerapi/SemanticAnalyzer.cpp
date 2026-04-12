@@ -2723,7 +2723,7 @@ void SemanticAnalyzer::Visit(BoolLiteralExpression* boolLiteralExpression)
 {
     boolLiteralExpression->SetType(TypeInfo::BoolType);
 
-    bool value = boolLiteralExpression->token->type == Token::eTrueLit;
+    bool value = boolLiteralExpression->token->type == Token::TrueLit;
     unsigned idx = compilerContext.AddBoolConstantValue(value);
     boolLiteralExpression->SetConstantValueIndex(idx);
 }

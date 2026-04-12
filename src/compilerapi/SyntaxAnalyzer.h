@@ -43,7 +43,7 @@ private:
 
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
-    bool IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, Token::EType expectedTokenType, const char* errorMsg = nullptr);
+    bool IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, uint16_t expectedTokenType, const char* errorMsg = nullptr);
 
     SyntaxTree::ExternFunctionDeclaration* ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter);
@@ -53,7 +53,7 @@ private:
 
     SyntaxTree::FunctionDeclaration* ProcessFunctionDeclaration(TokenIterator& iter,
                                                                 TokenIterator endIter,
-                                                                Token::EType endTokenType);
+                                                                uint16_t endTokenType);
 
     bool ProcessParameters(TokenIterator& iter, TokenIterator endIter,
                            SyntaxTree::Parameters& parameters);
@@ -84,14 +84,14 @@ private:
 
     SyntaxTree::Expression* ProcessTerm(TokenIterator& iter, TokenIterator endIter,
                                         bool& isPotentialEnd,
-                                        Token::EType endTokenType1 = Token::eInvalid,
-                                        Token::EType endTokenType2 = Token::eInvalid,
-                                        Token::EType endTokenType3 = Token::eInvalid);
+                                        uint16_t endTokenType1 = Token::Invalid,
+                                        uint16_t endTokenType2 = Token::Invalid,
+                                        uint16_t endTokenType3 = Token::Invalid);
 
     SyntaxTree::Expression* ProcessExpression(TokenIterator& iter, TokenIterator endIter,
-                                              Token::EType endTokenType1 = Token::eInvalid,
-                                              Token::EType endTokenType2 = Token::eInvalid,
-                                              Token::EType endTokenType3 = Token::eInvalid);
+                                              uint16_t endTokenType1 = Token::Invalid,
+                                              uint16_t endTokenType2 = Token::Invalid,
+                                              uint16_t endTokenType3 = Token::Invalid);
 
     TokenIterator FindParenthesisEnd(TokenIterator iter, TokenIterator endIter);
 

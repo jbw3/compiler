@@ -53,7 +53,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
     while (ok && iter != endIter)
     {
 
-        if (iter->type == Token::eConst)
+        if (iter->type == Token::Const)
         {
             ConstantDeclaration* constantDeclaration = ProcessConstantDeclaration(iter, endIter);
             if (constantDeclaration == nullptr)
@@ -65,7 +65,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
                 constantDeclarations.push_back(constantDeclaration);
             }
         }
-        else if (iter->type == Token::eFun)
+        else if (iter->type == Token::Fun)
         {
             FunctionDefinition* functionDefinition = ProcessFunctionDefinition(iter, endIter);
             if (functionDefinition == nullptr)
@@ -77,7 +77,7 @@ bool SyntaxAnalyzer::ProcessModule(unsigned fileId, const TokenList& tokens, Mod
                 functions.push_back(functionDefinition);
             }
         }
-        else if (iter->type == Token::eExtern)
+        else if (iter->type == Token::Extern)
         {
             ExternFunctionDeclaration* externDecl = ProcessExternFunction(iter, endIter);
             if (externDecl == nullptr)
@@ -136,7 +136,7 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
     return EndIteratorCheck(iter, endIter, errorMsg);
 }
 
-bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, Token::EType expectedTokenType, const char* errorMsg)
+bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, uint16_t expectedTokenType, const char* errorMsg)
 {
     bool ok = IncrementIterator(iter, endIter, errorMsg);
     if (ok)
@@ -159,7 +159,7 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
         return nullptr;
     }
 
-    if (iter->type != Token::eExtern)
+    if (iter->type != Token::Extern)
     {
         logger.LogError(*iter, "Expected extern keyword");
         return nullptr;
@@ -170,7 +170,7 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
         return nullptr;
     }
 
-    FunctionDeclaration* decl = ProcessFunctionDeclaration(iter, endIter, Token::eSemiColon);
+    FunctionDeclaration* decl = ProcessFunctionDeclaration(iter, endIter, Token::SemiColon);
     if (decl == nullptr)
     {
         return nullptr;
@@ -186,7 +186,7 @@ ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& 
 FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& iter,
                                                               TokenIterator endIter)
 {
-    unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, Token::eOpenBrace));
+    unique_ptr<FunctionDeclaration> functionDeclaration(ProcessFunctionDeclaration(iter, endIter, Token::OpenBrace));
     if (functionDeclaration == nullptr)
     {
         return nullptr;
@@ -203,7 +203,7 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    if (iter->type != Token::eCloseBrace)
+    if (iter->type != Token::CloseBrace)
     {
         logger.LogError(*iter, "Expected '}'");
         return nullptr;
@@ -220,14 +220,14 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
 
 FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& iter,
                                                                 TokenIterator endIter,
-                                                                Token::EType endTokenType)
+                                                                uint16_t endTokenType)
 {
     if (!EndIteratorCheck(iter, endIter, "Expected function keyword"))
     {
         return nullptr;
     }
 
-    if (iter->type != Token::eFun)
+    if (iter->type != Token::Fun)
     {
         logger.LogError(*iter, "Expected function keyword");
         return nullptr;
@@ -238,7 +238,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (iter->type != Token::eIdentifier)
+    if (iter->type != Token::Identifier)
     {
         logger.LogError(*iter, "'{}' is not a valid function name", iter->value);
         return nullptr;
@@ -252,7 +252,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (iter->type != Token::eOpenPar)
+    if (iter->type != Token::OpenPar)
     {
         logger.LogError(*iter, "Expected '('");
         return nullptr;
@@ -296,11 +296,11 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
 
     ROString paramName;
     const Token* paramNameToken = nullptr;
-    while (iter != endIter && iter->type != Token::eClosePar)
+    while (iter != endIter && iter->type != Token::ClosePar)
     {
         paramName = iter->value;
         paramNameToken = &*iter;
-        if (paramNameToken->type != Token::eIdentifier)
+        if (paramNameToken->type != Token::Identifier)
         {
             logger.LogError(*iter, "Invalid parameter name: '{}'", paramName);
             return false;
@@ -311,7 +311,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+        Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
 
         // make sure there was a type
         if (paramTypeExpr == nullptr)
@@ -323,7 +323,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         Parameter* param = new Parameter(paramName, paramTypeExpr, paramNameToken);
         parameters.push_back(param);
 
-        if (iter->type != Token::eClosePar)
+        if (iter->type != Token::ClosePar)
         {
             ++iter;
         }
@@ -348,7 +348,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         return nullptr;
     }
 
-    if (iter->type != Token::eStruct)
+    if (iter->type != Token::Struct)
     {
         logger.LogError("Expected struct keyword");
     }
@@ -360,7 +360,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         return nullptr;
     }
 
-    if (iter->type != Token::eOpenBrace)
+    if (iter->type != Token::OpenBrace)
     {
         logger.LogError(*iter, "Expected '{'");
         return nullptr;
@@ -372,10 +372,10 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
     ++iter;
 
     vector<MemberDefinition*> members;
-    while (iter != endIter && iter->type != Token::eCloseBrace)
+    while (iter != endIter && iter->type != Token::CloseBrace)
     {
         // get member name
-        if (iter->type != Token::eIdentifier)
+        if (iter->type != Token::Identifier)
         {
             deletePointerContainer(members);
             logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
@@ -391,7 +391,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
             return nullptr;
         }
 
-        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::eEqual, Token::eComma, Token::eCloseBrace);
+        Expression* memberTypeExpr = ProcessExpression(iter, endIter, Token::Equal, Token::Comma, Token::CloseBrace);
 
         // make sure there was a type
         if (memberTypeExpr == nullptr)
@@ -401,12 +401,12 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
             return nullptr;
         }
 
-        Token::EType delimiter = iter->type;
+        uint16_t delimiter = iter->type;
 
         // check if there is a default member value
         const Token* equalOpToken = nullptr;
         Expression* defaultMemberExpr = nullptr;
-        if (delimiter == Token::eEqual)
+        if (delimiter == Token::Equal)
         {
             equalOpToken = &*iter;
 
@@ -417,7 +417,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
                 return nullptr;
             }
 
-            defaultMemberExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
+            defaultMemberExpr = ProcessExpression(iter, endIter, Token::Comma, Token::CloseBrace);
             if (defaultMemberExpr == nullptr)
             {
                 deletePointerContainer(members);
@@ -436,11 +436,11 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         );
         members.push_back(member);
 
-        if (delimiter == Token::eCloseBrace)
+        if (delimiter == Token::CloseBrace)
         {
             break;
         }
-        else if (delimiter != Token::eComma)
+        else if (delimiter != Token::Comma)
         {
             logger.LogError(*iter, "Expected ',' or '}'");
             deletePointerContainer(members);
@@ -456,7 +456,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         logger.LogError("Expected '}'");
         return nullptr;
     }
-    else if (iter->type != Token::eCloseBrace)
+    else if (iter->type != Token::CloseBrace)
     {
         deletePointerContainer(members);
         logger.LogError(*iter, "Expected '}'");
@@ -482,7 +482,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
 )
 {
     // make sure ':' is followed by '{'
-    if (!IncrementIteratorCheckType(iter, endIter, Token::eOpenBrace, "Expected '{' after ':'"))
+    if (!IncrementIteratorCheckType(iter, endIter, Token::OpenBrace, "Expected '{' after ':'"))
     {
         return nullptr;
     }
@@ -499,10 +499,10 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
 
     // process member initializations
     vector<MemberInitialization*> members;
-    while (iter != endIter && iter->type != Token::eCloseBrace)
+    while (iter != endIter && iter->type != Token::CloseBrace)
     {
         // get member name
-        if (iter->type != Token::eIdentifier)
+        if (iter->type != Token::Identifier)
         {
             deletePointerContainer(members);
             logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
@@ -512,7 +512,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
         ROString memberName = iter->value;
 
         // make sure member name is followed by '='
-        if (!IncrementIteratorCheckType(iter, endIter, Token::eEqual, "Expected '=' after member"))
+        if (!IncrementIteratorCheckType(iter, endIter, Token::Equal, "Expected '=' after member"))
         {
             deletePointerContainer(members);
             return nullptr;
@@ -520,7 +520,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
 
         // get member expression
         ++iter;
-        Expression* memberExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBrace);
+        Expression* memberExpr = ProcessExpression(iter, endIter, Token::Comma, Token::CloseBrace);
         if (memberExpr == nullptr)
         {
             deletePointerContainer(members);
@@ -530,12 +530,12 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
         MemberInitialization* member = new MemberInitialization(memberName, memberExpr, memberNameToken);
         members.push_back(member);
 
-        Token::EType delimiter = iter->type;
-        if (delimiter == Token::eCloseBrace)
+        uint16_t delimiter = iter->type;
+        if (delimiter == Token::CloseBrace)
         {
             break;
         }
-        else if (delimiter != Token::eComma)
+        else if (delimiter != Token::Comma)
         {
             logger.LogError(*iter, "Expected ',' or '}'");
             deletePointerContainer(members);
@@ -551,7 +551,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
         logger.LogError("Expected '}'");
         return nullptr;
     }
-    else if (iter->type != Token::eCloseBrace)
+    else if (iter->type != Token::CloseBrace)
     {
         deletePointerContainer(members);
         logger.LogError(*iter, "Expected '}'");
@@ -566,7 +566,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
 
 ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& iter, TokenIterator endIter)
 {
-    if (iter->type != Token::eConst)
+    if (iter->type != Token::Const)
     {
         logger.LogError("Expected '{}'", CONST_KEYWORD);
         return nullptr;
@@ -577,7 +577,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (iter->type != Token::eIdentifier)
+    if (iter->type != Token::Identifier)
     {
         logger.LogError(*iter, "Invalid constant name");
         return nullptr;
@@ -591,9 +591,9 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     }
 
     Expression* typeExpr = nullptr;
-    if (iter->type != Token::eEqual)
+    if (iter->type != Token::Equal)
     {
-        typeExpr = ProcessExpression(iter, endIter, Token::eEqual);
+        typeExpr = ProcessExpression(iter, endIter, Token::Equal);
         if (typeExpr == nullptr)
         {
             return nullptr;
@@ -608,7 +608,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    Expression* expression = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
+    Expression* expression = ProcessExpression(iter, endIter, Token::SemiColon, Token::CloseBrace);
     if (expression == nullptr)
     {
         delete typeExpr;
@@ -623,7 +623,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (iter->type != Token::eSemiColon)
+    if (iter->type != Token::SemiColon)
     {
         logger.LogError(*iter, "Expected ';'");
         delete typeExpr;
@@ -641,7 +641,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
 
 VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& iter, TokenIterator endIter)
 {
-    if (iter->type != Token::eVar)
+    if (iter->type != Token::Var)
     {
         logger.LogError("Expected '{}'", VARIABLE_KEYWORD);
         return nullptr;
@@ -652,7 +652,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (iter->type != Token::eIdentifier)
+    if (iter->type != Token::Identifier)
     {
         logger.LogError(*iter, "Invalid variable name");
         return nullptr;
@@ -666,9 +666,9 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     Expression* typeExpr = nullptr;
-    if (iter->type != Token::eEqual)
+    if (iter->type != Token::Equal)
     {
-        typeExpr = ProcessExpression(iter, endIter, Token::eEqual);
+        typeExpr = ProcessExpression(iter, endIter, Token::Equal);
         if (typeExpr == nullptr)
         {
             return nullptr;
@@ -683,7 +683,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    Expression* expression = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
+    Expression* expression = ProcessExpression(iter, endIter, Token::SemiColon, Token::CloseBrace);
     if (expression == nullptr)
     {
         delete typeExpr;
@@ -698,7 +698,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (iter->type != Token::eSemiColon)
+    if (iter->type != Token::SemiColon)
     {
         logger.LogError(*iter, "Expected ';'");
         delete typeExpr;
@@ -716,7 +716,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
 WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator endIter)
 {
-    assert(iter->type == Token::eWhile);
+    assert(iter->type == Token::While);
 
     const Token* whileToken = &*iter;
 
@@ -724,13 +724,13 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
     ++iter;
 
     // read "while" condition
-    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, Token::eOpenBrace));
+    unique_ptr<Expression> whileCondition(ProcessExpression(iter, endIter, Token::OpenBrace));
     if (whileCondition == nullptr)
     {
         return nullptr;
     }
 
-    if (iter == endIter || iter->type != Token::eOpenBrace)
+    if (iter == endIter || iter->type != Token::OpenBrace)
     {
         logger.LogError(*iter, "Expected '{'");
         return nullptr;
@@ -751,7 +751,7 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
 
 ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIter)
 {
-    assert(iter->type == Token::eFor);
+    assert(iter->type == Token::For);
 
     const Token* forToken = &*iter;
 
@@ -764,7 +764,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    if (iter->type != Token::eIdentifier)
+    if (iter->type != Token::Identifier)
     {
         logger.LogError(*iter, "Invalid iterator variable name");
         return nullptr;
@@ -778,9 +778,9 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     }
 
     Expression* varTypeExpr = nullptr;
-    if (iter->type != Token::eComma && iter->type != Token::eIn)
+    if (iter->type != Token::Comma && iter->type != Token::In)
     {
-        varTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eIn);
+        varTypeExpr = ProcessExpression(iter, endIter, Token::Comma, Token::In);
         if (varTypeExpr == nullptr)
         {
             return nullptr;
@@ -790,7 +790,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     // check if there's an index variable
     const Token* indexVarNameToken = Token::None;
     Expression* indexVarTypeExpr = nullptr;
-    if (iter->type == Token::eComma)
+    if (iter->type == Token::Comma)
     {
         // read variable name
         if (!IncrementIterator(iter, endIter, "Expected variable name"))
@@ -798,7 +798,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
             return nullptr;
         }
 
-        if (iter->type != Token::eIdentifier)
+        if (iter->type != Token::Identifier)
         {
             logger.LogError(*iter, "Invalid index variable name");
             return nullptr;
@@ -811,9 +811,9 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
             return nullptr;
         }
 
-        if (iter->type != Token::eIn)
+        if (iter->type != Token::In)
         {
-            indexVarTypeExpr = ProcessExpression(iter, endIter, Token::eIn);
+            indexVarTypeExpr = ProcessExpression(iter, endIter, Token::In);
             if (indexVarTypeExpr == nullptr)
             {
                 return nullptr;
@@ -829,13 +829,13 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     }
 
     // read "for" iterable expression
-    unique_ptr<Expression> iterExpression(ProcessExpression(iter, endIter, Token::eOpenBrace));
+    unique_ptr<Expression> iterExpression(ProcessExpression(iter, endIter, Token::OpenBrace));
     if (iterExpression == nullptr)
     {
         return nullptr;
     }
 
-    if (iter == endIter || iter->type != Token::eOpenBrace)
+    if (iter == endIter || iter->type != Token::OpenBrace)
     {
         logger.LogError(*iter, "Expected '{'");
         return nullptr;
@@ -864,19 +864,19 @@ SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindStatementEnd(TokenIterator ite
 
     while (iter != endIter)
     {
-        Token::EType type = iter->type;
+        uint16_t type = iter->type;
         if (balance == 0)
         {
-            if (type == Token::eSemiColon || type == Token::eCloseBrace)
+            if (type == Token::SemiColon || type == Token::CloseBrace)
             {
                 break;
             }
         }
-        else if (type == Token::eOpenBrace)
+        else if (type == Token::OpenBrace)
         {
             ++balance;
         }
-        else if (type == Token::eCloseBrace)
+        else if (type == Token::CloseBrace)
         {
             --balance;
         }
@@ -904,30 +904,30 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     TokenIterator& iter,
     TokenIterator endIter,
     bool& isPotentialEnd,
-    Token::EType endTokenType1,
-    Token::EType endTokenType2,
-    Token::EType endTokenType3)
+    uint16_t endTokenType1,
+    uint16_t endTokenType2,
+    uint16_t endTokenType3)
 {
-    Token::EType type = iter->type;
-    Token::EMainType mainType = Token::GetMainType(type);
+    uint16_t type = iter->type;
+    uint16_t mainType = Token::GetMainType(type);
     Expression* expr = nullptr;
 
-    if (mainType == Token::eIntLiteralType)
+    if (mainType == Token::IntLiteralType)
     {
         int64_t intValue = 0;
         stringToInteger(iter->value, intValue);
         expr = new NumericExpression(intValue, &*iter);
     }
-    else if (mainType == Token::eFloatLiteralType)
+    else if (mainType == Token::FloatLiteralType)
     {
         double floatValue = stringToFloat(iter->value);
         expr = new FloatLiteralExpression(floatValue, &*iter);
     }
-    else if (mainType == Token::eBoolLiteralType)
+    else if (mainType == Token::BoolLiteralType)
     {
         expr = new BoolLiteralExpression(&*iter);
     }
-    else if (mainType == Token::eStrLiteralType)
+    else if (mainType == Token::StrLiteralType)
     {
         expr = ProcessStringExpression(iter);
         if (expr == nullptr)
@@ -935,7 +935,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
     }
-    else if (type == Token::eOpenPar)
+    else if (type == Token::OpenPar)
     {
         TokenIterator parenEndIter = FindParenthesisEnd(iter, endIter);
         if (parenEndIter == endIter)
@@ -951,7 +951,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
     }
-    else if (type == Token::eOpenBrace)
+    else if (type == Token::OpenBrace)
     {
         expr = ProcessBlockExpression(iter, endIter);
         if (expr == nullptr)
@@ -959,7 +959,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
     }
-    else if (type == Token::eIf)
+    else if (type == Token::If)
     {
         expr = ProcessBranchExpression(iter, endIter);
         if (expr == nullptr)
@@ -969,7 +969,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
         isPotentialEnd = true;
     }
-    else if (type == Token::eIdentifier)
+    else if (type == Token::Identifier)
     {
         expr = new IdentifierExpression(iter->value, &*iter);
     }
@@ -977,7 +977,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     {
         expr = new IdentifierExpression(iter->value, &*iter);
     }
-    else if (type == Token::eOpenBracket)
+    else if (type == Token::OpenBracket)
     {
         const Token* startToken = &*iter;
 
@@ -986,26 +986,26 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
 
-        if (iter->type == Token::eCloseBracket)
+        if (iter->type == Token::CloseBracket)
         {
             logger.LogError(*iter, "Array expressions cannot be empty");
             return nullptr;
         }
 
-        Expression* expr1 = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eComma, Token::eCloseBracket);
+        Expression* expr1 = ProcessExpression(iter, endIter, Token::SemiColon, Token::Comma, Token::CloseBracket);
         if (expr1 == nullptr)
         {
             return nullptr;
         }
 
-        if (iter->type == Token::eSemiColon)
+        if (iter->type == Token::SemiColon)
         {
             if (!IncrementIterator(iter, endIter, "Expected expression"))
             {
                 return nullptr;
             }
 
-            Expression* expr2 = ProcessExpression(iter, endIter, Token::eCloseBracket);
+            Expression* expr2 = ProcessExpression(iter, endIter, Token::CloseBracket);
             if (expr2 == nullptr)
             {
                 return nullptr;
@@ -1013,12 +1013,12 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
             expr = new ArraySizeValueExpression(expr1, expr2, startToken, &*iter);
         }
-        else if (iter->type == Token::eComma || iter->type == Token::eCloseBracket)
+        else if (iter->type == Token::Comma || iter->type == Token::CloseBracket)
         {
             vector<Expression*> expressions;
             expressions.push_back(expr1);
 
-            while (iter->type == Token::eComma)
+            while (iter->type == Token::Comma)
             {
                 if (!IncrementIterator(iter, endIter))
                 {
@@ -1027,12 +1027,12 @@ Expression* SyntaxAnalyzer::ProcessTerm(
                 }
 
                 // if there is a ']' immediately after the ',' then we are done
-                if (iter->type == Token::eCloseBracket)
+                if (iter->type == Token::CloseBracket)
                 {
                     break;
                 }
 
-                Expression* expr2 = ProcessExpression(iter, endIter, Token::eComma, Token::eCloseBracket);
+                Expression* expr2 = ProcessExpression(iter, endIter, Token::Comma, Token::CloseBracket);
                 if (expr2 == nullptr)
                 {
                     deletePointerContainer(expressions);
@@ -1050,7 +1050,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
     }
-    else if (type == Token::eStruct)
+    else if (type == Token::Struct)
     {
         expr = ProcessStructDefinitionExpression(iter, endIter);
         if (expr == nullptr)
@@ -1058,14 +1058,14 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
     }
-    else if (type == Token::eFun)
+    else if (type == Token::Fun)
     {
         const Token* funToken = &*iter;
         if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
         {
             return nullptr;
         }
-        if (iter->type != Token::eOpenPar)
+        if (iter->type != Token::OpenPar)
         {
             logger.LogError(*iter, "Expected '('");
             return nullptr;
@@ -1084,9 +1084,9 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             return nullptr;
         }
 
-        while (iter != endIter && iter->type != Token::eClosePar)
+        while (iter != endIter && iter->type != Token::ClosePar)
         {
-            if (iter->type != Token::eIdentifier)
+            if (iter->type != Token::Identifier)
             {
                 logger.LogError(*iter, "Invalid parameter name: '{}'", iter->value);
                 return nullptr;
@@ -1100,7 +1100,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
                 return nullptr;
             }
 
-            Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+            Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
             if (paramTypeExpr == nullptr)
             {
                 return nullptr;
@@ -1108,7 +1108,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
             paramTypes.push_back(paramTypeExpr);
 
-            if (iter->type != Token::eClosePar)
+            if (iter->type != Token::ClosePar)
             {
                 ++iter;
             }
@@ -1126,7 +1126,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         Expression* returnType = nullptr;
         TokenIterator nextIter = iter + 1;
         if (nextIter != endIter
-        && nextIter->type != Token::eCloseBracket // TODO: fix this 'cause it's a bit hacky
+        && nextIter->type != Token::CloseBracket // TODO: fix this 'cause it's a bit hacky
         && nextIter->type != endTokenType1
         && nextIter->type != endTokenType2
         && nextIter->type != endTokenType3)
@@ -1140,7 +1140,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
             if (iter != endIter)
             {
-                Token::EType tokenType = iter->type;
+                uint16_t tokenType = iter->type;
                 if (tokenType == endTokenType1 || tokenType == endTokenType2 || tokenType == endTokenType3)
                 {
                     // need to move back to the previous token because it will be incremented
@@ -1152,10 +1152,10 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
         expr = new FunctionTypeExpression(paramTypes, paramNames, returnType, funToken, openParToken, closeParToken, paramNameTokens);
     }
-    else if (type == Token::eBuiltInIdentifier)
+    else if (type == Token::BuiltInIdentifier)
     {
         TokenIterator nextIter = iter + 1;
-        if (nextIter != endIter && nextIter->type == Token::eOpenPar)
+        if (nextIter != endIter && nextIter->type == Token::OpenPar)
         {
             const Token* nameToken = &*iter;
             const Token* openParToken = &*nextIter;
@@ -1170,9 +1170,9 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
             // process arguments
             vector<Expression*> arguments;
-            while (iter->type != Token::eClosePar)
+            while (iter->type != Token::ClosePar)
             {
-                Expression* argExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+                Expression* argExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
                 if (argExpr == nullptr)
                 {
                     deletePointerContainer(arguments);
@@ -1180,7 +1180,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
                 }
                 arguments.push_back(argExpr);
 
-                if (iter->type == Token::eComma)
+                if (iter->type == Token::Comma)
                 {
                     ++iter;
                 }
@@ -1229,9 +1229,9 @@ const unordered_set<BinaryExpression::EOperator> BIN_OPERATORS10 = {
 };
 
 Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator endIter,
-                                              Token::EType endTokenType1,
-                                              Token::EType endTokenType2,
-                                              Token::EType endTokenType3)
+                                              uint16_t endTokenType1,
+                                              uint16_t endTokenType2,
+                                              uint16_t endTokenType3)
 {
     bool expectTerm = true;
     bool isEnd = false;
@@ -1242,7 +1242,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
 
     while (iter != endIter)
     {
-        Token::EType tokenType = iter->type;
+        uint16_t tokenType = iter->type;
         TokenIterator nextIter = iter + 1;
 
         if (tokenType == endTokenType1 || tokenType == endTokenType2 || tokenType == endTokenType3)
@@ -1261,7 +1261,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 expectTerm = true;
             }
             // the lexer will give us two characters together as one token
-            else if (tokenType == Token::eAmpersandAmpersand)
+            else if (tokenType == Token::AmpersandAmpersand)
             {
                 // create two tokens from one
                 const Token* originalToken = &*iter;
@@ -1272,19 +1272,19 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                             originalToken->filenameId,
                             originalToken->line,
                             originalToken->column,
-                            Token::eAmpersand);
+                            Token::Ampersand);
                 Token* token2 =
                     new Token(POINTER_TYPE_TOKEN,
                             originalToken->filenameId,
                             originalToken->line,
                             originalToken->column + 1,
-                            Token::eAmpersand);
+                            Token::Ampersand);
 
                 unaryOperators.push({token1, UnaryExpression::eAddressOf});
                 unaryOperators.push({token2, UnaryExpression::eAddressOf});
                 expectTerm = true;
             }
-            else if (tokenType == Token::eOpenBracket && nextIter != endIter && nextIter->type == Token::eCloseBracket)
+            else if (tokenType == Token::OpenBracket && nextIter != endIter && nextIter->type == Token::CloseBracket)
             {
                 unaryOperators.push({&*iter, UnaryExpression::eArrayOf});
                 expectTerm = true;
@@ -1302,7 +1302,7 @@ Expression* SyntaxAnalyzer::ProcessExpression(TokenIterator& iter, TokenIterator
                 // update nextIter since iter may have changed in ProcessTerm()
                 nextIter = (iter == endIter) ? endIter : iter + 1;
 
-                if ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket || nextIter->type == Token::eColon) )
+                if ( nextIter != endIter && (nextIter->type == Token::Period || nextIter->type == Token::OpenPar || nextIter->type == Token::OpenBracket || nextIter->type == Token::Colon) )
                 {
                     expr = ProcessPostTerm(expr, iter, endIter);
                     if (expr == nullptr)
@@ -1383,11 +1383,11 @@ SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindParenthesisEnd(TokenIterator i
     ++iter;
     while (iter != endIter)
     {
-        if (iter->type == Token::eOpenPar)
+        if (iter->type == Token::OpenPar)
         {
             ++balance;
         }
-        else if (iter->type == Token::eClosePar)
+        else if (iter->type == Token::ClosePar)
         {
             --balance;
             if (balance == 0)
@@ -1755,17 +1755,17 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
     // increment iter past "{"
     ++iter;
 
-    while (iter != endIter && iter->type != Token::eCloseBrace)
+    while (iter != endIter && iter->type != Token::CloseBrace)
     {
         SyntaxTreeNode* statement = nullptr;
 
-        Token::EType tokenType = iter->type;
-        if (tokenType == Token::eVar)
+        uint16_t tokenType = iter->type;
+        if (tokenType == Token::Var)
         {
             statement = ProcessVariableDeclaration(iter, endIter);
             needsUnitType = true;
         }
-        else if (tokenType == Token::eConst)
+        else if (tokenType == Token::Const)
         {
             ConstantDeclaration* constDecl = ProcessConstantDeclaration(iter, endIter);
             constantDeclarations.push_back(constDecl);
@@ -1773,7 +1773,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             statement = constDecl;
             needsUnitType = true;
         }
-        else if (tokenType == Token::eIf)
+        else if (tokenType == Token::If)
         {
             BranchExpression* branchExpr = ProcessBranchExpression(iter, endIter);
             statement = branchExpr;
@@ -1786,7 +1786,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                 needsUnitType = dynamic_cast<UnitTypeLiteralExpression*>(branchExpr->elseExpression) != nullptr;
             }
         }
-        else if (tokenType == Token::eOpenBrace)
+        else if (tokenType == Token::OpenBrace)
         {
             BlockExpression* blockExpr = ProcessBlockExpression(iter, endIter);
             statement = blockExpr;
@@ -1794,22 +1794,22 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             ++iter; // increment past end brace
             needsUnitType = false;
         }
-        else if (tokenType == Token::eWhile)
+        else if (tokenType == Token::While)
         {
             statement = ProcessWhileLoop(iter, endIter);
             needsUnitType = true;
         }
-        else if (tokenType == Token::eFor)
+        else if (tokenType == Token::For)
         {
             statement = ProcessForLoop(iter, endIter);
             needsUnitType = true;
         }
-        else if (tokenType == Token::eBreak || tokenType == Token::eContinue)
+        else if (tokenType == Token::Break || tokenType == Token::Continue)
         {
             TokenIterator tokenIter = iter;
             ++iter;
 
-            if (iter == endIter || iter->type != Token::eSemiColon)
+            if (iter == endIter || iter->type != Token::SemiColon)
             {
                 logger.LogError(*tokenIter, "Expected ';' after '{}'", tokenIter->value);
                 statement = nullptr;
@@ -1822,19 +1822,19 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             }
             needsUnitType = true;
         }
-        else if (tokenType == Token::eReturn)
+        else if (tokenType == Token::Return)
         {
             const Token* token = &*iter;
             if (IncrementIterator(iter, endIter))
             {
                 Expression* returnExpression = nullptr;
-                if (iter->type == Token::eSemiColon)
+                if (iter->type == Token::SemiColon)
                 {
                     returnExpression = new UnitTypeLiteralExpression();
                 }
                 else
                 {
-                    returnExpression = ProcessExpression(iter, endIter, Token::eSemiColon);
+                    returnExpression = ProcessExpression(iter, endIter, Token::SemiColon);
                 }
 
                 statement = new Return(token, returnExpression);
@@ -1846,7 +1846,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                 statement = nullptr;
             }
         }
-        else if (tokenType == Token::eUnchecked)
+        else if (tokenType == Token::Unchecked)
         {
             const Token* token = &*iter;
 
@@ -1855,7 +1855,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
                 return nullptr;
             }
 
-            if (iter->type != Token::eOpenBrace)
+            if (iter->type != Token::OpenBrace)
             {
                 logger.LogError(*iter, "Expected '{'");
                 return nullptr;
@@ -1876,18 +1876,18 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
         else
         {
             // process the sub-expression
-            statement = ProcessExpression(iter, endIter, Token::eSemiColon, Token::eCloseBrace);
+            statement = ProcessExpression(iter, endIter, Token::SemiColon, Token::CloseBrace);
             if (statement != nullptr && iter != endIter)
             {
                 // if we reached the end of a statement, increment the iterator
-                if (iter->type == Token::eSemiColon)
+                if (iter->type == Token::SemiColon)
                 {
                     ++iter;
                     needsUnitType = true;
                 }
                 // if we reached the end of a block, we're done, and the last expression is the
                 // block's return type (so we don't need the unit type expression)
-                else if (iter->type == Token::eCloseBrace)
+                else if (iter->type == Token::CloseBrace)
                 {
                     needsUnitType = false;
                 }
@@ -1901,7 +1901,7 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             return nullptr;
         }
 
-        if (tokenType != Token::eConst)
+        if (tokenType != Token::Const)
         {
             statements.push_back(statement);
         }
@@ -1938,13 +1938,13 @@ BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, T
     ++iter;
 
     // read "if" condition
-    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, Token::eOpenBrace));
+    unique_ptr<Expression> ifCondition(ProcessExpression(iter, endIter, Token::OpenBrace));
     if (ifCondition == nullptr)
     {
         return nullptr;
     }
 
-    if (iter == endIter || iter->type != Token::eOpenBrace)
+    if (iter == endIter || iter->type != Token::OpenBrace)
     {
         logger.LogError(*iter, "Expected '{'");
         return nullptr;
@@ -1957,7 +1957,7 @@ BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, T
         return nullptr;
     }
 
-    Token::EType nextTokenType = Token::eInvalid;
+    uint16_t nextTokenType = Token::Invalid;
     if (iter != endIter)
     {
         auto nextIter = iter + 1;
@@ -1969,7 +1969,7 @@ BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, T
 
     const Token* elseToken = nullptr;
     unique_ptr<Expression> elseExpression;
-    if (nextTokenType == Token::eElif)
+    if (nextTokenType == Token::Elif)
     {
         // move to 'elif' keyword
         ++iter;
@@ -1983,7 +1983,7 @@ BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, T
             return nullptr;
         }
     }
-    else if (nextTokenType == Token::eElse)
+    else if (nextTokenType == Token::Else)
     {
         // move to 'else' keyword
         ++iter;
@@ -1995,7 +1995,7 @@ BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, T
             return nullptr;
         }
 
-        if (iter->type != Token::eOpenBrace)
+        if (iter->type != Token::OpenBrace)
         {
             logger.LogError(*iter, "Expected '{'");
             return nullptr;
@@ -2028,10 +2028,10 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
 {
     TokenIterator nextIter = iter + 1;
 
-    while ( nextIter != endIter && (nextIter->type == Token::ePeriod || nextIter->type == Token::eOpenPar || nextIter->type == Token::eOpenBracket || nextIter->type == Token::eColon) )
+    while ( nextIter != endIter && (nextIter->type == Token::Period || nextIter->type == Token::OpenPar || nextIter->type == Token::OpenBracket || nextIter->type == Token::Colon) )
     {
         // process member expressions
-        while (nextIter != endIter && nextIter->type == Token::ePeriod)
+        while (nextIter != endIter && nextIter->type == Token::Period)
         {
             const Token* opToken = &*nextIter;
 
@@ -2044,7 +2044,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
                 delete expr;
                 return nullptr;
             }
-            else if (iter->type != Token::eIdentifier)
+            else if (iter->type != Token::Identifier)
             {
                 logger.LogError(*iter, "Invalid member name");
                 delete expr;
@@ -2057,7 +2057,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
         }
 
         // process function calls
-        while (nextIter != endIter && nextIter->type == Token::eOpenPar)
+        while (nextIter != endIter && nextIter->type == Token::OpenPar)
         {
             const Token* openParToken = &*nextIter;
 
@@ -2071,9 +2071,9 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
 
             // process arguments
             vector<Expression*> arguments;
-            while (iter->type != Token::eClosePar)
+            while (iter->type != Token::ClosePar)
             {
-                Expression* argExpr = ProcessExpression(iter, endIter, Token::eComma, Token::eClosePar);
+                Expression* argExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
                 if (argExpr == nullptr)
                 {
                     deletePointerContainer(arguments);
@@ -2081,7 +2081,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
                 }
                 arguments.push_back(argExpr);
 
-                if (iter->type == Token::eComma)
+                if (iter->type == Token::Comma)
                 {
                     ++iter;
                 }
@@ -2095,14 +2095,14 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
         }
 
         // process subscript expressions
-        while (nextIter != endIter && nextIter->type == Token::eOpenBracket)
+        while (nextIter != endIter && nextIter->type == Token::OpenBracket)
         {
             const Token* opToken = &*nextIter;
 
             // skip to token after "["
             iter += 2;
 
-            Expression* subscriptExpr = ProcessExpression(iter, endIter, Token::eCloseBracket);
+            Expression* subscriptExpr = ProcessExpression(iter, endIter, Token::CloseBracket);
             if (subscriptExpr == nullptr)
             {
                 return nullptr;
@@ -2116,7 +2116,7 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
         }
 
         // process struct initialization expressions
-        if (nextIter != endIter && nextIter->type == Token::eColon)
+        if (nextIter != endIter && nextIter->type == Token::Colon)
         {
             // move to ':'
             ++iter;

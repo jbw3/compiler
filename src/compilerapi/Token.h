@@ -9,169 +9,160 @@ class Token
 public:
     static const Token* None;
 
-    // types
-    enum EMainType : uint16_t
-    {
-        eIdentifierType        = 0x1000,
-        eBuiltInIdentifierType = 0x2000,
-        eKeywordType           = 0x3000,
-        eBoolLiteralType       = 0x4000,
-        eIntLiteralType        = 0x5000,
-        eFloatLiteralType      = 0x6000,
-        eStrLiteralType        = 0x7000,
-        eSymbolType            = 0x8000,
-    };
+    // main types
+    static constexpr uint16_t IdentifierType        = 0x1000;
+    static constexpr uint16_t BuiltInIdentifierType = 0x2000;
+    static constexpr uint16_t KeywordType           = 0x3000;
+    static constexpr uint16_t BoolLiteralType       = 0x4000;
+    static constexpr uint16_t IntLiteralType        = 0x5000;
+    static constexpr uint16_t FloatLiteralType      = 0x6000;
+    static constexpr uint16_t StrLiteralType        = 0x7000;
+    static constexpr uint16_t SymbolType            = 0x8000;
 
-    enum ESymbolFlags : uint16_t
-    {
-        eUnaryOp  = 0x0800,
-        eBinaryOp = 0x0400,
-    };
+    // symbol flags
+    static constexpr uint16_t UnaryOp  = 0x0800;
+    static constexpr uint16_t BinaryOp = 0x0400;
 
-    enum ETypeNameFlag : uint16_t
-    {
-        eTypeName = 0x0800,
-    };
+    // type name flag
+    static constexpr uint16_t TypeName = 0x0800;
 
-    enum EType : uint16_t
-    {
-        eInvalid      = 0,
+    // --- types ---
 
-        // identifier
-        eIdentifier   = eIdentifierType,
+    static constexpr uint16_t Invalid      = 0;
 
-        // built-in identifier
-        eBuiltInIdentifier = eBuiltInIdentifierType,
+    // identifier
+    static constexpr uint16_t Identifier   = IdentifierType;
 
-        // keyword
-        eBool         = eKeywordType | eTypeName |  0,
-        eBreak        = eKeywordType |  1,
-        eConst        = eKeywordType |  2,
-        eContinue     = eKeywordType |  3,
-        eElif         = eKeywordType |  4,
-        eElse         = eKeywordType |  5,
-        eExtern       = eKeywordType |  6,
-        eFor          = eKeywordType |  7,
-        eFun          = eKeywordType |  8,
-        eIf           = eKeywordType |  9,
-        eI8           = eKeywordType | eTypeName | 10,
-        eI16          = eKeywordType | eTypeName | 11,
-        eI32          = eKeywordType | eTypeName | 12,
-        eI64          = eKeywordType | eTypeName | 13,
-        eIn           = eKeywordType | 14,
-        eISize        = eKeywordType | eTypeName | 15,
-        eReturn       = eKeywordType | 16,
-        eStr          = eKeywordType | eTypeName | 17,
-        eStruct       = eKeywordType | 18,
-        eType         = eKeywordType | eTypeName | 19,
-        eU8           = eKeywordType | eTypeName | 20,
-        eU16          = eKeywordType | eTypeName | 21,
-        eU32          = eKeywordType | eTypeName | 22,
-        eU64          = eKeywordType | eTypeName | 23,
-        eUnchecked    = eKeywordType | 24,
-        eUSize        = eKeywordType | eTypeName | 25,
-        eVar          = eKeywordType | 26,
-        eWhile        = eKeywordType | 27,
+    // built-in identifier
+    static constexpr uint16_t BuiltInIdentifier = BuiltInIdentifierType;
 
-        // bool literal
-        eFalseLit     = eBoolLiteralType | 0,
-        eTrueLit      = eBoolLiteralType | 1,
+    // keyword
+    static constexpr uint16_t Bool         = KeywordType | TypeName |  0;
+    static constexpr uint16_t Break        = KeywordType |  1;
+    static constexpr uint16_t Const        = KeywordType |  2;
+    static constexpr uint16_t Continue     = KeywordType |  3;
+    static constexpr uint16_t Elif         = KeywordType |  4;
+    static constexpr uint16_t Else         = KeywordType |  5;
+    static constexpr uint16_t Extern       = KeywordType |  6;
+    static constexpr uint16_t For          = KeywordType |  7;
+    static constexpr uint16_t Fun          = KeywordType |  8;
+    static constexpr uint16_t If           = KeywordType |  9;
+    static constexpr uint16_t I8           = KeywordType | TypeName | 10;
+    static constexpr uint16_t I16          = KeywordType | TypeName | 11;
+    static constexpr uint16_t I32          = KeywordType | TypeName | 12;
+    static constexpr uint16_t I64          = KeywordType | TypeName | 13;
+    static constexpr uint16_t In           = KeywordType | 14;
+    static constexpr uint16_t ISize        = KeywordType | TypeName | 15;
+    static constexpr uint16_t Return       = KeywordType | 16;
+    static constexpr uint16_t Str          = KeywordType | TypeName | 17;
+    static constexpr uint16_t Struct       = KeywordType | 18;
+    static constexpr uint16_t Type         = KeywordType | TypeName | 19;
+    static constexpr uint16_t U8           = KeywordType | TypeName | 20;
+    static constexpr uint16_t U16          = KeywordType | TypeName | 21;
+    static constexpr uint16_t U32          = KeywordType | TypeName | 22;
+    static constexpr uint16_t U64          = KeywordType | TypeName | 23;
+    static constexpr uint16_t Unchecked    = KeywordType | 24;
+    static constexpr uint16_t USize        = KeywordType | TypeName | 25;
+    static constexpr uint16_t Var          = KeywordType | 26;
+    static constexpr uint16_t While        = KeywordType | 27;
 
-        // int literal
-        eBinIntLit    = eIntLiteralType | 0,
-        eOctIntLit    = eIntLiteralType | 1,
-        eDecIntLit    = eIntLiteralType | 2,
-        eHexIntLit    = eIntLiteralType | 3,
+    // bool literal
+    static constexpr uint16_t FalseLit     = BoolLiteralType | 0;
+    static constexpr uint16_t TrueLit      = BoolLiteralType | 1;
 
-        // float literal
-        eFloatLit     = eFloatLiteralType,
+    // int literal
+    static constexpr uint16_t BinIntLit    = IntLiteralType | 0;
+    static constexpr uint16_t OctIntLit    = IntLiteralType | 1;
+    static constexpr uint16_t DecIntLit    = IntLiteralType | 2;
+    static constexpr uint16_t HexIntLit    = IntLiteralType | 3;
 
-        // string literal
-        eStrLit       = eStrLiteralType,
+    // float literal
+    static constexpr uint16_t FloatLit     = FloatLiteralType;
 
-        // symbol
-        eEqual                      = eSymbolType | eBinaryOp |  0,
-        eEqualEqual                 = eSymbolType | eBinaryOp |  1,
-        eLess                       = eSymbolType | eBinaryOp |  2,
-        eLessEqual                  = eSymbolType | eBinaryOp |  3,
-        eLessLess                   = eSymbolType | eBinaryOp |  4,
-        eLessLessEqual              = eSymbolType | eBinaryOp |  5,
-        eGreater                    = eSymbolType | eBinaryOp |  6,
-        eGreaterEqual               = eSymbolType | eBinaryOp |  7,
-        eGreaterGreater             = eSymbolType | eBinaryOp |  8,
-        eGreaterGreaterEqual        = eSymbolType | eBinaryOp |  9,
-        eGreaterGreaterGreater      = eSymbolType | eBinaryOp | 10,
-        eGreaterGreaterGreaterEqual = eSymbolType | eBinaryOp | 11,
-        ePlus                       = eSymbolType | eBinaryOp | 12,
-        ePlusEqual                  = eSymbolType | eBinaryOp | 13,
-        eMinus                      = eSymbolType | eUnaryOp | eBinaryOp | 14,
-        eMinusEqual                 = eSymbolType | eBinaryOp | 15,
-        eTimes                      = eSymbolType | eUnaryOp | eBinaryOp | 16,
-        eTimesEqual                 = eSymbolType | eBinaryOp | 17,
-        eDivide                     = eSymbolType | eBinaryOp | 18,
-        eDivideEqual                = eSymbolType | eBinaryOp | 19,
-        eRemainder                  = eSymbolType | eBinaryOp | 20,
-        eRemainderEqual             = eSymbolType | eBinaryOp | 21,
-        eExclaim                    = eSymbolType | eUnaryOp | 22,
-        eExclaimEqual               = eSymbolType | eBinaryOp | 23,
-        eAmpersand                  = eSymbolType | eUnaryOp | eBinaryOp | 24,
-        eAmpersandEqual             = eSymbolType | eBinaryOp | 25,
-        eAmpersandAmpersand         = eSymbolType | eBinaryOp | 26,
-        eBar                        = eSymbolType | eBinaryOp | 27,
-        eBarEqual                   = eSymbolType | eBinaryOp | 28,
-        eBarBar                     = eSymbolType | eBinaryOp | 29,
-        eCaret                      = eSymbolType | eBinaryOp | 30,
-        eCaretEqual                 = eSymbolType | eBinaryOp | 31,
-        eOpenPar                    = eSymbolType | 32,
-        eClosePar                   = eSymbolType | 33,
-        eOpenBracket                = eSymbolType | 34,
-        eCloseBracket               = eSymbolType | 35,
-        eOpenBrace                  = eSymbolType | 36,
-        eCloseBrace                 = eSymbolType | 37,
-        eComma                      = eSymbolType | 38,
-        ePeriod                     = eSymbolType | 39,
-        ePeriodPeriod               = eSymbolType | eBinaryOp | 40,
-        ePeriodPeriodLess           = eSymbolType | eBinaryOp | 41,
-        eSemiColon                  = eSymbolType | 42,
-        eColon                      = eSymbolType | 43,
-    };
+    // string literal
+    static constexpr uint16_t StrLit       = StrLiteralType;
+
+    // symbol
+    static constexpr uint16_t Equal                      = SymbolType | BinaryOp |  0;
+    static constexpr uint16_t EqualEqual                 = SymbolType | BinaryOp |  1;
+    static constexpr uint16_t Less                       = SymbolType | BinaryOp |  2;
+    static constexpr uint16_t LessEqual                  = SymbolType | BinaryOp |  3;
+    static constexpr uint16_t LessLess                   = SymbolType | BinaryOp |  4;
+    static constexpr uint16_t LessLessEqual              = SymbolType | BinaryOp |  5;
+    static constexpr uint16_t Greater                    = SymbolType | BinaryOp |  6;
+    static constexpr uint16_t GreaterEqual               = SymbolType | BinaryOp |  7;
+    static constexpr uint16_t GreaterGreater             = SymbolType | BinaryOp |  8;
+    static constexpr uint16_t GreaterGreaterEqual        = SymbolType | BinaryOp |  9;
+    static constexpr uint16_t GreaterGreaterGreater      = SymbolType | BinaryOp | 10;
+    static constexpr uint16_t GreaterGreaterGreaterEqual = SymbolType | BinaryOp | 11;
+    static constexpr uint16_t Plus                       = SymbolType | BinaryOp | 12;
+    static constexpr uint16_t PlusEqual                  = SymbolType | BinaryOp | 13;
+    static constexpr uint16_t Minus                      = SymbolType | UnaryOp | BinaryOp | 14;
+    static constexpr uint16_t MinusEqual                 = SymbolType | BinaryOp | 15;
+    static constexpr uint16_t Times                      = SymbolType | UnaryOp | BinaryOp | 16;
+    static constexpr uint16_t TimesEqual                 = SymbolType | BinaryOp | 17;
+    static constexpr uint16_t Divide                     = SymbolType | BinaryOp | 18;
+    static constexpr uint16_t DivideEqual                = SymbolType | BinaryOp | 19;
+    static constexpr uint16_t Remainder                  = SymbolType | BinaryOp | 20;
+    static constexpr uint16_t RemainderEqual             = SymbolType | BinaryOp | 21;
+    static constexpr uint16_t Exclaim                    = SymbolType | UnaryOp | 22;
+    static constexpr uint16_t ExclaimEqual               = SymbolType | BinaryOp | 23;
+    static constexpr uint16_t Ampersand                  = SymbolType | UnaryOp | BinaryOp | 24;
+    static constexpr uint16_t AmpersandEqual             = SymbolType | BinaryOp | 25;
+    static constexpr uint16_t AmpersandAmpersand         = SymbolType | BinaryOp | 26;
+    static constexpr uint16_t Bar                        = SymbolType | BinaryOp | 27;
+    static constexpr uint16_t BarEqual                   = SymbolType | BinaryOp | 28;
+    static constexpr uint16_t BarBar                     = SymbolType | BinaryOp | 29;
+    static constexpr uint16_t Caret                      = SymbolType | BinaryOp | 30;
+    static constexpr uint16_t CaretEqual                 = SymbolType | BinaryOp | 31;
+    static constexpr uint16_t OpenPar                    = SymbolType | 32;
+    static constexpr uint16_t ClosePar                   = SymbolType | 33;
+    static constexpr uint16_t OpenBracket                = SymbolType | 34;
+    static constexpr uint16_t CloseBracket               = SymbolType | 35;
+    static constexpr uint16_t OpenBrace                  = SymbolType | 36;
+    static constexpr uint16_t CloseBrace                 = SymbolType | 37;
+    static constexpr uint16_t Comma                      = SymbolType | 38;
+    static constexpr uint16_t Period                     = SymbolType | 39;
+    static constexpr uint16_t PeriodPeriod               = SymbolType | BinaryOp | 40;
+    static constexpr uint16_t PeriodPeriodLess           = SymbolType | BinaryOp | 41;
+    static constexpr uint16_t SemiColon                  = SymbolType | 42;
+    static constexpr uint16_t Colon                      = SymbolType | 43;
 
     static constexpr uint16_t MAIN_TYPE_MASK = 0xf000;
 
-    static constexpr EMainType GetMainType(EType type)
+    static constexpr uint16_t GetMainType(uint16_t type)
     {
-        EMainType mainType = static_cast<EMainType>(MAIN_TYPE_MASK & type);
-        return mainType;
+        return MAIN_TYPE_MASK & type;
     }
 
-    static constexpr bool IsUnaryOp(EType type)
+    static constexpr bool IsUnaryOp(uint16_t type)
     {
-        bool isSymbol = GetMainType(type) == eSymbolType;
-        bool isUnaryOp = (type & eUnaryOp) == eUnaryOp;
+        bool isSymbol = GetMainType(type) == SymbolType;
+        bool isUnaryOp = (type & UnaryOp) == UnaryOp;
         return isSymbol & isUnaryOp;
     }
 
-    static constexpr bool IsBinaryOp(EType type)
+    static constexpr bool IsBinaryOp(uint16_t type)
     {
-        bool isSymbol = GetMainType(type) == eSymbolType;
-        bool isBinaryOp = (type & eBinaryOp) == eBinaryOp;
+        bool isSymbol = GetMainType(type) == SymbolType;
+        bool isBinaryOp = (type & BinaryOp) == BinaryOp;
         return isSymbol & isBinaryOp;
     }
 
-    static constexpr bool IsTypeName(EType type)
+    static constexpr bool IsTypeName(uint16_t type)
     {
-        bool isKeyword = GetMainType(type) == eKeywordType;
-        bool isTypeName = (type & eTypeName) == eTypeName;
+        bool isKeyword = GetMainType(type) == KeywordType;
+        bool isTypeName = (type & TypeName) == TypeName;
         return isKeyword & isTypeName;
     }
 
-    Token(ROString value, unsigned filenameId, unsigned line, unsigned column, EType type);
+    Token(ROString value, unsigned filenameId, unsigned line, unsigned column, uint16_t type);
 
     ROString value;
     unsigned filenameId;
     unsigned line;
     unsigned column;
-    EType type;
+    uint16_t type;
 };
 
 #endif // TOKEN_H_
