@@ -858,35 +858,6 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
     return forLoop;
 }
 
-SyntaxAnalyzer::TokenIterator SyntaxAnalyzer::FindStatementEnd(TokenIterator iter, TokenIterator endIter)
-{
-    unsigned int balance = 0;
-
-    while (iter != endIter)
-    {
-        uint16_t type = iter->type;
-        if (balance == 0)
-        {
-            if (type == Token::SemiColon || type == Token::CloseBrace)
-            {
-                break;
-            }
-        }
-        else if (type == Token::OpenBrace)
-        {
-            ++balance;
-        }
-        else if (type == Token::CloseBrace)
-        {
-            --balance;
-        }
-
-        ++iter;
-    }
-
-    return iter;
-}
-
 Expression* SyntaxAnalyzer::AddUnaryExpressions(Expression* baseExpr, stack<UnaryOpData>& unaryOperators)
 {
     Expression* result = baseExpr;

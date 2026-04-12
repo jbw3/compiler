@@ -77,8 +77,6 @@ private:
 
     SyntaxTree::ForLoop* ProcessForLoop(TokenIterator& iter, TokenIterator endIter);
 
-    TokenIterator FindStatementEnd(TokenIterator iter, TokenIterator endIter);
-
     SyntaxTree::Expression* AddUnaryExpressions(SyntaxTree::Expression* baseExpr,
                                                 std::stack<UnaryOpData>& unaryOperators);
 
