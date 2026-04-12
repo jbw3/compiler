@@ -10,7 +10,7 @@ def main() -> None:
 
     # run ctest
     subprocess.check_call(
-        ['ctest', '--output-on-failure'],
+        ['ctest', '--quiet'],
         env={'LLVM_PROFILE_FILE': 'default.profraw'},
         cwd=build_dir,
     )
