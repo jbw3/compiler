@@ -33,6 +33,8 @@ add_library(compilerapi
     SemanticAnalyzer.h
     SourceGenerator.cpp
     SourceGenerator.h
+    StartEndTokenFinder.cpp
+    StartEndTokenFinder.h
     Stopwatch.cpp
     Stopwatch.h
     SymbolTable.cpp
