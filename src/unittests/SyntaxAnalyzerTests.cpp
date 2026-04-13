@@ -81,6 +81,85 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
             "const s = struct",
             "error: Unexpected end of file. Expected '{'",
         },
+
+        // invalid functions
+        {
+            "fun (){}",
+            "error: '(' is not a valid function name",
+        },
+        {
+            "fun x{}",
+            "error: Expected '('",
+        },
+
+        // invalid strings
+        {
+            "const x = \"\\q\";",
+            "error: Invalid escape sequence",
+        },
+        {
+            "const x = \"\xff\";",
+            "error: Invalid character in string",
+        },
+
+        // invalid \x string escape sequences
+        {
+            "const x = \"\\x\";",
+            "error: Reached end of string before end of '\\x' escape sequence",
+        },
+        {
+            "const x = \"\\xy\";",
+            "error: Invalid hexadecimal digit in '\\x' escape sequence",
+        },
+        {
+            "const x = \"\\xff\";",
+            "error: Invalid UTF-8 byte in '\\x' escape sequence",
+        },
+
+        // invalid \u{} string escape sequences
+        {
+            "const x = \"\\u\";",
+            "error: Reached end of string before end of '\\u' escape sequence",
+        },
+        {
+            "const x = \"\\u000a\";",
+            "error: Expected '{' after '\\u'",
+        },
+        {
+            "const x = \"\\u{\";",
+            "error: Reached end of string before end of '\\u' escape sequence",
+        },
+        {
+            "const x = \"\\u{}\";",
+            "error: Unexpected '}' after '{'",
+        },
+        {
+            "const x = \"\\u{123456789}\";",
+            "error: '\\u' escape sequence cannot contain more than 8 digits",
+        },
+        {
+            "const x = \"\\u{1x}\";",
+            "error: Invalid hexadecimal digit in '\\u' escape sequence",
+        },
+        {
+            "const x = \"\\u{1a\";",
+            "error: Reached end of string before end of '\\u' escape sequence",
+        },
+        {
+            "const x = \"\\u{12345678}\";",
+            "error: Unicode sequence exceeds max value",
+        },
+
+        // no ';' after break/continue
+        {
+            "fun f() { while true { break } }",
+            "error: Expected ';' after 'break'",
+        },
+        {
+            "fun f() { while true { continue } }",
+            "error: Expected ';' after 'continue'",
+        },
+
     };
 
     bool ok = true;
