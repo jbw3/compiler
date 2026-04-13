@@ -244,6 +244,40 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
             "const S = struct { m1 bool = true && true };",
             "error: Default member value is not a constant expression",
         },
+
+        // struct with 'type' member
+        {
+            "const S = struct { t type };",
+            "error: Member cannot be of type 'type'",
+        },
+        {
+            "const S = struct { t []type };",
+            "error: Member cannot be of type '[]type'",
+        },
+
+        // struct with duplicate member
+        {
+            "const S = struct { abc i32, abc str };",
+            "error: Duplicate member 'abc' in struct 'S'",
+        },
+
+        // divide by zero
+        {
+            "const X i32 = 1 / 0;",
+            "error: Divide by zero in constant expression",
+        },
+        {
+            "const A i32 = 12;"
+            "const X i32 = A % 0;",
+            "error: Divide by zero in constant expression",
+        },
+
+        // array out-of-bounds
+        {
+            "const A []i32 = [1, 2, 3];\n"
+            "const X = A[3];",
+            "error: Index out-of-bounds. Index: 3, array size: 3",
+        },
     };
 
     bool ok = true;
@@ -353,6 +387,46 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
         {
             "var a = @bitCast(u8, 17_000);",
             "error: Cannot bit-cast expression of type '{integer}' to type 'u8' because sizes are not equal",
+        },
+
+        // not a struct type
+        {
+            "const X i32 = 1;\n"
+            "var s = X: {};",
+            "error: Expression is not a type",
+        },
+
+        // invalid struct member name
+        {
+            "const S = struct { abc i32, def str };\n"
+            "var s = S: { abc = 1, hello = 12 };",
+            "error: Struct 'S' does not have a member named 'hello'",
+        },
+
+        // member has already been initialized
+        {
+            "const S = struct { abc i32, def str };\n"
+            "var s = S: { abc = 1, def = \"a\", abc = 12 };",
+            "error: Member 'abc' has already been initialized",
+        },
+
+        // invalid member value
+        {
+            "const S = struct { abc i32, def str };\n"
+            "var s = S: { abc = 1, def = true };",
+            "error: Cannot assign expression of type 'bool' to member 'def' of type 'str'",
+        },
+
+        // uninitialized members
+        {
+            "const S = struct { abc i32, def str };\n"
+            "var s = S: { abc = 1, };",
+            "error: Struct member 'def' was not initialized",
+        },
+        {
+            "const S = struct { abc i32, def str };\n"
+            "var s = S: { };",
+            "error: The following struct members were not initialized: def, abc",
         },
     };
 
