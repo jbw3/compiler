@@ -162,7 +162,7 @@ void StartEndTokenFinder::Visit(UncheckedBlock* /*uncheckedBlock*/)
 
 void StartEndTokenFinder::Visit(ImplicitCastExpression* castExpression)
 {
-    castExpression->Accept(this);
+    castExpression->subExpression->Accept(this);
 }
 
 void StartEndTokenFinder::Visit(FunctionCallExpression* functionCallExpression)

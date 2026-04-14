@@ -189,6 +189,13 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             "const test []f32 = [\n1.2,\n@pi,\n77e3,\n];",
             1, 20, 5, 1,
         },
+
+        // implicit cast
+        {
+            "const abc i8 = 1;\n"
+            "const test i32 = abc + 1;",
+            2, 18, 2, 24,
+        },
     };
 
     Modules* syntaxTree = nullptr;
