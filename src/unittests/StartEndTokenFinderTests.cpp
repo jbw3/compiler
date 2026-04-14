@@ -1,10 +1,10 @@
 #include "StartEndTokenFinderTests.h"
 #include "CompilerContext.h"
 #include "LexicalAnalyzer.h"
+#include "SemanticAnalyzer.h"
 #include "StartEndTokenFinder.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
-#include <sstream>
 
 using namespace std;
 using namespace SyntaxTree;
@@ -15,13 +15,13 @@ StartEndTokenFinderTests::StartEndTokenFinderTests(ostream &results) :
     ADD_TEST(Test);
 }
 
-Modules* StartEndTokenFinderTests::CreateSyntaxTree(const std::string& input, std::string& failMsg)
+Modules* StartEndTokenFinderTests::CreateSyntaxTree(
+    stringstream& errStream,
+    CompilerContext& compilerContext,
+    const std::string& input,
+    std::string& failMsg
+)
 {
-    Config config;
-    config.color = Config::eFalse;
-    stringstream errStream;
-    CompilerContext compilerContext(config, errStream);
-
     Modules* syntaxTree = new Modules;
 
     char* input_copy = new char[input.size()]; // this will be freed by CompilerContext
@@ -62,6 +62,16 @@ Modules* StartEndTokenFinderTests::CreateSyntaxTree(const std::string& input, st
         }
     }
 
+    if (ok)
+    {
+        SemanticAnalyzer semanticAnalyzer(compilerContext);
+        ok = semanticAnalyzer.Process(syntaxTree);
+        if (!ok)
+        {
+            failMsg = errStream.str();
+        }
+    }
+
     if (!ok)
     {
         delete syntaxTree;
@@ -84,42 +94,101 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
 {
     vector<TestValue> tests = {
         // unary
-        {" - abc", 1, 2, 1, 6},
+        {
+            "const abc i32 = 2;\n"
+            "const test = - abc;",
+            2, 14, 2, 18,
+        },
 
         // binary
-        {"x + 2", 1, 1, 1, 5},
-        {" xyz / abc - 1_000", 1, 2, 1, 18},
-        {"xyz[17]", 1, 1, 1, 7},
+        {
+            "const x i32 = 4;\n"
+            "const test = x + 2;",
+            2, 14, 2, 18,
+        },
+        {
+            "const xyz i32 = 12;\n"
+            "const abc i32 = 30;\n"
+            "const test = xyz / abc - 1_000;",
+            3, 14, 3, 30,
+        },
+        {
+            "const xyz []i32 = [20; 0];\n"
+            "const test = xyz[17];",
+            2, 14, 2, 20,
+        },
 
         // function type expression
-        {"fun (a i32, b bool)", 1, 1, 1, 19},
-        {"fun (a i32, b bool) str", 1, 1, 1, 23},
-        {"fun (a i32,\nb bool) str", 1, 1, 2, 11},
+        {
+            "const test = fun (a i32, b bool);",
+            1, 14, 1, 32,
+        },
+        {
+            "const test = fun (a i32, b bool) str;",
+            1, 14, 1, 36,
+        },
+        {
+            "const test = fun (a i32,\nb bool) str;",
+            1, 14, 2, 11,
+        },
 
         // numeric
-        {"0x10", 1, 1, 1, 4},
+        {
+            "const test i16 = 0x10;",
+            1, 18, 1, 21,
+        },
 
         // float
-        {"1.234", 1, 1, 1, 5},
-        {"0.99e-30", 1, 1, 1, 8},
+        {
+            "const test f32 = 1.234;",
+            1, 18, 1, 22,
+        },
+        {
+            "const test f64 = 0.99e-30;",
+            1, 18, 1, 25,
+        },
 
         // bool
-        {"true", 1, 1, 1, 4},
-        {"false", 1, 1, 1, 5},
+        {
+            "const test = true;",
+            1, 14, 1, 17,
+        },
+        {
+            "const test = false;",
+            1, 14, 1, 18,
+        },
 
         // string
-        {"\"abc\"", 1, 1, 1, 5},
-        {"\"123\\n456\"", 1, 1, 1, 10},
+        {
+            "const test = \"abc\";",
+            1, 14, 1, 18,
+        },
+        {
+            "const test = \"123\\n456\";",
+            1, 14, 1, 23,
+        },
 
         // built-in identifier
-        {"@pi", 1, 1, 1, 3},
+        {
+            "const test f64 = @pi;",
+            1, 18, 1, 20,
+        },
 
         // array size/value
-        {"[3; 17.5]", 1, 1, 1, 9},
+        {
+            "const test []f64 = [3; 17.5];",
+            1, 20, 1, 28,
+        },
 
         // array multi-value
-        {"[1, 2, 300]", 1, 1, 1, 11},
-        {"[\n1.2,\n@pi,\n77e3,\n]", 1, 1, 5, 1},
+        {
+            "const test []i32 = [1, 2, 300];",
+            1, 20, 1, 30,
+        },
+        {
+            "const test []f32 = [\n1.2,\n@pi,\n77e3,\n];",
+            1, 20, 5, 1,
+        },
     };
 
     Modules* syntaxTree = nullptr;
@@ -127,10 +196,13 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
     string errMsg;
     for (TestValue test : tests)
     {
-        string input = "const x = " + test.input + ";";
-
         delete syntaxTree;
-        syntaxTree = CreateSyntaxTree(input, errMsg);
+
+        Config config;
+        config.color = Config::eFalse;
+        stringstream errStream;
+        CompilerContext compilerContext(config, errStream);
+        syntaxTree = CreateSyntaxTree(errStream, compilerContext, test.input, errMsg);
         if (syntaxTree == nullptr)
         {
             ok = false;
@@ -138,7 +210,22 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             break;
         }
 
-        Expression* expression = syntaxTree->modules[0]->constantDeclarations[0]->assignmentExpression->right;
+        Expression* expression = nullptr;
+        for (const ConstantDeclaration* constDecl : syntaxTree->modules[0]->constantDeclarations)
+        {
+            if (constDecl->name == "test")
+            {
+                expression = constDecl->assignmentExpression->right;
+                break;
+            }
+        }
+
+        if (expression == nullptr)
+        {
+            ok = false;
+            failMsg = "Could not find test constant";
+            break;
+        }
 
         StartEndTokenFinder finder;
         expression->Accept(&finder);
@@ -146,10 +233,6 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
         const Token* start = finder.start;
         unsigned expectedStartLine = test.startLineOffset;
         unsigned expectedStartColumn = test.startColumnOffset;
-        if (expectedStartLine == 1)
-        {
-            expectedStartColumn += 10;
-        }
         if (expectedStartLine != start->line || expectedStartColumn != start->column)
         {
             ok = false;
@@ -166,10 +249,6 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
         const Token* end = finder.end;
         unsigned expectedEndLine = test.endLineOffset;
         unsigned expectedEndColumn = test.endColumnOffset;
-        if (expectedEndLine == 1)
-        {
-            expectedEndColumn += 10;
-        }
         unsigned actualEndColumn = end->column + end->value.GetSize() - 1;
         if (expectedEndLine != end->line || expectedEndColumn != actualEndColumn)
         {
