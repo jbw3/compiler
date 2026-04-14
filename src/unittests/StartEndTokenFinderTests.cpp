@@ -122,13 +122,15 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
         {"[\n1.2,\n@pi,\n77e3,\n]", 1, 1, 5, 1},
     };
 
+    Modules* syntaxTree = nullptr;
     bool ok = true;
     string errMsg;
     for (TestValue test : tests)
     {
         string input = "const x = " + test.input + ";";
 
-        Modules* syntaxTree = CreateSyntaxTree(input, errMsg);
+        delete syntaxTree;
+        syntaxTree = CreateSyntaxTree(input, errMsg);
         if (syntaxTree == nullptr)
         {
             ok = false;
@@ -182,6 +184,8 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             break;
         }
     }
+
+    delete syntaxTree;
 
     return ok;
 }
