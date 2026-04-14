@@ -90,6 +90,36 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
         {"x + 2", 1, 1, 1, 5},
         {" xyz / abc - 1_000", 1, 2, 1, 18},
         {"xyz[17]", 1, 1, 1, 7},
+
+        // function type expression
+        {"fun (a i32, b bool)", 1, 1, 1, 19},
+        {"fun (a i32, b bool) str", 1, 1, 1, 23},
+        {"fun (a i32,\nb bool) str", 1, 1, 2, 11},
+
+        // numeric
+        {"0x10", 1, 1, 1, 4},
+
+        // float
+        {"1.234", 1, 1, 1, 5},
+        {"0.99e-30", 1, 1, 1, 8},
+
+        // bool
+        {"true", 1, 1, 1, 4},
+        {"false", 1, 1, 1, 5},
+
+        // string
+        {"\"abc\"", 1, 1, 1, 5},
+        {"\"123\\n456\"", 1, 1, 1, 10},
+
+        // built-in identifier
+        {"@pi", 1, 1, 1, 3},
+
+        // array size/value
+        {"[3; 17.5]", 1, 1, 1, 9},
+
+        // array multi-value
+        {"[1, 2, 300]", 1, 1, 1, 11},
+        {"[\n1.2,\n@pi,\n77e3,\n]", 1, 1, 5, 1},
     };
 
     bool ok = true;
@@ -113,7 +143,11 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
 
         const Token* start = finder.start;
         unsigned expectedStartLine = test.startLineOffset;
-        unsigned expectedStartColumn = test.startColumnOffset + 10;
+        unsigned expectedStartColumn = test.startColumnOffset;
+        if (expectedStartLine == 1)
+        {
+            expectedStartColumn += 10;
+        }
         if (expectedStartLine != start->line || expectedStartColumn != start->column)
         {
             ok = false;
@@ -129,7 +163,11 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
 
         const Token* end = finder.end;
         unsigned expectedEndLine = test.endLineOffset;
-        unsigned expectedEndColumn = test.endColumnOffset + 10;
+        unsigned expectedEndColumn = test.endColumnOffset;
+        if (expectedEndLine == 1)
+        {
+            expectedEndColumn += 10;
+        }
         unsigned actualEndColumn = end->column + end->value.GetSize() - 1;
         if (expectedEndLine != end->line || expectedEndColumn != actualEndColumn)
         {
