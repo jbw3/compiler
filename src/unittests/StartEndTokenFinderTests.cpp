@@ -196,6 +196,13 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             "const test i32 = abc + 1;",
             2, 18, 2, 24,
         },
+
+        // built-in function call
+        {
+            "const a i32 = 12;\n"
+            "const test = @cast(f32, a);",
+            2, 14, 2, 26,
+        },
     };
 
     Modules* syntaxTree = nullptr;
