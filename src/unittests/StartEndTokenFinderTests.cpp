@@ -138,6 +138,13 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             1, 14, 4, 1,
         },
 
+        // struct initialization
+        {
+            "const S = struct { x bool, y i32 };\n"
+            "const test = S: { x = true, y = 9_000 };",
+            2, 14, 2, 39,
+        },
+
         // numeric
         {
             "const test i16 = 0x10;",
@@ -208,6 +215,14 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             "const a i32 = 12;\n"
             "const test = @cast(f32, a);",
             2, 14, 2, 26,
+        },
+
+        // member access
+        {
+            "const S = struct { b bool, number i32 };\n"
+            "const xyz = S: { b = true, number = 9_000 };\n"
+            "const test = xyz.number;",
+            3, 14, 3, 23,
         },
     };
 
