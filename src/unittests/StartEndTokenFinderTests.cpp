@@ -132,6 +132,12 @@ bool StartEndTokenFinderTests::Test(std::string& failMsg)
             1, 14, 2, 11,
         },
 
+        // struct definition
+        {
+            "const test = struct\n{  x bool,\n  y i32,\n};",
+            1, 14, 4, 1,
+        },
+
         // numeric
         {
             "const test i16 = 0x10;",

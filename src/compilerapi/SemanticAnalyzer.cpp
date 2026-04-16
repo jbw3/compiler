@@ -3723,7 +3723,6 @@ void SemanticAnalyzer::Visit(ConstantDeclaration* constantDeclaration)
     if (structDefExpr != nullptr)
     {
         structDefExpr->name = constantDeclaration->name;
-        structDefExpr->structToken = constantDeclaration->nameToken;
     }
 
     // process right of assignment expression before adding constant to symbol
