@@ -21,6 +21,12 @@ public:
     }
 
 protected:
+    static bool CompareFiles(
+        const std::string& expectedFilename,
+        const std::string& actualFilename,
+        std::string& failMsg
+    );
+
     void AddTest(const std::string& testName, TestFunc test);
 
 private:

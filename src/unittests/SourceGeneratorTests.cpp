@@ -3,7 +3,6 @@
 #include "SourceGeneratorTests.h"
 #include "SyntaxTree.h"
 #include <filesystem>
-#include <fstream>
 #include <sstream>
 #include <string>
 
@@ -60,37 +59,9 @@ bool SourceGeneratorTests::TestSourceGenerator(string& failMsg)
     generator.Visit(syntaxTree);
     generator.Flush();
 
-    fstream expectedFile(inFilename);
-    fstream outFile(outFilename);
-
-    unsigned lineNum = 1;
-    string expectedLine;
-    string outLine;
-    while (!expectedFile.eof() && !outFile.eof())
-    {
-        getline(expectedFile, expectedLine);
-        getline(outFile, outLine);
-
-        if (expectedLine != outLine)
-        {
-            err << "Error: " << outFilename << ": Line " << lineNum << " is not correct\n"
-                << expectedLine << '\n'
-                << outLine << '\n';
-            failMsg = err.str();
-            return false;
-        }
-
-        ++lineNum;
-    }
-
-    if (expectedFile.eof() != outFile.eof())
-    {
-        err << "Error: " << outFilename << ": Unexpected number of lines\n";
-        failMsg = err.str();
-        return false;
-    }
+    ok = CompareFiles(inFilename, outFilename, failMsg);
 
     delete syntaxTree;
 
-    return true;
+    return ok;
 }

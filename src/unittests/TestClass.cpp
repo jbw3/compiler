@@ -1,9 +1,11 @@
 #include "TestClass.h"
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
-string xmlEscape(const string& str)
+static string xmlEscape(const string& str)
 {
     string newStr;
     for (char ch : str)
@@ -71,6 +73,47 @@ bool TestClass::Run()
     results << "    </testsuite>\n";
 
     return numFailed == 0;
+}
+
+bool TestClass::CompareFiles(
+    const string& expectedFilename,
+    const string& actualFilename,
+    string& failMsg
+)
+{
+    fstream expectedFile(expectedFilename);
+    fstream actualFile(actualFilename);
+
+    unsigned lineNum = 1;
+    string expectedLine;
+    string outLine;
+    while (!expectedFile.eof() && !actualFile.eof())
+    {
+        getline(expectedFile, expectedLine);
+        getline(actualFile, outLine);
+
+        if (expectedLine != outLine)
+        {
+            stringstream err;
+            err << "Error: " << actualFilename << ": Line " << lineNum << " is not correct\n"
+                << expectedLine << '\n'
+                << outLine << '\n';
+            failMsg = err.str();
+            return false;
+        }
+
+        ++lineNum;
+    }
+
+    if (expectedFile.eof() != actualFile.eof())
+    {
+        stringstream err;
+        err << "Error: " << actualFilename << ": Unexpected number of lines\n";
+        failMsg = err.str();
+        return false;
+    }
+
+    return true;
 }
 
 void TestClass::AddTest(const string& testName, TestFunc test)
