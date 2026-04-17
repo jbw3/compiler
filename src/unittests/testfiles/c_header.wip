@@ -1,0 +1,30 @@
+fun f1(x i32, abc u64, n1 f32, n2 f64) bool
+{
+    return true;
+}
+
+fun f2(s1 str)
+{
+}
+
+const Struct1 = struct
+{
+    s2 Struct2, # test out-of-order dependency
+    num f32,
+    abc bool,
+};
+
+const Struct2 = struct
+{
+    s str,
+    s1 &Struct1, # circular dependency with pointer
+};
+
+fun f3(a1 []i32, a2 []Struct3)
+{
+}
+
+# test typedef
+const Struct3 = Struct1;
+
+const EmptyStruct = struct { };

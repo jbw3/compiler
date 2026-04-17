@@ -5,6 +5,7 @@ debug
 release
 coverage-report
 test_results.xml
+*.out.h
 *.out.ll
 *.out.wip
 *.profraw

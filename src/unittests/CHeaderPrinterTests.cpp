@@ -13,6 +13,7 @@ CHeaderPrinterTests::CHeaderPrinterTests(ostream& results) :
     TestClass("CHeaderPrinter", results)
 {
     ADD_TEST(TestGetFilenameMacro);
+    ADD_TEST(TestPrinter);
 }
 
 bool CHeaderPrinterTests::TestGetFilenameMacro(string& failMsg)
@@ -37,6 +38,37 @@ bool CHeaderPrinterTests::TestGetFilenameMacro(string& failMsg)
             failMsg = "Expected: "s + expected + ", actual: "s + actual;
             ok = false;
         }
+    }
+
+    return ok;
+}
+
+bool CHeaderPrinterTests::TestPrinter(std::string& failMsg)
+{
+    stringstream err;
+
+    fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
+    string wipFilename = (testFilesDir / "c_header.wip").string();
+    string expectedFilename = (testFilesDir / "c_header.expected.h").string();
+    string actualFilename = (testFilesDir / "c_header.out.h").string();
+
+    Config config;
+    config.emitType = Config::eCHeader;
+    config.outFilename = actualFilename;
+    config.inFilenames.push_back(wipFilename);
+
+    Compiler compiler(config);
+    bool ok = compiler.Compile();
+    if (!ok)
+    {
+        err << "Error: " << wipFilename << ": Failed to compile\n";
+        failMsg = err.str();
+        return false;
+    }
+
+    if (ok)
+    {
+        ok = CompareFiles(expectedFilename, actualFilename, failMsg);
     }
 
     return ok;
