@@ -6,6 +6,8 @@ include_directories(../compilerapi)
 include_directories(${LLVM_INCLUDE_DIRS})
 
 add_executable(unittests
+    CHeaderPrinterTests.cpp
+    CHeaderPrinterTests.h
     CompilerTests.cpp
     CompilerTests.h
     LexicalAnalyzerTests.cpp

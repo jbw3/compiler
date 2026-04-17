@@ -1,3 +1,4 @@
+#include "CHeaderPrinterTests.h"
 #include "CompilerTests.h"
 #include "LexicalAnalyzerTests.h"
 #include "ROStringTests.h"
@@ -19,6 +20,7 @@ int main(int argc, const char* const argv[])
 
     vector<shared_ptr<TestClass>> testClasses =
     {
+        shared_ptr<TestClass>(new CHeaderPrinterTests(resultsFile)),
         shared_ptr<TestClass>(new UtilsTests(resultsFile)),
         shared_ptr<TestClass>(new ROStringTests(resultsFile)),
         shared_ptr<TestClass>(new LexicalAnalyzerTests(resultsFile)),

@@ -11,6 +11,8 @@ class ErrorLogger;
 class CHeaderPrinter
 {
 public:
+    static std::string GetFilenameMacro(const std::string& outFilename);
+
     CHeaderPrinter(CompilerContext& compilerContext);
 
     bool Print(const Config& config, const SyntaxTree::Modules* modules);
@@ -23,8 +25,6 @@ private:
     bool WriteFile(const std::string& tempFilename, const std::string& outFilename, const SyntaxTree::Modules* modules);
 
     std::string GetOutFilename(const Config& config);
-
-    std::string GetFilenameMacro(const std::string& outFilename);
 
     bool PrintCType(std::ostream& os, const TypeInfo* type, ROString varName);
 

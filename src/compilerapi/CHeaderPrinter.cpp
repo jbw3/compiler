@@ -11,6 +11,36 @@ namespace fs = std::filesystem;
 using namespace std;
 using namespace SyntaxTree;
 
+string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
+{
+    string macro;
+
+    // make sure the first char is valid for an identifier
+    if (!outFilename.empty())
+    {
+        char firstChar = outFilename[0];
+        if (!isalpha(firstChar) && firstChar != '_')
+        {
+            macro += "X_";
+        }
+    }
+
+    for (char ch : outFilename)
+    {
+        if (isalnum(ch))
+        {
+            macro += toupper(ch);
+        }
+        else
+        {
+            macro += "_";
+        }
+    }
+    macro += "_";
+
+    return macro;
+}
+
 CHeaderPrinter::CHeaderPrinter(CompilerContext& compilerContext) :
     logger(compilerContext.logger),
     compilerContext(compilerContext)
@@ -228,36 +258,6 @@ string CHeaderPrinter::GetOutFilename(const Config& config)
     }
 
     return outFilename;
-}
-
-string CHeaderPrinter::GetFilenameMacro(const string& outFilename)
-{
-    string macro;
-
-    // make sure the first char is valid for an identifier
-    if (!outFilename.empty())
-    {
-        char firstChar = outFilename[0];
-        if (!isalpha(firstChar) && firstChar != '_')
-        {
-            macro += "X_";
-        }
-    }
-
-    for (char ch : outFilename)
-    {
-        if (isalnum(ch))
-        {
-            macro += toupper(ch);
-        }
-        else
-        {
-            macro += "_";
-        }
-    }
-    macro += "_";
-
-    return macro;
 }
 
 void PrintArrayName(ostream& os, const TypeInfo* arrayType)
