@@ -8,7 +8,7 @@ fun a_function(x i32, p &i32)
 {
     var s = TheStruct:
     {
-        string = "abc",
+        string = "abc\\\"\n\r\t©ℼ😎",
         num = x,
     };
 
@@ -16,6 +16,10 @@ fun a_function(x i32, p &i32)
     for i in 0..s.num
     {
         sum += i;
+        if i >= 100
+        {
+            break;
+        }
     }
     *p = sum;
 
@@ -36,9 +40,32 @@ fun a_function(x i32, p &i32)
     {
         *p *= 2;
     }
+
+    var less bool = false;
+    var float f64 = 1.2 * @pi + ef();
+    if float < 20.2
+    {
+        less = true;
+    }
+
+    var array []f64 = [
+        float,
+        @cast(f64, *p),
+        @cast(f64, s.num),
+    ];
+
+    var a2 []u8 = [4; 7];
+
+    unchecked
+    {
+        var addr u64 = a2[2];
+        var ptr &i32 = @intToPtr(&i32, addr);
+    }
 }
 
 fun test_value(x i32) bool
 {
     return x < 4;
 }
+
+extern fun ef() f64;
