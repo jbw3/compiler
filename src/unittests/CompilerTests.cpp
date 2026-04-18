@@ -10,23 +10,24 @@ using namespace std;
 CompilerTests::CompilerTests(ostream& results) :
     TestClass("Compiler", results)
 {
-    AddTest("basic", [](string& failMsg){ return RunTest("basic", false, failMsg); });
-    AddTest("debug_info", [](string& failMsg){ return RunTest("debug_info", true, failMsg); });
+    AddTest("basic", [](string& failMsg){ return RunLlvmIrTest("basic", false, failMsg); });
+    AddTest("debug_info", [](string& failMsg){ return RunLlvmIrTest("debug_info", true, failMsg); });
     AddTest("multi_file", [](string& failMsg)
     {
         vector<string> multiFiles = { "multi_file1", "multi_file2" };
-        return RunTest(multiFiles, true, failMsg);
+        return RunLlvmIrTest(multiFiles, true, failMsg);
     });
+    ADD_TEST(TestPrintTokens);
 }
 
-bool CompilerTests::RunTest(const string& baseFilename, bool debugInfo, string& failMsg)
+bool CompilerTests::RunLlvmIrTest(const string& baseFilename, bool debugInfo, string& failMsg)
 {
     vector<string> baseFilenames;
     baseFilenames.push_back(baseFilename);
-    return RunTest(baseFilenames, debugInfo, failMsg);
+    return RunLlvmIrTest(baseFilenames, debugInfo, failMsg);
 }
 
-bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo, string& failMsg)
+bool CompilerTests::RunLlvmIrTest(const vector<string>& baseFilenames, bool debugInfo, string& failMsg)
 {
     string firstBaseFilename = baseFilenames.front();
 
@@ -125,4 +126,32 @@ bool CompilerTests::RunTest(const vector<string>& baseFilenames, bool debugInfo,
     }
 
     return true;
+}
+
+bool CompilerTests::TestPrintTokens(string& failMsg)
+{
+    fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
+    string wipFilename = (testFilesDir / "tokens.wip").string();
+    string expectedFilename = (testFilesDir / "tokens.expected.txt").string();
+    string actualFilename = (testFilesDir / "tokens.out.txt").string();
+
+    Config config;
+    config.emitType = Config::eTokens;
+    config.outFilename = actualFilename;
+    config.inFilenames.push_back(wipFilename);
+
+    Compiler compiler(config);
+    bool ok = compiler.Compile();
+    if (!ok)
+    {
+        failMsg = "Error: Failed to compile\n";
+        return false;
+    }
+
+    if (ok)
+    {
+        ok = CompareFiles(expectedFilename, actualFilename, failMsg);
+    }
+
+    return ok;
 }
