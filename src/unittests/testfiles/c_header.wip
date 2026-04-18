@@ -1,9 +1,9 @@
-fun f1(x i32, abc u64, n1 f32, n2 f64) bool
+fun f1(x i32, abc u64, s1 isize, s2 usize, n1 f32, n2 f64) bool
 {
     return true;
 }
 
-fun f2(s1 str)
+fun f2(s1 str, param_2 []Struct1, param3 Struct1, param4 &&&Struct1)
 {
 }
 
@@ -18,13 +18,30 @@ const Struct2 = struct
 {
     s str,
     s1 &Struct1, # circular dependency with pointer
+    s2 []bool,
+    s3 [][]&u64,
 };
 
-fun f3(a1 []i32, a2 []Struct3)
+fun f3(a1 []i32, a2 []Struct3) []i32
 {
+    return a1;
 }
 
 # test typedef
 const Struct3 = Struct1;
 
 const EmptyStruct = struct { };
+
+const FunStruct = struct
+{
+    f0 fun(),
+    f1 fun() &FunStruct,
+    f2 fun(a u8) u8,
+    f3 fun(a &i32, b &&i32, c &&&&&i32) &&i32,
+    f4 fun(a []i32) []i32,
+};
+
+fun f4(a &FunStruct) &FunStruct
+{
+    return a;
+}
