@@ -10,8 +10,6 @@ class TokenList;
 class Compiler
 {
 public:
-    Compiler();
-
     Compiler(const Config& config);
 
     bool CompileSyntaxTree(SyntaxTree::Modules*& syntaxTree);

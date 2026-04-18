@@ -17,11 +17,6 @@
 using namespace std;
 using namespace SyntaxTree;
 
-Compiler::Compiler() :
-    compilerContext(cerr)
-{
-}
-
 Compiler::Compiler(const Config& config) :
     compilerContext(config, cerr)
 {
