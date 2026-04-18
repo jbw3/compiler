@@ -1,0 +1,44 @@
+const TheStruct = struct
+{
+    string str,
+    num i32 = 0,
+};
+
+fun a_function(x i32, p &i32)
+{
+    var s = TheStruct:
+    {
+        string = "abc",
+        num = x,
+    };
+
+    var sum i32 = 0;
+    for i in 0..s.num
+    {
+        sum += i;
+    }
+    *p = sum;
+
+    if x < 1
+    {
+        *p += 1;
+    }
+    elif x < 2
+    {
+        *p *= 2;
+    }
+    else
+    {
+        *p += 12;
+    }
+
+    while test_value(x)
+    {
+        *p *= 2;
+    }
+}
+
+fun test_value(x i32) bool
+{
+    return x < 4;
+}

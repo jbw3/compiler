@@ -16,6 +16,8 @@ private:
     static bool RunLlvmIrTest(const std::vector<std::string>& baseFilenames, bool debugInfo, std::string& failMsg);
 
     static bool TestPrintTokens(std::string& failMsg);
+
+    static bool TestSyntaxTreePrinter(std::string& failMsg);
 };
 
 #endif // COMPILER_TESTS_H_

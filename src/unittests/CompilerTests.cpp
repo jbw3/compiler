@@ -18,6 +18,7 @@ CompilerTests::CompilerTests(ostream& results) :
         return RunLlvmIrTest(multiFiles, true, failMsg);
     });
     ADD_TEST(TestPrintTokens);
+    ADD_TEST(TestSyntaxTreePrinter);
 }
 
 bool CompilerTests::RunLlvmIrTest(const string& baseFilename, bool debugInfo, string& failMsg)
@@ -137,6 +138,34 @@ bool CompilerTests::TestPrintTokens(string& failMsg)
 
     Config config;
     config.emitType = Config::eTokens;
+    config.outFilename = actualFilename;
+    config.inFilenames.push_back(wipFilename);
+
+    Compiler compiler(config);
+    bool ok = compiler.Compile();
+    if (!ok)
+    {
+        failMsg = "Error: Failed to compile\n";
+        return false;
+    }
+
+    if (ok)
+    {
+        ok = CompareFiles(expectedFilename, actualFilename, failMsg);
+    }
+
+    return ok;
+}
+
+bool CompilerTests::TestSyntaxTreePrinter(string& failMsg)
+{
+    fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
+    string wipFilename = (testFilesDir / "syntax_tree.wip").string();
+    string expectedFilename = (testFilesDir / "syntax_tree.expected.json").string();
+    string actualFilename = (testFilesDir / "syntax_tree.out.json").string();
+
+    Config config;
+    config.emitType = Config::eSyntaxTree;
     config.outFilename = actualFilename;
     config.inFilenames.push_back(wipFilename);
 
