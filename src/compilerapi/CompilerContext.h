@@ -105,6 +105,8 @@ public:
     StringBuilder stringBuilder;
     TypeRegistry typeRegistry;
 
+    CompilerContext(std::ostream& logStream);
+
     CompilerContext(Config config, std::ostream& logStream);
 
     ~CompilerContext();

@@ -47,9 +47,9 @@ CHeaderPrinter::CHeaderPrinter(CompilerContext& compilerContext) :
 {
 }
 
-bool CHeaderPrinter::Print(const Config& config, const Modules* modules)
+bool CHeaderPrinter::Print(const Modules* modules)
 {
-    string outFilename = GetOutFilename(config);
+    string outFilename = GetOutFilename(compilerContext.config);
     string tempFilename = outFilename + ".0.tmp";
 
     unsigned i = 0;

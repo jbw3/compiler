@@ -63,6 +63,12 @@ void StringBuilder::AppendBuff(const char* ptr, size_t size)
     end += size;
 }
 
+CompilerContext::CompilerContext(ostream& logStream) :
+    logger(*this, &logStream, config.color),
+    typeRegistry(*this)
+{
+}
+
 CompilerContext::CompilerContext(Config config, ostream& logStream) :
     config(config),
     logger(*this, &logStream, config.color),

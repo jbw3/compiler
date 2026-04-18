@@ -18,12 +18,11 @@ using namespace std;
 using namespace SyntaxTree;
 
 Compiler::Compiler() :
-    compilerContext(config, cerr)
+    compilerContext(cerr)
 {
 }
 
 Compiler::Compiler(const Config& config) :
-    config(config),
     compilerContext(config, cerr)
 {
 }
@@ -42,7 +41,7 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
     {
         SW_START(Lexing);
 
-        for (string filename : config.inFilenames)
+        for (string filename : compilerContext.config.inFilenames)
         {
             LexicalAnalyzer lexicalAnalyzer(compilerContext);
             ok = lexicalAnalyzer.Process(filename);
@@ -58,7 +57,7 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
     }
 
     // check if tokens are the output
-    if (ok && config.emitType == Config::eTokens)
+    if (ok && compilerContext.config.emitType == Config::eTokens)
     {
         unsigned fileIdCount = compilerContext.GetFileIdCount();
         for (unsigned fileId = 0; fileId < fileIdCount; ++fileId)
@@ -104,25 +103,27 @@ bool Compiler::Compile()
     Modules* syntaxTree = nullptr;
     bool ok = CompileSyntaxTree(syntaxTree);
 
+    Config::EEmitType emitType = compilerContext.config.emitType;
+
     // check if syntax tree is the output
-    if (ok && config.emitType == Config::eSyntaxTree)
+    if (ok && emitType == Config::eSyntaxTree)
     {
-        SyntaxTreePrinter printer(config.outFilename);
+        SyntaxTreePrinter printer(compilerContext.config.outFilename);
         syntaxTree->Accept(&printer);
         delete syntaxTree;
         return ok;
     }
 
     // check if C header is the output
-    if (ok && config.emitType == Config::eCHeader)
+    if (ok && emitType == Config::eCHeader)
     {
         CHeaderPrinter printer(compilerContext);
-        ok = printer.Print(config, syntaxTree);
+        ok = printer.Print(syntaxTree);
         delete syntaxTree;
         return ok;
     }
 
-    if ( ok && (config.emitType == Config::eAssembly || config.emitType == Config::eLlvmIr) )
+    if ( ok && (emitType == Config::eAssembly || emitType == Config::eLlvmIr) )
     {
         llvm::Module* module = nullptr;
 
@@ -138,7 +139,7 @@ bool Compiler::Compile()
         {
             SW_START(IrOpt);
 
-            LlvmOptimizer optimizer(config);
+            LlvmOptimizer optimizer(compilerContext.config);
             ok = optimizer.Optimize(module);
 
             SW_STOP(IrOpt);
@@ -166,13 +167,13 @@ bool Compiler::Compile()
 void Compiler::PrintTokens(const TokenList& tokens) const
 {
     ostream* os = nullptr;
-    if (config.outFilename.empty())
+    if (compilerContext.config.outFilename.empty())
     {
         os = &cout;
     }
     else
     {
-        os = new fstream(config.outFilename, ios_base::out);
+        os = new fstream(compilerContext.config.outFilename, ios_base::out);
     }
 
     for (const Token& token : tokens)

@@ -15,7 +15,7 @@ public:
 
     CHeaderPrinter(CompilerContext& compilerContext);
 
-    bool Print(const Config& config, const SyntaxTree::Modules* modules);
+    bool Print(const SyntaxTree::Modules* modules);
 
 private:
     ErrorLogger& logger;

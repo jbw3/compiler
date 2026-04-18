@@ -19,7 +19,6 @@ public:
     bool Compile();
 
 private:
-    Config config;
     CompilerContext compilerContext;
 
     void PrintTokens(const TokenList& tokens) const;
