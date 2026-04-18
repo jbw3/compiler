@@ -1,9 +1,7 @@
 #include "CHeaderPrinterTests.h"
 #include "Compiler.h"
 #include "CHeaderPrinter.h"
-#include "SyntaxTree.h"
 #include <filesystem>
-#include <sstream>
 #include <string>
 
 namespace fs = std::filesystem;
@@ -45,8 +43,6 @@ bool CHeaderPrinterTests::TestGetFilenameMacro(string& failMsg)
 
 bool CHeaderPrinterTests::TestPrinter(std::string& failMsg)
 {
-    stringstream err;
-
     fs::path testFilesDir = fs::path("src") / "unittests" / "testfiles";
     string wipFilename = (testFilesDir / "c_header.wip").string();
     string expectedFilename = (testFilesDir / "c_header.expected.h").string();
@@ -61,8 +57,7 @@ bool CHeaderPrinterTests::TestPrinter(std::string& failMsg)
     bool ok = compiler.Compile();
     if (!ok)
     {
-        err << "Error: " << wipFilename << ": Failed to compile\n";
-        failMsg = err.str();
+        failMsg = "Error: " + wipFilename + ": Failed to compile\n";
         return false;
     }
 
