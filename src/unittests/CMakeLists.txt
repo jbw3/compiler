@@ -10,6 +10,8 @@ add_executable(unittests
     CHeaderPrinterTests.h
     CompilerTests.cpp
     CompilerTests.h
+    ConfigTests.cpp
+    ConfigTests.h
     LexicalAnalyzerTests.cpp
     LexicalAnalyzerTests.h
     main.cpp

@@ -1,5 +1,6 @@
 #include "CHeaderPrinterTests.h"
 #include "CompilerTests.h"
+#include "ConfigTests.h"
 #include "LexicalAnalyzerTests.h"
 #include "ROStringTests.h"
 #include "SemanticAnalyzerTests.h"
@@ -29,6 +30,7 @@ int main(int argc, const char* const argv[])
         shared_ptr<TestClass>(new SourceGeneratorTests(resultsFile)),
         shared_ptr<TestClass>(new StartEndTokenFinderTests(resultsFile)),
         shared_ptr<TestClass>(new CompilerTests(resultsFile)),
+        shared_ptr<TestClass>(new ConfigTests(resultsFile)),
     };
 
     bool passed = true;

@@ -51,7 +51,7 @@ bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
         }
     }
 
-    if (ok)
+    if (ok && !help)
     {
         // if no filenames were specified, add an empty string to indicate
         // we should read from stdin
