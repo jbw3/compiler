@@ -74,13 +74,13 @@ bool Config::ParseArgs(int argc, const char* const argv[], bool& help)
 TargetMachine* Config::CreateTargetMachine(const std::string& architecture, unsigned optimization)
 {
     // default target triple to the current machine
-    Triple targetTripple(sys::getDefaultTargetTriple());
+    Triple targetTriple(sys::getDefaultTargetTriple());
 
     // override the architecture if configured
     if (!architecture.empty())
     {
         Triple::ArchType archType = Triple::getArchTypeForLLVMName(architecture);
-        targetTripple.setArch(archType);
+        targetTriple.setArch(archType);
     }
 
     InitializeAllTargetInfos();
@@ -88,7 +88,7 @@ TargetMachine* Config::CreateTargetMachine(const std::string& architecture, unsi
     InitializeAllTargetMCs();
 
     string errorMsg;
-    const Target* target = TargetRegistry::lookupTarget(targetTripple.str(), errorMsg);
+    const Target* target = TargetRegistry::lookupTarget(targetTriple.str(), errorMsg);
     if (target == nullptr)
     {
         cerr << errorMsg;
@@ -112,7 +112,7 @@ TargetMachine* Config::CreateTargetMachine(const std::string& architecture, unsi
             break;
     }
 
-    TargetMachine* targetMachine = target->createTargetMachine(targetTripple.str(), "generic", "", options, relocModel, {}, codeGenOptLevel);
+    TargetMachine* targetMachine = target->createTargetMachine(targetTriple.str(), "generic", "", options, relocModel, {}, codeGenOptLevel);
 
     return targetMachine;
 }
