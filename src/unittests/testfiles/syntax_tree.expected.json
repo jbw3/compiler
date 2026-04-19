@@ -1,835 +1,835 @@
 {
-    "nodeType": "Modules",
-    "modules": [
+  "nodeType": "Modules",
+  "modules": [
+    {
+      "nodeType": "ModuleDefinition",
+      "constantDeclarations": [
         {
-            "nodeType": "ModuleDefinition",
-            "constantDeclarations": [
+          "nodeType": "ConstantDeclaration",
+          "name": "TheStruct",
+          "typeExpression": null,
+          "assignmentExpression":
+          {
+            "nodeType": "BinaryExpression",
+            "operator": "=",
+            "left":
+            {
+              "nodeType": "IdentifierExpression",
+              "name": "TheStruct"
+            },
+            "right":
+            {
+              "nodeType": "StructDefinitionExpression",
+              "members": [
                 {
-                    "nodeType": "ConstantDeclaration",
-                    "name": "TheStruct",
-                    "typeExpression": null,
-                    "assignmentExpression":
+                  "nodeType": "MemberDefinition",
+                  "name": "string",
+                  "typeExpression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "str"
+                  },
+                  "defaultValueExpression": null
+                },
+                {
+                  "nodeType": "MemberDefinition",
+                  "name": "num",
+                  "typeExpression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "i32"
+                  },
+                  "defaultValueExpression":
+                  {
+                    "nodeType": "NumericExpression",
+                    "value": "0"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "externFunctions": [
+        {
+          "nodeType": "ExternFunctionDeclaration",
+          "declaration":
+          {
+            "nodeType": "FunctionDeclaration",
+            "name": "ef",
+            "parameters": [],
+            "returnTypeExpression":
+            {
+              "nodeType": "IdentifierExpression",
+              "name": "f64"
+            }
+          }
+        }
+      ],
+      "functions": [
+        {
+          "nodeType": "FunctionDefinition",
+          "declaration":
+          {
+            "nodeType": "FunctionDeclaration",
+            "name": "a_function",
+            "parameters": [
+              {
+                "nodeType": "Parameter",
+                "name": "x",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "i32"
+                }
+              },
+              {
+                "nodeType": "Parameter",
+                "name": "p",
+                "typeExpression":
+                {
+                  "nodeType": "UnaryExpression",
+                  "operator": "&",
+                  "expression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "i32"
+                  }
+                }
+              }
+            ],
+            "returnTypeExpression": null
+          },
+          "expression":
+          {
+            "nodeType": "BlockExpression",
+            "constantDeclarations": [],
+            "statements": [
+              {
+                "nodeType": "VariableDeclaration",
+                "name": "s",
+                "typeExpression": null,
+                "assignmentExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "s"
+                  },
+                  "right":
+                  {
+                    "nodeType": "StructInitializationExpression",
+                    "structTypeExpression":
                     {
+                      "nodeType": "IdentifierExpression",
+                      "name": "TheStruct"
+                    },
+                    "memberInitializations": [
+                      {
+                        "nodeType": "MemberInitialization",
+                        "name": "string",
+                        "expression":
+                        {
+                          "nodeType": "StringLiteralExpression",
+                          "value": "abc\\\"\n\r\t\u00a9\u213c\u1f60e"
+                        }
+                      },
+                      {
+                        "nodeType": "MemberInitialization",
+                        "name": "num",
+                        "expression":
+                        {
+                          "nodeType": "IdentifierExpression",
+                          "name": "x"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "nodeType": "VariableDeclaration",
+                "name": "sum",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "i32"
+                },
+                "assignmentExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "sum"
+                  },
+                  "right":
+                  {
+                    "nodeType": "NumericExpression",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "nodeType": "ForLoop",
+                "variableName": "i",
+                "varTypeExpression": null,
+                "indexName": "",
+                "indexTypeExpression": null,
+                "iterExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "..",
+                  "left":
+                  {
+                    "nodeType": "NumericExpression",
+                    "value": "0"
+                  },
+                  "right":
+                  {
+                    "nodeType": "MemberExpression",
+                    "expression":
+                    {
+                      "nodeType": "IdentifierExpression",
+                      "name": "s"
+                    },
+                    "memberName": "num"
+                  }
+                },
+                "expression":
+                {
+                  "nodeType": "BlockExpression",
+                  "constantDeclarations": [],
+                  "statements": [
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "+=",
+                      "left":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "sum"
+                      },
+                      "right":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "i"
+                      }
+                    },
+                    {
+                      "nodeType": "BranchExpression",
+                      "ifCondition":
+                      {
+                        "nodeType": "BinaryExpression",
+                        "operator": ">=",
+                        "left":
+                        {
+                          "nodeType": "IdentifierExpression",
+                          "name": "i"
+                        },
+                        "right":
+                        {
+                          "nodeType": "NumericExpression",
+                          "value": "100"
+                        }
+                      },
+                      "ifExpression":
+                      {
+                        "nodeType": "BlockExpression",
+                        "constantDeclarations": [],
+                        "statements": [
+                          {
+                            "nodeType": "LoopControl",
+                            "value": "break"
+                          },
+                          {
+                            "nodeType": "UnitTypeLiteralExpression"
+                          }
+                        ]
+                      },
+                      "elseExpression":
+                      {
+                        "nodeType": "UnitTypeLiteralExpression"
+                      }
+                    },
+                    {
+                      "nodeType": "UnitTypeLiteralExpression"
+                    }
+                  ]
+                }
+              },
+              {
+                "nodeType": "BinaryExpression",
+                "operator": "=",
+                "left":
+                {
+                  "nodeType": "UnaryExpression",
+                  "operator": "*",
+                  "expression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "p"
+                  }
+                },
+                "right":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "sum"
+                }
+              },
+              {
+                "nodeType": "BranchExpression",
+                "ifCondition":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "<",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "x"
+                  },
+                  "right":
+                  {
+                    "nodeType": "NumericExpression",
+                    "value": "1"
+                  }
+                },
+                "ifExpression":
+                {
+                  "nodeType": "BlockExpression",
+                  "constantDeclarations": [],
+                  "statements": [
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "+=",
+                      "left":
+                      {
+                        "nodeType": "UnaryExpression",
+                        "operator": "*",
+                        "expression":
+                        {
+                          "nodeType": "IdentifierExpression",
+                          "name": "p"
+                        }
+                      },
+                      "right":
+                      {
+                        "nodeType": "NumericExpression",
+                        "value": "1"
+                      }
+                    },
+                    {
+                      "nodeType": "UnitTypeLiteralExpression"
+                    }
+                  ]
+                },
+                "elseExpression":
+                {
+                  "nodeType": "BranchExpression",
+                  "ifCondition":
+                  {
+                    "nodeType": "BinaryExpression",
+                    "operator": "<",
+                    "left":
+                    {
+                      "nodeType": "IdentifierExpression",
+                      "name": "x"
+                    },
+                    "right":
+                    {
+                      "nodeType": "NumericExpression",
+                      "value": "2"
+                    }
+                  },
+                  "ifExpression":
+                  {
+                    "nodeType": "BlockExpression",
+                    "constantDeclarations": [],
+                    "statements": [
+                      {
+                        "nodeType": "BinaryExpression",
+                        "operator": "*=",
+                        "left":
+                        {
+                          "nodeType": "UnaryExpression",
+                          "operator": "*",
+                          "expression":
+                          {
+                            "nodeType": "IdentifierExpression",
+                            "name": "p"
+                          }
+                        },
+                        "right":
+                        {
+                          "nodeType": "NumericExpression",
+                          "value": "2"
+                        }
+                      },
+                      {
+                        "nodeType": "UnitTypeLiteralExpression"
+                      }
+                    ]
+                  },
+                  "elseExpression":
+                  {
+                    "nodeType": "BlockExpression",
+                    "constantDeclarations": [],
+                    "statements": [
+                      {
+                        "nodeType": "BinaryExpression",
+                        "operator": "+=",
+                        "left":
+                        {
+                          "nodeType": "UnaryExpression",
+                          "operator": "*",
+                          "expression":
+                          {
+                            "nodeType": "IdentifierExpression",
+                            "name": "p"
+                          }
+                        },
+                        "right":
+                        {
+                          "nodeType": "NumericExpression",
+                          "value": "12"
+                        }
+                      },
+                      {
+                        "nodeType": "UnitTypeLiteralExpression"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "nodeType": "WhileLoop",
+                "condition":
+                {
+                  "nodeType": "FunctionExpression",
+                  "functionExpression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "test_value"
+                  },
+                  "arguments": [
+                    {
+                      "nodeType": "IdentifierExpression",
+                      "name": "x"
+                    }
+                  ]
+                },
+                "expression":
+                {
+                  "nodeType": "BlockExpression",
+                  "constantDeclarations": [],
+                  "statements": [
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "*=",
+                      "left":
+                      {
+                        "nodeType": "UnaryExpression",
+                        "operator": "*",
+                        "expression":
+                        {
+                          "nodeType": "IdentifierExpression",
+                          "name": "p"
+                        }
+                      },
+                      "right":
+                      {
+                        "nodeType": "NumericExpression",
+                        "value": "2"
+                      }
+                    },
+                    {
+                      "nodeType": "UnitTypeLiteralExpression"
+                    }
+                  ]
+                }
+              },
+              {
+                "nodeType": "VariableDeclaration",
+                "name": "less",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "bool"
+                },
+                "assignmentExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "less"
+                  },
+                  "right":
+                  {
+                    "nodeType": "BoolLiteralExpression",
+                    "value": "false"
+                  }
+                }
+              },
+              {
+                "nodeType": "VariableDeclaration",
+                "name": "float",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "f64"
+                },
+                "assignmentExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "float"
+                  },
+                  "right":
+                  {
+                    "nodeType": "BinaryExpression",
+                    "operator": "+",
+                    "left":
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "*",
+                      "left":
+                      {
+                        "nodeType": "FloatLiteralExpression",
+                        "value": "1.2"
+                      },
+                      "right":
+                      {
+                        "nodeType": "BuiltInIdentifierExpression",
+                        "name": "@pi"
+                      }
+                    },
+                    "right":
+                    {
+                      "nodeType": "FunctionExpression",
+                      "functionExpression":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "ef"
+                      },
+                      "arguments": []
+                    }
+                  }
+                }
+              },
+              {
+                "nodeType": "BranchExpression",
+                "ifCondition":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "<",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "float"
+                  },
+                  "right":
+                  {
+                    "nodeType": "FloatLiteralExpression",
+                    "value": "20.2"
+                  }
+                },
+                "ifExpression":
+                {
+                  "nodeType": "BlockExpression",
+                  "constantDeclarations": [],
+                  "statements": [
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "=",
+                      "left":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "less"
+                      },
+                      "right":
+                      {
+                        "nodeType": "BoolLiteralExpression",
+                        "value": "true"
+                      }
+                    },
+                    {
+                      "nodeType": "UnitTypeLiteralExpression"
+                    }
+                  ]
+                },
+                "elseExpression":
+                {
+                  "nodeType": "UnitTypeLiteralExpression"
+                }
+              },
+              {
+                "nodeType": "VariableDeclaration",
+                "name": "array",
+                "typeExpression":
+                {
+                  "nodeType": "UnaryExpression",
+                  "operator": "[]",
+                  "expression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "f64"
+                  }
+                },
+                "assignmentExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "array"
+                  },
+                  "right":
+                  {
+                    "nodeType": "ArrayMultiValueExpression",
+                    "expressions": [
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "float"
+                      },
+                      {
+                        "nodeType": "BuiltInFunctionExpression",
+                        "name": "@cast",
+                        "arguments": [
+                          {
+                            "nodeType": "IdentifierExpression",
+                            "name": "f64"
+                          },
+                          {
+                            "nodeType": "UnaryExpression",
+                            "operator": "*",
+                            "expression":
+                            {
+                              "nodeType": "IdentifierExpression",
+                              "name": "p"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "nodeType": "BuiltInFunctionExpression",
+                        "name": "@cast",
+                        "arguments": [
+                          {
+                            "nodeType": "IdentifierExpression",
+                            "name": "f64"
+                          },
+                          {
+                            "nodeType": "MemberExpression",
+                            "expression":
+                            {
+                              "nodeType": "IdentifierExpression",
+                              "name": "s"
+                            },
+                            "memberName": "num"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "nodeType": "VariableDeclaration",
+                "name": "a2",
+                "typeExpression":
+                {
+                  "nodeType": "UnaryExpression",
+                  "operator": "[]",
+                  "expression":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "u8"
+                  }
+                },
+                "assignmentExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "a2"
+                  },
+                  "right":
+                  {
+                    "nodeType": "ArraySizeValueExpression",
+                    "sizeExpressions":
+                    {
+                      "nodeType": "NumericExpression",
+                      "value": "4"
+                    },
+                    "valueExpression":
+                    {
+                      "nodeType": "NumericExpression",
+                      "value": "7"
+                    }
+                  }
+                }
+              },
+              {
+                "nodeType": "UncheckedBlock",
+                "block":
+                {
+                  "nodeType": "BlockExpression",
+                  "constantDeclarations": [],
+                  "statements": [
+                    {
+                      "nodeType": "VariableDeclaration",
+                      "name": "addr",
+                      "typeExpression":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "u64"
+                      },
+                      "assignmentExpression":
+                      {
                         "nodeType": "BinaryExpression",
                         "operator": "=",
                         "left":
                         {
-                            "nodeType": "IdentifierExpression",
-                            "name": "TheStruct"
+                          "nodeType": "IdentifierExpression",
+                          "name": "addr"
                         },
                         "right":
                         {
-                            "nodeType": "StructDefinitionExpression",
-                            "members": [
-                                {
-                                    "nodeType": "MemberDefinition",
-                                    "name": "string",
-                                    "typeExpression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "str"
-                                    },
-                                    "defaultValueExpression": null
-                                },
-                                {
-                                    "nodeType": "MemberDefinition",
-                                    "name": "num",
-                                    "typeExpression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "i32"
-                                    },
-                                    "defaultValueExpression":
-                                    {
-                                        "nodeType": "NumericExpression",
-                                        "value": "0"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            ],
-            "externFunctions": [
-                {
-                    "nodeType": "ExternFunctionDeclaration",
-                    "declaration":
-                    {
-                        "nodeType": "FunctionDeclaration",
-                        "name": "ef",
-                        "parameters": [],
-                        "returnTypeExpression":
-                        {
-                            "nodeType": "IdentifierExpression",
-                            "name": "f64"
-                        }
-                    }
-                }
-            ],
-            "functions": [
-                {
-                    "nodeType": "FunctionDefinition",
-                    "declaration":
-                    {
-                        "nodeType": "FunctionDeclaration",
-                        "name": "a_function",
-                        "parameters": [
+                          "nodeType": "ImplicitCastExpression",
+                          "expression":
+                          {
+                            "nodeType": "BinaryExpression",
+                            "operator": "[]",
+                            "left":
                             {
-                                "nodeType": "Parameter",
-                                "name": "x",
-                                "typeExpression":
-                                {
-                                    "nodeType": "IdentifierExpression",
-                                    "name": "i32"
-                                }
+                              "nodeType": "IdentifierExpression",
+                              "name": "a2"
                             },
+                            "right":
                             {
-                                "nodeType": "Parameter",
-                                "name": "p",
-                                "typeExpression":
-                                {
-                                    "nodeType": "UnaryExpression",
-                                    "operator": "&",
-                                    "expression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "i32"
-                                    }
-                                }
+                              "nodeType": "NumericExpression",
+                              "value": "2"
                             }
-                        ],
-                        "returnTypeExpression": null
+                          }
+                        }
+                      }
                     },
-                    "expression":
                     {
-                        "nodeType": "BlockExpression",
-                        "constantDeclarations": [],
-                        "statements": [
-                            {
-                                "nodeType": "VariableDeclaration",
-                                "name": "s",
-                                "typeExpression": null,
-                                "assignmentExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "=",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "s"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "StructInitializationExpression",
-                                        "structTypeExpression":
-                                        {
-                                            "nodeType": "IdentifierExpression",
-                                            "name": "TheStruct"
-                                        },
-                                        "memberInitializations": [
-                                            {
-                                                "nodeType": "MemberInitialization",
-                                                "name": "string",
-                                                "expression":
-                                                {
-                                                    "nodeType": "StringLiteralExpression",
-                                                    "value": "abc\\\"\n\r\t\u00a9\u213c\u1f60e"
-                                                }
-                                            },
-                                            {
-                                                "nodeType": "MemberInitialization",
-                                                "name": "num",
-                                                "expression":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "x"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "VariableDeclaration",
-                                "name": "sum",
-                                "typeExpression":
-                                {
-                                    "nodeType": "IdentifierExpression",
-                                    "name": "i32"
-                                },
-                                "assignmentExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "=",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "sum"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "NumericExpression",
-                                        "value": "0"
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "ForLoop",
-                                "variableName": "i",
-                                "varTypeExpression": null,
-                                "indexName": "",
-                                "indexTypeExpression": null,
-                                "iterExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "..",
-                                    "left":
-                                    {
-                                        "nodeType": "NumericExpression",
-                                        "value": "0"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "MemberExpression",
-                                        "expression":
-                                        {
-                                            "nodeType": "IdentifierExpression",
-                                            "name": "s"
-                                        },
-                                        "memberName": "num"
-                                    }
-                                },
-                                "expression":
-                                {
-                                    "nodeType": "BlockExpression",
-                                    "constantDeclarations": [],
-                                    "statements": [
-                                        {
-                                            "nodeType": "BinaryExpression",
-                                            "operator": "+=",
-                                            "left":
-                                            {
-                                                "nodeType": "IdentifierExpression",
-                                                "name": "sum"
-                                            },
-                                            "right":
-                                            {
-                                                "nodeType": "IdentifierExpression",
-                                                "name": "i"
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "BranchExpression",
-                                            "ifCondition":
-                                            {
-                                                "nodeType": "BinaryExpression",
-                                                "operator": ">=",
-                                                "left":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "i"
-                                                },
-                                                "right":
-                                                {
-                                                    "nodeType": "NumericExpression",
-                                                    "value": "100"
-                                                }
-                                            },
-                                            "ifExpression":
-                                            {
-                                                "nodeType": "BlockExpression",
-                                                "constantDeclarations": [],
-                                                "statements": [
-                                                    {
-                                                        "nodeType": "LoopControl",
-                                                        "value": "break"
-                                                    },
-                                                    {
-                                                        "nodeType": "UnitTypeLiteralExpression"
-                                                    }
-                                                ]
-                                            },
-                                            "elseExpression":
-                                            {
-                                                "nodeType": "UnitTypeLiteralExpression"
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "UnitTypeLiteralExpression"
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "nodeType": "BinaryExpression",
-                                "operator": "=",
-                                "left":
-                                {
-                                    "nodeType": "UnaryExpression",
-                                    "operator": "*",
-                                    "expression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "p"
-                                    }
-                                },
-                                "right":
-                                {
-                                    "nodeType": "IdentifierExpression",
-                                    "name": "sum"
-                                }
-                            },
-                            {
-                                "nodeType": "BranchExpression",
-                                "ifCondition":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "<",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "x"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "NumericExpression",
-                                        "value": "1"
-                                    }
-                                },
-                                "ifExpression":
-                                {
-                                    "nodeType": "BlockExpression",
-                                    "constantDeclarations": [],
-                                    "statements": [
-                                        {
-                                            "nodeType": "BinaryExpression",
-                                            "operator": "+=",
-                                            "left":
-                                            {
-                                                "nodeType": "UnaryExpression",
-                                                "operator": "*",
-                                                "expression":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "p"
-                                                }
-                                            },
-                                            "right":
-                                            {
-                                                "nodeType": "NumericExpression",
-                                                "value": "1"
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "UnitTypeLiteralExpression"
-                                        }
-                                    ]
-                                },
-                                "elseExpression":
-                                {
-                                    "nodeType": "BranchExpression",
-                                    "ifCondition":
-                                    {
-                                        "nodeType": "BinaryExpression",
-                                        "operator": "<",
-                                        "left":
-                                        {
-                                            "nodeType": "IdentifierExpression",
-                                            "name": "x"
-                                        },
-                                        "right":
-                                        {
-                                            "nodeType": "NumericExpression",
-                                            "value": "2"
-                                        }
-                                    },
-                                    "ifExpression":
-                                    {
-                                        "nodeType": "BlockExpression",
-                                        "constantDeclarations": [],
-                                        "statements": [
-                                            {
-                                                "nodeType": "BinaryExpression",
-                                                "operator": "*=",
-                                                "left":
-                                                {
-                                                    "nodeType": "UnaryExpression",
-                                                    "operator": "*",
-                                                    "expression":
-                                                    {
-                                                        "nodeType": "IdentifierExpression",
-                                                        "name": "p"
-                                                    }
-                                                },
-                                                "right":
-                                                {
-                                                    "nodeType": "NumericExpression",
-                                                    "value": "2"
-                                                }
-                                            },
-                                            {
-                                                "nodeType": "UnitTypeLiteralExpression"
-                                            }
-                                        ]
-                                    },
-                                    "elseExpression":
-                                    {
-                                        "nodeType": "BlockExpression",
-                                        "constantDeclarations": [],
-                                        "statements": [
-                                            {
-                                                "nodeType": "BinaryExpression",
-                                                "operator": "+=",
-                                                "left":
-                                                {
-                                                    "nodeType": "UnaryExpression",
-                                                    "operator": "*",
-                                                    "expression":
-                                                    {
-                                                        "nodeType": "IdentifierExpression",
-                                                        "name": "p"
-                                                    }
-                                                },
-                                                "right":
-                                                {
-                                                    "nodeType": "NumericExpression",
-                                                    "value": "12"
-                                                }
-                                            },
-                                            {
-                                                "nodeType": "UnitTypeLiteralExpression"
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "WhileLoop",
-                                "condition":
-                                {
-                                    "nodeType": "FunctionExpression",
-                                    "functionExpression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "test_value"
-                                    },
-                                    "arguments": [
-                                        {
-                                            "nodeType": "IdentifierExpression",
-                                            "name": "x"
-                                        }
-                                    ]
-                                },
-                                "expression":
-                                {
-                                    "nodeType": "BlockExpression",
-                                    "constantDeclarations": [],
-                                    "statements": [
-                                        {
-                                            "nodeType": "BinaryExpression",
-                                            "operator": "*=",
-                                            "left":
-                                            {
-                                                "nodeType": "UnaryExpression",
-                                                "operator": "*",
-                                                "expression":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "p"
-                                                }
-                                            },
-                                            "right":
-                                            {
-                                                "nodeType": "NumericExpression",
-                                                "value": "2"
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "UnitTypeLiteralExpression"
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "nodeType": "VariableDeclaration",
-                                "name": "less",
-                                "typeExpression":
-                                {
-                                    "nodeType": "IdentifierExpression",
-                                    "name": "bool"
-                                },
-                                "assignmentExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "=",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "less"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "BoolLiteralExpression",
-                                        "value": "false"
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "VariableDeclaration",
-                                "name": "float",
-                                "typeExpression":
-                                {
-                                    "nodeType": "IdentifierExpression",
-                                    "name": "f64"
-                                },
-                                "assignmentExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "=",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "float"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "BinaryExpression",
-                                        "operator": "+",
-                                        "left":
-                                        {
-                                            "nodeType": "BinaryExpression",
-                                            "operator": "*",
-                                            "left":
-                                            {
-                                                "nodeType": "FloatLiteralExpression",
-                                                "value": "1.2"
-                                            },
-                                            "right":
-                                            {
-                                                "nodeType": "BuiltInIdentifierExpression",
-                                                "name": "@pi"
-                                            }
-                                        },
-                                        "right":
-                                        {
-                                            "nodeType": "FunctionExpression",
-                                            "functionExpression":
-                                            {
-                                                "nodeType": "IdentifierExpression",
-                                                "name": "ef"
-                                            },
-                                            "arguments": []
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "BranchExpression",
-                                "ifCondition":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "<",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "float"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "FloatLiteralExpression",
-                                        "value": "20.2"
-                                    }
-                                },
-                                "ifExpression":
-                                {
-                                    "nodeType": "BlockExpression",
-                                    "constantDeclarations": [],
-                                    "statements": [
-                                        {
-                                            "nodeType": "BinaryExpression",
-                                            "operator": "=",
-                                            "left":
-                                            {
-                                                "nodeType": "IdentifierExpression",
-                                                "name": "less"
-                                            },
-                                            "right":
-                                            {
-                                                "nodeType": "BoolLiteralExpression",
-                                                "value": "true"
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "UnitTypeLiteralExpression"
-                                        }
-                                    ]
-                                },
-                                "elseExpression":
-                                {
-                                    "nodeType": "UnitTypeLiteralExpression"
-                                }
-                            },
-                            {
-                                "nodeType": "VariableDeclaration",
-                                "name": "array",
-                                "typeExpression":
-                                {
-                                    "nodeType": "UnaryExpression",
-                                    "operator": "[]",
-                                    "expression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "f64"
-                                    }
-                                },
-                                "assignmentExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "=",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "array"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "ArrayMultiValueExpression",
-                                        "expressions": [
-                                            {
-                                                "nodeType": "IdentifierExpression",
-                                                "name": "float"
-                                            },
-                                            {
-                                                "nodeType": "BuiltInFunctionExpression",
-                                                "name": "@cast",
-                                                "arguments": [
-                                                    {
-                                                        "nodeType": "IdentifierExpression",
-                                                        "name": "f64"
-                                                    },
-                                                    {
-                                                        "nodeType": "UnaryExpression",
-                                                        "operator": "*",
-                                                        "expression":
-                                                        {
-                                                            "nodeType": "IdentifierExpression",
-                                                            "name": "p"
-                                                        }
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                "nodeType": "BuiltInFunctionExpression",
-                                                "name": "@cast",
-                                                "arguments": [
-                                                    {
-                                                        "nodeType": "IdentifierExpression",
-                                                        "name": "f64"
-                                                    },
-                                                    {
-                                                        "nodeType": "MemberExpression",
-                                                        "expression":
-                                                        {
-                                                            "nodeType": "IdentifierExpression",
-                                                            "name": "s"
-                                                        },
-                                                        "memberName": "num"
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "VariableDeclaration",
-                                "name": "a2",
-                                "typeExpression":
-                                {
-                                    "nodeType": "UnaryExpression",
-                                    "operator": "[]",
-                                    "expression":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "u8"
-                                    }
-                                },
-                                "assignmentExpression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "=",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "a2"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "ArraySizeValueExpression",
-                                        "sizeExpressions":
-                                        {
-                                            "nodeType": "NumericExpression",
-                                            "value": "4"
-                                        },
-                                        "valueExpression":
-                                        {
-                                            "nodeType": "NumericExpression",
-                                            "value": "7"
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "nodeType": "UncheckedBlock",
-                                "block":
-                                {
-                                    "nodeType": "BlockExpression",
-                                    "constantDeclarations": [],
-                                    "statements": [
-                                        {
-                                            "nodeType": "VariableDeclaration",
-                                            "name": "addr",
-                                            "typeExpression":
-                                            {
-                                                "nodeType": "IdentifierExpression",
-                                                "name": "u64"
-                                            },
-                                            "assignmentExpression":
-                                            {
-                                                "nodeType": "BinaryExpression",
-                                                "operator": "=",
-                                                "left":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "addr"
-                                                },
-                                                "right":
-                                                {
-                                                    "nodeType": "ImplicitCastExpression",
-                                                    "expression":
-                                                    {
-                                                        "nodeType": "BinaryExpression",
-                                                        "operator": "[]",
-                                                        "left":
-                                                        {
-                                                            "nodeType": "IdentifierExpression",
-                                                            "name": "a2"
-                                                        },
-                                                        "right":
-                                                        {
-                                                            "nodeType": "NumericExpression",
-                                                            "value": "2"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "VariableDeclaration",
-                                            "name": "ptr",
-                                            "typeExpression":
-                                            {
-                                                "nodeType": "UnaryExpression",
-                                                "operator": "&",
-                                                "expression":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "i32"
-                                                }
-                                            },
-                                            "assignmentExpression":
-                                            {
-                                                "nodeType": "BinaryExpression",
-                                                "operator": "=",
-                                                "left":
-                                                {
-                                                    "nodeType": "IdentifierExpression",
-                                                    "name": "ptr"
-                                                },
-                                                "right":
-                                                {
-                                                    "nodeType": "BuiltInFunctionExpression",
-                                                    "name": "@intToPtr",
-                                                    "arguments": [
-                                                        {
-                                                            "nodeType": "UnaryExpression",
-                                                            "operator": "&",
-                                                            "expression":
-                                                            {
-                                                                "nodeType": "IdentifierExpression",
-                                                                "name": "i32"
-                                                            }
-                                                        },
-                                                        {
-                                                            "nodeType": "IdentifierExpression",
-                                                            "name": "addr"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "nodeType": "UnitTypeLiteralExpression"
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "nodeType": "UnitTypeLiteralExpression"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "nodeType": "FunctionDefinition",
-                    "declaration":
-                    {
-                        "nodeType": "FunctionDeclaration",
-                        "name": "test_value",
-                        "parameters": [
-                            {
-                                "nodeType": "Parameter",
-                                "name": "x",
-                                "typeExpression":
-                                {
-                                    "nodeType": "IdentifierExpression",
-                                    "name": "i32"
-                                }
-                            }
-                        ],
-                        "returnTypeExpression":
+                      "nodeType": "VariableDeclaration",
+                      "name": "ptr",
+                      "typeExpression":
+                      {
+                        "nodeType": "UnaryExpression",
+                        "operator": "&",
+                        "expression":
                         {
-                            "nodeType": "IdentifierExpression",
-                            "name": "bool"
+                          "nodeType": "IdentifierExpression",
+                          "name": "i32"
                         }
-                    },
-                    "expression":
-                    {
-                        "nodeType": "BlockExpression",
-                        "constantDeclarations": [],
-                        "statements": [
+                      },
+                      "assignmentExpression":
+                      {
+                        "nodeType": "BinaryExpression",
+                        "operator": "=",
+                        "left":
+                        {
+                          "nodeType": "IdentifierExpression",
+                          "name": "ptr"
+                        },
+                        "right":
+                        {
+                          "nodeType": "BuiltInFunctionExpression",
+                          "name": "@intToPtr",
+                          "arguments": [
                             {
-                                "nodeType": "Return",
-                                "expression":
-                                {
-                                    "nodeType": "BinaryExpression",
-                                    "operator": "<",
-                                    "left":
-                                    {
-                                        "nodeType": "IdentifierExpression",
-                                        "name": "x"
-                                    },
-                                    "right":
-                                    {
-                                        "nodeType": "NumericExpression",
-                                        "value": "4"
-                                    }
-                                }
+                              "nodeType": "UnaryExpression",
+                              "operator": "&",
+                              "expression":
+                              {
+                                "nodeType": "IdentifierExpression",
+                                "name": "i32"
+                              }
+                            },
+                            {
+                              "nodeType": "IdentifierExpression",
+                              "name": "addr"
                             }
-                        ]
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "nodeType": "UnitTypeLiteralExpression"
                     }
+                  ]
                 }
+              },
+              {
+                "nodeType": "UnitTypeLiteralExpression"
+              }
             ]
+          }
+        },
+        {
+          "nodeType": "FunctionDefinition",
+          "declaration":
+          {
+            "nodeType": "FunctionDeclaration",
+            "name": "test_value",
+            "parameters": [
+              {
+                "nodeType": "Parameter",
+                "name": "x",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "i32"
+                }
+              }
+            ],
+            "returnTypeExpression":
+            {
+              "nodeType": "IdentifierExpression",
+              "name": "bool"
+            }
+          },
+          "expression":
+          {
+            "nodeType": "BlockExpression",
+            "constantDeclarations": [],
+            "statements": [
+              {
+                "nodeType": "Return",
+                "expression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "<",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "x"
+                  },
+                  "right":
+                  {
+                    "nodeType": "NumericExpression",
+                    "value": "4"
+                  }
+                }
+              }
+            ]
+          }
         }
-    ]
+      ]
+    }
+  ]
 }

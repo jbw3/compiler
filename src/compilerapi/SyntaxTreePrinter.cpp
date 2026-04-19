@@ -37,7 +37,8 @@ SyntaxTreePrinter::BracePrinter::~BracePrinter()
 
 SyntaxTreePrinter::SyntaxTreePrinter(const string& outFilename) :
     level(0),
-    firstItem(true)
+    firstItem(true),
+    indentStr("  ")
 {
     os = outFilename.empty() ? &cout : new fstream(outFilename, ios_base::out);
 }
@@ -532,9 +533,9 @@ void SyntaxTreePrinter::Print(const char* str)
 
         if (ch == '\n')
         {
-            for (unsigned i = 0; i < level * 4; ++i)
+            for (unsigned i = 0; i < level; ++i)
             {
-                os->put(' ');
+                *os << indentStr;
             }
         }
     }
@@ -551,9 +552,9 @@ void SyntaxTreePrinter::Print(ROString str)
 
         if (ch == '\n')
         {
-            for (unsigned i = 0; i < level * 4; ++i)
+            for (unsigned i = 0; i < level; ++i)
             {
-                os->put(' ');
+                *os << indentStr;
             }
         }
     }
@@ -567,9 +568,9 @@ void SyntaxTreePrinter::Print(const string& str)
 
         if (ch == '\n')
         {
-            for (unsigned i = 0; i < level * 4; ++i)
+            for (unsigned i = 0; i < level; ++i)
             {
-                os->put(' ');
+                *os << indentStr;
             }
         }
     }

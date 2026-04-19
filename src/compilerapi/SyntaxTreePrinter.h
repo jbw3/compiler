@@ -94,6 +94,7 @@ private:
     std::ostream* os;
     unsigned int level;
     bool firstItem;
+    const char* indentStr;
 
     void PrintString(ROString str);
 
