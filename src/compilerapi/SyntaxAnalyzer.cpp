@@ -329,9 +329,8 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
     }
 
-    if (iter == endIter)
+    if (!EndIteratorCheck(iter, endIter, "Expected ')'"))
     {
-        logger.LogError("Expected ')'");
         return false;
     }
 
