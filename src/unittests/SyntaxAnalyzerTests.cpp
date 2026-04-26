@@ -84,12 +84,44 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
 
         // invalid functions
         {
+            "fun",
+            "error: Unexpected end of file. Expected function name",
+        },
+        {
             "fun (){}",
             "error: '(' is not a valid function name",
         },
         {
+            "fun abc",
+            "error: Unexpected end of file. Expected '('",
+        },
+        {
             "fun x{}",
             "error: Expected '('",
+        },
+        {
+            "fun abc(",
+            "error: Unexpected end of file. Expected ')'",
+        },
+        {
+            "fun abc(12){}",
+            "error: Invalid parameter name: '12'",
+        },
+        {
+            "fun abc(x",
+            "error: Unexpected end of file. Expected a parameter type",
+        },
+        {
+            "fun abc(x /){}",
+            "error: Unexpected term '/",
+        },
+        {
+            "fun abc()",
+            "error: Unexpected end of file. Expected a return type",
+        },
+        {
+            "fun abc(x i32) / {}",
+            "error: Unexpected term '/",
         },
 
         // invalid strings
