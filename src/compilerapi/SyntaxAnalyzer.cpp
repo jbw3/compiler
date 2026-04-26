@@ -267,7 +267,7 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
         return nullptr;
     }
 
-    if (!IncrementIterator(iter, endIter, "Expected return type"))
+    if (!IncrementIterator(iter, endIter, "Expected a return type"))
     {
         return nullptr;
     }
@@ -306,7 +306,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        if (!IncrementIterator(iter, endIter, "Expected a type"))
+        if (!IncrementIterator(iter, endIter, "Expected a parameter type"))
         {
             return false;
         }
@@ -316,7 +316,6 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         // make sure there was a type
         if (paramTypeExpr == nullptr)
         {
-            logger.LogError(*iter, "Expected a parameter type");
             return false;
         }
 
