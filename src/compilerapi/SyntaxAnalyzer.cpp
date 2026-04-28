@@ -130,6 +130,22 @@ bool SyntaxAnalyzer::EndIteratorCheck(const TokenIterator& iter, const TokenIter
     return true;
 }
 
+bool SyntaxAnalyzer::EndIteratorAndTypeCheck(const TokenIterator& iter, const TokenIterator& endIter, uint16_t expectedTokenType, const char* errorMsg)
+{
+    if (!EndIteratorCheck(iter, endIter, errorMsg))
+    {
+        return false;
+    }
+
+    if (iter->type != expectedTokenType)
+    {
+        logger.LogError(*iter, errorMsg);
+        return false;
+    }
+
+    return true;
+}
+
 bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg)
 {
     ++iter;
@@ -138,17 +154,18 @@ bool SyntaxAnalyzer::IncrementIterator(TokenIterator& iter, const TokenIterator&
 
 bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, uint16_t expectedTokenType, const char* errorMsg)
 {
-    bool ok = IncrementIterator(iter, endIter, errorMsg);
-    if (ok)
+    if (!IncrementIterator(iter, endIter, errorMsg))
     {
-        if (iter->type != expectedTokenType)
-        {
-            ok = false;
-            logger.LogError(*iter, "Did not expect '{}'", iter->value);
-        }
+        return false;
     }
 
-    return ok;
+    if (iter->type != expectedTokenType)
+    {
+        logger.LogError(*iter, errorMsg);
+        return false;
+    }
+
+    return true;
 }
 
 ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& iter,
@@ -448,16 +465,9 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         ++iter;
     }
 
-    if (iter == endIter)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::CloseBrace, "Expected '}'"))
     {
         deletePointerContainer(members);
-        logger.LogError("Expected '}'");
-        return nullptr;
-    }
-    else if (iter->type != Token::CloseBrace)
-    {
-        deletePointerContainer(members);
-        logger.LogError(*iter, "Expected '}'");
         return nullptr;
     }
 
@@ -488,10 +498,8 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
     const Token* openBraceToken = &*iter;
 
     // skip '{'
-    ++iter;
-    if (iter == endIter)
+    if (!IncrementIterator(iter, endIter, "Expected struct initialization"))
     {
-        logger.LogError("Unexpected end of file in the middle of a struct initialization");
         return nullptr;
     }
 
@@ -543,16 +551,9 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
         ++iter;
     }
 
-    if (iter == endIter)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::CloseBrace, "Expected '}'"))
     {
         deletePointerContainer(members);
-        logger.LogError("Expected '}'");
-        return nullptr;
-    }
-    else if (iter->type != Token::CloseBrace)
-    {
-        deletePointerContainer(members);
-        logger.LogError(*iter, "Expected '}'");
         return nullptr;
     }
 
@@ -614,16 +615,8 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
     }
 
     // ensure iter is a semicolon
-    if (iter == endIter)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::SemiColon, "Expected ';'"))
     {
-        logger.LogError("Unexpected end of file");
-        delete typeExpr;
-        return nullptr;
-    }
-
-    if (iter->type != Token::SemiColon)
-    {
-        logger.LogError(*iter, "Expected ';'");
         delete typeExpr;
         return nullptr;
     }
@@ -689,16 +682,8 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
     }
 
     // ensure iter is a semicolon
-    if (iter == endIter)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::SemiColon, "Expected ';'"))
     {
-        logger.LogError("Unexpected end of file");
-        delete typeExpr;
-        return nullptr;
-    }
-
-    if (iter->type != Token::SemiColon)
-    {
-        logger.LogError(*iter, "Expected ';'");
         delete typeExpr;
         return nullptr;
     }
@@ -728,9 +713,8 @@ WhileLoop* SyntaxAnalyzer::ProcessWhileLoop(TokenIterator& iter, TokenIterator e
         return nullptr;
     }
 
-    if (iter == endIter || iter->type != Token::OpenBrace)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::OpenBrace, "Expected '{'"))
     {
-        logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
 
@@ -833,9 +817,8 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
         return nullptr;
     }
 
-    if (iter == endIter || iter->type != Token::OpenBrace)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::OpenBrace, "Expected '{'"))
     {
-        logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
 
@@ -1083,9 +1066,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(
             }
         }
 
-        if (iter == endIter)
+        if (!EndIteratorCheck(iter, endIter, "Expected ')'"))
         {
-            logger.LogError("Expected ')'");
             return nullptr;
         }
 
@@ -1131,9 +1113,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
             // skip to token after "("
             iter += 2;
-            if (iter == endIter)
+            if (!EndIteratorCheck(iter, endIter, "Expected the rest of the built-in function call"))
             {
-                logger.LogError("Unexpected end of file in the middle of a built-in function call");
                 return nullptr;
             }
 
@@ -1778,9 +1759,8 @@ BlockExpression* SyntaxAnalyzer::ProcessBlockExpression(TokenIterator& iter, Tok
             TokenIterator tokenIter = iter;
             ++iter;
 
-            if (iter == endIter || iter->type != Token::SemiColon)
+            if (!EndIteratorAndTypeCheck(iter, endIter, Token::SemiColon, "Expected ';'"))
             {
-                logger.LogError(*tokenIter, "Expected ';' after '{}'", tokenIter->value);
                 statement = nullptr;
             }
             else
@@ -1913,9 +1893,8 @@ BranchExpression* SyntaxAnalyzer::ProcessBranchExpression(TokenIterator& iter, T
         return nullptr;
     }
 
-    if (iter == endIter || iter->type != Token::OpenBrace)
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::OpenBrace, "Expected '{'"))
     {
-        logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
 
@@ -2007,15 +1986,8 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
             // skip to token after "."
             iter += 2;
 
-            if (iter == endIter)
+            if (!EndIteratorAndTypeCheck(iter, endIter, Token::Identifier, "Expected member name identifier"))
             {
-                logger.LogError("No member name after member operator");
-                delete expr;
-                return nullptr;
-            }
-            else if (iter->type != Token::Identifier)
-            {
-                logger.LogError(*iter, "Invalid member name");
                 delete expr;
                 return nullptr;
             }
@@ -2032,9 +2004,8 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
 
             // skip to token after "("
             iter += 2;
-            if (iter == endIter)
+            if (!EndIteratorCheck(iter, endIter, "Expected the rest of the function call"))
             {
-                logger.LogError("Unexpected end of file in the middle of a function call");
                 return nullptr;
             }
 

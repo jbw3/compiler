@@ -41,6 +41,8 @@ private:
 
     bool EndIteratorCheck(const TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
+    bool EndIteratorAndTypeCheck(const TokenIterator& iter, const TokenIterator& endIter, uint16_t expectedTokenType, const char* errorMsg);
+
     bool IncrementIterator(TokenIterator& iter, const TokenIterator& endIter, const char* errorMsg = nullptr);
 
     bool IncrementIteratorCheckType(TokenIterator& iter, const TokenIterator& endIter, uint16_t expectedTokenType, const char* errorMsg = nullptr);

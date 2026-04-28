@@ -185,11 +185,11 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
         // no ';' after break/continue
         {
             "fun f() { while true { break } }",
-            "error: Expected ';' after 'break'",
+            "error: Expected ';'",
         },
         {
             "fun f() { while true { continue } }",
-            "error: Expected ';' after 'continue'",
+            "error: Expected ';'",
         },
 
     };
