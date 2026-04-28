@@ -224,6 +224,15 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
             "error: Expected ';'",
         },
 
+        // function call
+        {
+            "fun f() { abc(",
+            "error: Unexpected end of file. Expected the rest of the function call",
+        },
+        {
+            "fun f() { abc(,);",
+            "error: Expected another expression term",
+        },
     };
 
     bool ok = true;
