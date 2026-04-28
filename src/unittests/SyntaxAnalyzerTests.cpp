@@ -76,6 +76,12 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
 {
     vector<InvalidTest> tests =
     {
+        // unexpected token
+        {
+            "in",
+            "error: Unexpected token 'in'",
+        },
+
         // unexpected end of file
         {
             "const s = struct",
@@ -89,7 +95,7 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
         },
         {
             "fun (){}",
-            "error: '(' is not a valid function name",
+            "error: Expected function name",
         },
         {
             "fun abc",
@@ -122,6 +128,32 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
         {
             "fun abc(x i32) / {}",
             "error: Unexpected term '/",
+        },
+        {
+            "fun abc() i32",
+            "error: Expected another expression term",
+        },
+        {
+            "fun abc() {",
+            "error: Unexpected end of file. Expected block end",
+        },
+
+        // invalid extern functions
+        {
+            "extern",
+            "error: Unexpected end of file. Expected function keyword",
+        },
+        {
+            "extern if",
+            "error: Expected function keyword",
+        },
+        {
+            "extern fun",
+            "error: Unexpected end of file. Expected function name",
+        },
+        {
+            "extern fun (){}",
+            "error: Expected function name",
         },
 
         // invalid strings

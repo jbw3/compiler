@@ -171,14 +171,8 @@ bool SyntaxAnalyzer::IncrementIteratorCheckType(TokenIterator& iter, const Token
 ExternFunctionDeclaration* SyntaxAnalyzer::ProcessExternFunction(TokenIterator& iter,
                                                                  TokenIterator endIter)
 {
-    if (!EndIteratorCheck(iter, endIter, "Expected extern keyword"))
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::Extern, "Expected extern keyword"))
     {
-        return nullptr;
-    }
-
-    if (iter->type != Token::Extern)
-    {
-        logger.LogError(*iter, "Expected extern keyword");
         return nullptr;
     }
 
@@ -215,17 +209,6 @@ FunctionDefinition* SyntaxAnalyzer::ProcessFunctionDefinition(TokenIterator& ite
         return nullptr;
     }
 
-    if (!EndIteratorCheck(iter, endIter))
-    {
-        return nullptr;
-    }
-
-    if (iter->type != Token::CloseBrace)
-    {
-        logger.LogError(*iter, "Expected '}'");
-        return nullptr;
-    }
-
     // increment past "}"
     ++iter;
 
@@ -239,39 +222,21 @@ FunctionDeclaration* SyntaxAnalyzer::ProcessFunctionDeclaration(TokenIterator& i
                                                                 TokenIterator endIter,
                                                                 uint16_t endTokenType)
 {
-    if (!EndIteratorCheck(iter, endIter, "Expected function keyword"))
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::Fun, "Expected function keyword"))
     {
         return nullptr;
     }
 
-    if (iter->type != Token::Fun)
+    if (!IncrementIteratorCheckType(iter, endIter, Token::Identifier, "Expected function name"))
     {
-        logger.LogError(*iter, "Expected function keyword");
-        return nullptr;
-    }
-
-    if (!IncrementIterator(iter, endIter, "Expected function name"))
-    {
-        return nullptr;
-    }
-
-    if (iter->type != Token::Identifier)
-    {
-        logger.LogError(*iter, "'{}' is not a valid function name", iter->value);
         return nullptr;
     }
 
     ROString functionName = iter->value;
     const Token* nameToken = &*iter;
 
-    if (!IncrementIterator(iter, endIter, "Expected '('"))
+    if (!IncrementIteratorCheckType(iter, endIter, Token::OpenPar, "Expected '('"))
     {
-        return nullptr;
-    }
-
-    if (iter->type != Token::OpenPar)
-    {
-        logger.LogError(*iter, "Expected '('");
         return nullptr;
     }
 
@@ -358,26 +323,15 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
     TokenIterator endIter
 )
 {
-    if (!EndIteratorCheck(iter, endIter, "Expected struct keyword"))
+    if (!EndIteratorAndTypeCheck(iter, endIter, Token::Struct, "Expected struct keyword"))
     {
         return nullptr;
-    }
-
-    if (iter->type != Token::Struct)
-    {
-        logger.LogError("Expected struct keyword");
     }
 
     const Token* structToken = &*iter;
 
-    if (!IncrementIterator(iter, endIter, "Expected '{'"))
+    if (!IncrementIteratorCheckType(iter, endIter, Token::OpenBrace, "Expected '{'"))
     {
-        return nullptr;
-    }
-
-    if (iter->type != Token::OpenBrace)
-    {
-        logger.LogError(*iter, "Expected '{'");
         return nullptr;
     }
 
