@@ -428,6 +428,79 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
             "var s = S: { };",
             "error: The following struct members were not initialized: def, abc",
         },
+
+        // duplicate identifier
+        {
+            "var abc i32 = 12;\n"
+            "var abc i32 = 3;\n",
+            "error: Identifier 'abc' has already been declared",
+        },
+
+        // while loop condition error
+        {
+            "while x\n"
+            "{\n"
+            "    x -= 1;\n"
+            "}\n",
+            "error: Identifier 'x' is not declared in the current scope",
+        },
+
+        // while loop condition not a bool
+        {
+            "var x i32 = 12;\n"
+            "while x\n"
+            "{\n"
+            "    x -= 1;\n"
+            "}\n",
+            "error: While loop condition must be a boolean expression",
+        },
+
+        // while loop body error
+        {
+            "while true\n"
+            "{\n"
+            "    x -= 1;\n"
+            "}\n",
+            "error: Identifier 'x' is not declared in the current scope",
+        },
+
+        // for loop condition error
+        {
+            "for x in abc\n"
+            "{\n"
+            "    x -= 1;\n"
+            "}\n",
+            "error: Identifier 'abc' is not declared in the current scope",
+        },
+
+        // for loop not iterable
+        {
+            "var abc i32 = 1;\n"
+            "for x in abc\n"
+            "{\n"
+            "    x -= 1;\n"
+            "}\n",
+            "error: For loop expression is not iterable",
+        },
+
+        // for loop body error
+        {
+            "for x i32 in 0..<3\n"
+            "{\n"
+            "    q -= 1;\n"
+            "}\n",
+            "error: Identifier 'q' is not declared in the current scope",
+        },
+
+        // loop control not in loop
+        {
+            "break;",
+            "'break' can only be used in a loop",
+        },
+        {
+            "continue;",
+            "'continue' can only be used in a loop",
+        },
     };
 
     bool ok = true;
