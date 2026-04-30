@@ -466,10 +466,16 @@ bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
             "error: Expression value is not a struct type",
         },
 
-        // invalid built-in identifiers
+        // invalid built-in identifier
         {
             "var x = @notValid;\n",
             "error: '@notValid' is not a valid built-in identifier",
+        },
+
+        // invalid built-in function call
+        {
+            "var x = @notValid();\n",
+            "error: '@notValid' is not a valid built-in function",
         },
 
         // invalid bit-cast expression type
@@ -491,11 +497,24 @@ bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
             "error: Cannot bit-cast expression of type '{integer}' to type 'u8' because sizes are not equal",
         },
 
+        // invalid struct expression
+        {
+            "var s = S:{};",
+            "error: Identifier 'S' is not declared in the current scope",
+        },
+
         // not a struct type
         {
             "const X i32 = 1;\n"
             "var s = X: {};",
             "error: Expression is not a type",
+        },
+
+        // invalid member expression
+        {
+            "const S = struct { x i32 };\n"
+            "var s = S: { x = y };",
+            "error: Identifier 'y' is not declared in the current scope",
         },
 
         // invalid struct member name
