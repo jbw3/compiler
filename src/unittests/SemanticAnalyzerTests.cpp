@@ -19,6 +19,7 @@ SemanticAnalyzerTests::SemanticAnalyzerTests(ostream &results) :
 {
     ADD_TEST(TestValidConstants);
     ADD_TEST(TestInvalidConstants);
+    ADD_TEST(TestInvalidGlobalSpace);
     ADD_TEST(TestValidVariables);
     ADD_TEST(TestInvalidVariables);
 }
@@ -102,7 +103,7 @@ bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& fai
     return ok;
 }
 
-bool SemanticAnalyzerTests::TestValidConstants(string &failMsg)
+bool SemanticAnalyzerTests::TestValidConstants(string& failMsg)
 {
     vector<string> tests =
     {
@@ -303,6 +304,48 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
         // check if tests fail in a function
         string test2 = "fun f()\n{\n" + test.input + "}\n";
         valid = RunSemanticAnalysis(test2, errMsg);
+        if (valid)
+        {
+            ok = false;
+            failMsg = "Expected semantic analysis to fail";
+            break;
+        }
+        if (errMsg.find(test.expectedErrMsg) == string::npos)
+        {
+            ok = false;
+            failMsg = "Unexpected error message: " + errMsg;
+            break;
+        }
+    }
+
+    return ok;
+}
+
+bool SemanticAnalyzerTests::TestInvalidGlobalSpace(string& failMsg)
+{
+    vector<InvalidTest> tests =
+    {
+        // duplicate function param names
+        {
+            "fun f(number i32, number i16) { }",
+            "error: Function 'f' has multiple parameters named 'number'",
+        },
+
+        // same function param name as global
+        {
+            "const number i32 = 3;\n"
+            "fun f(number i32) { }\n",
+            "error: Identifier 'number' has already been declared",
+        },
+    };
+
+    bool ok = true;
+    bool valid = true;
+    string errMsg;
+    for (InvalidTest test : tests)
+    {
+        // check if tests fail in the global scope
+        valid = RunSemanticAnalysis(test.input, errMsg, /*check_const_decls =*/false);
         if (valid)
         {
             ok = false;
