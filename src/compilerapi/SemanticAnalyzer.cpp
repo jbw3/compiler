@@ -2804,6 +2804,17 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
 
     const TypeInfo* funType = functionCallExpression->functionExpression->GetType();
 
+    // check if type is a function
+    if (!funType->IsFunction())
+    {
+        StartEndTokenFinder finder;
+        functionCallExpression->functionExpression->Accept(&finder);
+
+        logger.LogError(*finder.start, *finder.end, "Expression is not a function type");
+        isError = true;
+        return;
+    }
+
     // check argument count
     const vector<Expression*>& args = functionCallExpression->arguments;
     const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
