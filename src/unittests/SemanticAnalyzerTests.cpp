@@ -19,6 +19,7 @@ SemanticAnalyzerTests::SemanticAnalyzerTests(ostream &results) :
 {
     ADD_TEST(TestValidConstants);
     ADD_TEST(TestInvalidConstants);
+    ADD_TEST(TestValidGlobalSpace);
     ADD_TEST(TestInvalidGlobalSpace);
     ADD_TEST(TestValidVariables);
     ADD_TEST(TestInvalidVariables);
@@ -321,6 +322,27 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
     return ok;
 }
 
+bool SemanticAnalyzerTests::TestValidGlobalSpace(string& failMsg)
+{
+    vector<string> tests =
+    {
+        // extern function
+        "extern fun extern_function(number i32, boolean bool) f32;",
+    };
+
+    bool ok = false;
+    for (string test : tests)
+    {
+        ok = RunSemanticAnalysis(test, failMsg, /*check_const_decls =*/false);
+        if (!ok)
+        {
+            break;
+        }
+    }
+
+    return ok;
+}
+
 bool SemanticAnalyzerTests::TestInvalidGlobalSpace(string& failMsg)
 {
     vector<InvalidTest> tests =
@@ -370,7 +392,6 @@ bool SemanticAnalyzerTests::TestInvalidGlobalSpace(string& failMsg)
     string errMsg;
     for (InvalidTest test : tests)
     {
-        // check if tests fail in the global scope
         valid = RunSemanticAnalysis(test.input, errMsg, /*check_const_decls =*/false);
         if (valid)
         {
