@@ -507,7 +507,7 @@ bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
         {
             "const X i32 = 1;\n"
             "var s = X: {};",
-            "error: Expression is not a type",
+            "error: Expected expression to be of type 'type'",
         },
 
         // invalid member expression

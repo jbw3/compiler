@@ -2110,36 +2110,14 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
 {
     Expression* structTypeExpr = structInitializationExpression->structTypeExpression;
 
-    structTypeExpr->Accept(this);
-    if (isError)
+    const TypeInfo* type = TypeExpressionToType(structTypeExpr);
+    if (type == nullptr)
     {
-        return;
-    }
-
-    // check if type expression is a constant
-    if (!structTypeExpr->GetIsConstant())
-    {
-        StartEndTokenFinder finder;
-        structTypeExpr->Accept(&finder);
-
         isError = true;
-        logger.LogError(*finder.start, *finder.end, "Struct type must be a constant expression");
-        return;
-    }
-
-    // check if type expression is a type
-    if (!structTypeExpr->GetType()->IsType())
-    {
-        StartEndTokenFinder finder;
-        structTypeExpr->Accept(&finder);
-
-        isError = true;
-        logger.LogError(*finder.start, *finder.end, "Expression is not a type");
         return;
     }
 
     // check if type is a struct
-    const TypeInfo* type = compilerContext.GetTypeConstantValue(structTypeExpr->GetConstantValueIndex());
     if (!type->IsStruct())
     {
         StartEndTokenFinder finder;
