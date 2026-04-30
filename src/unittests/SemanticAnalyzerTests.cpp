@@ -337,6 +337,32 @@ bool SemanticAnalyzerTests::TestInvalidGlobalSpace(string& failMsg)
             "fun f(number i32) { }\n",
             "error: Identifier 'number' has already been declared",
         },
+
+        // invalid number of function arguments
+        {
+            "fun aaa(xxx i32, yyy bool) { }\n"
+            "fun test(){ aaa(1); }\n",
+            "error: Function expected 2 arguments but got 1",
+        },
+        {
+            "fun aaa(xxx i32) { }\n"
+            "fun test(){ aaa(1, true); }\n",
+            "error: Function expected 1 argument but got 2",
+        },
+
+        // invalid argument expression
+        {
+            "fun aaa(xxx i32) { }\n"
+            "fun test(){ aaa(x); }\n",
+            "error: Identifier 'x' is not declared in the current scope",
+        },
+
+        // invalid argument type
+        {
+            "fun aaa(xxx i32) { }\n"
+            "fun test(){ aaa(true); }\n",
+            "error: Argument type does not match parameter type. Argument: 'bool', parameter: 'i32'",
+        },
     };
 
     bool ok = true;
@@ -543,6 +569,19 @@ bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
         {
             "continue;",
             "'continue' can only be used in a loop",
+        },
+
+        // invalid function expression
+        {
+            "x();\n",
+            "error: Identifier 'x' is not declared in the current scope",
+        },
+
+        // non-function type
+        {
+            "var x i32 = 2;\n"
+            "x();\n",
+            "error: Expression is not a function type",
         },
     };
 
