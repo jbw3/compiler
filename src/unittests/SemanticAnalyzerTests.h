@@ -15,13 +15,13 @@ private:
 
     static bool TestInvalidConstants(std::string& failMsg);
 
-    static bool TestValidGlobalSpace(std::string& failMsg);
+    static bool TestValidGlobalScope(std::string& failMsg);
 
-    static bool TestInvalidGlobalSpace(std::string& failMsg);
+    static bool TestInvalidGlobalScope(std::string& failMsg);
 
-    static bool TestValidVariables(std::string& failMsg);
+    static bool TestValidFunctionScope(std::string& failMsg);
 
-    static bool TestInvalidVariables(std::string& failMsg);
+    static bool TestInvalidFunctionScope(std::string& failMsg);
 };
 
 #endif // SEMANTIC_ANALYSIS_TESTS_H_

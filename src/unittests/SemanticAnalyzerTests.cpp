@@ -19,10 +19,10 @@ SemanticAnalyzerTests::SemanticAnalyzerTests(ostream &results) :
 {
     ADD_TEST(TestValidConstants);
     ADD_TEST(TestInvalidConstants);
-    ADD_TEST(TestValidGlobalSpace);
-    ADD_TEST(TestInvalidGlobalSpace);
-    ADD_TEST(TestValidVariables);
-    ADD_TEST(TestInvalidVariables);
+    ADD_TEST(TestValidGlobalScope);
+    ADD_TEST(TestInvalidGlobalScope);
+    ADD_TEST(TestValidFunctionScope);
+    ADD_TEST(TestInvalidFunctionScope);
 }
 
 bool SemanticAnalyzerTests::RunSemanticAnalysis(const string& input, string& failMsg, bool check_const_decls)
@@ -322,7 +322,7 @@ bool SemanticAnalyzerTests::TestInvalidConstants(string& failMsg)
     return ok;
 }
 
-bool SemanticAnalyzerTests::TestValidGlobalSpace(string& failMsg)
+bool SemanticAnalyzerTests::TestValidGlobalScope(string& failMsg)
 {
     vector<string> tests =
     {
@@ -343,7 +343,7 @@ bool SemanticAnalyzerTests::TestValidGlobalSpace(string& failMsg)
     return ok;
 }
 
-bool SemanticAnalyzerTests::TestInvalidGlobalSpace(string& failMsg)
+bool SemanticAnalyzerTests::TestInvalidGlobalScope(string& failMsg)
 {
     vector<InvalidTest> tests =
     {
@@ -410,7 +410,7 @@ bool SemanticAnalyzerTests::TestInvalidGlobalSpace(string& failMsg)
     return ok;
 }
 
-bool SemanticAnalyzerTests::TestValidVariables(string& failMsg)
+bool SemanticAnalyzerTests::TestValidFunctionScope(string& failMsg)
 {
     vector<string> tests =
     {
@@ -437,7 +437,7 @@ bool SemanticAnalyzerTests::TestValidVariables(string& failMsg)
     return ok;
 }
 
-bool SemanticAnalyzerTests::TestInvalidVariables(string& failMsg)
+bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
 {
     vector<InvalidTest> tests =
     {
