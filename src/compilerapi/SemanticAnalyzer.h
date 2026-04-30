@@ -134,7 +134,7 @@ private:
 
     const TypeInfo* GetVariableType(SyntaxTree::Expression* typeExpression, const TypeInfo* inferType, const Token* errorToken);
 
-    bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, SyntaxTree::Expression* expression, const Token* errorToken, SyntaxTree::Expression*& resultExpression);
+    bool CheckReturnType(const SyntaxTree::FunctionDeclaration* funcDecl, SyntaxTree::Expression* expression, SyntaxTree::Expression*& resultExpression);
 
     SyntaxTree::Expression* ImplicitCast(SyntaxTree::Expression* expression, const TypeInfo* type);
 

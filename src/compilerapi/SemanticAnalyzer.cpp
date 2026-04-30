@@ -1808,7 +1808,7 @@ void SemanticAnalyzer::Visit(Return* ret)
 
     // check if expression type matches function return type
     Expression* resultExpression = nullptr;
-    bool ok = CheckReturnType(currentFunction->declaration, expression, ret->token, resultExpression);
+    bool ok = CheckReturnType(currentFunction->declaration, expression, resultExpression);
     if (!ok)
     {
         isError = true;
@@ -1938,7 +1938,7 @@ void SemanticAnalyzer::Visit(FunctionDefinition* functionDefinition)
     {
         // check last expression
         Expression* resultExpression = nullptr;
-        bool ok = CheckReturnType(funcDecl, expression, blockExpr->endToken, resultExpression);
+        bool ok = CheckReturnType(funcDecl, expression, resultExpression);
         if (!ok)
         {
             isError = true;
@@ -4060,7 +4060,7 @@ const TypeInfo* SemanticAnalyzer::GetVariableType(Expression* typeExpression, co
     return type;
 }
 
-bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expression* expression, const Token* errorToken, Expression*& resultExpression)
+bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expression* expression, Expression*& resultExpression)
 {
     resultExpression = nullptr;
 
@@ -4069,7 +4069,17 @@ bool SemanticAnalyzer::CheckReturnType(const FunctionDeclaration* funcDecl, Expr
     bool needsCast = false;
     if (!AreCompatibleAssignmentTypes(returnType, expressionType, needsCast))
     {
-        logger.LogError(*errorToken, "Function '{}' has an invalid return type. Expected '{}' but got '{}'", funcDecl->name, returnType->GetName(), expressionType->GetName());
+        StartEndTokenFinder finder;
+        expression->Accept(&finder);
+
+        logger.LogError(
+            *finder.start,
+            *finder.end,
+            "Function '{}' has an invalid return type. Expected '{}' but got '{}'",
+            funcDecl->name,
+            returnType->GetName(),
+            expressionType->GetName()
+        );
         return false;
     }
 
