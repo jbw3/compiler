@@ -360,6 +360,18 @@ bool SemanticAnalyzerTests::TestInvalidGlobalScope(string& failMsg)
             "error: Identifier 'number' has already been declared",
         },
 
+        // invalid return expression
+        {
+            "fun f() i32 { return aaa; }",
+            "error: Identifier 'aaa' is not declared in the current scope",
+        },
+
+        // invalid return expression type
+        {
+            "fun f() i32 { var aaa = true; return aaa; }",
+            "error: Function 'f' has an invalid return type. Expected 'i32' but got 'bool'",
+        },
+
         // invalid number of function arguments
         {
             "fun aaa(xxx i32, yyy bool) { }\n"
