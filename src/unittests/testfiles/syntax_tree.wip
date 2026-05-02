@@ -61,6 +61,8 @@ fun a_function(x i32, p &i32)
         var addr u64 = a2[2];
         var ptr &i32 = @intToPtr(&i32, addr);
     }
+
+    multiple_params(1.2, p3 = less, p1 = 17, p2 = a2[0]);
 }
 
 fun test_value(x i32) bool
@@ -69,3 +71,7 @@ fun test_value(x i32) bool
 }
 
 extern fun ef() f64;
+
+fun multiple_params(p0 f64, p1 i32, p2 u8, p3 bool)
+{
+}

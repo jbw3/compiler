@@ -780,6 +780,62 @@
                 }
               },
               {
+                "nodeType": "FunctionExpression",
+                "functionExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "multiple_params"
+                },
+                "arguments": [
+                  {
+                    "nodeType": "Argument",
+                    "name": "null",
+                    "expression":
+                    {
+                      "nodeType": "FloatLiteralExpression",
+                      "value": "1.2"
+                    }
+                  },
+                  {
+                    "nodeType": "Argument",
+                    "name": "p3",
+                    "expression":
+                    {
+                      "nodeType": "IdentifierExpression",
+                      "name": "less"
+                    }
+                  },
+                  {
+                    "nodeType": "Argument",
+                    "name": "p1",
+                    "expression":
+                    {
+                      "nodeType": "NumericExpression",
+                      "value": "17"
+                    }
+                  },
+                  {
+                    "nodeType": "Argument",
+                    "name": "p2",
+                    "expression":
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "[]",
+                      "left":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "a2"
+                      },
+                      "right":
+                      {
+                        "nodeType": "NumericExpression",
+                        "value": "0"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
                 "nodeType": "UnitTypeLiteralExpression"
               }
             ]
@@ -830,6 +886,63 @@
                     "value": "4"
                   }
                 }
+              }
+            ]
+          }
+        },
+        {
+          "nodeType": "FunctionDefinition",
+          "declaration":
+          {
+            "nodeType": "FunctionDeclaration",
+            "name": "multiple_params",
+            "parameters": [
+              {
+                "nodeType": "Parameter",
+                "name": "p0",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "f64"
+                }
+              },
+              {
+                "nodeType": "Parameter",
+                "name": "p1",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "i32"
+                }
+              },
+              {
+                "nodeType": "Parameter",
+                "name": "p2",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "u8"
+                }
+              },
+              {
+                "nodeType": "Parameter",
+                "name": "p3",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "bool"
+                }
+              }
+            ],
+            "returnTypeExpression": null
+          },
+          "expression":
+          {
+            "nodeType": "BlockExpression",
+            "constantDeclarations": [],
+            "statements": [
+              {
+                "nodeType": "UnitTypeLiteralExpression"
               }
             ]
           }
