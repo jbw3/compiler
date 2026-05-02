@@ -328,6 +328,14 @@ bool SemanticAnalyzerTests::TestValidGlobalScope(string& failMsg)
     {
         // extern function
         "extern fun extern_function(number i32, boolean bool) f32;",
+
+        // named function arguments
+        "fun f(num i32, string str, boolean bool) { }\n"
+        "fun test() {\n"
+        "f(num = 1, string = \"hi\", boolean = true);\n"
+        "f(123, string = \"hi\", boolean = true);\n"
+        "f(boolean = true, string = \"hi\", num = 1);\n"
+        "}\n",
     };
 
     bool ok = false;
@@ -396,6 +404,32 @@ bool SemanticAnalyzerTests::TestInvalidGlobalScope(string& failMsg)
             "fun aaa(xxx i32) { }\n"
             "fun test(){ aaa(true); }\n",
             "error: Argument type does not match parameter type. Argument: 'bool', parameter: 'i32'",
+        },
+
+        // unnamed arg after named arg
+        {
+            "fun aaa(xxx i32, yyy bool, zzz f64) { }\n"
+            "fun test(){ aaa(1, yyy = true, 1.2); }\n",
+            "error: Unnamed arguments are not allowed after named argument",
+        },
+
+        // unknown param name
+        {
+            "fun aaa(xxx i32, yyy bool, zzz f64) { }\n"
+            "fun test(){ aaa(1, yyy = true, qqq = 1.2); }\n",
+            "error: Function does not have a parameter named 'qqq'",
+        },
+
+        // param has already been specified
+        {
+            "fun aaa(xxx i32, yyy bool, zzz f64) { }\n"
+            "fun test(){ aaa(1, yyy = true, yyy = false); }\n",
+            "error: Parameter 'yyy' has already been specified",
+        },
+        {
+            "fun aaa(xxx i32, yyy bool, zzz f64) { }\n"
+            "fun test(){ aaa(1, true, yyy = false); }\n",
+            "error: Parameter 'yyy' has already been specified",
         },
     };
 
