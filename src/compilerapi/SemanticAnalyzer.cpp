@@ -2881,7 +2881,7 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
 
         // check argument against the parameter type
         const TypeInfo* argType = argExpr->GetType();
-        const TypeInfo* paramType = paramTypes[i];
+        const TypeInfo* paramType = paramTypes[paramIndex];
 
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
