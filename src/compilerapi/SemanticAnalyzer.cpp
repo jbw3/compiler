@@ -2804,15 +2804,75 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         return;
     }
 
+    const vector<ROString>& paramNames = funType->GetParamNames();
+    unordered_set<ROString> paramsToInit(paramNames.begin(), paramNames.end());
+
     // process arguments
+    bool foundNamedArg = false;
     for (size_t i = 0; i < args.size(); ++i)
     {
-        Argument* arg = args[i];
+        const Argument* arg = args[i];
+        Expression* argExpr = arg->expression;
 
-        // TODO: handle arg name
+        size_t paramIndex = 0;
+        if (arg->nameToken == nullptr)
+        {
+            // check if we found an unnamed arg after a named arg
+            if (foundNamedArg)
+            {
+                StartEndTokenFinder finder;
+                argExpr->Accept(&finder);
+
+                logger.LogError(
+                    *finder.start,
+                    *finder.end,
+                    "Unnamed arguments are not allowed after named argument"
+                );
+                isError = true;
+                return;
+            }
+
+            paramIndex = i;
+        }
+        else
+        {
+            foundNamedArg = true;
+
+            ROString name = arg->nameToken->value;
+            for (paramIndex = 0; paramIndex < paramNames.size(); ++paramIndex)
+            {
+                if (name == paramNames[paramIndex])
+                {
+                    break;
+                }
+            }
+
+            if (paramIndex >= paramNames.size())
+            {
+                logger.LogError(
+                    *arg->nameToken,
+                    "Function does not have a parameter named '{}'",
+                    name
+                );
+                isError = true;
+                return;
+            }
+
+            ROString paramName = paramNames[paramIndex];
+            size_t num = paramsToInit.erase(paramName);
+            if (num == 0)
+            {
+                logger.LogError(
+                    *arg->nameToken,
+                    "Parameter '{}' has already been initialized",
+                    paramName
+                );
+                isError = true;
+                return;
+            }
+        }
 
         // set argument type
-        Expression* argExpr = arg->expression;
         argExpr->Accept(this);
         if (isError)
         {
