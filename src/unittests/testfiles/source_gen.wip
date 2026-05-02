@@ -225,3 +225,10 @@ fun function_types()
     f5(0);
     var x = test5()();
 }
+
+fun function_call_with_param_names(x i32)
+{
+    test3(1, 2, z = true);
+    test3(x = 1, y = 2, z = true);
+    test3(z = false, y = 7, x = -9 + x);
+}
