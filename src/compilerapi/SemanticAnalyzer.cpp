@@ -2857,19 +2857,19 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
                 isError = true;
                 return;
             }
+        }
 
-            ROString paramName = paramNames[paramIndex];
-            size_t num = paramsToInit.erase(paramName);
-            if (num == 0)
-            {
-                logger.LogError(
-                    *arg->nameToken,
-                    "Parameter '{}' has already been initialized",
-                    paramName
-                );
-                isError = true;
-                return;
-            }
+        ROString paramName = paramNames[paramIndex];
+        size_t num = paramsToInit.erase(paramName);
+        if (num == 0)
+        {
+            logger.LogError(
+                *arg->nameToken,
+                "Parameter '{}' has already been specified",
+                paramName
+            );
+            isError = true;
+            return;
         }
 
         // set argument type
