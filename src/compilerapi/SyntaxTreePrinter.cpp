@@ -87,8 +87,6 @@ void SyntaxTreePrinter::Visit(ForLoop* forLoop)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
-
     PrintProperty(NODE_TYPE_PROPERTY, "ForLoop");
     PrintProperty("variableName", forLoop->variableName);
     PrintProperty("varTypeExpression", forLoop->varTypeExpression);
@@ -405,8 +403,6 @@ void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
-
     PrintProperty(NODE_TYPE_PROPERTY, "ConstantDeclaration");
     PrintProperty("name", constantDeclaration->name);
     PrintProperty("typeExpression", constantDeclaration->typeExpression);
@@ -416,8 +412,6 @@ void SyntaxTreePrinter::Visit(ConstantDeclaration* constantDeclaration)
 void SyntaxTreePrinter::Visit(VariableDeclaration* variableDeclaration)
 {
     BracePrinter printer(*this, "{", "}");
-
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "VariableDeclaration");
     PrintProperty("name", variableDeclaration->name);
@@ -441,8 +435,6 @@ void SyntaxTreePrinter::PrintParameter(const Parameter* parameter)
 {
     BracePrinter printer(*this, "{", "}");
 
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
-
     PrintProperty(NODE_TYPE_PROPERTY, "Parameter");
     PrintProperty("name", parameter->name);
     PrintProperty("typeExpression", parameter->typeExpression);
@@ -463,8 +455,6 @@ void SyntaxTreePrinter::PrintFunctionDeclaration(const FunctionDeclaration* decl
 void SyntaxTreePrinter::PrintMemberDefinition(const MemberDefinition* member)
 {
     BracePrinter printer(*this, "{", "}");
-
-    function<void (const Token*)> printTypeName = [this](const Token* token){ PrintString(token->value); };
 
     PrintProperty(NODE_TYPE_PROPERTY, "MemberDefinition");
     PrintProperty("name", member->name);
