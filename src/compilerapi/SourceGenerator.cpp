@@ -418,16 +418,27 @@ void SourceGenerator::Visit(FunctionCallExpression* functionCallExpression)
 
     *os << '(';
 
-    const Expressions& args = functionCallExpression->arguments;
+    const Arguments& args = functionCallExpression->arguments;
     size_t numArgs = args.size();
     if (numArgs > 0)
     {
-        args[0]->Accept(this);
+        const Token* nameToken = args[0]->nameToken;
+        if (nameToken != nullptr)
+        {
+            *os << nameToken->value << " = ";
+        }
+        args[0]->expression->Accept(this);
 
         for (size_t i = 1; i < numArgs; ++i)
         {
             *os << ", ";
-            args[i]->Accept(this);
+
+            nameToken = args[i]->nameToken;
+            if (nameToken != nullptr)
+            {
+                *os << nameToken->value << " = ";
+            }
+            args[i]->expression->Accept(this);
         }
     }
 

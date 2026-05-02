@@ -415,8 +415,13 @@
                   },
                   "arguments": [
                     {
-                      "nodeType": "IdentifierExpression",
-                      "name": "x"
+                      "nodeType": "Argument",
+                      "name": "null",
+                      "expression":
+                      {
+                        "nodeType": "IdentifierExpression",
+                        "name": "x"
+                      }
                     }
                   ]
                 },

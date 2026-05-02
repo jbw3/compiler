@@ -315,11 +315,28 @@ public:
     Expression* subExpression;
 };
 
+class Argument
+{
+public:
+    Argument(const Token* nameToken, Expression* expression);
+
+    ~Argument();
+
+    const Token* nameToken;
+    Expression* expression;
+};
+
+typedef std::vector<Argument*> Arguments;
+
 class FunctionCallExpression : public Expression
 {
 public:
-    FunctionCallExpression(Expression* functionExpr, const Expressions& arguments,
-                           const Token* openParToken, const Token* closeParToken);
+    FunctionCallExpression(
+        Expression* functionExpr,
+        const Arguments& arguments,
+        const Token* openParToken,
+        const Token* closeParToken
+    );
 
     virtual ~FunctionCallExpression();
 
@@ -329,7 +346,7 @@ public:
     const Token* closeParToken;
     const TypeInfo* functionType;
     Expression* functionExpression;
-    Expressions arguments;
+    Arguments arguments;
 };
 
 class BuiltInFunctionCallExpression : public Expression

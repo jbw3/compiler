@@ -366,9 +366,11 @@ void SyntaxTreePrinter::Visit(FunctionCallExpression* functionCallExpression)
 {
     BracePrinter printer(*this, "{", "}");
 
+    function<void (Argument*)> printArg = [this](Argument* argument){ PrintArgument(argument); };
+
     PrintProperty(NODE_TYPE_PROPERTY, "FunctionExpression");
     PrintProperty("functionExpression", functionCallExpression->functionExpression);
-    PrintProperty("arguments", functionCallExpression->arguments);
+    PrintProperty("arguments", functionCallExpression->arguments, printArg);
 }
 
 void SyntaxTreePrinter::Visit(BuiltInFunctionCallExpression* builtInFunctionCallExpression)
@@ -477,6 +479,24 @@ void SyntaxTreePrinter::PrintMemberInitialization(const MemberInitialization* me
     PrintProperty(NODE_TYPE_PROPERTY, "MemberInitialization");
     PrintProperty("name", memberInitialization->name);
     PrintProperty("expression", memberInitialization->expression);
+}
+
+void SyntaxTreePrinter::PrintArgument(const SyntaxTree::Argument* argument)
+{
+    BracePrinter printer(*this, "{", "}");
+
+    const Token* nameToken = argument->nameToken;
+
+    PrintProperty(NODE_TYPE_PROPERTY, "Argument");
+    if (nameToken == nullptr)
+    {
+        PrintProperty("name", "null");
+    }
+    else
+    {
+        PrintProperty("name", nameToken->value);
+    }
+    PrintProperty("expression", argument->expression);
 }
 
 void SyntaxTreePrinter::PrintProperty(ROString name, ROString value)

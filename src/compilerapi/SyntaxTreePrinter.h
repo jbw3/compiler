@@ -108,6 +108,8 @@ private:
 
     void PrintMemberInitialization(const SyntaxTree::MemberInitialization* memberInitialization);
 
+    void PrintArgument(const SyntaxTree::Argument* argument);
+
     void PrintProperty(ROString name, ROString value);
 
     void PrintProperty(ROString name, SyntaxTree::SyntaxTreeNode* value);

@@ -1034,7 +1034,7 @@ void LlvmIrGenerator::Visit(FunctionDefinition* functionDefinition)
     DebugScope dbgScope(dbgInfo, diScopes, diSubprogram);
 
     unsigned idx = 0;
-    for (Argument& arg : func->args())
+    for (llvm::Argument& arg : func->args())
     {
         const Parameter* param = params[idx];
         ROString paramName = param->name;
@@ -1852,11 +1852,13 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
     }
     Value* funValue = resultValue;
 
-    vector<Expression*> argExpressions = functionCallExpression->arguments;
+    const Arguments& argExpressions = functionCallExpression->arguments;
     vector<Value*> args;
     for (size_t i = 0; i < argExpressions.size(); ++i)
     {
-        Expression* expr = argExpressions[i];
+        // TODO: handle arg name
+
+        Expression* expr = argExpressions[i]->expression;
         expr->Accept(this);
         if (resultValue == nullptr)
         {

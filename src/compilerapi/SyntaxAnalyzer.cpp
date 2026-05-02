@@ -1964,18 +1964,30 @@ Expression* SyntaxAnalyzer::ProcessPostTerm(Expression* expr, TokenIterator& ite
             }
 
             // process arguments
-            vector<Expression*> arguments;
-            while (iter->type != Token::ClosePar)
+            Arguments arguments;
+            while (iter != endIter && iter->type != Token::ClosePar)
             {
+                // check if this is a named argument
+                const Token* nameToken = nullptr;
+                if (iter->type == Token::Identifier)
+                {
+                    TokenIterator maybeEqualIter = iter + 1;
+                    if (maybeEqualIter != endIter && maybeEqualIter->type == Token::Equal)
+                    {
+                        nameToken = &*iter;
+                        iter += 2;
+                    }
+                }
+
                 Expression* argExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
                 if (argExpr == nullptr)
                 {
                     deletePointerContainer(arguments);
                     return nullptr;
                 }
-                arguments.push_back(argExpr);
+                arguments.push_back(new Argument(nameToken, argExpr));
 
-                if (iter->type == Token::Comma)
+                if (iter != endIter && iter->type == Token::Comma)
                 {
                     ++iter;
                 }

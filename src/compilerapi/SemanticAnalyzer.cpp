@@ -2794,7 +2794,7 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
     }
 
     // check argument count
-    const vector<Expression*>& args = functionCallExpression->arguments;
+    const Arguments& args = functionCallExpression->arguments;
     const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
     if (args.size() != paramTypes.size())
     {
@@ -2807,23 +2807,27 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
     // process arguments
     for (size_t i = 0; i < args.size(); ++i)
     {
+        Argument* arg = args[i];
+
+        // TODO: handle arg name
+
         // set argument type
-        Expression* arg = args[i];
-        arg->Accept(this);
+        Expression* argExpr = arg->expression;
+        argExpr->Accept(this);
         if (isError)
         {
             return;
         }
 
         // check argument against the parameter type
-        const TypeInfo* argType = arg->GetType();
+        const TypeInfo* argType = argExpr->GetType();
         const TypeInfo* paramType = paramTypes[i];
 
         bool needsCast = false;
         if (!AreCompatibleAssignmentTypes(paramType, argType, needsCast))
         {
             StartEndTokenFinder finder;
-            arg->Accept(&finder);
+            argExpr->Accept(&finder);
 
             logger.LogError(
                 *finder.start, *finder.end,
@@ -2837,7 +2841,7 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
 
         if (needsCast)
         {
-            functionCallExpression->arguments[i] = ImplicitCast(arg, paramType);
+            functionCallExpression->arguments[i]->expression = ImplicitCast(argExpr, paramType);
         }
     }
 

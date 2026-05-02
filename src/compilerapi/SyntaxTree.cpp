@@ -522,8 +522,23 @@ void ImplicitCastExpression::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-FunctionCallExpression::FunctionCallExpression(Expression* functionExpr, const Expressions& arguments,
-                                               const Token* openParToken, const Token* closeParToken) :
+Argument::Argument(const Token* nameToken, Expression* expression) :
+    nameToken(nameToken),
+    expression(expression)
+{
+}
+
+Argument::~Argument()
+{
+    delete expression;
+}
+
+FunctionCallExpression::FunctionCallExpression(
+    Expression* functionExpr,
+    const Arguments& arguments,
+    const Token* openParToken,
+    const Token* closeParToken
+) :
     openParToken(openParToken),
     closeParToken(closeParToken),
     functionType(nullptr),
