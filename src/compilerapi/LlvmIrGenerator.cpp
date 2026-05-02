@@ -1852,20 +1852,45 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
     }
     Value* funValue = resultValue;
 
-    const Arguments& argExpressions = functionCallExpression->arguments;
-    vector<Value*> args;
-    for (size_t i = 0; i < argExpressions.size(); ++i)
+    const Arguments& arguments = functionCallExpression->arguments;
+    vector<Value*> args(arguments.size(), nullptr);
+    for (size_t i = 0; i < arguments.size(); ++i)
     {
-        // TODO: handle arg name
-
-        Expression* expr = argExpressions[i]->expression;
+        const SyntaxTree::Argument* arg = arguments[i];
+        Expression* expr = arg->expression;
         expr->Accept(this);
         if (resultValue == nullptr)
         {
             return;
         }
 
-        args.push_back(resultValue);
+        size_t paramIndex = 0;
+        const Token* nameToken = arg->nameToken;
+        if (nameToken == nullptr)
+        {
+            paramIndex = i;
+        }
+        else
+        {
+            ROString name = nameToken->value;
+            const vector<ROString>& paramNames = functionCallExpression->functionExpression->GetType()->GetParamNames();
+            for (paramIndex = 0; paramIndex < paramNames.size(); ++paramIndex)
+            {
+                if (name == paramNames[paramIndex])
+                {
+                    break;
+                }
+            }
+
+            if (paramIndex >= paramNames.size())
+            {
+                logger.LogInternalError("Parameter index is out of bounds");
+                resultValue = nullptr;
+                return;
+            }
+        }
+
+        args[paramIndex] = resultValue;
     }
 
     FunctionType* funType = CreateLlvmFunctionType(functionCallExpression->functionType);

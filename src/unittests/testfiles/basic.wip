@@ -1235,3 +1235,20 @@ fun structWithDefaults(x u16)
     var s2 = StructWithDefaults: { m2 = x, m0 = 2, };
     var s3 = StructWithDefaults: { m0 = 3, m1 = false };
 }
+
+fun multiArgs1(p0 i32, p1 f64, p2 bool, p3 u16)
+{
+}
+
+extern fun multiArgs2(p0 i32, p1 f64, p2 bool, p3 u16);
+
+fun callWithNames(i i32, f f64, b bool, u u16)
+{
+    multiArgs1(i, f, b, u);
+    multiArgs1(i, f, p3 = u, p2 = b);
+    multiArgs1(p3 = u, p2 = b, p1 = f, p0 = i);
+
+    multiArgs2(i, f, b, u);
+    multiArgs2(i, f, p3 = u, p2 = b);
+    multiArgs2(p3 = u, p2 = b, p1 = f, p0 = i);
+}

@@ -51,6 +51,8 @@ declare %UnitType @extern1()
 
 declare i64 @extern2(i32, i1)
 
+declare %UnitType @multiArgs2(i32, double, i1, i16)
+
 ; Function Attrs: noinline nounwind optnone
 define i32 @noArgs() #0 {
 entry:
@@ -3712,6 +3714,64 @@ entry:
   %agg4 = insertvalue %StructWithDefaults %agg3, i1 true, 1
   store %StructWithDefaults %agg4, ptr %s2, align 4
   store %StructWithDefaults { i32 3, i1 false, i16 10000 }, ptr %s3, align 4
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @multiArgs1(i32 %p0, double %p1, i1 %p2, i16 %p3) #0 {
+entry:
+  %p34 = alloca i16, align 2
+  %p23 = alloca i1, align 1
+  %p12 = alloca double, align 8
+  %p01 = alloca i32, align 4
+  store i32 %p0, ptr %p01, align 4
+  store double %p1, ptr %p12, align 8
+  store i1 %p2, ptr %p23, align 1
+  store i16 %p3, ptr %p34, align 2
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @callWithNames(i32 %i, double %f, i1 %b, i16 %u) #0 {
+entry:
+  %u4 = alloca i16, align 2
+  %b3 = alloca i1, align 1
+  %f2 = alloca double, align 8
+  %i1 = alloca i32, align 4
+  store i32 %i, ptr %i1, align 4
+  store double %f, ptr %f2, align 8
+  store i1 %b, ptr %b3, align 1
+  store i16 %u, ptr %u4, align 2
+  %i5 = load i32, ptr %i1, align 4
+  %f6 = load double, ptr %f2, align 8
+  %b7 = load i1, ptr %b3, align 1
+  %u8 = load i16, ptr %u4, align 2
+  %call = call %UnitType @multiArgs1(i32 %i5, double %f6, i1 %b7, i16 %u8)
+  %i9 = load i32, ptr %i1, align 4
+  %f10 = load double, ptr %f2, align 8
+  %u11 = load i16, ptr %u4, align 2
+  %b12 = load i1, ptr %b3, align 1
+  %call13 = call %UnitType @multiArgs1(i32 %i9, double %f10, i1 %b12, i16 %u11)
+  %u14 = load i16, ptr %u4, align 2
+  %b15 = load i1, ptr %b3, align 1
+  %f16 = load double, ptr %f2, align 8
+  %i17 = load i32, ptr %i1, align 4
+  %call18 = call %UnitType @multiArgs1(i32 %i17, double %f16, i1 %b15, i16 %u14)
+  %i19 = load i32, ptr %i1, align 4
+  %f20 = load double, ptr %f2, align 8
+  %b21 = load i1, ptr %b3, align 1
+  %u22 = load i16, ptr %u4, align 2
+  %call23 = call %UnitType @multiArgs2(i32 %i19, double %f20, i1 %b21, i16 %u22)
+  %i24 = load i32, ptr %i1, align 4
+  %f25 = load double, ptr %f2, align 8
+  %u26 = load i16, ptr %u4, align 2
+  %b27 = load i1, ptr %b3, align 1
+  %call28 = call %UnitType @multiArgs2(i32 %i24, double %f25, i1 %b27, i16 %u26)
+  %u29 = load i16, ptr %u4, align 2
+  %b30 = load i1, ptr %b3, align 1
+  %f31 = load double, ptr %f2, align 8
+  %i32 = load i32, ptr %i1, align 4
+  %call33 = call %UnitType @multiArgs2(i32 %i32, double %f31, i1 %b30, i16 %u29)
   ret %UnitType zeroinitializer
 }
 
