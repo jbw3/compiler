@@ -119,7 +119,11 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
         },
         {
             "fun abc(x /){}",
-            "error: Unexpected term '/",
+            "error: Unexpected term '/'",
+        },
+        {
+            "fun abc(x =){}",
+            "error: Unexpected term '='",
         },
         {
             "fun abc()",
@@ -127,7 +131,7 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
         },
         {
             "fun abc(x i32) / {}",
-            "error: Unexpected term '/",
+            "error: Unexpected term '/'",
         },
         {
             "fun abc() i32",
