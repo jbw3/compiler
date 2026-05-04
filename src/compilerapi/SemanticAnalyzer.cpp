@@ -2158,6 +2158,25 @@ void SemanticAnalyzer::Visit(StructInitializationExpression* structInitializatio
             isError = true;
             const Token* token = member->nameToken;
             logger.LogError(*token, "Member '{}' has already been initialized", memberName);
+
+            // find where member was previously specified
+            for (const MemberInitialization* prevMember : structInitializationExpression->memberInitializations)
+            {
+                if (prevMember->name == memberName)
+                {
+                    StartEndTokenFinder finder;
+                    prevMember->expression->Accept(&finder);
+                    finder.UpdateStart(prevMember->nameToken);
+
+                    logger.LogNote(
+                        *finder.start,
+                        *finder.end,
+                        "Member was previously initialized here"
+                    );
+                    break;
+                }
+            }
+
             return;
         }
 
