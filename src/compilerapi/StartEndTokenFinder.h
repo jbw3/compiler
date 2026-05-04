@@ -70,7 +70,6 @@ public:
 
     void Visit(SyntaxTree::VariableDeclaration* variableDeclaration) override;
 
-private:
     void UpdateStart(const Token* newStart);
 
     void UpdateEnd(const Token* newEnd);

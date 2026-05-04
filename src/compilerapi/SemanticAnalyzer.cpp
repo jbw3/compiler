@@ -2868,6 +2868,45 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
                 "Parameter '{}' has already been specified",
                 paramName
             );
+
+            // find where parameter was previously specified
+            const Argument* prevArg = nullptr;
+            for (size_t j = 0; j < i; ++j)
+            {
+                prevArg = args[j];
+                if (prevArg->nameToken == nullptr)
+                {
+                    if (paramNames[j] == paramName)
+                    {
+                        break;
+                    }
+                }
+                else if (prevArg->nameToken->value == paramName)
+                {
+                    break;
+                }
+            }
+
+            if (prevArg == nullptr)
+            {
+                logger.LogInternalError("Could not find previous argument");
+            }
+            else
+            {
+                StartEndTokenFinder finder;
+                prevArg->expression->Accept(&finder);
+                if (prevArg->nameToken != nullptr)
+                {
+                    finder.UpdateStart(prevArg->nameToken);
+                }
+
+                logger.LogNote(
+                    *finder.start,
+                    *finder.end,
+                    "Parameter was previously specified here"
+                );
+            }
+
             isError = true;
             return;
         }
