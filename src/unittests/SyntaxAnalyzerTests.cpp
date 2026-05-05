@@ -19,7 +19,7 @@ SyntaxAnalyzerTests::SyntaxAnalyzerTests(ostream &results) :
     ADD_TEST(TestInvalid);
 }
 
-bool SyntaxAnalyzerTests::RunSyntaxAnalysis(const std::string& input, std::string& failMsg)
+bool SyntaxAnalyzerTests::RunSyntaxAnalysis(const string& input, string& failMsg)
 {
     Config config;
     config.color = Config::eFalse;
@@ -72,7 +72,7 @@ bool SyntaxAnalyzerTests::RunSyntaxAnalysis(const std::string& input, std::strin
     return ok;
 }
 
-bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
+bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
 {
     vector<InvalidTest> tests =
     {
@@ -82,10 +82,38 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
             "error: Unexpected token 'in'",
         },
 
-        // unexpected end of file
+        // invalid struct definitions
         {
             "const s = struct",
             "error: Unexpected end of file. Expected '{'",
+        },
+        {
+            "const s = struct .",
+            "error: Expected '{'",
+        },
+        {
+            "const s = struct {",
+            "error: Unexpected end of file. Expected '}'",
+        },
+        {
+            "const s = struct { 123 };",
+            "error: Invalid member name '123'",
+        },
+        {
+            "const s = struct { x",
+            "error: Unexpected end of file. Expected a member type",
+        },
+        {
+            "const s = struct { x / };",
+            "error: Unexpected term '/'",
+        },
+        {
+            "const s = struct { x i32 = ",
+            "error: Unexpected end of file. Expected a default member value expression",
+        },
+        {
+            "const s = struct { x i32 = / };",
+            "error: Unexpected term '/'",
         },
 
         // invalid functions
@@ -111,7 +139,7 @@ bool SyntaxAnalyzerTests::TestInvalid(std::string& failMsg)
         },
         {
             "fun abc(12){}",
-            "error: Invalid parameter name: '12'",
+            "error: Invalid parameter name '12'",
         },
         {
             "fun abc(x",
