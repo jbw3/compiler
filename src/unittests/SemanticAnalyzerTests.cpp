@@ -335,6 +335,7 @@ bool SemanticAnalyzerTests::TestValidGlobalScope(string& failMsg)
         "f(num = 1, string = \"hi\", boolean = true);\n"
         "f(123, string = \"hi\", boolean = true);\n"
         "f(boolean = true, string = \"hi\", num = 1);\n"
+        "f(1, string = \"hi\", true);\n"
         "}\n",
     };
 
@@ -406,11 +407,11 @@ bool SemanticAnalyzerTests::TestInvalidGlobalScope(string& failMsg)
             "error: Argument type does not match parameter type. Argument: 'bool', parameter: 'i32'",
         },
 
-        // unnamed arg after named arg
+        // unnamed arg after out-of-order arg
         {
             "fun aaa(xxx i32, yyy bool, zzz f64) { }\n"
-            "fun test(){ aaa(1, yyy = true, 1.2); }\n",
-            "error: Unnamed arguments are not allowed after named argument",
+            "fun test(){ aaa(yyy = true, xxx = 1, 1.2); }\n",
+            "error: Unnamed arguments are not allowed after out-of-order argument",
         },
 
         // unknown param name

@@ -3761,17 +3761,27 @@ entry:
   %f20 = load double, ptr %f2, align 8
   %b21 = load i1, ptr %b3, align 1
   %u22 = load i16, ptr %u4, align 2
-  %call23 = call %UnitType @multiArgs2(i32 %i19, double %f20, i1 %b21, i16 %u22)
+  %call23 = call %UnitType @multiArgs1(i32 %i19, double %f20, i1 %b21, i16 %u22)
   %i24 = load i32, ptr %i1, align 4
   %f25 = load double, ptr %f2, align 8
-  %u26 = load i16, ptr %u4, align 2
-  %b27 = load i1, ptr %b3, align 1
-  %call28 = call %UnitType @multiArgs2(i32 %i24, double %f25, i1 %b27, i16 %u26)
-  %u29 = load i16, ptr %u4, align 2
-  %b30 = load i1, ptr %b3, align 1
-  %f31 = load double, ptr %f2, align 8
-  %i32 = load i32, ptr %i1, align 4
-  %call33 = call %UnitType @multiArgs2(i32 %i32, double %f31, i1 %b30, i16 %u29)
+  %b26 = load i1, ptr %b3, align 1
+  %u27 = load i16, ptr %u4, align 2
+  %call28 = call %UnitType @multiArgs2(i32 %i24, double %f25, i1 %b26, i16 %u27)
+  %i29 = load i32, ptr %i1, align 4
+  %f30 = load double, ptr %f2, align 8
+  %u31 = load i16, ptr %u4, align 2
+  %b32 = load i1, ptr %b3, align 1
+  %call33 = call %UnitType @multiArgs2(i32 %i29, double %f30, i1 %b32, i16 %u31)
+  %u34 = load i16, ptr %u4, align 2
+  %b35 = load i1, ptr %b3, align 1
+  %f36 = load double, ptr %f2, align 8
+  %i37 = load i32, ptr %i1, align 4
+  %call38 = call %UnitType @multiArgs2(i32 %i37, double %f36, i1 %b35, i16 %u34)
+  %i39 = load i32, ptr %i1, align 4
+  %f40 = load double, ptr %f2, align 8
+  %b41 = load i1, ptr %b3, align 1
+  %u42 = load i16, ptr %u4, align 2
+  %call43 = call %UnitType @multiArgs2(i32 %i39, double %f40, i1 %b41, i16 %u42)
   ret %UnitType zeroinitializer
 }
 

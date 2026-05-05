@@ -2827,7 +2827,7 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
     unordered_set<ROString> paramsToInit(paramNames.begin(), paramNames.end());
 
     // process arguments
-    bool foundNamedArg = false;
+    bool foundOutOfOrderArg = false;
     for (size_t i = 0; i < args.size(); ++i)
     {
         const Argument* arg = args[i];
@@ -2836,8 +2836,8 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         size_t paramIndex = 0;
         if (arg->nameToken == nullptr)
         {
-            // check if we found an unnamed arg after a named arg
-            if (foundNamedArg)
+            // check if we found an unnamed arg after an out-of-order arg
+            if (foundOutOfOrderArg)
             {
                 StartEndTokenFinder finder;
                 argExpr->Accept(&finder);
@@ -2845,7 +2845,7 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
                 logger.LogError(
                     *finder.start,
                     *finder.end,
-                    "Unnamed arguments are not allowed after named argument"
+                    "Unnamed arguments are not allowed after out-of-order arguments"
                 );
                 isError = true;
                 return;
@@ -2855,8 +2855,6 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         }
         else
         {
-            foundNamedArg = true;
-
             ROString name = arg->nameToken->value;
             for (paramIndex = 0; paramIndex < paramNames.size(); ++paramIndex)
             {
@@ -2875,6 +2873,11 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
                 );
                 isError = true;
                 return;
+            }
+
+            if (paramIndex != i)
+            {
+                foundOutOfOrderArg = true;
             }
         }
 

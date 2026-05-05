@@ -1247,8 +1247,10 @@ fun callWithNames(i i32, f f64, b bool, u u16)
     multiArgs1(i, f, b, u);
     multiArgs1(i, f, p3 = u, p2 = b);
     multiArgs1(p3 = u, p2 = b, p1 = f, p0 = i);
+    multiArgs1(i, f, p2 = b, u);
 
     multiArgs2(i, f, b, u);
     multiArgs2(i, f, p3 = u, p2 = b);
     multiArgs2(p3 = u, p2 = b, p1 = f, p0 = i);
+    multiArgs2(i, f, p2 = b, u);
 }
