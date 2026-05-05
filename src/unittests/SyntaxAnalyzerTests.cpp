@@ -299,6 +299,22 @@ bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
             "fun f() { abc(,);",
             "error: Expected another expression term",
         },
+
+        // invalid member name
+        {
+            "fun f() i32 { return x.",
+            "error: Unexpected end of file. Expected member name identifier",
+        },
+        {
+            "fun f() i32 { return x./; }",
+            "error: Expected member name identifier",
+        },
+
+        // invalid brackets
+        {
+            "fun f() i32 { return x[/]; }",
+            "error: Unexpected term '/'",
+        },
     };
 
     bool ok = true;
