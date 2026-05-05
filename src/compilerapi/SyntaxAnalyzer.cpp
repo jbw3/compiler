@@ -284,7 +284,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         paramNameToken = &*iter;
         if (paramNameToken->type != Token::Identifier)
         {
-            logger.LogError(*iter, "Invalid parameter name: '{}'", paramName);
+            logger.LogError(*iter, "Invalid parameter name '{}'", paramName);
             return false;
         }
 
@@ -347,14 +347,14 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         if (iter->type != Token::Identifier)
         {
             deletePointerContainer(members);
-            logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
+            logger.LogError(*iter, "Invalid member name '{}'", iter->value);
             return nullptr;
         }
         const Token* memberNameToken = &*iter;
         ROString memberName = iter->value;
 
         // get member type
-        if (!IncrementIterator(iter, endIter, "Expected member type"))
+        if (!IncrementIterator(iter, endIter, "Expected a member type"))
         {
             deletePointerContainer(members);
             return nullptr;
@@ -366,7 +366,6 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
         if (memberTypeExpr == nullptr)
         {
             deletePointerContainer(members);
-            logger.LogError(*iter, "Expected a member type");
             return nullptr;
         }
 
@@ -380,7 +379,7 @@ StructDefinitionExpression* SyntaxAnalyzer::ProcessStructDefinitionExpression(
             equalOpToken = &*iter;
 
             // get default member value
-            if (!IncrementIterator(iter, endIter, "Expected default member value expression"))
+            if (!IncrementIterator(iter, endIter, "Expected a default member value expression"))
             {
                 deletePointerContainer(members);
                 return nullptr;
@@ -465,7 +464,7 @@ StructInitializationExpression* SyntaxAnalyzer::ProcessStructInitialization(
         if (iter->type != Token::Identifier)
         {
             deletePointerContainer(members);
-            logger.LogError(*iter, "Invalid member name: '{}'", iter->value);
+            logger.LogError(*iter, "Invalid member name '{}'", iter->value);
             return nullptr;
         }
         const Token* memberNameToken = &*iter;
@@ -532,7 +531,7 @@ ConstantDeclaration* SyntaxAnalyzer::ProcessConstantDeclaration(TokenIterator& i
 
     if (iter->type != Token::Identifier)
     {
-        logger.LogError(*iter, "Invalid constant name");
+        logger.LogError(*iter, "Invalid constant name '{}'", iter->value);
         return nullptr;
     }
 
@@ -599,7 +598,7 @@ VariableDeclaration* SyntaxAnalyzer::ProcessVariableDeclaration(TokenIterator& i
 
     if (iter->type != Token::Identifier)
     {
-        logger.LogError(*iter, "Invalid variable name");
+        logger.LogError(*iter, "Invalid variable name '{}'", iter->value);
         return nullptr;
     }
 
@@ -702,7 +701,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 
     if (iter->type != Token::Identifier)
     {
-        logger.LogError(*iter, "Invalid iterator variable name");
+        logger.LogError(*iter, "Invalid iterator variable name '{}'", iter->value);
         return nullptr;
     }
 
@@ -736,7 +735,7 @@ ForLoop* SyntaxAnalyzer::ProcessForLoop(TokenIterator& iter, TokenIterator endIt
 
         if (iter->type != Token::Identifier)
         {
-            logger.LogError(*iter, "Invalid index variable name");
+            logger.LogError(*iter, "Invalid index variable name '{}'", iter->value);
             return nullptr;
         }
 
@@ -994,7 +993,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         {
             if (iter->type != Token::Identifier)
             {
-                logger.LogError(*iter, "Invalid parameter name: '{}'", iter->value);
+                logger.LogError(*iter, "Invalid parameter name '{}'", iter->value);
                 return nullptr;
             }
 
