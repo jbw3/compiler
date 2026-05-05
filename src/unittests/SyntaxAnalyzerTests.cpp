@@ -116,6 +116,40 @@ bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
             "error: Unexpected term '/'",
         },
 
+        // invalid struct initializations
+        {
+            "const s = S:",
+            "error: Unexpected end of file. Expected '{' after ':'",
+        },
+        {
+            "const s = S: /",
+            "error: Expected '{' after ':'",
+        },
+        {
+            "const s = S: {",
+            "error: Unexpected end of file. Expected struct initialization",
+        },
+        {
+            "const s = S: { 111 };",
+            "error: Invalid member name '111'",
+        },
+        {
+            "const s = S: { x",
+            "error: Unexpected end of file. Expected '=' after member",
+        },
+        {
+            "const s = S: { x / };",
+            "error: Expected '=' after member",
+        },
+        {
+            "const s = S: { x = / };",
+            "error: Unexpected term '/'",
+        },
+        {
+            "const s = S: { x = 2,",
+            "error: Unexpected end of file. Expected '}'",
+        },
+
         // invalid functions
         {
             "fun",
