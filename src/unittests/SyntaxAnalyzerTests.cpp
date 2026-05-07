@@ -150,6 +150,122 @@ bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
             "error: Unexpected end of file. Expected '}'",
         },
 
+        // invalid const declarations
+        {
+            "const",
+            "error: Unexpected end of file. Expected a constant name",
+        },
+        {
+            "const i32",
+            "error: Invalid constant name 'i32'",
+        },
+        {
+            "const asdf",
+            "error: Unexpected end of file. Expected constant type or assignment operator",
+        },
+        {
+            "const asdf in",
+            "error: Unexpected term 'in'",
+        },
+        {
+            "const asdf i32",
+            "error: Expected another expression term",
+        },
+        {
+            "const asdf i32 =",
+            "error: Unexpected end of file. Expected expression",
+        },
+        {
+            "const asdf i32 = ;",
+            "error: Expected another expression term",
+        },
+
+        // invalid var declarations
+        {
+            "fun f() { var",
+            "error: Unexpected end of file. Expected a variable name",
+        },
+        {
+            "fun f() { var i32 }",
+            "error: Invalid variable name 'i32'",
+        },
+        {
+            "fun f() { var asdf",
+            "error: Unexpected end of file. Expected variable type or assignment operator",
+        },
+        {
+            "fun f() { var asdf in }",
+            "error: Unexpected term 'in'",
+        },
+        {
+            "fun f() { var asdf i32",
+            "error: Expected another expression term",
+        },
+        {
+            "fun f() { var asdf i32 =",
+            "error: Unexpected end of file. Expected expression",
+        },
+        {
+            "fun f() { var asdf i32 = ; }",
+            "error: Expected another expression term",
+        },
+
+        // invalid while loops
+        {
+            "fun f() { while",
+            "error: Expected another expression term",
+        },
+        {
+            "fun f() { while /",
+            "error: Unexpected term '/'",
+        },
+
+        // invalid for loops
+        {
+            "fun f() { for",
+            "error: Unexpected end of file. Expected a variable name",
+        },
+        {
+            "fun f() { for /",
+            "error: Invalid iterator variable name '/'",
+        },
+        {
+            "fun f() { for i",
+            "error: Unexpected end of file. Expected variable type, ',', or 'in' keyword",
+        },
+        {
+            "fun f() { for i /",
+            "error: Unexpected term '/'",
+        },
+        {
+            "fun f() { for i,",
+            "error: Unexpected end of file. Expected variable name",
+        },
+        {
+            "fun f() { for i, /",
+            "error: Invalid index variable name '/'",
+        },
+        {
+            "fun f() { for i, j",
+            "error: Unexpected end of file. Expected variable type or 'in' keyword",
+        },
+        {
+            "fun f() { for i, j /",
+            "error: Unexpected term '/'",
+        },
+        {
+            "fun f() { for i in",
+            "error: Unexpected end of file. Expected expression",
+        },
+        {
+            "fun f() { for i in /",
+            "error: Unexpected term '/'",
+        },
+        {
+            "fun f() { for i in x {",
+            "error: Unexpected end of file. Expected block end",
+        },
+
         // invalid functions
         {
             "fun",
