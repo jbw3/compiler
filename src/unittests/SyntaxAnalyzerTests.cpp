@@ -266,6 +266,32 @@ bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
             "error: Unexpected end of file. Expected block end",
         },
 
+        // invalid arrays
+        {
+            "fun f() { var x = [",
+            "error: Unexpected end of file",
+        },
+        {
+            "fun f() { var x = [ in ];",
+            "error: Unexpected term 'in'",
+        },
+        {
+            "fun f() { var x = [ 1 ;",
+            "error: Unexpected end of file. Expected an expression",
+        },
+        {
+            "fun f() { var x = [ 1 ; in ];",
+            "error: Unexpected term 'in'",
+        },
+        {
+            "fun f() { var x = [ 1 ,",
+            "error: Unexpected end of file. Expected an expression or ']'",
+        },
+        {
+            "fun f() { var x = [ 1, in ]; }",
+            "error: Unexpected term 'in'",
+        },
+
         // invalid functions
         {
             "fun",
