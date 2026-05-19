@@ -966,13 +966,8 @@ Expression* SyntaxAnalyzer::ProcessTerm(
     else if (type == Token::Fun)
     {
         const Token* funToken = &*iter;
-        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        if (!IncrementIteratorCheckType(iter, endIter, Token::OpenPar, "Expected '('"))
         {
-            return nullptr;
-        }
-        if (iter->type != Token::OpenPar)
-        {
-            logger.LogError(*iter, "Expected '('");
             return nullptr;
         }
 
@@ -984,7 +979,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
         vector<Expression*> paramTypes;
 
         // increment past '('
-        if (!IncrementIterator(iter, endIter, "Unexpected end of file"))
+        if (!IncrementIterator(iter, endIter, "Expected the rest of the function type"))
         {
             return nullptr;
         }
