@@ -905,7 +905,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
         if (iter->type == Token::SemiColon)
         {
-            if (!IncrementIterator(iter, endIter, "Expected expression"))
+            if (!IncrementIterator(iter, endIter, "Expected an expression"))
             {
                 return nullptr;
             }
@@ -925,7 +925,7 @@ Expression* SyntaxAnalyzer::ProcessTerm(
 
             while (iter->type == Token::Comma)
             {
-                if (!IncrementIterator(iter, endIter))
+                if (!IncrementIterator(iter, endIter, "Expected an expression or ']'"))
                 {
                     deletePointerContainer(expressions);
                     return nullptr;
