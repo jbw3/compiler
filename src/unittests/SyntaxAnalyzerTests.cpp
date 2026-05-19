@@ -292,6 +292,32 @@ bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
             "error: Unexpected term 'in'",
         },
 
+        // invalid function types
+        {
+            "const f = fun",
+            "error: Unexpected end of file. Expected '('",
+        },
+        {
+            "const f = fun in",
+            "error: Expected '('",
+        },
+        {
+            "const f = fun(",
+            "error: Unexpected end of file. Expected the rest of the function type",
+        },
+        {
+            "const f = fun(in);",
+            "error: Invalid parameter name 'in'",
+        },
+        {
+            "const f = fun(abc",
+            "error: Unexpected end of file. Expected a type",
+        },
+        {
+            "const f = fun(abc in);",
+            "error: Unexpected term 'in'",
+        },
+
         // invalid functions
         {
             "fun",
