@@ -517,15 +517,19 @@ public:
 class Parameter
 {
 public:
-    Parameter(ROString name,
-              Expression* typeExpression,
-              const Token* nameToken);
+    Parameter(
+        ROString name,
+        Expression* typeExpression,
+        Expression* defaultExpression,
+        const Token* nameToken
+    );
 
     ~Parameter();
 
     const Token* nameToken;
     ROString name;
     Expression* typeExpression;
+    Expression* defaultExpression;
     const TypeInfo* type;
 };
 

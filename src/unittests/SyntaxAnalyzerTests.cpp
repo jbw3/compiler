@@ -353,7 +353,15 @@ bool SyntaxAnalyzerTests::TestInvalid(string& failMsg)
         },
         {
             "fun abc(x =){}",
-            "error: Unexpected term '='",
+            "error: Expected another expression term",
+        },
+        {
+            "fun abc(x i32 =",
+            "error: Unexpected end of file. Expected a default parameter expression",
+        },
+        {
+            "fun abc(x i32 = in){}",
+            "error: Unexpected term 'in'",
         },
         {
             "fun abc()",

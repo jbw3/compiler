@@ -752,12 +752,16 @@ void Return::Accept(SyntaxTreeVisitor* visitor)
     visitor->Visit(this);
 }
 
-Parameter::Parameter(ROString name,
-                     Expression* typeExpression,
-                     const Token* nameToken) :
+Parameter::Parameter(
+    ROString name,
+    Expression* typeExpression,
+    Expression* defaultExpression,
+    const Token* nameToken
+) :
     nameToken(nameToken),
     name(name),
     typeExpression(typeExpression),
+    defaultExpression(defaultExpression),
     type(nullptr)
 {
 }
@@ -765,6 +769,7 @@ Parameter::Parameter(ROString name,
 Parameter::~Parameter()
 {
     delete typeExpression;
+    delete defaultExpression;
 }
 
 FunctionDeclaration::FunctionDeclaration(ROString name,

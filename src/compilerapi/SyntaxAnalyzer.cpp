@@ -293,7 +293,7 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
+        Expression* paramTypeExpr = ProcessExpression(iter, endIter, Token::Equal, Token::Comma, Token::ClosePar);
 
         // make sure there was a type
         if (paramTypeExpr == nullptr)
@@ -301,7 +301,23 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
             return false;
         }
 
-        Parameter* param = new Parameter(paramName, paramTypeExpr, paramNameToken);
+        // check if there is a default parameter expression
+        Expression* defaultParamExpr = nullptr;
+        if (iter != endIter && iter->type == Token::Equal)
+        {
+            if (!IncrementIterator(iter, endIter, "Expected a default parameter expression"))
+            {
+                return false;
+            }
+
+            defaultParamExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
+            if (defaultParamExpr == nullptr)
+            {
+                return false;
+            }
+        }
+
+        Parameter* param = new Parameter(paramName, paramTypeExpr, defaultParamExpr, paramNameToken);
         parameters.push_back(param);
 
         if (iter->type != Token::ClosePar)
