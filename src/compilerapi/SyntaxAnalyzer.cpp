@@ -302,19 +302,28 @@ bool SyntaxAnalyzer::ProcessParameters(TokenIterator& iter, TokenIterator endIte
         }
 
         // check if there is a default parameter expression
-        Expression* defaultParamExpr = nullptr;
+        BinaryExpression* defaultParamExpr = nullptr;
         if (iter != endIter && iter->type == Token::Equal)
         {
+            const Token* equalToken = &*iter;
+
             if (!IncrementIterator(iter, endIter, "Expected a default parameter expression"))
             {
                 return false;
             }
 
-            defaultParamExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
-            if (defaultParamExpr == nullptr)
+            Expression* rightExpr = ProcessExpression(iter, endIter, Token::Comma, Token::ClosePar);
+            if (rightExpr == nullptr)
             {
                 return false;
             }
+
+            defaultParamExpr = new BinaryExpression(
+                BinaryExpression::eAssign,
+                new IdentifierExpression(paramName, paramNameToken),
+                rightExpr,
+                equalToken
+            );
         }
 
         Parameter* param = new Parameter(paramName, paramTypeExpr, defaultParamExpr, paramNameToken);

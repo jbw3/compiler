@@ -755,7 +755,7 @@ void Return::Accept(SyntaxTreeVisitor* visitor)
 Parameter::Parameter(
     ROString name,
     Expression* typeExpression,
-    Expression* defaultExpression,
+    BinaryExpression* defaultExpression,
     const Token* nameToken
 ) :
     nameToken(nameToken),

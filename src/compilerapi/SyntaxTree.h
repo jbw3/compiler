@@ -520,7 +520,7 @@ public:
     Parameter(
         ROString name,
         Expression* typeExpression,
-        Expression* defaultExpression,
+        BinaryExpression* defaultExpression,
         const Token* nameToken
     );
 
@@ -529,7 +529,7 @@ public:
     const Token* nameToken;
     ROString name;
     Expression* typeExpression;
-    Expression* defaultExpression;
+    BinaryExpression* defaultExpression;
     const TypeInfo* type;
 };
 

@@ -4026,6 +4026,41 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
         }
 
         param->type = paramType;
+
+        // check default parameter value
+        BinaryExpression* defaultParamExpr = param->defaultExpression;
+        if (defaultParamExpr != nullptr)
+        {
+            if (defaultParamExpr->op != BinaryExpression::eAssign)
+            {
+                logger.LogInternalError("Binary expression in default parameter expression is not an assignment");
+                return false;
+            }
+
+            Expression* rightExpr = defaultParamExpr->right;
+            rightExpr->Accept(this);
+            if (isError)
+            {
+                return false;
+            }
+
+            if (!rightExpr->GetIsConstant())
+            {
+                StartEndTokenFinder finder;
+                rightExpr->Accept(&finder);
+
+                logger.LogError(*finder.start, *finder.end, "Parameter expression is not a constant value");
+                return false;
+            }
+
+            // assignment expression type check
+            defaultParamExpr->Accept(this);
+            if (isError)
+            {
+                return false;
+            }
+        }
+
         processedParams.insert(paramName);
     }
 
