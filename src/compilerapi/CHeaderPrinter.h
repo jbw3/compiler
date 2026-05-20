@@ -26,11 +26,15 @@ private:
 
     std::string GetOutFilename(const Config& config);
 
+    bool CanPrintFunction(const SyntaxTree::FunctionDefinition* function);
+
     bool PrintCType(std::ostream& os, const TypeInfo* type, ROString varName);
 
     bool PrintCFunctionType(std::ostream& os, const TypeInfo* type, ROString varName, unsigned pointerCount);
 
     bool PrintArrayStruct(std::ostream& os, const TypeInfo* arrayType);
+
+    bool PrintConstantValue(std::ostream& os, const TypeInfo* type, unsigned constIndex);
 };
 
 #endif // C_HEADER_PRINTER_H_

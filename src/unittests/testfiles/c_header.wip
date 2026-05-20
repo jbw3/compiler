@@ -45,3 +45,15 @@ fun f4(a &FunStruct) &FunStruct
 {
     return a;
 }
+
+fun default_args(aaa i32 = 1 + 1, bbb f32 = -2.3, ccc bool = true)
+{
+}
+
+fun invalid_c_default_args1(aaa i32 = 1, bbb EmptyStruct = EmptyStruct: {})
+{
+}
+
+fun invalid_c_default_args2(aaa i32 = 1, bbb i32)
+{
+}

@@ -86,6 +86,8 @@ struct array_i32 f3(struct array_i32 a1, struct array_Struct1 a2);
 
 struct FunStruct* f4(struct FunStruct* a);
 
+void default_args(int32_t aaa = 2, float bbb = -2.3, bool ccc = true);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

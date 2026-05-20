@@ -165,6 +165,11 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
             const Parameters& params = declaration->parameters;
             const TypeInfo* returnType = declaration->returnType;
 
+            if (!CanPrintFunction(function))
+            {
+                continue;
+            }
+
             // print array structs
             if (returnType->IsArray())
             {
@@ -214,6 +219,18 @@ bool CHeaderPrinter::WriteFile(const string& tempFilename, const string& outFile
                     return false;
                 }
 
+                if (param->defaultExpression != nullptr)
+                {
+                    outFile << " = ";
+
+                    Expression* expr = param->defaultExpression->right;
+                    unsigned constIdx = expr->GetConstantValueIndex();
+                    if (!PrintConstantValue(outFile, expr->GetType(), constIdx))
+                    {
+                        return false;
+                    }
+                }
+
                 if (i < numParams - 1)
                 {
                     outFile << ", ";
@@ -258,6 +275,45 @@ string CHeaderPrinter::GetOutFilename(const Config& config)
     }
 
     return outFilename;
+}
+
+bool isInvalidParamDefaultType(const TypeInfo* type)
+{
+    constexpr uint16_t mask = ~(TypeInfo::F_BOOL | TypeInfo::F_INT | TypeInfo::F_FLOAT);
+    return (type->GetFlags() & mask) != 0;
+}
+
+bool CHeaderPrinter::CanPrintFunction(const FunctionDefinition* function)
+{
+    const TypeInfo* funType = function->GetType();
+    const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
+    const vector<unsigned>& paramDefaultIndexes = funType->GetParamDefaultValueIndexes();
+    bool foundDefault = false;
+    for (size_t i = 0; i < paramTypes.size(); ++i)
+    {
+        bool hasDefault = paramDefaultIndexes[i] != NO_DEFAULT_VALUE;
+        if (hasDefault && isInvalidParamDefaultType(paramTypes[i]))
+        {
+            logger.LogWarning(
+                "Skipping function '{}' because default parameters are invalid in C",
+                function->declaration->name
+            );
+            return false;
+        }
+
+        if (foundDefault && !hasDefault)
+        {
+            logger.LogWarning(
+                "Skipping function '{}' because a parameter with no default occurs after a parameter with a default",
+                function->declaration->name
+            );
+            return false;
+        }
+
+        foundDefault |= hasDefault;
+    }
+
+    return true;
 }
 
 void PrintArrayName(ostream& os, const TypeInfo* arrayType)
@@ -486,6 +542,51 @@ bool CHeaderPrinter::PrintArrayStruct(ostream& os, const TypeInfo* arrayType)
         os << "* Data;\n};\n\n";
 
         arrayTypeNames.insert(typeName);
+    }
+
+    return true;
+}
+
+bool CHeaderPrinter::PrintConstantValue(ostream& os, const TypeInfo* type, unsigned constIndex)
+{
+    if (type->IsBool())
+    {
+        bool value = compilerContext.GetBoolConstantValue(constIndex);
+        os << (value ? "true" : "false");
+    }
+    else if (type->IsInt())
+    {
+        int64_t value = compilerContext.GetIntConstantValue(constIndex);
+        if (type->GetSign() == TypeInfo::eSigned)
+        {
+            os << value;
+        }
+        else
+        {
+            os << static_cast<uint64_t>(value);
+        }
+    }
+    else if (type->IsFloat())
+    {
+        double value = compilerContext.GetFloatConstantValue(constIndex);
+        if (type->GetNumBits() == 32)
+        {
+            os << static_cast<float>(value);
+        }
+        else if (type->GetNumBits() == 64)
+        {
+            os << value;
+        }
+        else
+        {
+            logger.LogInternalError("Unsupported float size");
+            return false;
+        }
+    }
+    else
+    {
+        logger.LogInternalError("Unsupported default parameter type");
+        return false;
     }
 
     return true;
