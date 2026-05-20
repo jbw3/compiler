@@ -337,6 +337,15 @@ bool SemanticAnalyzerTests::TestValidGlobalScope(string& failMsg)
         "f(boolean = true, string = \"hi\", num = 1);\n"
         "f(1, string = \"hi\", true);\n"
         "}\n",
+
+        // default function arguments
+
+        "fun f(x i32, y bool = false, z i32 = 1 + 2) { }",
+
+        "fun f(x i32, y bool = true, z bool) { }",
+
+        "const S = struct { x i32 };\n"
+        "fun f(a S = S: { x = 5 }) { }\n",
     };
 
     bool ok = false;
@@ -431,6 +440,19 @@ bool SemanticAnalyzerTests::TestInvalidGlobalScope(string& failMsg)
             "fun aaa(xxx i32, yyy bool, zzz f64) { }\n"
             "fun test(){ aaa(1, true, yyy = false); }\n",
             "error: Parameter 'yyy' has already been specified",
+        },
+
+        // default argument is not a constant expression
+        {
+            "extern fun e();\n"
+            "fun f(x i32 = e()) { }\n",
+            "error: Parameter expression is not a constant value",
+        },
+
+        // default argument is not correct type
+        {
+            "fun f(x i32 = true) { }",
+            "error: Binary operator '=' does not support types 'i32' and 'bool'",
         },
     };
 

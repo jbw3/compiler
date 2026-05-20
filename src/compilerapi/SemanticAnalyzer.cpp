@@ -4054,7 +4054,10 @@ bool SemanticAnalyzer::SetFunctionDeclarationTypes(FunctionDeclaration* function
             }
 
             // assignment expression type check
+            symbolTable.Push(); // TODO: This is hacky. Fix it
+            symbolTable.AddVariable(paramName, param->nameToken, paramType);
             defaultParamExpr->Accept(this);
+            symbolTable.Pop();
             if (isError)
             {
                 return false;
