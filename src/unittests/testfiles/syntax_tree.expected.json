@@ -81,7 +81,8 @@
                 {
                   "nodeType": "IdentifierExpression",
                   "name": "i32"
-                }
+                },
+                "defaultExpression": null
               },
               {
                 "nodeType": "Parameter",
@@ -95,7 +96,8 @@
                     "nodeType": "IdentifierExpression",
                     "name": "i32"
                   }
-                }
+                },
+                "defaultExpression": null
               }
             ],
             "returnTypeExpression": null
@@ -855,7 +857,8 @@
                 {
                   "nodeType": "IdentifierExpression",
                   "name": "i32"
-                }
+                },
+                "defaultExpression": null
               }
             ],
             "returnTypeExpression":
@@ -904,7 +907,8 @@
                 {
                   "nodeType": "IdentifierExpression",
                   "name": "f64"
-                }
+                },
+                "defaultExpression": null
               },
               {
                 "nodeType": "Parameter",
@@ -913,7 +917,8 @@
                 {
                   "nodeType": "IdentifierExpression",
                   "name": "i32"
-                }
+                },
+                "defaultExpression": null
               },
               {
                 "nodeType": "Parameter",
@@ -922,7 +927,8 @@
                 {
                   "nodeType": "IdentifierExpression",
                   "name": "u8"
-                }
+                },
+                "defaultExpression": null
               },
               {
                 "nodeType": "Parameter",
@@ -931,6 +937,106 @@
                 {
                   "nodeType": "IdentifierExpression",
                   "name": "bool"
+                },
+                "defaultExpression": null
+              }
+            ],
+            "returnTypeExpression": null
+          },
+          "expression":
+          {
+            "nodeType": "BlockExpression",
+            "constantDeclarations": [],
+            "statements": [
+              {
+                "nodeType": "UnitTypeLiteralExpression"
+              }
+            ]
+          }
+        },
+        {
+          "nodeType": "FunctionDefinition",
+          "declaration":
+          {
+            "nodeType": "FunctionDeclaration",
+            "name": "default_args",
+            "parameters": [
+              {
+                "nodeType": "Parameter",
+                "name": "p0",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "i8"
+                },
+                "defaultExpression": null
+              },
+              {
+                "nodeType": "Parameter",
+                "name": "p1",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "i32"
+                },
+                "defaultExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "p1"
+                  },
+                  "right":
+                  {
+                    "nodeType": "NumericExpression",
+                    "value": "123"
+                  }
+                }
+              },
+              {
+                "nodeType": "Parameter",
+                "name": "p2",
+                "typeExpression":
+                {
+                  "nodeType": "IdentifierExpression",
+                  "name": "u16"
+                },
+                "defaultExpression":
+                {
+                  "nodeType": "BinaryExpression",
+                  "operator": "=",
+                  "left":
+                  {
+                    "nodeType": "IdentifierExpression",
+                    "name": "p2"
+                  },
+                  "right":
+                  {
+                    "nodeType": "BinaryExpression",
+                    "operator": "+",
+                    "left":
+                    {
+                      "nodeType": "BinaryExpression",
+                      "operator": "*",
+                      "left":
+                      {
+                        "nodeType": "NumericExpression",
+                        "value": "7"
+                      },
+                      "right":
+                      {
+                        "nodeType": "NumericExpression",
+                        "value": "3"
+                      }
+                    },
+                    "right":
+                    {
+                      "nodeType": "NumericExpression",
+                      "value": "1"
+                    }
+                  }
                 }
               }
             ],

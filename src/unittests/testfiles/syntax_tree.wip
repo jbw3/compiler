@@ -75,3 +75,7 @@ extern fun ef() f64;
 fun multiple_params(p0 f64, p1 i32, p2 u8, p3 bool)
 {
 }
+
+fun default_args(p0 i8, p1 i32 = 123, p2 u16 = 7 * 3 + 1)
+{
+}
