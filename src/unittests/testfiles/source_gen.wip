@@ -211,6 +211,14 @@ fun test5() fun() i32
     test2
 }
 
+fun test6(a i32, b i32 = 10, c i32 = GLOBAL_CONST3 * 2, d bool = true, e Person = Person:
+{
+    name = "Phil",
+    age = 33,
+})
+{
+}
+
 fun function_types()
 {
     var f1 fun() = test1;

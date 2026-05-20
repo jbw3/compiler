@@ -561,6 +561,12 @@ void SourceGenerator::PrintFunctionDeclaration(FunctionDeclaration* functionDecl
         *os << param->name << ' ';
         param->typeExpression->Accept(this);
 
+        if (param->defaultExpression != nullptr)
+        {
+            *os << " = ";
+            param->defaultExpression->right->Accept(this);
+        }
+
         if (i != numParams - 1)
         {
             *os << ", ";
