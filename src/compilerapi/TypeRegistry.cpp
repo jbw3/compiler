@@ -98,8 +98,8 @@ TypeRegistry::TypeRegistry(CompilerContext& compilerContext) :
 
     stringType = new TypeInfo(GetNextTypeId(), pointerSize * 2, TypeInfo::F_STR, TypeInfo::eNotApplicable, STR_KEYWORD);
     types.push_back(stringType);
-    stringType->AddMember("Size", uintSizeType, false, MemberInfo::NO_DEFAULT_VALUE, Token::None);
-    stringType->AddMember("Data", GetPointerToType(TypeInfo::UInt8Type), false, MemberInfo::NO_DEFAULT_VALUE, Token::None);
+    stringType->AddMember("Size", uintSizeType, false, NO_DEFAULT_VALUE, Token::None);
+    stringType->AddMember("Data", GetPointerToType(TypeInfo::UInt8Type), false, NO_DEFAULT_VALUE, Token::None);
 }
 
 TypeRegistry::~TypeRegistry()
@@ -135,8 +135,8 @@ const TypeInfo* TypeRegistry::GetRangeType(const TypeInfo* memberType, bool isHa
 
     TypeInfo* newRangeType = new TypeInfo(GetNextTypeId(), size, flags, TypeInfo::eNotApplicable, name, memberType);
     types.push_back(newRangeType);
-    newRangeType->AddMember("Start", memberType, false, MemberInfo::NO_DEFAULT_VALUE, Token::None);
-    newRangeType->AddMember("End", memberType, false, MemberInfo::NO_DEFAULT_VALUE, Token::None);
+    newRangeType->AddMember("Start", memberType, false, NO_DEFAULT_VALUE, Token::None);
+    newRangeType->AddMember("End", memberType, false, NO_DEFAULT_VALUE, Token::None);
     rangeTypes.insert({key, newRangeType});
 
     return newRangeType;
@@ -209,6 +209,14 @@ const TypeInfo* TypeRegistry::GetFunctionType(const FunctionDeclaration* functio
     {
         newFunType->data->paramTypes.push_back(param->type);
         newFunType->data->paramNames.push_back(param->name);
+
+        unsigned constIdx = NO_DEFAULT_VALUE;
+        BinaryExpression* defaultExpr = param->defaultExpression;
+        if (defaultExpr != nullptr)
+        {
+            constIdx = defaultExpr->right->GetConstantValueIndex();
+        }
+        newFunType->data->paramDefaultValueIndexes.push_back(constIdx);
     }
     newFunType->data->returnType = functionDeclaration->returnType;
 
@@ -241,6 +249,7 @@ const TypeInfo* TypeRegistry::GetFunctionType(
     {
         newFunType->data->paramTypes.push_back(parameterTypes[i]);
         newFunType->data->paramNames.push_back(parameterNames[i]);
+        newFunType->data->paramDefaultValueIndexes.push_back(NO_DEFAULT_VALUE);
     }
     newFunType->data->returnType = returnType;
 
@@ -284,8 +293,8 @@ const TypeInfo* TypeRegistry::GetArrayOfType(const TypeInfo* type)
 
     TypeInfo* newArrayType = new TypeInfo(GetNextTypeId(), pointerSize * 2, TypeInfo::F_ARRAY, TypeInfo::eNotApplicable, name, type);
     types.push_back(newArrayType);
-    newArrayType->AddMember("Size", GetUIntSizeType(), false, MemberInfo::NO_DEFAULT_VALUE, Token::None);
-    newArrayType->AddMember("Data", GetPointerToType(type), false, MemberInfo::NO_DEFAULT_VALUE, Token::None);
+    newArrayType->AddMember("Size", GetUIntSizeType(), false, NO_DEFAULT_VALUE, Token::None);
+    newArrayType->AddMember("Data", GetPointerToType(type), false, NO_DEFAULT_VALUE, Token::None);
     arrayTypes.insert({typeId, newArrayType});
 
     return newArrayType;

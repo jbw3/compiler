@@ -1152,7 +1152,7 @@ void LlvmIrGenerator::Visit(StructInitializationExpression* structInitialization
         if (membersToInit.find(memberInfo->GetName()) != membersToInit.end())
         {
             unsigned constIdx = memberInfo->GetDefaultValueIndex();
-            assert(constIdx != MemberInfo::NO_DEFAULT_VALUE && "Member does not have a default value index");
+            assert(constIdx != NO_DEFAULT_VALUE && "Member does not have a default value index");
 
             Value* value = CreateConstantValue(memberInfo->GetType(), constIdx);
 

@@ -332,10 +332,10 @@ bool SemanticAnalyzerTests::TestValidGlobalScope(string& failMsg)
         // named function arguments
         "fun f(num i32, string str, boolean bool) { }\n"
         "fun test() {\n"
-        "f(num = 1, string = \"hi\", boolean = true);\n"
-        "f(123, string = \"hi\", boolean = true);\n"
-        "f(boolean = true, string = \"hi\", num = 1);\n"
-        "f(1, string = \"hi\", true);\n"
+        "  f(num = 1, string = \"hi\", boolean = true);\n"
+        "  f(123, string = \"hi\", boolean = true);\n"
+        "  f(boolean = true, string = \"hi\", num = 1);\n"
+        "  f(1, string = \"hi\", true);\n"
         "}\n",
 
         // default function arguments
@@ -346,6 +346,14 @@ bool SemanticAnalyzerTests::TestValidGlobalScope(string& failMsg)
 
         "const S = struct { x i32 };\n"
         "fun f(a S = S: { x = 5 }) { }\n",
+
+        // default function arguments in call
+        "fun f(num1 i32, num2 i32 = 123, boolean bool = true) { }\n"
+        "fun test() {\n"
+        "  f(1);\n"
+        "  f(1, 2);\n"
+        "  f(1, 2, false);\n"
+        "}\n",
     };
 
     bool ok = false;
@@ -394,12 +402,27 @@ bool SemanticAnalyzerTests::TestInvalidGlobalScope(string& failMsg)
         {
             "fun aaa(xxx i32, yyy bool) { }\n"
             "fun test(){ aaa(1); }\n",
-            "error: Function expected 2 arguments but got 1",
+            "error: Parameter 'yyy' was not specified",
+        },
+        {
+            "fun aaa(xxx i32, yyy bool, zzz f32 = 1.2) { }\n"
+            "fun test(){ aaa(1); }\n",
+            "error: Parameter 'yyy' was not specified",
+        },
+        {
+            "fun aaa(xxx i32, yyy bool = true, zzz f32) { }\n"
+            "fun test(){ aaa(1); }\n",
+            "error: Parameter 'zzz' was not specified",
+        },
+        {
+            "fun aaa(xxx i32, yyy bool, zzz f32) { }\n"
+            "fun test(){ aaa(1); }\n",
+            "error: The following parameters were not specified: zzz, yyy",
         },
         {
             "fun aaa(xxx i32) { }\n"
             "fun test(){ aaa(1, true); }\n",
-            "error: Function expected 1 argument but got 2",
+            "error: More arguments than parameters",
         },
 
         // invalid argument expression

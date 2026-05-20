@@ -21,11 +21,11 @@ const char* const DOUBLE_POINTER_TYPE_TOKEN = "&&";
 const char* const ARRAY_TYPE_START_TOKEN = "[";
 const char* const ARRAY_TYPE_END_TOKEN = "]";
 
+constexpr unsigned NO_DEFAULT_VALUE = static_cast<unsigned>(-1);
+
 class MemberInfo
 {
 public:
-    static constexpr unsigned NO_DEFAULT_VALUE = static_cast<unsigned>(-1);
-
     MemberInfo(ROString name, unsigned index, const TypeInfo* type, bool isStorage, unsigned defaultValueIndex, const Token* token);
 
     const ROString GetName() const
@@ -141,6 +141,7 @@ private:
         const TypeInfo* innerType;
         std::vector<const TypeInfo*> paramTypes;
         std::vector<ROString> paramNames;
+        std::vector<unsigned> paramDefaultValueIndexes;
         const TypeInfo* returnType;
     };
 
@@ -307,6 +308,11 @@ public:
     const std::vector<ROString>& GetParamNames() const
     {
         return data->paramNames;
+    }
+
+    const std::vector<unsigned>& GetParamDefaultValueIndexes() const
+    {
+        return data->paramDefaultValueIndexes;
     }
 
     const TypeInfo* GetReturnType() const

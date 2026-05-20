@@ -2086,7 +2086,7 @@ void SemanticAnalyzer::Visit(StructDefinitionExpression* structDefinitionExpress
                 }
             }
 
-            unsigned defaultValueIndex = MemberInfo::NO_DEFAULT_VALUE;
+            unsigned defaultValueIndex = NO_DEFAULT_VALUE;
             if (member->defaultValueExpression != nullptr)
             {
                 defaultValueIndex = member->defaultValueExpression->GetConstantValueIndex();
@@ -2812,16 +2812,8 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         return;
     }
 
-    // check argument count
     const Arguments& args = functionCallExpression->arguments;
     const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
-    if (args.size() != paramTypes.size())
-    {
-        const char* suffix = (paramTypes.size() == 1) ? "" : "s";
-        logger.LogError(*functionCallExpression->openParToken, "Function expected {} argument{} but got {}", paramTypes.size(), suffix, args.size());
-        isError = true;
-        return;
-    }
 
     const vector<ROString>& paramNames = funType->GetParamNames();
     unordered_set<ROString> paramsToInit(paramNames.begin(), paramNames.end());
@@ -2852,6 +2844,15 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
             }
 
             paramIndex = i;
+            if (paramIndex >= paramNames.size())
+            {
+                StartEndTokenFinder finder;
+                argExpr->Accept(&finder);
+
+                logger.LogError(*finder.start, *finder.end, "More arguments than parameters");
+                isError = true;
+                return;
+            }
         }
         else
         {
@@ -2964,6 +2965,48 @@ void SemanticAnalyzer::Visit(FunctionCallExpression* functionCallExpression)
         {
             functionCallExpression->arguments[i]->expression = ImplicitCast(argExpr, paramType);
         }
+    }
+
+    // check if uninitialized arguments have default values
+    const vector<unsigned>& defaultValues = funType->GetParamDefaultValueIndexes();
+    for (size_t i = 0; i < paramNames.size(); ++i)
+    {
+        ROString paramName = paramNames[i];
+        if (paramsToInit.find(paramName) != paramsToInit.end())
+        {
+            if (defaultValues[i] != NO_DEFAULT_VALUE)
+            {
+                paramsToInit.erase(paramName);
+            }
+        }
+    }
+
+    // error if not all parameters were specified
+    size_t paramsNotInit = paramsToInit.size();
+    if (paramsNotInit > 0)
+    {
+        stringstream errorMsg;
+        if (paramsNotInit == 1)
+        {
+            errorMsg << "Parameter '" << *paramsToInit.cbegin() << "' was not specified";
+        }
+        else
+        {
+            auto iter = paramsToInit.cbegin();
+            errorMsg << "The following parameters were not specified: " << *iter;
+            ++iter;
+            for (; iter != paramsToInit.cend(); ++iter)
+            {
+                errorMsg << ", ";
+                errorMsg << *iter;
+            }
+        }
+
+        isError = true;
+        const Token* startToken = functionCallExpression->openParToken;
+        const Token* closeToken = functionCallExpression->closeParToken;
+        logger.LogError(*startToken, *closeToken, errorMsg.str().c_str());
+        return;
     }
 
     // set the expression's function type
