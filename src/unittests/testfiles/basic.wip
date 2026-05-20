@@ -1254,3 +1254,32 @@ fun callWithNames(i i32, f f64, b bool, u u16)
     multiArgs2(p3 = u, p2 = b, p1 = f, p0 = i);
     multiArgs2(i, f, p2 = b, u);
 }
+
+fun defaultArgs1(
+    p0 i32 = global_constant1 + 1,
+    p1 bool = true,
+    p2 str = "abc",
+    p3 StructWithDefaults = StructWithDefaults: { m0 = 543 },
+)
+{
+}
+
+extern fun defaultArgs2(
+    p0 i32 = global_constant1 + 1,
+    p1 bool = true,
+    p2 str = "abc",
+    p3 StructWithDefaults = StructWithDefaults: { m0 = 543 },
+);
+
+fun callWithDefaults(i i32, b bool, s str, x StructWithDefaults)
+{
+    defaultArgs1();
+    defaultArgs1(i);
+    defaultArgs1(i, b, s);
+    defaultArgs1(p1 = b, p3 = x);
+
+    defaultArgs2();
+    defaultArgs2(i);
+    defaultArgs2(i, b, s);
+    defaultArgs2(p1 = b, p3 = x);
+}

@@ -1852,8 +1852,13 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
     }
     Value* funValue = resultValue;
 
+    const TypeInfo* funType = functionCallExpression->functionExpression->GetType();
+    const vector<ROString>& paramNames = funType->GetParamNames();
+
+    unordered_set<ROString> paramsToInit(paramNames.cbegin(), paramNames.cend());
+
     const Arguments& arguments = functionCallExpression->arguments;
-    vector<Value*> args(arguments.size(), nullptr);
+    vector<Value*> args(paramNames.size(), nullptr);
     for (size_t i = 0; i < arguments.size(); ++i)
     {
         const SyntaxTree::Argument* arg = arguments[i];
@@ -1873,7 +1878,6 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
         else
         {
             ROString name = nameToken->value;
-            const vector<ROString>& paramNames = functionCallExpression->functionExpression->GetType()->GetParamNames();
             for (paramIndex = 0; paramIndex < paramNames.size(); ++paramIndex)
             {
                 if (name == paramNames[paramIndex])
@@ -1891,11 +1895,28 @@ void LlvmIrGenerator::Visit(FunctionCallExpression* functionCallExpression)
         }
 
         args[paramIndex] = resultValue;
+        paramsToInit.erase(paramNames[paramIndex]);
     }
 
-    FunctionType* funType = CreateLlvmFunctionType(functionCallExpression->functionType);
+    // init params with default values
+    const vector<const TypeInfo*>& paramTypes = funType->GetParamTypes();
+    const vector<unsigned>& defaultValueIndexes = funType->GetParamDefaultValueIndexes();
+    for (size_t i = 0; i < paramNames.size(); ++i)
+    {
+        ROString paramName = paramNames[i];
+        if (paramsToInit.find(paramName) != paramsToInit.end())
+        {
+            unsigned constIdx = defaultValueIndexes[i];
+            assert(constIdx != NO_DEFAULT_VALUE && "Param does not have a default value index");
 
-    FunctionCallee func(funType, funValue);
+            Value* value = CreateConstantValue(paramTypes[i], constIdx);
+            args[i] = value;
+        }
+    }
+
+    FunctionType* llvmFunType = CreateLlvmFunctionType(funType);
+
+    FunctionCallee func(llvmFunType, funValue);
     resultValue = builder.CreateCall(func, args, "call");
 }
 

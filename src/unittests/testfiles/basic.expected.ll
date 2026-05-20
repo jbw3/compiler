@@ -5,6 +5,7 @@ $target_triple
 
 %str = type { i64, ptr }
 %UnitType = type {}
+%StructWithDefaults = type { i32, i1, i16 }
 %"RangeClosed'i32'" = type { i32, i32 }
 %"RangeHalfOpen'u32'" = type { i32, i32 }
 %"[]i32" = type { i64, ptr }
@@ -24,7 +25,6 @@ $target_triple
 %"<struct29>" = type { i32, i16 }
 %TypesTest = type {}
 %"[]TypesTest" = type { i64, ptr }
-%StructWithDefaults = type { i32, i1, i16 }
 
 @strData0 = constant [0 x i8] zeroinitializer
 @strStruct0 = constant %str { i64 0, ptr @strData0 }
@@ -52,6 +52,8 @@ declare %UnitType @extern1()
 declare i64 @extern2(i32, i1)
 
 declare %UnitType @multiArgs2(i32, double, i1, i16)
+
+declare %UnitType @defaultArgs2(i32, i1, %str, %StructWithDefaults)
 
 ; Function Attrs: noinline nounwind optnone
 define i32 @noArgs() #0 {
@@ -3782,6 +3784,60 @@ entry:
   %b41 = load i1, ptr %b3, align 1
   %u42 = load i16, ptr %u4, align 2
   %call43 = call %UnitType @multiArgs2(i32 %i39, double %f40, i1 %b41, i16 %u42)
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @defaultArgs1(i32 %p0, i1 %p1, %str %p2, %StructWithDefaults %p3) #0 {
+entry:
+  %p34 = alloca %StructWithDefaults, align 8
+  %p23 = alloca %str, align 8
+  %p12 = alloca i1, align 1
+  %p01 = alloca i32, align 4
+  store i32 %p0, ptr %p01, align 4
+  store i1 %p1, ptr %p12, align 1
+  store %str %p2, ptr %p23, align 8
+  store %StructWithDefaults %p3, ptr %p34, align 4
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
+define %UnitType @callWithDefaults(i32 %i, i1 %b, %str %s, %StructWithDefaults %x) #0 {
+entry:
+  %x4 = alloca %StructWithDefaults, align 8
+  %s3 = alloca %str, align 8
+  %b2 = alloca i1, align 1
+  %i1 = alloca i32, align 4
+  store i32 %i, ptr %i1, align 4
+  store i1 %b, ptr %b2, align 1
+  store %str %s, ptr %s3, align 8
+  store %StructWithDefaults %x, ptr %x4, align 4
+  %load = load %str, ptr @strStruct6, align 8
+  %call = call %UnitType @defaultArgs1(i32 10, i1 true, %str %load, %StructWithDefaults { i32 543, i1 true, i16 10000 })
+  %i5 = load i32, ptr %i1, align 4
+  %load6 = load %str, ptr @strStruct6, align 8
+  %call7 = call %UnitType @defaultArgs1(i32 %i5, i1 true, %str %load6, %StructWithDefaults { i32 543, i1 true, i16 10000 })
+  %i8 = load i32, ptr %i1, align 4
+  %b9 = load i1, ptr %b2, align 1
+  %s10 = load %str, ptr %s3, align 8
+  %call11 = call %UnitType @defaultArgs1(i32 %i8, i1 %b9, %str %s10, %StructWithDefaults { i32 543, i1 true, i16 10000 })
+  %b12 = load i1, ptr %b2, align 1
+  %x13 = load %StructWithDefaults, ptr %x4, align 4
+  %load14 = load %str, ptr @strStruct6, align 8
+  %call15 = call %UnitType @defaultArgs1(i32 10, i1 %b12, %str %load14, %StructWithDefaults %x13)
+  %load16 = load %str, ptr @strStruct6, align 8
+  %call17 = call %UnitType @defaultArgs2(i32 10, i1 true, %str %load16, %StructWithDefaults { i32 543, i1 true, i16 10000 })
+  %i18 = load i32, ptr %i1, align 4
+  %load19 = load %str, ptr @strStruct6, align 8
+  %call20 = call %UnitType @defaultArgs2(i32 %i18, i1 true, %str %load19, %StructWithDefaults { i32 543, i1 true, i16 10000 })
+  %i21 = load i32, ptr %i1, align 4
+  %b22 = load i1, ptr %b2, align 1
+  %s23 = load %str, ptr %s3, align 8
+  %call24 = call %UnitType @defaultArgs2(i32 %i21, i1 %b22, %str %s23, %StructWithDefaults { i32 543, i1 true, i16 10000 })
+  %b25 = load i1, ptr %b2, align 1
+  %x26 = load %StructWithDefaults, ptr %x4, align 4
+  %load27 = load %str, ptr @strStruct6, align 8
+  %call28 = call %UnitType @defaultArgs2(i32 10, i1 %b25, %str %load27, %StructWithDefaults %x26)
   ret %UnitType zeroinitializer
 }
 
