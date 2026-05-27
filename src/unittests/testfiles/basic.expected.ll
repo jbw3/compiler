@@ -2628,9 +2628,8 @@ passed7:                                          ; preds = %passed
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays2() #0 {
 entry:
-  %array64 = alloca [5 x i8], align 1
   %r1 = alloca i8, align 1
-  %array52 = alloca [12 x i32], align 4
+  %array52 = alloca [3 x i32], align 4
   %array42 = alloca [3 x i32], align 4
   %s = alloca %ArrayTest, align 8
   %array33 = alloca [12 x i32], align 4
@@ -2738,73 +2737,37 @@ fillExit49:                                       ; preds = %fillBody43
   %agg50 = insertvalue %"[]i32" { i64 3, ptr undef }, ptr %array42, 1
   %agg51 = insertvalue %ArrayTest undef, %"[]i32" %agg50, 0
   store %ArrayTest %agg51, ptr %s, align 8
-  %startPtr54 = getelementptr inbounds [12 x i32], ptr %array52, i64 0, i64 0
-  %endPtr55 = getelementptr inbounds [12 x i32], ptr %array52, i64 0, i64 12
+  %startPtr54 = getelementptr inbounds [3 x i32], ptr %array52, i64 0, i64 0
+  %endPtr55 = getelementptr inbounds [3 x i32], ptr %array52, i64 0, i64 3
   br label %fillBody53
 
 fillBody53:                                       ; preds = %fillBody53, %fillExit49
   %phi56 = phi ptr [ %startPtr54, %fillExit49 ], [ %nextPtr57, %fillBody53 ]
   store i32 123, ptr %phi56, align 4
-  %nextPtr57 = getelementptr inbounds [12 x i32], ptr %phi56, i64 1
+  %nextPtr57 = getelementptr inbounds [3 x i32], ptr %phi56, i64 1
   %atEnd58 = icmp eq ptr %nextPtr57, %endPtr55
   br i1 %atEnd58, label %fillExit59, label %fillBody53
 
 fillExit59:                                       ; preds = %fillBody53
-  %agg60 = insertvalue %"[]i32" { i64 12, ptr undef }, ptr %array52, 1
-  %size = extractvalue %"[]i32" %agg60, 0
-  %data = extractvalue %"[]i32" %agg60, 1
-  %endok = icmp ult i64 7, %size
-  %checkend = select i1 %endok, i64 7, i64 %size
-  %startok = icmp ule i64 4, %checkend
-  %checkstart = select i1 %startok, i64 4, i64 %checkend
-  %sub = sub i64 %checkend, %checkstart
-  %ptr = getelementptr inbounds i32, ptr %data, i64 %checkstart
-  %agg61 = insertvalue %"[]i32" undef, i64 %sub, 0
-  %agg62 = insertvalue %"[]i32" %agg61, ptr %ptr, 1
-  %call63 = call %UnitType @arrays1(%"[]i32" %agg62)
-  %startPtr66 = getelementptr inbounds [5 x i8], ptr %array64, i64 0, i64 0
-  %endPtr67 = getelementptr inbounds [5 x i8], ptr %array64, i64 0, i64 5
-  br label %fillBody65
-
-fillBody65:                                       ; preds = %fillBody65, %fillExit59
-  %phi68 = phi ptr [ %startPtr66, %fillExit59 ], [ %nextPtr69, %fillBody65 ]
-  store i8 7, ptr %phi68, align 1
-  %nextPtr69 = getelementptr inbounds [5 x i8], ptr %phi68, i64 1
-  %atEnd70 = icmp eq ptr %nextPtr69, %endPtr67
-  br i1 %atEnd70, label %fillExit71, label %fillBody65
-
-fillExit71:                                       ; preds = %fillBody65
-  %agg72 = insertvalue %"[]i8" { i64 5, ptr undef }, ptr %array64, 1
-  %size73 = extractvalue %"[]i8" %agg72, 0
-  %check = icmp uge i64 3, %size73
-  br i1 %check, label %failed, label %passed
-
-failed:                                           ; preds = %fillExit71
-  call void @exit(i32 1)
-  unreachable
-
-passed:                                           ; preds = %fillExit71
-  %data74 = extractvalue %"[]i8" %agg72, 1
-  %value = getelementptr inbounds i8, ptr %data74, i64 3
-  %load = load i8, ptr %value, align 1
-  store i8 %load, ptr %r1, align 1
+  %agg60 = insertvalue %"[]i32" { i64 3, ptr undef }, ptr %array52, 1
+  %call61 = call %UnitType @arrays1(%"[]i32" %agg60)
+  store i8 7, ptr %r1, align 1
   ret %UnitType zeroinitializer
 }
 
 ; Function Attrs: noinline nounwind optnone
 define %UnitType @arrays3() #0 {
 entry:
-  %array61 = alloca [3 x i32], align 4
-  %array58 = alloca [2 x i32], align 4
-  %array57 = alloca [2 x %"[]i32"], align 8
+  %array50 = alloca [3 x i32], align 4
+  %array47 = alloca [2 x i32], align 4
+  %array46 = alloca [2 x %"[]i32"], align 8
   %a7 = alloca %"[][]i32", align 8
-  %array51 = alloca [2 x i32], align 4
-  %array46 = alloca [2 x i32], align 4
-  %array45 = alloca [2 x %"[]i32"], align 8
+  %array40 = alloca [2 x i32], align 4
+  %array35 = alloca [2 x i32], align 4
+  %array34 = alloca [2 x %"[]i32"], align 8
   %a6 = alloca %"[][]i32", align 8
-  %array39 = alloca [2 x i16], align 2
   %r1 = alloca i16, align 2
-  %array28 = alloca [5 x i32], align 4
+  %array28 = alloca [3 x i32], align 4
   %array22 = alloca [3 x i32], align 4
   %s = alloca %ArrayTest, align 8
   %array17 = alloca [3 x i32], align 4
@@ -2866,94 +2829,63 @@ entry:
   %agg26 = insertvalue %"[]i32" { i64 3, ptr undef }, ptr %array22, 1
   %agg27 = insertvalue %ArrayTest undef, %"[]i32" %agg26, 0
   store %ArrayTest %agg27, ptr %s, align 8
-  %ptr29 = getelementptr inbounds [5 x i32], ptr %array28, i64 0, i64 0
-  store i32 10, ptr %ptr29, align 4
-  %ptr30 = getelementptr inbounds [5 x i32], ptr %array28, i64 0, i64 1
-  store i32 20, ptr %ptr30, align 4
-  %ptr31 = getelementptr inbounds [5 x i32], ptr %array28, i64 0, i64 2
-  store i32 30, ptr %ptr31, align 4
-  %ptr32 = getelementptr inbounds [5 x i32], ptr %array28, i64 0, i64 3
-  store i32 40, ptr %ptr32, align 4
-  %ptr33 = getelementptr inbounds [5 x i32], ptr %array28, i64 0, i64 4
-  store i32 50, ptr %ptr33, align 4
-  %agg34 = insertvalue %"[]i32" { i64 5, ptr undef }, ptr %array28, 1
-  %size = extractvalue %"[]i32" %agg34, 0
-  %data = extractvalue %"[]i32" %agg34, 1
-  %endok = icmp ult i64 4, %size
-  %checkend = select i1 %endok, i64 4, i64 %size
-  %startok = icmp ule i64 1, %checkend
-  %checkstart = select i1 %startok, i64 1, i64 %checkend
-  %sub = sub i64 %checkend, %checkstart
-  %ptr35 = getelementptr inbounds i32, ptr %data, i64 %checkstart
-  %agg36 = insertvalue %"[]i32" undef, i64 %sub, 0
-  %agg37 = insertvalue %"[]i32" %agg36, ptr %ptr35, 1
-  %call38 = call %UnitType @arrays1(%"[]i32" %agg37)
-  %ptr40 = getelementptr inbounds [2 x i16], ptr %array39, i64 0, i64 0
-  store i16 100, ptr %ptr40, align 2
-  %ptr41 = getelementptr inbounds [2 x i16], ptr %array39, i64 0, i64 1
-  store i16 200, ptr %ptr41, align 2
-  %agg42 = insertvalue %"[]i16" { i64 2, ptr undef }, ptr %array39, 1
-  %size43 = extractvalue %"[]i16" %agg42, 0
-  %check = icmp uge i64 0, %size43
-  br i1 %check, label %failed, label %passed
-
-failed:                                           ; preds = %entry
-  call void @exit(i32 1)
-  unreachable
-
-passed:                                           ; preds = %entry
-  %data44 = extractvalue %"[]i16" %agg42, 1
-  %value = getelementptr inbounds i16, ptr %data44, i64 0
-  %load = load i16, ptr %value, align 2
-  store i16 %load, ptr %r1, align 2
-  %ptr47 = getelementptr inbounds [2 x i32], ptr %array46, i64 0, i64 0
-  store i32 10, ptr %ptr47, align 4
-  %ptr48 = getelementptr inbounds [2 x i32], ptr %array46, i64 0, i64 1
-  store i32 20, ptr %ptr48, align 4
-  %agg49 = insertvalue %"[]i32" { i64 2, ptr undef }, ptr %array46, 1
-  %ptr50 = getelementptr inbounds [2 x %"[]i32"], ptr %array45, i64 0, i64 0
-  store %"[]i32" %agg49, ptr %ptr50, align 8
-  %ptr52 = getelementptr inbounds [2 x i32], ptr %array51, i64 0, i64 0
-  store i32 30, ptr %ptr52, align 4
-  %ptr53 = getelementptr inbounds [2 x i32], ptr %array51, i64 0, i64 1
-  store i32 40, ptr %ptr53, align 4
-  %agg54 = insertvalue %"[]i32" { i64 2, ptr undef }, ptr %array51, 1
-  %ptr55 = getelementptr inbounds [2 x %"[]i32"], ptr %array45, i64 0, i64 1
-  store %"[]i32" %agg54, ptr %ptr55, align 8
-  %agg56 = insertvalue %"[][]i32" { i64 2, ptr undef }, ptr %array45, 1
-  store %"[][]i32" %agg56, ptr %a6, align 8
-  %startPtr = getelementptr inbounds [2 x i32], ptr %array58, i64 0, i64 0
-  %endPtr = getelementptr inbounds [2 x i32], ptr %array58, i64 0, i64 2
+  %ptr29 = getelementptr inbounds [3 x i32], ptr %array28, i64 0, i64 0
+  store i32 20, ptr %ptr29, align 4
+  %ptr30 = getelementptr inbounds [3 x i32], ptr %array28, i64 0, i64 1
+  store i32 30, ptr %ptr30, align 4
+  %ptr31 = getelementptr inbounds [3 x i32], ptr %array28, i64 0, i64 2
+  store i32 40, ptr %ptr31, align 4
+  %agg32 = insertvalue %"[]i32" { i64 3, ptr undef }, ptr %array28, 1
+  %call33 = call %UnitType @arrays1(%"[]i32" %agg32)
+  store i16 100, ptr %r1, align 2
+  %ptr36 = getelementptr inbounds [2 x i32], ptr %array35, i64 0, i64 0
+  store i32 10, ptr %ptr36, align 4
+  %ptr37 = getelementptr inbounds [2 x i32], ptr %array35, i64 0, i64 1
+  store i32 20, ptr %ptr37, align 4
+  %agg38 = insertvalue %"[]i32" { i64 2, ptr undef }, ptr %array35, 1
+  %ptr39 = getelementptr inbounds [2 x %"[]i32"], ptr %array34, i64 0, i64 0
+  store %"[]i32" %agg38, ptr %ptr39, align 8
+  %ptr41 = getelementptr inbounds [2 x i32], ptr %array40, i64 0, i64 0
+  store i32 30, ptr %ptr41, align 4
+  %ptr42 = getelementptr inbounds [2 x i32], ptr %array40, i64 0, i64 1
+  store i32 40, ptr %ptr42, align 4
+  %agg43 = insertvalue %"[]i32" { i64 2, ptr undef }, ptr %array40, 1
+  %ptr44 = getelementptr inbounds [2 x %"[]i32"], ptr %array34, i64 0, i64 1
+  store %"[]i32" %agg43, ptr %ptr44, align 8
+  %agg45 = insertvalue %"[][]i32" { i64 2, ptr undef }, ptr %array34, 1
+  store %"[][]i32" %agg45, ptr %a6, align 8
+  %startPtr = getelementptr inbounds [2 x i32], ptr %array47, i64 0, i64 0
+  %endPtr = getelementptr inbounds [2 x i32], ptr %array47, i64 0, i64 2
   br label %fillBody
 
-fillBody:                                         ; preds = %fillBody, %passed
-  %phi = phi ptr [ %startPtr, %passed ], [ %nextPtr, %fillBody ]
+fillBody:                                         ; preds = %fillBody, %entry
+  %phi = phi ptr [ %startPtr, %entry ], [ %nextPtr, %fillBody ]
   store i32 8, ptr %phi, align 4
   %nextPtr = getelementptr inbounds [2 x i32], ptr %phi, i64 1
   %atEnd = icmp eq ptr %nextPtr, %endPtr
   br i1 %atEnd, label %fillExit, label %fillBody
 
 fillExit:                                         ; preds = %fillBody
-  %agg59 = insertvalue %"[]i32" { i64 2, ptr undef }, ptr %array58, 1
-  %ptr60 = getelementptr inbounds [2 x %"[]i32"], ptr %array57, i64 0, i64 0
-  store %"[]i32" %agg59, ptr %ptr60, align 8
-  %startPtr63 = getelementptr inbounds [3 x i32], ptr %array61, i64 0, i64 0
-  %endPtr64 = getelementptr inbounds [3 x i32], ptr %array61, i64 0, i64 3
-  br label %fillBody62
+  %agg48 = insertvalue %"[]i32" { i64 2, ptr undef }, ptr %array47, 1
+  %ptr49 = getelementptr inbounds [2 x %"[]i32"], ptr %array46, i64 0, i64 0
+  store %"[]i32" %agg48, ptr %ptr49, align 8
+  %startPtr52 = getelementptr inbounds [3 x i32], ptr %array50, i64 0, i64 0
+  %endPtr53 = getelementptr inbounds [3 x i32], ptr %array50, i64 0, i64 3
+  br label %fillBody51
 
-fillBody62:                                       ; preds = %fillBody62, %fillExit
-  %phi65 = phi ptr [ %startPtr63, %fillExit ], [ %nextPtr66, %fillBody62 ]
-  store i32 9, ptr %phi65, align 4
-  %nextPtr66 = getelementptr inbounds [3 x i32], ptr %phi65, i64 1
-  %atEnd67 = icmp eq ptr %nextPtr66, %endPtr64
-  br i1 %atEnd67, label %fillExit68, label %fillBody62
+fillBody51:                                       ; preds = %fillBody51, %fillExit
+  %phi54 = phi ptr [ %startPtr52, %fillExit ], [ %nextPtr55, %fillBody51 ]
+  store i32 9, ptr %phi54, align 4
+  %nextPtr55 = getelementptr inbounds [3 x i32], ptr %phi54, i64 1
+  %atEnd56 = icmp eq ptr %nextPtr55, %endPtr53
+  br i1 %atEnd56, label %fillExit57, label %fillBody51
 
-fillExit68:                                       ; preds = %fillBody62
-  %agg69 = insertvalue %"[]i32" { i64 3, ptr undef }, ptr %array61, 1
-  %ptr70 = getelementptr inbounds [2 x %"[]i32"], ptr %array57, i64 0, i64 1
-  store %"[]i32" %agg69, ptr %ptr70, align 8
-  %agg71 = insertvalue %"[][]i32" { i64 2, ptr undef }, ptr %array57, 1
-  store %"[][]i32" %agg71, ptr %a7, align 8
+fillExit57:                                       ; preds = %fillBody51
+  %agg58 = insertvalue %"[]i32" { i64 3, ptr undef }, ptr %array50, 1
+  %ptr59 = getelementptr inbounds [2 x %"[]i32"], ptr %array46, i64 0, i64 1
+  store %"[]i32" %agg58, ptr %ptr59, align 8
+  %agg60 = insertvalue %"[][]i32" { i64 2, ptr undef }, ptr %array46, 1
+  store %"[][]i32" %agg60, ptr %a7, align 8
   ret %UnitType zeroinitializer
 }
 

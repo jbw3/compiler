@@ -149,6 +149,16 @@ void LlvmIrGenerator::Visit(UnaryExpression* unaryExpression)
 
 void LlvmIrGenerator::Visit(BinaryExpression* binaryExpression)
 {
+    if (binaryExpression->GetIsConstant())
+    {
+        SetDebugLocation(binaryExpression->opToken);
+
+        unsigned constIdx = binaryExpression->GetConstantValueIndex();
+        const TypeInfo* type = binaryExpression->GetType();
+        resultValue = CreateConstantValue(type, constIdx);
+        return;
+    }
+
     BinaryExpression::EOperator op = binaryExpression->op;
     Expression* leftExpr = binaryExpression->left;
     Expression* rightExpr = binaryExpression->right;
