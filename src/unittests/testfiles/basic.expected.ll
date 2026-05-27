@@ -89,6 +89,44 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
+define %UnitType @integerMinsMaxes() #0 {
+entry:
+  %p = alloca i64, align 8
+  %o = alloca i64, align 8
+  %n = alloca i64, align 8
+  %m = alloca i64, align 8
+  %l = alloca i32, align 4
+  %k = alloca i32, align 4
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %h = alloca i16, align 2
+  %g = alloca i16, align 2
+  %f = alloca i16, align 2
+  %e = alloca i16, align 2
+  %d = alloca i8, align 1
+  %c = alloca i8, align 1
+  %b = alloca i8, align 1
+  %a = alloca i8, align 1
+  store i8 -128, ptr %a, align 1
+  store i8 127, ptr %b, align 1
+  store i8 0, ptr %c, align 1
+  store i8 -1, ptr %d, align 1
+  store i16 -32768, ptr %e, align 2
+  store i16 32767, ptr %f, align 2
+  store i16 0, ptr %g, align 2
+  store i16 -1, ptr %h, align 2
+  store i32 -2147483648, ptr %i, align 4
+  store i32 2147483647, ptr %j, align 4
+  store i32 0, ptr %k, align 4
+  store i32 -1, ptr %l, align 4
+  store i64 -9223372036854775808, ptr %m, align 8
+  store i64 9223372036854775807, ptr %n, align 8
+  store i64 0, ptr %o, align 8
+  store i64 -1, ptr %p, align 8
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
 define i32 @twoArgs(i32 %arg1, i32 %arg2) #0 {
 entry:
   %arg22 = alloca i32, align 4

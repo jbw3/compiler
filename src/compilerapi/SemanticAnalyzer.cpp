@@ -193,6 +193,29 @@ void SemanticAnalyzer::Visit(UnaryExpression* unaryExpression)
 
             if (isConst)
             {
+                if (op == UnaryExpression::eNegative)
+                {
+                    // check if we need to update the type
+                    unsigned signedResultNumBits = getMinSignedSize(value);
+                    unsigned unsignedResultNumBits = getMinUnsignedSize(static_cast<uint64_t>(value));
+                    unsigned resultNumBits = 0;
+                    if (resultType->GetSign() == TypeInfo::eSigned)
+                    {
+                        resultNumBits = signedResultNumBits;
+                    }
+                    else
+                    {
+                        resultNumBits = unsignedResultNumBits;
+                    }
+
+                    bool subIsLit = subExprType->IsLiteral();
+                    if ((subIsLit && resultNumBits != resultType->GetNumBits()) || (!subIsLit && resultNumBits > subExprType->GetNumBits()))
+                    {
+                        resultType = compilerContext.typeRegistry.CreateNumericLiteralType(resultType->GetSign(), signedResultNumBits, unsignedResultNumBits);
+                        unaryExpression->SetType(resultType);
+                    }
+                }
+
                 unsigned idx = compilerContext.AddIntConstantValue(value);
                 unaryExpression->SetConstantValueIndex(idx);
             }

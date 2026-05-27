@@ -13,6 +13,26 @@ fun integerLiterals(x i32) i32
     0b101 + x + 0o370 + x + 123 + x + 0x_a5_7F93
 }
 
+fun integerMinsMaxes()
+{
+    var a i8 = -128;
+    var b i8 = 127;
+    var c u8 = 0;
+    var d u8 = 255;
+    var e i16 = -32_768;
+    var f i16 = 32_767;
+    var g u16 = 0;
+    var h u16 = 65_535;
+    var i i32 = -2_147_483_648;
+    var j i32 = 2_147_483_647;
+    var k u32 = 0;
+    var l u32 = 4_294_967_295;
+    var m i64 = -9_223_372_036_854_775_808;
+    var n i64 = 9_223_372_036_854_775_807;
+    var o u64 = 0;
+    var p u64 = 18_446_744_073_709_551_615;
+}
+
 # test trailing command in parameter list
 fun twoArgs(arg1 i32, arg2 i32,) i32
 {

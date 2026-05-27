@@ -84,8 +84,18 @@ LlvmIrGenerator::~LlvmIrGenerator()
     delete diBuilder;
 }
 
-void LlvmIrGenerator::Visit(SyntaxTree::UnaryExpression* unaryExpression)
+void LlvmIrGenerator::Visit(UnaryExpression* unaryExpression)
 {
+    if (unaryExpression->GetIsConstant())
+    {
+        SetDebugLocation(unaryExpression->opToken);
+
+        unsigned constIdx = unaryExpression->GetConstantValueIndex();
+        const TypeInfo* type = unaryExpression->GetType();
+        resultValue = CreateConstantValue(type, constIdx);
+        return;
+    }
+
     Expression* subExpr = unaryExpression->subExpression;
 
     subExpr->Accept(this);

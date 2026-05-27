@@ -506,6 +506,24 @@ bool SemanticAnalyzerTests::TestValidFunctionScope(string& failMsg)
 {
     vector<string> tests =
     {
+        // integer literal mins/maxes
+        "var x i8 = -128;",
+        "var x i8 = 127;",
+        "var x u8 = 0;",
+        "var x u8 = 255;",
+        "var x i16 = -32_768;",
+        "var x i16 = 32_767;",
+        "var x u16 = 0;",
+        "var x u16 = 65_535;",
+        "var x i32 = -2_147_483_648;",
+        "var x i32 = 2_147_483_647;",
+        "var x u32 = 0;",
+        "var x u32 = 4_294_967_295;",
+        "var x i64 = -9_223_372_036_854_775_808;",
+        "var x i64 = 9_223_372_036_854_775_807;",
+        "var x u64 = 0;",
+        "var x u64 = 18_446_744_073_709_551_615;",
+
         // constants in different scopes can have the same name
         "{ const A = struct { x i8, y f32 }; var a = A: { x = 3, y = 9.2 }; }\n"
         "{ const A = struct { x i16, b bool }; var a = A: { x = 3_000, b = true }; }\n",
@@ -533,6 +551,57 @@ bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
 {
     vector<InvalidTest> tests =
     {
+        // invalid integer literals
+        {
+            "var x i8 = -129;",
+            "error: Binary operator '=' does not support types 'i8' and '{signed-integer}'",
+        },
+        {
+            "var x i8 = 128;",
+            "error: Binary operator '=' does not support types 'i8' and '{integer}'",
+        },
+        {
+            "var x u8 = 256;",
+            "error: Binary operator '=' does not support types 'u8' and '{integer}'",
+        },
+        {
+            "var x i16 = -32_769;",
+            "error: Binary operator '=' does not support types 'i16' and '{signed-integer}'",
+        },
+        {
+            "var x i16 = 32_768;",
+            "error: Binary operator '=' does not support types 'i16' and '{integer}'",
+        },
+        {
+            "var x u16 = 65_536;",
+            "error: Binary operator '=' does not support types 'u16' and '{integer}'",
+        },
+        {
+            "var x i32 = -2_147_483_649;",
+            "error: Binary operator '=' does not support types 'i32' and '{signed-integer}'",
+        },
+        {
+            "var x i32 = 2_147_483_648;",
+            "error: Binary operator '=' does not support types 'i32' and '{integer}'",
+        },
+        {
+            "var x u32 = 4_294_967_296;",
+            "error: Binary operator '=' does not support types 'u32' and '{integer}'",
+        },
+        // TODO: add these tests
+        // {
+        //     "var x i64 = -9_223_372_036_854_775_809;",
+        //     "error: Binary operator '=' does not support types 'i64' and '{signed-integer}'",
+        // },
+        // {
+        //     "var x i64 = 9_223_372_036_854_775_808;",
+        //     "error: Binary operator '=' does not support types 'i64' and '{integer}'",
+        // },
+        // {
+        //     "var x u64 = 18_446_744_073_709_551_616;",
+        //     "error: Binary operator '=' does not support types 'u64' and '{integer}'",
+        // },
+
         // can't assign struct definition to var
         {
             "var s = struct { a i32, b i32 };",
