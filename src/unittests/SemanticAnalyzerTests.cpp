@@ -551,7 +551,7 @@ bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
 {
     vector<InvalidTest> tests =
     {
-        // invalid integer literals
+        // invalid integer literals (just out of min/max range)
         {
             "var x i8 = -129;",
             "error: Binary operator '=' does not support types 'i8' and '{signed-integer}'",
@@ -601,6 +601,12 @@ bool SemanticAnalyzerTests::TestInvalidFunctionScope(string& failMsg)
         //     "var x u64 = 18_446_744_073_709_551_616;",
         //     "error: Binary operator '=' does not support types 'u64' and '{integer}'",
         // },
+
+        // invalid const integer expressions (out of range)
+        {
+            "var x i8 = 100 * 100;",
+            "error: Binary operator '=' does not support types 'i8' and '{integer}'",
+        },
 
         // can't assign struct definition to var
         {

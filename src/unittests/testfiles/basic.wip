@@ -783,6 +783,12 @@ fun unary_operator(b bool, x i8, y u8)
     var r16 u32 = y + !!200;
 }
 
+fun binary_operator()
+{
+    var r1 i8 = 50_000 - 50_001;
+    var r2 u8 = 50_000 - 49_999;
+}
+
 fun pointers(p1 &i32) &i32
 {
     var p2 = p1;

@@ -494,6 +494,26 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                 }
                 else if (resultType->IsInt())
                 {
+                    // check if we need to update the result type
+                    unsigned signedResultNumBits = getMinSignedSize(intValue);
+                    unsigned unsignedResultNumBits = getMinUnsignedSize(static_cast<uint64_t>(intValue));
+                    unsigned resultNumBits = 0;
+                    if (resultType->GetSign() == TypeInfo::eSigned)
+                    {
+                        resultNumBits = signedResultNumBits;
+                    }
+                    else
+                    {
+                        resultNumBits = unsignedResultNumBits;
+                    }
+
+                    bool subAreLit = leftType->IsLiteral() && rightType->IsLiteral();
+                    if ((subAreLit && resultNumBits != resultType->GetNumBits()))
+                    {
+                        resultType = compilerContext.typeRegistry.CreateNumericLiteralType(resultType->GetSign(), signedResultNumBits, unsignedResultNumBits);
+                        binaryExpression->SetType(resultType);
+                    }
+
                     idx = compilerContext.AddIntConstantValue(intValue);
                 }
                 else if (resultType->IsRange())

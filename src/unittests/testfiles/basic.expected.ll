@@ -2302,6 +2302,16 @@ merge:                                            ; preds = %else, %if
 }
 
 ; Function Attrs: noinline nounwind optnone
+define %UnitType @binary_operator() #0 {
+entry:
+  %r2 = alloca i8, align 1
+  %r1 = alloca i8, align 1
+  store i8 -1, ptr %r1, align 1
+  store i8 1, ptr %r2, align 1
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
 define ptr @pointers(ptr %p1) #0 {
 entry:
   %b = alloca i1, align 1
