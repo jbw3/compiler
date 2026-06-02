@@ -8,9 +8,10 @@ import os
 import random
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, IO, Iterator
+from typing import Any, Callable, IO, Iterator
+
+Constraint = Callable[['ConstExpression'], bool]
 
 class IdentifierInfo:
     def __init__(self, name: str, type: 'TypeInfo'):
@@ -41,6 +42,10 @@ class TypeInfo:
         self.is_int = is_int
         self.is_float = is_float
         self.is_signed = is_signed
+
+    @property
+    def is_numeric(self) -> bool:
+        return self.is_int or self.is_float
 
 TYPE_BOOL = TypeInfo('bool')
 TYPE_I8 = TypeInfo('i8', size=8, is_int=True, is_signed=True)
@@ -155,6 +160,128 @@ class TypeCategories:
             TYPE_TYPE,
         ]
 
+class ConstExpression:
+    def __init__(
+        self,
+        type: TypeInfo,
+        value: Any,
+        value_str: str,
+        is_literal: bool,
+    ) -> None:
+        self.type = type
+        self.value = value
+        self.value_str = value_str
+        self.is_literal = is_literal
+
+    @staticmethod
+    def get_int_max_min_constraint(type: TypeInfo) -> Constraint:
+        if type.is_signed:
+            x = 1 << (type.size - 1)
+            lower_bound = -x
+            upper_bound = x - 1
+        else:
+            lower_bound = 0
+            upper_bound = (1 << type.size) - 1
+
+        def f(expr: 'ConstExpression') -> bool:
+            return lower_bound <= expr.value <= upper_bound
+
+        return f
+
+    @staticmethod
+    def generate(type: TypeInfo) -> 'ConstExpression':
+        if type.name == 'bool':
+            expr = ConstExpression(type, False, 'false', True)
+        elif type.is_int:
+            expr = ConstExpression.gen_int_expr(type, ConstExpression.get_int_max_min_constraint(type))
+        elif type.is_float:
+            expr = ConstExpression(type, 0.1, "0.1", True)
+        elif type.name == 'str':
+            expr = ConstExpression(type, '', '""', True)
+        elif type.name == 'type':
+            expr = ConstExpression(type, {}, "struct { }", False)
+        else:
+            assert False, f"Unexpected type '{type.name}'"
+
+        return expr
+
+    @staticmethod
+    def gen_int_expr(
+        type: TypeInfo,
+        constraint: Constraint | None = None
+    ) -> 'ConstExpression':
+        expr = None
+        while expr is None or (constraint is not None and not constraint(expr)):
+            if random.randint(0, 5) == 0:
+                expr = ConstExpression.gen_int_binary_expr(type)
+            else:
+                expr = ConstExpression.gen_int_literal(type)
+
+        return expr
+
+    @staticmethod
+    def gen_int_literal(type: TypeInfo) -> 'ConstExpression':
+        r = random.randrange(0, 2)
+        if r == 0:
+            value = 0
+            value_str = random.choice([
+                '0b0',
+                '0o0',
+                '0',
+                '0x0',
+            ])
+        else:
+            if type.is_signed:
+                x = 1 << 63
+                lower_bound = -x
+                upper_bound = x - 1
+            else:
+                lower_bound = 0
+                upper_bound = (1 << 64) - 1
+            value = random.randint(lower_bound, upper_bound)
+            f = random.choice([bin, oct, str, hex])
+            value_str = f(value)
+
+        expr = ConstExpression(type, value, value_str, True)
+        return expr
+
+    @staticmethod
+    def gen_int_binary_expr(type: TypeInfo) -> 'ConstExpression':
+        op = random.choice(['+', '-', '*', '/', '&', '|', '^']) # TODO: add %
+
+        constraint: Constraint | None
+        if op == '/' or op == '%':
+            constraint = lambda e: e.value != 0
+        else:
+            constraint = None
+
+        left = ConstExpression.gen_int_expr(type)
+        right = ConstExpression.gen_int_expr(type, constraint)
+
+        match op:
+            case '+':
+                value = left.value + right.value
+            case '-':
+                value = left.value - right.value
+            case '*':
+                value = left.value * right.value
+            case '/':
+                value = left.value // right.value
+            case '&':
+                value = left.value & right.value
+            case '|':
+                value = left.value | right.value
+            case '^':
+                value = left.value ^ right.value
+            case _:
+                assert False, f"Unexpected op '{op}'"
+
+        # TODO: check precedence and add () if necessary
+
+        value_str = f"{left.value_str} {op} {right.value_str}"
+        expr = ConstExpression(type, value, value_str, left.is_literal and right.is_literal)
+        return expr
+
 class SourceGenerator:
     def __init__(self) -> None:
         with open('fuzzer_data.json', 'r') as f:
@@ -205,15 +332,27 @@ class SourceGenerator:
         const_infos: list[IdentifierInfo] = []
 
         # create constant names
-        for _ in range(random.randint(0, 5)):
+        for _ in range(random.randint(0, 10)):
             name = self.create_identifier_name()
             type = self.get_new_const_type()
             info = IdentifierInfo(name, type)
             self.add_identifier(info)
             const_infos.append(info)
 
-        for const_info in const_infos:
-            io.write(f'# TODO: {const_info.name}\n')
+        for i, const_info in enumerate(const_infos):
+            type = const_info.type
+            expr = ConstExpression.generate(type)
+            io.write('const ')
+            io.write(const_info.name)
+            if (type.is_numeric and expr.is_literal) or random.randint(0, 1) == 0:
+                io.write(' ')
+                io.write(type.name)
+            io.write(' = ')
+            io.write(expr.value_str)
+            io.write(';\n')
+
+            if i < len(const_infos) - 1:
+                io.write('\n')
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
