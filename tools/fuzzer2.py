@@ -247,7 +247,7 @@ class ConstExpression:
 
     @staticmethod
     def gen_int_binary_expr(type: TypeInfo) -> 'ConstExpression':
-        op = random.choice(['+', '-', '*', '/', '&', '|', '^']) # TODO: add %
+        op = random.choice(['+', '-', '*', '/', '%', '&', '|', '^'])
 
         constraint: Constraint | None
         if op == '/' or op == '%':
@@ -267,6 +267,8 @@ class ConstExpression:
                 value = left.value * right.value
             case '/':
                 value = left.value // right.value
+            case '%':
+                value = left.value - right.value * int(left.value / right.value)
             case '&':
                 value = left.value & right.value
             case '|':
