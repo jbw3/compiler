@@ -167,11 +167,13 @@ class ConstExpression:
         value: Any,
         value_str: str,
         is_literal: bool,
+        precedence: int = 100,
     ) -> None:
         self.type = type
         self.value = value
         self.value_str = value_str
         self.is_literal = is_literal
+        self.precedence = precedence
 
     @staticmethod
     def get_int_max_min_constraint(type: TypeInfo) -> Constraint:
@@ -247,7 +249,16 @@ class ConstExpression:
 
     @staticmethod
     def gen_int_binary_expr(type: TypeInfo) -> 'ConstExpression':
-        op = random.choice(['+', '-', '*', '/', '%', '&', '|', '^'])
+        op, precedence = random.choice([
+            ('+', 8),
+            ('-', 8),
+            ('*', 9),
+            ('/', 9),
+            ('%', 9),
+            ('&', 6),
+            ('|', 4),
+            ('^', 5),
+        ])
 
         constraint: Constraint | None
         if op == '/' or op == '%':
@@ -278,10 +289,25 @@ class ConstExpression:
             case _:
                 assert False, f"Unexpected op '{op}'"
 
-        # TODO: check precedence and add () if necessary
+        # check precedence
+        if left.precedence < precedence:
+            left_str = f'({left.value_str})'
+        else:
+            left_str = left.value_str
 
-        value_str = f"{left.value_str} {op} {right.value_str}"
-        expr = ConstExpression(type, value, value_str, left.is_literal and right.is_literal)
+        if right.precedence <= precedence:
+            right_str = f'({right.value_str})'
+        else:
+            right_str = right.value_str
+
+        value_str = f"{left_str} {op} {right_str}"
+        expr = ConstExpression(
+            type,
+            value,
+            value_str,
+            left.is_literal and right.is_literal,
+            precedence,
+        )
         return expr
 
 class SourceGenerator:
