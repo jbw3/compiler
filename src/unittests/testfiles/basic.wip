@@ -33,6 +33,11 @@ fun integerMinsMaxes()
     var p u64 = 18_446_744_073_709_551_615;
 }
 
+fun integerLiteralsMath()
+{
+    var v0 u8 = 0x8000_0000_0000_0000 / 0x4000_0000_0000_0000;
+}
+
 # test trailing command in parameter list
 fun twoArgs(arg1 i32, arg2 i32,) i32
 {

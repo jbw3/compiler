@@ -433,7 +433,16 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                         isError = true;
                         return;
                     }
-                    intValue = leftValue / rightValue;
+
+                    if (leftType->GetSign() == TypeInfo::eSigned || rightType->GetSign() == TypeInfo::eSigned)
+                    {
+                        intValue = leftValue / rightValue;
+                    }
+                    else
+                    {
+                        intValue = static_cast<int64_t>(static_cast<uint64_t>(leftValue) / static_cast<uint64_t>(rightValue));
+                    }
+
                     break;
                 }
                 case BinaryExpression::eRemainder:
@@ -445,7 +454,16 @@ void SemanticAnalyzer::Visit(BinaryExpression* binaryExpression)
                         isError = true;
                         return;
                     }
-                    intValue = leftValue % rightValue;
+
+                    if (leftType->GetSign() == TypeInfo::eSigned || rightType->GetSign() == TypeInfo::eSigned)
+                    {
+                        intValue = leftValue % rightValue;
+                    }
+                    else
+                    {
+                        intValue = static_cast<int64_t>(static_cast<uint64_t>(leftValue) % static_cast<uint64_t>(rightValue));
+                    }
+
                     break;
                 }
                 case BinaryExpression::eShiftLeft:

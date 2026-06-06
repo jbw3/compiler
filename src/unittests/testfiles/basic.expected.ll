@@ -127,6 +127,14 @@ entry:
 }
 
 ; Function Attrs: noinline nounwind optnone
+define %UnitType @integerLiteralsMath() #0 {
+entry:
+  %v0 = alloca i8, align 1
+  store i8 2, ptr %v0, align 1
+  ret %UnitType zeroinitializer
+}
+
+; Function Attrs: noinline nounwind optnone
 define i32 @twoArgs(i32 %arg1, i32 %arg2) #0 {
 entry:
   %arg22 = alloca i32, align 4
