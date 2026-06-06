@@ -13,6 +13,18 @@ from typing import Any, Callable, IO, Iterator
 
 Constraint = Callable[['ConstExpression'], bool]
 
+def int_floor_divide(a: int, b: int) -> int:
+    d = abs(a) // abs(b)
+    if (a < 0) != (b < 0):
+        d = -d
+    return d
+
+def int_floor_modulo(a: int, b: int) -> int:
+    m = abs(a) % abs(b)
+    if a < 0:
+        m = -m
+    return m
+
 class IdentifierInfo:
     def __init__(self, name: str, type: 'TypeInfo'):
         self.name = name
@@ -277,9 +289,9 @@ class ConstExpression:
             case '*':
                 value = left.value * right.value
             case '/':
-                value = left.value // right.value
+                value = int_floor_divide(left.value, right.value)
             case '%':
-                value = left.value - right.value * int(left.value / right.value)
+                value = int_floor_modulo(left.value, right.value)
             case '&':
                 value = left.value & right.value
             case '|':
