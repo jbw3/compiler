@@ -6,6 +6,7 @@
 #include "LlvmIrGenerator.h"
 #include "LlvmIrOptimizer.h"
 #include "SemanticAnalyzer.h"
+#include "StartEndTokenFinder.h"
 #include "Stopwatch.h"
 #include "SyntaxAnalyzer.h"
 #include "SyntaxTree.h"
@@ -13,9 +14,12 @@
 #include "llvm/IR/Module.h"
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 using namespace SyntaxTree;
+
+const char* const BUILD_FILE_NAME = "build.wip";
 
 Compiler::Compiler(const Config& config) :
     compilerContext(config, cerr)
@@ -30,6 +34,11 @@ bool Compiler::CompileSyntaxTree(Modules*& syntaxTree)
 
     bool ok = true;
     syntaxTree = new Modules;
+
+    if (ok)
+    {
+        ok = CompileBuildFile(syntaxTree);
+    }
 
     // lexical analysis
     if (ok)
@@ -159,6 +168,48 @@ bool Compiler::Compile()
     return ok;
 }
 
+bool Compiler::CompileBuildFile(SyntaxTree::Modules* syntaxTree)
+{
+    bool ok = true;
+
+    // lexical analysis
+    if (ok)
+    {
+        string buildFile = compilerContext.config.topDir / BUILD_FILE_NAME;
+        LexicalAnalyzer lexicalAnalyzer(compilerContext);
+        ok = lexicalAnalyzer.Process(buildFile);
+
+    }
+
+    // syntax analysis
+    if (ok)
+    {
+        SyntaxAnalyzer syntaxAnalyzer(compilerContext);
+        ok = syntaxAnalyzer.Process(syntaxTree);
+    }
+
+    // semantic analysis
+    if (ok)
+    {
+        SemanticAnalyzer semanticAnalyzer(compilerContext);
+        ok = semanticAnalyzer.Process(syntaxTree);
+    }
+
+    // check BuildConfig struct
+    if (ok)
+    {
+        ok = CheckBuildConfigStruct(syntaxTree);
+    }
+
+    // check BuildConfigs array
+    if (ok)
+    {
+        ok = CheckBuildConfigsArray(syntaxTree);
+    }
+
+    return ok;
+}
+
 void Compiler::PrintTokens(const TokenList& tokens) const
 {
     ostream* os = nullptr;
@@ -180,4 +231,101 @@ void Compiler::PrintTokens(const TokenList& tokens) const
     {
         delete os;
     }
+}
+
+bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
+{
+    const ConstantDeclaration* buildConfig = nullptr;
+    for (const ConstantDeclaration* constDecl : syntaxTree->orderedGlobalConstants)
+    {
+        if (constDecl->name == "BuildConfig")
+        {
+            buildConfig = constDecl;
+            break;
+        }
+    }
+
+    if (buildConfig == nullptr)
+    {
+        compilerContext.logger.LogError("{} does not have a BuildConfig struct", BUILD_FILE_NAME);
+        return false;
+    }
+
+    unsigned constIdx = buildConfig->assignmentExpression->right->GetConstantValueIndex();
+    const TypeInfo* structType = compilerContext.GetTypeConstantValue(constIdx);
+    if (!structType->IsStruct())
+    {
+        StartEndTokenFinder finder;
+        buildConfig->assignmentExpression->right->Accept(&finder);
+
+        compilerContext.logger.LogError(*finder.start, *finder.end, "BuildConfig is not a struct");
+        return false;
+    }
+
+    unordered_map<ROString, const TypeInfo*> expectedMembers =
+    {
+        {"name", compilerContext.typeRegistry.GetStringType()},
+    };
+
+    for (const MemberInfo* member : structType->GetMembers())
+    {
+        const ROString& name = member->GetName();
+        auto iter = expectedMembers.find(name);
+        if (iter == expectedMembers.end())
+        {
+            compilerContext.logger.LogError(*member->GetToken(), "Invalid BuildConfig member '{}'", name);
+            return false;
+        }
+        else if (!member->GetType()->IsSameAs(*iter->second))
+        {
+            compilerContext.logger.LogError(
+                *member->GetToken(),
+                "Expected type of '{}' to be '{}'",
+                name,
+                iter->second->GetName()
+            );
+            return false;
+        }
+        else
+        {
+            expectedMembers.erase(name);
+        }
+    }
+
+    if (expectedMembers.size() > 0)
+    {
+        StartEndTokenFinder finder;
+        buildConfig->assignmentExpression->right->Accept(&finder);
+
+        // TODO: list missing members
+        compilerContext.logger.LogError(
+            *finder.start,
+            *finder.end,
+            "BuildConfig is missing members"
+        );
+        return false;
+    }
+
+    return true;
+}
+
+bool Compiler::CheckBuildConfigsArray(Modules* syntaxTree)
+{
+    const ConstantDeclaration* buildConfigs = nullptr;
+    for (const ConstantDeclaration* constDecl : syntaxTree->orderedGlobalConstants)
+    {
+        if (constDecl->name == "BuildConfigs")
+        {
+            buildConfigs = constDecl;
+            break;
+        }
+    }
+
+    if (buildConfigs == nullptr)
+    {
+        compilerContext.logger.LogError("{} does not have a BuildConfigs array", BUILD_FILE_NAME);
+        return false;
+    }
+
+    return true;
 }

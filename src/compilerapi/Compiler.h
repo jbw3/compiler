@@ -19,6 +19,12 @@ public:
 private:
     CompilerContext compilerContext;
 
+    bool CompileBuildFile(SyntaxTree::Modules* syntaxTree);
+
+    bool CheckBuildConfigStruct(SyntaxTree::Modules* syntaxTree);
+
+    bool CheckBuildConfigsArray(SyntaxTree::Modules* syntaxTree);
+
     void PrintTokens(const TokenList& tokens) const;
 };
 

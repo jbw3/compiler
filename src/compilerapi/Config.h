@@ -1,6 +1,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,7 @@ public:
         eAuto,
     };
 
+    std::filesystem::path topDir;
     EEmitType emitType;
     EAssemblyType assemblyType;
     std::vector<std::string> inFilenames;

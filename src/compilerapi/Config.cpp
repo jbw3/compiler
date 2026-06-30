@@ -26,6 +26,7 @@ using namespace std;
 
 Config::Config()
 {
+    topDir = ".";
     emitType = eAssembly;
     assemblyType = eBinary;
     outFilename = "";
