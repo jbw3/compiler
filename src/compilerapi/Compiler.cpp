@@ -293,16 +293,33 @@ bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
         }
     }
 
-    if (expectedMembers.size() > 0)
+    size_t missingMembersCount = expectedMembers.size();
+    if (missingMembersCount > 0)
     {
+        stringstream errorMsg;
+        if (missingMembersCount == 1)
+        {
+            errorMsg << "BuildConfig is missing member '" << expectedMembers.cbegin()->first << "'";
+        }
+        else
+        {
+            auto iter = expectedMembers.cbegin();
+            errorMsg << "BuildConfig is missing the following members: " << iter->first;
+            ++iter;
+            for (; iter != expectedMembers.cend(); ++iter)
+            {
+                errorMsg << ", ";
+                errorMsg << iter->first;
+            }
+        }
+
         StartEndTokenFinder finder;
         buildConfig->assignmentExpression->right->Accept(&finder);
 
-        // TODO: list missing members
         compilerContext.logger.LogError(
             *finder.start,
             *finder.end,
-            "BuildConfig is missing members"
+            errorMsg.str().c_str()
         );
         return false;
     }
