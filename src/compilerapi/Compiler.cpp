@@ -264,7 +264,8 @@ bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
 
     unordered_map<ROString, const TypeInfo*> expectedMembers =
     {
-        {"name", compilerContext.typeRegistry.GetStringType()},
+        {"Name", compilerContext.typeRegistry.GetStringType()},
+        {"DebugInfo", TypeInfo::BoolType},
     };
 
     for (const MemberInfo* member : structType->GetMembers())
