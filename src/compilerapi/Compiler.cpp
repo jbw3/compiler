@@ -196,15 +196,16 @@ bool Compiler::CompileBuildFile(SyntaxTree::Modules* syntaxTree)
     }
 
     // check BuildConfig struct
+    const TypeInfo* buildConfigType = nullptr;
     if (ok)
     {
-        ok = CheckBuildConfigStruct(syntaxTree);
+        ok = CheckBuildConfigStruct(syntaxTree, buildConfigType);
     }
 
     // check BuildConfigs array
     if (ok)
     {
-        ok = CheckBuildConfigsArray(syntaxTree);
+        ok = CheckBuildConfigsArray(syntaxTree, buildConfigType);
     }
 
     return ok;
@@ -233,7 +234,7 @@ void Compiler::PrintTokens(const TokenList& tokens) const
     }
 }
 
-bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
+bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree, const TypeInfo*& buildConfigType)
 {
     const ConstantDeclaration* buildConfig = nullptr;
     for (const ConstantDeclaration* constDecl : syntaxTree->orderedGlobalConstants)
@@ -252,8 +253,8 @@ bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
     }
 
     unsigned constIdx = buildConfig->assignmentExpression->right->GetConstantValueIndex();
-    const TypeInfo* structType = compilerContext.GetTypeConstantValue(constIdx);
-    if (!structType->IsStruct())
+    buildConfigType = compilerContext.GetTypeConstantValue(constIdx);
+    if (!buildConfigType->IsStruct())
     {
         StartEndTokenFinder finder;
         buildConfig->assignmentExpression->right->Accept(&finder);
@@ -268,7 +269,7 @@ bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
         {"DebugInfo", TypeInfo::BoolType},
     };
 
-    for (const MemberInfo* member : structType->GetMembers())
+    for (const MemberInfo* member : buildConfigType->GetMembers())
     {
         const ROString& name = member->GetName();
         auto iter = expectedMembers.find(name);
@@ -327,7 +328,7 @@ bool Compiler::CheckBuildConfigStruct(Modules* syntaxTree)
     return true;
 }
 
-bool Compiler::CheckBuildConfigsArray(Modules* syntaxTree)
+bool Compiler::CheckBuildConfigsArray(Modules* syntaxTree, const TypeInfo* buildConfigType)
 {
     const ConstantDeclaration* buildConfigs = nullptr;
     for (const ConstantDeclaration* constDecl : syntaxTree->orderedGlobalConstants)
@@ -342,6 +343,20 @@ bool Compiler::CheckBuildConfigsArray(Modules* syntaxTree)
     if (buildConfigs == nullptr)
     {
         compilerContext.logger.LogError("{} does not have a BuildConfigs array", BUILD_FILE_NAME);
+        return false;
+    }
+
+    const TypeInfo* type = buildConfigs->assignmentExpression->right->GetType();
+    if (!type->IsArray() || !type->GetInnerType()->IsSameAs(*buildConfigType))
+    {
+        StartEndTokenFinder finder;
+        buildConfigs->assignmentExpression->right->Accept(&finder);
+
+        compilerContext.logger.LogError(
+            *finder.start,
+            *finder.end,
+            "BuildConfigs is not an array of BuildConfig structs"
+        );
         return false;
     }
 
